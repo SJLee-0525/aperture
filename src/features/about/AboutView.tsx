@@ -22,10 +22,14 @@ const AboutView = ({ site, photos, albums }: Props) => {
 
   const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
   const lenses = useMemo(() => [...new Set(photos.map((photo) => photo.lens))], [photos]);
-  const regions = useMemo(
-    () => [...new Set(photos.map((photo) => pickText(photo.place, lang)))],
-    [photos, lang],
-  );
+  // 활동 지역 = 장소에서 도시만 추출 (ko "도쿄 미나토구"→도쿄, en "Minato, Tokyo"→Tokyo)
+  const regions = useMemo(() => {
+    const cityOf = (place: Photo["place"]) => {
+      const text = pickText(place, lang);
+      return lang === "en" ? (text.split(",").pop() ?? text).trim() : text.split(" ")[0];
+    };
+    return [...new Set(photos.map((photo) => cityOf(photo.place)))];
+  }, [photos, lang]);
 
   const stats: Array<[number, string]> = [
     [photos.length, "PHOTOS"],
