@@ -1,0 +1,38 @@
+.like {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  padding: 6px 8px;
+  border-radius: var(--r-pill);
+  transition: color var(--dur);
+}
+.like svg {
+  transition: transform var(--dur) var(--ease);
+}
+.like:hover {
+  color: var(--like);
+}
+.filled {
+  color: var(--like);
+}
+.filled svg {
+  transform: scale(1.05);
+}
+.count {
+  font-variant-numeric: tabular-nums;
+}
+.glass {
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 7px 9px;
+}
+.glass.filled {
+  color: var(--like);
+}

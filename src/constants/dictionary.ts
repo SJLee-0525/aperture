@@ -15,6 +15,17 @@ type UIDict = {
   emptyResults: string;
   viewMasonry: string;
   viewSquare: string;
+  // EXIF 라벨 (상세 패널)
+  exifAperture: string;
+  exifShutter: string;
+  exifIso: string;
+  exifEv: string;
+  exifWb: string;
+  exifMetering: string;
+  exifFlash: string;
+  exifSize: string;
+  exifShotAt: string;
+  exifFile: string;
 };
 
 const DICTIONARY: Record<Lang, UIDict> = {
@@ -32,6 +43,16 @@ const DICTIONARY: Record<Lang, UIDict> = {
     emptyResults: "검색 결과가 없습니다",
     viewMasonry: "메이슨리",
     viewSquare: "정사각",
+    exifAperture: "조리개",
+    exifShutter: "셔터",
+    exifIso: "감도",
+    exifEv: "노출보정",
+    exifWb: "화이트밸런스",
+    exifMetering: "측광",
+    exifFlash: "플래시",
+    exifSize: "크기",
+    exifShotAt: "촬영일시",
+    exifFile: "파일",
   },
   en: {
     workNav: "Work",
@@ -47,6 +68,16 @@ const DICTIONARY: Record<Lang, UIDict> = {
     emptyResults: "No results found",
     viewMasonry: "Masonry",
     viewSquare: "Square",
+    exifAperture: "Aperture",
+    exifShutter: "Shutter",
+    exifIso: "ISO",
+    exifEv: "Exposure",
+    exifWb: "White balance",
+    exifMetering: "Metering",
+    exifFlash: "Flash",
+    exifSize: "Size",
+    exifShotAt: "Captured",
+    exifFile: "File",
   },
 };
 

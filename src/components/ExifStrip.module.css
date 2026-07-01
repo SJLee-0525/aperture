@@ -1,0 +1,48 @@
+.strip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-5);
+  font-variant-numeric: tabular-nums;
+}
+.seg {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  color: var(--text);
+}
+.lab {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+/* 사진 위 글래스 pill */
+.glass {
+  gap: 0;
+  flex-wrap: nowrap;
+  width: max-content;
+  padding: 5px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.glass .seg {
+  position: relative;
+  padding: 5px 14px;
+  color: #fff;
+}
+.glass .seg + .seg::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.glass .lab {
+  color: rgba(255, 255, 255, 0.5);
+}
