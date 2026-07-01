@@ -1,0 +1,180 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "ui_kits/dashboard/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Space Grotesk|Inter|JetBrains Mono))/i]",
+        "message": "Font not provided by the design system. Available: Space Grotesk, Inter, JetBrains Mono."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {},
+    "tokens": [
+      "--ai-cyan",
+      "--border-default",
+      "--border-gold-faint",
+      "--border-gold-medium",
+      "--border-gold-strong",
+      "--border-strong",
+      "--border-subtle",
+      "--elev-gold-glow-mid",
+      "--elev-gold-glow-soft",
+      "--elev-inset",
+      "--error",
+      "--fg-dim",
+      "--fg-ghost",
+      "--fg-high",
+      "--fg-medium",
+      "--fg-muted",
+      "--fg-primary",
+      "--fg-secondary",
+      "--fg-subtle",
+      "--fg-tertiary",
+      "--font-heading",
+      "--font-mono",
+      "--font-sans",
+      "--gold",
+      "--gold-10",
+      "--gold-20",
+      "--gold-30",
+      "--gold-60",
+      "--gold-dark",
+      "--gold-deep",
+      "--gold-glow",
+      "--gold-soft",
+      "--gold-warm",
+      "--info",
+      "--radius",
+      "--recessed",
+      "--space-1",
+      "--space-12",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-8",
+      "--success",
+      "--surface",
+      "--surface-high",
+      "--surface-highest",
+      "--surface-low",
+      "--surface-mid",
+      "--tracking-2em",
+      "--tracking-3em",
+      "--tracking-normal",
+      "--tracking-tight",
+      "--tracking-wide",
+      "--tracking-widest",
+      "--void",
+      "--warning"
+    ],
+    "tokenKinds": {
+      "--void": "color",
+      "--surface": "color",
+      "--surface-low": "color",
+      "--recessed": "color",
+      "--surface-mid": "color",
+      "--surface-high": "color",
+      "--surface-highest": "color",
+      "--gold": "color",
+      "--gold-soft": "color",
+      "--gold-dark": "color",
+      "--gold-deep": "color",
+      "--gold-warm": "color",
+      "--gold-glow": "color",
+      "--gold-10": "color",
+      "--gold-20": "color",
+      "--gold-30": "color",
+      "--gold-60": "color",
+      "--ai-cyan": "color",
+      "--fg-primary": "color",
+      "--fg-high": "color",
+      "--fg-medium": "color",
+      "--fg-secondary": "color",
+      "--fg-tertiary": "color",
+      "--fg-muted": "color",
+      "--fg-subtle": "color",
+      "--fg-dim": "color",
+      "--fg-ghost": "color",
+      "--success": "color",
+      "--warning": "color",
+      "--error": "color",
+      "--info": "color",
+      "--border-subtle": "color",
+      "--border-default": "color",
+      "--border-strong": "color",
+      "--border-gold-faint": "color",
+      "--border-gold-medium": "color",
+      "--border-gold-strong": "color",
+      "--font-heading": "font",
+      "--font-sans": "font",
+      "--font-mono": "font",
+      "--tracking-tight": "font",
+      "--tracking-normal": "font",
+      "--tracking-wide": "font",
+      "--tracking-widest": "font",
+      "--tracking-2em": "font",
+      "--tracking-3em": "font",
+      "--radius": "radius",
+      "--elev-inset": "shadow",
+      "--elev-gold-glow-soft": "shadow",
+      "--elev-gold-glow-mid": "shadow",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-8": "spacing",
+      "--space-12": "spacing"
+    },
+    "fontFamilies": [
+      "Inter",
+      "JetBrains Mono",
+      "Space Grotesk"
+    ]
+  }
+}

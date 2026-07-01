@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 포트폴리오 — Mobile Wireframes</title>
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/mobile.css?v=6">
+<style> html, body { margin: 0; background: #e9e9ec; } </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="portfolio.js"></script>
+<script src="mobile-screens.js?v=2"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const MFrame = ({html}) => <div style={{width:390,height:844}} dangerouslySetInnerHTML={{__html: html}} />;
+
+function App(){
+  return (
+    <DesignCanvas>
+      <DCSection id="flow" title="모바일 · 메인 플로우" subtitle="하단 탭바 + 풀스크린 디테일 + 끌어올리는 메타 시트">
+        <DCArtboard id="m-home" label="홈 · 2열 그리드" width={390} height={844}><MFrame html={mHome()} /></DCArtboard>
+        <DCArtboard id="m-peek" label="사진 디테일 · 시트 접힘" width={390} height={844}><MFrame html={mDetailPeek()} /></DCArtboard>
+        <DCArtboard id="m-sheet" label="사진 디테일 · 시트 펼침(EXIF·지도)" width={390} height={844}><MFrame html={mDetailSheet()} /></DCArtboard>
+      </DCSection>
+      <DCSection id="browse" title="모바일 · 앨범 & 지도" subtitle="앨범 목록 → 진입 / 위치 지도">
+        <DCArtboard id="m-albums" label="앨범 목록" width={390} height={844}><MFrame html={mAlbums()} /></DCArtboard>
+        <DCArtboard id="m-albdet" label="앨범 진입 · 커버 히어로" width={390} height={844}><MFrame html={mAlbumDetail()} /></DCArtboard>
+        <DCArtboard id="m-map" label="지도 · 핀 + 위치 시트" width={390} height={844}><MFrame html={mMap()} /></DCArtboard>
+      </DCSection>
+      <DCSection id="more" title="모바일 · 소개 & 바텀시트" subtitle="소개 / 필터 시트 / 내보내기 시트">
+        <DCArtboard id="m-about" label="소개" width={390} height={844}><MFrame html={mAbout()} /></DCArtboard>
+        <DCArtboard id="m-filter" label="필터 바텀시트" width={390} height={844}><MFrame html={mFilterSheet()} /></DCArtboard>
+        <DCArtboard id="m-export" label="내보내기 바텀시트 · 프레임" width={390} height={844}><MFrame html={mExportSheet()} /></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
