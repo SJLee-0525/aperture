@@ -1,0 +1,9 @@
+.content {
+  min-height: 60vh;
+}
+/* 모바일: 하단 고정 탭바(62px + safe-area)에 콘텐츠가 가리지 않도록 여백 */
+@media (max-width: 767px) {
+  .content {
+    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  }
+}

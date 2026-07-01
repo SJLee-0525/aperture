@@ -1,0 +1,81 @@
+.wrap {
+  position: relative;
+}
+.btn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: var(--r-pill);
+  transition:
+    background var(--dur),
+    color var(--dur);
+}
+.btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.btn svg {
+  width: 18px;
+  height: 18px;
+}
+@media (min-width: 768px) {
+  .btn {
+    width: 34px;
+    height: 34px;
+  }
+  .btn svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+.menu {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  z-index: 49;
+  min-width: 146px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  padding: 5px;
+}
+.option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--dur);
+}
+.option:hover {
+  background: var(--surface-2);
+}
+.check {
+  font-size: 8px;
+  color: var(--accent);
+  opacity: 0;
+}
+.checkOn {
+  opacity: 1;
+}

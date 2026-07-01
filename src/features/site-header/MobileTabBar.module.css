@@ -1,0 +1,33 @@
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  height: 62px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 768px) {
+  .tabbar {
+    display: none;
+  }
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-4);
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--dur);
+}
+.active {
+  color: var(--accent);
+}

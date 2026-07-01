@@ -1,0 +1,71 @@
+.btn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: var(--r-pill);
+  transition:
+    background var(--dur),
+    color var(--dur);
+}
+.btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+@media (min-width: 768px) {
+  .btn {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+.icons {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+.sun,
+.moon {
+  position: absolute;
+  inset: 0;
+  transition:
+    transform 0.5s var(--ease-spring),
+    opacity 0.5s var(--ease-spring);
+}
+.sun svg,
+.moon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+/* light(기본): 해 중앙 / 달 아래 숨음 */
+.sun {
+  transform: translateY(0);
+  opacity: 1;
+}
+.moon {
+  transform: translateY(9px);
+  opacity: 0;
+}
+
+/* dark: 해 아래로 지고 / 달 떠오름 */
+:global(html[data-theme="dark"]) .sun {
+  transform: translateY(9px);
+  opacity: 0;
+}
+:global(html[data-theme="dark"]) .moon {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sun,
+  .moon {
+    transition: none;
+  }
+}
