@@ -1,0 +1,166 @@
+/* =========================================================================
+   Aperture. — 디자인 토큰 (design/claude_design/styles/tokens.css 이식)
+   에디토리얼 사진 갤러리. 그레이스케일 주도 + 액센트 1개. Light/Dark via [data-theme].
+   폰트는 @import 대신 next/font 변수(--font-*)를 참조. 기본 테마 = light 고정
+   (prefers-color-scheme 자동추종은 명시적 light override 충돌 방지 위해 미채용).
+   ========================================================================= */
+
+:root {
+  /* --- Type families (next/font 주입: app/layout.tsx) --- */
+  --font-display: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-schibsted), system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, monospace;
+
+  /* --- Type scale (clamped) --- */
+  --t-display: clamp(2.4rem, 4vw, 3.6rem);
+  --t-h1: 2rem;
+  --t-h2: 1.5rem;
+  --t-h3: 1.15rem;
+  --t-body: 0.95rem;
+  --t-small: 0.825rem;
+  --t-micro: 0.72rem;
+  --t-label: 0.68rem;
+
+  --tracking-label: 0.14em;
+  --tracking-wide: 0.04em;
+
+  /* --- Radius: 전부 각짐. pill은 태그/칩 전용 --- */
+  --r-photo: 0px;
+  --r-xs: 0px;
+  --r-sm: 0px;
+  --r-md: 0px;
+  --r-lg: 0px;
+  --r-pill: 999px;
+
+  /* --- Spacing --- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+
+  /* --- Vivid accents (테마 무관, 절제 사용) --- */
+  --accent: #0a84ff;
+  --accent-press: #0066d6;
+  --accent-soft: rgba(10, 132, 255, 0.12);
+  --like: #ff2d55;
+  --like-soft: rgba(255, 45, 85, 0.12);
+
+  /* --- Motion --- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 0.22s;
+}
+
+/* ===================== LIGHT (default) ===================== */
+:root,
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface-1: #fafafa;
+  --surface-2: #f3f3f5;
+  --surface-3: #ebebee;
+  --surface-inset: #f6f6f8;
+
+  --line: rgba(17, 17, 20, 0.08);
+  --line-strong: rgba(17, 17, 20, 0.16);
+
+  --text: #18181b;
+  --text-2: #3f3f46;
+  --text-3: #71717a;
+  --text-4: #a1a1aa;
+
+  --photo-bg: #ececef;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --map-land: #eceef0;
+  --map-road: #ffffff;
+  --map-water: #dfe6ee;
+  --shadow-card: 0 1px 2px rgba(17, 17, 20, 0.04), 0 8px 24px rgba(17, 17, 20, 0.06);
+  --shadow-pop: 0 24px 60px rgba(17, 17, 20, 0.18);
+  color-scheme: light;
+}
+
+/* ===================== DARK ===================== */
+[data-theme="dark"] {
+  --bg: #000000;
+  --surface-1: #0d0d0f;
+  --surface-2: #151517;
+  --surface-3: #1e1e22;
+  --surface-inset: #0a0a0c;
+
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.18);
+
+  --text: #fafafa;
+  --text-2: #c7c7cd;
+  --text-3: #8a8a93;
+  --text-4: #5a5a62;
+
+  --photo-bg: #161618;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --map-land: #161618;
+  --map-road: #2a2a30;
+  --map-water: #10171f;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 28px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 30px 70px rgba(0, 0, 0, 0.7);
+
+  --accent: #2b95ff;
+  --accent-soft: rgba(43, 149, 255, 0.16);
+  --like: #ff375f;
+  --like-soft: rgba(255, 55, 95, 0.18);
+  color-scheme: dark;
+}
+
+/* ===================== Reset + Base ===================== */
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* 테마 전환 시 배경·글자색 페이드 (해/달 아이콘 애니와 함께) */
+  transition:
+    background 0.35s,
+    color 0.35s;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font: inherit;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* ===================== Primitives ===================== */
+.u-label {
+  font-family: var(--font-sans);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.u-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
