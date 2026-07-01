@@ -1,0 +1,35 @@
+.view {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100dvh - 200px);
+}
+@media (max-width: 760px) {
+  .view {
+    grid-template-columns: 1fr;
+  }
+}
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--map-land);
+  min-height: 340px;
+}
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.note {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 80%;
+  padding: 10px 16px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text-3);
+  font-size: var(--t-small);
+  text-align: center;
+}

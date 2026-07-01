@@ -26,6 +26,11 @@ type UIDict = {
   exifSize: string;
   exifShotAt: string;
   exifFile: string;
+  // 소개 · 지도
+  lensLabel: string;
+  regionsLabel: string;
+  locationsLabel: string;
+  mapPending: string;
 };
 
 const DICTIONARY: Record<Lang, UIDict> = {
@@ -53,6 +58,10 @@ const DICTIONARY: Record<Lang, UIDict> = {
     exifSize: "크기",
     exifShotAt: "촬영일시",
     exifFile: "파일",
+    lensLabel: "렌즈",
+    regionsLabel: "활동 지역",
+    locationsLabel: "촬영 위치",
+    mapPending: "실제 지도는 Google Maps 연결 시 표시됩니다",
   },
   en: {
     workNav: "Work",
@@ -78,6 +87,10 @@ const DICTIONARY: Record<Lang, UIDict> = {
     exifSize: "Size",
     exifShotAt: "Captured",
     exifFile: "File",
+    lensLabel: "Lens",
+    regionsLabel: "Regions",
+    locationsLabel: "Locations",
+    mapPending: "Live map appears once Google Maps is connected",
   },
 };
 
