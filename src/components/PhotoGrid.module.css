@@ -1,0 +1,35 @@
+.mason {
+  columns: 4;
+  column-gap: 12px;
+}
+.mason .cell {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+.square {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 1100px) {
+  .mason {
+    columns: 3;
+  }
+  .square {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .mason {
+    columns: 2;
+  }
+  .square {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.empty {
+  padding: 80px 0;
+  text-align: center;
+  color: var(--text-3);
+  font-size: var(--t-small);
+}

@@ -1,0 +1,23 @@
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+}
+.seg button {
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  padding: 7px 11px;
+  cursor: pointer;
+  transition:
+    background var(--dur),
+    color var(--dur);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--bg);
+  color: var(--text);
+}

@@ -19,6 +19,23 @@ const PATHS: Record<string, ReactNode> = {
       <rect x="14" y="14" width="7" height="7" />
     </>
   ),
+  square: (
+    <>
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+    </>
+  ),
+  mason: (
+    <>
+      <rect x="3" y="3" width="7" height="10" />
+      <rect x="14" y="3" width="7" height="6" />
+      <rect x="3" y="16" width="7" height="5" />
+      <rect x="14" y="12" width="7" height="9" />
+    </>
+  ),
+  funnel: <path d="M3 5h18M6 12h12M10 19h4" />,
   album: (
     <>
       <rect x="3" y="5" width="18" height="14" />
