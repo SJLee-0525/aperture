@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -18,6 +19,8 @@ type Props = {
   photos: Photo[];
   tags: Tag[];
 };
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const closeIcon = (
   <svg
@@ -59,20 +62,23 @@ const chevRight = (
   </svg>
 );
 
-/** 사진 상세 — 데스크톱 라이트박스(사진 다크 + 라이트 패널) / 모바일 바텀시트(탭으로 peek↔확장). */
+/**
+ * 사진 상세 — 데스크톱 라이트박스 / 모바일 바텀시트(탭으로 peek↔확장).
+ * AnimatePresence로 열림/닫힘 페이드+스케일 (exit 애니메이션 포함). URL(?photo=)이 열림 상태의 단일 출처.
+ */
 const PhotoModal = ({ photos, tags }: Props) => {
   const { lang } = useLang();
   const { photo, open, close, next, prev } = usePhotoModal(photos);
   const [expanded, setExpanded] = useState(false);
   useScrollLock(open);
 
-  if (!open || !photo) return null;
-
-  const alt = pickText(photo.title, lang);
-  const tagLabels = photo.tags.map((id) => {
-    const found = tags.find((tag) => tag.id === id);
-    return found ? pickText(found, lang) : id;
-  });
+  const alt = photo ? pickText(photo.title, lang) : "";
+  const tagLabels = photo
+    ? photo.tags.map((id) => {
+        const found = tags.find((tag) => tag.id === id);
+        return found ? pickText(found, lang) : id;
+      })
+    : [];
 
   const onPanelClick = (event: React.MouseEvent) => {
     if ((event.target as HTMLElement).closest("button")) return;
@@ -80,60 +86,80 @@ const PhotoModal = ({ photos, tags }: Props) => {
   };
 
   return (
-    <div className={styles.modal} role="dialog" aria-modal="true" aria-label={alt}>
-      <button type="button" className={styles.scrim} aria-label="Close" onClick={close} />
-      <div className={styles.inner}>
-        <div className={styles.photo}>
-          <Image
-            src={photo.image.url}
-            alt={alt}
-            fill
-            sizes="100vw"
-            className={styles.img}
-            priority
-          />
-          <div className={styles.strip}>
-            <ExifStrip
-              aperture={photo.exif.aperture}
-              shutter={photo.exif.shutter}
-              iso={photo.exif.iso}
-              glass
-            />
-          </div>
-          <button
-            type="button"
-            className={`${styles.nav} ${styles.close}`}
-            aria-label="Close"
-            onClick={close}
-          >
-            {closeIcon}
-          </button>
-          <button
-            type="button"
-            className={`${styles.nav} ${styles.prev}`}
-            aria-label="Previous"
-            onClick={prev}
-          >
-            {chevLeft}
-          </button>
-          <button
-            type="button"
-            className={`${styles.nav} ${styles.next}`}
-            aria-label="Next"
-            onClick={next}
-          >
-            {chevRight}
-          </button>
-        </div>
-        <aside
-          className={`${styles.panel} ${expanded ? styles.expanded : ""}`}
-          onClick={onPanelClick}
+    <AnimatePresence>
+      {open && photo ? (
+        <m.div
+          key="photo-modal"
+          className={styles.modal}
+          role="dialog"
+          aria-modal="true"
+          aria-label={alt}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.22 }}
         >
-          <span className={styles.handle} />
-          <ExifPanel photo={photo} tagLabels={tagLabels} />
-        </aside>
-      </div>
-    </div>
+          <button type="button" className={styles.scrim} aria-label="Close" onClick={close} />
+          <m.div
+            className={styles.inner}
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.985 }}
+            transition={{ duration: 0.28, ease: EASE }}
+          >
+            <div className={styles.photo}>
+              <Image
+                src={photo.image.url}
+                alt={alt}
+                fill
+                sizes="100vw"
+                className={styles.img}
+                priority
+              />
+              <div className={styles.strip}>
+                <ExifStrip
+                  aperture={photo.exif.aperture}
+                  shutter={photo.exif.shutter}
+                  iso={photo.exif.iso}
+                  glass
+                />
+              </div>
+              <button
+                type="button"
+                className={`${styles.nav} ${styles.close}`}
+                aria-label="Close"
+                onClick={close}
+              >
+                {closeIcon}
+              </button>
+              <button
+                type="button"
+                className={`${styles.nav} ${styles.prev}`}
+                aria-label="Previous"
+                onClick={prev}
+              >
+                {chevLeft}
+              </button>
+              <button
+                type="button"
+                className={`${styles.nav} ${styles.next}`}
+                aria-label="Next"
+                onClick={next}
+              >
+                {chevRight}
+              </button>
+            </div>
+            <aside
+              className={`${styles.panel} ${expanded ? styles.expanded : ""}`}
+              onClick={onPanelClick}
+            >
+              <span className={styles.handle} />
+              <ExifPanel photo={photo} tagLabels={tagLabels} />
+            </aside>
+          </m.div>
+        </m.div>
+      ) : null}
+    </AnimatePresence>
   );
 };
 

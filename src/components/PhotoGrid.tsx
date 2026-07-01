@@ -19,9 +19,10 @@ const PhotoGrid = ({ photos, lang, square, emptyLabel }: Props) => {
 
   return (
     <div className={square ? styles.square : styles.mason}>
-      {photos.map((photo) => (
+      {photos.map((photo, index) => (
         <div key={photo.id} className={styles.cell}>
-          <PhotoTile photo={photo} lang={lang} square={square} />
+          {/* 첫 4장은 LCP 보호 위해 priority(eager) */}
+          <PhotoTile photo={photo} lang={lang} square={square} priority={index < 4} />
         </div>
       ))}
     </div>

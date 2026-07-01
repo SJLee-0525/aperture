@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
 import { LangProvider } from "@/features/lang/LangProvider";
+import { MotionProvider } from "@/features/motion/MotionProvider";
 import { THEME_INIT_SCRIPT } from "@/features/theme/theme-script";
 
 import "./globals.css";
@@ -50,7 +51,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
-        <LangProvider>{children}</LangProvider>
+        <LangProvider>
+          <MotionProvider>{children}</MotionProvider>
+        </LangProvider>
       </body>
     </html>
   );

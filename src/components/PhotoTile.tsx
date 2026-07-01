@@ -11,10 +11,12 @@ type Props = {
   photo: Photo;
   lang: Lang;
   square?: boolean;
+  /** LCP 보호 — 상단(첫 화면)에 오는 타일만 eager 로드 */
+  priority?: boolean;
 };
 
-/** 사진 타일 — 클릭 시 ?photo= 딥링크(상세 모달은 Slice 3). 호버 시 제목·노출값 오버레이. */
-const PhotoTile = ({ photo, lang, square = false }: Props) => {
+/** 사진 타일 — 클릭 시 ?photo= 딥링크(상세 모달). 호버 시 제목·노출값 오버레이. */
+const PhotoTile = ({ photo, lang, square = false, priority = false }: Props) => {
   const title = pickText(photo.title, lang);
   const meta = `${photo.exif.aperture} · ${photo.exif.shutter} · ISO${photo.exif.iso} · ${photo.exif.focalLength}`;
 
@@ -30,6 +32,7 @@ const PhotoTile = ({ photo, lang, square = false }: Props) => {
         src={photo.image.url}
         alt={title}
         fill
+        priority={priority}
         sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
         className={styles.photo}
       />
