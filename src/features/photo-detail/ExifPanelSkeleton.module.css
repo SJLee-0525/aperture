@@ -1,0 +1,70 @@
+/* 실제 ExifPanel 각 구간의 측정 높이를 그대로 예약해 로드 시 CLS(튐)를 없앤다.
+   head 62 / exifHead 41(+mb s-6) / triangle 63(+mb s-8) / row 35×N / minimap 148 / tags 30, panel gap s-5. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.head {
+  min-height: 62px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.titleWrap {
+  flex: 1;
+  min-width: 0;
+}
+.titleLine {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+.dateLine {
+  height: 18px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.exifHead {
+  height: 41px;
+  box-sizing: border-box;
+  margin-bottom: var(--s-6);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.triangle {
+  height: 63px;
+  margin-bottom: var(--s-8);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+}
+.tri {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}

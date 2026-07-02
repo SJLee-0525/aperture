@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import { ExifStrip } from "@/components/ExifStrip";
 import { useLang } from "@/features/lang/use-lang";
 import { ExifPanel } from "@/features/photo-detail/ExifPanel";
+import { ExifPanelSkeleton } from "@/features/photo-detail/ExifPanelSkeleton";
 import { usePhotoModal } from "@/features/photo-detail/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
@@ -74,6 +75,13 @@ const PhotoModal = ({ photos, tags }: Props) => {
   const { lang } = useLang();
   const { photo, open, close, next, prev } = usePhotoModal(photos);
   const [expanded, setExpanded] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [seenId, setSeenId] = useState<string | undefined>(photo?.id);
+  // 사진이 바뀌면(prev/next·열기) 로더/스켈레톤을 다시 표시 — effect 없이 render-time reseed.
+  if (photo && photo.id !== seenId) {
+    setSeenId(photo.id);
+    setImgLoaded(false);
+  }
   const trapRef = useFocusTrap(open);
   const mounted = useMounted();
   useScrollLock(open);
@@ -119,21 +127,31 @@ const PhotoModal = ({ photos, tags }: Props) => {
           >
             <div className={styles.photo}>
               <Image
+                key={photo.id}
                 src={photo.image.url}
                 alt={alt}
                 fill
                 sizes="100vw"
                 className={styles.img}
                 priority
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setImgLoaded(true)}
               />
-              <div className={styles.strip}>
-                <ExifStrip
-                  aperture={photo.exif.aperture}
-                  shutter={photo.exif.shutter}
-                  iso={photo.exif.iso}
-                  glass
-                />
-              </div>
+              {imgLoaded ? null : (
+                <div className={styles.imgLoader} aria-hidden="true">
+                  <span className={styles.spinner} />
+                </div>
+              )}
+              {imgLoaded ? (
+                <div className={styles.strip}>
+                  <ExifStrip
+                    aperture={photo.exif.aperture}
+                    shutter={photo.exif.shutter}
+                    iso={photo.exif.iso}
+                    glass
+                  />
+                </div>
+              ) : null}
               <button
                 type="button"
                 className={`${styles.nav} ${styles.close}`}
@@ -164,7 +182,11 @@ const PhotoModal = ({ photos, tags }: Props) => {
               onClick={onPanelClick}
             >
               <span className={styles.handle} />
-              <ExifPanel photo={photo} tagLabels={tagLabels} />
+              {imgLoaded ? (
+                <ExifPanel photo={photo} tagLabels={tagLabels} />
+              ) : (
+                <ExifPanelSkeleton />
+              )}
             </aside>
           </m.div>
         </m.div>
