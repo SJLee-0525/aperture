@@ -11,7 +11,7 @@ color: blue
 ## 책임
 
 - `design/claude_design/` 프로토타입(Desktop/Mobile) → Next.js 컴포넌트 이식 (디자인 충실도 책임)
-- 공개 페이지: **작업**(사진 그리드+필터) · **앨범** · **지도**(Google Maps) · **소개** + **사진 상세 모달**(`?photo=` 딥링크)
+- 공개 페이지: **작업**(사진 그리드+필터) · **앨범** · **지도**(MapLibre+CARTO) · **소개** + **사진 상세 모달**(`?photo=` 딥링크)
 - 시그니처 기능: **프레임 내보내기**(canvas, 프레임 6종 → webp) · **좋아요**(익명 +1, `likes≥1`이면 빨강 채움)
 - 관리자 페이지: 로그인, 사진·앨범·태그사전·소개 폼 CMS, **이미지 업로드**(EXIF 자동추출), **dnd-kit 수동 정렬**
 - i18n(ko/en)·테마(다크모드) — **jh-portfolio 구현 패턴 이식** (아래 §5·§6)
@@ -63,7 +63,7 @@ src/
 │   ├── gallery/                 # GalleryView, FilterBar, ViewToggle, use-photo-filter (태그·카메라·초점거리·검색)
 │   ├── photo-detail/            # PhotoModal(데스크톱 라이트박스/모바일 바텀시트), ExifPanel, MiniMap, use-photo-modal
 │   ├── albums/                  # AlbumsView, AlbumDetailView
-│   ├── map/                     # MapView (Google Maps), LocationList
+│   ├── map/                     # MapView + MapCanvas(MapLibre GL, dynamic), LocationList
 │   ├── about/                   # AboutView (통계 자동 집계)
 │   ├── export/                  # ExportModal, framePreview, use-export (canvas → webp)
 │   ├── likes/                   # LikeButton, use-like (익명 increment)
@@ -78,7 +78,6 @@ src/
 ├── lib/content/                 # 공개 getter — mock↔Firestore 교체 지점 ★
 ├── lib/i18n/                     # pick-text.ts (ko/en 폴백)
 ├── lib/exif/                     # exifr 래퍼
-├── lib/maps/                     # Google Maps 로더
 ├── mocks/                        # design 데이터 이식본 (env 미설정 시 폴백)
 ├── constants/                    # collections, dictionary, navigation, routes, storage-keys, frame-styles
 ├── hooks/                        # ★ 2개 이상 feature 가 쓰는 hook 만 (use-scroll-lock)
@@ -204,11 +203,11 @@ export default async function WorkPage() {
 }
 ```
 
-### 9. 지도 (Google Maps) — [의도적 이탈 #3](../../design/README.md)
+### 9. 지도 (MapLibre GL + CARTO) — [의도적 이탈 #3](../../design/README.md)
 
-- **Google Maps JavaScript API**. 로더는 `lib/maps/`. `/map` 라우트에서만 **`next/dynamic`(ssr:false)** 로드(스크립트 무거움).
-- 사진 여러 개 = **Advanced Markers** 핀. 위치 리스트(LocationList)와 선택 상태 연동. `coords` 있는 사진만 핀.
-- 키는 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, **referrer 제한 전제**. 로드 실패 시 폴백 UI(리스트만).
+- **MapLibre GL + CARTO 무료 타일**(키·카드 없음). `features/map/MapCanvas`를 `/map`에서만 **`next/dynamic`(ssr:false)** 로드(maplibre-gl은 window 의존).
+- 마커 = `coords` 있는 사진. 클릭 → `?photo=` 딥링크로 상세 모달. 위치 리스트(LocationList)와 함께.
+- **테마 연동**: `data-theme` MutationObserver로 Positron(라이트)↔Dark Matter(다크) GL 스타일 전환. 상세 패널 미니맵은 쿼터·경량 위해 스타일 SVG 유지(P1).
 
 ### 10. 내보내기 (프레임 canvas) — [의도적 이탈 #4](../../design/README.md)
 

@@ -13,7 +13,7 @@
 
 1. 사용자가 **Supabase 무료 DB 의 7일 무활동 일시정지를 거부** → Firestore 는 정지 없음.
 2. 관리자 1명 + 방문자 구조라 상시 서버 불필요. 월 $0 목표.
-3. 트레이드오프: Storage·Google Maps 위해 Blaze 전환 + 카드 등록 (무료 한도 내 $0, 예산 알림 $1 필수 — **결제 표면 2개**).
+3. 트레이드오프: **Storage** 위해 Blaze 전환 + 카드 등록 (무료 한도 내 $0, 예산 알림 $1). 지도는 MapLibre+CARTO 무료 타일이라 결제 표면은 **Firebase 하나뿐**.
 
 ## 프로젝트 정체성 (2026-07-01 확정)
 
@@ -28,7 +28,7 @@
 - **정렬 = 수동 `order` 필드 + dnd-kit 드래그** (날짜 정렬 아님 — **큐레이션 우선**이 사용자 결정).
 - **이미지**: `exifr` 로 **압축 前** EXIF·GPS 추출 → webp ~2048px 압축. **원본 미보관.** GPS 없으면 지도 클릭 수동 좌표.
 - **좋아요**: 익명 **+1 전용** 공개 카운트, `likes≥1` 빨강. Rules delta-guard = **유일하게 허용된 무인증 쓰기**.
-- **지도**: Google Maps JS API (실제 지도), 키 **referrer 제한**, `/map` 에서만 dynamic 로드.
+- **지도**: **MapLibre GL + CARTO 무료 타일**(Positron/Dark Matter, 테마 연동). 키·카드 없음, `/map` 에서만 dynamic 로드(ssr:false). (Google Maps는 카드·비용 이슈로 기각 — 2026-07-02)
 - **내보내기**: 클라이언트 canvas 프레임 6종 → webp, 저장 해상도(원본 옵션 제거).
 - **AI 태그 추천**: **Phase 3**, **브라우저 내 `transformers.js` CLIP zero-shot 만** (클라우드 비전/LLM API 는 시크릿 키·서버 필요 → 아키텍처상 금지).
 

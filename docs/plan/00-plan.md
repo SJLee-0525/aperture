@@ -12,14 +12,14 @@
 ## 0. 현재 상태 & 목표
 
 - **현재**: 저장소는 문서만 있음 (`CLAUDE.md`, `.claude/`, `design/`). `src/`·`package.json` 없음, git 저장소 아님.
-- **목표(P1)**: 디자인 프로토타입을 Next.js(App Router) + **CSS Modules** 로 이식 — mock 데이터, 4뷰(작업·앨범·**지도(Google Maps 실지도)**·소개) + 상세 모달, 반응형·다크·ko/en 완비. (**내보내기는 P2**)
+- **목표(P1)**: 디자인 프로토타입을 Next.js(App Router) + **CSS Modules** 로 이식 — mock 데이터, 4뷰(작업·앨범·**지도(MapLibre+CARTO)**·소개) + 상세 모달, 반응형·다크·ko/en 완비. (**내보내기는 P2**)
 - **목표(P2)**: Firebase 연동(Auth·Firestore·Storage) + 관리자 CMS + 실제 좋아요 + **프레임 내보내기**.
 - **목표(P3)**: AI 태그 추천·SEO·즉시 반영 등 선택 강화.
 
 ## 1. 작업 순서 원칙
 
 1. **토대 → chrome → 뷰 → 상세 → 파워기능** 순으로 쌓는다 (아래가 위를 의존).
-2. **P1은 Firebase·AI 없이 mock 데이터로 UI 를 완성.** 단 **지도만 Google Maps 실연동**(사용자 결정) — P1의 유일한 외부 의존. Firebase 실데이터는 P2.
+2. **P1은 Firebase·AI 없이 mock 데이터로 UI 를 완성.** 단 **지도만 실지도(MapLibre+CARTO)**(사용자 결정) — P1의 유일한 외부 의존. Firebase 실데이터는 P2.
 3. **`lib/content/get-*` getter 뒤에 데이터 소스를 숨긴다** — P1은 mock, P2에서 Firestore 로 교체해도 **호출부 무변경** (getter는 모두 `Promise` 반환 + published 필터·`order` 정렬 완료 상태로).
 4. **각 슬라이스는 반응형·다크·ko/en 3종을 항상 함께** 마감 (나중에 몰아서 하면 부채).
 5. **매 슬라이스 종료 시 `npm run build` + `npm run lint` 통과** 유지 (hook 컨벤션 경고 0).
@@ -82,14 +82,13 @@
 - `app/(public)/albums/page.tsx`, `albums/[id]/page.tsx`
 - **완료**: 앨범 그리드→상세, 상세 내 사진 클릭→상세 모달(`?photo=`)
 
-### Slice 5 — 지도(Google Maps 실연동) + 소개(About)
+### Slice 5 — 지도(MapLibre+CARTO) + 소개(About)
 
-- `lib/maps/`: Google Maps 로더 (키 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, **referrer 제한**)
-- `features/map/`: `MapView`(**Google Maps** + 위치 리스트 사이드바, `next/dynamic` ssr:false, `/map`에서만), `LocationList`. **Advanced Markers 로 mock 사진 좌표 핀**, 리스트↔핀 선택 연동, 로드 실패 폴백(리스트만)
+- `features/map/`: `MapCanvas`(**MapLibre GL + CARTO 무료 타일**, `next/dynamic` ssr:false, `/map`에서만) + `MapView` + `LocationList`. 마커 = coords 있는 사진, 클릭 → `?photo=` 딥링크. 테마 연동(Positron↔Dark Matter)
 - `features/about/`: `AboutView`(bio·연락처 링크 + **통계 자동집계**: 사진/앨범/지역/바디 수 + 카메라·렌즈·지역 목록)
 - `app/(public)/map/page.tsx`, `about/page.tsx`
-- ⚠️ **선행조건**: Google Maps 키 + billing (아래 §7) — 이 슬라이스 전에 준비
-- **완료**: 실제 지도에 mock 좌표 핀·리스트 연동, 소개 통계/목록
+- 선행조건 **없음** — CARTO 무료 타일이라 키·billing 불필요
+- **완료**: 실제 지도에 좌표 핀·리스트 연동·테마 전환, 소개 통계/목록
 
 ### Slice 6 — 마감
 
@@ -127,19 +126,16 @@
 
 ## 6. 의존성 추가 시점
 
-| 시점 | 패키지                                                                                             |
-| ---- | -------------------------------------------------------------------------------------------------- |
-| P0   | 없음 (Next·React 만, **Tailwind 제외**)                                                            |
-| P1   | **Google Maps 로더**(`@vis.gl/react-google-maps` 등) — 지도 슬라이스. 그 외 UI 는 순수 CSS Modules |
-| P2   | `firebase`, `browser-image-compression`, `exifr`, `@dnd-kit/*`                                     |
-| P3   | `@huggingface/transformers`(또는 `@xenova/transformers`)                                           |
+| 시점 | 패키지                                                                        |
+| ---- | ----------------------------------------------------------------------------- |
+| P0   | 없음 (Next·React 만, **Tailwind 제외**)                                       |
+| P1   | `maplibre-gl`(지도) + `motion`(전환 애니메이션). 그 외 UI 는 순수 CSS Modules |
+| P2   | `firebase`, `browser-image-compression`, `exifr`, `@dnd-kit/*`                |
+| P3   | `@huggingface/transformers`(또는 `@xenova/transformers`)                      |
 
 ## 7. 관리자(본인) 셋업 체크리스트 — 코드와 별개, 직접
 
-**P1 지도 슬라이스 전 (Google Maps):**
-
-- [ ] GCP 프로젝트 + **billing 활성화** (Maps 는 결제 계정 없이는 키가 동작 안 함) + **예산 알림 $1**
-- [ ] **Google Maps JavaScript API 키** 발급 + **HTTP referrer 제한** → `.env.local` `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
+**지도**: 셋업 불필요 — MapLibre + CARTO 무료 타일(키·카드·billing 없음).
 
 **P2 전 (Firebase):**
 
@@ -148,29 +144,29 @@
 - [ ] Vercel 프로젝트 연결 + env 등록 + Authorized domains
 - [ ] `.env.local` 작성 (env_file_guard hook 이 차단 → 직접 편집; 항목은 CLAUDE.md 환경변수 절)
 
-> Firebase + Maps 는 **같은 GCP 프로젝트**로 묶으면 예산 알림 하나로 두 결제 표면을 함께 감시 가능.
+> 결제 표면은 **Firebase 하나뿐** (지도는 CARTO 무료). 예산 알림 $1로 그 하나만 감시.
 
 ## 8. 마일스톤
 
-| #   | 내용                                                     | Phase | 완료 기준                        |
-| --- | -------------------------------------------------------- | ----- | -------------------------------- |
-| M0  | 스캐폴드 + 토큰·폰트·테마·언어                           | P0    | 빈 홈에서 다크/라이트·ko/en 전환 |
-| M1  | 작업뷰 + 상세모달 + 좋아요(로컬)                         | P1    | 반응형·다크·ko/en 완비           |
-| M2  | 앨범 + **지도(Google Maps 실지도)** + 소개 → **P1 완료** | P1    | `/design-check` 통과·배포 가능   |
-| M3  | Firebase + CMS + **내보내기** + 실좋아요 → **P2 완료**   | P2    | `/deploy-check` 통과·배포        |
-| M4  | AI 태그·SEO 등                                           | P3    | —                                |
+| #   | 내용                                                   | Phase | 완료 기준                        |
+| --- | ------------------------------------------------------ | ----- | -------------------------------- |
+| M0  | 스캐폴드 + 토큰·폰트·테마·언어                         | P0    | 빈 홈에서 다크/라이트·ko/en 전환 |
+| M1  | 작업뷰 + 상세모달 + 좋아요(로컬)                       | P1    | 반응형·다크·ko/en 완비           |
+| M2  | 앨범 + **지도(MapLibre+CARTO)** + 소개 → **P1 완료**   | P1    | `/design-check` 통과·배포 가능   |
+| M3  | Firebase + CMS + **내보내기** + 실좋아요 → **P2 완료** | P2    | `/deploy-check` 통과·배포        |
+| M4  | AI 태그·SEO 등                                         | P3    | —                                |
 
 ## 9. 리스크 & 열린 질문
 
 - **order 기본 부여** — 신규 문서를 맨 앞/맨 뒤 어디에? (P2 관리자에서 결정, 이후 드래그 조정)
-- **Google Maps 가 P1 선행조건** — 지도 슬라이스 전 키·billing 준비 필요. 미준비 시 그 슬라이스만 뒤로 미루고 나머지 P1 진행 가능
+- **지도 = MapLibre+CARTO** — 키·billing 불필요($0). CARTO 무료 타일 사용정책은 저트래픽 개인 사이트엔 무방(고트래픽 시 자가호스팅 Protomaps 대안).
 - **Storage egress** — 트래픽 늘면 다운로드 1GB/일 위협 → next/image + Vercel 엣지 캐시로 완화 (Storage 는 원본당 1회만 히트)
 - **EXIF 필드 편차** — 카메라별 GPS·렌즈명 누락 가능 → 수동 보정 UI 로 흡수
 
 ## 10. 확정된 착수 결정
 
 1. **Next.js 버전** — jh-portfolio 와 동일 계열 **Next 16.x / React 19** ✅
-2. **지도 P1 범위** — **P1부터 Google Maps 실지도** ✅ (→ Maps 키·billing 이 P1 지도 슬라이스 선행조건)
+2. **지도** — P1부터 실지도 ✅. Google Maps(카드·비용) 대신 **MapLibre GL + CARTO 무료 타일**로 교체(2026-07-02) — 키·카드 없음, 테마 연동.
 3. **내보내기** — **P2로 이동** ✅ (P1 상세 패널엔 버튼 자리만)
 
 ---

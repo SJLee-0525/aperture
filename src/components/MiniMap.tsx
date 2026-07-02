@@ -9,8 +9,8 @@ type Props = {
 };
 
 /**
- * 상세 패널용 스타일라이즈드 미니맵 (P1). 상세를 열 때마다 실제 지도를 로드하면 Maps 쿼터 낭비라
- * 추상 SVG로 유지 — 실제 Google Maps는 /지도 뷰(Slice 5)에서만.
+ * 상세 패널용 스타일라이즈드 미니맵. 상세를 열 때마다 실제 지도를 로드하면 무겁고 타일 요청이 많아
+ * 추상 SVG로 유지 — 실제 지도(MapLibre+CARTO)는 /지도 뷰에서만.
  */
 const MiniMap = ({ place, coords }: Props) => (
   <div className={styles.map}>

@@ -30,7 +30,6 @@ type UIDict = {
   lensLabel: string;
   regionsLabel: string;
   locationsLabel: string;
-  mapPending: string;
 };
 
 const DICTIONARY: Record<Lang, UIDict> = {
@@ -61,7 +60,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     lensLabel: "렌즈",
     regionsLabel: "활동 지역",
     locationsLabel: "촬영 위치",
-    mapPending: "실제 지도는 Google Maps 연결 시 표시됩니다",
   },
   en: {
     workNav: "Work",
@@ -90,7 +88,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     lensLabel: "Lens",
     regionsLabel: "Regions",
     locationsLabel: "Locations",
-    mapPending: "Live map appears once Google Maps is connected",
   },
 };
 

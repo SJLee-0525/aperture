@@ -15,21 +15,21 @@
 
 ## 확정 스택 & 결정 기록
 
-| 레이어     | 선택                       | 왜 (결정 사유)                                                                         |
-| ---------- | -------------------------- | -------------------------------------------------------------------------------------- |
-| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거                                             |
-| 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                               |
-| 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                            |
-| DB         | Firestore                  | **무활동 일시정지 없음** (Supabase 무료 DB의 7일 정지 회피가 선택 이유)                |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축**                                                |
-| 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용** |
-| i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음)                          |
-| 지도       | Google Maps JS API         | 사진 좌표를 실제 지도에 핀. 키 **referrer 제한** 필수                                  |
-| EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)        |
-| 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                       |
+| 레이어     | 선택                       | 왜 (결정 사유)                                                                          |
+| ---------- | -------------------------- | --------------------------------------------------------------------------------------- |
+| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거                                              |
+| 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                |
+| 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                             |
+| DB         | Firestore                  | **무활동 일시정지 없음** (Supabase 무료 DB의 7일 정지 회피가 선택 이유)                 |
+| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축**                                                 |
+| 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**  |
+| i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음)                           |
+| 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter) |
+| EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)         |
+| 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                        |
 
-> ⚠️ **Firebase Storage · Google Maps는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
-> **GCP 예산 알림 $1 등록 필수** — Firebase + Maps **두 결제 표면**을 함께 감시.
+> ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
+> **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **결제 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
 
 ## 아키텍처 원칙 (서버리스)
 
@@ -81,7 +81,7 @@ src/
 │   │   ├── page.tsx            # 작업 — 사진 그리드 + 필터 (?photo= 모달)
 │   │   ├── albums/page.tsx     # 앨범 그리드
 │   │   ├── albums/[id]/page.tsx# 앨범 상세 (히어로 + 메이슨리, ?photo= 모달)
-│   │   ├── map/page.tsx        # 지도 (Google Maps — next/dynamic ssr:false)
+│   │   ├── map/page.tsx        # 지도 (MapLibre+CARTO — next/dynamic ssr:false)
 │   │   ├── about/page.tsx      # 소개 (통계 파생)
 │   │   └── layout.tsx          # chrome(SiteHeader) 마운트는 여기서만
 │   ├── admin/                  # 관리자 — 전부 client, AuthGuard 마운트는 admin/layout.tsx
@@ -93,7 +93,7 @@ src/
 │   ├── gallery/                # 작업 그리드, 필터바(태그·카메라·초점거리), 뷰토글, use-photo-filter
 │   ├── photo-detail/           # 라이트박스/바텀시트 + EXIF 패널 + 미니맵 + use-photo-modal
 │   ├── albums/                 # 앨범 그리드·상세 뷰
-│   ├── map/                    # Google Maps 뷰 + 위치 리스트
+│   ├── map/                    # MapLibre 지도(MapCanvas, dynamic) + 위치 리스트
 │   ├── about/                  # 소개 (통계 자동 집계)
 │   ├── export/                 # 프레임 내보내기 (canvas, 프레임 6종)
 │   ├── likes/                  # 하트 버튼 + use-like (익명 +1)
@@ -108,7 +108,6 @@ src/
 ├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
 ├── lib/exif/                   # exifr 래퍼
-├── lib/maps/                   # Google Maps 로더
 ├── mocks/                      # Phase 1 mock (design 데이터 이식, env 미설정 시 폴백)
 ├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION, ROUTES, STORAGE_KEYS, FRAME_STYLES
 ├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-scroll-lock)
@@ -127,20 +126,21 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_ADMIN_UID=                 # UI 가드용 (보안은 Rules의 isAdmin()이 담당)
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=       # HTTP referrer 제한 필수
 ```
 
-> Firebase 웹 키(`AIza…`)·Maps 키는 공개돼도 보안 위험이 아니다 — 보안은 Rules와 **referrer 제한**이 담당.
+> 지도(MapLibre+CARTO)는 **키가 없다** — CARTO 무료 타일 사용.
+
+> Firebase 웹 키(`AIza…`)는 공개돼도 보안 위험이 아니다 — 보안은 Rules가 담당.
 > LLM/비전 API 키 같은 **진짜 시크릿은 이 프로젝트에 없다**(아키텍처 원칙 #8). 코드 하드코딩 시 secret_scan hook이 경고.
 
 ## 무료 한도 가드
 
-| 리소스      | 무료 한도                          | 이 프로젝트 대응                                             |
-| ----------- | ---------------------------------- | ------------------------------------------------------------ |
-| Firestore   | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 좋아요 쓰기는 view당 1회 |
-| Storage     | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image    |
-| Vercel      | 100GB 대역폭/월                    | next/image 최적화                                            |
-| Google Maps | 월 무료 한도 (지도 로드)           | `/map` 라우트에서만 dynamic 로드. 예산 알림으로 감시         |
+| 리소스       | 무료 한도                          | 이 프로젝트 대응                                             |
+| ------------ | ---------------------------------- | ------------------------------------------------------------ |
+| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 좋아요 쓰기는 view당 1회 |
+| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image    |
+| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                            |
+| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/map` 라우트에서만 dynamic 로드          |
 
 ## 개발 명령어
 
@@ -175,6 +175,6 @@ firebase deploy --only firestore:rules,storage   # Rules만 배포
 - **Phase 1 — 디자인 이식 (정적)**: `design/` 프로토타입 → Next.js 컴포넌트. mock 데이터, 반응형 통합,
   다크모드·ko/en 토글. 4뷰(작업/앨범/지도/소개) + 상세 모달 + 내보내기 + 지도(mock 좌표).
 - **Phase 2 — Firebase 연동**: Auth(관리자 로그인) + Firestore(photos·albums·site) + Storage(exifr + webp 압축) +
-  관리자 CMS(폼 + dnd-kit 수동 정렬) + 좋아요 delta-guard Rule + Google Maps 실연동.
+  관리자 CMS(폼 + dnd-kit 수동 정렬) + 좋아요 delta-guard Rule. (지도 MapLibre+CARTO는 P1에서 완료)
 - **Phase 3 — 선택**: **AI 태그 추천**(브라우저 내 `transformers.js` CLIP zero-shot), 지도 고도화,
   OG 이미지·SEO 강화, `/api/revalidate` 즉시 반영.

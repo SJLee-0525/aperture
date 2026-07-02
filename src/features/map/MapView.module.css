@@ -7,6 +7,9 @@
   .view {
     grid-template-columns: 1fr;
   }
+  .stage {
+    min-height: 60vh;
+  }
 }
 .stage {
   position: relative;
@@ -14,22 +17,8 @@
   background: var(--map-land);
   min-height: 340px;
 }
-.map {
+.loading {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.note {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 80%;
-  padding: 10px 16px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  color: var(--text-3);
-  font-size: var(--t-small);
-  text-align: center;
+  background: var(--map-land);
 }
