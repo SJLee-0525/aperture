@@ -38,7 +38,7 @@ const ExifPanel = ({ photo, tagLabels }: Props) => {
           <div className={styles.title}>{pickText(photo.title, lang)}</div>
           <div className={styles.date}>{formatShotAt(photo.shotAt)}</div>
         </div>
-        <LikeButton key={photo.id} initialLikes={photo.likes} />
+        <LikeButton key={photo.id} photoId={photo.id} initialLikes={photo.likes} />
       </div>
 
       <div className={styles.exif}>

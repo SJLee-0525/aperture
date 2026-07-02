@@ -21,6 +21,10 @@
 .filled {
   color: var(--like);
 }
+/* 이미 좋아요함 — 재클릭 무의미하므로 커서만 기본으로(색은 filled 유지) */
+.liked {
+  cursor: default;
+}
 .filled svg {
   transform: scale(1.05);
 }

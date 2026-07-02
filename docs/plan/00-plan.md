@@ -101,14 +101,14 @@
 
 ## 4. Phase 2 — Firebase 연동 + 관리자 CMS + 내보내기
 
-- [ ] `lib/firebase/`: `client.ts`(초기화 1곳, `getApps()[0] ?? initializeApp`), `auth.ts`, `firestore.ts`(관리자 SDK, Timestamp↔Date 변환·한국어 에러), `firestore-rest.ts`(공개 ISR fetch), `storage.ts`
+- [x] `lib/firebase/`: `client.ts`(초기화 1곳, `getApps()[0] ?? initializeApp`), `auth.ts`, `firestore.ts`(관리자 SDK, Timestamp↔Date 변환·한국어 에러), `firestore-rest.ts`(공개 ISR fetch — runQuery `published==true`+`orderBy(order)`, GET `site/config`), `config.ts`(설정 여부 판별), `storage.ts`
 - [ ] **Security Rules**: `firestore.rules`(photos/albums/site + **좋아요 delta-guard** `hasOnly(['likes'])`+`==old+1`+`published`), `storage.rules`(webp·10MB·image/*), `firestore.indexes.json`(published+order ×2)
 - [ ] **Emulator 테스트**: 좋아요 +1 허용 / +2·−1·타필드·초안 거부, 타 UID 관리자쓰기 거부, 미정의 컬렉션 거부 (firebase agent 체크리스트) — **통과 후에만 Rules 배포**
 - [ ] Auth: `LoginForm`, `AuthGuard`, `use-auth`, `admin/layout.tsx` 가드(비로그인→`/admin/login`)
-- [ ] `lib/content/get-*` → mock에서 **Firestore 로 교체** (호출부 무변경) + 빈 컬렉션 폴백
+- [x] `lib/content/get-*` → mock에서 **Firestore REST 로 교체** (호출부 무변경) + env 미설정·빈 컬렉션·오류 시 mock 폴백 (get-album·get-tags 는 get-albums·get-site 파생)
 - [ ] **업로드 파이프라인** `features/image-upload/`: `exifr`(압축 前 EXIF·GPS) → `browser-image-compression`(webp ~2048) → ID 선발급 → Storage → getDownloadURL → 폼 자동채움. 삭제 시 `deleteFolder` 정리
 - [ ] 관리자 CMS: `admin/photos`(EXIF 폼·태그 멀티셀렉트·**지도 좌표 픽커**·**dnd-kit 정렬**), `admin/albums`(사진 선택·커버·정렬), `admin/tags`(사전 편집), `admin/site`(이름·bio·링크). admin 화면은 기존 토큰만 재사용(새 색 금지)
-- [ ] 좋아요 영속화: `likePhoto = updateDoc(ref,{likes:increment(1)})`
+- [x] 좋아요 영속화: `likePhoto = updateDoc(ref,{likes:increment(1)})` + `use-like` optimistic·롤백 + localStorage 브라우저당 1회 가드(`liked-store`, useSyncExternalStore)
 - [ ] **프레임 내보내기** `features/export/`: `ExportModal`, `frame-preview.ts`(프레임 6종 — SRP 예외 한 파일), `use-export`(canvas → **webp** `toBlob`). 옵션: 워터마크·메타범위·해상도(저장본 기준). 상세 패널 "내보내기" 버튼 활성화
 - [ ] `next.config` `images.remotePatterns` 에 `firebasestorage.googleapis.com`
 - [ ] `deploy-check` 통과 후 배포. (선택) `app/api/revalidate` 즉시 반영
