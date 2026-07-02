@@ -1,0 +1,29 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  /* 잠깐 유지했다 페이드아웃 → 끝나면 숨김 + 클릭 통과(forwards 로 종료 상태 유지) */
+  animation: introDismiss 1.4s var(--ease) forwards;
+}
+@keyframes introDismiss {
+  0%,
+  55% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+/* reduced-motion: 스플래시 생략 */
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    display: none;
+  }
+}

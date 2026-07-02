@@ -1,0 +1,45 @@
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+.brand {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.dot {
+  color: var(--accent);
+}
+.bar {
+  position: relative;
+  display: block;
+  width: 160px;
+  height: 2px;
+  overflow: hidden;
+  background: var(--line);
+}
+.barFill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 40%;
+  background: var(--accent);
+  animation: loadSlide 1.1s var(--ease) infinite;
+}
+@keyframes loadSlide {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(330%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barFill {
+    animation: none;
+  }
+}
