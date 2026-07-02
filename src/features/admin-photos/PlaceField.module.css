@@ -113,9 +113,12 @@
   list-style: none;
   display: flex;
   flex-direction: column;
+  /* 최대 10개 → 너무 길어지지 않게 약 4개 높이에서 내부 스크롤 */
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  overflow: hidden;
 }
 .result {
   display: flex;

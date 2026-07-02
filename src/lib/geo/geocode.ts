@@ -30,7 +30,7 @@ type NominatimSearch = {
 const searchPlaces = async (query: string): Promise<GeoResult[]> => {
   const q = query.trim();
   if (!q) return [];
-  const url = `${ENDPOINT}/search?q=${encodeURIComponent(q)}&format=jsonv2&accept-language=ko&limit=6`;
+  const url = `${ENDPOINT}/search?q=${encodeURIComponent(q)}&format=jsonv2&accept-language=ko&limit=10`;
   let res: Response;
   try {
     res = await fetch(url, { headers: { Accept: "application/json" } });
