@@ -1,0 +1,94 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.blockLabel {
+  font-size: var(--t-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gridItem {
+  list-style: none;
+}
+
+.tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  background: var(--photo-bg);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease);
+}
+.tile:hover {
+  border-color: var(--line-strong);
+}
+.tileOn {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.tileImg {
+  object-fit: cover;
+  transition: opacity var(--dur) var(--ease);
+}
+.tileOn .tileImg {
+  opacity: 0.72;
+}
+
+.check {
+  position: absolute;
+  top: var(--s-1);
+  right: var(--s-1);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  font-size: var(--t-small);
+  line-height: 1;
+}
+
+.emptySel {
+  font-size: var(--t-small);
+  color: var(--text-4);
+}
+
+.state {
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+.stateError {
+  font-size: var(--t-small);
+  color: var(--like);
+}

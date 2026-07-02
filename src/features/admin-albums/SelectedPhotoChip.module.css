@@ -1,0 +1,86 @@
+.chip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  width: 96px;
+  list-style: none;
+}
+
+.grab {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 96px;
+  padding: 0;
+  background: var(--photo-bg);
+  border: 1px solid var(--line);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+.grab:active {
+  cursor: grabbing;
+}
+.cover .grab {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.img {
+  object-fit: cover;
+}
+
+.coverTag {
+  position: absolute;
+  top: var(--s-1);
+  left: var(--s-1);
+  padding: 2px var(--s-2);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-label);
+}
+
+.controls {
+  display: flex;
+  gap: var(--s-1);
+}
+
+.coverBtn {
+  flex: 1;
+  height: 26px;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.coverBtn:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+.coverBtn:disabled {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+  cursor: default;
+}
+
+.removeBtn {
+  flex: none;
+  height: 26px;
+  padding: 0 var(--s-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.removeBtn:hover {
+  border-color: var(--line-strong);
+  color: var(--like);
+}

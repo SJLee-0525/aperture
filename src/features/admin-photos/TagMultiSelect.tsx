@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Chip } from "@/components/Chip";
-import { getTags } from "@/lib/content/get-tags";
+import { getSiteConfig } from "@/lib/firebase/site";
 import type { Tag } from "@/types/tag";
 
 import styles from "./TagMultiSelect.module.css";
@@ -19,9 +19,13 @@ const TagMultiSelect = ({ selected, onChange }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    getTags().then((loaded) => {
-      if (alive) setTags(loaded);
-    });
+    getSiteConfig()
+      .then((config) => {
+        if (alive) setTags(config.tags);
+      })
+      .catch(() => {
+        if (alive) setTags([]);
+      });
     return () => {
       alive = false;
     };
