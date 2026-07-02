@@ -1,0 +1,67 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 500;
+  color: var(--text);
+}
+.hello {
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-4);
+}
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-6);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.badge {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  padding: 2px var(--s-2);
+  background: var(--surface-3);
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 500;
+  color: var(--text);
+}
+.cardDesc {
+  font-size: var(--t-small);
+  color: var(--text-3);
+  line-height: 1.5;
+}

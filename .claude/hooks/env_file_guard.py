@@ -6,6 +6,10 @@
   2. 서비스 계정 키 JSON (*serviceaccount*.json, *adminsdk*.json)
      — 이 프로젝트는 firebase-admin 자체를 쓰지 않는 게 원칙 (CLAUDE.md 아키텍처 원칙 #5)
 
+예외(허용):
+  - .env.example / .env.*.example 등 `.example`·`.sample`·`.template` 로 끝나는 템플릿.
+    플레이스홀더만 담고 커밋 대상이라(.gitignore `!.env.example`) 차단할 이유가 없다.
+
 차단 동작: stderr 로 사유 출력 + exit 2 (Claude Code 가 차단 신호로 처리).
 
 비활성화: .claude/settings.json 의 PreToolUse 에서 본 항목 제거.
@@ -40,8 +44,12 @@ def main() -> int:
 
     p = Path(file_path)
     name = p.name
+    nl = name.lower()
 
-    if name == ".env" or name.startswith(".env."):
+    # 템플릿(.example/.sample/.template)은 플레이스홀더뿐이라 허용 (.gitignore `!.env.example`)
+    is_template = nl.endswith((".example", ".sample", ".template"))
+
+    if (name == ".env" or name.startswith(".env.")) and not is_template:
         sys.stderr.write(
             f"[hook:env_file_guard] {p} 자동 수정 차단\n"
             f"  .env 류는 Firebase 설정·시크릿을 포함할 수 있어 Claude 자동 수정을 막습니다.\n"

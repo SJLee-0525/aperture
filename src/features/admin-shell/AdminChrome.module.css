@@ -1,0 +1,84 @@
+.shell {
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 var(--s-6);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-3);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.link {
+  font-size: var(--t-small);
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color var(--dur) var(--ease);
+}
+.link:hover {
+  color: var(--text);
+}
+
+.logout {
+  height: 34px;
+  padding: 0 var(--s-4);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.logout:hover {
+  border-color: var(--text-3);
+  color: var(--text);
+}
+
+.content {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--s-10) var(--s-6);
+}
+
+@media (max-width: 640px) {
+  .bar {
+    padding: 0 var(--s-4);
+  }
+  .content {
+    padding: var(--s-6) var(--s-4);
+  }
+}
