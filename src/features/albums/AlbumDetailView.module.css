@@ -7,6 +7,10 @@
   margin-bottom: var(--s-8);
   overflow: hidden;
 }
+.heroImgWrap {
+  position: absolute;
+  inset: 0;
+}
 .heroImg {
   object-fit: cover;
 }

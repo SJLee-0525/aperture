@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -14,6 +15,8 @@ import type { Tag } from "@/types/tag";
 
 import styles from "./AlbumDetailView.module.css";
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 type Props = {
   album: Album;
   photos: Photo[];
@@ -21,7 +24,11 @@ type Props = {
   tags: Tag[];
 };
 
-/** 앨범 상세 — 히어로(커버+제목) + 메이슨리 그리드 + 상세 모달(앨범 내 순환). */
+/**
+ * 앨범 상세 — 히어로(커버+제목) + 메이슨리 그리드 + 상세 모달(앨범 내 순환).
+ * 진입 시: 커버가 살짝 줌아웃되며 자리잡고, 제목과 그리드가 순차로 떠오른다.
+ * (모달은 body 로 포털되어 이 영역의 transform 영향을 받지 않는다.)
+ */
 const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
   const { dict, lang } = useLang();
   const title = pickText(album.title, lang);
@@ -29,22 +36,46 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
   return (
     <>
       <div className={styles.hero}>
-        <Image src={coverUrl} alt={title} fill sizes="100vw" className={styles.heroImg} priority />
+        <m.div
+          className={styles.heroImgWrap}
+          initial={{ scale: 1.08 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.9, ease: EASE }}
+        >
+          <Image
+            src={coverUrl}
+            alt={title}
+            fill
+            sizes="100vw"
+            className={styles.heroImg}
+            priority
+          />
+        </m.div>
         <div className={styles.scrim} />
         <Link href={ROUTES.ALBUMS} className={styles.back}>
           ← {dict.albumsNav}
         </Link>
-        <div className={styles.heroText}>
+        <m.div
+          className={styles.heroText}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.12 }}
+        >
           <h1 className={styles.heroTitle}>{title}</h1>
           <div className={styles.heroMeta}>
             {pickText(album.subtitle, lang)} · {photos.length} photos
           </div>
-        </div>
+        </m.div>
       </div>
 
-      <main className={styles.main}>
+      <m.main
+        className={styles.main}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE, delay: 0.18 }}
+      >
         <PhotoGrid photos={photos} lang={lang} square={false} emptyLabel={dict.emptyResults} />
-      </main>
+      </m.main>
 
       <PhotoModal photos={photos} tags={tags} />
     </>
