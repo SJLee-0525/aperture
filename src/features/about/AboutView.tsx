@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "motion/react";
 import { useMemo } from "react";
 
 import { useLang } from "@/features/lang/use-lang";
@@ -9,6 +10,18 @@ import type { Photo } from "@/types/photo";
 import type { SiteConfig } from "@/types/site";
 
 import styles from "./AboutView.module.css";
+import { CountUp } from "./CountUp";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+/** 블록이 순번대로 아래에서 떠오름 (custom = 순번). */
+const FADE_UP = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: EASE, delay: i * 0.1 },
+  }),
+};
 
 type Props = {
   site: SiteConfig;
@@ -45,7 +58,13 @@ const AboutView = ({ site, photos, albums }: Props) => {
 
   return (
     <main className={styles.about}>
-      <header className={styles.hero}>
+      <m.header
+        className={styles.hero}
+        custom={0}
+        variants={FADE_UP}
+        initial="hidden"
+        animate="show"
+      >
         <h1 className={styles.name}>
           {pickText(site.name, lang)}
           <br />
@@ -65,18 +84,20 @@ const AboutView = ({ site, photos, albums }: Props) => {
             </a>
           ))}
         </div>
-      </header>
+      </m.header>
 
-      <div className={styles.stats}>
+      <m.div className={styles.stats} custom={1} variants={FADE_UP} initial="hidden" animate="show">
         {stats.map(([value, label]) => (
           <div key={label} className={styles.stat}>
-            <div className={styles.sn}>{value}</div>
+            <div className={styles.sn}>
+              <CountUp value={value} />
+            </div>
             <div className={styles.sl}>{label}</div>
           </div>
         ))}
-      </div>
+      </m.div>
 
-      <div className={styles.cols}>
+      <m.div className={styles.cols} custom={2} variants={FADE_UP} initial="hidden" animate="show">
         {columns.map(([label, items]) => (
           <div key={label}>
             <div className="u-label">{label}</div>
@@ -87,7 +108,7 @@ const AboutView = ({ site, photos, albums }: Props) => {
             </ul>
           </div>
         ))}
-      </div>
+      </m.div>
     </main>
   );
 };

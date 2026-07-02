@@ -1,6 +1,10 @@
 .card {
   display: block;
   cursor: pointer;
+  transition: transform var(--dur) var(--ease);
+}
+.card:hover {
+  transform: translateY(-4px);
 }
 .cover {
   position: relative;
