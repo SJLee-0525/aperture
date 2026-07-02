@@ -44,13 +44,12 @@ const SiteHeader = () => {
 
         <span className={styles.spacer} />
 
-        <SearchBox />
-
         <div className={styles.controls}>
           <LangMenu />
           <ThemeToggleButton />
-          <span className={styles.avatar} aria-hidden="true" />
         </div>
+
+        <SearchBox />
       </div>
     </header>
   );
