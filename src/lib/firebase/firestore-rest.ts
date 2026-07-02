@@ -88,7 +88,10 @@ const runQuery = async (
   const rows = (await res.json()) as Array<{ document?: RestDocument }>;
   return rows
     .filter((row): row is { document: RestDocument } => Boolean(row.document))
-    .map((row) => ({ id: docId(row.document.name), data: decodeFields(row.document.fields ?? {}) }));
+    .map((row) => ({
+      id: docId(row.document.name),
+      data: decodeFields(row.document.fields ?? {}),
+    }));
 };
 
 // ── REST 디코딩 값 → 도메인 타입 매핑 (누락 필드는 안전 기본값) ──────────────

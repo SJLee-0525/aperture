@@ -2,20 +2,3 @@
   position: absolute;
   inset: 0;
 }
-.marker {
-  width: 15px;
-  height: 15px;
-  padding: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 3px solid var(--bg);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition:
-    transform var(--dur),
-    background var(--dur);
-}
-.marker:hover {
-  background: var(--like);
-  transform: scale(1.25);
-}
