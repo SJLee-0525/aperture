@@ -1,8 +1,8 @@
 "use client";
 
-import { MiniMap } from "@/components/MiniMap";
 import { useLang } from "@/features/lang/use-lang";
 import { LikeButton } from "@/features/likes/LikeButton";
+import { DetailMiniMap } from "@/features/photo-detail/DetailMiniMap";
 import { formatShotAt } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Photo } from "@/types/photo";
@@ -70,7 +70,7 @@ const ExifPanel = ({ photo, tagLabels }: Props) => {
         </div>
       </div>
 
-      <MiniMap place={pickText(photo.place, lang)} coords={photo.coords} />
+      <DetailMiniMap place={pickText(photo.place, lang)} coords={photo.coords} />
 
       {tagLabels.length > 0 ? (
         <div className={styles.tags}>
