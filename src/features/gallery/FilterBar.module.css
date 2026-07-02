@@ -70,18 +70,6 @@
   flex-direction: column;
   gap: 9px;
 }
-.select {
-  font-family: var(--font-sans);
-  font-size: var(--t-small);
-  color: var(--text);
-  background: var(--surface-inset);
-  border: 1px solid var(--line);
-  padding: 9px 11px;
-  outline: none;
-}
-.select:focus {
-  border-color: var(--accent);
-}
 .foot {
   display: flex;
   justify-content: flex-end;

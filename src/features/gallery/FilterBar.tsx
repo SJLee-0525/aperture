@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Chip } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
 import { RangeSlider } from "@/components/RangeSlider";
+import { Select } from "@/components/Select";
 import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/features/gallery/filter-photos";
 import { useLang } from "@/features/lang/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -69,18 +70,15 @@ const FilterBar = (props: Props) => {
             <div className={styles.pop}>
               <div className={styles.row}>
                 <span className="u-label">{dict.cameraLabel}</span>
-                <select
-                  className={styles.select}
+                <Select
+                  ariaLabel={dict.cameraLabel}
                   value={props.camera}
-                  onChange={(event) => props.onCamera(event.target.value)}
-                >
-                  <option value={ALL}>{dict.allTag}</option>
-                  {props.cameras.map((camera) => (
-                    <option key={camera} value={camera}>
-                      {camera}
-                    </option>
-                  ))}
-                </select>
+                  onChange={props.onCamera}
+                  options={[
+                    { value: ALL, label: dict.allTag },
+                    ...props.cameras.map((camera) => ({ value: camera, label: camera })),
+                  ]}
+                />
               </div>
 
               <div className={styles.row}>
