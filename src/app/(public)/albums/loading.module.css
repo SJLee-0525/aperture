@@ -5,7 +5,11 @@
   padding: var(--s-8) var(--s-6) var(--s-16);
 }
 .title {
+  /* 실제 h1(--t-h1) 렌더 높이 = font-size × line-height(1.6) 예약 → 그리드 시작 정합 */
+  height: calc(var(--t-h1) * 1.6);
   margin-bottom: var(--s-6);
+  display: flex;
+  align-items: center;
 }
 .grid {
   display: grid;

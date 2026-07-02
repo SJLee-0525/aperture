@@ -149,6 +149,16 @@ img {
   display: block;
   max-width: 100%;
 }
+/* 제목 여백은 각 .title/.name 클래스가 margin-bottom 으로 제어 → UA 기본 heading 여백 제거
+   (안 하면 h1 위에 ~0.67em 유령 여백이 남아 로딩 스켈레톤과 높이가 어긋난다). */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
 
 /* ===================== Primitives ===================== */
 .u-label {

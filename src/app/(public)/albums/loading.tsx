@@ -8,7 +8,9 @@ const CARD_COUNT = 8;
 export default function AlbumsLoading() {
   return (
     <main className={styles.main}>
-      <Skeleton className={styles.title} width={140} height={30} />
+      <div className={styles.title}>
+        <Skeleton width={150} height={34} />
+      </div>
       <div className={styles.grid}>
         {Array.from({ length: CARD_COUNT }).map((_, index) => (
           <div key={`album-${index}`}>

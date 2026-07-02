@@ -1,4 +1,4 @@
-/* 작업(홈) 로딩 셸 — GalleryView.module.css .main/.toolbar + PhotoGrid 메이슨리 흉내. */
+/* 작업(홈) 로딩 셸 — GalleryView.module.css .main/.toolbar + FilterBar.module.css .bar/.tagbar + 메이슨리 흉내. */
 .main {
   max-width: 1180px;
   margin: 0 auto;
@@ -12,16 +12,32 @@
   flex-wrap: wrap;
   padding-bottom: var(--s-5);
 }
+/* 실제 h1(--t-h1) 렌더 높이 = font-size × line-height(1.6) 예약 → 툴바 높이 정합 */
+.titleLine {
+  height: calc(var(--t-h1) * 1.6);
+  display: flex;
+  align-items: flex-end;
+}
 .tools {
   display: flex;
   align-items: center;
   gap: var(--s-4);
 }
-.chips {
+/* FilterBar .bar/.tagbar 미러 — 태그칩(가변, ~2줄) + 깔때기 버튼 */
+.bar {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-5);
   flex-wrap: wrap;
-  gap: var(--s-2);
-  margin-bottom: var(--s-6);
+  margin-bottom: var(--s-5);
+}
+.tagbar {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .mason {
   columns: 4;
