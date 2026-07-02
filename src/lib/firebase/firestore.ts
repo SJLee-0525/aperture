@@ -110,5 +110,32 @@ const deletePhoto = async (id: string): Promise<void> => {
   }
 };
 
-export { createPhoto, deletePhoto, getPhotoAdmin, listPhotosAdmin, newPhotoId, updatePhoto };
+/** 순서만 갱신 (dnd 정렬) — 전체 입력 없이 order 필드만. */
+const updatePhotoOrder = async (id: string, order: number): Promise<void> => {
+  try {
+    await updateDoc(doc(db, COLLECTIONS.PHOTOS, id), { order, updatedAt: serverTimestamp() });
+  } catch {
+    throw new Error("순서 저장에 실패했습니다.");
+  }
+};
+
+/** 공개 여부만 토글. */
+const setPhotoPublished = async (id: string, published: boolean): Promise<void> => {
+  try {
+    await updateDoc(doc(db, COLLECTIONS.PHOTOS, id), { published, updatedAt: serverTimestamp() });
+  } catch {
+    throw new Error("공개 상태 변경에 실패했습니다.");
+  }
+};
+
+export {
+  createPhoto,
+  deletePhoto,
+  getPhotoAdmin,
+  listPhotosAdmin,
+  newPhotoId,
+  setPhotoPublished,
+  updatePhoto,
+  updatePhotoOrder,
+};
 export type { PhotoInput };

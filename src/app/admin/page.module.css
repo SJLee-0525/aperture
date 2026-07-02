@@ -42,6 +42,17 @@
   border-radius: var(--r-md);
 }
 
+.cardLink {
+  text-decoration: none;
+  transition:
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+.cardLink:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+}
+
 .badge {
   position: absolute;
   top: var(--s-4);
@@ -52,6 +63,10 @@
   font-family: var(--font-mono);
   font-size: var(--t-micro);
   color: var(--text-3);
+}
+.badgeReady {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .cardTitle {

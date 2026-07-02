@@ -1,0 +1,10 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.empty {
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
