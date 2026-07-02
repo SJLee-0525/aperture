@@ -45,6 +45,8 @@
   max-height: 240px;
   overflow-y: auto;
   list-style: none;
+  /* ul 기본 margin(≈1em) 제거 — 안 하면 top 오프셋에 더해져 리스트가 아래로 뜬다 */
+  margin: 0;
   padding: var(--s-1);
   background: var(--bg);
   border: 1px solid var(--line-strong);
