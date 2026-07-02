@@ -30,6 +30,15 @@ type UIDict = {
   lensLabel: string;
   regionsLabel: string;
   locationsLabel: string;
+  // 에러 · 404
+  errorLabel: string;
+  errorTitle: string;
+  errorBody: string;
+  errorRetry: string;
+  errorDigest: string;
+  notFoundTitle: string;
+  notFoundBody: string;
+  backHome: string;
 };
 
 const DICTIONARY: Record<Lang, UIDict> = {
@@ -60,6 +69,14 @@ const DICTIONARY: Record<Lang, UIDict> = {
     lensLabel: "렌즈",
     regionsLabel: "활동 지역",
     locationsLabel: "촬영 위치",
+    errorLabel: "오류",
+    errorTitle: "문제가 발생했습니다",
+    errorBody: "예기치 못한 오류로 페이지를 표시할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    errorRetry: "다시 시도",
+    errorDigest: "오류 코드",
+    notFoundTitle: "페이지를 찾을 수 없습니다",
+    notFoundBody: "요청하신 페이지가 없거나 이동되었습니다. 주소를 확인하거나 홈으로 돌아가세요.",
+    backHome: "홈으로",
   },
   en: {
     workNav: "Work",
@@ -88,6 +105,15 @@ const DICTIONARY: Record<Lang, UIDict> = {
     lensLabel: "Lens",
     regionsLabel: "Regions",
     locationsLabel: "Locations",
+    errorLabel: "Error",
+    errorTitle: "Something went wrong",
+    errorBody: "An unexpected error occurred and the page can’t be displayed. Please try again.",
+    errorRetry: "Try again",
+    errorDigest: "Error code",
+    notFoundTitle: "Page not found",
+    notFoundBody:
+      "The page you’re looking for doesn’t exist or has moved. Check the URL or head back home.",
+    backHome: "Back to home",
   },
 };
 

@@ -1,0 +1,23 @@
+.block {
+  display: block;
+  width: 100%;
+  background: var(--surface-2);
+  animation: shimmer 1.4s var(--ease) infinite;
+}
+
+/* surface-2 ↔ surface-3 사이를 은은하게 펄스 (색만 변화 — 레이아웃 영향 없음) */
+@keyframes shimmer {
+  0%,
+  100% {
+    background: var(--surface-2);
+  }
+  50% {
+    background: var(--surface-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    animation: none;
+  }
+}

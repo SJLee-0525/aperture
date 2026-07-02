@@ -1,0 +1,56 @@
+/* 소개 로딩 셸 — AboutView.module.css .about/.hero/.stats/.cols 흉내. */
+.about {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--s-10) var(--s-6) var(--s-16);
+}
+.hero {
+  padding-bottom: var(--s-10);
+  border-bottom: 1px solid var(--line);
+}
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: var(--s-5);
+  max-width: 60ch;
+}
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  margin-top: var(--s-6);
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-5);
+  padding: var(--s-8) 0;
+  border-bottom: 1px solid var(--line);
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-8);
+  padding-top: var(--s-8);
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--s-3);
+}
+@media (max-width: 760px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cols {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+}

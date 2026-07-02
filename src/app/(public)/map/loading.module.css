@@ -1,0 +1,43 @@
+/* 지도 로딩 셸 — MapView.module.css .view(320px 1fr) + LocationList 항목 + stage 흉내. */
+.view {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100dvh - 200px);
+}
+.list {
+  padding: var(--s-5);
+  border-right: 1px solid var(--line);
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--s-4);
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px;
+}
+.txt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stage {
+  min-height: 340px;
+  background: var(--map-land);
+}
+@media (max-width: 760px) {
+  .view {
+    grid-template-columns: 1fr;
+  }
+  .list {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .stage {
+    min-height: 60vh;
+  }
+}

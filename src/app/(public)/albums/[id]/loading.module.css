@@ -1,0 +1,27 @@
+/* 앨범 상세 로딩 셸 — AlbumDetailView.module.css hero(300px) + 메이슨리 그리드 흉내. */
+.hero {
+  margin-bottom: var(--s-8);
+}
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--s-6) var(--s-16);
+}
+.mason {
+  columns: 4;
+  column-gap: 12px;
+}
+.cell {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+@media (max-width: 1100px) {
+  .mason {
+    columns: 3;
+  }
+}
+@media (max-width: 760px) {
+  .mason {
+    columns: 2;
+  }
+}

@@ -1,0 +1,30 @@
+/* 앨범 로딩 셸 — AlbumsView.module.css .main/.title/.grid + AlbumCard 커버/정보 흉내. */
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
+}
+.title {
+  margin-bottom: var(--s-6);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 2px 0;
+}
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
