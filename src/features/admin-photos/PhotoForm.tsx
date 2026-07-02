@@ -11,6 +11,7 @@ import type { Photo } from "@/types/photo";
 
 import { fromDatetimeLocal, toDatetimeLocal } from "./datetime-local";
 import { PhotoUploadField } from "./PhotoUploadField";
+import { PlaceField } from "./PlaceField";
 import styles from "./PhotoForm.module.css";
 import { TagMultiSelect } from "./TagMultiSelect";
 
@@ -168,7 +169,7 @@ const PhotoForm = ({ photoId, initial }: Props) => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.legend}>제목 · 장소</h2>
+        <h2 className={styles.legend}>제목</h2>
         <div className={styles.grid2}>
           <label className={styles.field}>
             <span className={styles.label}>제목 (한국어) *</span>
@@ -185,22 +186,6 @@ const PhotoForm = ({ photoId, initial }: Props) => {
               className={styles.input}
               value={form.title.en}
               onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>장소 (한국어)</span>
-            <input
-              className={styles.input}
-              value={form.place.ko}
-              onChange={(e) => patch({ place: { ...form.place, ko: e.target.value } })}
-            />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>장소 (English)</span>
-            <input
-              className={styles.input}
-              value={form.place.en}
-              onChange={(e) => patch({ place: { ...form.place, en: e.target.value } })}
             />
           </label>
         </div>
@@ -255,32 +240,20 @@ const PhotoForm = ({ photoId, initial }: Props) => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.legend}>좌표</h2>
-        <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>위도 (lat)</span>
-            <input
-              className={styles.input}
-              type="number"
-              step="any"
-              value={lat}
-              placeholder="비우면 지도 핀 없음"
-              onChange={(e) => setLat(e.target.value)}
-            />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>경도 (lng)</span>
-            <input
-              className={styles.input}
-              type="number"
-              step="any"
-              value={lng}
-              placeholder="비우면 지도 핀 없음"
-              onChange={(e) => setLng(e.target.value)}
-            />
-          </label>
-        </div>
-        {/* TODO: 지도 클릭 좌표 픽커는 후속 슬라이스 — 지금은 lat/lng 숫자 입력으로 충분. */}
+        <h2 className={styles.legend}>장소 · 좌표</h2>
+        <PlaceField
+          place={form.place}
+          latStr={lat}
+          lngStr={lng}
+          onPlaceChange={(place) => patch({ place })}
+          onLatChange={setLat}
+          onLngChange={setLng}
+          onPickResult={(place, plat, plng) => {
+            patch({ place });
+            setLat(String(plat));
+            setLng(String(plng));
+          }}
+        />
       </section>
 
       <section className={styles.section}>
