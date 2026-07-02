@@ -30,7 +30,11 @@ export default function Error({ error, reset }: Props) {
       <div className={styles.inner}>
         <div className={styles.label}>{dict.errorLabel}</div>
         <h1 className={styles.title}>{dict.errorTitle}</h1>
-        <p className={styles.body}>{dict.errorBody}</p>
+        <p className={styles.body}>
+          {dict.errorBody}
+          <br />
+          {dict.errorBody2}
+        </p>
         <div className={styles.actions}>
           <button type="button" onClick={reset} className={styles.retry}>
             {dict.errorRetry}

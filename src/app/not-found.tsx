@@ -19,7 +19,11 @@ export default function NotFound() {
       <div className={styles.inner}>
         <div className={styles.label}>404</div>
         <h1 className={styles.title}>{dict.notFoundTitle}</h1>
-        <p className={styles.body}>{dict.notFoundBody}</p>
+        <p className={styles.body}>
+          {dict.notFoundBody}
+          <br />
+          {dict.notFoundBody2}
+        </p>
         <div className={styles.actions}>
           <Link href={ROUTES.HOME} className={styles.home}>
             {dict.backHome}
