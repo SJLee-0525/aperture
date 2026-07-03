@@ -1,0 +1,120 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  list-style: none;
+}
+
+.handle {
+  flex: none;
+  width: 28px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-4);
+  font-size: var(--t-h3);
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+  transition: color var(--dur) var(--ease);
+}
+.handle:hover {
+  color: var(--text-2);
+}
+.handle:active {
+  cursor: grabbing;
+}
+
+.year {
+  flex: none;
+  width: 56px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  font-size: var(--t-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place {
+  flex: none;
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.badge {
+  flex: none;
+  height: 28px;
+  padding: 0 var(--s-3);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.badge:hover {
+  border-color: var(--line-strong);
+}
+.badgeOn {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.edit {
+  font-size: var(--t-small);
+  color: var(--text-2);
+  transition: color var(--dur) var(--ease);
+}
+.edit:hover {
+  color: var(--text);
+}
+
+.delete {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.delete:hover {
+  color: var(--like);
+}
+
+@media (max-width: 640px) {
+  .row {
+    gap: var(--s-3);
+    padding: var(--s-3);
+  }
+  .place {
+    display: none;
+  }
+}

@@ -22,6 +22,7 @@ const ROUTES = {
   // 관리자
   ADMIN: "/admin",
   LOGIN: "/admin/login",
+  ADMIN_PHOTO: "/admin/photo", // 사진 관리 허브 (작업·앨범·태그·소개 묶음)
   ADMIN_PHOTOS: "/admin/photos",
   ADMIN_PHOTO_NEW: "/admin/photos/new",
   ADMIN_ALBUMS: "/admin/albums",
@@ -47,6 +48,15 @@ const adminPhotoRoute = (id: string) => `${ROUTES.ADMIN_PHOTOS}/${id}`;
 /** 관리자 앨범 수정 경로 */
 const adminAlbumRoute = (id: string) => `${ROUTES.ADMIN_ALBUMS}/${id}`;
 
+/** 관리자 음악 연주 수정 경로 */
+const adminMusicWorkRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_WORKS}/${id}`;
+
+/** 관리자 음악 수상 수정 경로 */
+const adminMusicAwardRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_AWARDS}/${id}`;
+
+/** 관리자 음악 영상 수정 경로 */
+const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`;
+
 /** 사진 상세 모달 딥링크 쿼리 (현재 페이지에 ?photo= 부착) */
 const photoQuery = (id: string) => `?photo=${id}`;
 
@@ -60,6 +70,9 @@ export {
   ROUTES,
   albumRoute,
   adminAlbumRoute,
+  adminMusicWorkRoute,
+  adminMusicAwardRoute,
+  adminMusicMediaRoute,
   adminPhotoRoute,
   photoQuery,
   workQuery,
