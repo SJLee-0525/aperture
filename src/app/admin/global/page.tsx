@@ -49,9 +49,12 @@ const AdminGlobalPage = () => {
       {status === "ready" ? (
         <>
           <section className={styles.section}>
-            <h2 className={styles.legend}>순환 타이핑 역할 (‘·’ 로 구분 · 예: Photographer · Pianist · Developer)</h2>
+            <h2 className={styles.legend}>
+              순환 타이핑 역할 (‘·’ 로 구분 · 예: Photographer · Pianist · Developer)
+            </h2>
             <p className={styles.note}>
-              메인 이름 아래에서 순환합니다. 역할 색 매칭을 위해 Photographer · Pianist · Developer 표기를 권장합니다.
+              메인 이름 아래에서 순환합니다. 역할 색 매칭을 위해 Photographer · Pianist · Developer
+              표기를 권장합니다.
             </p>
             <div className={styles.grid2}>
               <label className={styles.field}>
@@ -123,7 +126,9 @@ const AdminGlobalPage = () => {
 
           <section className={styles.section}>
             <div className={styles.linksHead}>
-              <h2 className={styles.legend}>연락 버튼 링크 (연락 페이지 · 헤더 · mailto 폼 대상)</h2>
+              <h2 className={styles.legend}>
+                연락 버튼 링크 (연락 페이지 · 헤더 · mailto 폼 대상)
+              </h2>
               <button type="button" className={styles.add} onClick={addLink}>
                 + 링크 추가
               </button>
