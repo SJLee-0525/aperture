@@ -1,11 +1,10 @@
-import { redirect } from "next/navigation";
+import { LandingView } from "@/features/landing/LandingView";
+import { getSite } from "@/lib/content/get-site";
 
-import { ROUTES } from "@/constants/routes";
+export const revalidate = 3600;
 
-/**
- * 임시 루트 — Phase A3에서 LandingView(이름·태그라인 + 3섹션 진입 허브)로 교체한다.
- * 그 전까지 `/` 는 사진 섹션(작업)으로 보낸다.
- */
-export default function RootPage() {
-  redirect(ROUTES.PHOTO);
+/** 랜딩 허브 (/) — 이름·태그라인 + 사진/음악/개발 진입. */
+export default async function RootPage() {
+  const site = await getSite();
+  return <LandingView site={site} />;
 }
