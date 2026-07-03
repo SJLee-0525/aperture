@@ -20,6 +20,12 @@ type UIDict = {
   devProjectsNav: string;
   devCareerNav: string;
   comingSoon: string;
+  // 음악 섹션 UI
+  musicContactLead: string;
+  musicBookingLabel: string;
+  socialLabel: string;
+  musicStatusOnSale: string;
+  musicStatusSoon: string;
   searchPlaceholder: string;
   allTag: string;
   filterLabel: string;
@@ -77,6 +83,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
     comingSoon: "곧 공개됩니다",
+    musicContactLead: "함께 무대를 만들 분을 기다립니다.",
+    musicBookingLabel: "공연 문의",
+    socialLabel: "소셜",
+    musicStatusOnSale: "예매 중",
+    musicStatusSoon: "오픈 예정",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     allTag: "전체",
     filterLabel: "필터",
@@ -129,6 +140,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devProjectsNav: "Projects",
     devCareerNav: "Career",
     comingSoon: "Coming soon",
+    musicContactLead: "Looking for someone to build the stage together.",
+    musicBookingLabel: "Booking",
+    socialLabel: "Social",
+    musicStatusOnSale: "On sale",
+    musicStatusSoon: "Opening soon",
     searchPlaceholder: "Search · tag / gear / place",
     allTag: "All",
     filterLabel: "Filter",
