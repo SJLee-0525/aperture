@@ -105,7 +105,7 @@
 - [ ] **Security Rules**: `firestore.rules`(photos/albums/site + **좋아요 delta-guard** `hasOnly(['likes'])`+`==old+1`+`published`), `storage.rules`(webp·10MB·image/*), `firestore.indexes.json`(published+order ×2)
 - [ ] **Emulator 테스트**: 좋아요 +1 허용 / +2·−1·타필드·초안 거부, 타 UID 관리자쓰기 거부, 미정의 컬렉션 거부 (firebase agent 체크리스트) — **통과 후에만 Rules 배포**
 - [ ] Auth: `LoginForm`, `AuthGuard`, `use-auth`, `admin/layout.tsx` 가드(비로그인→`/admin/login`)
-- [x] `lib/content/get-*` → mock에서 **Firestore REST 로 교체** (호출부 무변경) + env 미설정·빈 컬렉션·오류 시 mock 폴백 (get-album·get-tags 는 get-albums·get-site 파생)
+- [x] `lib/content/get-*` → mock에서 **Firestore REST 로 교체** (호출부 무변경). photos·albums 는 Firebase 설정 시 **항상 실데이터**(빈 컬렉션=빈 상태, mock 은 env 미설정 로컬 dev 에서만 — 실데이터+mock 혼재 방지). site 는 문서 없을 때 seed 폴백 유지. (get-album·get-tags 는 get-albums·get-site 파생)
 - [ ] **업로드 파이프라인** `features/image-upload/`: `exifr`(압축 前 EXIF·GPS) → `browser-image-compression`(webp ~2048) → ID 선발급 → Storage → getDownloadURL → 폼 자동채움. 삭제 시 `deleteFolder` 정리
 - [ ] 관리자 CMS: `admin/photos`(EXIF 폼·태그 멀티셀렉트·**지도 좌표 픽커**·**dnd-kit 정렬**), `admin/albums`(사진 선택·커버·정렬), `admin/tags`(사전 편집), `admin/site`(이름·bio·링크). admin 화면은 기존 토큰만 재사용(새 색 금지)
 - [x] 좋아요 영속화: `likePhoto = updateDoc(ref,{likes:increment(1)})` + `use-like` optimistic·롤백 + localStorage 브라우저당 1회 가드(`liked-store`, useSyncExternalStore)

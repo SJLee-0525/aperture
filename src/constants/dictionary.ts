@@ -13,6 +13,7 @@ type UIDict = {
   focalLabel: string;
   resetLabel: string;
   emptyResults: string;
+  emptyAlbums: string;
   viewMasonry: string;
   viewSquare: string;
   // EXIF 라벨 (상세 패널)
@@ -56,6 +57,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     focalLabel: "초점거리",
     resetLabel: "초기화",
     emptyResults: "검색 결과가 없습니다",
+    emptyAlbums: "아직 등록된 앨범이 없습니다",
     viewMasonry: "메이슨리",
     viewSquare: "정사각",
     exifAperture: "조리개",
@@ -94,6 +96,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     focalLabel: "Focal length",
     resetLabel: "Reset",
     emptyResults: "No results found",
+    emptyAlbums: "No albums yet",
     viewMasonry: "Masonry",
     viewSquare: "Square",
     exifAperture: "Aperture",

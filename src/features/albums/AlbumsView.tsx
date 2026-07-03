@@ -33,6 +33,15 @@ const AlbumsView = ({ albums, photos }: Props) => {
     photos[0]?.image.url ??
     "";
 
+  if (albums.length === 0) {
+    return (
+      <main className={styles.main}>
+        <h1 className={styles.title}>{dict.albumsNav}</h1>
+        <p className={styles.empty}>{dict.emptyAlbums}</p>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>{dict.albumsNav}</h1>
