@@ -1,27 +1,13 @@
 "use client";
 
-import { m } from "motion/react";
 import { useMemo } from "react";
 
-import { CountUp } from "@/components/CountUp";
+import { AboutSection } from "@/components/AboutSection";
 import { useLang } from "@/features/lang/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
-import styles from "./MusicAboutView.module.css";
-
-const EASE = [0.22, 1, 0.36, 1] as const;
-/** 블록이 순번대로 아래에서 떠오름 (custom = 순번). */
-const FADE_UP = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: EASE, delay: i * 0.1 },
-  }),
-};
-
-/** eyebrow 역할 라벨 — 사이트 태그라인 규칙상 언어 무관(고정). */
+/** eyebrow 역할 라벨 — 태그라인 규칙상 언어 무관(고정). */
 const EYEBROW = "Pianist";
 
 type Props = {
@@ -31,7 +17,7 @@ type Props = {
   media: MusicMedia[];
 };
 
-/** 음악 소개 — intro 요약 헤드라인·본문 + 통계(연주/수상/영상/무대) + 레퍼토리·무대·장르(연주에서 파생). */
+/** 음악 소개 — intro 요약·본문 + 통계(연주/수상/영상/무대) + 레퍼토리·무대·장르. 레이아웃은 공통 AboutSection. */
 const MusicAboutView = ({ config, works, awards, media }: Props) => {
   const { dict, lang } = useLang();
 
@@ -60,56 +46,23 @@ const MusicAboutView = ({ config, works, awards, media }: Props) => {
     [works, lang],
   );
 
-  const stats: Array<[number, string]> = [
-    [works.length, "WORKS"],
-    [awards.length, "AWARDS"],
-    [media.length, "VIDEOS"],
-    [venues.length, "STAGES"],
-  ];
-  const columns: Array<[string, string[]]> = [
-    [dict.musicRepertoireLabel, composers],
-    [dict.musicVenuesLabel, venues],
-    [dict.musicGenresLabel, genres],
-  ];
-
   return (
-    <main className={styles.about}>
-      <m.header
-        className={styles.hero}
-        custom={0}
-        variants={FADE_UP}
-        initial="hidden"
-        animate="show"
-      >
-        <p className={styles.eyebrow}>{EYEBROW}</p>
-        <h1 className={styles.name}>{summary}</h1>
-        {body ? <p className={styles.bio}>{body}</p> : null}
-      </m.header>
-
-      <m.div className={styles.stats} custom={1} variants={FADE_UP} initial="hidden" animate="show">
-        {stats.map(([value, label]) => (
-          <div key={label}>
-            <div className={styles.sn}>
-              <CountUp value={value} />
-            </div>
-            <div className={styles.sl}>{label}</div>
-          </div>
-        ))}
-      </m.div>
-
-      <m.div className={styles.cols} custom={2} variants={FADE_UP} initial="hidden" animate="show">
-        {columns.map(([label, items]) => (
-          <div key={label}>
-            <div className="u-label">{label}</div>
-            <ul className={styles.list}>
-              {items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </m.div>
-    </main>
+    <AboutSection
+      eyebrow={EYEBROW}
+      summary={summary}
+      body={body}
+      stats={[
+        { value: works.length, label: "WORKS" },
+        { value: awards.length, label: "AWARDS" },
+        { value: media.length, label: "VIDEOS" },
+        { value: venues.length, label: "STAGES" },
+      ]}
+      cols={[
+        { label: dict.musicRepertoireLabel, items: composers },
+        { label: dict.musicVenuesLabel, items: venues },
+        { label: dict.musicGenresLabel, items: genres },
+      ]}
+    />
   );
 };
 
