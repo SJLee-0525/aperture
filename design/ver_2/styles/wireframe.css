@@ -1,0 +1,65 @@
+/* wireframe.css — layout helpers for wireframe screens (flat, minimal).
+   Pairs with tokens.css + components.css. */
+
+.wf-screen { background: var(--bg); color: var(--text); height: 100%; display: flex; flex-direction: column; overflow: hidden; font-family: var(--font-sans); }
+.wf-screen.wf-row { flex-direction: row; align-items: stretch; }
+
+.wf-toolbar { display: flex; align-items: flex-end; justify-content: space-between; padding: var(--s-8) var(--s-8) var(--s-5); }
+.wf-h { font-family: var(--font-display); font-size: 2rem; font-weight: 500; display: flex; align-items: baseline; gap: 12px; letter-spacing: -0.01em; }
+.wf-h .sub { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.22em; color: var(--text-4); text-transform: uppercase; }
+.wf-tools { display: flex; align-items: center; gap: 16px; }
+.wf-count { font-size: var(--t-small); color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.wf-mason { columns: 4; column-gap: 10px; padding: 0 var(--s-8) var(--s-8); }
+.wf-mason .wf-tile { margin: 0 0 10px; break-inside: avoid; }
+.wf-sq { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 var(--s-8) var(--s-8); }
+.wf-sq .wf-tile { aspect-ratio: 1; }
+.wf-just { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 var(--s-8) var(--s-8); }
+.wf-just .wf-tile { height: 196px; flex-grow: 1; }
+
+.wf-tile { position: relative; overflow: hidden; background: var(--photo-bg); }
+.wf-photo { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.6s var(--ease); }
+.wf-tile:hover .wf-photo { transform: scale(1.045); }
+.wf-ov { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; background: linear-gradient(transparent 42%, rgba(0,0,0,0.55)); opacity: 0; transition: opacity var(--dur) var(--ease); }
+.wf-tile:hover .wf-ov { opacity: 1; }
+.wf-ov .t { color: #fff; font-family: var(--font-display); font-size: 1rem; }
+.wf-ov .m { color: rgba(255,255,255,0.82); font-size: 11px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.wf-like { position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity var(--dur); }
+.wf-tile:hover .wf-like { opacity: 1; }
+
+.wf-rail { width: 212px; flex: none; border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: var(--s-5); gap: 3px; background: var(--surface-1); }
+.wf-rail .brand { margin: 4px 8px var(--s-6); }
+.wf-railnav { display: flex; flex-direction: column; gap: 2px; }
+.wf-railnav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: var(--text-3); font-size: var(--t-small); font-weight: 500; text-decoration: none; }
+.wf-railnav a.cur { color: var(--text); background: var(--surface-2); }
+.wf-railnav a svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+.wf-rail-foot { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px 8px 4px; border-top: 1px solid var(--line); }
+.wf-rail-foot .nm { font-size: var(--t-small); font-weight: 600; }
+.wf-rail-foot .rl { font-size: 10px; color: var(--text-4); }
+.wf-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.wf-masthead { padding: var(--s-12) var(--s-8) var(--s-8); }
+.wf-masthead .nm { font-family: var(--font-display); font-size: 3rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.05; }
+.wf-masthead .nm em { font-style: italic; }
+.wf-masthead .bio { color: var(--text-3); max-width: 56ch; margin-top: 14px; font-size: var(--t-body); }
+.wf-filters { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+
+.wf-bread { display: flex; align-items: center; gap: 14px; padding: 14px var(--s-8); border-bottom: 1px solid var(--line); }
+.wf-bread .crumb { display: flex; align-items: center; gap: 8px; color: var(--text-3); font-size: var(--t-small); white-space: nowrap; }
+.wf-bread .crumb b { color: var(--text); font-weight: 600; }
+.wf-detail { display: grid; grid-template-columns: 1fr 384px; flex: 1; min-height: 0; }
+.wf-pane { position: relative; background: #0b0b0d; overflow: hidden; }
+.wf-aside { padding: var(--s-6); overflow: hidden; display: flex; flex-direction: column; gap: var(--s-5); border-left: 1px solid var(--line); }
+.wf-aside .ttl { font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; }
+.wf-aside .date { font-size: var(--t-micro); color: var(--text-3); font-variant-numeric: tabular-nums; margin-top: 4px; }
+
+.wf-exprow { display: flex; gap: 8px; flex-wrap: wrap; }
+.wf-expchip { font-size: 11px; padding: 7px 12px; border: 1px solid var(--line); color: var(--text-2); white-space: nowrap; }
+.wf-expchip.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+.wf-meta-rows { display: flex; flex-direction: column; }
+.wf-mr { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+.wf-mr .k { font-size: var(--t-small); color: var(--text-3); }
+.wf-mr .v { font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+
+.wf-foot { margin-top: auto; display: flex; gap: 10px; }

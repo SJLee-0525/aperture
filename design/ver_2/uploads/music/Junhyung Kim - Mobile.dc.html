@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    ::selection { background: #18181b; color: #fff; }
+    @keyframes menuIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  </style>
+  <script src="image-slot.js"></script>
+</helmet>
+<div id="top" style="--bg:{{bg}};--s1:{{s1}};--s2:{{s2}};--line:{{line}};--line2:{{line2}};--text:{{text}};--t2:{{t2}};--t3:{{t3}};--t4:{{t4}};--photo:{{photo}};--accent:{{accent}};--shadow:{{shadow}};background:{{bg}};color:{{text}};font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;min-height:100vh;transition:background .35s,color .35s;-webkit-font-smoothing:antialiased;word-break:keep-all">
+
+  <header style="position:sticky;top:0;z-index:40;background:{{bg}};border-bottom:1px solid var(--line,rgba(17,17,20,0.08));transition:background .35s,border-color .35s">
+    <div style="padding:14px 20px;display:flex;align-items:center;gap:14px">
+      <button onClick="{{ homeTop }}" style="font-family:'Newsreader',Georgia,serif;font-size:21px;font-weight:500;letter-spacing:-.01em;background:none;border:none;cursor:pointer;padding:0;color:var(--text,#18181b)">Junhyung Kim<span style="color:var(--accent,#0a84ff)">.</span></button>
+      <button onClick="{{ toggleTheme }}" aria-label="Theme" style="margin-left:auto;width:38px;height:38px;border:none;background:none;cursor:pointer;color:var(--text,#18181b);font-size:15px;display:flex;align-items:center;justify-content:center;border-radius:999px">{{ themeIcon }}</button>
+      <button onClick="{{ toggleMenu }}" aria-label="Menu" style="width:38px;height:38px;border:none;background:none;cursor:pointer;color:var(--text,#18181b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0">
+        <span style="width:20px;height:1.5px;background:currentColor;display:block"></span>
+        <span style="width:20px;height:1.5px;background:currentColor;display:block"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MENU OVERLAY -->
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;background:var(--bg,#fff);display:flex;flex-direction:column;padding:14px 20px 26px;animation:menuIn .3s cubic-bezier(.2,.7,.2,1) both">
+      <div style="display:flex;align-items:center;height:38px">
+        <span style="font-family:'Newsreader',Georgia,serif;font-size:21px;font-weight:500;letter-spacing:-.01em">Junhyung Kim<span style="color:var(--accent,#0a84ff)">.</span></span>
+        <button onClick="{{ closeMenu }}" aria-label="Close" style="margin-left:auto;width:40px;height:40px;border:1px solid var(--line2,rgba(17,17,20,0.16));border-radius:999px;background:none;cursor:pointer;color:var(--text,#18181b);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .2s" style-hover="background:var(--s2,#f3f3f5)">×</button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0">
+        <button onClick="{{ navBio }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">01</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.bio }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+        <button onClick="{{ navCareer }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">02</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.career }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+        <button onClick="{{ navWorks }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">03</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.works }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+        <button onClick="{{ navSchedule }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">04</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.schedule }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+        <button onClick="{{ navAwards }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">05</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.awards }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+        <button onClick="{{ navPress }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">06</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.press }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+        <button onClick="{{ navMedia }}" style="display:flex;align-items:center;gap:18px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));border-bottom:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:var(--text,#18181b);padding:clamp(13px,2.2vh,20px) 4px;transition:padding-left .2s" style-hover="padding-left:12px"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--t4,#a1a1aa);flex:0 0 24px">07</span><span style="flex:1;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ L.media }}</span><span style="color:var(--accent,#0a84ff);font-size:15px">→</span></button>
+      </nav>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:22px;display:flex;flex-direction:column;gap:18px">
+        <a href="mailto:hello@junhyungkim.com" style="align-self:flex-start;font-family:'Newsreader',Georgia,serif;font-size:22px;font-weight:500;letter-spacing:-.01em;text-decoration:none;color:var(--text,#18181b);border-bottom:1px solid var(--accent,#0a84ff);padding-bottom:3px">hello@junhyungkim.com</a>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+          <div style="display:flex;gap:16px;font-size:13px;font-weight:600">
+            <a href="#" style="color:var(--accent,#0a84ff);text-decoration:none">Instagram</a>
+            <a href="#" style="color:var(--accent,#0a84ff);text-decoration:none">YouTube</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;font-size:13px;font-weight:600">
+            <button onClick="{{ pickKo }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font:inherit;padding:0;opacity:{{ koCheck }}">한국어</button>
+            <span style="color:var(--t4,#a1a1aa)">·</span>
+            <button onClick="{{ pickEn }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font:inherit;padding:0;opacity:{{ enCheck }}">EN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ================= HOME ================= -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div>
+    <!-- HERO -->
+    <section style="padding:8px 20px 40px">
+      <div style="position:relative;aspect-ratio:4/5;margin-bottom:26px"><image-slot id="jk-portrait" shape="rect" fit="cover" placeholder="{{ L.dropPortrait }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot></div>
+      <h1 style="font-family:'Newsreader',Georgia,serif;font-size:46px;font-weight:500;line-height:.98;letter-spacing:-.02em;margin:0">Junhyung Kim<br><span style="font-style:italic;font-weight:400;color:var(--t2,#3f3f46)">— Pianist</span></h1>
+      <p style="font-size:16px;line-height:1.62;color:var(--t2,#3f3f46);margin:22px 0 0">{{ L.bioLead }}</p>
+      <div style="display:flex;gap:26px;margin-top:24px">
+        <sc-for list="{{ social }}" as="s" hint-placeholder-count="3">
+          <a href="{{ s.h }}" style="text-decoration:none;display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:14px;font-weight:600;color:var(--accent,#0a84ff)">{{ s.t }}</span>
+            <span style="font-size:13px;color:var(--accent,#0a84ff)">↗</span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- 01 BIO -->
+    <section id="bio" style="padding:40px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:22px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">01</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.bio }}</h2></div>
+      <p style="font-family:'Newsreader',Georgia,serif;font-size:23px;line-height:1.42;margin:0 0 18px;letter-spacing:-.01em">{{ L.bioBody }}</p>
+      <p style="font-size:15px;line-height:1.75;color:var(--t2,#3f3f46);margin:0">{{ L.bioBody2 }}</p>
+    </section>
+
+    <!-- 02 CAREER & EDUCATION -->
+    <section id="career" style="padding:44px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:18px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">02</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.career }}</h2></div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--t3,#71717a);margin-bottom:2px">{{ L.careerL }}</div>
+      <sc-for list="{{ careerData }}" as="c" hint-placeholder-count="3">
+        <div style="display:flex;gap:16px;align-items:baseline;padding:15px 0;border-top:1px solid var(--line,rgba(17,17,20,0.08))"><span style="font-size:12.5px;color:var(--accent,#0a84ff);flex:0 0 84px">{{ c.p }}</span><span style="flex:1;font-size:15.5px;font-weight:500;letter-spacing:-.01em;line-height:1.35">{{ c.t }}</span></div>
+      </sc-for>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--t3,#71717a);margin:30px 0 2px">{{ L.eduL }}</div>
+      <sc-for list="{{ eduData }}" as="e" hint-placeholder-count="3">
+        <div style="display:flex;gap:16px;align-items:baseline;padding:15px 0;border-top:1px solid var(--line,rgba(17,17,20,0.08))"><span style="font-size:12.5px;color:var(--accent,#0a84ff);flex:0 0 84px">{{ e.p }}</span><span style="flex:1;font-size:15.5px;font-weight:500;letter-spacing:-.01em;line-height:1.35">{{ e.t }}</span></div>
+      </sc-for>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+    </section>
+
+    <!-- 03 WORKS -->
+    <section id="works" style="padding:44px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:22px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">03</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.works }}</h2></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <sc-for list="{{ worksPreviewM }}" as="w" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column">
+            <div style="position:relative;aspect-ratio:3/4">
+              <image-slot id="{{ w.posterId }}" shape="rect" placeholder="{{ L.dropPoster }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot>
+              <span style="position:absolute;top:9px;left:9px;background:rgba(0,0,0,.62);color:#fff;border-radius:999px;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;pointer-events:none;z-index:2">{{ w.tag }}</span>
+              <button onClick="{{ w.onOpen }}" aria-label="detail" style="position:absolute;bottom:9px;right:9px;z-index:2;width:30px;height:30px;border:none;border-radius:50%;background:var(--bg,#fff);color:var(--text,#18181b);display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:var(--shadow);cursor:pointer">↗</button>
+            </div>
+            <button onClick="{{ w.onOpen }}" style="text-align:left;background:none;border:none;padding:0;margin-top:11px;cursor:pointer;color:inherit;font:inherit">
+              <div style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:500;letter-spacing:-.01em;line-height:1.1">{{ w.t }}</div>
+              <div style="font-size:11px;color:var(--t3,#71717a);margin-top:6px">{{ w.d }}</div>
+            </button>
+          </div>
+        </sc-for>
+      </div>
+      <button onClick="{{ goWorks }}" style="margin-top:24px;width:100%;background:none;border:1px solid var(--line2,rgba(17,17,20,0.16));cursor:pointer;color:var(--text,#18181b);font:inherit;font-size:14px;font-weight:600;padding:15px;display:flex;align-items:center;justify-content:center;gap:8px">{{ L.seeWorks }} <span style="color:var(--t3,#71717a)">({{ worksTotal }})</span> <span style="color:var(--accent,#0a84ff)">→</span></button>
+    </section>
+
+    <!-- 04 SCHEDULE -->
+    <section id="schedule" style="padding:44px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:14px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">04</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.schedule }}</h2></div>
+      <sc-for list="{{ schedulePreview }}" as="s" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-top:1px solid var(--line,rgba(17,17,20,0.08))">
+          <div style="flex:0 0 auto;text-align:center;min-width:50px"><div style="font-family:'Newsreader',Georgia,serif;font-size:22px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ s.d }}</div><div style="font-size:10.5px;color:var(--t3,#71717a);margin-top:3px">{{ s.y }}</div></div>
+          <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.25">{{ s.t }}</div><div style="font-size:12.5px;color:var(--t3,#71717a);margin-top:3px">{{ s.v }}</div></div>
+          <span style="font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3,#71717a);border:1px solid var(--line2,rgba(17,17,20,0.16));border-radius:999px;padding:4px 9px;white-space:nowrap">{{ s.status }}</span>
+        </div>
+      </sc-for>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+      <button onClick="{{ goSchedule }}" style="margin-top:20px;background:none;border:none;cursor:pointer;color:var(--accent,#0a84ff);font:inherit;font-size:14px;font-weight:600;padding:0;display:flex;align-items:center;gap:7px">{{ L.seeSchedule }} <span>({{ scheduleTotal }}) →</span></button>
+    </section>
+
+    <!-- 05 AWARDS -->
+    <section id="awards" style="padding:44px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:16px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">05</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.awards }}</h2></div>
+      <sc-for list="{{ awards }}" as="a" hint-placeholder-count="6">
+        <button onClick="{{ a.onOpen }}" style="display:flex;width:100%;align-items:baseline;gap:14px;text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:inherit;font:inherit;padding:18px 2px">
+          <span style="font-size:13px;font-weight:500;color:var(--accent,#0a84ff);flex:0 0 48px">{{ a.y }}</span>
+          <span style="flex:1;font-size:15.5px;font-weight:500;letter-spacing:-.015em;line-height:1.3">{{ a.n }}</span>
+          <span style="font-size:13px;color:var(--t4,#a1a1aa)">↗</span>
+        </button>
+      </sc-for>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+    </section>
+
+    <!-- 06 PRESS -->
+    <section id="press" style="padding:44px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:18px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">06</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.press }}</h2></div>
+      <sc-for list="{{ pressPreviewM }}" as="p" hint-placeholder-count="2">
+        <button onClick="{{ p.onOpen }}" style="text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding:20px 2px;cursor:pointer;color:inherit;font:inherit;display:flex;flex-direction:column;gap:12px;width:100%">
+          <blockquote style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:22px;line-height:1.36;margin:0;letter-spacing:-.01em">“{{ p.q }}”</blockquote>
+          <figcaption style="font-size:11.5px;letter-spacing:.04em;color:var(--t3,#71717a);display:flex;align-items:center;gap:8px">— {{ p.s }} <span style="color:var(--t4,#a1a1aa)">·</span> {{ p.date }} <span style="color:var(--accent,#0a84ff)">↗</span></figcaption>
+        </button>
+      </sc-for>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+      <button onClick="{{ goPress }}" style="margin-top:20px;background:none;border:none;cursor:pointer;color:var(--accent,#0a84ff);font:inherit;font-size:14px;font-weight:600;padding:0;display:flex;align-items:center;gap:7px">{{ L.seePress }} <span>({{ pressTotal }}) →</span></button>
+    </section>
+
+    <!-- 07 MEDIA -->
+    <section id="media" style="padding:44px 20px 0;scroll-margin-top:62px">
+      <div style="display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px;margin-bottom:18px"><span style="font-size:12px;color:var(--t4,#a1a1aa)">07</span><h2 style="font-size:26px;font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.media }}</h2></div>
+      <div style="position:relative;aspect-ratio:16/9;margin-bottom:6px">
+        <image-slot id="jk-media" shape="rect" placeholder="{{ L.dropImg }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><span style="width:50px;height:50px;border-radius:50%;background:var(--bg,#fff);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:var(--shadow)">▶</span></div>
+      </div>
+      <sc-for list="{{ tracks }}" as="tr" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 2px;border-top:1px solid var(--line,rgba(17,17,20,0.08))">
+          <span style="width:26px;height:26px;border-radius:50%;border:1px solid var(--line2,rgba(17,17,20,0.16));display:flex;align-items:center;justify-content:center;font-size:8px;flex:0 0 auto">▶</span>
+          <span style="flex:1;font-size:13.5px;line-height:1.3">{{ tr.t }}</span>
+          <span style="font-size:11.5px;color:var(--t3,#71717a)">{{ tr.dur }}</span>
+        </div>
+      </sc-for>
+      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+    </section>
+
+    <div style="height:56px"></div>
+  </div>
+  </sc-if>
+
+  <!-- ================= WORKS PAGE ================= -->
+  <sc-if value="{{ isWorksPage }}" hint-placeholder-val="{{ false }}">
+  <section style="padding:18px 20px 56px">
+    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--t3,#71717a);font:inherit;font-size:13.5px;font-weight:500;padding:0;margin-bottom:20px"><span>←</span> {{ L.backHome }}</button>
+    <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));padding-bottom:18px;margin-bottom:24px"><h1 style="font-size:32px;font-weight:600;letter-spacing:-.03em;margin:0;line-height:1">{{ L.worksPageTitle }}</h1><span style="font-size:14px;color:var(--t3,#71717a)">{{ worksTotal }}</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <sc-for list="{{ works }}" as="w" hint-placeholder-count="9">
+        <div style="display:flex;flex-direction:column">
+          <div style="position:relative;aspect-ratio:3/4">
+            <image-slot id="{{ w.posterId }}" shape="rect" placeholder="{{ L.dropPoster }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot>
+            <span style="position:absolute;top:9px;left:9px;background:rgba(0,0,0,.62);color:#fff;border-radius:999px;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;pointer-events:none;z-index:2">{{ w.tag }}</span>
+            <button onClick="{{ w.onOpen }}" aria-label="detail" style="position:absolute;bottom:9px;right:9px;z-index:2;width:30px;height:30px;border:none;border-radius:50%;background:var(--bg,#fff);color:var(--text,#18181b);display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:var(--shadow);cursor:pointer">↗</button>
+          </div>
+          <button onClick="{{ w.onOpen }}" style="text-align:left;background:none;border:none;padding:0;margin-top:11px;cursor:pointer;color:inherit;font:inherit">
+            <div style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:500;letter-spacing:-.01em;line-height:1.1">{{ w.t }}</div>
+            <div style="font-size:11px;color:var(--t3,#71717a);margin-top:6px">{{ w.d }}</div>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+  </sc-if>
+
+  <!-- ================= SCHEDULE PAGE ================= -->
+  <sc-if value="{{ isSchedulePage }}" hint-placeholder-val="{{ false }}">
+  <section style="padding:18px 20px 56px">
+    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--t3,#71717a);font:inherit;font-size:13.5px;font-weight:500;padding:0;margin-bottom:20px"><span>←</span> {{ L.backHome }}</button>
+    <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));padding-bottom:18px;margin-bottom:6px"><h1 style="font-size:32px;font-weight:600;letter-spacing:-.03em;margin:0;line-height:1">{{ L.schedulePageTitle }}</h1><span style="font-size:14px;color:var(--t3,#71717a)">{{ scheduleTotal }}</span></div>
+    <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="5">
+      <div style="display:flex;align-items:center;gap:14px;padding:18px 0;border-top:1px solid var(--line,rgba(17,17,20,0.08))">
+        <div style="flex:0 0 auto;text-align:center;min-width:50px"><div style="font-family:'Newsreader',Georgia,serif;font-size:22px;font-weight:500;letter-spacing:-.01em;line-height:1">{{ s.d }}</div><div style="font-size:10.5px;color:var(--t3,#71717a);margin-top:3px">{{ s.y }}</div></div>
+        <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.25">{{ s.t }}</div><div style="font-size:12.5px;color:var(--t3,#71717a);margin-top:3px">{{ s.v }}</div></div>
+        <span style="font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3,#71717a);border:1px solid var(--line2,rgba(17,17,20,0.16));border-radius:999px;padding:4px 9px;white-space:nowrap">{{ s.status }}</span>
+      </div>
+    </sc-for>
+    <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+  </section>
+  </sc-if>
+
+  <!-- ================= PRESS PAGE ================= -->
+  <sc-if value="{{ isPressPage }}" hint-placeholder-val="{{ false }}">
+  <section style="padding:18px 20px 56px">
+    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--t3,#71717a);font:inherit;font-size:13.5px;font-weight:500;padding:0;margin-bottom:20px"><span>←</span> {{ L.backHome }}</button>
+    <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));padding-bottom:18px;margin-bottom:6px"><h1 style="font-size:32px;font-weight:600;letter-spacing:-.03em;margin:0;line-height:1">{{ L.pressPageTitle }}</h1><span style="font-size:14px;color:var(--t3,#71717a)">{{ pressTotal }}</span></div>
+    <sc-for list="{{ press }}" as="p" hint-placeholder-count="4">
+      <button onClick="{{ p.onOpen }}" style="text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding:24px 2px;cursor:pointer;color:inherit;font:inherit;display:flex;flex-direction:column;gap:12px;width:100%">
+        <blockquote style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:24px;line-height:1.34;margin:0;letter-spacing:-.01em">“{{ p.q }}”</blockquote>
+        <figcaption style="font-size:11.5px;letter-spacing:.04em;color:var(--t3,#71717a);display:flex;align-items:center;gap:8px">— {{ p.s }} <span style="color:var(--t4,#a1a1aa)">·</span> {{ p.date }} <span style="color:var(--accent,#0a84ff)">↗</span></figcaption>
+      </button>
+    </sc-for>
+    <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+  </section>
+  </sc-if>
+
+  <footer style="border-top:1px solid var(--line,rgba(17,17,20,0.08));transition:border-color .35s">
+    <div style="padding:22px 20px;display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.04em;color:var(--t3,#71717a)">
+      <span>© 2026 Junhyung Kim</span>
+      <span>Pianist · Seoul</span>
+    </div>
+  </footer>
+
+  <!-- WORK MODAL -->
+  <sc-if value="{{ workOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:var(--bg,#fff);color:var(--text,#18181b);overflow-y:auto">
+      <div style="position:sticky;top:0;background:var(--bg,#fff);display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));z-index:2">
+        <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a)">{{ workCur.tag }} · {{ L.recital }}</span>
+        <button onClick="{{ close }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font-size:24px;line-height:1;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+      <div style="padding:22px 20px 48px">
+        <image-slot id="{{ workCur.posterId }}" shape="rect" placeholder="{{ L.dropPoster }}" style="display:block;width:100%;aspect-ratio:3/4;margin-bottom:22px"></image-slot>
+        <h3 style="font-family:'Newsreader',Georgia,serif;font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1.02;margin:0 0 6px">{{ workCur.t }}</h3>
+        <div style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:17px;color:var(--t3,#71717a);margin-bottom:16px">{{ workCur.sub }}</div>
+        <div style="font-size:12.5px;color:var(--t3,#71717a);line-height:1.7;margin-bottom:20px">{{ workCur.d }} · {{ workCur.time }}<br>{{ workCur.v }}</div>
+        <div style="display:flex;gap:10px;margin-bottom:26px">
+          <a href="#" style="text-decoration:none;background:var(--accent,#0a84ff);color:#fff;font-size:13.5px;font-weight:600;padding:13px 22px;flex:1;text-align:center">{{ L.book }}</a>
+          <a href="#" style="text-decoration:none;border:1px solid var(--line2,rgba(17,17,20,0.16));color:var(--text,#18181b);font-size:13.5px;font-weight:600;padding:12px 22px">{{ L.share }}</a>
+        </div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a);margin-bottom:8px">{{ L.program }}</div>
+        <sc-for list="{{ workCur.program }}" as="pp" hint-placeholder-count="4">
+          <div style="display:flex;gap:14px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line,rgba(17,17,20,0.08))"><span style="font-size:10px;color:var(--t4,#a1a1aa);flex:0 0 22px">{{ pp.n }}</span><span style="font-size:14px;line-height:1.4">{{ pp.t }}</span></div>
+        </sc-for>
+        <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08));margin-bottom:26px"></div>
+        <p style="font-size:15px;line-height:1.75;color:var(--t2,#3f3f46);margin:0 0 26px">{{ workCur.desc }}</p>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a);margin-bottom:11px">{{ L.gallery }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <sc-for list="{{ workCur.gimg }}" as="g" hint-placeholder-count="3">
+            <image-slot id="{{ g }}" shape="rect" placeholder="{{ L.dropImg }}" style="display:block;width:100%;aspect-ratio:4/3"></image-slot>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- AWARD MODAL -->
+  <sc-if value="{{ awardOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:var(--bg,#fff);color:var(--text,#18181b);overflow-y:auto">
+      <div style="position:sticky;top:0;background:var(--bg,#fff);display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));z-index:2">
+        <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a)">{{ L.awardTag }} · {{ awardCur.y }}</span>
+        <button onClick="{{ close }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font-size:24px;line-height:1;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+      <div style="padding:22px 20px 48px">
+        <image-slot id="{{ awardCur.imgId }}" shape="rect" placeholder="{{ L.dropImg }}" style="display:block;width:100%;aspect-ratio:16/10;margin-bottom:24px"></image-slot>
+        <div style="font-family:'Newsreader',Georgia,serif;font-size:52px;font-weight:500;letter-spacing:-.02em;line-height:1;margin-bottom:14px">{{ awardCur.y }}</div>
+        <h3 style="font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin:0 0 8px">{{ awardCur.n }}</h3>
+        <div style="font-size:12.5px;color:var(--t3,#71717a);margin-bottom:20px">{{ awardCur.place }}</div>
+        <p style="font-size:15px;line-height:1.75;color:var(--t2,#3f3f46);margin:0;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:20px">{{ awardCur.desc }}</p>
+        <a href="{{ awardCur.linkUrl }}" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;margin-top:22px;font-size:13.5px;font-weight:600;color:var(--accent,#0a84ff)">{{ awardCur.linkLabel }} <span>↗</span></a>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- PRESS MODAL -->
+  <sc-if value="{{ pressOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:var(--bg,#fff);color:var(--text,#18181b);overflow-y:auto">
+      <div style="position:sticky;top:0;background:var(--bg,#fff);display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));z-index:2">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3,#71717a)">{{ L.pressTag }} · {{ pressCur.s }} · {{ pressCur.date }}</span>
+        <button onClick="{{ close }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font-size:24px;line-height:1;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+      <div style="padding:26px 20px 48px">
+        <blockquote style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:30px;line-height:1.28;letter-spacing:-.015em;margin:0 0 24px">“{{ pressCur.q }}”</blockquote>
+        <p style="font-size:15.5px;line-height:1.8;color:var(--t2,#3f3f46);margin:0 0 26px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:22px">{{ pressCur.excerpt }}</p>
+        <a href="#" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--accent,#0a84ff)">{{ L.readOrig }} <span>↗</span></a>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+<template id="__bundler_thumbnail" data-bg-color="#ffffff">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#ffffff"></rect>
+    <text x="600" y="420" font-family="Georgia, serif" font-size="150" font-style="italic" font-weight="500" fill="#18181b" text-anchor="middle">JK</text>
+    <circle cx="690" cy="300" r="13" fill="#0a84ff"></circle>
+  </svg>
+</template></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844}}">
+class Component extends DCLogic {
+  state = { theme: 'light', lang: 'ko', page: 'home', modal: null, menuOpen: false, pendingScroll: null };
+  componentDidMount() {
+    this._key = (e) => { if (e.key === 'Escape') this.setState({ modal: null, menuOpen: false }); };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  componentDidUpdate() {
+    if (this.state.pendingScroll && this.state.page === 'home') {
+      const id = this.state.pendingScroll;
+      window.requestAnimationFrame(() => { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' }); });
+      this.setState({ pendingScroll: null });
+    }
+  }
+  _nav(id) {
+    if (this.state.page !== 'home') { this.setState({ page: 'home', menuOpen: false, pendingScroll: id }); }
+    else { this.setState({ menuOpen: false }); const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' }); }
+  }
+  _page(p) { this.setState({ page: p, modal: null, menuOpen: false }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  renderVals() {
+    const { theme, lang, page, modal } = this.state;
+    const t = theme === 'dark'
+      ? { bg:'#000000', s1:'#0d0d0f', s2:'#151517', line:'rgba(255,255,255,0.09)', line2:'rgba(255,255,255,0.18)', text:'#fafafa', t2:'#c7c7cd', t3:'#8a8a93', t4:'#5a5a62', photo:'#161618', accent:'#2b95ff', shadow:'0 1px 2px rgba(0,0,0,0.5), 0 8px 28px rgba(0,0,0,0.45)' }
+      : { bg:'#ffffff', s1:'#fafafa', s2:'#f3f3f5', line:'rgba(17,17,20,0.08)', line2:'rgba(17,17,20,0.16)', text:'#18181b', t2:'#3f3f46', t3:'#71717a', t4:'#a1a1aa', photo:'#ececef', accent:'#0a84ff', shadow:'0 1px 2px rgba(17,17,20,0.04), 0 8px 24px rgba(17,17,20,0.06)' };
+    const k = lang === 'ko';
+    const dict = {
+      ko: {
+        bio:'약력', career:'경력 · 학력', works:'연주 목록', schedule:'공연 일정', awards:'수상 경력', press:'보도 · 평론', media:'영상 · 오디오',
+        bioLead:'서울을 기반으로 활동하는 피아니스트. 슈베르트와 라흐마니노프 사이를 오가며, 정교한 구조 감각과 노래하는 음색으로 무대를 만듭니다.',
+        bioBody:'독주와 협연, 가곡 반주를 넘나들며 국내외 무대에 선다.',
+        bioBody2:'작품의 구조를 명료하게 드러내면서도 한 음 한 음의 노래를 놓치지 않는 연주로 평가받는다. 슈베르트 연가곡과 라흐마니노프 협주곡을 중심으로 레퍼토리를 넓혀가고 있다.',
+        careerL:'경력', eduL:'학력',
+        live:'실황 영상', recital:'프로그램 · 예매', program:'프로그램', book:'예매하기', share:'공유', gallery:'갤러리',
+        seeWorks:'전체 연주 목록', seeSchedule:'전체 공연 일정', seePress:'전체 보도 · 평론', backHome:'홈으로',
+        worksPageTitle:'연주 목록', schedulePageTitle:'공연 일정', pressPageTitle:'보도 · 평론',
+        awardTag:'수상', pressTag:'평론', readOrig:'원문 보기',
+        dropPortrait:'프로필 사진을 끌어다 놓으세요', dropPoster:'포스터', dropImg:'이미지를 끌어다 놓으세요'
+      },
+      en: {
+        bio:'Biography', career:'Career & Education', works:'Repertoire', schedule:'Schedule', awards:'Awards', press:'Press', media:'Media',
+        bioLead:'A pianist based in Seoul, moving between Schubert and Rachmaninoff with a clear sense of structure and a singing tone.',
+        bioBody:'At home in solo, concerto and lieder repertoire, on stages at home and abroad.',
+        bioBody2:'Praised for playing that reveals a work\u2019s architecture without ever losing the song in a single note — building a repertoire centred on Schubert song cycles and the Rachmaninoff concertos.',
+        careerL:'Career', eduL:'Education',
+        live:'Live video', recital:'Programme · Tickets', program:'Programme', book:'Book now', share:'Share', gallery:'Gallery',
+        seeWorks:'All repertoire', seeSchedule:'All dates', seePress:'All press', backHome:'Home',
+        worksPageTitle:'Repertoire', schedulePageTitle:'Schedule', pressPageTitle:'Press',
+        awardTag:'Award', pressTag:'Review', readOrig:'Read original',
+        dropPortrait:'Drop a portrait', dropPoster:'Poster', dropImg:'Drop an image'
+      }
+    };
+    const L = dict[lang];
+    const social = [ { t:'Instagram', h:'#' }, { t:'YouTube', h:'#' }, { t:'Email', h:'mailto:hello@junhyungkim.com' } ];
+    const careerData = [
+      { p:'2023 —', t:k?'금호아트홀 상주음악가':'Kumho Art Hall, Resident Artist' },
+      { p:'2021 – 2023', t:k?'서울시립교향악단 협력 아티스트':'Seoul Phil., Associate Artist' },
+      { p:'2019 —', t:k?'평창대관령음악제 참여 아티스트':'PyeongChang Festival, Artist' }
+    ];
+    const eduData = [
+      { p:'2018 – 2020', t:k?'한국예술종합학교 전문사':'Korea Nat\u2019l Univ. of Arts, M.M.' },
+      { p:'2014 – 2018', t:k?'한국예술종합학교 예술사':'Korea Nat\u2019l Univ. of Arts, B.M.' },
+      { p:'2011 – 2014', t:k?'서울예술고등학교':'Seoul Arts High School' }
+    ];
+    const worksData = [
+      { t:'Winterreise', sub:'Schubert · D.911', d:'2026.03.14', time:'19:30', v:'예술의전당 콘서트홀', tag:k?'리사이틀':'Recital', program:['Gute Nacht','Die Wetterfahne','Gefrorne Tränen','Erstarrung','Der Lindenbaum'], desc:k?'슈베르트 최후의 연가곡 《겨울 나그네》. 24개의 노래로 이어지는 한 편의 겨울 여정을 한 무대에 담는다.':'Schubert\u2019s final song cycle — a winter journey across 24 songs in a single evening.' },
+      { t:'Chopin Recital', sub:'Chopin', d:'2025.11.02', time:'17:00', v:'롯데콘서트홀', tag:k?'리사이틀':'Recital', program:['Ballade No.1 in G minor','Nocturne Op.27 No.2','Scherzo No.2','24 Préludes Op.28 (sel.)'], desc:k?'쇼팽의 발라드와 녹턴, 프렐류드를 엮은 단독 리사이틀.':'A solo programme of Chopin ballades, nocturnes and preludes.' },
+      { t:'Rachmaninoff No.2', sub:'with KBS Symphony', d:'2025.06.20', time:'20:00', v:'세종문화회관 대극장', tag:k?'협연':'Concerto', program:['Piano Concerto No.2 in C minor, Op.18'], desc:k?'오케스트라와 함께하는 라흐마니노프 피아노 협주곡 2번.':'Rachmaninoff\u2019s Second Piano Concerto with orchestra.' },
+      { t:'Schubert Sonatas', sub:'Schubert', d:'2025.02.15', time:'19:30', v:'금호아트홀 연세', tag:k?'리사이틀':'Recital', program:['Sonata in A, D.959','Sonata in B-flat, D.960'], desc:k?'슈베르트 후기 소나타 두 곡을 하룻밤에.':'Two late Schubert sonatas in one evening.' },
+      { t:'New Year Gala', sub:'Various', d:'2025.01.01', time:'17:00', v:'예술의전당', tag:k?'갈라':'Gala', program:['Liszt · Liebestraum No.3','Debussy · Clair de lune','Encore Selections'], desc:k?'새해를 여는 갈라 콘서트.':'A gala concert to open the new year.' },
+      { t:'Brahms & Schumann', sub:'Duo', d:'2024.10.08', time:'19:30', v:'예술의전당 IBK챔버홀', tag:k?'협연':'Duo', program:['Brahms · Cello Sonata No.1','Schumann · Fantasiestücke'], desc:k?'첼로와 함께한 브람스·슈만 듀오 무대.':'A Brahms and Schumann duo programme with cello.' },
+      { t:'Debussy · Ravel', sub:'French Programme', d:'2024.05.19', time:'17:00', v:'금호아트홀', tag:k?'리사이틀':'Recital', program:['Debussy · Estampes','Ravel · Gaspard de la nuit'], desc:k?'프랑스 인상주의 레퍼토리로 구성한 리사이틀.':'A recital of French impressionist repertoire.' },
+      { t:'Goldberg Variations', sub:'J.S. Bach', d:'2024.02.11', time:'19:00', v:'LG아트센터', tag:k?'리사이틀':'Recital', program:['Goldberg Variations, BWV 988'], desc:k?'바흐 골드베르크 변주곡 전곡.':'Bach\u2019s complete Goldberg Variations.' },
+      { t:'Mozart Concertos', sub:'with Korean Chamber', d:'2023.11.23', time:'20:00', v:'롯데콘서트홀', tag:k?'협연':'Concerto', program:['Concerto No.20 in D minor, K.466','Concerto No.23 in A, K.488'], desc:k?'실내악단과 함께한 모차르트 협주곡의 밤.':'An evening of Mozart concertos with chamber orchestra.' }
+    ];
+    worksData.forEach((w, i) => { w.posterId = 'wposter-' + i; w.gimg = ['wg-' + i + '-1', 'wg-' + i + '-2', 'wg-' + i + '-3']; });
+    const works = worksData.map((w, i) => ({ ...w, onOpen: () => this.setState({ modal: { type: 'work', i } }) }));
+    const worksPreviewM = works.slice(0, 4);
+    const scheduleData = [
+      { d:'07.12', y:'2026', t:'Summer Solo Recital', v:'예술의전당 IBK챔버홀', status:k?'예매 중':'On sale' },
+      { d:'08.03', y:'2026', t:'Beethoven Concerto No.5 “Emperor”', v:'롯데콘서트홀', status:k?'예매 중':'On sale' },
+      { d:'09.21', y:'2026', t:'Duo Concert — with cello', v:'금호아트홀 연세', status:k?'오픈 예정':'Soon' },
+      { d:'10.15', y:'2026', t:'Autumn Lieder Evening', v:'금호아트홀', status:k?'오픈 예정':'Soon' },
+      { d:'11.30', y:'2026', t:'Year-End Concerto Gala', v:'세종문화회관 대극장', status:k?'오픈 예정':'Soon' }
+    ];
+    const schedulePreview = scheduleData.slice(0, 3);
+    const awardsData = [
+      { y:'2024', n:k?'국제 피아노 콩쿠르 — 파이널리스트':'International Piano Competition — Finalist', place:'Geneva, CH', desc:k?'세계적 권위의 콩쿠르 결선에 올라 협주곡 라운드를 연주했다.':'Reached the concerto final at one of the most prestigious international competitions.' },
+      { y:'2022', n:k?'부조니 콩쿠르 — 2위':'Busoni Competition — 2nd Prize', place:'Bolzano, IT', desc:k?'부조니 국제 피아노 콩쿠르에서 2위와 함께 청중상을 받았다.':'Awarded 2nd Prize and the audience prize at the Busoni International Competition.' },
+      { y:'2021', n:k?'리즈 콩쿠르 — 세미파이널':'Leeds Competition — Semi-finalist', place:'Leeds, UK', desc:k?'리즈 국제 피아노 콩쿠르 준결선에 진출했다.':'Advanced to the semi-final round of the Leeds International Piano Competition.' },
+      { y:'2020', n:k?'서울 음악 콩쿠르 — 1위':'Seoul Music Competition — 1st Prize', place:'Seoul, KR', desc:k?'국내 최정상 콩쿠르에서 1위를 차지했다.':'First Prize at one of Korea\u2019s leading music competitions.' },
+      { y:'2019', n:k?'한국 청년 음악가상':'Korean Young Musician Award', place:'Seoul, KR', desc:k?'그해 가장 주목받은 신예 음악가에게 주어지는 상을 받았다.':'Recognised as the most promising young musician of the year.' },
+      { y:'2018', n:k?'영 콘서트 아티스트 — 수상':'Young Concert Artists — Winner', place:'New York, US', desc:k?'국제 오디션을 통해 북미 데뷔 무대 기회를 얻었다.':'Won the international auditions, earning a North American debut series.' }
+    ];
+    awardsData.forEach((a, i) => { a.imgId = 'award-' + i; a.linkUrl = '#'; a.linkLabel = k ? '관련 기사 보기' : 'Read more'; });
+    const awards = awardsData.map((a, i) => ({ ...a, onOpen: () => this.setState({ modal: { type: 'award', i } }) }));
+    const pressData = [
+      { q:'정교한 구조 감각과 노래하는 음색.', s:k?'음악 월간지':'Music Monthly', date:'2025.11', excerpt:k?'그의 손에서 작품은 설계도처럼 또렷하게 드러난다. 그러면서도 선율은 한순간도 노래이기를 멈추지 않는다. 구조와 노래가 한자리에 머무는, 드문 균형의 연주였다.':'In his hands the work emerges as clear as a blueprint, yet the line never stops singing — a rare balance of architecture and song.' },
+      { q:'두려움 없는 표현과 빛나는 테크닉.', s:k?'일간지 문화면':'Daily Arts', date:'2025.06', excerpt:k?'협주곡의 클라이맥스에서 그는 망설임 없이 모든 것을 걸었고, 오케스트라는 그 대담함에 화답했다.':'At the concerto\u2019s climax he held nothing back, and the orchestra answered his daring in kind.' },
+      { q:'드물게 시적인 피아니스트.', s:k?'공연 리뷰':'Concert Review', date:'2025.02', excerpt:k?'느린 악장에서의 침묵마저 음악이 되는 순간들. 시간이 늘어나고 줄어드는 그 감각이 인상적이었다.':'Even the silences in the slow movement became music — a striking sense of time stretching and contracting.' },
+      { q:'한 음 한 음이 노래가 되는 순간.', s:k?'클래식 웹진':'Classical Webzine', date:'2024.10', excerpt:k?'리트 반주에서 보여준 섬세함은 성악가의 호흡을 그대로 읽어내는 듯했다.':'His sensitivity as a song accompanist seemed to read the singer\u2019s every breath.' }
+    ];
+    const press = pressData.map((p, i) => ({ ...p, onOpen: () => this.setState({ modal: { type: 'press', i } }) }));
+    const pressPreviewM = press.slice(0, 2);
+    const tracks = [
+      { t:'Schubert · Impromptu Op.90 No.3', dur:'6:12' },
+      { t:'Rachmaninoff · Prélude Op.23 No.5', dur:'4:08' },
+      { t:'Debussy · Clair de lune', dur:'5:01' }
+    ];
+    const mt = modal && modal.type;
+    const workCur = mt === 'work' ? { ...worksData[modal.i], program: worksData[modal.i].program.map((tt, i) => ({ t: tt, n: String(i + 1).padStart(2, '0') })) } : {};
+    const awardCur = mt === 'award' ? awardsData[modal.i] : {};
+    const pressCur = mt === 'press' ? pressData[modal.i] : {};
+    return {
+      bg:t.bg, s1:t.s1, s2:t.s2, line:t.line, line2:t.line2, text:t.text, t2:t.t2, t3:t.t3, t4:t.t4, photo:t.photo, accent:t.accent, shadow:t.shadow,
+      L, social, careerData, eduData, works, worksPreviewM, worksTotal: worksData.length,
+      schedule: scheduleData, schedulePreview, scheduleTotal: scheduleData.length,
+      awards, press, pressPreviewM, pressTotal: pressData.length, tracks,
+      isHome: page === 'home', isWorksPage: page === 'works', isSchedulePage: page === 'schedule', isPressPage: page === 'press',
+      workOpen: mt === 'work', awardOpen: mt === 'award', pressOpen: mt === 'press',
+      workCur, awardCur, pressCur,
+      themeIcon: theme === 'dark' ? '☾' : '☀',
+      menuOpen: this.state.menuOpen,
+      koCheck: k ? 1 : 0.4, enCheck: k ? 0.4 : 1,
+      toggleTheme: () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      toggleMenu: () => this.setState(s => ({ menuOpen: !s.menuOpen })),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      pickKo: () => this.setState({ lang:'ko' }),
+      pickEn: () => this.setState({ lang:'en' }),
+      navBio: () => this._nav('bio'), navCareer: () => this._nav('career'), navWorks: () => this._nav('works'), navSchedule: () => this._nav('schedule'), navAwards: () => this._nav('awards'), navPress: () => this._nav('press'), navMedia: () => this._nav('media'),
+      goWorks: () => this._page('works'), goSchedule: () => this._page('schedule'), goPress: () => this._page('press'), goHome: () => this._page('home'),
+      homeTop: () => this._page('home'),
+      close: () => this.setState({ modal: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

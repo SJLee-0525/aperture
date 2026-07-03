@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 포트폴리오 — Wireframes</title>
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/wireframe.css">
+<style> html, body { margin: 0; background: #e9e9ec; } </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="wireframe-screens.js"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const Frame = ({html}) => <div style={{width:'100%',height:'100%'}} dangerouslySetInnerHTML={{__html: html}} />;
+
+function App(){
+  return (
+    <DesignCanvas>
+      <DCSection id="home" title="셸 + 홈 갤러리" subtitle="내비게이션 구조 + 메인 그리드 — 3가지 레이아웃 (믹스 앤 매치)">
+        <DCArtboard id="home-a" label="A · 탑내비 · 풀블리드 메이슨리" width={1320} height={900}><Frame html={homeA()} /></DCArtboard>
+        <DCArtboard id="home-b" label="B · 좌측 사이드 레일 · 정사각" width={1320} height={900}><Frame html={homeB()} /></DCArtboard>
+        <DCArtboard id="home-c" label="C · 센터 마스트헤드 · 저스티파이" width={1320} height={1000}><Frame html={homeC()} /></DCArtboard>
+      </DCSection>
+      <DCSection id="detail" title="사진 디테일 (자세히 보기)" subtitle="2가지 — 라이트박스 vs 전용 페이지">
+        <DCArtboard id="det-a" label="A · 풀스크린 라이트박스" width={1320} height={820}><Frame html={detailA()} /></DCArtboard>
+        <DCArtboard id="det-b" label="B · 전용 디테일 페이지 (+ 내보내기 스타일)" width={1320} height={1000}><Frame html={detailB()} /></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
