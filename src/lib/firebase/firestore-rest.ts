@@ -1,9 +1,17 @@
-import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
+import { COLLECTIONS, SITE_DOC, SITE_MUSIC_DOC } from "@/constants/collections";
 import { isFirebaseConfigured } from "@/lib/firebase/config";
 import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
+import type {
+  MusicAward,
+  MusicConfig,
+  MusicMedia,
+  MusicSchedule,
+  MusicScheduleStatus,
+  MusicWork,
+} from "@/types/music";
 import type { Photo } from "@/types/photo";
 import type { SiteConfig, SiteLink } from "@/types/site";
 import type { Tag } from "@/types/tag";
@@ -145,6 +153,62 @@ const restToSite = (d: Record<string, unknown>): SiteConfig => ({
   tags: (d.tags as Tag[]) ?? [],
 });
 
+const EMPTY_LOCALIZED: LocalizedText = { ko: "", en: "" };
+const EMPTY_IMAGE: ImageMeta = { url: "", path: "", w: 0, h: 0 };
+
+const restToMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
+  id,
+  title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+  subtitle: (d.subtitle as LocalizedText) ?? EMPTY_LOCALIZED,
+  performedAt: toDate(d.performedAt),
+  time: (d.time as string) ?? "",
+  venue: (d.venue as LocalizedText) ?? EMPTY_LOCALIZED,
+  category: (d.category as LocalizedText) ?? EMPTY_LOCALIZED,
+  program: (d.program as string[]) ?? [],
+  description: (d.description as LocalizedText) ?? EMPTY_LOCALIZED,
+  poster: (d.poster as ImageMeta) ?? EMPTY_IMAGE,
+  ticketUrl: (d.ticketUrl as string) ?? "",
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
+});
+
+const restToMusicSchedule = (id: string, d: Record<string, unknown>): MusicSchedule => ({
+  id,
+  title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+  date: toDate(d.date),
+  venue: (d.venue as LocalizedText) ?? EMPTY_LOCALIZED,
+  status: (d.status as MusicScheduleStatus) === "onSale" ? "onSale" : "soon",
+  ticketUrl: (d.ticketUrl as string) ?? "",
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
+});
+
+const restToMusicAward = (id: string, d: Record<string, unknown>): MusicAward => ({
+  id,
+  year: (d.year as number) ?? 0,
+  name: (d.name as LocalizedText) ?? EMPTY_LOCALIZED,
+  place: (d.place as string) ?? "",
+  description: (d.description as LocalizedText) ?? EMPTY_LOCALIZED,
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
+});
+
+const restToMusicMedia = (id: string, d: Record<string, unknown>): MusicMedia => ({
+  id,
+  title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+  source: (d.source as LocalizedText) ?? EMPTY_LOCALIZED,
+  youtubeId: (d.youtubeId as string) ?? "",
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
+});
+
+const restToMusicConfig = (d: Record<string, unknown>): MusicConfig => ({
+  heroLead: (d.heroLead as LocalizedText) ?? EMPTY_LOCALIZED,
+  typeWords: (d.typeWords as string[]) ?? [],
+  bookingEmail: (d.bookingEmail as string) ?? "",
+  social: (d.social as SiteLink[]) ?? [],
+});
+
 // ── 공개 read API (도메인 타입 반환) ────────────────────────────────────────
 
 /** 공개 사진 — published==true, order 순. */
@@ -171,4 +235,50 @@ const fetchSiteConfig = async (): Promise<SiteConfig | null> => {
   return restToSite(decodeFields(doc.fields ?? {}));
 };
 
-export { fetchPublishedAlbums, fetchPublishedPhotos, fetchSiteConfig, isFirebaseConfigured };
+/** 공개 연주 목록 — published==true, order 순. */
+const fetchPublishedMusicWorks = async (): Promise<MusicWork[]> => {
+  const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_WORKS));
+  return rows.map((row) => restToMusicWork(row.id, row.data));
+};
+
+/** 공개 공연 일정 — published==true, order 순. */
+const fetchPublishedMusicSchedule = async (): Promise<MusicSchedule[]> => {
+  const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_SCHEDULE));
+  return rows.map((row) => restToMusicSchedule(row.id, row.data));
+};
+
+/** 공개 수상 — published==true, order 순. */
+const fetchPublishedMusicAwards = async (): Promise<MusicAward[]> => {
+  const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_AWARDS));
+  return rows.map((row) => restToMusicAward(row.id, row.data));
+};
+
+/** 공개 영상 — published==true, order 순. */
+const fetchPublishedMusicMedia = async (): Promise<MusicMedia[]> => {
+  const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_MEDIA));
+  return rows.map((row) => restToMusicMedia(row.id, row.data));
+};
+
+/** site/music 설정 문서(read: if true). 문서가 없으면 null → 호출부가 mock 폴백. */
+const fetchMusicConfig = async (): Promise<MusicConfig | null> => {
+  const res = await fetch(`${documentsUrl()}/${COLLECTIONS.SITE}/${SITE_MUSIC_DOC}?key=${API_KEY}`, {
+    next: { revalidate: REVALIDATE_SECONDS },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Firestore music config 읽기 실패 (${res.status})`);
+
+  const doc = (await res.json()) as RestDocument;
+  return restToMusicConfig(decodeFields(doc.fields ?? {}));
+};
+
+export {
+  fetchMusicConfig,
+  fetchPublishedAlbums,
+  fetchPublishedMusicAwards,
+  fetchPublishedMusicMedia,
+  fetchPublishedMusicSchedule,
+  fetchPublishedMusicWorks,
+  fetchPublishedPhotos,
+  fetchSiteConfig,
+  isFirebaseConfigured,
+};

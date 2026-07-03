@@ -33,6 +33,24 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── 음악 섹션 — 무인증 쓰기 없음 (좋아요 +1 예외는 photos 전용) ──
+    match /musicWorks/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /musicSchedule/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /musicAwards/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /musicMedia/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
     match /site/{id} {
       allow read:  if true;      // name·bio·links·태그 사전은 공개
       allow write: if isAdmin();
