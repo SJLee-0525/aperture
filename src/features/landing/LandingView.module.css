@@ -22,7 +22,8 @@
 .type {
   display: flex;
   align-items: center;
-  min-height: 1.5em;
+  height: 1.6em; /* 고정 — 타이핑 중 텍스트 유무로 높이가 흔들리지 않게(min-height는 자연 높이보다 작아 미세 점프) */
+  line-height: 1.6;
   margin: clamp(14px, 2vw, 22px) 0 0;
   font-family: var(--font-mono);
   font-size: clamp(16px, 2.2vw, 28px);
