@@ -10,8 +10,8 @@ import { useLang } from "@/features/lang/use-lang";
 import styles from "./SearchBox.module.css";
 
 /**
- * 데스크톱 헤더 검색 (모바일은 CSS로 숨김 — 모바일 검색은 Slice 2 갤러리 뷰에 배치).
- * 제출 시 작업(Work) 페이지로 `?q=` 를 붙여 이동 — Slice 2의 필터가 이 쿼리를 소비한다.
+ * 데스크톱 헤더 검색 (모바일은 CSS로 숨김 — 모바일 검색은 버거 메뉴 안). 제출 시 통합 검색
+ * 페이지(/search?q=)로 이동 — 사진·음악·개발 전 섹션을 검색한다. 우측 아이콘 버튼 클릭으로도 제출.
  */
 const SearchBox = () => {
   const router = useRouter();
@@ -21,12 +21,11 @@ const SearchBox = () => {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const query = value.trim();
-    router.push(query ? `${ROUTES.PHOTO}?q=${encodeURIComponent(query)}` : ROUTES.PHOTO);
+    router.push(query ? `${ROUTES.SEARCH}?q=${encodeURIComponent(query)}` : ROUTES.SEARCH);
   };
 
   return (
     <form className={styles.box} onSubmit={submit} role="search">
-      <Icon name="search" size={15} />
       <input
         type="text"
         value={value}
@@ -35,6 +34,9 @@ const SearchBox = () => {
         aria-label={dict.searchPlaceholder}
         className={styles.input}
       />
+      <button type="submit" className={styles.btn} aria-label={dict.searchPlaceholder}>
+        <Icon name="search" size={15} />
+      </button>
     </form>
   );
 };

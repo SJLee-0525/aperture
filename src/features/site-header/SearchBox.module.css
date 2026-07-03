@@ -17,9 +17,6 @@
     display: flex;
   }
 }
-.box svg {
-  flex: none;
-}
 .input {
   width: 100%;
   border: 0;
@@ -31,4 +28,20 @@
 }
 .input::placeholder {
   color: var(--text-3);
+}
+/* 우측 아이콘 버튼 — 클릭으로 검색 제출. */
+.btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.btn:hover {
+  color: var(--accent);
 }

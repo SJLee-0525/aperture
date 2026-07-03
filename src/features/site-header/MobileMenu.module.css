@@ -137,6 +137,22 @@
 .search input::placeholder {
   color: var(--text-3);
 }
+/* 우측 아이콘 버튼 — 클릭으로 검색 제출. */
+.searchBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.searchBtn:hover {
+  color: var(--accent);
+}
 
 .group {
   border-top: 1px solid var(--line);

@@ -19,6 +19,8 @@ const ROUTES = {
   DEV_ABOUT: "/dev/about", // 소개
   // 연락처 (섹션 아님 — 전역 페이지)
   CONTACT: "/contact",
+  // 통합 검색 (사진·음악·개발 전 섹션)
+  SEARCH: "/search",
   // 관리자
   ADMIN: "/admin",
   LOGIN: "/admin/login",

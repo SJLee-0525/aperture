@@ -53,7 +53,7 @@ const MobileMenu = () => {
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
     const q = query.trim();
-    router.push(q ? `${ROUTES.PHOTO}?q=${encodeURIComponent(q)}` : ROUTES.PHOTO);
+    router.push(q ? `${ROUTES.SEARCH}?q=${encodeURIComponent(q)}` : ROUTES.SEARCH);
     close();
   };
 
@@ -76,7 +76,6 @@ const MobileMenu = () => {
           <button type="button" className={styles.scrim} aria-label="Close menu" onClick={close} />
           <div className={styles.panel}>
             <form className={styles.search} onSubmit={submitSearch} role="search">
-              <Icon name="search" size={15} />
               <input
                 type="text"
                 value={query}
@@ -84,6 +83,13 @@ const MobileMenu = () => {
                 placeholder={dict.searchPlaceholder}
                 aria-label={dict.searchPlaceholder}
               />
+              <button
+                type="submit"
+                className={styles.searchBtn}
+                aria-label={dict.searchPlaceholder}
+              >
+                <Icon name="search" size={15} />
+              </button>
             </form>
 
             {MEGA_MENU.map((group) => {
