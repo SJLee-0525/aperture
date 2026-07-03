@@ -1,24 +1,30 @@
+/* 언어·테마 토글(.btn)과 크기·라운드·호버 통일 */
 .burger {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
   border: 0;
-  background: none;
+  background: transparent;
   color: var(--text-2);
   cursor: pointer;
+  border-radius: var(--r-pill);
+  transition:
+    background var(--dur),
+    color var(--dur);
+}
+.burger:hover {
+  background: var(--surface-2);
+  color: var(--text);
 }
 .burger svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-.burger:hover {
-  color: var(--text);
 }
 @media (min-width: 768px) {
   .burger {

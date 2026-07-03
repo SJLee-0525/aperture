@@ -61,11 +61,10 @@ const SiteHeader = () => {
         <div className={styles.controls}>
           <LangMenu />
           <ThemeToggleButton />
+          <MobileMenu />
         </div>
 
         {section === "photo" ? <SearchBox /> : null}
-
-        <MobileMenu />
       </div>
     </header>
   );
