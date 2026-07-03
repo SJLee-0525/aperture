@@ -18,10 +18,16 @@ const SECTIONS: { key: string; label: string; desc: string; href?: string }[] = 
   {
     key: "music",
     label: "음악",
-    desc: "연주 · 수상 · 영상 · 소개 설정",
+    desc: "연주 · 수상 · 영상 · 소개",
     href: ROUTES.ADMIN_MUSIC,
   },
-  // 전역·소개(랜딩·연락), 개발 섹션 CMS 는 추후 추가.
+  {
+    key: "dev",
+    label: "개발",
+    desc: "프로젝트 · 소개",
+    href: ROUTES.ADMIN_DEV,
+  },
+  // 전역·소개(랜딩·연락) CMS 는 추후 추가.
 ];
 
 const AdminHomePage = () => {

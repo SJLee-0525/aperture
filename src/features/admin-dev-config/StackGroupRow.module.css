@@ -1,0 +1,196 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  list-style: none;
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.categoryInput {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--t-body);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: border-color var(--dur) var(--ease);
+}
+.categoryInput:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.controls {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.move {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-body);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.move:hover:not(:disabled) {
+  border-color: var(--text-3);
+  color: var(--text);
+}
+.move:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.delete {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.delete:hover {
+  color: var(--like);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.chipPreview {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  height: 36px;
+  padding: 0 var(--s-3);
+  /* 각진 디자인 — 공개 /dev 스택 칩(사각)과 동일하게 미리보기도 사각 */
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.nameInput {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--t-body);
+  font-family: var(--font-sans);
+  transition: border-color var(--dur) var(--ease);
+}
+.nameInput:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.colorField {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.colorLabel {
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+.color {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.itemDelete {
+  flex: none;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.itemDelete:hover {
+  color: var(--like);
+}
+
+.addItem {
+  align-self: flex-start;
+  height: 32px;
+  padding: 0 var(--s-3);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.addItem:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.note {
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+@media (max-width: 640px) {
+  .groupHead {
+    flex-wrap: wrap;
+  }
+  .item {
+    flex-wrap: wrap;
+  }
+  .nameInput {
+    flex: 1 1 100%;
+  }
+}

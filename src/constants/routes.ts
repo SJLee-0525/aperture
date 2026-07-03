@@ -57,6 +57,9 @@ const adminMusicAwardRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_AWARDS}/${id}
 /** 관리자 음악 영상 수정 경로 */
 const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`;
 
+/** 관리자 개발 프로젝트 수정 경로 */
+const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}`;
+
 /** 사진 상세 모달 딥링크 쿼리 (현재 페이지에 ?photo= 부착) */
 const photoQuery = (id: string) => `?photo=${id}`;
 
@@ -73,6 +76,7 @@ export {
   adminMusicWorkRoute,
   adminMusicAwardRoute,
   adminMusicMediaRoute,
+  adminDevProjectRoute,
   adminPhotoRoute,
   photoQuery,
   workQuery,
