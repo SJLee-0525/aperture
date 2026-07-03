@@ -2,13 +2,7 @@
 const ROUTES = {
   // 통합 셸
   LANDING: "/", // 랜딩 허브 (A3)
-  // ⚠️ legacy 별칭 — 값은 A1에서 /photo/* 로 이동 완료. 현행 SiteHeader/NAV_ITEMS/링크가 참조.
-  //    A2(mega-menu 재작성) 때 이 4개 키를 제거하고 아래 PHOTO* 로 일원화한다.
-  HOME: "/photo", // 작업(Work)
-  ALBUMS: "/photo/albums",
-  MAP: "/photo/map",
-  ABOUT: "/photo/about",
-  // 사진 섹션 (/photo/*) — 정식 키
+  // 사진 섹션 (/photo/*)
   PHOTO: "/photo", // 작업(Work)
   PHOTO_ALBUMS: "/photo/albums",
   PHOTO_MAP: "/photo/map",
@@ -36,8 +30,8 @@ const ROUTES = {
   ADMIN_DEV_CONFIG: "/admin/dev/config",
 } as const;
 
-/** 앨범 상세 경로 — 현행 /albums/[id] (A1에서 /photo/albums/[id] 로 이동) */
-const albumRoute = (id: string) => `${ROUTES.ALBUMS}/${id}`;
+/** 앨범 상세 경로 (/photo/albums/[id]) */
+const albumRoute = (id: string) => `${ROUTES.PHOTO_ALBUMS}/${id}`;
 
 /** 관리자 사진 수정 경로 */
 const adminPhotoRoute = (id: string) => `${ROUTES.ADMIN_PHOTOS}/${id}`;

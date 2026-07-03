@@ -25,7 +25,7 @@ export default function NotFound() {
           {dict.notFoundBody2}
         </p>
         <div className={styles.actions}>
-          <Link href={ROUTES.HOME} className={styles.home}>
+          <Link href={ROUTES.LANDING} className={styles.home}>
             {dict.backHome}
           </Link>
         </div>

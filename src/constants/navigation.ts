@@ -2,19 +2,8 @@ import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
 import type { SectionId } from "@/constants/sections";
 
-/** 상단/하단 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 Icon name */
+/** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 Icon name */
 type NavItem = { labelKey: keyof UIDict; href: string; icon: string };
-
-/**
- * ⚠️ legacy — 현행 SiteHeader/MobileTabBar 가 사용. A2에서 mega-menu(MEGA_MENU)·
- * 섹션별 탭(MOBILE_TABS)으로 교체하며 제거한다.
- */
-const NAV_ITEMS: NavItem[] = [
-  { labelKey: "workNav", href: ROUTES.HOME, icon: "work" },
-  { labelKey: "albumsNav", href: ROUTES.ALBUMS, icon: "album" },
-  { labelKey: "mapNav", href: ROUTES.MAP, icon: "map" },
-  { labelKey: "aboutNav", href: ROUTES.ABOUT, icon: "user" },
-];
 
 /** 섹션(사진·음악·개발) — home 제외 */
 type NavSection = Exclude<SectionId, "home">;
@@ -68,7 +57,7 @@ const MEGA_MENU: MegaSection[] = [
 /** 모바일 섹션별 하단 탭 — 섹션에 따라 탭 세트가 다름 (A2 MobileTabBar 소비) */
 const MOBILE_TABS: Record<NavSection, NavItem[]> = {
   photo: [
-    { labelKey: "workNav", href: ROUTES.PHOTO, icon: "grid" },
+    { labelKey: "workNav", href: ROUTES.PHOTO, icon: "work" },
     { labelKey: "albumsNav", href: ROUTES.PHOTO_ALBUMS, icon: "album" },
     { labelKey: "mapNav", href: ROUTES.PHOTO_MAP, icon: "map" },
     { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT, icon: "user" },
@@ -87,5 +76,5 @@ const MOBILE_TABS: Record<NavSection, NavItem[]> = {
   ],
 };
 
-export { NAV_ITEMS, MEGA_MENU, MOBILE_TABS };
+export { MEGA_MENU, MOBILE_TABS };
 export type { NavItem, NavSection, MegaLink, MegaSection };

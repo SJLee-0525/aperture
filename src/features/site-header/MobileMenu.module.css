@@ -1,0 +1,151 @@
+.burger {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.burger svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.burger:hover {
+  color: var(--text);
+}
+@media (min-width: 768px) {
+  .burger {
+    display: none;
+  }
+}
+
+/* 시트는 헤더(58px) 아래에서 내려온다 — 버거는 헤더에 남아 클릭 가능(X 토글). */
+.scrim {
+  position: fixed;
+  top: 58px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 39;
+  animation: fade 0.2s var(--ease);
+}
+.panel {
+  position: fixed;
+  top: 58px;
+  left: 0;
+  right: 0;
+  max-height: calc(100dvh - 58px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 16px 20px;
+  z-index: 41;
+  animation: slideDown 0.28s var(--ease);
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .panel {
+    animation: none;
+  }
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  margin-bottom: 10px;
+  color: var(--text-3);
+}
+.search input {
+  border: 0;
+  background: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  width: 100%;
+}
+.search input::placeholder {
+  color: var(--text-3);
+}
+
+.group {
+  border-top: 1px solid var(--line);
+}
+.groupBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 17px 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.groupLabel {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.plus {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-4);
+  transition: transform 0.25s var(--ease);
+}
+.groupOpen .plus {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
+.subs {
+  display: none;
+  flex-direction: column;
+  padding: 0 4px 14px;
+  gap: 1px;
+}
+.groupOpen .subs {
+  display: flex;
+}
+.sub {
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+.sub:hover {
+  color: var(--accent);
+}

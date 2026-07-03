@@ -8,6 +8,7 @@ import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
 import { useLang } from "@/features/lang/use-lang";
 import { LangMenu } from "@/features/site-header/LangMenu";
+import { MobileMenu } from "@/features/site-header/MobileMenu";
 import { SearchBox } from "@/features/site-header/SearchBox";
 import { ThemeToggleButton } from "@/features/site-header/ThemeToggleButton";
 
@@ -63,6 +64,8 @@ const SiteHeader = () => {
         </div>
 
         {section === "photo" ? <SearchBox /> : null}
+
+        <MobileMenu />
       </div>
     </header>
   );
