@@ -4,17 +4,11 @@ import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
-import type {
-  MusicAward,
-  MusicConfig,
-  MusicMedia,
-  MusicSchedule,
-  MusicScheduleStatus,
-  MusicWork,
-} from "@/types/music";
+import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 import type { Photo } from "@/types/photo";
 import type { SiteConfig, SiteLink } from "@/types/site";
 import type { Tag } from "@/types/tag";
+import type { TimelineEntry } from "@/types/timeline";
 
 /**
  * 공개 페이지 서버 읽기 = Firestore REST API + fetch (아키텍처 원칙 #6).
@@ -172,17 +166,6 @@ const restToMusicWork = (id: string, d: Record<string, unknown>): MusicWork => (
   published: (d.published as boolean) ?? false,
 });
 
-const restToMusicSchedule = (id: string, d: Record<string, unknown>): MusicSchedule => ({
-  id,
-  title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
-  date: toDate(d.date),
-  venue: (d.venue as LocalizedText) ?? EMPTY_LOCALIZED,
-  status: (d.status as MusicScheduleStatus) === "onSale" ? "onSale" : "soon",
-  ticketUrl: (d.ticketUrl as string) ?? "",
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
-
 const restToMusicAward = (id: string, d: Record<string, unknown>): MusicAward => ({
   id,
   year: (d.year as number) ?? 0,
@@ -203,10 +186,9 @@ const restToMusicMedia = (id: string, d: Record<string, unknown>): MusicMedia =>
 });
 
 const restToMusicConfig = (d: Record<string, unknown>): MusicConfig => ({
-  heroLead: (d.heroLead as LocalizedText) ?? EMPTY_LOCALIZED,
-  typeWords: (d.typeWords as string[]) ?? [],
-  bookingEmail: (d.bookingEmail as string) ?? "",
-  social: (d.social as SiteLink[]) ?? [],
+  intro: (d.intro as LocalizedText) ?? EMPTY_LOCALIZED,
+  career: (d.career as TimelineEntry[]) ?? [],
+  education: (d.education as TimelineEntry[]) ?? [],
 });
 
 // ── 공개 read API (도메인 타입 반환) ────────────────────────────────────────
@@ -241,12 +223,6 @@ const fetchPublishedMusicWorks = async (): Promise<MusicWork[]> => {
   return rows.map((row) => restToMusicWork(row.id, row.data));
 };
 
-/** 공개 공연 일정 — published==true, order 순. */
-const fetchPublishedMusicSchedule = async (): Promise<MusicSchedule[]> => {
-  const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_SCHEDULE));
-  return rows.map((row) => restToMusicSchedule(row.id, row.data));
-};
-
 /** 공개 수상 — published==true, order 순. */
 const fetchPublishedMusicAwards = async (): Promise<MusicAward[]> => {
   const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_AWARDS));
@@ -261,9 +237,12 @@ const fetchPublishedMusicMedia = async (): Promise<MusicMedia[]> => {
 
 /** site/music 설정 문서(read: if true). 문서가 없으면 null → 호출부가 mock 폴백. */
 const fetchMusicConfig = async (): Promise<MusicConfig | null> => {
-  const res = await fetch(`${documentsUrl()}/${COLLECTIONS.SITE}/${SITE_MUSIC_DOC}?key=${API_KEY}`, {
-    next: { revalidate: REVALIDATE_SECONDS },
-  });
+  const res = await fetch(
+    `${documentsUrl()}/${COLLECTIONS.SITE}/${SITE_MUSIC_DOC}?key=${API_KEY}`,
+    {
+      next: { revalidate: REVALIDATE_SECONDS },
+    },
+  );
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Firestore music config 읽기 실패 (${res.status})`);
 
@@ -276,7 +255,6 @@ export {
   fetchPublishedAlbums,
   fetchPublishedMusicAwards,
   fetchPublishedMusicMedia,
-  fetchPublishedMusicSchedule,
   fetchPublishedMusicWorks,
   fetchPublishedPhotos,
   fetchSiteConfig,

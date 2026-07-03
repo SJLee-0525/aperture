@@ -1,4 +1,5 @@
 import { IntroSplash } from "@/components/IntroSplash";
+import { SiteFooter } from "@/components/SiteFooter";
 import { MobileTabBar } from "@/features/site-header/MobileTabBar";
 import { SectionAccent } from "@/features/site-header/SectionAccent";
 import { SiteHeader } from "@/features/site-header/SiteHeader";
@@ -13,6 +14,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
       <IntroSplash />
       <SiteHeader />
       <div className={styles.content}>{children}</div>
+      <SiteFooter />
       <MobileTabBar />
     </>
   );

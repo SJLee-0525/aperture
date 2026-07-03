@@ -5,8 +5,8 @@ import type { SectionId } from "@/constants/sections";
 /** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 Icon name */
 type NavItem = { labelKey: keyof UIDict; href: string; icon: string };
 
-/** 섹션(사진·음악·개발) — home 제외 */
-type NavSection = Exclude<SectionId, "home">;
+/** 섹션 탭 세트를 갖는 섹션(사진·음악·개발) — home·contact(단일 페이지) 제외 */
+type NavSection = Exclude<SectionId, "home" | "contact">;
 
 /** 데스크톱 mega-menu 링크 — href는 라우트(사진) 또는 인-페이지 앵커(음악·개발) */
 type MegaLink = { labelKey: keyof UIDict; href: string };
@@ -36,9 +36,9 @@ const MEGA_MENU: MegaSection[] = [
     href: ROUTES.MUSIC,
     links: [
       { labelKey: "musicWorksNav", href: ROUTES.MUSIC },
-      { labelKey: "musicScheduleNav", href: ROUTES.MUSIC_SCHEDULE },
-      { labelKey: "musicAwardsNav", href: ROUTES.MUSIC_AWARDS },
+      { labelKey: "musicCareerNav", href: ROUTES.MUSIC_CAREER },
       { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA },
+      { labelKey: "aboutNav", href: ROUTES.MUSIC_ABOUT },
     ],
   },
   {
@@ -49,9 +49,16 @@ const MEGA_MENU: MegaSection[] = [
       { labelKey: "devStackNav", href: ROUTES.DEV },
       { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
       { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER },
+      { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT },
     ],
   },
 ];
+
+/**
+ * 연락처 — 섹션이 아닌 전역 단일 페이지라 mega-menu 그룹이 아니라 최상위 평면 링크로 노출.
+ * 사진/음악/개발 그룹 뒤에 이어서 렌더(데스크톱 mega, 모바일 버거 시트 공용).
+ */
+const CONTACT_NAV: MegaLink = { labelKey: "contactNav", href: ROUTES.CONTACT };
 
 /** 모바일 섹션별 하단 탭 — 섹션에 따라 탭 세트가 다름 (A2 MobileTabBar 소비) */
 const MOBILE_TABS: Record<NavSection, NavItem[]> = {
@@ -63,16 +70,17 @@ const MOBILE_TABS: Record<NavSection, NavItem[]> = {
   ],
   music: [
     { labelKey: "musicWorksNav", href: ROUTES.MUSIC, icon: "music" },
-    { labelKey: "musicScheduleNav", href: ROUTES.MUSIC_SCHEDULE, icon: "cal" },
-    { labelKey: "musicAwardsNav", href: ROUTES.MUSIC_AWARDS, icon: "award" },
+    { labelKey: "musicCareerNav", href: ROUTES.MUSIC_CAREER, icon: "award" },
     { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA, icon: "play" },
+    { labelKey: "aboutNav", href: ROUTES.MUSIC_ABOUT, icon: "user" },
   ],
   dev: [
     { labelKey: "devStackNav", href: ROUTES.DEV, icon: "code" },
     { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
     { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER, icon: "cal" },
+    { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT, icon: "user" },
   ],
 };
 
-export { MEGA_MENU, MOBILE_TABS };
+export { MEGA_MENU, CONTACT_NAV, MOBILE_TABS };
 export type { NavItem, NavSection, MegaLink, MegaSection };

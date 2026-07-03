@@ -25,14 +25,6 @@
       ]
     },
     {
-      "collectionGroup": "musicSchedule",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "published", "order": "ASCENDING" },
-        { "fieldPath": "order", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "musicAwards",
       "queryScope": "COLLECTION",
       "fields": [

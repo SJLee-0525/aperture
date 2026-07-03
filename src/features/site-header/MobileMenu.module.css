@@ -77,6 +77,9 @@
 .panel > *:nth-child(4) {
   animation-delay: 0.2s;
 }
+.panel > *:nth-child(5) {
+  animation-delay: 0.25s;
+}
 @keyframes fade {
   from {
     opacity: 0;
@@ -182,5 +185,21 @@
   transition: color 0.15s;
 }
 .sub:hover {
+  color: var(--accent);
+}
+
+/* 연락처 — 아코디언이 아닌 평면 링크(그룹 헤더와 동일한 디스플레이 타이포) */
+.flatLink {
+  display: block;
+  width: 100%;
+  padding: 17px 4px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: color 0.15s;
+}
+.flatLink:hover {
   color: var(--accent);
 }

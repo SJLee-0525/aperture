@@ -8,14 +8,17 @@ const ROUTES = {
   PHOTO_MAP: "/photo/map",
   PHOTO_ABOUT: "/photo/about",
   // 음악 섹션 (/music/*) — 사진처럼 개별 페이지
-  MUSIC: "/music", // 연주 목록
-  MUSIC_SCHEDULE: "/music/schedule",
-  MUSIC_AWARDS: "/music/awards",
+  MUSIC: "/music", // 연주
+  MUSIC_CAREER: "/music/career", // 학력·경력·수상
   MUSIC_MEDIA: "/music/media",
-  // 개발 섹션 (/dev/*) — Phase C. 소개 없음
+  MUSIC_ABOUT: "/music/about", // 소개
+  // 개발 섹션 (/dev/*) — Phase C
   DEV: "/dev", // 기술 스택
   DEV_PROJECTS: "/dev/projects",
   DEV_CAREER: "/dev/career",
+  DEV_ABOUT: "/dev/about", // 소개
+  // 연락처 (섹션 아님 — 전역 페이지)
+  CONTACT: "/contact",
   // 관리자
   ADMIN: "/admin",
   LOGIN: "/admin/login",
@@ -27,7 +30,6 @@ const ROUTES = {
   ADMIN_SITE: "/admin/site",
   ADMIN_MUSIC: "/admin/music",
   ADMIN_MUSIC_WORKS: "/admin/music/works",
-  ADMIN_MUSIC_SCHEDULE: "/admin/music/schedule",
   ADMIN_MUSIC_AWARDS: "/admin/music/awards",
   ADMIN_MUSIC_MEDIA: "/admin/music/media",
   ADMIN_MUSIC_CONFIG: "/admin/music/config",

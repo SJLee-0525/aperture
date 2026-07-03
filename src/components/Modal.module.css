@@ -1,0 +1,83 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* 헤더(40)·모바일 메뉴(41)·mega 패널(46) 위 */
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: clamp(16px, 5vh, 56px) clamp(14px, 5vw, 52px);
+}
+.scrim {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  animation: mfade 0.4s linear;
+}
+.panel {
+  position: relative;
+  z-index: 1;
+  /* flex 자동 마진 = 뷰포트에 맞으면 수직 중앙, 넘치면 마진 0으로 접혀 상단부터 스크롤 가능 */
+  margin: auto;
+  width: 100%;
+  max-width: 880px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  animation: mpop 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px clamp(20px, 3vw, 34px);
+  border-bottom: 1px solid var(--line);
+}
+.crumb {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.close {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.close:hover {
+  color: var(--accent);
+}
+.body {
+  padding: clamp(26px, 4vw, 40px);
+}
+@keyframes mfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mpop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .panel {
+    animation: none;
+  }
+}

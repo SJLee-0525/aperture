@@ -1,6 +1,6 @@
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
-import type { SiteLink } from "@/types/site";
+import type { TimelineEntry } from "@/types/timeline";
 
 /** 연주 (musicWorks) — 포스터·프로그램·예매. 상세는 모달(?work=). */
 type MusicWork = {
@@ -16,21 +16,6 @@ type MusicWork = {
   poster: ImageMeta; // 저장된 webp (EXIF 추출 없음)
   ticketUrl: string;
   order: number; // 수동 정렬 (dnd-kit)
-  published: boolean;
-};
-
-/** 공연 예매 상태 */
-type MusicScheduleStatus = "onSale" | "soon";
-
-/** 공연 일정 (musicSchedule) */
-type MusicSchedule = {
-  id: string;
-  title: LocalizedText;
-  date: Date;
-  venue: LocalizedText;
-  status: MusicScheduleStatus;
-  ticketUrl: string;
-  order: number;
   published: boolean;
 };
 
@@ -55,19 +40,11 @@ type MusicMedia = {
   published: boolean;
 };
 
-/** site/music 설정 문서 — 히어로·연락처 */
+/** site/music 설정 문서 — 소개(intro) + 경력 페이지의 학력·경력 타임라인 */
 type MusicConfig = {
-  heroLead: LocalizedText;
-  typeWords: string[]; // 히어로 타이핑 순환 문구 (언어 무관 곡명)
-  bookingEmail: string;
-  social: SiteLink[];
+  intro: LocalizedText; // 소개 페이지 헤드라인·본문 (첫 문장 = 요약 헤드라인)
+  career: TimelineEntry[];
+  education: TimelineEntry[];
 };
 
-export type {
-  MusicWork,
-  MusicScheduleStatus,
-  MusicSchedule,
-  MusicAward,
-  MusicMedia,
-  MusicConfig,
-};
+export type { MusicWork, MusicAward, MusicMedia, MusicConfig };

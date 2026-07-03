@@ -38,10 +38,6 @@ service cloud.firestore {
       allow read:  if resource.data.published == true || isAdmin();
       allow write: if isAdmin();
     }
-    match /musicSchedule/{id} {
-      allow read:  if resource.data.published == true || isAdmin();
-      allow write: if isAdmin();
-    }
     match /musicAwards/{id} {
       allow read:  if resource.data.published == true || isAdmin();
       allow write: if isAdmin();

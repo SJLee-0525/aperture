@@ -1,10 +1,4 @@
-import type {
-  MusicAward,
-  MusicConfig,
-  MusicMedia,
-  MusicSchedule,
-  MusicWork,
-} from "@/types/music";
+import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
 /** 빈 포스터 — mock 은 이미지 없음(WorkPoster 가 플레이스홀더 렌더). */
 const NO_POSTER = { url: "", path: "", w: 0, h: 0 };
@@ -22,7 +16,14 @@ const MOCK_MUSIC_WORKS: MusicWork[] = [
     time: "19:30",
     venue: { ko: "예술의전당 콘서트홀", en: "Seoul Arts Center Concert Hall" },
     category: { ko: "리사이틀", en: "Recital" },
-    program: ["Gute Nacht", "Die Wetterfahne", "Gefrorne Tränen", "Erstarrung", "Der Lindenbaum", "Wasserflut"],
+    program: [
+      "Gute Nacht",
+      "Die Wetterfahne",
+      "Gefrorne Tränen",
+      "Erstarrung",
+      "Der Lindenbaum",
+      "Wasserflut",
+    ],
     description: {
       ko: "슈베르트 겨울 나그네 전곡. 24개의 가곡을 하나의 긴 호흡으로.",
       en: "Schubert's complete Winterreise — twenty-four songs in one long breath.",
@@ -40,7 +41,12 @@ const MOCK_MUSIC_WORKS: MusicWork[] = [
     time: "17:00",
     venue: { ko: "롯데콘서트홀", en: "Lotte Concert Hall" },
     category: { ko: "리사이틀", en: "Recital" },
-    program: ["Ballade No.1 in G minor", "Nocturne Op.27 No.2", "Scherzo No.2", "Polonaise-Fantaisie"],
+    program: [
+      "Ballade No.1 in G minor",
+      "Nocturne Op.27 No.2",
+      "Scherzo No.2",
+      "Polonaise-Fantaisie",
+    ],
     description: {
       ko: "쇼팽의 발라드와 스케르초를 중심으로 한 프로그램.",
       en: "A programme centred on Chopin's ballades and scherzos.",
@@ -133,54 +139,14 @@ const MOCK_MUSIC_WORKS: MusicWork[] = [
   },
 ];
 
-const MOCK_MUSIC_SCHEDULE: MusicSchedule[] = [
-  {
-    id: "summer-solo",
-    title: { ko: "여름 독주회", en: "Summer Solo Recital" },
-    date: new Date("2026-07-12T19:30:00+09:00"),
-    venue: { ko: "예술의전당 IBK챔버홀", en: "Seoul Arts Center IBK Chamber Hall" },
-    status: "onSale",
-    ticketUrl: "#",
-    order: 0,
-    published: true,
-  },
-  {
-    id: "emperor",
-    title: { ko: '베토벤 협주곡 5번 "황제"', en: 'Beethoven Concerto No.5 "Emperor"' },
-    date: new Date("2026-08-03T20:00:00+09:00"),
-    venue: { ko: "롯데콘서트홀", en: "Lotte Concert Hall" },
-    status: "onSale",
-    ticketUrl: "#",
-    order: 1,
-    published: true,
-  },
-  {
-    id: "duo-cello",
-    title: { ko: "듀오 콘서트 — 첼로와 함께", en: "Duo Concert — with cello" },
-    date: new Date("2026-09-21T19:30:00+09:00"),
-    venue: { ko: "금호아트홀 연세", en: "Kumho Art Hall Yonsei" },
-    status: "soon",
-    ticketUrl: "#",
-    order: 2,
-    published: true,
-  },
-  {
-    id: "autumn-lieder",
-    title: { ko: "가을 가곡의 밤", en: "Autumn Lieder Evening" },
-    date: new Date("2026-11-08T19:30:00+09:00"),
-    venue: { ko: "예술의전당 콘서트홀", en: "Seoul Arts Center Concert Hall" },
-    status: "soon",
-    ticketUrl: "#",
-    order: 3,
-    published: true,
-  },
-];
-
 const MOCK_MUSIC_AWARDS: MusicAward[] = [
   {
     id: "geneva-2024",
     year: 2024,
-    name: { ko: "국제 피아노 콩쿠르 — 파이널리스트", en: "International Piano Competition — Finalist" },
+    name: {
+      ko: "국제 피아노 콩쿠르 — 파이널리스트",
+      en: "International Piano Competition — Finalist",
+    },
     place: "Geneva, CH",
     description: {
       ko: "세계적 권위의 콩쿠르 결선에 올라 협주곡 라운드를 연주했다.",
@@ -287,27 +253,44 @@ const MOCK_MUSIC_MEDIA: MusicMedia[] = [
 ];
 
 const MOCK_MUSIC_CONFIG: MusicConfig = {
-  heroLead: {
-    ko: "서울을 기반으로 활동하는 피아니스트. 슈베르트와 라흐마니노프 사이를 오가며, 정교한 구조 감각과 노래하는 음색으로 무대를 만듭니다.",
-    en: "A Seoul-based pianist moving between Schubert and Rachmaninoff — building the stage with a precise sense of structure and a singing tone.",
+  intro: {
+    ko: "피아노로 이야기를 짓습니다. 슈베르트의 겨울부터 라흐마니노프의 격정까지, 리사이틀·협연·실내악을 오가며 한 호흡의 무대를 만듭니다. 국내외 콩쿠르 무대에서 연주해 왔고, 지금은 프리랜스 피아니스트로 활동합니다.",
+    en: "I tell stories at the piano. From Schubert's winter to Rachmaninoff's fervour — across recitals, concertos, and chamber music, shaped into a single breath. I've played on competition stages at home and abroad, and now work as a freelance pianist.",
   },
-  typeWords: [
-    "Schubert · Winterreise",
-    "Rachmaninoff · Concerto No.2",
-    "Chopin · Ballades",
-    "Bach · Goldberg",
+  career: [
+    {
+      period: "2024 —",
+      title: {
+        ko: "프리랜스 피아니스트 · 리사이틀·협연",
+        en: "Freelance pianist · recitals & concertos",
+      },
+    },
+    {
+      period: "2023 — 2024",
+      title: { ko: "금호아트홀 상주 음악가", en: "Kumho Art Hall Resident Artist" },
+    },
+    {
+      period: "2021 — 2023",
+      title: {
+        ko: "국내·국제 콩쿠르 입상 및 연주 활동",
+        en: "Competition prizes & performances (KR/intl.)",
+      },
+    },
   ],
-  bookingEmail: "booking@sungjoonlee.com",
-  social: [
-    { label: "YouTube", href: "#" },
-    { label: "Instagram", href: "#" },
+  education: [
+    {
+      period: "2017 — 2023",
+      title: { ko: "연세대학교 음악대학 피아노과", en: "Yonsei University — B.Mus. in Piano" },
+    },
+    {
+      period: "2013 — 2016",
+      title: { ko: "서울예술고등학교 피아노과", en: "Seoul Arts High School — Piano" },
+    },
+    {
+      period: "2010 — 2013",
+      title: { ko: "예원학교 피아노과", en: "Yewon School — Piano" },
+    },
   ],
 };
 
-export {
-  MOCK_MUSIC_WORKS,
-  MOCK_MUSIC_SCHEDULE,
-  MOCK_MUSIC_AWARDS,
-  MOCK_MUSIC_MEDIA,
-  MOCK_MUSIC_CONFIG,
-};
+export { MOCK_MUSIC_WORKS, MOCK_MUSIC_AWARDS, MOCK_MUSIC_MEDIA, MOCK_MUSIC_CONFIG };

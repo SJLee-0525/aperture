@@ -42,7 +42,7 @@
 ### Slice A0 — 타입 · 상수 · 라우트 골격
 
 - `types/`: `music.ts`(MusicWork·MusicSchedule·MusicAward·MusicMedia), `dev.ts`(DevProject·DevConfig), `site.ts` 확장(tagline·landingLead·MusicConfig·DevConfig).
-- `constants/`: `sections.ts`(SECTIONS + 액센트 메타), `navigation.ts` → **mega-menu 구조**(사진/음악/개발 + 하위 링크), `routes.ts`(PHOTO_WORK/ALBUMS/MAP/ABOUT·MUSIC·DEV·ADMIN_MUSIC_*·ADMIN_DEV_*), `collections.ts`(musicWorks·musicSchedule·musicAwards·musicMedia·devProjects + site 문서 id), `dictionary.ts`(섹션·네비 라벨 추가).
+- `constants/`: `sections.ts`(SECTIONS + 액센트 메타), `navigation.ts` → **mega-menu 구조**(사진/음악/개발 + 하위 링크), `routes.ts`(PHOTO_WORK/ALBUMS/MAP/ABOUT·MUSIC·DEV·ADMIN_MUSIC__·ADMIN_DEV__), `collections.ts`(musicWorks·musicSchedule·musicAwards·musicMedia·devProjects + site 문서 id), `dictionary.ts`(섹션·네비 라벨 추가).
 - `next.config.ts` **redirects**: `/albums→/photo/albums`, `/map→/photo/map`, `/about→/photo/about`.
 - **완료**: 타입·상수 컴파일 통과, redirect 규칙 등록.
 
@@ -90,7 +90,7 @@
 
 ### Slice B2 — 음악 관리자 CMS
 
-- `admin/music/works|schedule|awards|media|config` + `features/admin-music-*/`(*Form + use-*-admin + **dnd 정렬**). 포스터 업로드(**EXIF 없이** 압축→Storage `music/{id}/`). `LocalizedTextField`·`ImageUploader` 재사용, 새 색 금지.
+- `admin/music/works|schedule|awards|media|config` + `features/admin-music-*/`(_Form + use-_-admin + **dnd 정렬**). 포스터 업로드(**EXIF 없이** 압축→Storage `music/{id}/`). `LocalizedTextField`·`ImageUploader` 재사용, 새 색 금지.
 - **완료**: 관리자가 연주·일정·수상·영상·설정 CRUD + 드래그 정렬 → 공개 페이지 반영.
 
 **완료기준(MB)**: Slice B0–B2 → 음악 섹션 공개+관리 완결.
@@ -149,11 +149,11 @@
 
 ## 7. 의존성 추가 시점
 
-| 시점  | 패키지                                                                                          |
-| ----- | ----------------------------------------------------------------------------------------------- |
-| A~D   | **신규 없음** — `motion`(이미 사용, 랜딩·개발 reveal/타이핑) + 기존 스택(next/image·CSS Modules) |
-| 관리자 | 기존 `@dnd-kit/*`·`browser-image-compression` 재사용 (음악 포스터·개발 썸네일 업로드)          |
-| P3    | `@huggingface/transformers`(AI 태그 — 사진 전용, 선택)                                          |
+| 시점   | 패키지                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------ |
+| A~D    | **신규 없음** — `motion`(이미 사용, 랜딩·개발 reveal/타이핑) + 기존 스택(next/image·CSS Modules) |
+| 관리자 | 기존 `@dnd-kit/*`·`browser-image-compression` 재사용 (음악 포스터·개발 썸네일 업로드)            |
+| P3     | `@huggingface/transformers`(AI 태그 — 사진 전용, 선택)                                           |
 
 > 개발 섹션은 원본이 GSAP/Zustand지만 **도입하지 않는다**(frontend §7). 인터랙션만 CSS/`motion`으로 재현.
 
@@ -165,12 +165,12 @@
 
 ## 9. 마일스톤
 
-| #   | 내용                                             | Phase | 완료 기준                                    |
-| --- | ------------------------------------------------ | ----- | -------------------------------------------- |
-| MA  | 셸(mega-menu)·랜딩·사진 `/photo/*` 이동          | A     | 3섹션 진입 셸 + 사진 회귀 0 + 액센트 전환    |
-| MB  | 음악 섹션 (공개 + 관리자 CMS + Rules·인덱스)     | B     | 연주·일정·수상·영상 CRUD → 공개 반영          |
-| MC  | 개발 섹션 (공개 + 관리자 CMS + Rules·인덱스)     | C     | 프로젝트·스택·경력 CRUD → 공개 반영           |
-| MD  | ko/en·SEO·접근성 마감 + 배포                     | D     | `/design-check`·`/deploy-check` 통과·배포     |
+| #   | 내용                                         | Phase | 완료 기준                                 |
+| --- | -------------------------------------------- | ----- | ----------------------------------------- |
+| MA  | 셸(mega-menu)·랜딩·사진 `/photo/*` 이동      | A     | 3섹션 진입 셸 + 사진 회귀 0 + 액센트 전환 |
+| MB  | 음악 섹션 (공개 + 관리자 CMS + Rules·인덱스) | B     | 연주·일정·수상·영상 CRUD → 공개 반영      |
+| MC  | 개발 섹션 (공개 + 관리자 CMS + Rules·인덱스) | C     | 프로젝트·스택·경력 CRUD → 공개 반영       |
+| MD  | ko/en·SEO·접근성 마감 + 배포                 | D     | `/design-check`·`/deploy-check` 통과·배포 |
 
 ## 10. 리스크 & 열린 질문
 

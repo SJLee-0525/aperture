@@ -22,7 +22,8 @@ const MobileTabBar = () => {
   const pathname = usePathname();
   const section = sectionFromPath(pathname);
 
-  if (section === "home") return null;
+  // home·contact 는 섹션 탭 세트가 없다(단일 페이지) → 탭바 숨김.
+  if (section === "home" || section === "contact") return null;
 
   return (
     <nav className={styles.tabbar} aria-label="Mobile navigation">

@@ -4,70 +4,70 @@
    ========================================================================= */
 
 /* Fonts — Google Fonts (we use these directly, see fonts/README.md) */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
 :root {
   /* ── Surfaces (obsidian stack) ──────────────────────────────────── */
-  --void:            #000000;
-  --surface:         #000000;
-  --surface-low:     #080808;
-  --recessed:        #0a0a0a;  /* terminal bg, code blocks */
-  --surface-mid:     #141414;  /* cards, panels, inputs */
-  --surface-high:    #1c1c1c;  /* popovers */
-  --surface-highest: #252525;  /* highest elevation */
+  --void: #000000;
+  --surface: #000000;
+  --surface-low: #080808;
+  --recessed: #0a0a0a; /* terminal bg, code blocks */
+  --surface-mid: #141414; /* cards, panels, inputs */
+  --surface-high: #1c1c1c; /* popovers */
+  --surface-highest: #252525; /* highest elevation */
 
   /* ── Gold scale (the only chromatic accent) ─────────────────────── */
-  --gold:       #FFC000;  /* primary CTA, active, gauge arc */
-  --gold-soft:  #FFE3AD;  /* high-visibility trigger */
-  --gold-dark:  #D4A000;  /* hover */
-  --gold-deep:  #917300;  /* queued / warning / error */
-  --gold-warm:  #C49A4A;  /* attention */
-  --gold-glow:  rgba(255, 192, 0, 0.06);
-  --gold-10:    rgba(255, 192, 0, 0.10);
-  --gold-20:    rgba(255, 192, 0, 0.20);
-  --gold-30:    rgba(255, 192, 0, 0.30);
-  --gold-60:    rgba(255, 192, 0, 0.60);
+  --gold: #ffc000; /* primary CTA, active, gauge arc */
+  --gold-soft: #ffe3ad; /* high-visibility trigger */
+  --gold-dark: #d4a000; /* hover */
+  --gold-deep: #917300; /* queued / warning / error */
+  --gold-warm: #c49a4a; /* attention */
+  --gold-glow: rgba(255, 192, 0, 0.06);
+  --gold-10: rgba(255, 192, 0, 0.1);
+  --gold-20: rgba(255, 192, 0, 0.2);
+  --gold-30: rgba(255, 192, 0, 0.3);
+  --gold-60: rgba(255, 192, 0, 0.6);
 
   /* Cyan — ONLY for AI-generated / technical callouts, nowhere else */
-  --ai-cyan:    #00DDFE;
+  --ai-cyan: #00ddfe;
 
   /* ── Text hierarchy (cool monochrome only) ──────────────────────── */
-  --fg-primary:   #ffffff;  /* headlines, key numbers */
-  --fg-high:      #e0e0e0;  /* body text */
-  --fg-medium:    #d0d0d0;  /* skill names, gauge labels */
-  --fg-secondary: #b0b0b0;  /* descriptions, sub-labels */
-  --fg-tertiary:  #a0a0a0;  /* metadata, timestamps */
-  --fg-muted:     #909090;  /* pipeline details, durations */
-  --fg-subtle:    #808080;  /* dividers-as-text, inactive */
-  --fg-dim:       #707070;  /* completed items */
-  --fg-ghost:     #606060;  /* decorative */
+  --fg-primary: #ffffff; /* headlines, key numbers */
+  --fg-high: #e0e0e0; /* body text */
+  --fg-medium: #d0d0d0; /* skill names, gauge labels */
+  --fg-secondary: #b0b0b0; /* descriptions, sub-labels */
+  --fg-tertiary: #a0a0a0; /* metadata, timestamps */
+  --fg-muted: #909090; /* pipeline details, durations */
+  --fg-subtle: #808080; /* dividers-as-text, inactive */
+  --fg-dim: #707070; /* completed items */
+  --fg-ghost: #606060; /* decorative */
 
   /* ── Semantic (all gold — no green/red) ─────────────────────────── */
   --success: var(--gold);
   --warning: var(--gold-warm);
-  --error:   var(--gold-deep);
-  --info:    var(--fg-tertiary);
+  --error: var(--gold-deep);
+  --info: var(--fg-tertiary);
 
   /* ── Borders (ghost rules — see DON'Ts) ─────────────────────────── */
-  --border-subtle:  rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.04);
   --border-default: rgba(255, 255, 255, 0.06);
-  --border-strong:  rgba(255, 255, 255, 0.10);
-  --border-gold-faint:  rgba(255, 192, 0, 0.10);
-  --border-gold-medium: rgba(255, 192, 0, 0.20);
-  --border-gold-strong: rgba(255, 192, 0, 0.30);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --border-gold-faint: rgba(255, 192, 0, 0.1);
+  --border-gold-medium: rgba(255, 192, 0, 0.2);
+  --border-gold-strong: rgba(255, 192, 0, 0.3);
 
   /* ── Typography ─────────────────────────────────────────────────── */
-  --font-heading: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-sans:    'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+  --font-heading: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Courier New", monospace;
 
   /* tracking (letter-spacing) */
-  --tracking-tight:   -0.02em;
-  --tracking-normal:   0;
-  --tracking-wide:     0.1em;
-  --tracking-widest:   0.15em;
-  --tracking-2em:      0.2em;
-  --tracking-3em:      0.3em;  /* used on CTA labels */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.1em;
+  --tracking-widest: 0.15em;
+  --tracking-2em: 0.2em;
+  --tracking-3em: 0.3em; /* used on CTA labels */
 
   /* ── Radii (0 everywhere, no exceptions) ────────────────────────── */
   --radius: 0px;
@@ -75,16 +75,16 @@
   /* ── Elevation (tonal, never drop-shadow) ───────────────────────── */
   --elev-inset: inset 0 0 20px rgba(0, 0, 0, 0.5);
   --elev-gold-glow-soft: 0 0 20px rgba(255, 192, 0, 0.1);
-  --elev-gold-glow-mid:  0 0 8px rgba(255, 192, 0, 0.6);
+  --elev-gold-glow-mid: 0 0 8px rgba(255, 192, 0, 0.6);
 
   /* ── Spacing (4px grid) ─────────────────────────────────────────── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
-  --space-4: 16px;  /* card internal */
-  --space-5: 20px;  /* card internal, larger */
-  --space-6: 24px;  /* panel padding */
-  --space-8: 32px;  /* page padding */
+  --space-4: 16px; /* card internal */
+  --space-5: 20px; /* card internal, larger */
+  --space-6: 24px; /* panel padding */
+  --space-8: 32px; /* page padding */
   --space-12: 48px;
 }
 
@@ -92,7 +92,9 @@
    Base / Reset
    ========================================================================= */
 
-html { font-size: 15px; }
+html {
+  font-size: 15px;
+}
 
 body {
   font-family: var(--font-sans);
@@ -106,60 +108,66 @@ body {
    Semantic type (apply directly, or use .heading / .label etc.)
    ========================================================================= */
 
-h1, .h1 {
+h1,
+.h1 {
   font-family: var(--font-heading);
   font-weight: 900;
-  font-size: 3.5rem;         /* ~56px — display */
+  font-size: 3.5rem; /* ~56px — display */
   line-height: 1;
   letter-spacing: var(--tracking-tight);
   color: var(--fg-primary);
 }
 
-h2, .h2 {
+h2,
+.h2 {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 2rem;           /* 32px — module title */
+  font-size: 2rem; /* 32px — module title */
   line-height: 1.1;
   letter-spacing: var(--tracking-tight);
   color: var(--fg-primary);
   text-transform: uppercase;
 }
 
-h3, .h3 {
+h3,
+.h3 {
   font-family: var(--font-heading);
   font-weight: 900;
-  font-size: 0.875rem;       /* 14px — panel title */
+  font-size: 0.875rem; /* 14px — panel title */
   line-height: 1.2;
   letter-spacing: var(--tracking-2em);
   text-transform: uppercase;
   color: var(--gold);
 }
 
-h4, .h4 {
+h4,
+.h4 {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 0.8125rem;      /* 13px — content heading */
+  font-size: 0.8125rem; /* 13px — content heading */
   color: var(--gold);
 }
 
-p, .body {
+p,
+.body {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.875rem;       /* 14px */
+  font-size: 0.875rem; /* 14px */
   line-height: 1.6;
   color: var(--fg-high);
 }
 
-small, .meta {
+small,
+.meta {
   font-family: var(--font-sans);
-  font-size: 0.75rem;        /* 12px */
+  font-size: 0.75rem; /* 12px */
   color: var(--fg-secondary);
 }
 
 .label {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 0.625rem;       /* 10px */
+  font-size: 0.625rem; /* 10px */
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   color: var(--fg-muted);
@@ -168,15 +176,17 @@ small, .meta {
 .sublabel {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 0.5625rem;      /* 9px */
+  font-size: 0.5625rem; /* 9px */
   text-transform: uppercase;
   letter-spacing: var(--tracking-2em);
   color: var(--fg-muted);
 }
 
-code, .mono, .code {
+code,
+.mono,
+.code {
   font-family: var(--font-mono);
-  font-size: 0.75rem;        /* 12px */
+  font-size: 0.75rem; /* 12px */
   color: var(--fg-muted);
   background: var(--recessed);
   padding: 2px 6px;
@@ -192,7 +202,7 @@ code, .mono, .code {
   font-family: var(--font-heading);
   font-weight: 900;
   font-style: italic;
-  font-size: 4.5rem;         /* 72px — gauge center large */
+  font-size: 4.5rem; /* 72px — gauge center large */
   line-height: 1;
   color: var(--fg-primary);
 }
@@ -201,7 +211,7 @@ code, .mono, .code {
   font-family: var(--font-heading);
   font-weight: 900;
   font-style: italic;
-  font-size: 3rem;           /* 48px — gauge center side */
+  font-size: 3rem; /* 48px — gauge center side */
   line-height: 1;
   color: var(--fg-primary);
 }
@@ -210,21 +220,47 @@ code, .mono, .code {
    Utilities
    ========================================================================= */
 
-.font-heading { font-family: var(--font-heading); }
-.font-sans    { font-family: var(--font-sans); }
-.font-mono    { font-family: var(--font-mono); }
+.font-heading {
+  font-family: var(--font-heading);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
 
-.text-gold    { color: var(--gold); }
-.text-primary { color: var(--fg-primary); }
-.text-high    { color: var(--fg-high); }
-.text-medium  { color: var(--fg-medium); }
-.text-muted   { color: var(--fg-muted); }
-.text-dim     { color: var(--fg-dim); }
+.text-gold {
+  color: var(--gold);
+}
+.text-primary {
+  color: var(--fg-primary);
+}
+.text-high {
+  color: var(--fg-high);
+}
+.text-medium {
+  color: var(--fg-medium);
+}
+.text-muted {
+  color: var(--fg-muted);
+}
+.text-dim {
+  color: var(--fg-dim);
+}
 
-.uppercase       { text-transform: uppercase; }
-.tracking-2em    { letter-spacing: var(--tracking-2em); }
-.tracking-3em    { letter-spacing: var(--tracking-3em); }
-.tracking-widest { letter-spacing: var(--tracking-widest); }
+.uppercase {
+  text-transform: uppercase;
+}
+.tracking-2em {
+  letter-spacing: var(--tracking-2em);
+}
+.tracking-3em {
+  letter-spacing: var(--tracking-3em);
+}
+.tracking-widest {
+  letter-spacing: var(--tracking-widest);
+}
 
 /* =========================================================================
    Textures — copy these class defs into any page
@@ -244,7 +280,11 @@ code, .mono, .code {
     linear-gradient(45deg, transparent 75%, #111 75%),
     linear-gradient(-45deg, transparent 75%, #111 75%);
   background-size: 4px 4px;
-  background-position: 0 0, 0 2px, 2px -2px, -2px 0;
+  background-position:
+    0 0,
+    0 2px,
+    2px -2px,
+    -2px 0;
 }
 
 .hud-scanline {
@@ -252,21 +292,22 @@ code, .mono, .code {
 }
 .hud-scanline::after {
   content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 50%, rgba(255,192,0,0.03) 50%);
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(255, 192, 0, 0.03) 50%);
   background-size: 100% 4px;
   pointer-events: none;
 }
 
 .cluster-glass {
-  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.5) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.5) 100%);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-gold-faint);
   box-shadow: var(--elev-inset);
 }
 
 .gold-radial {
-  background: radial-gradient(ellipse at left, rgba(255,192,0,0.04) 0%, transparent 50%);
+  background: radial-gradient(ellipse at left, rgba(255, 192, 0, 0.04) 0%, transparent 50%);
 }
 
 /* =========================================================================
@@ -274,24 +315,51 @@ code, .mono, .code {
    ========================================================================= */
 
 @keyframes gold-glow {
-  0%, 100% { opacity: 0.8; }
-  50%      { opacity: 1; filter: drop-shadow(0 0 8px rgba(255,192,0,0.6)); }
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(255, 192, 0, 0.6));
+  }
 }
-.animate-glow { animation: gold-glow 2s infinite ease-in-out; }
+.animate-glow {
+  animation: gold-glow 2s infinite ease-in-out;
+}
 
 @keyframes cursor-blink {
-  0%, 50%   { opacity: 1; }
-  50.01%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
 }
-.animate-cursor { animation: cursor-blink 1s step-end infinite; }
+.animate-cursor {
+  animation: cursor-blink 1s step-end infinite;
+}
 
 @keyframes gauge-fill {
-  from { stroke-dashoffset: var(--dash-from, 283); }
-  to   { stroke-dashoffset: var(--dash-to, 0); }
+  from {
+    stroke-dashoffset: var(--dash-from, 283);
+  }
+  to {
+    stroke-dashoffset: var(--dash-to, 0);
+  }
 }
 
 @keyframes radar-sweep {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
-.animate-sweep { animation: radar-sweep 4s linear infinite; transform-origin: center; }
+.animate-sweep {
+  animation: radar-sweep 4s linear infinite;
+  transform-origin: center;
+}

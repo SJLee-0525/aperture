@@ -1,0 +1,36 @@
+.footer {
+  border-top: 1px solid var(--line);
+}
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-6) clamp(20px, 4vw, 40px);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+.credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+  color: var(--text-4);
+  transition: color 0.2s;
+}
+.credit:hover {
+  color: var(--text);
+}
+.credit svg {
+  transform: translateY(-1px);
+}
+/* 모바일: 하단 탭바에 가리지 않도록 여백(콘텐츠와 동일 기준) */
+@media (max-width: 767px) {
+  .footer {
+    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  }
+}

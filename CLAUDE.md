@@ -14,12 +14,13 @@
 **이성준(Sungjoon Lee)** 의 개인 통합 포트폴리오. 사이트 워드마크 `Sungjoon Lee.`, 태그라인 **Photographer · Pianist · Developer**.
 하나의 셸(상단 mega-menu 네비 + 랜딩 허브) 아래 **세 개의 섹션**이 각자의 액센트 색과 콘텐츠를 갖는다.
 
-| 섹션          | 경로       | 액센트                | 정체성 / 콘텐츠                                                                    |
-| ------------- | ---------- | --------------------- | --------------------------------------------------------------------------------- |
-| **랜딩**      | `/`        | 블루                  | 3섹션 진입 허브 — 이름·태그라인·소개 + 사진/음악/개발 이동 행                     |
-| **사진**      | `/photo/*` | **블루** `#0a84ff`    | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달 + 프레임 내보내기       |
-| **음악**      | `/music`   | **레드** `#e5484d`    | 피아니스트 — 연주 목록·공연 일정·수상·영상·연락처 (단일 스크롤 + 앵커 네비)       |
-| **개발**      | `/dev`     | **그린** `#16a34a`    | 프론트엔드 개발자 — 소개·기술 스택·프로젝트·경력 (단일 스크롤 + 프로젝트 모달)    |
+| 섹션     | 경로       | 액센트             | 정체성 / 콘텐츠                                                                  |
+| -------- | ---------- | ------------------ | -------------------------------------------------------------------------------- |
+| **랜딩** | `/`        | 블루               | 3섹션 진입 허브 — 이름·태그라인·소개 + 사진/음악/개발 이동 행                    |
+| **사진** | `/photo/*` | **블루** `#0a84ff` | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달 + 프레임 내보내기       |
+| **음악** | `/music/*` | **레드** `#e5484d` | 피아니스트 — 연주·경력(학력·경력·수상)·영상·소개 (개별 페이지 + 연주/수상 모달)  |
+| **개발** | `/dev/*`   | **그린** `#16a34a` | 프론트엔드 개발자 — 기술 스택·프로젝트·경력·소개 (개별 페이지, Phase C)          |
+| **연락** | `/contact` | **주황** `#f5820d` | 전역 연락 페이지 — mailto 폼 + 인스타·깃헙·메일 링크 (섹션 아니지만 자체 액센트) |
 
 - **방문자**: 로그인 없음, **ko/en 토글**, 다크모드. 각 섹션을 자유 열람.
   - 사진: EXIF·촬영 위치·태그, **좋아요**(익명 카운트)·**프레임 내보내기**.
@@ -31,11 +32,11 @@
 
 | 레이어     | 선택                       | 왜 (결정 사유)                                                                          |
 | ---------- | -------------------------- | --------------------------------------------------------------------------------------- |
-| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                            |
+| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                           |
 | 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                |
 | 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                             |
 | DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)               |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축** (사진·음악 포스터·개발 썸네일)                   |
+| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축** (사진·음악 포스터·개발 썸네일)                  |
 | 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**  |
 | i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음). **전 섹션 이중언어**     |
 | 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter) |
@@ -82,35 +83,35 @@
 
 ### 사진 섹션 (기존)
 
-| 컬렉션   | 역할               | 주요 필드                                                                                                                                                                                                                        |
-| -------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `photos` | 사진 (작업)        | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, **likes**, order, published |
-| `albums` | 앨범 (사진 묶음)   | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, photoIds[](**수동 순서**), order, published                                                                                                                                     |
+| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                                      |
+| -------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, **likes**, order, published |
+| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, photoIds[](**수동 순서**), order, published                                                                                                                                                   |
 
 ### 음악 섹션 (신규)
 
-| 컬렉션          | 역할          | 주요 필드                                                                                                                            |
-| --------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `musicWorks`    | 연주 목록     | title{ko,en}, subtitle{ko,en}(작곡가·작품번호), performedAt(TS), time, venue{ko,en}, category{ko,en}(리사이틀/협연/갈라), program[](곡명 평면), description{ko,en}, poster{url,path,w,h}, ticketUrl, order, published |
-| `musicSchedule` | 공연 일정     | title{ko,en}, date(TS), venue{ko,en}, status("onSale"\|"soon"), ticketUrl, order, published                                          |
-| `musicAwards`   | 수상 경력     | year(number), name{ko,en}, place, description{ko,en}, order, published                                                               |
-| `musicMedia`    | 영상          | title{ko,en}, source{ko,en}, youtubeId, order, published                                                                             |
+| 컬렉션        | 역할      | 주요 필드                                                                                                                                                                                                             |
+| ------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `musicWorks`  | 연주 목록 | title{ko,en}, subtitle{ko,en}(작곡가·작품번호), performedAt(TS), time, venue{ko,en}, category{ko,en}(리사이틀/협연/갈라), program[](곡명 평면), description{ko,en}, poster{url,path,w,h}, ticketUrl, order, published |
+| `musicAwards` | 수상 경력 | year(number), name{ko,en}, place, description{ko,en}, order, published                                                                                                                                                |
+| `musicMedia`  | 영상      | title{ko,en}, source{ko,en}, youtubeId, order, published                                                                                                                                                              |
 
 ### 개발 섹션 (신규)
 
-| 컬렉션        | 역할     | 주요 필드                                                                                                                                                                    |
-| ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 컬렉션        | 역할     | 주요 필드                                                                                                                                                                                                     |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `devProjects` | 프로젝트 | title{ko,en}, category{ko,en}, year, summary{ko,en}, overview{ko,en}, roles[]{ko,en}(담당·작업), troubleshooting[]{ko,en}, techTags[](평면), links[]{label,href}, image{url,path,w,h}\|null, order, published |
 
 ### 고정 config 문서 (`site` 컬렉션)
 
-| 문서 ID      | 역할               | 주요 필드                                                                                                          |
-| ------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `config`     | 전역 + 사진        | name{ko,en}, **tagline{ko,en}**, **landingLead{ko,en}**, bio{ko,en}, links[]{label,href}, **tags[]{id,ko,en}**(사진 태그 사전) |
-| `music`      | 음악 섹션 설정     | heroLead{ko,en}, typeWords[](타이핑 효과 문구), bookingEmail, social[]{label,href}                                 |
-| `dev`        | 개발 섹션 설정     | heroLead{ko,en}, typeWords[], interview[]{q{ko,en},a{ko,en}}, stack[]{category,items[]}, timeline[]{period,title{ko,en},role{ko,en},desc{ko,en}}, githubUrl, resumeUrl, contactEmail, social[] |
+| 문서 ID  | 역할           | 주요 필드                                                                                                                                                                                      |
+| -------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `config` | 전역 + 사진    | name{ko,en}, **tagline{ko,en}**, **landingLead{ko,en}**, bio{ko,en}, links[]{label,href}, **tags[]{id,ko,en}**(사진 태그 사전)                                                                 |
+| `music`  | 음악 섹션 설정 | intro{ko,en}(소개 헤드라인·본문 — 첫 문장=요약), career[]{period,title{ko,en}}, education[]{period,title{ko,en}}                                                                               |
+| `dev`    | 개발 섹션 설정 | heroLead{ko,en}, typeWords[], interview[]{q{ko,en},a{ko,en}}, stack[]{category,items[]}, timeline[]{period,title{ko,en},role{ko,en},desc{ko,en}}, githubUrl, resumeUrl, contactEmail, social[] |
 
 설계 메모:
+
 - **정렬 = 수동 `order` 필드** (dnd-kit로 관리자가 드래그). 앨범 내 사진 순서 = `photoIds` 배열 순서.
 - **사진 태그는 통제 사전** — `site/config.tags`에 `{id, ko, en}`을 정의, 사진은 **id만 참조**. 카메라·초점거리 필터는 photos EXIF에서 파생.
 - **음악 program·개발 techTags**는 평면 배열(곡명·기술명은 언어 무관). category/name/설명 등 서술 필드만 `{ko,en}`.
@@ -138,7 +139,7 @@ src/
 │   ├── admin/                  # 관리자 — 전부 client, AuthGuard 마운트는 admin/layout.tsx
 │   │   ├── login/
 │   │   ├── photos/  albums/  tags/  site/   # 사진 CMS (기존)
-│   │   ├── music/              # 음악 CMS: works · schedule · awards · media · config
+│   │   ├── music/              # 음악 CMS: works · awards · media · config
 │   │   └── dev/                # 개발 CMS: projects · config
 │   └── layout.tsx              # 폰트 3종 + 테마 no-flash + LangProvider
 ├── features/                   # ★ 기능 단위 조합 — 비즈니스 로직 있음
@@ -147,9 +148,10 @@ src/
 │   ├── photo-detail/           # 라이트박스/바텀시트 + EXIF 패널 + 미니맵 + use-photo-modal
 │   ├── albums/  map/  about/   # 사진 섹션 뷰
 │   ├── export/  likes/         # 프레임 내보내기 · 좋아요(익명 +1)
-│   ├── music/                  # 음악 섹션: MusicView(연주·일정·수상·영상·연락처) + 연주/수상 모달 + 타이핑 훅
-│   ├── dev/                    # 개발 섹션: DevView(소개·스택·프로젝트·경력) + 프로젝트 모달 + reveal 훅
-│   ├── site-header/            # SiteHeader(mega-menu), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
+│   ├── contact/                # 연락 페이지: ContactView(mailto 폼 + 소셜 링크)
+│   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달
+│   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon)
+│   ├── site-header/            # SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
 │   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context
 │   ├── auth/                   # LoginForm, AuthGuard, use-auth
 │   ├── image-upload/           # exifr 추출 + 압축 + Storage 업로드
@@ -163,7 +165,7 @@ src/
 ├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
 ├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES, STORAGE_KEYS, FRAME_STYLES, SECTIONS(액센트)
 ├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-scroll-lock)
-└── types/                      # photo, album, music(work/schedule/award/media), dev(project), site, tag, localized, lang, image, coords
+└── types/                      # photo, album, music(work/award/media/config), dev(project), site, tag, localized, timeline, lang, image, coords
 ```
 
 의존 방향: `app → features → components` (역방향 금지). barrel export(index.ts) 금지 — 직접 경로 import.
@@ -197,12 +199,12 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드용 (보안은 Rules의 isAdmi
 
 ## 무료 한도 가드
 
-| 리소스       | 무료 한도                          | 이 프로젝트 대응                                             |
-| ------------ | ---------------------------------- | ------------------------------------------------------------ |
+| 리소스       | 무료 한도                          | 이 프로젝트 대응                                                                         |
+| ------------ | ---------------------------------- | ---------------------------------------------------------------------------------------- |
 | Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약(섹션 늘어도 페이지당 fetch). 좋아요 쓰기는 view당 1회 |
-| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image    |
-| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                            |
-| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드    |
+| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image                                |
+| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                                                        |
+| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드                                |
 
 ## 개발 명령어
 
@@ -226,11 +228,11 @@ firebase deploy --only firestore:rules,storage   # Rules만 배포
 
 ## .claude 구성
 
-| 종류     | 항목                                                                                                                    |
-| -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 종류     | 항목                                                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·Rules·인증) |
-| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                    |
-| hooks    | env_file_guard(차단), secret_scan(경고), frontend_convention_check(경고) — [README](.claude/hooks/README.md)            |
+| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                          |
+| hooks    | env_file_guard(차단), secret_scan(경고), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                  |
 
 ## Phase 계획 (v2 — 통합 포트폴리오)
 
@@ -238,9 +240,9 @@ firebase deploy --only firestore:rules,storage   # Rules만 배포
 
 - **Phase A — 셸 & 랜딩**: 라우트 재구성(사진 `/photo/*` 이동 + redirects), mega-menu SiteHeader(검색 우측·아바타 제거),
   섹션 액센트(`[data-section]`), 랜딩 허브, 모바일 탭바/메뉴 3섹션 대응.
-- **Phase B — 음악 섹션**: 타입·mock·getter·Firestore 컬렉션(musicWorks/schedule/awards/media + site/music) + Rules·인덱스 +
-  공개 `MusicView`(연주·일정·수상·영상·연락처, 연주/수상 모달) + 관리자 CMS(`/admin/music/*`).
+- **Phase B — 음악 섹션**: 타입·mock·getter·Firestore 컬렉션(musicWorks/awards/media + site/music) + Rules·인덱스 +
+  공개 개별 페이지(연주·경력(학력·경력·수상)·영상·소개, 연주/수상 모달) + 관리자 CMS(`/admin/music/*`). (공연 일정 미채택)
 - **Phase C — 개발 섹션**: 타입·mock·getter·Firestore 컬렉션(devProjects + site/dev) + Rules·인덱스 +
-  공개 `DevView`(소개·스택·프로젝트·경력, 프로젝트 모달, reveal·타이핑) + 관리자 CMS(`/admin/dev/*`).
+  공개 개별 페이지(스택·프로젝트·경력·소개, 프로젝트 모달, reveal·타이핑) + 관리자 CMS(`/admin/dev/*`).
 - **Phase D — 마감**: 전 섹션 ko/en 번역 채움, 반응형·다크·접근성 점검, SEO/OG(섹션별), `/design-check`·`/deploy-check` 통과, 배포.
 - **Phase 3(선택)**: AI 태그 추천(브라우저 `transformers.js`), 지도 고도화, `/api/revalidate` 즉시 반영.

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/Icon";
-import { MEGA_MENU, type NavSection } from "@/constants/navigation";
+import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
 import { useLang } from "@/features/lang/use-lang";
@@ -30,7 +30,12 @@ const MobileMenu = () => {
   useScrollLock(open);
 
   const openMenu = () => {
-    setExpanded(currentSection === "home" ? null : currentSection);
+    // 그룹(아코디언)이 있는 섹션만 펼친 채로 연다 — home·contact 는 그룹 없음.
+    const group: NavSection | null =
+      currentSection === "photo" || currentSection === "music" || currentSection === "dev"
+        ? currentSection
+        : null;
+    setExpanded(group);
     setOpen(true);
   };
   const close = () => setOpen(false);
@@ -109,6 +114,10 @@ const MobileMenu = () => {
                 </div>
               );
             })}
+
+            <Link href={CONTACT_NAV.href} className={styles.flatLink} onClick={close}>
+              {dict[CONTACT_NAV.labelKey]}
+            </Link>
           </div>
         </>
       ) : null}

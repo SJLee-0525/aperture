@@ -70,8 +70,21 @@
   padding: 8px 14px;
   transition: color 0.2s;
 }
+/* 호버 = 해당 섹션 색(활성 섹션의 --accent가 아니라 각 섹션 고정색). 연락처는 data-section 없음 → 아래 기본(검정). */
 .megaItem:hover .megaBtn {
   color: var(--text);
+}
+.megaItem[data-section="photo"]:hover .megaBtn {
+  color: var(--accent-photo);
+}
+.megaItem[data-section="music"]:hover .megaBtn {
+  color: var(--accent-music);
+}
+.megaItem[data-section="dev"]:hover .megaBtn {
+  color: var(--accent-dev);
+}
+.megaItem[data-section="contact"]:hover .megaBtn {
+  color: var(--accent-contact);
 }
 .current .megaBtn {
   color: var(--accent);
@@ -98,6 +111,20 @@
 }
 .megaItem:hover .megaPanel,
 .megaItem:focus-within .megaPanel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+/* 섹션 하나가 활성(.current)일 땐 그 섹션 드롭다운만 hover 로 열림 — 다른 섹션 hover 는 억제(사용자 요청).
+   홈(활성 섹션 없음)에선 위 규칙대로 전부 열린다. */
+.mega:has(.current) .megaItem:hover .megaPanel,
+.mega:has(.current) .megaItem:focus-within .megaPanel {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+}
+.mega:has(.current) .megaItem.current:hover .megaPanel,
+.mega:has(.current) .megaItem.current:focus-within .megaPanel {
   opacity: 1;
   visibility: visible;
   transform: none;

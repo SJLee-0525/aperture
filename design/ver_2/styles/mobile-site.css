@@ -1,114 +1,499 @@
 /* mobile-site.css — integrated mobile shell (landing + discipline switch).
    Pairs with mobile.css, music.css, dev.css, site.css (accent tokens). */
 
-.phone { width: 390px; height: 844px; background: var(--bg); position: relative; overflow: hidden; box-shadow: 0 30px 90px rgba(0,0,0,0.45); font-family: var(--font-sans); }
+.phone {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-sans);
+}
 
 /* discipline screens fill phone — unified top bar (52) + bottom nav (62) */
-#mscreen { position: absolute; top: 52px; left: 0; right: 0; bottom: 62px; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-#mscreen.no-nav { bottom: 0; }
-#mov { position: absolute; inset: 0; z-index: 60; }
-#mov[hidden] { display: none; }
+#mscreen {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  bottom: 62px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+#mscreen.no-nav {
+  bottom: 0;
+}
+#mov {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+}
+#mov[hidden] {
+  display: none;
+}
 
 /* unified top app bar (all sections) */
-.m-appbar { position: absolute; top: 0; left: 0; right: 0; height: 52px; z-index: 40; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-.m-appbar .wm { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; letter-spacing: -0.01em; background: none; border: 0; color: var(--text); cursor: pointer; padding: 0; }
-.m-appbar .wm .dot { color: var(--accent); }
-.m-appbar .sp { flex: 1; }
-.m-appbar .ab-btn { width: 40px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: var(--text-2); cursor: pointer; }
-.m-appbar .ab-btn svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 1.7; }
-.m-appbar .ab-btn:active { color: var(--accent); }
+.m-appbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 16px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.m-appbar .wm {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  background: none;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+}
+.m-appbar .wm .dot {
+  color: var(--accent);
+}
+.m-appbar .sp {
+  flex: 1;
+}
+.m-appbar .ab-btn {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.m-appbar .ab-btn svg {
+  width: 21px;
+  height: 21px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+}
+.m-appbar .ab-btn:active {
+  color: var(--accent);
+}
 
 /* unified bottom nav (all sections) */
-.m-navbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 40; }
-.m-navbar .m-tabbar { border-top: 1px solid var(--line); }
+.m-navbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+}
+.m-navbar .m-tabbar {
+  border-top: 1px solid var(--line);
+}
 
 /* menu search field */
-#mmenu .msearch { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 13px; border: 1px solid var(--line); background: var(--surface-2); margin-bottom: 10px; }
-#mmenu .msearch svg { width: 15px; height: 15px; stroke: var(--text-3); fill: none; stroke-width: 1.8; flex: none; }
-#mmenu .msearch input { border: 0; background: none; outline: none; font-family: var(--font-sans); font-size: 14px; color: var(--text); width: 100%; }
+#mmenu .msearch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  margin-bottom: 10px;
+}
+#mmenu .msearch svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--text-3);
+  fill: none;
+  stroke-width: 1.8;
+  flex: none;
+}
+#mmenu .msearch input {
+  border: 0;
+  background: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  width: 100%;
+}
 
 /* photo screens: strip their internal chrome — the unified shell provides it */
 #mscreen .m-screen .m-status,
 #mscreen .m-screen > .m-top,
 #mscreen .m-screen .m-searchrow,
-#mscreen .m-screen > .m-tabbar { display: none; }
-#mscreen .m-screen { height: auto; min-height: 100%; }
-#mscreen .m-screen .m-body { padding-top: 8px; }
+#mscreen .m-screen > .m-tabbar {
+  display: none;
+}
+#mscreen .m-screen {
+  height: auto;
+  min-height: 100%;
+}
+#mscreen .m-screen .m-body {
+  padding-top: 8px;
+}
 /* photo: pill tags + pinned filter button */
-.m-chiprow { display: flex; align-items: center; gap: 8px; padding: 16px 16px 12px; }
-.m-chiprow .m-chips { flex: 1; min-width: 0; padding: 0; margin: 0; overflow-x: auto; scrollbar-width: none; }
-.m-chiprow .m-chips::-webkit-scrollbar { display: none; }
-.m-filtbtn2 { flex: none; width: 34px; height: 30px; display: grid; place-items: center; border: 0; background: none; color: var(--text-2); cursor: pointer; }
-.m-filtbtn2 svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; }
-.m-filtbtn2:active { color: var(--accent); }
-#mscreen .m-screen .m-map { position: relative; height: 380px; }
-#mscreen .m-screen .m-mapsheet { position: relative; bottom: auto; border-top: 1px solid var(--line); }
-#mscreen .m-screen .m-hero .m-back { top: 12px; }
+.m-chiprow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 12px;
+}
+.m-chiprow .m-chips {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.m-chiprow .m-chips::-webkit-scrollbar {
+  display: none;
+}
+.m-filtbtn2 {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.m-filtbtn2 svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+}
+.m-filtbtn2:active {
+  color: var(--accent);
+}
+#mscreen .m-screen .m-map {
+  position: relative;
+  height: 380px;
+}
+#mscreen .m-screen .m-mapsheet {
+  position: relative;
+  bottom: auto;
+  border-top: 1px solid var(--line);
+}
+#mscreen .m-screen .m-hero .m-back {
+  top: 12px;
+}
 
 /* discipline menu — nav bar expands downward */
-#mmenu { position: absolute; inset: 0; z-index: 39; display: none; }
-#mmenu.open { display: block; }
-#mmenu .sc { position: absolute; top: 52px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.35); }
-#mmenu .pnl { position: absolute; top: 52px; left: 0; right: 0; max-height: calc(100% - 52px); overflow-y: auto; background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 16px 20px; display: flex; flex-direction: column; transform: translateY(-100%); transition: transform .32s var(--ease); }
-#mmenu.open .pnl { transform: none; }
-#mmenu .mh { display: none; }
-#mmenu .mgroup { border-top: 1px solid var(--line); }
-#mmenu .di { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 17px 4px; background: none; border: 0; cursor: pointer; text-align: left; }
-#mmenu .di .t { font-family: var(--font-display); font-size: 1.55rem; font-weight: 500; color: var(--text); }
-#mmenu .di .ex { font-size: 20px; color: var(--text-4); transition: transform .25s var(--ease); line-height: 1; }
-#mmenu .mgroup.open .di .ex { transform: rotate(45deg); color: var(--accent); }
-#mmenu .subs { display: none; flex-direction: column; padding: 0 4px 14px; gap: 1px; }
-#mmenu .mgroup.open .subs { display: flex; }
-#mmenu .subs button { text-align: left; background: none; border: 0; padding: 10px 12px; font-family: var(--font-sans); font-size: 15px; color: var(--text-3); cursor: pointer; }
-#mmenu .subs button:active { color: var(--accent); }
+#mmenu {
+  position: absolute;
+  inset: 0;
+  z-index: 39;
+  display: none;
+}
+#mmenu.open {
+  display: block;
+}
+#mmenu .sc {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+#mmenu .pnl {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  max-height: calc(100% - 52px);
+  overflow-y: auto;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(-100%);
+  transition: transform 0.32s var(--ease);
+}
+#mmenu.open .pnl {
+  transform: none;
+}
+#mmenu .mh {
+  display: none;
+}
+#mmenu .mgroup {
+  border-top: 1px solid var(--line);
+}
+#mmenu .di {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 17px 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+#mmenu .di .t {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--text);
+}
+#mmenu .di .ex {
+  font-size: 20px;
+  color: var(--text-4);
+  transition: transform 0.25s var(--ease);
+  line-height: 1;
+}
+#mmenu .mgroup.open .di .ex {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
+#mmenu .subs {
+  display: none;
+  flex-direction: column;
+  padding: 0 4px 14px;
+  gap: 1px;
+}
+#mmenu .mgroup.open .subs {
+  display: flex;
+}
+#mmenu .subs button {
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--text-3);
+  cursor: pointer;
+}
+#mmenu .subs button:active {
+  color: var(--accent);
+}
 
 /* ===== mobile landing ===== */
-.ml { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 40px 24px; }
-.ml-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-3); display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
-.ml-eyebrow::before { content:""; width: 26px; height: 1px; background: var(--accent); }
-.ml-name { font-family: var(--font-display); font-size: 62px; font-weight: 500; line-height: 0.94; letter-spacing: -0.03em; margin: 0; }
-.ml-name .dot { color: var(--accent); }
-.ml-sub { font-size: 15px; color: var(--text-2); line-height: 1.65; margin: 24px 0 0; }
-.ml-btns { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
-.ml-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border: 1px solid var(--line-strong); background: none; cursor: pointer; text-decoration: none; color: var(--text); font-family: var(--font-sans); transition: background .2s, border-color .2s, color .2s; }
-.ml-btn .t { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
-.ml-btn .a { font-size: 14px; color: var(--text-4); transition: color .2s; }
-.ml-btn[data-go="photo"] { --accent:#0a84ff; }
-.ml-btn[data-go="music"] { --accent:#e5484d; }
-.ml-btn[data-go="dev"] { --accent:#16a34a; }
-.ml-btn:active, .ml-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-.ml-btn:active .a, .ml-btn:hover .a { color: #fff; }
+.ml {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 24px;
+}
+.ml-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.ml-eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--accent);
+}
+.ml-name {
+  font-family: var(--font-display);
+  font-size: 62px;
+  font-weight: 500;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.ml-name .dot {
+  color: var(--accent);
+}
+.ml-sub {
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin: 24px 0 0;
+}
+.ml-btns {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ml-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 1px solid var(--line-strong);
+  background: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.ml-btn .t {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.ml-btn .a {
+  font-size: 14px;
+  color: var(--text-4);
+  transition: color 0.2s;
+}
+.ml-btn[data-go="photo"] {
+  --accent: #0a84ff;
+}
+.ml-btn[data-go="music"] {
+  --accent: #e5484d;
+}
+.ml-btn[data-go="dev"] {
+  --accent: #16a34a;
+}
+.ml-btn:active,
+.ml-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.ml-btn:active .a,
+.ml-btn:hover .a {
+  color: #fff;
+}
 
 /* ===== scope music/dev fixed layers to the phone ===== */
-.phone .mu, .phone .dv { padding-left: 18px; padding-right: 18px; }
-.phone .mu-hero, .phone .dv-hero { min-height: 0; padding-top: 30px; padding-bottom: 40px; }
-.phone .dv-load, .phone .dv-modal, .phone .mu-modal { position: absolute; }
-.phone .dv-modal .sh, .phone .mu-modal .sh { width: 94%; max-height: 88%; }
-.phone .mu-sec, .phone .dv-sec { scroll-margin-top: 60px; }
-.phone .mu-works { grid-template-columns: 1fr 1fr; }
-.phone .mu-vid { grid-template-columns: 1fr; }
+.phone .mu,
+.phone .dv {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+.phone .mu-hero,
+.phone .dv-hero {
+  min-height: 0;
+  padding-top: 30px;
+  padding-bottom: 40px;
+}
+.phone .dv-load,
+.phone .dv-modal,
+.phone .mu-modal {
+  position: absolute;
+}
+.phone .dv-modal .sh,
+.phone .mu-modal .sh {
+  width: 94%;
+  max-height: 88%;
+}
+.phone .mu-sec,
+.phone .dv-sec {
+  scroll-margin-top: 60px;
+}
+.phone .mu-works {
+  grid-template-columns: 1fr 1fr;
+}
+.phone .mu-vid {
+  grid-template-columns: 1fr;
+}
 
 /* ===== phone-scoped type sizing (clamp uses real vw, so pin fixed sizes) ===== */
-.phone .mu-hero h1, .phone .dv-hero h1 { font-size: 40px; }
-.phone .mu-type, .phone .dv-type { font-size: 16px; }
-.phone .mu-lead, .phone .dv-lead { font-size: 14px; }
-.phone .mu-eyebrow, .phone .dv-eyebrow { font-size: 11px; }
-.phone .mu-head h2, .phone .dv-shead h2 { font-size: 21px; }
-.phone .mu-sec, .phone .dv-sec { padding-top: 40px; padding-bottom: 40px; }
-.phone .dv-sec { padding-top: 40px; }
-.phone .mu-work .wt { font-size: 1.05rem; }
-.phone .mu-work .ws { font-size: 0.85rem; }
-.phone .mu-sch .tt { font-size: 17px; }
-.phone .mu-aw .an { font-size: 15px; }
-.phone .dv-qa .a { font-size: 18px; }
-.phone .dv-qa .a.small { font-size: 15px; }
-.phone .dv-proj .pt { font-size: 21px; }
-.phone .dv-tl .tt { font-size: 17px; }
-.phone .dv-contact .big { font-size: 28px; }
-.phone .dv-links a, .phone .mu-links a { font-size: 13px; padding: 10px 15px; }
-.phone .mu-meta { grid-template-columns: 1fr 1fr; }
-.phone .dv-stack { grid-template-columns: 1fr; }
-.phone .dv-projects { grid-template-columns: 1fr; }
-.phone .mu-contact, .phone .dv-qa { grid-template-columns: 1fr; }
-.phone .mu-modal .pt, .phone .dv-modal .pt { font-size: 26px; }
-.phone .mrec { grid-template-columns: 1fr; }
+.phone .mu-hero h1,
+.phone .dv-hero h1 {
+  font-size: 40px;
+}
+.phone .mu-type,
+.phone .dv-type {
+  font-size: 16px;
+}
+.phone .mu-lead,
+.phone .dv-lead {
+  font-size: 14px;
+}
+.phone .mu-eyebrow,
+.phone .dv-eyebrow {
+  font-size: 11px;
+}
+.phone .mu-head h2,
+.phone .dv-shead h2 {
+  font-size: 21px;
+}
+.phone .mu-sec,
+.phone .dv-sec {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+.phone .dv-sec {
+  padding-top: 40px;
+}
+.phone .mu-work .wt {
+  font-size: 1.05rem;
+}
+.phone .mu-work .ws {
+  font-size: 0.85rem;
+}
+.phone .mu-sch .tt {
+  font-size: 17px;
+}
+.phone .mu-aw .an {
+  font-size: 15px;
+}
+.phone .dv-qa .a {
+  font-size: 18px;
+}
+.phone .dv-qa .a.small {
+  font-size: 15px;
+}
+.phone .dv-proj .pt {
+  font-size: 21px;
+}
+.phone .dv-tl .tt {
+  font-size: 17px;
+}
+.phone .dv-contact .big {
+  font-size: 28px;
+}
+.phone .dv-links a,
+.phone .mu-links a {
+  font-size: 13px;
+  padding: 10px 15px;
+}
+.phone .mu-meta {
+  grid-template-columns: 1fr 1fr;
+}
+.phone .dv-stack {
+  grid-template-columns: 1fr;
+}
+.phone .dv-projects {
+  grid-template-columns: 1fr;
+}
+.phone .mu-contact,
+.phone .dv-qa {
+  grid-template-columns: 1fr;
+}
+.phone .mu-modal .pt,
+.phone .dv-modal .pt {
+  font-size: 26px;
+}
+.phone .mrec {
+  grid-template-columns: 1fr;
+}

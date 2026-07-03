@@ -47,32 +47,32 @@ color: green
 
 ### 사진 섹션 (기존)
 
-| 컬렉션   | 문서 ID | 주요 필드                                                                                                                                                                                                                                                                            |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 컬렉션   | 문서 ID | 주요 필드                                                                                                                                                                                                                                                                                     |
+| -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `photos` | auto    | title{ko,en}, shotAt(Timestamp), camera, lens, exif{aperture, shutter, iso, focalLength, ev, wb, metering, flash}, dimensions{w,h}, aspectRatio(number), place{ko,en}, coords{lat,lng}\|null, tags(string[] — 태그 id 참조), image{url,path,w,h}, **likes(number, 기본 0)**, order, published |
-| `albums` | auto    | title{ko,en}, subtitle{ko,en}, **coverPhotoId**(소속 사진 중 하나), photoIds(string[] — **수동 순서**), order, published                                                                                                                                                            |
+| `albums` | auto    | title{ko,en}, subtitle{ko,en}, **coverPhotoId**(소속 사진 중 하나), photoIds(string[] — **수동 순서**), order, published                                                                                                                                                                      |
 
 ### 음악 섹션 (신규)
 
-| 컬렉션          | 문서 ID | 주요 필드                                                                                                                              |
-| --------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 컬렉션          | 문서 ID | 주요 필드                                                                                                                                                                                                |
+| --------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `musicWorks`    | auto    | title{ko,en}, subtitle{ko,en}, performedAt(Timestamp), time(string), venue{ko,en}, category{ko,en}, program(string[] — 곡명 평면), description{ko,en}, poster{url,path,w,h}, ticketUrl, order, published |
-| `musicSchedule` | auto    | title{ko,en}, date(Timestamp), venue{ko,en}, status("onSale"\|"soon"), ticketUrl, order, published                                    |
-| `musicAwards`   | auto    | year(number), name{ko,en}, place(string), description{ko,en}, order, published                                                        |
-| `musicMedia`    | auto    | title{ko,en}, source{ko,en}, youtubeId(string), order, published                                                                      |
+| `musicSchedule` | auto    | title{ko,en}, date(Timestamp), venue{ko,en}, status("onSale"\|"soon"), ticketUrl, order, published                                                                                                       |
+| `musicAwards`   | auto    | year(number), name{ko,en}, place(string), description{ko,en}, order, published                                                                                                                           |
+| `musicMedia`    | auto    | title{ko,en}, source{ko,en}, youtubeId(string), order, published                                                                                                                                         |
 
 ### 개발 섹션 (신규)
 
-| 컬렉션        | 문서 ID | 주요 필드                                                                                                                                                                     |
-| ------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 컬렉션        | 문서 ID | 주요 필드                                                                                                                                                                                                                                     |
+| ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `devProjects` | auto    | title{ko,en}, category{ko,en}, year(string), summary{ko,en}, overview{ko,en}, roles(array of {ko,en}), troubleshooting(array of {ko,en}), techTags(string[] 평면), links(array of {label, href}), image{url,path,w,h}\|null, order, published |
 
 ### 고정 config 문서 (`site` 컬렉션)
 
-| 문서 ID  | 주요 필드                                                                                                                                                    |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `config` | name{ko,en}, tagline{ko,en}, landingLead{ko,en}, bio{ko,en}, links(array of {label, href}), **tags(array of {id, ko, en})** — 사진 태그 사전                 |
-| `music`  | heroLead{ko,en}, typeWords(string[]), bookingEmail, social(array of {label, href})                                                                          |
+| 문서 ID  | 주요 필드                                                                                                                                                                                                                              |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `config` | name{ko,en}, tagline{ko,en}, landingLead{ko,en}, bio{ko,en}, links(array of {label, href}), **tags(array of {id, ko, en})** — 사진 태그 사전                                                                                           |
+| `music`  | heroLead{ko,en}, typeWords(string[]), bookingEmail, social(array of {label, href})                                                                                                                                                     |
 | `dev`    | heroLead{ko,en}, typeWords(string[]), interview(array of {q{ko,en}, a{ko,en}}), stack(array of {category, items[]}), timeline(array of {period, title{ko,en}, role{ko,en}, desc{ko,en}}), githubUrl, resumeUrl, contactEmail, social[] |
 
 설계 메모:

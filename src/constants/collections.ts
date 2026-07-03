@@ -4,7 +4,6 @@ const COLLECTIONS = {
   ALBUMS: "albums",
   // 음악 섹션
   MUSIC_WORKS: "musicWorks",
-  MUSIC_SCHEDULE: "musicSchedule",
   MUSIC_AWARDS: "musicAwards",
   MUSIC_MEDIA: "musicMedia",
   // 개발 섹션

@@ -3,6 +3,7 @@
 import { m } from "motion/react";
 import { useMemo } from "react";
 
+import { CountUp } from "@/components/CountUp";
 import { useLang } from "@/features/lang/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Album } from "@/types/album";
@@ -10,7 +11,6 @@ import type { Photo } from "@/types/photo";
 import type { SiteConfig } from "@/types/site";
 
 import styles from "./AboutView.module.css";
-import { CountUp } from "./CountUp";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 /** 블록이 순번대로 아래에서 떠오름 (custom = 순번). */
@@ -29,9 +29,17 @@ type Props = {
   albums: Album[];
 };
 
-/** 소개 — 이름·바이오·연락처 + 통계(사진에서 자동 집계) + 카메라·렌즈·활동지역 목록. */
+/** 소개 — 요약 헤드라인·바이오 + 통계(사진에서 자동 집계) + 카메라·렌즈·활동지역 목록.
+ *  이름·연락처는 노출하지 않는다(연락은 /contact 로 일원화). 헤드라인은 bio 첫 문장에서 파생. */
 const AboutView = ({ site, photos, albums }: Props) => {
   const { dict, lang } = useLang();
+
+  // bio 첫 문장 = 요약 헤드라인, 나머지 = 본문 (관리자가 bio만 편집하면 자동 반영)
+  const [summary, body] = useMemo(() => {
+    const text = pickText(site.bio, lang);
+    const at = text.indexOf(". ");
+    return at === -1 ? [text, ""] : [text.slice(0, at), text.slice(at + 2)];
+  }, [site.bio, lang]);
 
   const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
   const lenses = useMemo(() => [...new Set(photos.map((photo) => photo.lens))], [photos]);
@@ -65,25 +73,9 @@ const AboutView = ({ site, photos, albums }: Props) => {
         initial="hidden"
         animate="show"
       >
-        <h1 className={styles.name}>
-          {pickText(site.name, lang)}
-          <br />
-          <em>— photography</em>
-        </h1>
-        <p className={styles.bio}>{pickText(site.bio, lang)}</p>
-        <div className={styles.contact}>
-          {site.links.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className={styles.link}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {link.label} ↗
-            </a>
-          ))}
-        </div>
+        <p className={styles.eyebrow}>Aperture.</p>
+        <h1 className={styles.name}>{summary}</h1>
+        {body ? <p className={styles.bio}>{body}</p> : null}
       </m.header>
 
       <m.div className={styles.stats} custom={1} variants={FADE_UP} initial="hidden" animate="show">

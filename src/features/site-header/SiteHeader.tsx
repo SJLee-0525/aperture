@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { MEGA_MENU } from "@/constants/navigation";
+import { CONTACT_NAV, MEGA_MENU } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
 import { useLang } from "@/features/lang/use-lang";
@@ -35,6 +35,7 @@ const SiteHeader = () => {
           {MEGA_MENU.map((group) => (
             <div
               key={group.section}
+              data-section={group.section}
               className={`${styles.megaItem} ${section === group.section ? styles.current : ""}`}
             >
               <Link href={group.href} className={styles.megaBtn}>
@@ -54,6 +55,16 @@ const SiteHeader = () => {
               </div>
             </div>
           ))}
+          <div
+            data-section="contact"
+            className={`${styles.megaItem} ${
+              pathname.startsWith(ROUTES.CONTACT) ? styles.current : ""
+            }`}
+          >
+            <Link href={CONTACT_NAV.href} className={styles.megaBtn}>
+              {dict[CONTACT_NAV.labelKey]}
+            </Link>
+          </div>
         </nav>
 
         <span className={styles.spacer} />

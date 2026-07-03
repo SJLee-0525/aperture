@@ -39,6 +39,7 @@ const MOCK_SITE: SiteConfig = {
   },
   links: [
     { label: "Instagram", href: "https://instagram.com/" },
+    { label: "GitHub", href: "https://github.com/SJLee-0525" },
     { label: "Email", href: "mailto:hello@example.com" },
   ],
   tags: TAGS,
