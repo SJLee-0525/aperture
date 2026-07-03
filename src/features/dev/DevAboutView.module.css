@@ -1,0 +1,24 @@
+/* 인터뷰 Q&A — AboutSection 하단(children)에 렌더. 상단 히어로·통계·목록은 공통 컴포넌트. */
+.qa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin-top: var(--s-8);
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--line);
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.q {
+  font-size: var(--t-h3);
+  font-weight: 600;
+  color: var(--text);
+}
+.a {
+  font-size: var(--t-body);
+  line-height: 1.7;
+  color: var(--text-2);
+}

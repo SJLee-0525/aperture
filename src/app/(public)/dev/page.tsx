@@ -1,6 +1,10 @@
-import { ComingSoon } from "@/features/coming-soon/ComingSoon";
+import { DevStackView } from "@/features/dev/DevStackView";
+import { getDevConfig } from "@/lib/content/get-dev-config";
 
-/** 임시 — Phase C에서 getDevProjects()·getDevConfig() + <DevView/> 로 교체. */
-export default function DevPage() {
-  return <ComingSoon titleKey="sectionDev" />;
+export const revalidate = 3600;
+
+/** 개발 — 기술 스택 (/dev). */
+export default async function DevPage() {
+  const config = await getDevConfig();
+  return <DevStackView config={config} />;
 }

@@ -1,0 +1,198 @@
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
+}
+.title {
+  margin-bottom: var(--s-6);
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.empty {
+  padding: var(--s-16) 0;
+  color: var(--text-2);
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(16px, 2.4vw, 24px);
+}
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease);
+}
+.card:hover {
+  border-color: var(--accent);
+}
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.coverImg {
+  object-fit: cover;
+}
+.coverEmpty {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: 0.2em;
+  color: var(--text-4);
+}
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-5) var(--s-6) var(--s-6);
+}
+.year {
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+.pt {
+  font-size: var(--t-h3);
+  font-weight: 600;
+  color: var(--text);
+}
+.pc {
+  font-size: var(--t-small);
+  color: var(--accent);
+}
+.pd {
+  margin-top: var(--s-1);
+  font-size: var(--t-small);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--s-3);
+}
+.tags span {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+/* ── modal ── */
+.detail {
+  display: flex;
+  flex-direction: column;
+}
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  /* 하단 여백 0 — 이미지→첫 섹션(개요) 간격은 .secL margin-top 이 담당(섹션 간 간격과 통일) */
+  margin-bottom: 0;
+}
+.shot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.shotImg {
+  object-fit: cover;
+}
+.shotEmpty {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: 0.2em;
+  color: var(--text-4);
+}
+.secL {
+  margin-top: var(--s-10);
+  margin-bottom: var(--s-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.secL:first-child {
+  margin-top: 0;
+}
+.p {
+  /* flex 컨테이너(.detail)라 마진이 collapse 안 됨 — UA <p> 마진 제거해 라벨→본문 간격을 다른 섹션(8px)과 통일 */
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.ul {
+  margin: 0;
+  padding-left: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.ul li {
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+.mtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mtags span {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-2);
+}
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-6);
+}
+.btn {
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--accent);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+}

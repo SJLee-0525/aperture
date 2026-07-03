@@ -1,6 +1,11 @@
-import { ComingSoon } from "@/features/coming-soon/ComingSoon";
+import { DevAboutView } from "@/features/dev/DevAboutView";
+import { getDevConfig } from "@/lib/content/get-dev-config";
+import { getDevProjects } from "@/lib/content/get-dev-projects";
 
-/** 임시 — Phase C에서 getDevConfig() + <DevAboutView/> 로 교체 (사진·음악 소개와 동일 구조). */
-export default function DevAboutPage() {
-  return <ComingSoon titleKey="aboutNav" />;
+export const revalidate = 3600;
+
+/** 개발 — 소개 (/dev/about): 공통 소개 레이아웃(프로젝트·스택 파생 통계) + 인터뷰 Q&A. */
+export default async function DevAboutPage() {
+  const [config, projects] = await Promise.all([getDevConfig(), getDevProjects()]);
+  return <DevAboutView config={config} projects={projects} />;
 }

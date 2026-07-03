@@ -1,0 +1,58 @@
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
+}
+.title {
+  margin-bottom: var(--s-8);
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.empty {
+  padding: var(--s-16) 0;
+  color: var(--text-2);
+  text-align: center;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.group {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--s-4);
+  padding-bottom: var(--s-8);
+  border-bottom: 1px solid var(--line);
+}
+.group:last-child {
+  border-bottom: 0;
+}
+@media (max-width: 640px) {
+  .group {
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+/* 배경색·글자색·테두리색은 인라인 style(데이터)에서 주입 — 기술별 브랜드 색.
+   각진 디자인 기조에 맞춰 사각(버튼) 스타일 — pill 은 필터 Chip 전용. */
+.chip {
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-size: var(--t-small);
+  font-weight: 600;
+  transition: transform var(--dur) var(--ease);
+}
+.chip:hover {
+  transform: translateY(-1px);
+}
