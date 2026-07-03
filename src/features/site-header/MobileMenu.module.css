@@ -57,7 +57,25 @@
   border-bottom: 1px solid var(--line);
   padding: 8px 16px 20px;
   z-index: 41;
-  animation: slideDown 0.28s var(--ease);
+  transform-origin: top;
+  /* 내비에서 펼쳐지듯 위→아래로 열림(슬라이드가 아니라 언폴드) */
+  animation: menuUnfold 0.42s var(--ease-spring) both;
+}
+/* 항목은 아래에서 살짝 올라오며 순차 등장(cascade) */
+.panel > * {
+  animation: menuItemIn 0.45s var(--ease) both;
+}
+.panel > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.panel > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.panel > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.panel > *:nth-child(4) {
+  animation-delay: 0.2s;
 }
 @keyframes fade {
   from {
@@ -67,17 +85,28 @@
     opacity: 1;
   }
 }
-@keyframes slideDown {
+@keyframes menuUnfold {
   from {
-    transform: translateY(-100%);
+    clip-path: inset(0 0 100% 0);
   }
   to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes menuItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
     transform: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .scrim,
-  .panel {
+  .panel,
+  .panel > * {
     animation: none;
   }
 }

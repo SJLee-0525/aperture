@@ -1,17 +1,38 @@
 .bar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--s-5);
-  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
   margin-bottom: var(--s-5);
 }
+/* 모바일: 태그 한 줄 + 좌우 스크롤(스크롤바 숨김). 데스크톱은 아래 미디어쿼리에서 다시 wrap. */
 .tagbar {
   display: flex;
   flex: 1;
-  min-width: 200px;
+  min-width: 0;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tagbar::-webkit-scrollbar {
+  display: none;
+}
+.tagbar > * {
+  flex: none;
+}
+@media (min-width: 768px) {
+  .bar {
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-5);
+    flex-wrap: wrap;
+  }
+  .tagbar {
+    min-width: 200px;
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
 }
 .filters {
   position: relative;
