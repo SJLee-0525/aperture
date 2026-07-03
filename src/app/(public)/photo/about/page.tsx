@@ -1,4 +1,4 @@
-import { AboutView } from "@/features/about/AboutView";
+import { AboutView } from "@/features/about/_components/AboutView";
 import { getAlbums } from "@/lib/content/get-albums";
 import { getPhotos } from "@/lib/content/get-photos";
 import { getSite } from "@/lib/content/get-site";

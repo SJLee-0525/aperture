@@ -3,8 +3,8 @@
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { LinkRow } from "@/features/admin-global/LinkRow";
-import { useGlobalAdmin } from "@/features/admin-global/use-global-admin";
+import { LinkRow } from "@/features/admin-global/_components/LinkRow";
+import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin";
 
 import styles from "./page.module.css";
 

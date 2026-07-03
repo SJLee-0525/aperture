@@ -1,4 +1,4 @@
-import { AlbumsView } from "@/features/albums/AlbumsView";
+import { AlbumsView } from "@/features/albums/_components/AlbumsView";
 import { getAlbums } from "@/lib/content/get-albums";
 import { getPhotos } from "@/lib/content/get-photos";
 

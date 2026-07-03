@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 
 import { ROUTES } from "@/constants/routes";
-import { useLang } from "@/features/lang/use-lang";
+import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import styles from "./status.module.css";
 

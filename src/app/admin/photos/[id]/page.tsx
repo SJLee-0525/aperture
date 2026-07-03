@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 
-import { PhotoForm } from "@/features/admin-photos/PhotoForm";
+import { PhotoForm } from "@/features/admin-photos/_components/PhotoForm";
 import { getPhotoAdmin } from "@/lib/firebase/firestore";
 import type { Photo } from "@/types/photo";
 

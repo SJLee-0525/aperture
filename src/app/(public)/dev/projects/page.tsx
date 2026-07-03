@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { DevProjectsView } from "@/features/dev/DevProjectsView";
+import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
 import { getDevProjects } from "@/lib/content/get-dev-projects";
 
 export const revalidate = 3600;

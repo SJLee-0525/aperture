@@ -3,9 +3,9 @@
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { TimelineRow } from "@/features/admin-music-config/TimelineRow";
-import { useMusicConfigAdmin } from "@/features/admin-music-config/use-music-config-admin";
-import type { TimelineKey } from "@/features/admin-music-config/use-music-config-admin";
+import { TimelineRow } from "@/features/admin-music-config/_components/TimelineRow";
+import { useMusicConfigAdmin } from "@/features/admin-music-config/_hooks/use-music-config-admin";
+import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
 import type { TimelineEntry } from "@/types/timeline";
 
 import styles from "./page.module.css";

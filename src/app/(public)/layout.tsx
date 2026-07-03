@@ -1,8 +1,8 @@
 import { IntroSplash } from "@/components/IntroSplash";
 import { SiteFooter } from "@/components/SiteFooter";
-import { MobileTabBar } from "@/features/site-header/MobileTabBar";
-import { SectionAccent } from "@/features/site-header/SectionAccent";
-import { SiteHeader } from "@/features/site-header/SiteHeader";
+import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
+import { SectionAccent } from "@/features/site-header/_components/SectionAccent";
+import { SiteHeader } from "@/features/site-header/_components/SiteHeader";
 
 import styles from "./layout.module.css";
 

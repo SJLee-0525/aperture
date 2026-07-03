@@ -1,4 +1,4 @@
-import { LandingView } from "@/features/landing/LandingView";
+import { LandingView } from "@/features/landing/_components/LandingView";
 import { getSite } from "@/lib/content/get-site";
 
 export const revalidate = 3600;

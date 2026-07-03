@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { AlbumDetailView } from "@/features/albums/AlbumDetailView";
+import { AlbumDetailView } from "@/features/albums/_components/AlbumDetailView";
 import { getAlbum } from "@/lib/content/get-album";
 import { getAlbums } from "@/lib/content/get-albums";
 import { getPhotos } from "@/lib/content/get-photos";

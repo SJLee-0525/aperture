@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { ROUTES } from "@/constants/routes";
-import { AdminChrome } from "@/features/admin-shell/AdminChrome";
-import { AuthGuard } from "@/features/auth/AuthGuard";
+import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
+import { AuthGuard } from "@/features/auth/_components/AuthGuard";
 
 /**
  * 관리자 레이아웃 — AuthGuard 마운트는 여기 한 곳에서만 (CLAUDE.md 디렉토리 원칙).

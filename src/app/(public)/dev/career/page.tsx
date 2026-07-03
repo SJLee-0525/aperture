@@ -1,4 +1,4 @@
-import { DevCareerView } from "@/features/dev/DevCareerView";
+import { DevCareerView } from "@/features/dev/_components/DevCareerView";
 import { getDevConfig } from "@/lib/content/get-dev-config";
 
 export const revalidate = 3600;

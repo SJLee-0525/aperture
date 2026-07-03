@@ -12,8 +12,8 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { MediaRow } from "@/features/admin-music-media/MediaRow";
-import { useMusicMediaAdmin } from "@/features/admin-music-media/use-music-media-admin";
+import { MediaRow } from "@/features/admin-music-media/_components/MediaRow";
+import { useMusicMediaAdmin } from "@/features/admin-music-media/_hooks/use-music-media-admin";
 
 import styles from "./page.module.css";
 

@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 
-import { AlbumForm } from "@/features/admin-albums/AlbumForm";
+import { AlbumForm } from "@/features/admin-albums/_components/AlbumForm";
 import { getAlbumAdmin } from "@/lib/firebase/albums";
 import type { Album } from "@/types/album";
 

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { MusicWorksView } from "@/features/music/MusicWorksView";
+import { MusicWorksView } from "@/features/music/_components/MusicWorksView";
 import { getMusicWorks } from "@/lib/content/get-music-works";
 
 export const revalidate = 3600;

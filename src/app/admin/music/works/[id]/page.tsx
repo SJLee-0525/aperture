@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 
-import { WorkForm } from "@/features/admin-music-works/WorkForm";
+import { WorkForm } from "@/features/admin-music-works/_components/WorkForm";
 import { musicWorks } from "@/lib/firebase/music";
 import type { MusicWork } from "@/types/music";
 

@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 
-import { ProjectForm } from "@/features/admin-dev-projects/ProjectForm";
+import { ProjectForm } from "@/features/admin-dev-projects/_components/ProjectForm";
 import { devProjects } from "@/lib/firebase/dev";
 import type { DevProject } from "@/types/dev";
 

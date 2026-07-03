@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { GalleryView } from "@/features/gallery/GalleryView";
+import { GalleryView } from "@/features/gallery/_components/GalleryView";
 import { getPhotos } from "@/lib/content/get-photos";
 import { getTags } from "@/lib/content/get-tags";
 

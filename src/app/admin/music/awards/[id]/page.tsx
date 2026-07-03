@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 
-import { AwardForm } from "@/features/admin-music-awards/AwardForm";
+import { AwardForm } from "@/features/admin-music-awards/_components/AwardForm";
 import { musicAwards } from "@/lib/firebase/music";
 import type { MusicAward } from "@/types/music";
 

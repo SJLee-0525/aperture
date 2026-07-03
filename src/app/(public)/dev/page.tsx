@@ -1,4 +1,4 @@
-import { DevStackView } from "@/features/dev/DevStackView";
+import { DevStackView } from "@/features/dev/_components/DevStackView";
 import { getDevConfig } from "@/lib/content/get-dev-config";
 
 export const revalidate = 3600;

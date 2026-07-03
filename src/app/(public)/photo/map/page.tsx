@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { MapView } from "@/features/map/MapView";
+import { MapView } from "@/features/map/_components/MapView";
 import { getPhotos } from "@/lib/content/get-photos";
 import { getTags } from "@/lib/content/get-tags";
 

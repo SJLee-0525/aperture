@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { MusicCareerView } from "@/features/music/MusicCareerView";
+import { MusicCareerView } from "@/features/music/_components/MusicCareerView";
 import { getMusicAwards } from "@/lib/content/get-music-awards";
 import { getMusicConfig } from "@/lib/content/get-music-config";
 

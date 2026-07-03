@@ -1,4 +1,4 @@
-import { MusicAboutView } from "@/features/music/MusicAboutView";
+import { MusicAboutView } from "@/features/music/_components/MusicAboutView";
 import { getMusicAwards } from "@/lib/content/get-music-awards";
 import { getMusicConfig } from "@/lib/content/get-music-config";
 import { getMusicMedia } from "@/lib/content/get-music-media";

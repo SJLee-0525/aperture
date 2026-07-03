@@ -1,4 +1,4 @@
-import { ContactView } from "@/features/contact/ContactView";
+import { ContactView } from "@/features/contact/_components/ContactView";
 import { getSite } from "@/lib/content/get-site";
 
 export const revalidate = 3600;

@@ -12,8 +12,8 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { ProjectRow } from "@/features/admin-dev-projects/ProjectRow";
-import { useDevProjectsAdmin } from "@/features/admin-dev-projects/use-dev-projects-admin";
+import { ProjectRow } from "@/features/admin-dev-projects/_components/ProjectRow";
+import { useDevProjectsAdmin } from "@/features/admin-dev-projects/_hooks/use-dev-projects-admin";
 
 import styles from "./page.module.css";
 

@@ -1,4 +1,4 @@
-import { DevAboutView } from "@/features/dev/DevAboutView";
+import { DevAboutView } from "@/features/dev/_components/DevAboutView";
 import { getDevConfig } from "@/lib/content/get-dev-config";
 import { getDevProjects } from "@/lib/content/get-dev-projects";
 

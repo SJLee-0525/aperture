@@ -12,8 +12,8 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { AlbumRow } from "@/features/admin-albums/AlbumRow";
-import { useAlbumsAdmin } from "@/features/admin-albums/use-albums-admin";
+import { AlbumRow } from "@/features/admin-albums/_components/AlbumRow";
+import { useAlbumsAdmin } from "@/features/admin-albums/_hooks/use-albums-admin";
 
 import styles from "./page.module.css";
 

@@ -12,8 +12,8 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { WorkRow } from "@/features/admin-music-works/WorkRow";
-import { useMusicWorksAdmin } from "@/features/admin-music-works/use-music-works-admin";
+import { WorkRow } from "@/features/admin-music-works/_components/WorkRow";
+import { useMusicWorksAdmin } from "@/features/admin-music-works/_hooks/use-music-works-admin";
 
 import styles from "./page.module.css";
 

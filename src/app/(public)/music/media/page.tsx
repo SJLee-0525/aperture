@@ -1,4 +1,4 @@
-import { MusicMediaView } from "@/features/music/MusicMediaView";
+import { MusicMediaView } from "@/features/music/_components/MusicMediaView";
 import { getMusicMedia } from "@/lib/content/get-music-media";
 
 export const revalidate = 3600;

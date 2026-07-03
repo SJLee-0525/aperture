@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { useSiteAdmin } from "@/features/admin-site/use-site-admin";
+import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
 
 import styles from "./page.module.css";
 

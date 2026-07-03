@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 
-import { MediaForm } from "@/features/admin-music-media/MediaForm";
+import { MediaForm } from "@/features/admin-music-media/_components/MediaForm";
 import { musicMedia } from "@/lib/firebase/music";
 import type { MusicMedia } from "@/types/music";
 

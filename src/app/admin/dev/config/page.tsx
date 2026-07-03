@@ -3,11 +3,11 @@
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
-import { DevTimelineRow } from "@/features/admin-dev-config/DevTimelineRow";
-import type { LocalizedField } from "@/features/admin-dev-config/DevTimelineRow";
-import { InterviewRow } from "@/features/admin-dev-config/InterviewRow";
-import { StackGroupRow } from "@/features/admin-dev-config/StackGroupRow";
-import { useDevConfigAdmin } from "@/features/admin-dev-config/use-dev-config-admin";
+import { DevTimelineRow } from "@/features/admin-dev-config/_components/DevTimelineRow";
+import type { LocalizedField } from "@/features/admin-dev-config/_components/DevTimelineRow";
+import { InterviewRow } from "@/features/admin-dev-config/_components/InterviewRow";
+import { StackGroupRow } from "@/features/admin-dev-config/_components/StackGroupRow";
+import { useDevConfigAdmin } from "@/features/admin-dev-config/_hooks/use-dev-config-admin";
 import type { DevStackItem } from "@/types/dev";
 
 import styles from "./page.module.css";
