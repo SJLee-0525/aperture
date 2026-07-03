@@ -170,6 +170,12 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
+  /* 세로 스크롤바를 상시 예약 → 짧은 페이지(/contact 등, 스크롤 없음)와 긴 페이지 사이를
+     오갈 때 스크롤바 폭(≈15px)만큼 콘텐츠가 좌우로 밀리던 문제 제거.
+     scrollbar-gutter:stable 은 이 엔진(Chromium)에서 root/viewport 예약이 동작하지 않아
+     overflow-y:scroll 로 처리(html 은 visible 유지 → 모달의 body 스크롤 잠금과 양립).
+     macOS 오버레이 스크롤바에선 폭이 0이라 빈 트랙 없이 무영향. */
+  overflow-y: scroll;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
