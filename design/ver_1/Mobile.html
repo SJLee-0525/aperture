@@ -1,98 +1,223 @@
 <!doctype html>
 <html lang="ko" data-theme="light">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aperture. — 모바일 프로토타입</title>
-<link rel="stylesheet" href="styles/tokens.css">
-<link rel="stylesheet" href="styles/components.css">
-<link rel="stylesheet" href="styles/mobile.css?v=8">
-<style>
-  html, body { margin: 0; height: 100%; }
-  body { background: #b9b9be; overflow: hidden; display: grid; place-items: center; font-family: var(--font-sans); }
-  .phone-stage { transform-origin: center; }
-  .phone { width: 390px; height: 844px; background: var(--bg); position: relative; overflow: hidden; box-shadow: 0 30px 90px rgba(0,0,0,0.45); }
-  #app, #ov { position: absolute; inset: 0; }
-  #ov { z-index: 50; }
-  #ov[hidden] { display: none; }
-  /* tap feedback */
-  .m-tile, .m-alb, .m-tab, .m-filtbtn, .m-gbtn, .m-expitem, .chip-tag { -webkit-tap-highlight-color: transparent; }
-  .m-tile:active .ph, .m-alb:active .cov .ph { filter: brightness(0.9); }
-</style>
-</head>
-<body>
-<div class="phone-stage">
-  <div class="phone">
-    <div id="app"></div>
-    <div id="ov" hidden></div>
-  </div>
-</div>
-
-<script src="portfolio.js"></script>
-<script src="mobile-screens.js?v=7"></script>
-<script>
-  const app = document.getElementById('app');
-  const ov = document.getElementById('ov');
-  const phone = document.querySelector('.phone');
-  const VIEWS = { work: mHome, albums: mAlbums, map: mMap, about: mAbout };
-  let curTab = 'work', detailIdx = 0, detailState = 'peek';
-
-  function renderTab(t){ curTab = t; closeOv(); app.innerHTML = VIEWS[t](); }
-  function openDetail(i){ detailIdx = i; detailState = 'peek'; ov.innerHTML = mDetailPeek(i); ov.hidden = false; }
-  function toggleSheet(){ detailState = detailState === 'peek' ? 'sheet' : 'peek'; ov.innerHTML = detailState === 'peek' ? mDetailPeek(detailIdx) : mDetailSheet(detailIdx); }
-  function openAlbum(i){ closeOv(); app.innerHTML = mAlbumDetail(i); }
-  function openOv(html){ ov.innerHTML = html; ov.hidden = false; }
-  function closeOv(){ ov.hidden = true; ov.innerHTML = ''; }
-  function toggleTheme(){ const d = document.documentElement; const t = d.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; d.setAttribute('data-theme', t); }
-
-  phone.addEventListener('click', e => {
-    // global: tab bar
-    const tab = e.target.closest('.m-tab[data-tab]');
-    if (tab) { renderTab(tab.dataset.tab); return; }
-
-    if (!ov.hidden) {
-      // overlay context (detail / filter / export)
-      if (e.target.closest('.m-back')) { closeOv(); return; }
-      if (e.target.closest('.m-export')) { openOv(mExportSheet(detailIdx)); return; }
-      if (e.target.closest('.m-close')) {
-        if (ov.querySelector('.m-exprow')) { openDetail(detailIdx); }   // export → back to detail
-        else { closeOv(); }                                            // filter → close
-        return;
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aperture. — 모바일 프로토타입</title>
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/components.css" />
+    <link rel="stylesheet" href="styles/mobile.css?v=8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
       }
-      // export: select a frame
-      if (ov.querySelector('.m-exprow')) {
-        const it = e.target.closest('.m-expitem');
-        if (it) { ov.querySelectorAll('.m-expitem').forEach(x => x.classList.remove('on')); it.classList.add('on'); return; }
-        const seg = e.target.closest('.m-opt-seg button');
-        if (seg) { seg.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('on')); seg.classList.add('on'); return; }
+      body {
+        background: #b9b9be;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        font-family: var(--font-sans);
       }
-      // filter: apply / chips
-      if (ov.querySelector('.m-fsheet')) {
-        if (e.target.closest('.btn-primary')) { closeOv(); return; }
-        const chip = e.target.closest('.chip-tag'); if (chip) { ov.querySelectorAll('.m-fsheet .chip-tag').forEach(c => c.classList.remove('active')); chip.classList.add('active'); return; }
+      .phone-stage {
+        transform-origin: center;
       }
-      // detail: tap sheet to expand/collapse
-      if (ov.querySelector('.m-detail')) {
-        const sh = e.target.closest('.m-sheet');
-        if (sh && !e.target.closest('button') && !e.target.closest('.m-iconbtn')) { toggleSheet(); return; }
+      .phone {
+        width: 390px;
+        height: 844px;
+        background: var(--bg);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
       }
-      return; // overlay swallows the rest
-    }
+      #app,
+      #ov {
+        position: absolute;
+        inset: 0;
+      }
+      #ov {
+        z-index: 50;
+      }
+      #ov[hidden] {
+        display: none;
+      }
+      /* tap feedback */
+      .m-tile,
+      .m-alb,
+      .m-tab,
+      .m-filtbtn,
+      .m-gbtn,
+      .m-expitem,
+      .chip-tag {
+        -webkit-tap-highlight-color: transparent;
+      }
+      .m-tile:active .ph,
+      .m-alb:active .cov .ph {
+        filter: brightness(0.9);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-stage">
+      <div class="phone">
+        <div id="app"></div>
+        <div id="ov" hidden></div>
+      </div>
+    </div>
 
-    // app context (no overlay)
-    const tile = e.target.closest('.m-tile[data-i]'); if (tile) { openDetail(+tile.dataset.i); return; }
-    const alb = e.target.closest('.m-alb[data-album]'); if (alb) { openAlbum(+alb.dataset.album); return; }
-    if (e.target.closest('.m-back')) { renderTab('albums'); return; }   // album-detail back
-    if (e.target.closest('.m-filtbtn')) { openOv(mFilterSheet()); return; }
-    if (e.target.closest('[data-act="theme"]')) { toggleTheme(); return; }
-    const chip = e.target.closest('.m-chips .chip-tag'); if (chip) { app.querySelectorAll('.m-chips .chip-tag').forEach(c => c.classList.remove('active')); chip.classList.add('active'); return; }
-  });
+    <script src="portfolio.js"></script>
+    <script src="mobile-screens.js?v=7"></script>
+    <script>
+      const app = document.getElementById("app");
+      const ov = document.getElementById("ov");
+      const phone = document.querySelector(".phone");
+      const VIEWS = { work: mHome, albums: mAlbums, map: mMap, about: mAbout };
+      let curTab = "work",
+        detailIdx = 0,
+        detailState = "peek";
 
-  // fit phone to viewport
-  function fit(){ const s = Math.min((innerWidth - 24) / 390, (innerHeight - 24) / 844, 1.15); document.querySelector('.phone-stage').style.transform = 'scale(' + s + ')'; }
-  addEventListener('resize', fit); fit();
+      function renderTab(t) {
+        curTab = t;
+        closeOv();
+        app.innerHTML = VIEWS[t]();
+      }
+      function openDetail(i) {
+        detailIdx = i;
+        detailState = "peek";
+        ov.innerHTML = mDetailPeek(i);
+        ov.hidden = false;
+      }
+      function toggleSheet() {
+        detailState = detailState === "peek" ? "sheet" : "peek";
+        ov.innerHTML = detailState === "peek" ? mDetailPeek(detailIdx) : mDetailSheet(detailIdx);
+      }
+      function openAlbum(i) {
+        closeOv();
+        app.innerHTML = mAlbumDetail(i);
+      }
+      function openOv(html) {
+        ov.innerHTML = html;
+        ov.hidden = false;
+      }
+      function closeOv() {
+        ov.hidden = true;
+        ov.innerHTML = "";
+      }
+      function toggleTheme() {
+        const d = document.documentElement;
+        const t = d.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        d.setAttribute("data-theme", t);
+      }
 
-  renderTab('work');
-</script>
-</body>
+      phone.addEventListener("click", (e) => {
+        // global: tab bar
+        const tab = e.target.closest(".m-tab[data-tab]");
+        if (tab) {
+          renderTab(tab.dataset.tab);
+          return;
+        }
+
+        if (!ov.hidden) {
+          // overlay context (detail / filter / export)
+          if (e.target.closest(".m-back")) {
+            closeOv();
+            return;
+          }
+          if (e.target.closest(".m-export")) {
+            openOv(mExportSheet(detailIdx));
+            return;
+          }
+          if (e.target.closest(".m-close")) {
+            if (ov.querySelector(".m-exprow")) {
+              openDetail(detailIdx);
+            } // export → back to detail
+            else {
+              closeOv();
+            } // filter → close
+            return;
+          }
+          // export: select a frame
+          if (ov.querySelector(".m-exprow")) {
+            const it = e.target.closest(".m-expitem");
+            if (it) {
+              ov.querySelectorAll(".m-expitem").forEach((x) => x.classList.remove("on"));
+              it.classList.add("on");
+              return;
+            }
+            const seg = e.target.closest(".m-opt-seg button");
+            if (seg) {
+              seg.parentElement.querySelectorAll("button").forEach((b) => b.classList.remove("on"));
+              seg.classList.add("on");
+              return;
+            }
+          }
+          // filter: apply / chips
+          if (ov.querySelector(".m-fsheet")) {
+            if (e.target.closest(".btn-primary")) {
+              closeOv();
+              return;
+            }
+            const chip = e.target.closest(".chip-tag");
+            if (chip) {
+              ov.querySelectorAll(".m-fsheet .chip-tag").forEach((c) =>
+                c.classList.remove("active"),
+              );
+              chip.classList.add("active");
+              return;
+            }
+          }
+          // detail: tap sheet to expand/collapse
+          if (ov.querySelector(".m-detail")) {
+            const sh = e.target.closest(".m-sheet");
+            if (sh && !e.target.closest("button") && !e.target.closest(".m-iconbtn")) {
+              toggleSheet();
+              return;
+            }
+          }
+          return; // overlay swallows the rest
+        }
+
+        // app context (no overlay)
+        const tile = e.target.closest(".m-tile[data-i]");
+        if (tile) {
+          openDetail(+tile.dataset.i);
+          return;
+        }
+        const alb = e.target.closest(".m-alb[data-album]");
+        if (alb) {
+          openAlbum(+alb.dataset.album);
+          return;
+        }
+        if (e.target.closest(".m-back")) {
+          renderTab("albums");
+          return;
+        } // album-detail back
+        if (e.target.closest(".m-filtbtn")) {
+          openOv(mFilterSheet());
+          return;
+        }
+        if (e.target.closest('[data-act="theme"]')) {
+          toggleTheme();
+          return;
+        }
+        const chip = e.target.closest(".m-chips .chip-tag");
+        if (chip) {
+          app.querySelectorAll(".m-chips .chip-tag").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          return;
+        }
+      });
+
+      // fit phone to viewport
+      function fit() {
+        const s = Math.min((innerWidth - 24) / 390, (innerHeight - 24) / 844, 1.15);
+        document.querySelector(".phone-stage").style.transform = "scale(" + s + ")";
+      }
+      addEventListener("resize", fit);
+      fit();
+
+      renderTab("work");
+    </script>
+  </body>
 </html>

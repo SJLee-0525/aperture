@@ -1,9 +1,5 @@
 .content {
   min-height: 60vh;
 }
-/* 모바일: 하단 고정 탭바(62px + safe-area)에 콘텐츠가 가리지 않도록 여백 */
-@media (max-width: 767px) {
-  .content {
-    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
-  }
-}
+/* 모바일 하단 고정 탭바(62px) 클리어런스는 전역 푸터(SiteFooter)가 담당 —
+   콘텐츠 바로 뒤에 푸터가 이어지므로 여기서 여백을 주면 사이 공백이 생긴다. */

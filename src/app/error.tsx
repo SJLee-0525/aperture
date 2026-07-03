@@ -39,7 +39,7 @@ export default function Error({ error, reset }: Props) {
           <button type="button" onClick={reset} className={styles.retry}>
             {dict.errorRetry}
           </button>
-          <Link href={ROUTES.HOME} className={styles.home}>
+          <Link href={ROUTES.LANDING} className={styles.home}>
             {dict.backHome}
           </Link>
         </div>

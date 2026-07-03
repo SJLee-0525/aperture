@@ -7,7 +7,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * 통계 숫자 카운트업 (0 → value). prefers-reduced-motion 사용자는 애니메이션 없이 최종값 표시.
- * animate() 는 프레임마다 onUpdate 로 상태를 갱신(값이 작아 부담 없음).
+ * animate() 는 프레임마다 onUpdate 로 상태를 갱신(값이 작아 부담 없음). 소개 페이지(사진·음악) 공용 순수 UI.
  */
 const CountUp = ({ value }: { value: number }) => {
   const reduce = useReducedMotion();

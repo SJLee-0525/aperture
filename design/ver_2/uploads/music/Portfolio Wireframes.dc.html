@@ -1,467 +1,2865 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-  </style>
-</helmet>
-<div style="min-height:100vh;background:{{grid}};color:{{ink}};font-family:system-ui,-apple-system,sans-serif;background-image:radial-gradient(rgba(128,128,128,.12) 1px,transparent 1px);background-size:22px 22px;transition:background .25s,color .25s">
-
-  <div style="position:sticky;top:0;z-index:30;background:{{grid}};border-bottom:1px solid {{ink}};padding:13px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="display:flex;flex-direction:column;gap:3px;margin-right:auto;white-space:nowrap">
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:27px;font-weight:600;line-height:1;letter-spacing:.01em">Junhyung Kim</div>
-      <div style="font-family:monospace;font-size:10px;opacity:.55;letter-spacing:.16em;text-transform:uppercase">Portfolio Wireframes · 3가지 방향 + 상세</div>
-    </div>
-    <div style="display:flex;gap:5px;border:1px solid {{ink}};padding:4px">
-      <button onClick="{{tabA}}" style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{aBg}};color:{{aFg}};transition:all .15s">A · 센터드</button>
-      <button onClick="{{tabB}}" style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{bBg}};color:{{bFg}};transition:all .15s">B · 사이드바</button>
-      <button onClick="{{tabC}}" style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{cBg}};color:{{cFg}};transition:all .15s">C · 그리드</button>
-      <button onClick="{{tabD}}" style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{dBg}};color:{{dFg}};transition:all .15s">연주 상세</button>
-    </div>
-    <div style="display:flex;border:1px solid {{ink}}">
-      <button onClick="{{lightOn}}" style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{ltBg}};color:{{ltFg}};transition:all .15s">라이트</button>
-      <button onClick="{{darkOn}}" style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{dkBg}};color:{{dkFg}};transition:all .15s">다크</button>
-    </div>
-    <div style="display:flex;border:1px solid {{ink}}">
-      <button onClick="{{koOn}}" style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{koBg}};color:{{koFg}};transition:all .15s">KR</button>
-      <button onClick="{{enOn}}" style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{enBg}};color:{{enFg}};transition:all .15s">EN</button>
-    </div>
-  </div>
-
-  <div style="padding:18px 26px 0;display:flex;gap:18px;align-items:center;flex-wrap:wrap;font-family:monospace;font-size:11px;opacity:.72">
-    <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;background:{{accent}};display:inline-block"></span> 클릭 → 상세 페이지로 이동</span>
-    <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border:1px solid currentColor;display:inline-block"></span> 이미지 자리표시자</span>
-    <span>모든 텍스트·이미지는 자리표시자입니다 — 구조와 흐름에 집중</span>
-  </div>
-
-  <!-- ============== VARIATION A ============== -->
-  <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
-  <div>
-    <div style="padding:16px 26px 6px">
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:34px;font-weight:600;line-height:1">A · 센터드 에디토리얼</div>
-      <div style="max-width:700px;opacity:.72;font-size:13.5px;line-height:1.55">중앙 정렬 단일 컬럼. 큰 원형 프로필이 첫 화면을 압도하고 그 아래로 섹션이 번호 순서대로 흐릅니다. 격식 있고 정적인 — 리사이틀 프로그램북 같은 클래식 무대 인상.</div>
-    </div>
-    <div style="display:flex;gap:44px;align-items:flex-start;padding:14px 26px 64px;overflow-x:auto">
-
-      <!-- A desktop -->
-      <div data-screen-label="A · Desktop" style="flex:0 0 760px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.desktop}} <span style="font-family:monospace;font-size:10px;opacity:.5">1440px</span></div>
-        <div style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s">
-          <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid currentColor">
-            <span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span>
-            <span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span>
-            <span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span>
-            <span style="margin-left:8px;flex:1;height:14px;border:1px solid currentColor;opacity:.45"></span>
-          </div>
-          <!-- header -->
-          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 40px 36px;gap:13px;border-bottom:1px solid currentColor">
-            <div style="width:100%;display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:11px;opacity:.65">
-              <span style="font-weight:600;letter-spacing:.1em">JK</span>
-              <span style="display:flex;gap:14px;align-items:center"><span>{{L.bio}}</span><span>{{L.works}}</span><span>{{L.schedule}}</span><span>{{L.contact}}</span><span style="border:1px solid currentColor;padding:2px 7px">EN / 다크</span></span>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+          html,
+          body {
+            margin: 0;
+            padding: 0;
+          }
+        </style>
+      </helmet>
+      <div
+        style="min-height:100vh;background:{{grid}};color:{{ink}};font-family:system-ui,-apple-system,sans-serif;background-image:radial-gradient(rgba(128,128,128,.12) 1px,transparent 1px);background-size:22px 22px;transition:background .25s,color .25s"
+      >
+        <div
+          style="position:sticky;top:0;z-index:30;background:{{grid}};border-bottom:1px solid {{ink}};padding:13px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap"
+        >
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 3px;
+              margin-right: auto;
+              white-space: nowrap;
+            "
+          >
+            <div
+              style="
+                font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                font-size: 27px;
+                font-weight: 600;
+                line-height: 1;
+                letter-spacing: 0.01em;
+              "
+            >
+              Junhyung Kim
             </div>
-            <div style="width:128px;height:128px;border-radius:50%;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.09) 6px,rgba(128,128,128,.09) 7px);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;opacity:.6;margin-top:8px">PHOTO</div>
-            <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:54px;font-weight:600;line-height:.92">Junhyung Kim</div>
-            <div style="font-family:monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;opacity:.7">{{L.role}}</div>
-            <div style="font-size:14px;opacity:.7;font-style:italic">{{L.tagline}}</div>
-            <div style="display:flex;gap:9px;margin-top:5px">
-              <span style="font-family:monospace;font-size:11px;border:1px solid currentColor;padding:5px 12px">{{L.follow}}</span>
-              <span style="font-family:monospace;font-size:11px;background:{{accent}};color:#fff;padding:6px 13px">{{L.contact}}</span>
+            <div
+              style="
+                font-family: monospace;
+                font-size: 10px;
+                opacity: 0.55;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+              "
+            >
+              Portfolio Wireframes · 3가지 방향 + 상세
             </div>
           </div>
-          <!-- sections column -->
-          <div style="max-width:560px;margin:0 auto;padding:42px 0 56px;display:flex;flex-direction:column;gap:46px">
-            <section>
-              <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:18px"><span style="font-family:monospace;font-size:12px;opacity:.5">01</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;margin:0;font-weight:600">{{L.bio}}</h3></div>
-              <div style="display:flex;flex-direction:column;gap:9px">
-                <div style="height:8px;background:currentColor;opacity:.11"></div>
-                <div style="height:8px;background:currentColor;opacity:.11;width:97%"></div>
-                <div style="height:8px;background:currentColor;opacity:.11;width:90%"></div>
-                <div style="height:8px;background:currentColor;opacity:.11;width:94%"></div>
-                <div style="height:8px;background:currentColor;opacity:.11;width:62%"></div>
+          <div style="display:flex;gap:5px;border:1px solid {{ink}};padding:4px">
+            <button
+              onClick="{{tabA}}"
+              style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{aBg}};color:{{aFg}};transition:all .15s"
+            >
+              A · 센터드
+            </button>
+            <button
+              onClick="{{tabB}}"
+              style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{bBg}};color:{{bFg}};transition:all .15s"
+            >
+              B · 사이드바
+            </button>
+            <button
+              onClick="{{tabC}}"
+              style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{cBg}};color:{{cFg}};transition:all .15s"
+            >
+              C · 그리드
+            </button>
+            <button
+              onClick="{{tabD}}"
+              style="font-family:monospace;font-size:12px;letter-spacing:.03em;padding:7px 12px;border:none;cursor:pointer;white-space:nowrap;background:{{dBg}};color:{{dFg}};transition:all .15s"
+            >
+              연주 상세
+            </button>
+          </div>
+          <div style="display:flex;border:1px solid {{ink}}">
+            <button
+              onClick="{{lightOn}}"
+              style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{ltBg}};color:{{ltFg}};transition:all .15s"
+            >
+              라이트
+            </button>
+            <button
+              onClick="{{darkOn}}"
+              style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{dkBg}};color:{{dkFg}};transition:all .15s"
+            >
+              다크
+            </button>
+          </div>
+          <div style="display:flex;border:1px solid {{ink}}">
+            <button
+              onClick="{{koOn}}"
+              style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{koBg}};color:{{koFg}};transition:all .15s"
+            >
+              KR
+            </button>
+            <button
+              onClick="{{enOn}}"
+              style="font-family:monospace;font-size:11px;padding:7px 11px;border:none;cursor:pointer;white-space:nowrap;background:{{enBg}};color:{{enFg}};transition:all .15s"
+            >
+              EN
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="
+            padding: 18px 26px 0;
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex-wrap: wrap;
+            font-family: monospace;
+            font-size: 11px;
+            opacity: 0.72;
+          "
+        >
+          <span style="display: flex; align-items: center; gap: 6px"
+            ><span style="width:12px;height:12px;background:{{accent}};display:inline-block"></span>
+            클릭 → 상세 페이지로 이동</span
+          >
+          <span style="display: flex; align-items: center; gap: 6px"
+            ><span
+              style="
+                width: 12px;
+                height: 12px;
+                border: 1px solid currentColor;
+                display: inline-block;
+              "
+            ></span>
+            이미지 자리표시자</span
+          >
+          <span>모든 텍스트·이미지는 자리표시자입니다 — 구조와 흐름에 집중</span>
+        </div>
+
+        <!-- ============== VARIATION A ============== -->
+        <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="padding: 16px 26px 6px">
+              <div
+                style="
+                  font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                  font-size: 34px;
+                  font-weight: 600;
+                  line-height: 1;
+                "
+              >
+                A · 센터드 에디토리얼
               </div>
-            </section>
-            <section>
-              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:18px"><div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:monospace;font-size:12px;opacity:.5">02</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;margin:0;font-weight:600">{{L.works}}</h3></div><span style="font-family:monospace;font-size:11px;opacity:.55">{{L.selected}} →</span></div>
-              <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:6px">
-                <sc-for list="{{ works }}" as="w" hint-placeholder-count="5">
-                  <div style="flex:0 0 148px;cursor:pointer">
-                    <div style="aspect-ratio:3/4;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.08) 6px,rgba(128,128,128,.08) 7px);position:relative;display:flex;align-items:flex-end;padding:8px">
-                      <span style="position:absolute;top:7px;right:7px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-family:monospace">→</span>
-                      <span style="font-family:monospace;font-size:9px;opacity:.55">PAMPHLET</span>
-                    </div>
-                    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;margin-top:7px;line-height:1.1">{{ w.t }}</div>
-                    <div style="font-family:monospace;font-size:10px;opacity:.6">{{ w.d }}</div>
+              <div style="max-width: 700px; opacity: 0.72; font-size: 13.5px; line-height: 1.55">
+                중앙 정렬 단일 컬럼. 큰 원형 프로필이 첫 화면을 압도하고 그 아래로 섹션이 번호
+                순서대로 흐릅니다. 격식 있고 정적인 — 리사이틀 프로그램북 같은 클래식 무대 인상.
+              </div>
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 44px;
+                align-items: flex-start;
+                padding: 14px 26px 64px;
+                overflow-x: auto;
+              "
+            >
+              <!-- A desktop -->
+              <div
+                data-screen-label="A · Desktop"
+                style="flex: 0 0 760px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.desktop}}
+                  <span style="font-family: monospace; font-size: 10px; opacity: 0.5">1440px</span>
+                </div>
+                <div
+                  style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s"
+                >
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 7px;
+                      padding: 8px 12px;
+                      border-bottom: 1px solid currentColor;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span>
+                    <span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span>
+                    <span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span>
+                    <span
+                      style="
+                        margin-left: 8px;
+                        flex: 1;
+                        height: 14px;
+                        border: 1px solid currentColor;
+                        opacity: 0.45;
+                      "
+                    ></span>
                   </div>
-                </sc-for>
-              </div>
-            </section>
-            <section>
-              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:14px"><div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:monospace;font-size:12px;opacity:.5">03</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;margin:0;font-weight:600">{{L.schedule}}</h3></div><span style="font-family:monospace;font-size:10px;border:1px solid currentColor;padding:3px 8px">{{L.upcoming}}</span></div>
-              <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="3">
-                <div style="display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid currentColor">
-                  <span style="font-family:monospace;font-size:13px;opacity:.75;flex:0 0 92px">{{ s.d }}</span>
-                  <span style="flex:1;font-size:15px;line-height:1.3">{{ s.t }}<br><span style="font-family:monospace;font-size:11px;opacity:.6">{{ s.v }}</span></span>
-                  <span style="font-family:monospace;font-size:11px;border:1.5px solid {{accent}};color:{{accent}};padding:5px 12px;cursor:pointer">{{L.ticket}}</span>
-                </div>
-              </sc-for>
-            </section>
-            <section style="display:grid;grid-template-columns:1fr 1fr;gap:30px">
-              <div>
-                <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:12px"><span style="font-family:monospace;font-size:12px;opacity:.5">04</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;margin:0;font-weight:600">{{L.awards}}</h3></div>
-                <sc-for list="{{ awards }}" as="a" hint-placeholder-count="4">
-                  <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid currentColor"><span style="font-family:monospace;font-size:12px;opacity:.6;flex:0 0 42px">{{ a.y }}</span><span style="font-size:12.5px;line-height:1.3">{{ a.n }}</span></div>
-                </sc-for>
-              </div>
-              <div>
-                <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:12px"><span style="font-family:monospace;font-size:12px;opacity:.5">05</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;margin:0;font-weight:600">{{L.press}}</h3></div>
-                <div style="border-left:3px solid {{accent}};padding:4px 0 4px 14px;margin-bottom:16px;display:flex;flex-direction:column;gap:7px">
-                  <div style="height:8px;background:currentColor;opacity:.11"></div><div style="height:8px;background:currentColor;opacity:.11;width:80%"></div>
-                  <span style="font-family:monospace;font-size:10px;opacity:.55">[ 매체명 ]</span>
-                </div>
-                <div style="border-left:3px solid {{accent}};padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:7px">
-                  <div style="height:8px;background:currentColor;opacity:.11"></div><div style="height:8px;background:currentColor;opacity:.11;width:72%"></div>
-                  <span style="font-family:monospace;font-size:10px;opacity:.55">[ 매체명 ]</span>
-                </div>
-              </div>
-            </section>
-            <section>
-              <div style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:16px"><span style="font-family:monospace;font-size:12px;opacity:.5">06</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;margin:0;font-weight:600">{{L.media}}</h3></div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-                <div style="aspect-ratio:16/9;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.07) 6px,rgba(128,128,128,.07) 7px);display:flex;align-items:center;justify-content:center;gap:8px;font-family:monospace;font-size:11px;opacity:.6"><span style="width:30px;height:30px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center">▶</span>VIDEO</div>
-                <div style="aspect-ratio:16/9;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;opacity:.6;background:repeating-linear-gradient(90deg,currentColor,currentColor 2px,transparent 2px,transparent 7px)">AUDIO ~~~</div>
-              </div>
-            </section>
-          </div>
-          <div style="border-top:1px solid currentColor;padding:32px 40px;text-align:center;display:flex;flex-direction:column;gap:7px">
-            <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:600">{{L.contact}}</div>
-            <div style="font-family:monospace;font-size:12px;opacity:.7">hello@junhyungkim.com · {{L.agency}}: Artist Mgmt · @junhyung</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- A mobile -->
-      <div data-screen-label="A · Mobile" style="flex:0 0 340px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.mobile}} <span style="font-family:monospace;font-size:10px;opacity:.5">375px</span></div>
-        <div style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)">
-          <div style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid currentColor;font-family:monospace;font-size:11px"><span style="font-weight:600;letter-spacing:.1em">JK</span><span style="display:flex;flex-direction:column;gap:3px"><span style="width:18px;height:2px;background:currentColor"></span><span style="width:18px;height:2px;background:currentColor"></span><span style="width:18px;height:2px;background:currentColor"></span></span></div>
-            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;padding:26px 18px 24px;border-bottom:1px solid currentColor">
-              <div style="width:92px;height:92px;border-radius:50%;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.09) 6px,rgba(128,128,128,.09) 7px);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;opacity:.6">PHOTO</div>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:38px;font-weight:600;line-height:.95">Junhyung Kim</div>
-              <div style="font-family:monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.7">{{L.role}}</div>
-              <span style="font-family:monospace;font-size:10px;background:{{accent}};color:#fff;padding:6px 14px">{{L.contact}}</span>
-            </div>
-            <div style="padding:20px 16px 26px;display:flex;flex-direction:column;gap:28px">
-              <section>
-                <div style="display:flex;align-items:baseline;gap:9px;border-bottom:1px solid currentColor;padding-bottom:6px;margin-bottom:12px"><span style="font-family:monospace;font-size:10px;opacity:.5">01</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;margin:0;font-weight:600">{{L.bio}}</h3></div>
-                <div style="display:flex;flex-direction:column;gap:7px"><div style="height:7px;background:currentColor;opacity:.11"></div><div style="height:7px;background:currentColor;opacity:.11;width:92%"></div><div style="height:7px;background:currentColor;opacity:.11;width:70%"></div></div>
-              </section>
-              <section>
-                <div style="display:flex;align-items:baseline;gap:9px;border-bottom:1px solid currentColor;padding-bottom:6px;margin-bottom:12px"><span style="font-family:monospace;font-size:10px;opacity:.5">02</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;margin:0;font-weight:600">{{L.works}}</h3></div>
-                <div style="display:flex;gap:11px;overflow-x:auto">
-                  <sc-for list="{{ works }}" as="w" hint-placeholder-count="3">
-                    <div style="flex:0 0 110px"><div style="aspect-ratio:3/4;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.08) 6px,rgba(128,128,128,.08) 7px);position:relative"><span style="position:absolute;top:6px;right:6px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-family:monospace">→</span></div><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;margin-top:5px;line-height:1.05">{{ w.t }}</div></div>
-                  </sc-for>
-                </div>
-              </section>
-              <section>
-                <div style="display:flex;align-items:baseline;gap:9px;border-bottom:1px solid currentColor;padding-bottom:6px;margin-bottom:10px"><span style="font-family:monospace;font-size:10px;opacity:.5">03</span><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;margin:0;font-weight:600">{{L.schedule}}</h3></div>
-                <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="3">
-                  <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid currentColor"><span style="font-family:monospace;font-size:10px;opacity:.7;flex:0 0 64px">{{ s.d }}</span><span style="flex:1;font-size:12px">{{ s.t }}</span><span style="font-family:monospace;font-size:9px;border:1.5px solid {{accent}};color:{{accent}};padding:3px 7px">{{L.ticket}}</span></div>
-                </sc-for>
-              </section>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-  </sc-if>
-
-  <!-- ============== VARIATION B ============== -->
-  <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
-  <div>
-    <div style="padding:16px 26px 6px">
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:34px;font-weight:600;line-height:1">B · 고정 사이드바</div>
-      <div style="max-width:700px;opacity:.72;font-size:13.5px;line-height:1.55">왼쪽에 프로필·내비게이션이 고정되고 오른쪽 콘텐츠만 스크롤. 어도비 포트폴리오류의 정리된 구조로, 섹션 이동이 빠르고 작업물(연주 목록)이 넓은 영역을 차지합니다.</div>
-    </div>
-    <div style="display:flex;gap:44px;align-items:flex-start;padding:14px 26px 64px;overflow-x:auto">
-
-      <!-- B desktop -->
-      <div data-screen-label="B · Desktop" style="flex:0 0 820px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.desktop}} <span style="font-family:monospace;font-size:10px;opacity:.5">1440px</span></div>
-        <div style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s">
-          <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid currentColor"><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="margin-left:8px;flex:1;height:14px;border:1px solid currentColor;opacity:.45"></span></div>
-          <div style="display:flex;min-height:640px">
-            <aside style="flex:0 0 230px;border-right:1px solid currentColor;padding:30px 22px;display:flex;flex-direction:column;gap:16px;align-items:flex-start">
-              <div style="width:88px;height:88px;border-radius:50%;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.09) 6px,rgba(128,128,128,.09) 7px);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;opacity:.6">PHOTO</div>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:600;line-height:.95">Junhyung Kim</div>
-              <div style="font-family:monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.7">{{L.role}}</div>
-              <nav style="display:flex;flex-direction:column;gap:0;width:100%;margin-top:10px;border-top:1px solid currentColor">
-                <span style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between"><span>{{L.bio}}</span><span style="opacity:.4">›</span></span>
-                <span style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between;color:{{accent}}"><span>{{L.works}}</span><span>›</span></span>
-                <span style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between"><span>{{L.schedule}}</span><span style="opacity:.4">›</span></span>
-                <span style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between"><span>{{L.awards}}</span><span style="opacity:.4">›</span></span>
-                <span style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between"><span>{{L.media}}</span><span style="opacity:.4">›</span></span>
-                <span style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between"><span>{{L.contact}}</span><span style="opacity:.4">›</span></span>
-              </nav>
-              <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px;width:100%">
-                <div style="display:flex;gap:5px"><span style="flex:1;text-align:center;font-family:monospace;font-size:9px;border:1px solid currentColor;padding:4px 0">라이트</span><span style="flex:1;text-align:center;font-family:monospace;font-size:9px;background:currentColor;color:{{paper}};padding:5px 0">다크</span></div>
-                <div style="display:flex;gap:5px"><span style="flex:1;text-align:center;font-family:monospace;font-size:9px;background:currentColor;color:{{paper}};padding:5px 0">KR</span><span style="flex:1;text-align:center;font-family:monospace;font-size:9px;border:1px solid currentColor;padding:4px 0">EN</span></div>
-              </div>
-            </aside>
-            <div style="flex:1;padding:32px 34px;display:flex;flex-direction:column;gap:38px">
-              <section style="display:flex;gap:24px;align-items:flex-start">
-                <div style="flex:1">
-                  <div style="font-family:monospace;font-size:11px;opacity:.5;margin-bottom:4px">01 — {{L.bio}}</div>
-                  <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;line-height:1;margin-bottom:14px">{{L.tagline}}</div>
-                  <div style="display:flex;flex-direction:column;gap:8px"><div style="height:8px;background:currentColor;opacity:.11"></div><div style="height:8px;background:currentColor;opacity:.11;width:95%"></div><div style="height:8px;background:currentColor;opacity:.11;width:88%"></div><div style="height:8px;background:currentColor;opacity:.11;width:60%"></div></div>
-                </div>
-                <div style="flex:0 0 150px;aspect-ratio:4/5;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.08) 6px,rgba(128,128,128,.08) 7px);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;opacity:.55">PORTRAIT</div>
-              </section>
-              <section>
-                <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:16px"><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;margin:0;font-weight:600">02 · {{L.works}}</h3><span style="font-family:monospace;font-size:11px;opacity:.55">{{L.more}} →</span></div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-                  <sc-for list="{{ works }}" as="w" hint-placeholder-count="6">
-                    <div style="cursor:pointer">
-                      <div style="aspect-ratio:3/4;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.08) 6px,rgba(128,128,128,.08) 7px);position:relative;display:flex;align-items:flex-end;padding:8px"><span style="position:absolute;top:7px;right:7px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-family:monospace">→</span><span style="font-family:monospace;font-size:9px;opacity:.55">PAMPHLET</span></div>
-                      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;margin-top:6px;line-height:1.05">{{ w.t }}</div>
-                      <div style="font-family:monospace;font-size:10px;opacity:.6">{{ w.d }}</div>
+                  <!-- header -->
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      text-align: center;
+                      padding: 30px 40px 36px;
+                      gap: 13px;
+                      border-bottom: 1px solid currentColor;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-family: monospace;
+                        font-size: 11px;
+                        opacity: 0.65;
+                      "
+                    >
+                      <span style="font-weight: 600; letter-spacing: 0.1em">JK</span>
+                      <span style="display: flex; gap: 14px; align-items: center"
+                        ><span>{{L.bio}}</span><span>{{L.works}}</span><span>{{L.schedule}}</span
+                        ><span>{{L.contact}}</span
+                        ><span style="border: 1px solid currentColor; padding: 2px 7px"
+                          >EN / 다크</span
+                        ></span
+                      >
                     </div>
-                  </sc-for>
+                    <div
+                      style="
+                        width: 128px;
+                        height: 128px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                        background: repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 6px,
+                          rgba(128, 128, 128, 0.09) 6px,
+                          rgba(128, 128, 128, 0.09) 7px
+                        );
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: monospace;
+                        font-size: 10px;
+                        opacity: 0.6;
+                        margin-top: 8px;
+                      "
+                    >
+                      PHOTO
+                    </div>
+                    <div
+                      style="
+                        font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                        font-size: 54px;
+                        font-weight: 600;
+                        line-height: 0.92;
+                      "
+                    >
+                      Junhyung Kim
+                    </div>
+                    <div
+                      style="
+                        font-family: monospace;
+                        font-size: 12px;
+                        letter-spacing: 0.24em;
+                        text-transform: uppercase;
+                        opacity: 0.7;
+                      "
+                    >
+                      {{L.role}}
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.7; font-style: italic">
+                      {{L.tagline}}
+                    </div>
+                    <div style="display: flex; gap: 9px; margin-top: 5px">
+                      <span
+                        style="
+                          font-family: monospace;
+                          font-size: 11px;
+                          border: 1px solid currentColor;
+                          padding: 5px 12px;
+                        "
+                        >{{L.follow}}</span
+                      >
+                      <span
+                        style="font-family:monospace;font-size:11px;background:{{accent}};color:#fff;padding:6px 13px"
+                        >{{L.contact}}</span
+                      >
+                    </div>
+                  </div>
+                  <!-- sections column -->
+                  <div
+                    style="
+                      max-width: 560px;
+                      margin: 0 auto;
+                      padding: 42px 0 56px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 46px;
+                    "
+                  >
+                    <section>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: baseline;
+                          gap: 12px;
+                          border-bottom: 1px solid currentColor;
+                          padding-bottom: 8px;
+                          margin-bottom: 18px;
+                        "
+                      >
+                        <span style="font-family: monospace; font-size: 12px; opacity: 0.5"
+                          >01</span
+                        >
+                        <h3
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 30px;
+                            margin: 0;
+                            font-weight: 600;
+                          "
+                        >
+                          {{L.bio}}
+                        </h3>
+                      </div>
+                      <div style="display: flex; flex-direction: column; gap: 9px">
+                        <div style="height: 8px; background: currentColor; opacity: 0.11"></div>
+                        <div
+                          style="height: 8px; background: currentColor; opacity: 0.11; width: 97%"
+                        ></div>
+                        <div
+                          style="height: 8px; background: currentColor; opacity: 0.11; width: 90%"
+                        ></div>
+                        <div
+                          style="height: 8px; background: currentColor; opacity: 0.11; width: 94%"
+                        ></div>
+                        <div
+                          style="height: 8px; background: currentColor; opacity: 0.11; width: 62%"
+                        ></div>
+                      </div>
+                    </section>
+                    <section>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: baseline;
+                          justify-content: space-between;
+                          border-bottom: 1px solid currentColor;
+                          padding-bottom: 8px;
+                          margin-bottom: 18px;
+                        "
+                      >
+                        <div style="display: flex; align-items: baseline; gap: 12px">
+                          <span style="font-family: monospace; font-size: 12px; opacity: 0.5"
+                            >02</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 30px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.works}}
+                          </h3>
+                        </div>
+                        <span style="font-family: monospace; font-size: 11px; opacity: 0.55"
+                          >{{L.selected}} →</span
+                        >
+                      </div>
+                      <div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 6px">
+                        <sc-for list="{{ works }}" as="w" hint-placeholder-count="5">
+                          <div style="flex: 0 0 148px; cursor: pointer">
+                            <div
+                              style="
+                                aspect-ratio: 3/4;
+                                border: 1px solid currentColor;
+                                background: repeating-linear-gradient(
+                                  45deg,
+                                  transparent,
+                                  transparent 6px,
+                                  rgba(128, 128, 128, 0.08) 6px,
+                                  rgba(128, 128, 128, 0.08) 7px
+                                );
+                                position: relative;
+                                display: flex;
+                                align-items: flex-end;
+                                padding: 8px;
+                              "
+                            >
+                              <span
+                                style="position:absolute;top:7px;right:7px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-family:monospace"
+                                >→</span
+                              >
+                              <span style="font-family: monospace; font-size: 9px; opacity: 0.55"
+                                >PAMPHLET</span
+                              >
+                            </div>
+                            <div
+                              style="
+                                font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                                font-size: 18px;
+                                margin-top: 7px;
+                                line-height: 1.1;
+                              "
+                            >
+                              {{ w.t }}
+                            </div>
+                            <div style="font-family: monospace; font-size: 10px; opacity: 0.6">
+                              {{ w.d }}
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </section>
+                    <section>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: baseline;
+                          justify-content: space-between;
+                          border-bottom: 1px solid currentColor;
+                          padding-bottom: 8px;
+                          margin-bottom: 14px;
+                        "
+                      >
+                        <div style="display: flex; align-items: baseline; gap: 12px">
+                          <span style="font-family: monospace; font-size: 12px; opacity: 0.5"
+                            >03</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 30px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.schedule}}
+                          </h3>
+                        </div>
+                        <span
+                          style="
+                            font-family: monospace;
+                            font-size: 10px;
+                            border: 1px solid currentColor;
+                            padding: 3px 8px;
+                          "
+                          >{{L.upcoming}}</span
+                        >
+                      </div>
+                      <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="3">
+                        <div
+                          style="
+                            display: flex;
+                            align-items: center;
+                            gap: 16px;
+                            padding: 13px 0;
+                            border-bottom: 1px solid currentColor;
+                          "
+                        >
+                          <span
+                            style="
+                              font-family: monospace;
+                              font-size: 13px;
+                              opacity: 0.75;
+                              flex: 0 0 92px;
+                            "
+                            >{{ s.d }}</span
+                          >
+                          <span style="flex: 1; font-size: 15px; line-height: 1.3"
+                            >{{ s.t }}<br /><span
+                              style="font-family: monospace; font-size: 11px; opacity: 0.6"
+                              >{{ s.v }}</span
+                            ></span
+                          >
+                          <span
+                            style="font-family:monospace;font-size:11px;border:1.5px solid {{accent}};color:{{accent}};padding:5px 12px;cursor:pointer"
+                            >{{L.ticket}}</span
+                          >
+                        </div>
+                      </sc-for>
+                    </section>
+                    <section style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px">
+                      <div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: baseline;
+                            gap: 12px;
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 8px;
+                            margin-bottom: 12px;
+                          "
+                        >
+                          <span style="font-family: monospace; font-size: 12px; opacity: 0.5"
+                            >04</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 26px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.awards}}
+                          </h3>
+                        </div>
+                        <sc-for list="{{ awards }}" as="a" hint-placeholder-count="4">
+                          <div
+                            style="
+                              display: flex;
+                              gap: 12px;
+                              padding: 8px 0;
+                              border-bottom: 1px solid currentColor;
+                            "
+                          >
+                            <span
+                              style="
+                                font-family: monospace;
+                                font-size: 12px;
+                                opacity: 0.6;
+                                flex: 0 0 42px;
+                              "
+                              >{{ a.y }}</span
+                            ><span style="font-size: 12.5px; line-height: 1.3">{{ a.n }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: baseline;
+                            gap: 12px;
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 8px;
+                            margin-bottom: 12px;
+                          "
+                        >
+                          <span style="font-family: monospace; font-size: 12px; opacity: 0.5"
+                            >05</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 26px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.press}}
+                          </h3>
+                        </div>
+                        <div
+                          style="border-left:3px solid {{accent}};padding:4px 0 4px 14px;margin-bottom:16px;display:flex;flex-direction:column;gap:7px"
+                        >
+                          <div style="height: 8px; background: currentColor; opacity: 0.11"></div>
+                          <div
+                            style="height: 8px; background: currentColor; opacity: 0.11; width: 80%"
+                          ></div>
+                          <span style="font-family: monospace; font-size: 10px; opacity: 0.55"
+                            >[ 매체명 ]</span
+                          >
+                        </div>
+                        <div
+                          style="border-left:3px solid {{accent}};padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:7px"
+                        >
+                          <div style="height: 8px; background: currentColor; opacity: 0.11"></div>
+                          <div
+                            style="height: 8px; background: currentColor; opacity: 0.11; width: 72%"
+                          ></div>
+                          <span style="font-family: monospace; font-size: 10px; opacity: 0.55"
+                            >[ 매체명 ]</span
+                          >
+                        </div>
+                      </div>
+                    </section>
+                    <section>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: baseline;
+                          gap: 12px;
+                          border-bottom: 1px solid currentColor;
+                          padding-bottom: 8px;
+                          margin-bottom: 16px;
+                        "
+                      >
+                        <span style="font-family: monospace; font-size: 12px; opacity: 0.5"
+                          >06</span
+                        >
+                        <h3
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 30px;
+                            margin: 0;
+                            font-weight: 600;
+                          "
+                        >
+                          {{L.media}}
+                        </h3>
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+                        <div
+                          style="
+                            aspect-ratio: 16/9;
+                            border: 1px solid currentColor;
+                            background: repeating-linear-gradient(
+                              45deg,
+                              transparent,
+                              transparent 6px,
+                              rgba(128, 128, 128, 0.07) 6px,
+                              rgba(128, 128, 128, 0.07) 7px
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            font-family: monospace;
+                            font-size: 11px;
+                            opacity: 0.6;
+                          "
+                        >
+                          <span
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              border-radius: 50%;
+                              border: 1px solid currentColor;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                            "
+                            >▶</span
+                          >VIDEO
+                        </div>
+                        <div
+                          style="
+                            aspect-ratio: 16/9;
+                            border: 1px solid currentColor;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-family: monospace;
+                            font-size: 11px;
+                            opacity: 0.6;
+                            background: repeating-linear-gradient(
+                              90deg,
+                              currentColor,
+                              currentColor 2px,
+                              transparent 2px,
+                              transparent 7px
+                            );
+                          "
+                        >
+                          AUDIO ~~~
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div
+                    style="
+                      border-top: 1px solid currentColor;
+                      padding: 32px 40px;
+                      text-align: center;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 7px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                        font-size: 32px;
+                        font-weight: 600;
+                      "
+                    >
+                      {{L.contact}}
+                    </div>
+                    <div style="font-family: monospace; font-size: 12px; opacity: 0.7">
+                      hello@junhyungkim.com · {{L.agency}}: Artist Mgmt · @junhyung
+                    </div>
+                  </div>
                 </div>
-              </section>
-              <section>
-                <div style="border-bottom:1px solid currentColor;padding-bottom:8px;margin-bottom:12px"><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;margin:0;font-weight:600">03 · {{L.schedule}}</h3></div>
-                <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="3">
-                  <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid currentColor"><span style="font-family:monospace;font-size:13px;opacity:.75;flex:0 0 92px">{{ s.d }}</span><span style="flex:1;font-size:14px">{{ s.t }} <span style="font-family:monospace;font-size:11px;opacity:.55">· {{ s.v }}</span></span><span style="font-family:monospace;font-size:11px;border:1.5px solid {{accent}};color:{{accent}};padding:5px 11px">{{L.ticket}}</span></div>
-                </sc-for>
-              </section>
-            </div>
-          </div>
-        </div>
-      </div>
+              </div>
 
-      <!-- B mobile -->
-      <div data-screen-label="B · Mobile" style="flex:0 0 340px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.mobile}} <span style="font-family:monospace;font-size:10px;opacity:.5">375px</span></div>
-        <div style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)">
-          <div style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s">
-            <div style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid currentColor">
-              <div style="width:50px;height:50px;border-radius:50%;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.09) 6px,rgba(128,128,128,.09) 7px);flex:0 0 50px"></div>
-              <div style="flex:1"><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-weight:600;line-height:.9">Junhyung Kim</div><div style="font-family:monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.7">{{L.role}}</div></div>
-              <span style="display:flex;flex-direction:column;gap:3px"><span style="width:18px;height:2px;background:currentColor"></span><span style="width:18px;height:2px;background:currentColor"></span><span style="width:18px;height:2px;background:currentColor"></span></span>
-            </div>
-            <div style="display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid currentColor;overflow-x:auto;font-family:monospace;font-size:10px"><span style="border:1px solid currentColor;padding:4px 9px;white-space:nowrap;background:{{accent}};color:#fff">{{L.works}}</span><span style="border:1px solid currentColor;padding:4px 9px;white-space:nowrap">{{L.bio}}</span><span style="border:1px solid currentColor;padding:4px 9px;white-space:nowrap">{{L.schedule}}</span><span style="border:1px solid currentColor;padding:4px 9px;white-space:nowrap">{{L.contact}}</span></div>
-            <div style="padding:18px 16px 24px">
-              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid currentColor;padding-bottom:6px;margin-bottom:12px"><h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:23px;margin:0;font-weight:600">{{L.works}}</h3><span style="font-family:monospace;font-size:9px;opacity:.5">{{L.more}} →</span></div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                <sc-for list="{{ works }}" as="w" hint-placeholder-count="4">
-                  <div><div style="aspect-ratio:3/4;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.08) 6px,rgba(128,128,128,.08) 7px);position:relative"><span style="position:absolute;top:6px;right:6px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-family:monospace">→</span></div><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;margin-top:5px;line-height:1.05">{{ w.t }}</div><div style="font-family:monospace;font-size:9px;opacity:.6">{{ w.d }}</div></div>
-                </sc-for>
+              <!-- A mobile -->
+              <div
+                data-screen-label="A · Mobile"
+                style="flex: 0 0 340px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.mobile}}
+                  <span style="font-family: monospace; font-size: 10px; opacity: 0.5">375px</span>
+                </div>
+                <div
+                  style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)"
+                >
+                  <div
+                    style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s"
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 10px 14px;
+                        border-bottom: 1px solid currentColor;
+                        font-family: monospace;
+                        font-size: 11px;
+                      "
+                    >
+                      <span style="font-weight: 600; letter-spacing: 0.1em">JK</span
+                      ><span style="display: flex; flex-direction: column; gap: 3px"
+                        ><span style="width: 18px; height: 2px; background: currentColor"></span
+                        ><span style="width: 18px; height: 2px; background: currentColor"></span
+                        ><span style="width: 18px; height: 2px; background: currentColor"></span
+                      ></span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        text-align: center;
+                        gap: 9px;
+                        padding: 26px 18px 24px;
+                        border-bottom: 1px solid currentColor;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 92px;
+                          height: 92px;
+                          border-radius: 50%;
+                          border: 1px solid currentColor;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 6px,
+                            rgba(128, 128, 128, 0.09) 6px,
+                            rgba(128, 128, 128, 0.09) 7px
+                          );
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-family: monospace;
+                          font-size: 9px;
+                          opacity: 0.6;
+                        "
+                      >
+                        PHOTO
+                      </div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 38px;
+                          font-weight: 600;
+                          line-height: 0.95;
+                        "
+                      >
+                        Junhyung Kim
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 10px;
+                          letter-spacing: 0.2em;
+                          text-transform: uppercase;
+                          opacity: 0.7;
+                        "
+                      >
+                        {{L.role}}
+                      </div>
+                      <span
+                        style="font-family:monospace;font-size:10px;background:{{accent}};color:#fff;padding:6px 14px"
+                        >{{L.contact}}</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        padding: 20px 16px 26px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 28px;
+                      "
+                    >
+                      <section>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: baseline;
+                            gap: 9px;
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 6px;
+                            margin-bottom: 12px;
+                          "
+                        >
+                          <span style="font-family: monospace; font-size: 10px; opacity: 0.5"
+                            >01</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 24px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.bio}}
+                          </h3>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 7px">
+                          <div style="height: 7px; background: currentColor; opacity: 0.11"></div>
+                          <div
+                            style="height: 7px; background: currentColor; opacity: 0.11; width: 92%"
+                          ></div>
+                          <div
+                            style="height: 7px; background: currentColor; opacity: 0.11; width: 70%"
+                          ></div>
+                        </div>
+                      </section>
+                      <section>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: baseline;
+                            gap: 9px;
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 6px;
+                            margin-bottom: 12px;
+                          "
+                        >
+                          <span style="font-family: monospace; font-size: 10px; opacity: 0.5"
+                            >02</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 24px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.works}}
+                          </h3>
+                        </div>
+                        <div style="display: flex; gap: 11px; overflow-x: auto">
+                          <sc-for list="{{ works }}" as="w" hint-placeholder-count="3">
+                            <div style="flex: 0 0 110px">
+                              <div
+                                style="
+                                  aspect-ratio: 3/4;
+                                  border: 1px solid currentColor;
+                                  background: repeating-linear-gradient(
+                                    45deg,
+                                    transparent,
+                                    transparent 6px,
+                                    rgba(128, 128, 128, 0.08) 6px,
+                                    rgba(128, 128, 128, 0.08) 7px
+                                  );
+                                  position: relative;
+                                "
+                              >
+                                <span
+                                  style="position:absolute;top:6px;right:6px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-family:monospace"
+                                  >→</span
+                                >
+                              </div>
+                              <div
+                                style="
+                                  font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                                  font-size: 15px;
+                                  margin-top: 5px;
+                                  line-height: 1.05;
+                                "
+                              >
+                                {{ w.t }}
+                              </div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </section>
+                      <section>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: baseline;
+                            gap: 9px;
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 6px;
+                            margin-bottom: 10px;
+                          "
+                        >
+                          <span style="font-family: monospace; font-size: 10px; opacity: 0.5"
+                            >03</span
+                          >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 24px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            {{L.schedule}}
+                          </h3>
+                        </div>
+                        <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="3">
+                          <div
+                            style="
+                              display: flex;
+                              align-items: center;
+                              gap: 10px;
+                              padding: 9px 0;
+                              border-bottom: 1px solid currentColor;
+                            "
+                          >
+                            <span
+                              style="
+                                font-family: monospace;
+                                font-size: 10px;
+                                opacity: 0.7;
+                                flex: 0 0 64px;
+                              "
+                              >{{ s.d }}</span
+                            ><span style="flex: 1; font-size: 12px">{{ s.t }}</span
+                            ><span
+                              style="font-family:monospace;font-size:9px;border:1.5px solid {{accent}};color:{{accent}};padding:3px 7px"
+                              >{{L.ticket}}</span
+                            >
+                          </div>
+                        </sc-for>
+                      </section>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </sc-if>
 
-    </div>
-  </div>
-  </sc-if>
-
-  <!-- ============== VARIATION C ============== -->
-  <sc-if value="{{ isC }}" hint-placeholder-val="{{ false }}">
-  <div>
-    <div style="padding:16px 26px 6px">
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:34px;font-weight:600;line-height:1">C · 그리드 인덱스</div>
-      <div style="max-width:700px;opacity:.72;font-size:13.5px;line-height:1.55">와이드 배너 위로 원형 프로필이 겹쳐지고, 아래는 섹션이 각진 타일 그리드로 펼쳐집니다. 갤러리·매거진 인상 — 모든 섹션이 한 화면에서 클릭 가능한 진입점이 됩니다.</div>
-    </div>
-    <div style="display:flex;gap:44px;align-items:flex-start;padding:14px 26px 64px;overflow-x:auto">
-
-      <!-- C desktop -->
-      <div data-screen-label="C · Desktop" style="flex:0 0 820px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.desktop}} <span style="font-family:monospace;font-size:10px;opacity:.5">1440px</span></div>
-        <div style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s">
-          <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid currentColor"><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="margin-left:8px;flex:1;height:14px;border:1px solid currentColor;opacity:.45"></span></div>
-          <div style="position:relative">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 26px;font-family:monospace;font-size:11px;border-bottom:1px solid currentColor"><span style="font-weight:600;letter-spacing:.1em">JUNHYUNG KIM</span><span style="display:flex;gap:14px;align-items:center"><span>{{L.works}}</span><span>{{L.schedule}}</span><span>{{L.contact}}</span><span style="border:1px solid currentColor;padding:2px 7px">EN / 다크</span></span></div>
-            <div style="height:188px;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.07) 7px,rgba(128,128,128,.07) 8px);border-bottom:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:12px;opacity:.5;letter-spacing:.1em">BANNER IMAGE</div>
-            <div style="display:flex;flex-direction:column;align-items:center;margin-top:-56px;padding-bottom:22px">
-              <div style="width:112px;height:112px;border-radius:50%;border:1px solid currentColor;background:{{paper}};box-shadow:0 0 0 6px {{paper}};display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;opacity:.6">PHOTO</div>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:46px;font-weight:600;line-height:.95;margin-top:12px">Junhyung Kim</div>
-              <div style="font-family:monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.7;margin-top:4px">{{L.role}}</div>
+        <!-- ============== VARIATION B ============== -->
+        <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="padding: 16px 26px 6px">
+              <div
+                style="
+                  font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                  font-size: 34px;
+                  font-weight: 600;
+                  line-height: 1;
+                "
+              >
+                B · 고정 사이드바
+              </div>
+              <div style="max-width: 700px; opacity: 0.72; font-size: 13.5px; line-height: 1.55">
+                왼쪽에 프로필·내비게이션이 고정되고 오른쪽 콘텐츠만 스크롤. 어도비 포트폴리오류의
+                정리된 구조로, 섹션 이동이 빠르고 작업물(연주 목록)이 넓은 영역을 차지합니다.
+              </div>
             </div>
-          </div>
-          <div style="padding:26px 30px 36px;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:13px">
-            <div style="grid-column:span 2;grid-row:span 2;border:1px solid currentColor;padding:16px;cursor:pointer;display:flex;flex-direction:column;position:relative;background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(128,128,128,.06) 8px,rgba(128,128,128,.06) 9px)">
-              <span style="position:absolute;top:12px;right:12px;width:20px;height:20px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:12px">→</span>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600">{{L.works}}</div>
-              <div style="font-family:monospace;font-size:10px;opacity:.6">05 PAMPHLETS</div>
-              <div style="display:flex;gap:8px;margin-top:auto"><div style="flex:1;aspect-ratio:3/4;border:1px solid currentColor"></div><div style="flex:1;aspect-ratio:3/4;border:1px solid currentColor"></div><div style="flex:1;aspect-ratio:3/4;border:1px solid currentColor"></div></div>
-            </div>
-            <div style="grid-column:span 2;border:1px solid currentColor;padding:14px;cursor:pointer;position:relative">
-              <span style="position:absolute;top:12px;right:12px;width:18px;height:18px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:11px">→</span>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:600;margin-bottom:8px">{{L.schedule}}</div>
-              <div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:8px;font-family:monospace;font-size:10px;opacity:.75"><span>2026.07.12</span><span style="opacity:.7">Summer Recital</span></div><div style="display:flex;gap:8px;font-family:monospace;font-size:10px;opacity:.75"><span>2026.08.03</span><span style="opacity:.7">Beethoven No.5</span></div></div>
-            </div>
-            <div style="border:1px solid currentColor;padding:14px;cursor:pointer;position:relative"><span style="position:absolute;top:11px;right:11px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px">→</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600">{{L.awards}}</div><div style="font-family:monospace;font-size:10px;opacity:.6;margin-top:6px">12 ITEMS</div></div>
-            <div style="border:1px solid currentColor;padding:14px;cursor:pointer;position:relative"><span style="position:absolute;top:11px;right:11px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px">→</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600">{{L.press}}</div><div style="font-family:monospace;font-size:10px;opacity:.6;margin-top:6px">QUOTES</div></div>
-            <div style="grid-column:span 2;border:1px solid currentColor;cursor:pointer;position:relative;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.07) 7px,rgba(128,128,128,.07) 8px);display:flex;align-items:center;justify-content:center;gap:10px"><span style="width:34px;height:34px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center">▶</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:600">{{L.media}}</div></div>
-            <div style="border:1px solid currentColor;padding:14px;cursor:pointer;position:relative"><span style="position:absolute;top:11px;right:11px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px">→</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600">{{L.bio}}</div></div>
-            <div style="border:1px solid currentColor;padding:14px;cursor:pointer;position:relative;background:{{accent}};color:#fff"><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600">{{L.contact}}</div><div style="font-family:monospace;font-size:9px;opacity:.85;margin-top:6px">hello@…</div></div>
-          </div>
-        </div>
-      </div>
+            <div
+              style="
+                display: flex;
+                gap: 44px;
+                align-items: flex-start;
+                padding: 14px 26px 64px;
+                overflow-x: auto;
+              "
+            >
+              <!-- B desktop -->
+              <div
+                data-screen-label="B · Desktop"
+                style="flex: 0 0 820px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.desktop}}
+                  <span style="font-family: monospace; font-size: 10px; opacity: 0.5">1440px</span>
+                </div>
+                <div
+                  style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s"
+                >
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 7px;
+                      padding: 8px 12px;
+                      border-bottom: 1px solid currentColor;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        margin-left: 8px;
+                        flex: 1;
+                        height: 14px;
+                        border: 1px solid currentColor;
+                        opacity: 0.45;
+                      "
+                    ></span>
+                  </div>
+                  <div style="display: flex; min-height: 640px">
+                    <aside
+                      style="
+                        flex: 0 0 230px;
+                        border-right: 1px solid currentColor;
+                        padding: 30px 22px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 16px;
+                        align-items: flex-start;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 88px;
+                          height: 88px;
+                          border-radius: 50%;
+                          border: 1px solid currentColor;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 6px,
+                            rgba(128, 128, 128, 0.09) 6px,
+                            rgba(128, 128, 128, 0.09) 7px
+                          );
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-family: monospace;
+                          font-size: 9px;
+                          opacity: 0.6;
+                        "
+                      >
+                        PHOTO
+                      </div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 32px;
+                          font-weight: 600;
+                          line-height: 0.95;
+                        "
+                      >
+                        Junhyung Kim
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 11px;
+                          letter-spacing: 0.18em;
+                          text-transform: uppercase;
+                          opacity: 0.7;
+                        "
+                      >
+                        {{L.role}}
+                      </div>
+                      <nav
+                        style="
+                          display: flex;
+                          flex-direction: column;
+                          gap: 0;
+                          width: 100%;
+                          margin-top: 10px;
+                          border-top: 1px solid currentColor;
+                        "
+                      >
+                        <span
+                          style="
+                            font-size: 13.5px;
+                            padding: 10px 0;
+                            border-bottom: 1px solid currentColor;
+                            display: flex;
+                            justify-content: space-between;
+                          "
+                          ><span>{{L.bio}}</span><span style="opacity: 0.4">›</span></span
+                        >
+                        <span
+                          style="font-size:13.5px;padding:10px 0;border-bottom:1px solid currentColor;display:flex;justify-content:space-between;color:{{accent}}"
+                          ><span>{{L.works}}</span><span>›</span></span
+                        >
+                        <span
+                          style="
+                            font-size: 13.5px;
+                            padding: 10px 0;
+                            border-bottom: 1px solid currentColor;
+                            display: flex;
+                            justify-content: space-between;
+                          "
+                          ><span>{{L.schedule}}</span><span style="opacity: 0.4">›</span></span
+                        >
+                        <span
+                          style="
+                            font-size: 13.5px;
+                            padding: 10px 0;
+                            border-bottom: 1px solid currentColor;
+                            display: flex;
+                            justify-content: space-between;
+                          "
+                          ><span>{{L.awards}}</span><span style="opacity: 0.4">›</span></span
+                        >
+                        <span
+                          style="
+                            font-size: 13.5px;
+                            padding: 10px 0;
+                            border-bottom: 1px solid currentColor;
+                            display: flex;
+                            justify-content: space-between;
+                          "
+                          ><span>{{L.media}}</span><span style="opacity: 0.4">›</span></span
+                        >
+                        <span
+                          style="
+                            font-size: 13.5px;
+                            padding: 10px 0;
+                            border-bottom: 1px solid currentColor;
+                            display: flex;
+                            justify-content: space-between;
+                          "
+                          ><span>{{L.contact}}</span><span style="opacity: 0.4">›</span></span
+                        >
+                      </nav>
+                      <div
+                        style="
+                          margin-top: auto;
+                          display: flex;
+                          flex-direction: column;
+                          gap: 8px;
+                          width: 100%;
+                        "
+                      >
+                        <div style="display: flex; gap: 5px">
+                          <span
+                            style="
+                              flex: 1;
+                              text-align: center;
+                              font-family: monospace;
+                              font-size: 9px;
+                              border: 1px solid currentColor;
+                              padding: 4px 0;
+                            "
+                            >라이트</span
+                          ><span
+                            style="flex:1;text-align:center;font-family:monospace;font-size:9px;background:currentColor;color:{{paper}};padding:5px 0"
+                            >다크</span
+                          >
+                        </div>
+                        <div style="display: flex; gap: 5px">
+                          <span
+                            style="flex:1;text-align:center;font-family:monospace;font-size:9px;background:currentColor;color:{{paper}};padding:5px 0"
+                            >KR</span
+                          ><span
+                            style="
+                              flex: 1;
+                              text-align: center;
+                              font-family: monospace;
+                              font-size: 9px;
+                              border: 1px solid currentColor;
+                              padding: 4px 0;
+                            "
+                            >EN</span
+                          >
+                        </div>
+                      </div>
+                    </aside>
+                    <div
+                      style="
+                        flex: 1;
+                        padding: 32px 34px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 38px;
+                      "
+                    >
+                      <section style="display: flex; gap: 24px; align-items: flex-start">
+                        <div style="flex: 1">
+                          <div
+                            style="
+                              font-family: monospace;
+                              font-size: 11px;
+                              opacity: 0.5;
+                              margin-bottom: 4px;
+                            "
+                          >
+                            01 — {{L.bio}}
+                          </div>
+                          <div
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 30px;
+                              font-weight: 600;
+                              line-height: 1;
+                              margin-bottom: 14px;
+                            "
+                          >
+                            {{L.tagline}}
+                          </div>
+                          <div style="display: flex; flex-direction: column; gap: 8px">
+                            <div style="height: 8px; background: currentColor; opacity: 0.11"></div>
+                            <div
+                              style="
+                                height: 8px;
+                                background: currentColor;
+                                opacity: 0.11;
+                                width: 95%;
+                              "
+                            ></div>
+                            <div
+                              style="
+                                height: 8px;
+                                background: currentColor;
+                                opacity: 0.11;
+                                width: 88%;
+                              "
+                            ></div>
+                            <div
+                              style="
+                                height: 8px;
+                                background: currentColor;
+                                opacity: 0.11;
+                                width: 60%;
+                              "
+                            ></div>
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            flex: 0 0 150px;
+                            aspect-ratio: 4/5;
+                            border: 1px solid currentColor;
+                            background: repeating-linear-gradient(
+                              45deg,
+                              transparent,
+                              transparent 6px,
+                              rgba(128, 128, 128, 0.08) 6px,
+                              rgba(128, 128, 128, 0.08) 7px
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-family: monospace;
+                            font-size: 10px;
+                            opacity: 0.55;
+                          "
+                        >
+                          PORTRAIT
+                        </div>
+                      </section>
+                      <section>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: baseline;
+                            justify-content: space-between;
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 8px;
+                            margin-bottom: 16px;
+                          "
+                        >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 28px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            02 · {{L.works}}
+                          </h3>
+                          <span style="font-family: monospace; font-size: 11px; opacity: 0.55"
+                            >{{L.more}} →</span
+                          >
+                        </div>
+                        <div
+                          style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px"
+                        >
+                          <sc-for list="{{ works }}" as="w" hint-placeholder-count="6">
+                            <div style="cursor: pointer">
+                              <div
+                                style="
+                                  aspect-ratio: 3/4;
+                                  border: 1px solid currentColor;
+                                  background: repeating-linear-gradient(
+                                    45deg,
+                                    transparent,
+                                    transparent 6px,
+                                    rgba(128, 128, 128, 0.08) 6px,
+                                    rgba(128, 128, 128, 0.08) 7px
+                                  );
+                                  position: relative;
+                                  display: flex;
+                                  align-items: flex-end;
+                                  padding: 8px;
+                                "
+                              >
+                                <span
+                                  style="position:absolute;top:7px;right:7px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-family:monospace"
+                                  >→</span
+                                ><span style="font-family: monospace; font-size: 9px; opacity: 0.55"
+                                  >PAMPHLET</span
+                                >
+                              </div>
+                              <div
+                                style="
+                                  font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                                  font-size: 18px;
+                                  margin-top: 6px;
+                                  line-height: 1.05;
+                                "
+                              >
+                                {{ w.t }}
+                              </div>
+                              <div style="font-family: monospace; font-size: 10px; opacity: 0.6">
+                                {{ w.d }}
+                              </div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </section>
+                      <section>
+                        <div
+                          style="
+                            border-bottom: 1px solid currentColor;
+                            padding-bottom: 8px;
+                            margin-bottom: 12px;
+                          "
+                        >
+                          <h3
+                            style="
+                              font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                              font-size: 28px;
+                              margin: 0;
+                              font-weight: 600;
+                            "
+                          >
+                            03 · {{L.schedule}}
+                          </h3>
+                        </div>
+                        <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="3">
+                          <div
+                            style="
+                              display: flex;
+                              align-items: center;
+                              gap: 16px;
+                              padding: 12px 0;
+                              border-bottom: 1px solid currentColor;
+                            "
+                          >
+                            <span
+                              style="
+                                font-family: monospace;
+                                font-size: 13px;
+                                opacity: 0.75;
+                                flex: 0 0 92px;
+                              "
+                              >{{ s.d }}</span
+                            ><span style="flex: 1; font-size: 14px"
+                              >{{ s.t }}
+                              <span style="font-family: monospace; font-size: 11px; opacity: 0.55"
+                                >· {{ s.v }}</span
+                              ></span
+                            ><span
+                              style="font-family:monospace;font-size:11px;border:1.5px solid {{accent}};color:{{accent}};padding:5px 11px"
+                              >{{L.ticket}}</span
+                            >
+                          </div>
+                        </sc-for>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      <!-- C mobile -->
-      <div data-screen-label="C · Mobile" style="flex:0 0 340px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.mobile}} <span style="font-family:monospace;font-size:10px;opacity:.5">375px</span></div>
-        <div style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)">
-          <div style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s">
-            <div style="height:120px;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.07) 7px,rgba(128,128,128,.07) 8px);border-bottom:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;opacity:.5">BANNER</div>
-            <div style="display:flex;flex-direction:column;align-items:center;margin-top:-44px;padding-bottom:16px;border-bottom:1px solid currentColor">
-              <div style="width:80px;height:80px;border-radius:50%;border:1px solid currentColor;background:{{paper}};box-shadow:0 0 0 5px {{paper}};display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;opacity:.6">PHOTO</div>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;margin-top:9px">Junhyung Kim</div>
-              <div style="font-family:monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.7">{{L.role}}</div>
-            </div>
-            <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:11px">
-              <div style="grid-column:span 2;border:1px solid currentColor;padding:13px;position:relative;min-height:120px;display:flex;flex-direction:column"><span style="position:absolute;top:10px;right:10px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px">→</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:600">{{L.works}}</div><div style="display:flex;gap:6px;margin-top:auto"><div style="flex:1;aspect-ratio:3/4;border:1px solid currentColor"></div><div style="flex:1;aspect-ratio:3/4;border:1px solid currentColor"></div><div style="flex:1;aspect-ratio:3/4;border:1px solid currentColor"></div></div></div>
-              <div style="border:1px solid currentColor;padding:12px;position:relative;min-height:84px"><span style="position:absolute;top:9px;right:9px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:9px">→</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;line-height:1">{{L.schedule}}</div></div>
-              <div style="border:1px solid currentColor;padding:12px;position:relative;min-height:84px"><span style="position:absolute;top:9px;right:9px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:9px">→</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;line-height:1">{{L.awards}}</div></div>
-              <div style="border:1px solid currentColor;padding:12px;min-height:74px;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.07) 7px,rgba(128,128,128,.07) 8px);display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px">▶</span><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:600">{{L.media}}</div></div>
-              <div style="border:1px solid currentColor;padding:12px;min-height:74px;background:{{accent}};color:#fff"><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:600">{{L.contact}}</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-  </sc-if>
-
-  <!-- ============== DETAIL PAGE D ============== -->
-  <sc-if value="{{ isD }}" hint-placeholder-val="{{ false }}">
-  <div>
-    <div style="padding:16px 26px 6px">
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:34px;font-weight:600;line-height:1">연주 상세 페이지</div>
-      <div style="max-width:700px;opacity:.72;font-size:13.5px;line-height:1.55">연주 목록의 팜플렛을 클릭하면 도착하는 화면. 팜플렛 원본 + 프로그램 · 예매 · 갤러리 · 영상이 한 곳에. 세 변형 모두 동일한 상세 구조를 공유합니다.</div>
-    </div>
-    <div style="display:flex;gap:44px;align-items:flex-start;padding:14px 26px 64px;overflow-x:auto">
-
-      <!-- Detail desktop -->
-      <div data-screen-label="Detail · Desktop" style="flex:0 0 820px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.desktop}}</div>
-        <div style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s">
-          <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid currentColor"><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="width:9px;height:9px;border-radius:50%;border:1px solid currentColor"></span><span style="margin-left:8px;flex:1;height:14px;border:1px solid currentColor;opacity:.45"></span></div>
-          <div style="padding:18px 30px;border-bottom:1px solid currentColor;font-family:monospace;font-size:12px;display:flex;align-items:center;gap:8px;color:{{accent}};cursor:pointer">← {{L.back}} · {{L.works}}</div>
-          <div style="padding:32px 30px;display:flex;gap:30px;align-items:flex-start">
-            <div style="flex:0 0 290px;aspect-ratio:3/4;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.08) 7px,rgba(128,128,128,.08) 8px);display:flex;align-items:flex-end;padding:12px;font-family:monospace;font-size:11px;opacity:.6">PAMPHLET · 원본</div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:14px">
-              <div style="font-family:monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6">Recital</div>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:44px;font-weight:600;line-height:.95">Winterreise, D.911</div>
-              <div style="font-family:monospace;font-size:13px;opacity:.75">2026.03.14 · 19:30 · 예술의전당 콘서트홀</div>
-              <div style="display:flex;gap:9px;margin:6px 0"><span style="font-family:monospace;font-size:12px;background:{{accent}};color:#fff;padding:9px 18px">{{L.booking}}</span><span style="font-family:monospace;font-size:12px;border:1px solid currentColor;padding:9px 16px">{{L.share}}</span></div>
-              <div style="border-top:1px solid currentColor;padding-top:12px;margin-top:4px"><div style="font-family:monospace;font-size:11px;opacity:.6;margin-bottom:8px">{{L.program}}</div>
-                <div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:10px;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:7px"><span style="font-family:monospace;font-size:10px;opacity:.5;flex:0 0 22px">I.</span><span style="font-size:13px">Gute Nacht</span></div><div style="display:flex;gap:10px;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:7px"><span style="font-family:monospace;font-size:10px;opacity:.5;flex:0 0 22px">II.</span><span style="font-size:13px">Die Wetterfahne</span></div><div style="display:flex;gap:10px;align-items:baseline"><span style="font-family:monospace;font-size:10px;opacity:.5;flex:0 0 22px">III.</span><span style="font-size:13px">Gefrorne Tränen</span></div></div>
+              <!-- B mobile -->
+              <div
+                data-screen-label="B · Mobile"
+                style="flex: 0 0 340px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.mobile}}
+                  <span style="font-family: monospace; font-size: 10px; opacity: 0.5">375px</span>
+                </div>
+                <div
+                  style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)"
+                >
+                  <div
+                    style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s"
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 14px;
+                        border-bottom: 1px solid currentColor;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 50px;
+                          height: 50px;
+                          border-radius: 50%;
+                          border: 1px solid currentColor;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 6px,
+                            rgba(128, 128, 128, 0.09) 6px,
+                            rgba(128, 128, 128, 0.09) 7px
+                          );
+                          flex: 0 0 50px;
+                        "
+                      ></div>
+                      <div style="flex: 1">
+                        <div
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 26px;
+                            font-weight: 600;
+                            line-height: 0.9;
+                          "
+                        >
+                          Junhyung Kim
+                        </div>
+                        <div
+                          style="
+                            font-family: monospace;
+                            font-size: 9px;
+                            letter-spacing: 0.16em;
+                            text-transform: uppercase;
+                            opacity: 0.7;
+                          "
+                        >
+                          {{L.role}}
+                        </div>
+                      </div>
+                      <span style="display: flex; flex-direction: column; gap: 3px"
+                        ><span style="width: 18px; height: 2px; background: currentColor"></span
+                        ><span style="width: 18px; height: 2px; background: currentColor"></span
+                        ><span style="width: 18px; height: 2px; background: currentColor"></span
+                      ></span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        gap: 6px;
+                        padding: 10px 14px;
+                        border-bottom: 1px solid currentColor;
+                        overflow-x: auto;
+                        font-family: monospace;
+                        font-size: 10px;
+                      "
+                    >
+                      <span
+                        style="border:1px solid currentColor;padding:4px 9px;white-space:nowrap;background:{{accent}};color:#fff"
+                        >{{L.works}}</span
+                      ><span
+                        style="
+                          border: 1px solid currentColor;
+                          padding: 4px 9px;
+                          white-space: nowrap;
+                        "
+                        >{{L.bio}}</span
+                      ><span
+                        style="
+                          border: 1px solid currentColor;
+                          padding: 4px 9px;
+                          white-space: nowrap;
+                        "
+                        >{{L.schedule}}</span
+                      ><span
+                        style="
+                          border: 1px solid currentColor;
+                          padding: 4px 9px;
+                          white-space: nowrap;
+                        "
+                        >{{L.contact}}</span
+                      >
+                    </div>
+                    <div style="padding: 18px 16px 24px">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: baseline;
+                          justify-content: space-between;
+                          border-bottom: 1px solid currentColor;
+                          padding-bottom: 6px;
+                          margin-bottom: 12px;
+                        "
+                      >
+                        <h3
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 23px;
+                            margin: 0;
+                            font-weight: 600;
+                          "
+                        >
+                          {{L.works}}
+                        </h3>
+                        <span style="font-family: monospace; font-size: 9px; opacity: 0.5"
+                          >{{L.more}} →</span
+                        >
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                        <sc-for list="{{ works }}" as="w" hint-placeholder-count="4">
+                          <div>
+                            <div
+                              style="
+                                aspect-ratio: 3/4;
+                                border: 1px solid currentColor;
+                                background: repeating-linear-gradient(
+                                  45deg,
+                                  transparent,
+                                  transparent 6px,
+                                  rgba(128, 128, 128, 0.08) 6px,
+                                  rgba(128, 128, 128, 0.08) 7px
+                                );
+                                position: relative;
+                              "
+                            >
+                              <span
+                                style="position:absolute;top:6px;right:6px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-family:monospace"
+                                >→</span
+                              >
+                            </div>
+                            <div
+                              style="
+                                font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                                font-size: 15px;
+                                margin-top: 5px;
+                                line-height: 1.05;
+                              "
+                            >
+                              {{ w.t }}
+                            </div>
+                            <div style="font-family: monospace; font-size: 9px; opacity: 0.6">
+                              {{ w.d }}
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div style="padding:0 30px 30px;display:flex;flex-direction:column;gap:30px">
-            <div style="display:flex;flex-direction:column;gap:8px"><div style="height:8px;background:currentColor;opacity:.11"></div><div style="height:8px;background:currentColor;opacity:.11;width:96%"></div><div style="height:8px;background:currentColor;opacity:.11;width:90%"></div><div style="height:8px;background:currentColor;opacity:.11;width:55%"></div></div>
-            <div><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-weight:600;margin-bottom:12px">{{L.gallery}}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"><div style="aspect-ratio:4/3;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.07) 6px,rgba(128,128,128,.07) 7px)"></div><div style="aspect-ratio:4/3;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.07) 6px,rgba(128,128,128,.07) 7px)"></div><div style="aspect-ratio:4/3;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(128,128,128,.07) 6px,rgba(128,128,128,.07) 7px)"></div></div></div>
-            <div><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-weight:600;margin-bottom:12px">{{L.media}}</div><div style="aspect-ratio:16/9;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.07) 7px,rgba(128,128,128,.07) 8px);display:flex;align-items:center;justify-content:center;gap:10px;font-family:monospace;font-size:12px;opacity:.6"><span style="width:38px;height:38px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center">▶</span>LIVE VIDEO</div></div>
-          </div>
-        </div>
-      </div>
+        </sc-if>
 
-      <!-- Detail mobile -->
-      <div data-screen-label="Detail · Mobile" style="flex:0 0 340px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;display:flex;align-items:center;gap:8px">{{L.mobile}}</div>
-        <div style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)">
-          <div style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s">
-            <div style="padding:13px 16px;border-bottom:1px solid currentColor;font-family:monospace;font-size:11px;color:{{accent}}">← {{L.back}}</div>
-            <div style="padding:18px 16px;display:flex;flex-direction:column;gap:12px">
-              <div style="width:100%;aspect-ratio:3/4;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.08) 7px,rgba(128,128,128,.08) 8px);display:flex;align-items:flex-end;padding:10px;font-family:monospace;font-size:10px;opacity:.6">PAMPHLET</div>
-              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:600;line-height:.95">Winterreise, D.911</div>
-              <div style="font-family:monospace;font-size:11px;opacity:.75">2026.03.14 · 19:30 · 예술의전당</div>
-              <span style="font-family:monospace;font-size:12px;background:{{accent}};color:#fff;padding:11px 0;text-align:center">{{L.booking}}</span>
-              <div style="border-top:1px solid currentColor;padding-top:10px"><div style="font-family:monospace;font-size:10px;opacity:.6;margin-bottom:7px">{{L.program}}</div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:8px;border-bottom:1px solid currentColor;padding-bottom:6px"><span style="font-family:monospace;font-size:9px;opacity:.5">I.</span><span style="font-size:12px">Gute Nacht</span></div><div style="display:flex;gap:8px;border-bottom:1px solid currentColor;padding-bottom:6px"><span style="font-family:monospace;font-size:9px;opacity:.5">II.</span><span style="font-size:12px">Die Wetterfahne</span></div></div></div>
-              <div style="aspect-ratio:16/9;border:1px solid currentColor;background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(128,128,128,.07) 7px,rgba(128,128,128,.07) 8px);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;opacity:.6;gap:8px"><span style="width:30px;height:30px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center">▶</span>VIDEO</div>
+        <!-- ============== VARIATION C ============== -->
+        <sc-if value="{{ isC }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="padding: 16px 26px 6px">
+              <div
+                style="
+                  font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                  font-size: 34px;
+                  font-weight: 600;
+                  line-height: 1;
+                "
+              >
+                C · 그리드 인덱스
+              </div>
+              <div style="max-width: 700px; opacity: 0.72; font-size: 13.5px; line-height: 1.55">
+                와이드 배너 위로 원형 프로필이 겹쳐지고, 아래는 섹션이 각진 타일 그리드로
+                펼쳐집니다. 갤러리·매거진 인상 — 모든 섹션이 한 화면에서 클릭 가능한 진입점이
+                됩니다.
+              </div>
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 44px;
+                align-items: flex-start;
+                padding: 14px 26px 64px;
+                overflow-x: auto;
+              "
+            >
+              <!-- C desktop -->
+              <div
+                data-screen-label="C · Desktop"
+                style="flex: 0 0 820px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.desktop}}
+                  <span style="font-family: monospace; font-size: 10px; opacity: 0.5">1440px</span>
+                </div>
+                <div
+                  style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s"
+                >
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 7px;
+                      padding: 8px 12px;
+                      border-bottom: 1px solid currentColor;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        margin-left: 8px;
+                        flex: 1;
+                        height: 14px;
+                        border: 1px solid currentColor;
+                        opacity: 0.45;
+                      "
+                    ></span>
+                  </div>
+                  <div style="position: relative">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 26px;
+                        font-family: monospace;
+                        font-size: 11px;
+                        border-bottom: 1px solid currentColor;
+                      "
+                    >
+                      <span style="font-weight: 600; letter-spacing: 0.1em">JUNHYUNG KIM</span
+                      ><span style="display: flex; gap: 14px; align-items: center"
+                        ><span>{{L.works}}</span><span>{{L.schedule}}</span
+                        ><span>{{L.contact}}</span
+                        ><span style="border: 1px solid currentColor; padding: 2px 7px"
+                          >EN / 다크</span
+                        ></span
+                      >
+                    </div>
+                    <div
+                      style="
+                        height: 188px;
+                        background: repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 7px,
+                          rgba(128, 128, 128, 0.07) 7px,
+                          rgba(128, 128, 128, 0.07) 8px
+                        );
+                        border-bottom: 1px solid currentColor;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: monospace;
+                        font-size: 12px;
+                        opacity: 0.5;
+                        letter-spacing: 0.1em;
+                      "
+                    >
+                      BANNER IMAGE
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        margin-top: -56px;
+                        padding-bottom: 22px;
+                      "
+                    >
+                      <div
+                        style="width:112px;height:112px;border-radius:50%;border:1px solid currentColor;background:{{paper}};box-shadow:0 0 0 6px {{paper}};display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:10px;opacity:.6"
+                      >
+                        PHOTO
+                      </div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 46px;
+                          font-weight: 600;
+                          line-height: 0.95;
+                          margin-top: 12px;
+                        "
+                      >
+                        Junhyung Kim
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 11px;
+                          letter-spacing: 0.22em;
+                          text-transform: uppercase;
+                          opacity: 0.7;
+                          margin-top: 4px;
+                        "
+                      >
+                        {{L.role}}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 26px 30px 36px;
+                      display: grid;
+                      grid-template-columns: repeat(4, 1fr);
+                      grid-auto-rows: 140px;
+                      gap: 13px;
+                    "
+                  >
+                    <div
+                      style="
+                        grid-column: span 2;
+                        grid-row: span 2;
+                        border: 1px solid currentColor;
+                        padding: 16px;
+                        cursor: pointer;
+                        display: flex;
+                        flex-direction: column;
+                        position: relative;
+                        background: repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 8px,
+                          rgba(128, 128, 128, 0.06) 8px,
+                          rgba(128, 128, 128, 0.06) 9px
+                        );
+                      "
+                    >
+                      <span
+                        style="position:absolute;top:12px;right:12px;width:20px;height:20px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:12px"
+                        >→</span
+                      >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 30px;
+                          font-weight: 600;
+                        "
+                      >
+                        {{L.works}}
+                      </div>
+                      <div style="font-family: monospace; font-size: 10px; opacity: 0.6">
+                        05 PAMPHLETS
+                      </div>
+                      <div style="display: flex; gap: 8px; margin-top: auto">
+                        <div
+                          style="flex: 1; aspect-ratio: 3/4; border: 1px solid currentColor"
+                        ></div>
+                        <div
+                          style="flex: 1; aspect-ratio: 3/4; border: 1px solid currentColor"
+                        ></div>
+                        <div
+                          style="flex: 1; aspect-ratio: 3/4; border: 1px solid currentColor"
+                        ></div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        grid-column: span 2;
+                        border: 1px solid currentColor;
+                        padding: 14px;
+                        cursor: pointer;
+                        position: relative;
+                      "
+                    >
+                      <span
+                        style="position:absolute;top:12px;right:12px;width:18px;height:18px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:11px"
+                        >→</span
+                      >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 24px;
+                          font-weight: 600;
+                          margin-bottom: 8px;
+                        "
+                      >
+                        {{L.schedule}}
+                      </div>
+                      <div style="display: flex; flex-direction: column; gap: 5px">
+                        <div
+                          style="
+                            display: flex;
+                            gap: 8px;
+                            font-family: monospace;
+                            font-size: 10px;
+                            opacity: 0.75;
+                          "
+                        >
+                          <span>2026.07.12</span><span style="opacity: 0.7">Summer Recital</span>
+                        </div>
+                        <div
+                          style="
+                            display: flex;
+                            gap: 8px;
+                            font-family: monospace;
+                            font-size: 10px;
+                            opacity: 0.75;
+                          "
+                        >
+                          <span>2026.08.03</span><span style="opacity: 0.7">Beethoven No.5</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        border: 1px solid currentColor;
+                        padding: 14px;
+                        cursor: pointer;
+                        position: relative;
+                      "
+                    >
+                      <span
+                        style="position:absolute;top:11px;right:11px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px"
+                        >→</span
+                      >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 22px;
+                          font-weight: 600;
+                        "
+                      >
+                        {{L.awards}}
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 10px;
+                          opacity: 0.6;
+                          margin-top: 6px;
+                        "
+                      >
+                        12 ITEMS
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        border: 1px solid currentColor;
+                        padding: 14px;
+                        cursor: pointer;
+                        position: relative;
+                      "
+                    >
+                      <span
+                        style="position:absolute;top:11px;right:11px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px"
+                        >→</span
+                      >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 22px;
+                          font-weight: 600;
+                        "
+                      >
+                        {{L.press}}
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 10px;
+                          opacity: 0.6;
+                          margin-top: 6px;
+                        "
+                      >
+                        QUOTES
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        grid-column: span 2;
+                        border: 1px solid currentColor;
+                        cursor: pointer;
+                        position: relative;
+                        background: repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 7px,
+                          rgba(128, 128, 128, 0.07) 7px,
+                          rgba(128, 128, 128, 0.07) 8px
+                        );
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                      "
+                    >
+                      <span
+                        style="
+                          width: 34px;
+                          height: 34px;
+                          border-radius: 50%;
+                          border: 1px solid currentColor;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                        >▶</span
+                      >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 24px;
+                          font-weight: 600;
+                        "
+                      >
+                        {{L.media}}
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        border: 1px solid currentColor;
+                        padding: 14px;
+                        cursor: pointer;
+                        position: relative;
+                      "
+                    >
+                      <span
+                        style="position:absolute;top:11px;right:11px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px"
+                        >→</span
+                      >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 22px;
+                          font-weight: 600;
+                        "
+                      >
+                        {{L.bio}}
+                      </div>
+                    </div>
+                    <div
+                      style="border:1px solid currentColor;padding:14px;cursor:pointer;position:relative;background:{{accent}};color:#fff"
+                    >
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 22px;
+                          font-weight: 600;
+                        "
+                      >
+                        {{L.contact}}
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 9px;
+                          opacity: 0.85;
+                          margin-top: 6px;
+                        "
+                      >
+                        hello@…
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- C mobile -->
+              <div
+                data-screen-label="C · Mobile"
+                style="flex: 0 0 340px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.mobile}}
+                  <span style="font-family: monospace; font-size: 10px; opacity: 0.5">375px</span>
+                </div>
+                <div
+                  style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)"
+                >
+                  <div
+                    style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s"
+                  >
+                    <div
+                      style="
+                        height: 120px;
+                        background: repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 7px,
+                          rgba(128, 128, 128, 0.07) 7px,
+                          rgba(128, 128, 128, 0.07) 8px
+                        );
+                        border-bottom: 1px solid currentColor;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: monospace;
+                        font-size: 10px;
+                        opacity: 0.5;
+                      "
+                    >
+                      BANNER
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        margin-top: -44px;
+                        padding-bottom: 16px;
+                        border-bottom: 1px solid currentColor;
+                      "
+                    >
+                      <div
+                        style="width:80px;height:80px;border-radius:50%;border:1px solid currentColor;background:{{paper}};box-shadow:0 0 0 5px {{paper}};display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;opacity:.6"
+                      >
+                        PHOTO
+                      </div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 30px;
+                          font-weight: 600;
+                          margin-top: 9px;
+                        "
+                      >
+                        Junhyung Kim
+                      </div>
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 9px;
+                          letter-spacing: 0.2em;
+                          text-transform: uppercase;
+                          opacity: 0.7;
+                        "
+                      >
+                        {{L.role}}
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        padding: 16px;
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 11px;
+                      "
+                    >
+                      <div
+                        style="
+                          grid-column: span 2;
+                          border: 1px solid currentColor;
+                          padding: 13px;
+                          position: relative;
+                          min-height: 120px;
+                          display: flex;
+                          flex-direction: column;
+                        "
+                      >
+                        <span
+                          style="position:absolute;top:10px;right:10px;width:16px;height:16px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:10px"
+                          >→</span
+                        >
+                        <div
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 24px;
+                            font-weight: 600;
+                          "
+                        >
+                          {{L.works}}
+                        </div>
+                        <div style="display: flex; gap: 6px; margin-top: auto">
+                          <div
+                            style="flex: 1; aspect-ratio: 3/4; border: 1px solid currentColor"
+                          ></div>
+                          <div
+                            style="flex: 1; aspect-ratio: 3/4; border: 1px solid currentColor"
+                          ></div>
+                          <div
+                            style="flex: 1; aspect-ratio: 3/4; border: 1px solid currentColor"
+                          ></div>
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          border: 1px solid currentColor;
+                          padding: 12px;
+                          position: relative;
+                          min-height: 84px;
+                        "
+                      >
+                        <span
+                          style="position:absolute;top:9px;right:9px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:9px"
+                          >→</span
+                        >
+                        <div
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 19px;
+                            font-weight: 600;
+                            line-height: 1;
+                          "
+                        >
+                          {{L.schedule}}
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          border: 1px solid currentColor;
+                          padding: 12px;
+                          position: relative;
+                          min-height: 84px;
+                        "
+                      >
+                        <span
+                          style="position:absolute;top:9px;right:9px;width:14px;height:14px;background:{{accent}};display:flex;align-items:center;justify-content:center;color:#fff;font-family:monospace;font-size:9px"
+                          >→</span
+                        >
+                        <div
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 19px;
+                            font-weight: 600;
+                            line-height: 1;
+                          "
+                        >
+                          {{L.awards}}
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          border: 1px solid currentColor;
+                          padding: 12px;
+                          min-height: 74px;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 7px,
+                            rgba(128, 128, 128, 0.07) 7px,
+                            rgba(128, 128, 128, 0.07) 8px
+                          );
+                          display: flex;
+                          align-items: center;
+                          gap: 8px;
+                        "
+                      >
+                        <span
+                          style="
+                            width: 24px;
+                            height: 24px;
+                            border-radius: 50%;
+                            border: 1px solid currentColor;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 11px;
+                          "
+                          >▶</span
+                        >
+                        <div
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 18px;
+                            font-weight: 600;
+                          "
+                        >
+                          {{L.media}}
+                        </div>
+                      </div>
+                      <div
+                        style="border:1px solid currentColor;padding:12px;min-height:74px;background:{{accent}};color:#fff"
+                      >
+                        <div
+                          style="
+                            font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                            font-size: 18px;
+                            font-weight: 600;
+                          "
+                        >
+                          {{L.contact}}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </sc-if>
+
+        <!-- ============== DETAIL PAGE D ============== -->
+        <sc-if value="{{ isD }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="padding: 16px 26px 6px">
+              <div
+                style="
+                  font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                  font-size: 34px;
+                  font-weight: 600;
+                  line-height: 1;
+                "
+              >
+                연주 상세 페이지
+              </div>
+              <div style="max-width: 700px; opacity: 0.72; font-size: 13.5px; line-height: 1.55">
+                연주 목록의 팜플렛을 클릭하면 도착하는 화면. 팜플렛 원본 + 프로그램 · 예매 · 갤러리
+                · 영상이 한 곳에. 세 변형 모두 동일한 상세 구조를 공유합니다.
+              </div>
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 44px;
+                align-items: flex-start;
+                padding: 14px 26px 64px;
+                overflow-x: auto;
+              "
+            >
+              <!-- Detail desktop -->
+              <div
+                data-screen-label="Detail · Desktop"
+                style="flex: 0 0 820px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.desktop}}
+                </div>
+                <div
+                  style="border:1px solid {{ink}};background:{{paper}};color:{{ink}};box-shadow:0 22px 70px -34px rgba(0,0,0,.4);transition:background .25s,color .25s"
+                >
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 7px;
+                      padding: 8px 12px;
+                      border-bottom: 1px solid currentColor;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 50%;
+                        border: 1px solid currentColor;
+                      "
+                    ></span
+                    ><span
+                      style="
+                        margin-left: 8px;
+                        flex: 1;
+                        height: 14px;
+                        border: 1px solid currentColor;
+                        opacity: 0.45;
+                      "
+                    ></span>
+                  </div>
+                  <div
+                    style="padding:18px 30px;border-bottom:1px solid currentColor;font-family:monospace;font-size:12px;display:flex;align-items:center;gap:8px;color:{{accent}};cursor:pointer"
+                  >
+                    ← {{L.back}} · {{L.works}}
+                  </div>
+                  <div
+                    style="padding: 32px 30px; display: flex; gap: 30px; align-items: flex-start"
+                  >
+                    <div
+                      style="
+                        flex: 0 0 290px;
+                        aspect-ratio: 3/4;
+                        border: 1px solid currentColor;
+                        background: repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 7px,
+                          rgba(128, 128, 128, 0.08) 7px,
+                          rgba(128, 128, 128, 0.08) 8px
+                        );
+                        display: flex;
+                        align-items: flex-end;
+                        padding: 12px;
+                        font-family: monospace;
+                        font-size: 11px;
+                        opacity: 0.6;
+                      "
+                    >
+                      PAMPHLET · 원본
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
+                      <div
+                        style="
+                          font-family: monospace;
+                          font-size: 11px;
+                          letter-spacing: 0.2em;
+                          text-transform: uppercase;
+                          opacity: 0.6;
+                        "
+                      >
+                        Recital
+                      </div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 44px;
+                          font-weight: 600;
+                          line-height: 0.95;
+                        "
+                      >
+                        Winterreise, D.911
+                      </div>
+                      <div style="font-family: monospace; font-size: 13px; opacity: 0.75">
+                        2026.03.14 · 19:30 · 예술의전당 콘서트홀
+                      </div>
+                      <div style="display: flex; gap: 9px; margin: 6px 0">
+                        <span
+                          style="font-family:monospace;font-size:12px;background:{{accent}};color:#fff;padding:9px 18px"
+                          >{{L.booking}}</span
+                        ><span
+                          style="
+                            font-family: monospace;
+                            font-size: 12px;
+                            border: 1px solid currentColor;
+                            padding: 9px 16px;
+                          "
+                          >{{L.share}}</span
+                        >
+                      </div>
+                      <div
+                        style="
+                          border-top: 1px solid currentColor;
+                          padding-top: 12px;
+                          margin-top: 4px;
+                        "
+                      >
+                        <div
+                          style="
+                            font-family: monospace;
+                            font-size: 11px;
+                            opacity: 0.6;
+                            margin-bottom: 8px;
+                          "
+                        >
+                          {{L.program}}
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px">
+                          <div
+                            style="
+                              display: flex;
+                              gap: 10px;
+                              align-items: baseline;
+                              border-bottom: 1px solid currentColor;
+                              padding-bottom: 7px;
+                            "
+                          >
+                            <span
+                              style="
+                                font-family: monospace;
+                                font-size: 10px;
+                                opacity: 0.5;
+                                flex: 0 0 22px;
+                              "
+                              >I.</span
+                            ><span style="font-size: 13px">Gute Nacht</span>
+                          </div>
+                          <div
+                            style="
+                              display: flex;
+                              gap: 10px;
+                              align-items: baseline;
+                              border-bottom: 1px solid currentColor;
+                              padding-bottom: 7px;
+                            "
+                          >
+                            <span
+                              style="
+                                font-family: monospace;
+                                font-size: 10px;
+                                opacity: 0.5;
+                                flex: 0 0 22px;
+                              "
+                              >II.</span
+                            ><span style="font-size: 13px">Die Wetterfahne</span>
+                          </div>
+                          <div style="display: flex; gap: 10px; align-items: baseline">
+                            <span
+                              style="
+                                font-family: monospace;
+                                font-size: 10px;
+                                opacity: 0.5;
+                                flex: 0 0 22px;
+                              "
+                              >III.</span
+                            ><span style="font-size: 13px">Gefrorne Tränen</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="padding: 0 30px 30px; display: flex; flex-direction: column; gap: 30px"
+                  >
+                    <div style="display: flex; flex-direction: column; gap: 8px">
+                      <div style="height: 8px; background: currentColor; opacity: 0.11"></div>
+                      <div
+                        style="height: 8px; background: currentColor; opacity: 0.11; width: 96%"
+                      ></div>
+                      <div
+                        style="height: 8px; background: currentColor; opacity: 0.11; width: 90%"
+                      ></div>
+                      <div
+                        style="height: 8px; background: currentColor; opacity: 0.11; width: 55%"
+                      ></div>
+                    </div>
+                    <div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 26px;
+                          font-weight: 600;
+                          margin-bottom: 12px;
+                        "
+                      >
+                        {{L.gallery}}
+                      </div>
+                      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px">
+                        <div
+                          style="
+                            aspect-ratio: 4/3;
+                            border: 1px solid currentColor;
+                            background: repeating-linear-gradient(
+                              45deg,
+                              transparent,
+                              transparent 6px,
+                              rgba(128, 128, 128, 0.07) 6px,
+                              rgba(128, 128, 128, 0.07) 7px
+                            );
+                          "
+                        ></div>
+                        <div
+                          style="
+                            aspect-ratio: 4/3;
+                            border: 1px solid currentColor;
+                            background: repeating-linear-gradient(
+                              45deg,
+                              transparent,
+                              transparent 6px,
+                              rgba(128, 128, 128, 0.07) 6px,
+                              rgba(128, 128, 128, 0.07) 7px
+                            );
+                          "
+                        ></div>
+                        <div
+                          style="
+                            aspect-ratio: 4/3;
+                            border: 1px solid currentColor;
+                            background: repeating-linear-gradient(
+                              45deg,
+                              transparent,
+                              transparent 6px,
+                              rgba(128, 128, 128, 0.07) 6px,
+                              rgba(128, 128, 128, 0.07) 7px
+                            );
+                          "
+                        ></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 26px;
+                          font-weight: 600;
+                          margin-bottom: 12px;
+                        "
+                      >
+                        {{L.media}}
+                      </div>
+                      <div
+                        style="
+                          aspect-ratio: 16/9;
+                          border: 1px solid currentColor;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 7px,
+                            rgba(128, 128, 128, 0.07) 7px,
+                            rgba(128, 128, 128, 0.07) 8px
+                          );
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          gap: 10px;
+                          font-family: monospace;
+                          font-size: 12px;
+                          opacity: 0.6;
+                        "
+                      >
+                        <span
+                          style="
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 50%;
+                            border: 1px solid currentColor;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                          >▶</span
+                        >LIVE VIDEO
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detail mobile -->
+              <div
+                data-screen-label="Detail · Mobile"
+                style="flex: 0 0 340px; display: flex; flex-direction: column; gap: 9px"
+              >
+                <div
+                  style="
+                    font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                    font-size: 19px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  {{L.mobile}}
+                </div>
+                <div
+                  style="border:1px solid {{ink}};border-radius:20px;padding:8px;background:{{ink}};box-shadow:0 24px 60px -34px rgba(0,0,0,.45)"
+                >
+                  <div
+                    style="background:{{paper}};color:{{ink}};border-radius:13px;overflow:hidden;transition:background .25s,color .25s"
+                  >
+                    <div
+                      style="padding:13px 16px;border-bottom:1px solid currentColor;font-family:monospace;font-size:11px;color:{{accent}}"
+                    >
+                      ← {{L.back}}
+                    </div>
+                    <div
+                      style="padding: 18px 16px; display: flex; flex-direction: column; gap: 12px"
+                    >
+                      <div
+                        style="
+                          width: 100%;
+                          aspect-ratio: 3/4;
+                          border: 1px solid currentColor;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 7px,
+                            rgba(128, 128, 128, 0.08) 7px,
+                            rgba(128, 128, 128, 0.08) 8px
+                          );
+                          display: flex;
+                          align-items: flex-end;
+                          padding: 10px;
+                          font-family: monospace;
+                          font-size: 10px;
+                          opacity: 0.6;
+                        "
+                      >
+                        PAMPHLET
+                      </div>
+                      <div
+                        style="
+                          font-family: &quot;Cormorant Garamond&quot;, Georgia, serif;
+                          font-size: 32px;
+                          font-weight: 600;
+                          line-height: 0.95;
+                        "
+                      >
+                        Winterreise, D.911
+                      </div>
+                      <div style="font-family: monospace; font-size: 11px; opacity: 0.75">
+                        2026.03.14 · 19:30 · 예술의전당
+                      </div>
+                      <span
+                        style="font-family:monospace;font-size:12px;background:{{accent}};color:#fff;padding:11px 0;text-align:center"
+                        >{{L.booking}}</span
+                      >
+                      <div style="border-top: 1px solid currentColor; padding-top: 10px">
+                        <div
+                          style="
+                            font-family: monospace;
+                            font-size: 10px;
+                            opacity: 0.6;
+                            margin-bottom: 7px;
+                          "
+                        >
+                          {{L.program}}
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px">
+                          <div
+                            style="
+                              display: flex;
+                              gap: 8px;
+                              border-bottom: 1px solid currentColor;
+                              padding-bottom: 6px;
+                            "
+                          >
+                            <span style="font-family: monospace; font-size: 9px; opacity: 0.5"
+                              >I.</span
+                            ><span style="font-size: 12px">Gute Nacht</span>
+                          </div>
+                          <div
+                            style="
+                              display: flex;
+                              gap: 8px;
+                              border-bottom: 1px solid currentColor;
+                              padding-bottom: 6px;
+                            "
+                          >
+                            <span style="font-family: monospace; font-size: 9px; opacity: 0.5"
+                              >II.</span
+                            ><span style="font-size: 12px">Die Wetterfahne</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          aspect-ratio: 16/9;
+                          border: 1px solid currentColor;
+                          background: repeating-linear-gradient(
+                            45deg,
+                            transparent,
+                            transparent 7px,
+                            rgba(128, 128, 128, 0.07) 7px,
+                            rgba(128, 128, 128, 0.07) 8px
+                          );
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-family: monospace;
+                          font-size: 11px;
+                          opacity: 0.6;
+                          gap: 8px;
+                        "
+                      >
+                        <span
+                          style="
+                            width: 30px;
+                            height: 30px;
+                            border-radius: 50%;
+                            border: 1px solid currentColor;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                          >▶</span
+                        >VIDEO
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
       </div>
-
-    </div>
-  </div>
-  </sc-if>
-
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { tab: 'A', theme: 'light', lang: 'ko' };
-  renderVals() {
-    const { tab, theme, lang } = this.state;
-    const t = theme === 'dark'
-      ? { paper: '#1a1917', ink: '#ecebe7', grid: '#232019' }
-      : { paper: '#f6f5f3', ink: '#1b1a18', grid: '#d7d5d0' };
-    const accent = 'oklch(0.56 0.13 30)';
-    const on = t.ink, off = 'transparent', onfg = t.paper, offfg = t.ink;
-    const dict = {
-      ko: { bio:'약력', works:'연주 목록', schedule:'공연 일정', awards:'수상 경력', press:'보도 · 평론', media:'영상 · 오디오', contact:'연락처', role:'피아니스트', ticket:'예매', detail:'상세 보기', listen:'듣기', watch:'보기', more:'더 보기', upcoming:'다가오는 공연', selected:'주요 연주', menu:'메뉴', desktop:'데스크탑', mobile:'모바일', follow:'팔로우', email:'이메일', agency:'소속', tagline:'무대 위의 이야기를 전합니다', back:'목록으로', program:'프로그램', gallery:'갤러리', booking:'예매하기', share:'공유' },
-      en: { bio:'Biography', works:'Repertoire', schedule:'Schedule', awards:'Awards', press:'Press', media:'Media', contact:'Contact', role:'Pianist', ticket:'Tickets', detail:'View', listen:'Listen', watch:'Watch', more:'More', upcoming:'Upcoming', selected:'Selected Works', menu:'Menu', desktop:'Desktop', mobile:'Mobile', follow:'Follow', email:'Email', agency:'Mgmt', tagline:'Stories told from the stage', back:'Back', program:'Programme', gallery:'Gallery', booking:'Book Now', share:'Share' }
-    };
-    const L = dict[lang];
-    const works = [
-      { t:'Winterreise, D.911', d:'2026.03.14', v:'예술의전당' },
-      { t:'Chopin Recital', d:'2025.11.02', v:'롯데콘서트홀' },
-      { t:'Rachmaninov No.2', d:'2025.06.20', v:'세종문화회관' },
-      { t:'Schubert Sonatas', d:'2025.02.15', v:'금호아트홀' },
-      { t:'New Year Gala', d:'2025.01.01', v:'예술의전당' }
-    ];
-    const schedule = [
-      { d:'2026.07.12', t:'Summer Solo Recital', v:'예술의전당 IBK챔버홀' },
-      { d:'2026.08.03', t:'Beethoven Concerto No.5', v:'롯데콘서트홀' },
-      { d:'2026.09.21', t:'Duo Concert', v:'금호아트홀' }
-    ];
-    const awards = [
-      { y:'2024', n:'International Piano Competition · Finalist' },
-      { y:'2022', n:'Busoni Competition · 2nd Prize' },
-      { y:'2020', n:'Seoul Music Competition · 1st Prize' },
-      { y:'2018', n:'Young Artist Award' }
-    ];
-    return {
-      L, accent, paper: t.paper, ink: t.ink, grid: t.grid,
-      works, schedule, awards,
-      isA: tab==='A', isB: tab==='B', isC: tab==='C', isD: tab==='D',
-      aBg: tab==='A'?on:off, aFg: tab==='A'?onfg:offfg,
-      bBg: tab==='B'?on:off, bFg: tab==='B'?onfg:offfg,
-      cBg: tab==='C'?on:off, cFg: tab==='C'?onfg:offfg,
-      dBg: tab==='D'?on:off, dFg: tab==='D'?onfg:offfg,
-      ltBg: theme==='light'?on:off, ltFg: theme==='light'?onfg:offfg,
-      dkBg: theme==='dark'?on:off, dkFg: theme==='dark'?onfg:offfg,
-      koBg: lang==='ko'?on:off, koFg: lang==='ko'?onfg:offfg,
-      enBg: lang==='en'?on:off, enFg: lang==='en'?onfg:offfg,
-      tabA: ()=>this.setState({tab:'A'}), tabB: ()=>this.setState({tab:'B'}),
-      tabC: ()=>this.setState({tab:'C'}), tabD: ()=>this.setState({tab:'D'}),
-      lightOn: ()=>this.setState({theme:'light'}), darkOn: ()=>this.setState({theme:'dark'}),
-      koOn: ()=>this.setState({lang:'ko'}), enOn: ()=>this.setState({lang:'en'})
-    };
-  }
-}
-</script>
-</body>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script>
+      class Component extends DCLogic {
+        state = { tab: 'A', theme: 'light', lang: 'ko' };
+        renderVals() {
+          const { tab, theme, lang } = this.state;
+          const t = theme === 'dark'
+            ? { paper: '#1a1917', ink: '#ecebe7', grid: '#232019' }
+            : { paper: '#f6f5f3', ink: '#1b1a18', grid: '#d7d5d0' };
+          const accent = 'oklch(0.56 0.13 30)';
+          const on = t.ink, off = 'transparent', onfg = t.paper, offfg = t.ink;
+          const dict = {
+            ko: { bio:'약력', works:'연주 목록', schedule:'공연 일정', awards:'수상 경력', press:'보도 · 평론', media:'영상 · 오디오', contact:'연락처', role:'피아니스트', ticket:'예매', detail:'상세 보기', listen:'듣기', watch:'보기', more:'더 보기', upcoming:'다가오는 공연', selected:'주요 연주', menu:'메뉴', desktop:'데스크탑', mobile:'모바일', follow:'팔로우', email:'이메일', agency:'소속', tagline:'무대 위의 이야기를 전합니다', back:'목록으로', program:'프로그램', gallery:'갤러리', booking:'예매하기', share:'공유' },
+            en: { bio:'Biography', works:'Repertoire', schedule:'Schedule', awards:'Awards', press:'Press', media:'Media', contact:'Contact', role:'Pianist', ticket:'Tickets', detail:'View', listen:'Listen', watch:'Watch', more:'More', upcoming:'Upcoming', selected:'Selected Works', menu:'Menu', desktop:'Desktop', mobile:'Mobile', follow:'Follow', email:'Email', agency:'Mgmt', tagline:'Stories told from the stage', back:'Back', program:'Programme', gallery:'Gallery', booking:'Book Now', share:'Share' }
+          };
+          const L = dict[lang];
+          const works = [
+            { t:'Winterreise, D.911', d:'2026.03.14', v:'예술의전당' },
+            { t:'Chopin Recital', d:'2025.11.02', v:'롯데콘서트홀' },
+            { t:'Rachmaninov No.2', d:'2025.06.20', v:'세종문화회관' },
+            { t:'Schubert Sonatas', d:'2025.02.15', v:'금호아트홀' },
+            { t:'New Year Gala', d:'2025.01.01', v:'예술의전당' }
+          ];
+          const schedule = [
+            { d:'2026.07.12', t:'Summer Solo Recital', v:'예술의전당 IBK챔버홀' },
+            { d:'2026.08.03', t:'Beethoven Concerto No.5', v:'롯데콘서트홀' },
+            { d:'2026.09.21', t:'Duo Concert', v:'금호아트홀' }
+          ];
+          const awards = [
+            { y:'2024', n:'International Piano Competition · Finalist' },
+            { y:'2022', n:'Busoni Competition · 2nd Prize' },
+            { y:'2020', n:'Seoul Music Competition · 1st Prize' },
+            { y:'2018', n:'Young Artist Award' }
+          ];
+          return {
+            L, accent, paper: t.paper, ink: t.ink, grid: t.grid,
+            works, schedule, awards,
+            isA: tab==='A', isB: tab==='B', isC: tab==='C', isD: tab==='D',
+            aBg: tab==='A'?on:off, aFg: tab==='A'?onfg:offfg,
+            bBg: tab==='B'?on:off, bFg: tab==='B'?onfg:offfg,
+            cBg: tab==='C'?on:off, cFg: tab==='C'?onfg:offfg,
+            dBg: tab==='D'?on:off, dFg: tab==='D'?onfg:offfg,
+            ltBg: theme==='light'?on:off, ltFg: theme==='light'?onfg:offfg,
+            dkBg: theme==='dark'?on:off, dkFg: theme==='dark'?onfg:offfg,
+            koBg: lang==='ko'?on:off, koFg: lang==='ko'?onfg:offfg,
+            enBg: lang==='en'?on:off, enFg: lang==='en'?onfg:offfg,
+            tabA: ()=>this.setState({tab:'A'}), tabB: ()=>this.setState({tab:'B'}),
+            tabC: ()=>this.setState({tab:'C'}), tabD: ()=>this.setState({tab:'D'}),
+            lightOn: ()=>this.setState({theme:'light'}), darkOn: ()=>this.setState({theme:'dark'}),
+            koOn: ()=>this.setState({lang:'ko'}), enOn: ()=>this.setState({lang:'en'})
+          };
+        }
+      }
+    </script>
+  </body>
 </html>

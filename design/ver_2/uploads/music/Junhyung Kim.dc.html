@@ -1,520 +1,2513 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    ::selection { background: #18181b; color: #fff; }
-  </style>
-  <script src="image-slot.js"></script>
-</helmet>
-<div id="top" style="--bg:{{bg}};--s1:{{s1}};--s2:{{s2}};--line:{{line}};--line2:{{line2}};--text:{{text}};--t2:{{t2}};--t3:{{t3}};--t4:{{t4}};--photo:{{photo}};--accent:{{accent}};--shadow:{{shadow}};background:{{bg}};color:{{text}};font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;min-height:100vh;transition:background .35s,color .35s;-webkit-font-smoothing:antialiased;word-break:keep-all">
-
-  <header style="position:sticky;top:0;z-index:40;background:{{bg}};border-bottom:1px solid var(--line,rgba(17,17,20,0.08));transition:background .35s,border-color .35s">
-    <div style="max-width:1180px;margin:0 auto;padding:17px clamp(20px,4vw,40px);display:flex;align-items:center;gap:26px">
-      <button onClick="{{ homeTop }}" style="font-family:'Newsreader',Georgia,serif;font-size:23px;font-weight:500;letter-spacing:-.01em;background:none;border:none;cursor:pointer;padding:0;color:var(--text,#18181b)">Junhyung Kim<span style="color:var(--accent,#0a84ff)">.</span></button>
-      <nav style="margin-left:auto;display:flex;gap:clamp(9px,1.5vw,22px);align-items:center;font-size:13.5px;font-weight:500">
-        <button onClick="{{ navBio }}" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--t3,#71717a);transition:color .2s" style-hover="color:var(--text,#18181b)">{{ L.bioNav }}</button>
-        <button onClick="{{ navWorks }}" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--t3,#71717a);transition:color .2s" style-hover="color:var(--text,#18181b)">{{ L.worksNav }}</button>
-        <button onClick="{{ navSchedule }}" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--t3,#71717a);transition:color .2s" style-hover="color:var(--text,#18181b)">{{ L.scheduleNav }}</button>
-        <button onClick="{{ navMedia }}" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;color:var(--t3,#71717a);transition:color .2s" style-hover="color:var(--text,#18181b)">{{ L.mediaNav }}</button>
-      </nav>
-      <div style="display:flex;align-items:center;gap:2px;padding-left:10px;border-left:1px solid var(--line,rgba(17,17,20,0.08))">
-        <div style="position:relative">
-          <button onClick="{{ toggleLangMenu }}" aria-label="Language" style="width:34px;height:34px;border:none;background:none;cursor:pointer;color:var(--text,#18181b);display:flex;align-items:center;justify-content:center;border-radius:999px;transition:background .2s" style-hover="background:var(--s2,#f3f3f5)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.6 2.7 2.6 15.3 0 18c-2.6-2.7-2.6-15.3 0-18z"></path></svg></button>
-          <sc-if value="{{ langMenuOpen }}" hint-placeholder-val="{{ false }}">
-            <div onClick="{{ closeLangMenu }}" style="position:fixed;inset:0;z-index:48"></div>
-            <div style="position:absolute;top:42px;right:0;z-index:49;background:var(--bg,#fff);border:1px solid var(--line,rgba(17,17,20,0.08));box-shadow:var(--shadow);min-width:146px;padding:5px">
-              <button onClick="{{ pickKo }}" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;background:none;border:none;cursor:pointer;color:var(--text,#18181b);font:inherit;font-size:13.5px;padding:9px 11px;text-align:left;transition:background .15s" style-hover="background:var(--s2,#f3f3f5)"><span>한국어</span><span style="font-size:8px;color:var(--accent,#0a84ff);opacity:{{ koCheck }}">●</span></button>
-              <button onClick="{{ pickEn }}" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;background:none;border:none;cursor:pointer;color:var(--text,#18181b);font:inherit;font-size:13.5px;padding:9px 11px;text-align:left;transition:background .15s" style-hover="background:var(--s2,#f3f3f5)"><span>English</span><span style="font-size:8px;color:var(--accent,#0a84ff);opacity:{{ enCheck }}">●</span></button>
-            </div>
-          </sc-if>
-        </div>
-        <button onClick="{{ toggleTheme }}" aria-label="Theme" style="width:34px;height:34px;border:none;background:none;cursor:pointer;color:var(--text,#18181b);font-size:14px;display:flex;align-items:center;justify-content:center;border-radius:999px;transition:background .2s" style-hover="background:var(--s2,#f3f3f5)">{{ themeIcon }}</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- ================= HOME ================= -->
-  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-  <div>
-    <!-- HERO -->
-    <section style="max-width:1180px;margin:0 auto;padding:clamp(44px,7vw,92px) clamp(20px,4vw,40px) clamp(36px,5vw,64px)">
-      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(30px,6vw,76px);align-items:stretch">
-      <div>
-        <h1 style="font-family:'Newsreader',Georgia,serif;font-size:clamp(42px,8.4vw,90px);font-weight:500;line-height:.96;letter-spacing:-.02em;margin:0">Junhyung Kim<br><span style="font-style:italic;font-weight:400;color:var(--t2,#3f3f46)">— Pianist</span></h1>
-        <p style="font-size:clamp(16px,1.9vw,20px);line-height:1.6;color:var(--t2,#3f3f46);max-width:60ch;margin:clamp(22px,3vw,30px) 0 0">{{ L.bioLead }}</p>
-        <div style="display:flex;gap:clamp(22px,3vw,38px);margin-top:clamp(24px,3vw,32px)">
-          <sc-for list="{{ social }}" as="s" hint-placeholder-count="3">
-            <a href="{{ s.h }}" style="text-decoration:none;display:flex;flex-direction:column;gap:5px">
-              <span style="font-size:14px;font-weight:600;color:var(--accent,#0a84ff)">{{ s.t }}</span>
-              <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--accent,#0a84ff)">↗</span>
-            </a>
-          </sc-for>
-        </div>
-      </div>
-      <image-slot id="jk-portrait" shape="rect" fit="cover" placeholder="{{ L.dropPortrait }}" style="display:block;width:100%;height:100%;min-height:clamp(300px,42vw,560px)"></image-slot>
-      </div>
-    </section>
-
-    <!-- 01 BIO -->
-    <section id="bio" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(26px,4vw,44px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">01</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.bio }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.bioDesc }}</span>
-      </div>
-      <div style="max-width:820px">
-        <p style="font-family:'Newsreader',Georgia,serif;font-size:clamp(22px,2.7vw,32px);line-height:1.45;margin:0 0 22px;letter-spacing:-.01em">{{ L.bioBody }}</p>
-        <p style="font-size:15.5px;line-height:1.8;color:var(--t2,#3f3f46);margin:0;max-width:64ch">{{ L.bioBody2 }}</p>
-      </div>
-    </section>
-
-    <!-- 02 CAREER & EDUCATION -->
-    <section id="career" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(22px,3vw,38px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">02</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.career }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.careerDesc }}</span>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--t3,#71717a);margin-bottom:2px">{{ L.careerL }}</div>
-        <sc-for list="{{ careerData }}" as="c" hint-placeholder-count="3">
-          <div style="display:flex;gap:clamp(16px,2.5vw,30px);align-items:baseline;padding:clamp(15px,2vw,19px) 8px;border-top:1px solid var(--line,rgba(17,17,20,0.08))"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--accent,#0a84ff);flex:0 0 clamp(96px,12vw,150px)">{{ c.p }}</span><span style="flex:1;font-size:clamp(16px,1.8vw,19px);font-weight:500;letter-spacing:-.015em;line-height:1.3">{{ c.t }}</span></div>
-        </sc-for>
-        <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
-        <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--t3,#71717a);margin:clamp(30px,4vw,46px) 0 2px">{{ L.eduL }}</div>
-        <sc-for list="{{ eduData }}" as="e" hint-placeholder-count="3">
-          <div style="display:flex;gap:clamp(16px,2.5vw,30px);align-items:baseline;padding:clamp(15px,2vw,19px) 8px;border-top:1px solid var(--line,rgba(17,17,20,0.08))"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--accent,#0a84ff);flex:0 0 clamp(96px,12vw,150px)">{{ e.p }}</span><span style="flex:1;font-size:clamp(16px,1.8vw,19px);font-weight:500;letter-spacing:-.015em;line-height:1.3">{{ e.t }}</span></div>
-        </sc-for>
-        <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
-      </div>
-    </section>
-
-    <!-- 03 WORKS (preview, 2 rows) -->
-    <section id="works" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(26px,4vw,44px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">03</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.works }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.worksDesc }}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,26px)">
-        <sc-for list="{{ worksPreview }}" as="w" hint-placeholder-count="6">
-          <div style="display:flex;flex-direction:column">
-            <div style="position:relative;aspect-ratio:3/4;transition:transform .25s cubic-bezier(.2,.7,.2,1)" style-hover="transform:translateY(-4px)">
-              <image-slot id="{{ w.posterId }}" shape="rect" placeholder="{{ L.dropPoster }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot>
-              <span style="position:absolute;top:11px;left:11px;background:rgba(0,0,0,.62);color:#fff;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;pointer-events:none;z-index:2">{{ w.tag }}</span>
-              <button onClick="{{ w.onOpen }}" aria-label="detail" style="position:absolute;bottom:11px;right:11px;z-index:2;width:32px;height:32px;border:none;border-radius:50%;background:var(--bg,#fff);color:var(--text,#18181b);display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:var(--shadow);cursor:pointer">↗</button>
-            </div>
-            <button onClick="{{ w.onOpen }}" style="text-align:left;background:none;border:none;padding:0;margin-top:13px;cursor:pointer;color:inherit;font:inherit">
-              <div style="font-family:'Newsreader',Georgia,serif;font-size:20px;font-weight:500;letter-spacing:-.01em;line-height:1.1">{{ w.t }}</div>
-              <div style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11.5px;color:var(--t3,#71717a);margin-top:7px;display:flex;gap:7px;flex-wrap:wrap"><span>{{ w.d }}</span><span style="color:var(--t4,#a1a1aa)">·</span><span>{{ w.v }}</span></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+          html,
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          html {
+            scroll-behavior: smooth;
+          }
+          ::selection {
+            background: #18181b;
+            color: #fff;
+          }
+        </style>
+        <script src="image-slot.js"></script>
+      </helmet>
+      <div
+        id="top"
+        style="--bg:{{bg}};--s1:{{s1}};--s2:{{s2}};--line:{{line}};--line2:{{line2}};--text:{{text}};--t2:{{t2}};--t3:{{t3}};--t4:{{t4}};--photo:{{photo}};--accent:{{accent}};--shadow:{{shadow}};background:{{bg}};color:{{text}};font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;min-height:100vh;transition:background .35s,color .35s;-webkit-font-smoothing:antialiased;word-break:keep-all"
+      >
+        <header
+          style="position:sticky;top:0;z-index:40;background:{{bg}};border-bottom:1px solid var(--line,rgba(17,17,20,0.08));transition:background .35s,border-color .35s"
+        >
+          <div
+            style="
+              max-width: 1180px;
+              margin: 0 auto;
+              padding: 17px clamp(20px, 4vw, 40px);
+              display: flex;
+              align-items: center;
+              gap: 26px;
+            "
+          >
+            <button
+              onClick="{{ homeTop }}"
+              style="
+                font-family: &quot;Newsreader&quot;, Georgia, serif;
+                font-size: 23px;
+                font-weight: 500;
+                letter-spacing: -0.01em;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                color: var(--text, #18181b);
+              "
+            >
+              Junhyung Kim<span style="color: var(--accent, #0a84ff)">.</span>
             </button>
-          </div>
-        </sc-for>
-      </div>
-      <button onClick="{{ goWorks }}" style="margin-top:clamp(24px,3vw,34px);width:100%;background:none;border:1px solid var(--line2,rgba(17,17,20,0.16));cursor:pointer;color:var(--text,#18181b);font:inherit;font-size:14px;font-weight:600;padding:15px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" style-hover="background:var(--s1,#fafafa)">{{ L.seeWorks }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;color:var(--t3,#71717a)">({{ worksTotal }})</span> <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;color:var(--accent,#0a84ff)">→</span></button>
-    </section>
-
-    <!-- 04 SCHEDULE (preview) -->
-    <section id="schedule" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(16px,2vw,26px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">04</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.schedule }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.scheduleDesc }}</span>
-      </div>
-      <div>
-        <sc-for list="{{ schedulePreview }}" as="s" hint-placeholder-count="3">
-          <div style="display:flex;align-items:center;gap:clamp(16px,3vw,40px);padding:clamp(18px,2.4vw,24px) 4px;border-top:1px solid var(--line,rgba(17,17,20,0.08));transition:background .2s" style-hover="background:var(--s1,#fafafa)">
-            <div style="flex:0 0 auto;text-align:center;min-width:58px"><div style="font-family:'Newsreader',Georgia,serif;font-size:clamp(22px,2.6vw,30px);font-weight:500;letter-spacing:-.01em;line-height:1">{{ s.d }}</div><div style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;color:var(--t3,#71717a);margin-top:3px">{{ s.y }}</div></div>
-            <div style="flex:1;min-width:0"><div style="font-size:clamp(16px,1.8vw,19px);font-weight:600;letter-spacing:-.01em">{{ s.t }}</div><div style="font-size:13px;color:var(--t3,#71717a);margin-top:4px">{{ s.v }}</div></div>
-            <span style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3,#71717a);border:1px solid var(--line2,rgba(17,17,20,0.16));border-radius:999px;padding:5px 11px;white-space:nowrap">{{ s.status }}</span>
-          </div>
-        </sc-for>
-        <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
-      </div>
-      <button onClick="{{ goSchedule }}" style="margin-top:clamp(22px,3vw,30px);background:none;border:none;cursor:pointer;color:var(--accent,#0a84ff);font:inherit;font-size:14px;font-weight:600;padding:0;display:flex;align-items:center;gap:7px">{{ L.seeSchedule }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">({{ scheduleTotal }}) →</span></button>
-    </section>
-
-    <!-- 05 AWARDS (1 column, clickable) -->
-    <section id="awards" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(16px,2vw,26px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">05</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.awards }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.awardsDesc }}</span>
-      </div>
-      <div>
-        <sc-for list="{{ awards }}" as="a" hint-placeholder-count="6">
-          <button onClick="{{ a.onOpen }}" style="display:flex;width:100%;align-items:baseline;gap:clamp(16px,2.5vw,28px);text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;color:inherit;font:inherit;padding:clamp(19px,2.6vw,26px) 8px;transition:background .2s,padding-left .2s" style-hover="background:var(--s1,#fafafa);padding-left:16px">
-            <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:14px;font-weight:500;color:var(--accent,#0a84ff);flex:0 0 54px">{{ a.y }}</span>
-            <span style="flex:1;font-size:clamp(16px,1.8vw,19px);font-weight:500;letter-spacing:-.015em;line-height:1.3">{{ a.n }}</span>
-            <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11.5px;color:var(--t3,#71717a);white-space:nowrap">{{ a.place }}</span>
-            <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">↗</span>
-          </button>
-        </sc-for>
-        <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
-      </div>
-    </section>
-
-    <!-- 06 PRESS (preview, clickable) -->
-    <section id="press" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(26px,4vw,44px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">06</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.press }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.pressDesc }}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:clamp(24px,4vw,48px)">
-        <sc-for list="{{ pressPreview }}" as="p" hint-placeholder-count="3">
-          <button onClick="{{ p.onOpen }}" style="text-align:left;background:none;border:none;padding:0;cursor:pointer;color:inherit;font:inherit;display:flex;flex-direction:column;gap:14px">
-            <blockquote style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:clamp(19px,2.1vw,25px);line-height:1.42;margin:0;letter-spacing:-.01em">“{{ p.q }}”</blockquote>
-            <figcaption style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;letter-spacing:.06em;color:var(--t3,#71717a);display:flex;align-items:center;gap:7px">— {{ p.s }} <span style="color:var(--accent,#0a84ff)">↗</span></figcaption>
-          </button>
-        </sc-for>
-      </div>
-      <button onClick="{{ goPress }}" style="margin-top:clamp(26px,3.5vw,38px);background:none;border:none;cursor:pointer;color:var(--accent,#0a84ff);font:inherit;font-size:14px;font-weight:600;padding:0;display:flex;align-items:center;gap:7px">{{ L.seePress }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">({{ pressTotal }}) →</span></button>
-    </section>
-
-    <!-- 07 MEDIA -->
-    <section id="media" style="max-width:1180px;margin:0 auto;padding:clamp(52px,7vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:78px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:clamp(20px,3vw,26px);margin-bottom:clamp(20px,3vw,32px);flex-wrap:wrap">
-        <div style="display:flex;align-items:baseline;gap:15px"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:13px;color:var(--t4,#a1a1aa)">07</span><h2 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(24px,3vw,37px);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1">{{ L.media }}</h2></div>
-        <span style="font-size:13px;color:var(--t3,#71717a)">{{ L.mediaDesc }}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(20px,3vw,36px);align-items:start">
-        <div style="position:relative;aspect-ratio:16/9">
-          <image-slot id="jk-media" shape="rect" placeholder="{{ L.dropImg }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:13px;pointer-events:none">
-            <span style="width:56px;height:56px;border-radius:50%;background:var(--bg,#fff);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:var(--shadow)">▶</span>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column">
-          <sc-for list="{{ tracks }}" as="tr" hint-placeholder-count="3">
-            <div style="display:flex;align-items:center;gap:13px;padding:13px 4px;border-top:1px solid var(--line,rgba(17,17,20,0.08));cursor:pointer;transition:background .2s" style-hover="background:var(--s1,#fafafa)">
-              <span style="width:28px;height:28px;border-radius:50%;border:1px solid var(--line2,rgba(17,17,20,0.16));display:flex;align-items:center;justify-content:center;font-size:9px;flex:0 0 auto">▶</span>
-              <span style="flex:1;font-size:13.5px;line-height:1.3">{{ tr.t }}</span>
-              <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11.5px;color:var(--t3,#71717a)">{{ tr.dur }}</span>
+            <nav
+              style="
+                margin-left: auto;
+                display: flex;
+                gap: clamp(9px, 1.5vw, 22px);
+                align-items: center;
+                font-size: 13.5px;
+                font-weight: 500;
+              "
+            >
+              <button
+                onClick="{{ navBio }}"
+                style="
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  padding: 0;
+                  font: inherit;
+                  color: var(--t3, #71717a);
+                  transition: color 0.2s;
+                "
+                style-hover="color:var(--text,#18181b)"
+              >
+                {{ L.bioNav }}
+              </button>
+              <button
+                onClick="{{ navWorks }}"
+                style="
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  padding: 0;
+                  font: inherit;
+                  color: var(--t3, #71717a);
+                  transition: color 0.2s;
+                "
+                style-hover="color:var(--text,#18181b)"
+              >
+                {{ L.worksNav }}
+              </button>
+              <button
+                onClick="{{ navSchedule }}"
+                style="
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  padding: 0;
+                  font: inherit;
+                  color: var(--t3, #71717a);
+                  transition: color 0.2s;
+                "
+                style-hover="color:var(--text,#18181b)"
+              >
+                {{ L.scheduleNav }}
+              </button>
+              <button
+                onClick="{{ navMedia }}"
+                style="
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  padding: 0;
+                  font: inherit;
+                  color: var(--t3, #71717a);
+                  transition: color 0.2s;
+                "
+                style-hover="color:var(--text,#18181b)"
+              >
+                {{ L.mediaNav }}
+              </button>
+            </nav>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                padding-left: 10px;
+                border-left: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+              "
+            >
+              <div style="position: relative">
+                <button
+                  onClick="{{ toggleLangMenu }}"
+                  aria-label="Language"
+                  style="
+                    width: 34px;
+                    height: 34px;
+                    border: none;
+                    background: none;
+                    cursor: pointer;
+                    color: var(--text, #18181b);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 999px;
+                    transition: background 0.2s;
+                  "
+                  style-hover="background:var(--s2,#f3f3f5)"
+                >
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                  >
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <path d="M3 12h18"></path>
+                    <path d="M12 3c2.6 2.7 2.6 15.3 0 18c-2.6-2.7-2.6-15.3 0-18z"></path>
+                  </svg>
+                </button>
+                <sc-if value="{{ langMenuOpen }}" hint-placeholder-val="{{ false }}">
+                  <div
+                    onClick="{{ closeLangMenu }}"
+                    style="position: fixed; inset: 0; z-index: 48"
+                  ></div>
+                  <div
+                    style="
+                      position: absolute;
+                      top: 42px;
+                      right: 0;
+                      z-index: 49;
+                      background: var(--bg, #fff);
+                      border: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                      box-shadow: var(--shadow);
+                      min-width: 146px;
+                      padding: 5px;
+                    "
+                  >
+                    <button
+                      onClick="{{ pickKo }}"
+                      style="
+                        display: flex;
+                        width: 100%;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        color: var(--text, #18181b);
+                        font: inherit;
+                        font-size: 13.5px;
+                        padding: 9px 11px;
+                        text-align: left;
+                        transition: background 0.15s;
+                      "
+                      style-hover="background:var(--s2,#f3f3f5)"
+                    >
+                      <span>한국어</span
+                      ><span style="font-size:8px;color:var(--accent,#0a84ff);opacity:{{ koCheck }}"
+                        >●</span
+                      >
+                    </button>
+                    <button
+                      onClick="{{ pickEn }}"
+                      style="
+                        display: flex;
+                        width: 100%;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        color: var(--text, #18181b);
+                        font: inherit;
+                        font-size: 13.5px;
+                        padding: 9px 11px;
+                        text-align: left;
+                        transition: background 0.15s;
+                      "
+                      style-hover="background:var(--s2,#f3f3f5)"
+                    >
+                      <span>English</span
+                      ><span style="font-size:8px;color:var(--accent,#0a84ff);opacity:{{ enCheck }}"
+                        >●</span
+                      >
+                    </button>
+                  </div>
+                </sc-if>
+              </div>
+              <button
+                onClick="{{ toggleTheme }}"
+                aria-label="Theme"
+                style="
+                  width: 34px;
+                  height: 34px;
+                  border: none;
+                  background: none;
+                  cursor: pointer;
+                  color: var(--text, #18181b);
+                  font-size: 14px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  border-radius: 999px;
+                  transition: background 0.2s;
+                "
+                style-hover="background:var(--s2,#f3f3f5)"
+              >
+                {{ themeIcon }}
+              </button>
             </div>
-          </sc-for>
-          <a href="#" style="font-size:13px;font-weight:600;text-decoration:none;color:var(--accent,#0a84ff);border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:14px;margin-top:2px;display:flex;align-items:center;gap:5px">{{ L.mediaAll }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:12px">↗</span></a>
-        </div>
-      </div>
-    </section>
-
-  </div>
-  </sc-if>
-
-  <!-- ================= WORKS PAGE ================= -->
-  <sc-if value="{{ isWorksPage }}" hint-placeholder-val="{{ false }}">
-  <section style="max-width:1180px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(20px,4vw,40px) clamp(48px,7vw,90px)">
-    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--t3,#71717a);font:inherit;font-size:13.5px;font-weight:500;padding:0;margin-bottom:clamp(22px,3vw,32px);transition:color .2s" style-hover="color:var(--text,#18181b)"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">←</span> {{ L.backHome }}</button>
-    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));padding-bottom:clamp(20px,3vw,28px);margin-bottom:clamp(28px,4vw,44px)">
-      <h1 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(30px,5vw,54px);font-weight:600;letter-spacing:-.03em;margin:0;line-height:1">{{ L.worksPageTitle }}</h1>
-      <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:14px;color:var(--t3,#71717a)">{{ worksTotal }}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:clamp(16px,2vw,26px)">
-      <sc-for list="{{ works }}" as="w" hint-placeholder-count="9">
-        <div style="display:flex;flex-direction:column">
-          <div style="position:relative;aspect-ratio:3/4;transition:transform .25s cubic-bezier(.2,.7,.2,1)" style-hover="transform:translateY(-4px)">
-            <image-slot id="{{ w.posterId }}" shape="rect" placeholder="{{ L.dropPoster }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></image-slot>
-            <span style="position:absolute;top:11px;left:11px;background:rgba(0,0,0,.62);color:#fff;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;pointer-events:none;z-index:2">{{ w.tag }}</span>
-            <button onClick="{{ w.onOpen }}" aria-label="detail" style="position:absolute;bottom:11px;right:11px;z-index:2;width:32px;height:32px;border:none;border-radius:50%;background:var(--bg,#fff);color:var(--text,#18181b);display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:var(--shadow);cursor:pointer">↗</button>
           </div>
-          <button onClick="{{ w.onOpen }}" style="text-align:left;background:none;border:none;padding:0;margin-top:12px;cursor:pointer;color:inherit;font:inherit">
-            <div style="font-family:'Newsreader',Georgia,serif;font-size:19px;font-weight:500;letter-spacing:-.01em;line-height:1.1">{{ w.t }}</div>
-            <div style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;color:var(--t3,#71717a);margin-top:6px;display:flex;gap:7px;flex-wrap:wrap"><span>{{ w.d }}</span><span style="color:var(--t4,#a1a1aa)">·</span><span>{{ w.v }}</span></div>
-          </button>
-        </div>
-      </sc-for>
-    </div>
-  </section>
-  </sc-if>
+        </header>
 
-  <!-- ================= SCHEDULE PAGE ================= -->
-  <sc-if value="{{ isSchedulePage }}" hint-placeholder-val="{{ false }}">
-  <section style="max-width:1180px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(20px,4vw,40px) clamp(48px,7vw,90px)">
-    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--t3,#71717a);font:inherit;font-size:13.5px;font-weight:500;padding:0;margin-bottom:clamp(22px,3vw,32px);transition:color .2s" style-hover="color:var(--text,#18181b)"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">←</span> {{ L.backHome }}</button>
-    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));padding-bottom:clamp(20px,3vw,28px);margin-bottom:clamp(8px,1.5vw,18px)">
-      <h1 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(30px,5vw,54px);font-weight:600;letter-spacing:-.03em;margin:0;line-height:1">{{ L.schedulePageTitle }}</h1>
-      <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:14px;color:var(--t3,#71717a)">{{ scheduleTotal }}</span>
-    </div>
-    <div style="max-width:920px">
-      <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="5">
-        <div style="display:flex;align-items:center;gap:clamp(16px,3vw,40px);padding:clamp(18px,2.4vw,26px) 4px;border-top:1px solid var(--line,rgba(17,17,20,0.08));transition:background .2s" style-hover="background:var(--s1,#fafafa)">
-          <div style="flex:0 0 auto;text-align:center;min-width:58px"><div style="font-family:'Newsreader',Georgia,serif;font-size:clamp(22px,2.6vw,30px);font-weight:500;letter-spacing:-.01em;line-height:1">{{ s.d }}</div><div style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;color:var(--t3,#71717a);margin-top:3px">{{ s.y }}</div></div>
-          <div style="flex:1;min-width:0"><div style="font-size:clamp(16px,1.8vw,19px);font-weight:600;letter-spacing:-.01em">{{ s.t }}</div><div style="font-size:13px;color:var(--t3,#71717a);margin-top:4px">{{ s.v }}</div></div>
-          <span style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3,#71717a);border:1px solid var(--line2,rgba(17,17,20,0.16));border-radius:999px;padding:5px 11px;white-space:nowrap">{{ s.status }}</span>
-          <a href="#" style="text-decoration:none;font-size:13.5px;font-weight:600;color:var(--accent,#0a84ff);white-space:nowrap;display:flex;align-items:center;gap:4px">{{ L.ticket }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:12px">↗</span></a>
-        </div>
-      </sc-for>
-      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
-    </div>
-  </section>
-  </sc-if>
-
-  <!-- ================= PRESS PAGE ================= -->
-  <sc-if value="{{ isPressPage }}" hint-placeholder-val="{{ false }}">
-  <section style="max-width:1180px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(20px,4vw,40px) clamp(48px,7vw,90px)">
-    <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--t3,#71717a);font:inherit;font-size:13.5px;font-weight:500;padding:0;margin-bottom:clamp(22px,3vw,32px);transition:color .2s" style-hover="color:var(--text,#18181b)"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">←</span> {{ L.backHome }}</button>
-    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line,rgba(17,17,20,0.08));padding-bottom:clamp(20px,3vw,28px);margin-bottom:clamp(28px,4vw,44px)">
-      <h1 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(30px,5vw,54px);font-weight:600;letter-spacing:-.03em;margin:0;line-height:1">{{ L.pressPageTitle }}</h1>
-      <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:14px;color:var(--t3,#71717a)">{{ pressTotal }}</span>
-    </div>
-    <div style="display:flex;flex-direction:column;max-width:880px">
-      <sc-for list="{{ press }}" as="p" hint-placeholder-count="4">
-        <button onClick="{{ p.onOpen }}" style="text-align:left;background:none;border:none;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding:clamp(22px,3vw,30px) 6px;cursor:pointer;color:inherit;font:inherit;display:flex;flex-direction:column;gap:13px;transition:background .2s" style-hover="background:var(--s1,#fafafa)">
-          <blockquote style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:clamp(21px,2.6vw,30px);line-height:1.38;margin:0;letter-spacing:-.01em;max-width:30ch">“{{ p.q }}”</blockquote>
-          <figcaption style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11.5px;letter-spacing:.06em;color:var(--t3,#71717a);display:flex;align-items:center;gap:9px">— {{ p.s }} <span style="color:var(--t4,#a1a1aa)">·</span> {{ p.date }} <span style="color:var(--accent,#0a84ff)">↗</span></figcaption>
-        </button>
-      </sc-for>
-      <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
-    </div>
-  </section>
-  </sc-if>
-
-  <footer style="border-top:1px solid var(--line,rgba(17,17,20,0.08));transition:border-color .35s">
-    <div style="max-width:1180px;margin:0 auto;padding:24px clamp(20px,4vw,40px);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;letter-spacing:.04em;color:var(--t3,#71717a)">
-      <span>© 2026 Junhyung Kim</span>
-      <span>Pianist · Seoul</span>
-    </div>
-  </footer>
-
-  <!-- WORK MODAL -->
-  <sc-if value="{{ workOpen }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:clamp(14px,5vw,52px)">
-      <div style="background:var(--bg,#fff);color:var(--text,#18181b);max-width:920px;width:100%;border:1px solid var(--line,rgba(17,17,20,0.08));box-shadow:var(--shadow)">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:17px clamp(20px,3vw,34px);border-bottom:1px solid var(--line,rgba(17,17,20,0.08))">
-          <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a)">{{ workCur.tag }} · {{ L.recital }}</span>
-          <button onClick="{{ close }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font-size:22px;line-height:1;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center">×</button>
-        </div>
-        <div style="display:grid;grid-template-columns:290px 1fr;gap:clamp(24px,4vw,46px);padding:clamp(24px,4vw,42px)">
-          <image-slot id="{{ workCur.posterId }}" shape="rect" placeholder="{{ L.dropPoster }}" style="display:block;width:100%;aspect-ratio:3/4"></image-slot>
+        <!-- ================= HOME ================= -->
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
           <div>
-            <h3 style="font-family:'Newsreader',Georgia,serif;font-size:clamp(28px,3.8vw,44px);font-weight:500;letter-spacing:-.02em;line-height:1.02;margin:0 0 6px">{{ workCur.t }}</h3>
-            <div style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:18px;color:var(--t3,#71717a);margin-bottom:18px">{{ workCur.sub }}</div>
-            <div style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:12.5px;color:var(--t3,#71717a);line-height:1.7;margin-bottom:22px">{{ workCur.d }} · {{ workCur.time }}<br>{{ workCur.v }}</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px">
-              <a href="#" style="text-decoration:none;background:var(--accent,#0a84ff);color:#fff;font-size:13.5px;font-weight:600;padding:12px 24px">{{ L.book }}</a>
-              <a href="#" style="text-decoration:none;border:1px solid var(--line2,rgba(17,17,20,0.16));color:var(--text,#18181b);font-size:13.5px;font-weight:600;padding:11px 22px">{{ L.share }}</a>
+            <!-- HERO -->
+            <section
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(44px, 7vw, 92px) clamp(20px, 4vw, 40px) clamp(36px, 5vw, 64px);
+              "
+            >
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1.5fr 1fr;
+                  gap: clamp(30px, 6vw, 76px);
+                  align-items: stretch;
+                "
+              >
+                <div>
+                  <h1
+                    style="
+                      font-family: &quot;Newsreader&quot;, Georgia, serif;
+                      font-size: clamp(42px, 8.4vw, 90px);
+                      font-weight: 500;
+                      line-height: 0.96;
+                      letter-spacing: -0.02em;
+                      margin: 0;
+                    "
+                  >
+                    Junhyung Kim<br /><span
+                      style="font-style: italic; font-weight: 400; color: var(--t2, #3f3f46)"
+                      >— Pianist</span
+                    >
+                  </h1>
+                  <p
+                    style="
+                      font-size: clamp(16px, 1.9vw, 20px);
+                      line-height: 1.6;
+                      color: var(--t2, #3f3f46);
+                      max-width: 60ch;
+                      margin: clamp(22px, 3vw, 30px) 0 0;
+                    "
+                  >
+                    {{ L.bioLead }}
+                  </p>
+                  <div
+                    style="
+                      display: flex;
+                      gap: clamp(22px, 3vw, 38px);
+                      margin-top: clamp(24px, 3vw, 32px);
+                    "
+                  >
+                    <sc-for list="{{ social }}" as="s" hint-placeholder-count="3">
+                      <a
+                        href="{{ s.h }}"
+                        style="
+                          text-decoration: none;
+                          display: flex;
+                          flex-direction: column;
+                          gap: 5px;
+                        "
+                      >
+                        <span
+                          style="font-size: 14px; font-weight: 600; color: var(--accent, #0a84ff)"
+                          >{{ s.t }}</span
+                        >
+                        <span
+                          style="
+                            font-family:
+                              &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                              sans-serif;
+                            font-size: 13px;
+                            color: var(--accent, #0a84ff);
+                          "
+                          >↗</span
+                        >
+                      </a>
+                    </sc-for>
+                  </div>
+                </div>
+                <image-slot
+                  id="jk-portrait"
+                  shape="rect"
+                  fit="cover"
+                  placeholder="{{ L.dropPortrait }}"
+                  style="
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    min-height: clamp(300px, 42vw, 560px);
+                  "
+                ></image-slot>
+              </div>
+            </section>
+
+            <!-- 01 BIO -->
+            <section
+              id="bio"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(26px, 4vw, 44px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >01</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.bio }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.bioDesc }}</span>
+              </div>
+              <div style="max-width: 820px">
+                <p
+                  style="
+                    font-family: &quot;Newsreader&quot;, Georgia, serif;
+                    font-size: clamp(22px, 2.7vw, 32px);
+                    line-height: 1.45;
+                    margin: 0 0 22px;
+                    letter-spacing: -0.01em;
+                  "
+                >
+                  {{ L.bioBody }}
+                </p>
+                <p
+                  style="
+                    font-size: 15.5px;
+                    line-height: 1.8;
+                    color: var(--t2, #3f3f46);
+                    margin: 0;
+                    max-width: 64ch;
+                  "
+                >
+                  {{ L.bioBody2 }}
+                </p>
+              </div>
+            </section>
+
+            <!-- 02 CAREER & EDUCATION -->
+            <section
+              id="career"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(22px, 3vw, 38px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >02</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.career }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.careerDesc }}</span>
+              </div>
+              <div>
+                <div
+                  style="
+                    font-size: 11px;
+                    font-weight: 600;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    color: var(--t3, #71717a);
+                    margin-bottom: 2px;
+                  "
+                >
+                  {{ L.careerL }}
+                </div>
+                <sc-for list="{{ careerData }}" as="c" hint-placeholder-count="3">
+                  <div
+                    style="
+                      display: flex;
+                      gap: clamp(16px, 2.5vw, 30px);
+                      align-items: baseline;
+                      padding: clamp(15px, 2vw, 19px) 8px;
+                      border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                    "
+                  >
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 13px;
+                        color: var(--accent, #0a84ff);
+                        flex: 0 0 clamp(96px, 12vw, 150px);
+                      "
+                      >{{ c.p }}</span
+                    ><span
+                      style="
+                        flex: 1;
+                        font-size: clamp(16px, 1.8vw, 19px);
+                        font-weight: 500;
+                        letter-spacing: -0.015em;
+                        line-height: 1.3;
+                      "
+                      >{{ c.t }}</span
+                    >
+                  </div>
+                </sc-for>
+                <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+                <div
+                  style="
+                    font-size: 11px;
+                    font-weight: 600;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    color: var(--t3, #71717a);
+                    margin: clamp(30px, 4vw, 46px) 0 2px;
+                  "
+                >
+                  {{ L.eduL }}
+                </div>
+                <sc-for list="{{ eduData }}" as="e" hint-placeholder-count="3">
+                  <div
+                    style="
+                      display: flex;
+                      gap: clamp(16px, 2.5vw, 30px);
+                      align-items: baseline;
+                      padding: clamp(15px, 2vw, 19px) 8px;
+                      border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                    "
+                  >
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 13px;
+                        color: var(--accent, #0a84ff);
+                        flex: 0 0 clamp(96px, 12vw, 150px);
+                      "
+                      >{{ e.p }}</span
+                    ><span
+                      style="
+                        flex: 1;
+                        font-size: clamp(16px, 1.8vw, 19px);
+                        font-weight: 500;
+                        letter-spacing: -0.015em;
+                        line-height: 1.3;
+                      "
+                      >{{ e.t }}</span
+                    >
+                  </div>
+                </sc-for>
+                <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+              </div>
+            </section>
+
+            <!-- 03 WORKS (preview, 2 rows) -->
+            <section
+              id="works"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(26px, 4vw, 44px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >03</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.works }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.worksDesc }}</span>
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(3, 1fr);
+                  gap: clamp(16px, 2vw, 26px);
+                "
+              >
+                <sc-for list="{{ worksPreview }}" as="w" hint-placeholder-count="6">
+                  <div style="display: flex; flex-direction: column">
+                    <div
+                      style="
+                        position: relative;
+                        aspect-ratio: 3/4;
+                        transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+                      "
+                      style-hover="transform:translateY(-4px)"
+                    >
+                      <image-slot
+                        id="{{ w.posterId }}"
+                        shape="rect"
+                        placeholder="{{ L.dropPoster }}"
+                        style="
+                          position: absolute;
+                          inset: 0;
+                          width: 100%;
+                          height: 100%;
+                          display: block;
+                        "
+                      ></image-slot>
+                      <span
+                        style="
+                          position: absolute;
+                          top: 11px;
+                          left: 11px;
+                          background: rgba(0, 0, 0, 0.62);
+                          color: #fff;
+                          border-radius: 999px;
+                          font-size: 10px;
+                          font-weight: 600;
+                          letter-spacing: 0.1em;
+                          text-transform: uppercase;
+                          padding: 4px 10px;
+                          pointer-events: none;
+                          z-index: 2;
+                        "
+                        >{{ w.tag }}</span
+                      >
+                      <button
+                        onClick="{{ w.onOpen }}"
+                        aria-label="detail"
+                        style="
+                          position: absolute;
+                          bottom: 11px;
+                          right: 11px;
+                          z-index: 2;
+                          width: 32px;
+                          height: 32px;
+                          border: none;
+                          border-radius: 50%;
+                          background: var(--bg, #fff);
+                          color: var(--text, #18181b);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 13px;
+                          box-shadow: var(--shadow);
+                          cursor: pointer;
+                        "
+                      >
+                        ↗
+                      </button>
+                    </div>
+                    <button
+                      onClick="{{ w.onOpen }}"
+                      style="
+                        text-align: left;
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        margin-top: 13px;
+                        cursor: pointer;
+                        color: inherit;
+                        font: inherit;
+                      "
+                    >
+                      <div
+                        style="
+                          font-family: &quot;Newsreader&quot;, Georgia, serif;
+                          font-size: 20px;
+                          font-weight: 500;
+                          letter-spacing: -0.01em;
+                          line-height: 1.1;
+                        "
+                      >
+                        {{ w.t }}
+                      </div>
+                      <div
+                        style="
+                          font-family:
+                            &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                            sans-serif;
+                          font-size: 11.5px;
+                          color: var(--t3, #71717a);
+                          margin-top: 7px;
+                          display: flex;
+                          gap: 7px;
+                          flex-wrap: wrap;
+                        "
+                      >
+                        <span>{{ w.d }}</span><span style="color: var(--t4, #a1a1aa)">·</span
+                        ><span>{{ w.v }}</span>
+                      </div>
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+              <button
+                onClick="{{ goWorks }}"
+                style="
+                  margin-top: clamp(24px, 3vw, 34px);
+                  width: 100%;
+                  background: none;
+                  border: 1px solid var(--line2, rgba(17, 17, 20, 0.16));
+                  cursor: pointer;
+                  color: var(--text, #18181b);
+                  font: inherit;
+                  font-size: 14px;
+                  font-weight: 600;
+                  padding: 15px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 8px;
+                  transition: background 0.2s;
+                "
+                style-hover="background:var(--s1,#fafafa)"
+              >
+                {{ L.seeWorks }}
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    color: var(--t3, #71717a);
+                  "
+                  >({{ worksTotal }})</span
+                >
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    color: var(--accent, #0a84ff);
+                  "
+                  >→</span
+                >
+              </button>
+            </section>
+
+            <!-- 04 SCHEDULE (preview) -->
+            <section
+              id="schedule"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(16px, 2vw, 26px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >04</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.schedule }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.scheduleDesc }}</span>
+              </div>
+              <div>
+                <sc-for list="{{ schedulePreview }}" as="s" hint-placeholder-count="3">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: clamp(16px, 3vw, 40px);
+                      padding: clamp(18px, 2.4vw, 24px) 4px;
+                      border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                      transition: background 0.2s;
+                    "
+                    style-hover="background:var(--s1,#fafafa)"
+                  >
+                    <div style="flex: 0 0 auto; text-align: center; min-width: 58px">
+                      <div
+                        style="
+                          font-family: &quot;Newsreader&quot;, Georgia, serif;
+                          font-size: clamp(22px, 2.6vw, 30px);
+                          font-weight: 500;
+                          letter-spacing: -0.01em;
+                          line-height: 1;
+                        "
+                      >
+                        {{ s.d }}
+                      </div>
+                      <div
+                        style="
+                          font-family:
+                            &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                            sans-serif;
+                          font-size: 11px;
+                          color: var(--t3, #71717a);
+                          margin-top: 3px;
+                        "
+                      >
+                        {{ s.y }}
+                      </div>
+                    </div>
+                    <div style="flex: 1; min-width: 0">
+                      <div
+                        style="
+                          font-size: clamp(16px, 1.8vw, 19px);
+                          font-weight: 600;
+                          letter-spacing: -0.01em;
+                        "
+                      >
+                        {{ s.t }}
+                      </div>
+                      <div style="font-size: 13px; color: var(--t3, #71717a); margin-top: 4px">
+                        {{ s.v }}
+                      </div>
+                    </div>
+                    <span
+                      style="
+                        font-size: 10px;
+                        font-weight: 600;
+                        letter-spacing: 0.1em;
+                        text-transform: uppercase;
+                        color: var(--t3, #71717a);
+                        border: 1px solid var(--line2, rgba(17, 17, 20, 0.16));
+                        border-radius: 999px;
+                        padding: 5px 11px;
+                        white-space: nowrap;
+                      "
+                      >{{ s.status }}</span
+                    >
+                  </div>
+                </sc-for>
+                <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+              </div>
+              <button
+                onClick="{{ goSchedule }}"
+                style="
+                  margin-top: clamp(22px, 3vw, 30px);
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  color: var(--accent, #0a84ff);
+                  font: inherit;
+                  font-size: 14px;
+                  font-weight: 600;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 7px;
+                "
+              >
+                {{ L.seeSchedule }}
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  "
+                  >({{ scheduleTotal }}) →</span
+                >
+              </button>
+            </section>
+
+            <!-- 05 AWARDS (1 column, clickable) -->
+            <section
+              id="awards"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(16px, 2vw, 26px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >05</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.awards }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.awardsDesc }}</span>
+              </div>
+              <div>
+                <sc-for list="{{ awards }}" as="a" hint-placeholder-count="6">
+                  <button
+                    onClick="{{ a.onOpen }}"
+                    style="
+                      display: flex;
+                      width: 100%;
+                      align-items: baseline;
+                      gap: clamp(16px, 2.5vw, 28px);
+                      text-align: left;
+                      background: none;
+                      border: none;
+                      border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                      cursor: pointer;
+                      color: inherit;
+                      font: inherit;
+                      padding: clamp(19px, 2.6vw, 26px) 8px;
+                      transition:
+                        background 0.2s,
+                        padding-left 0.2s;
+                    "
+                    style-hover="background:var(--s1,#fafafa);padding-left:16px"
+                  >
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: var(--accent, #0a84ff);
+                        flex: 0 0 54px;
+                      "
+                      >{{ a.y }}</span
+                    >
+                    <span
+                      style="
+                        flex: 1;
+                        font-size: clamp(16px, 1.8vw, 19px);
+                        font-weight: 500;
+                        letter-spacing: -0.015em;
+                        line-height: 1.3;
+                      "
+                      >{{ a.n }}</span
+                    >
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 11.5px;
+                        color: var(--t3, #71717a);
+                        white-space: nowrap;
+                      "
+                      >{{ a.place }}</span
+                    >
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 13px;
+                        color: var(--t4, #a1a1aa);
+                      "
+                      >↗</span
+                    >
+                  </button>
+                </sc-for>
+                <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+              </div>
+            </section>
+
+            <!-- 06 PRESS (preview, clickable) -->
+            <section
+              id="press"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(26px, 4vw, 44px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >06</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.press }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.pressDesc }}</span>
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                  gap: clamp(24px, 4vw, 48px);
+                "
+              >
+                <sc-for list="{{ pressPreview }}" as="p" hint-placeholder-count="3">
+                  <button
+                    onClick="{{ p.onOpen }}"
+                    style="
+                      text-align: left;
+                      background: none;
+                      border: none;
+                      padding: 0;
+                      cursor: pointer;
+                      color: inherit;
+                      font: inherit;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <blockquote
+                      style="
+                        font-family: &quot;Newsreader&quot;, Georgia, serif;
+                        font-style: italic;
+                        font-size: clamp(19px, 2.1vw, 25px);
+                        line-height: 1.42;
+                        margin: 0;
+                        letter-spacing: -0.01em;
+                      "
+                    >
+                      “{{ p.q }}”
+                    </blockquote>
+                    <figcaption
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 11px;
+                        letter-spacing: 0.06em;
+                        color: var(--t3, #71717a);
+                        display: flex;
+                        align-items: center;
+                        gap: 7px;
+                      "
+                    >
+                      — {{ p.s }} <span style="color: var(--accent, #0a84ff)">↗</span>
+                    </figcaption>
+                  </button>
+                </sc-for>
+              </div>
+              <button
+                onClick="{{ goPress }}"
+                style="
+                  margin-top: clamp(26px, 3.5vw, 38px);
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  color: var(--accent, #0a84ff);
+                  font: inherit;
+                  font-size: 14px;
+                  font-weight: 600;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 7px;
+                "
+              >
+                {{ L.seePress }}
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  "
+                  >({{ pressTotal }}) →</span
+                >
+              </button>
+            </section>
+
+            <!-- 07 MEDIA -->
+            <section
+              id="media"
+              style="
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: clamp(52px, 7vw, 96px) clamp(20px, 4vw, 40px) 0;
+                scroll-margin-top: 78px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: space-between;
+                  gap: 20px;
+                  border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                  padding-top: clamp(20px, 3vw, 26px);
+                  margin-bottom: clamp(20px, 3vw, 32px);
+                  flex-wrap: wrap;
+                "
+              >
+                <div style="display: flex; align-items: baseline; gap: 15px">
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 13px;
+                      color: var(--t4, #a1a1aa);
+                    "
+                    >07</span
+                  >
+                  <h2
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: clamp(24px, 3vw, 37px);
+                      font-weight: 600;
+                      letter-spacing: -0.025em;
+                      margin: 0;
+                      line-height: 1;
+                    "
+                  >
+                    {{ L.media }}
+                  </h2>
+                </div>
+                <span style="font-size: 13px; color: var(--t3, #71717a)">{{ L.mediaDesc }}</span>
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1.5fr 1fr;
+                  gap: clamp(20px, 3vw, 36px);
+                  align-items: start;
+                "
+              >
+                <div style="position: relative; aspect-ratio: 16/9">
+                  <image-slot
+                    id="jk-media"
+                    shape="rect"
+                    placeholder="{{ L.dropImg }}"
+                    style="position: absolute; inset: 0; width: 100%; height: 100%; display: block"
+                  ></image-slot>
+                  <div
+                    style="
+                      position: absolute;
+                      inset: 0;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 13px;
+                      pointer-events: none;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 50%;
+                        background: var(--bg, #fff);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 16px;
+                        box-shadow: var(--shadow);
+                      "
+                      >▶</span
+                    >
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column">
+                  <sc-for list="{{ tracks }}" as="tr" hint-placeholder-count="3">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 13px;
+                        padding: 13px 4px;
+                        border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                        cursor: pointer;
+                        transition: background 0.2s;
+                      "
+                      style-hover="background:var(--s1,#fafafa)"
+                    >
+                      <span
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 50%;
+                          border: 1px solid var(--line2, rgba(17, 17, 20, 0.16));
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 9px;
+                          flex: 0 0 auto;
+                        "
+                        >▶</span
+                      >
+                      <span style="flex: 1; font-size: 13.5px; line-height: 1.3">{{ tr.t }}</span>
+                      <span
+                        style="
+                          font-family:
+                            &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                            sans-serif;
+                          font-size: 11.5px;
+                          color: var(--t3, #71717a);
+                        "
+                        >{{ tr.dur }}</span
+                      >
+                    </div>
+                  </sc-for>
+                  <a
+                    href="#"
+                    style="
+                      font-size: 13px;
+                      font-weight: 600;
+                      text-decoration: none;
+                      color: var(--accent, #0a84ff);
+                      border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                      padding-top: 14px;
+                      margin-top: 2px;
+                      display: flex;
+                      align-items: center;
+                      gap: 5px;
+                    "
+                    >{{ L.mediaAll }}
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 12px;
+                      "
+                      >↗</span
+                    ></a
+                  >
+                </div>
+              </div>
+            </section>
+          </div>
+        </sc-if>
+
+        <!-- ================= WORKS PAGE ================= -->
+        <sc-if value="{{ isWorksPage }}" hint-placeholder-val="{{ false }}">
+          <section
+            style="
+              max-width: 1180px;
+              margin: 0 auto;
+              padding: clamp(32px, 5vw, 56px) clamp(20px, 4vw, 40px) clamp(48px, 7vw, 90px);
+            "
+          >
+            <button
+              onClick="{{ goHome }}"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--t3, #71717a);
+                font: inherit;
+                font-size: 13.5px;
+                font-weight: 500;
+                padding: 0;
+                margin-bottom: clamp(22px, 3vw, 32px);
+                transition: color 0.2s;
+              "
+              style-hover="color:var(--text,#18181b)"
+            >
+              <span
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                "
+                >←</span
+              >
+              {{ L.backHome }}
+            </button>
+            <div
+              style="
+                display: flex;
+                align-items: baseline;
+                gap: 14px;
+                border-bottom: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                padding-bottom: clamp(20px, 3vw, 28px);
+                margin-bottom: clamp(28px, 4vw, 44px);
+              "
+            >
+              <h1
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  font-size: clamp(30px, 5vw, 54px);
+                  font-weight: 600;
+                  letter-spacing: -0.03em;
+                  margin: 0;
+                  line-height: 1;
+                "
+              >
+                {{ L.worksPageTitle }}
+              </h1>
+              <span
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  font-size: 14px;
+                  color: var(--t3, #71717a);
+                "
+                >{{ worksTotal }}</span
+              >
             </div>
-            <div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a);margin-bottom:10px">{{ L.program }}</div>
-            <div>
-              <sc-for list="{{ workCur.program }}" as="pp" hint-placeholder-count="4">
-                <div style="display:flex;gap:14px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line,rgba(17,17,20,0.08))"><span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:10px;color:var(--t4,#a1a1aa);flex:0 0 24px">{{ pp.n }}</span><span style="font-size:14px;line-height:1.4">{{ pp.t }}</span></div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: clamp(16px, 2vw, 26px);
+              "
+            >
+              <sc-for list="{{ works }}" as="w" hint-placeholder-count="9">
+                <div style="display: flex; flex-direction: column">
+                  <div
+                    style="
+                      position: relative;
+                      aspect-ratio: 3/4;
+                      transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+                    "
+                    style-hover="transform:translateY(-4px)"
+                  >
+                    <image-slot
+                      id="{{ w.posterId }}"
+                      shape="rect"
+                      placeholder="{{ L.dropPoster }}"
+                      style="
+                        position: absolute;
+                        inset: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                      "
+                    ></image-slot>
+                    <span
+                      style="
+                        position: absolute;
+                        top: 11px;
+                        left: 11px;
+                        background: rgba(0, 0, 0, 0.62);
+                        color: #fff;
+                        border-radius: 999px;
+                        font-size: 10px;
+                        font-weight: 600;
+                        letter-spacing: 0.1em;
+                        text-transform: uppercase;
+                        padding: 4px 10px;
+                        pointer-events: none;
+                        z-index: 2;
+                      "
+                      >{{ w.tag }}</span
+                    >
+                    <button
+                      onClick="{{ w.onOpen }}"
+                      aria-label="detail"
+                      style="
+                        position: absolute;
+                        bottom: 11px;
+                        right: 11px;
+                        z-index: 2;
+                        width: 32px;
+                        height: 32px;
+                        border: none;
+                        border-radius: 50%;
+                        background: var(--bg, #fff);
+                        color: var(--text, #18181b);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 13px;
+                        box-shadow: var(--shadow);
+                        cursor: pointer;
+                      "
+                    >
+                      ↗
+                    </button>
+                  </div>
+                  <button
+                    onClick="{{ w.onOpen }}"
+                    style="
+                      text-align: left;
+                      background: none;
+                      border: none;
+                      padding: 0;
+                      margin-top: 12px;
+                      cursor: pointer;
+                      color: inherit;
+                      font: inherit;
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: &quot;Newsreader&quot;, Georgia, serif;
+                        font-size: 19px;
+                        font-weight: 500;
+                        letter-spacing: -0.01em;
+                        line-height: 1.1;
+                      "
+                    >
+                      {{ w.t }}
+                    </div>
+                    <div
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 11px;
+                        color: var(--t3, #71717a);
+                        margin-top: 6px;
+                        display: flex;
+                        gap: 7px;
+                        flex-wrap: wrap;
+                      "
+                    >
+                      <span>{{ w.d }}</span><span style="color: var(--t4, #a1a1aa)">·</span
+                      ><span>{{ w.v }}</span>
+                    </div>
+                  </button>
+                </div>
               </sc-for>
-              <div style="border-top:1px solid var(--line,rgba(17,17,20,0.08))"></div>
+            </div>
+          </section>
+        </sc-if>
+
+        <!-- ================= SCHEDULE PAGE ================= -->
+        <sc-if value="{{ isSchedulePage }}" hint-placeholder-val="{{ false }}">
+          <section
+            style="
+              max-width: 1180px;
+              margin: 0 auto;
+              padding: clamp(32px, 5vw, 56px) clamp(20px, 4vw, 40px) clamp(48px, 7vw, 90px);
+            "
+          >
+            <button
+              onClick="{{ goHome }}"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--t3, #71717a);
+                font: inherit;
+                font-size: 13.5px;
+                font-weight: 500;
+                padding: 0;
+                margin-bottom: clamp(22px, 3vw, 32px);
+                transition: color 0.2s;
+              "
+              style-hover="color:var(--text,#18181b)"
+            >
+              <span
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                "
+                >←</span
+              >
+              {{ L.backHome }}
+            </button>
+            <div
+              style="
+                display: flex;
+                align-items: baseline;
+                gap: 14px;
+                border-bottom: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                padding-bottom: clamp(20px, 3vw, 28px);
+                margin-bottom: clamp(8px, 1.5vw, 18px);
+              "
+            >
+              <h1
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  font-size: clamp(30px, 5vw, 54px);
+                  font-weight: 600;
+                  letter-spacing: -0.03em;
+                  margin: 0;
+                  line-height: 1;
+                "
+              >
+                {{ L.schedulePageTitle }}
+              </h1>
+              <span
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  font-size: 14px;
+                  color: var(--t3, #71717a);
+                "
+                >{{ scheduleTotal }}</span
+              >
+            </div>
+            <div style="max-width: 920px">
+              <sc-for list="{{ schedule }}" as="s" hint-placeholder-count="5">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: clamp(16px, 3vw, 40px);
+                    padding: clamp(18px, 2.4vw, 26px) 4px;
+                    border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                    transition: background 0.2s;
+                  "
+                  style-hover="background:var(--s1,#fafafa)"
+                >
+                  <div style="flex: 0 0 auto; text-align: center; min-width: 58px">
+                    <div
+                      style="
+                        font-family: &quot;Newsreader&quot;, Georgia, serif;
+                        font-size: clamp(22px, 2.6vw, 30px);
+                        font-weight: 500;
+                        letter-spacing: -0.01em;
+                        line-height: 1;
+                      "
+                    >
+                      {{ s.d }}
+                    </div>
+                    <div
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 11px;
+                        color: var(--t3, #71717a);
+                        margin-top: 3px;
+                      "
+                    >
+                      {{ s.y }}
+                    </div>
+                  </div>
+                  <div style="flex: 1; min-width: 0">
+                    <div
+                      style="
+                        font-size: clamp(16px, 1.8vw, 19px);
+                        font-weight: 600;
+                        letter-spacing: -0.01em;
+                      "
+                    >
+                      {{ s.t }}
+                    </div>
+                    <div style="font-size: 13px; color: var(--t3, #71717a); margin-top: 4px">
+                      {{ s.v }}
+                    </div>
+                  </div>
+                  <span
+                    style="
+                      font-size: 10px;
+                      font-weight: 600;
+                      letter-spacing: 0.1em;
+                      text-transform: uppercase;
+                      color: var(--t3, #71717a);
+                      border: 1px solid var(--line2, rgba(17, 17, 20, 0.16));
+                      border-radius: 999px;
+                      padding: 5px 11px;
+                      white-space: nowrap;
+                    "
+                    >{{ s.status }}</span
+                  >
+                  <a
+                    href="#"
+                    style="
+                      text-decoration: none;
+                      font-size: 13.5px;
+                      font-weight: 600;
+                      color: var(--accent, #0a84ff);
+                      white-space: nowrap;
+                      display: flex;
+                      align-items: center;
+                      gap: 4px;
+                    "
+                    >{{ L.ticket }}
+                    <span
+                      style="
+                        font-family:
+                          &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                          sans-serif;
+                        font-size: 12px;
+                      "
+                      >↗</span
+                    ></a
+                  >
+                </div>
+              </sc-for>
+              <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+            </div>
+          </section>
+        </sc-if>
+
+        <!-- ================= PRESS PAGE ================= -->
+        <sc-if value="{{ isPressPage }}" hint-placeholder-val="{{ false }}">
+          <section
+            style="
+              max-width: 1180px;
+              margin: 0 auto;
+              padding: clamp(32px, 5vw, 56px) clamp(20px, 4vw, 40px) clamp(48px, 7vw, 90px);
+            "
+          >
+            <button
+              onClick="{{ goHome }}"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--t3, #71717a);
+                font: inherit;
+                font-size: 13.5px;
+                font-weight: 500;
+                padding: 0;
+                margin-bottom: clamp(22px, 3vw, 32px);
+                transition: color 0.2s;
+              "
+              style-hover="color:var(--text,#18181b)"
+            >
+              <span
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                "
+                >←</span
+              >
+              {{ L.backHome }}
+            </button>
+            <div
+              style="
+                display: flex;
+                align-items: baseline;
+                gap: 14px;
+                border-bottom: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                padding-bottom: clamp(20px, 3vw, 28px);
+                margin-bottom: clamp(28px, 4vw, 44px);
+              "
+            >
+              <h1
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  font-size: clamp(30px, 5vw, 54px);
+                  font-weight: 600;
+                  letter-spacing: -0.03em;
+                  margin: 0;
+                  line-height: 1;
+                "
+              >
+                {{ L.pressPageTitle }}
+              </h1>
+              <span
+                style="
+                  font-family:
+                    &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                  font-size: 14px;
+                  color: var(--t3, #71717a);
+                "
+                >{{ pressTotal }}</span
+              >
+            </div>
+            <div style="display: flex; flex-direction: column; max-width: 880px">
+              <sc-for list="{{ press }}" as="p" hint-placeholder-count="4">
+                <button
+                  onClick="{{ p.onOpen }}"
+                  style="
+                    text-align: left;
+                    background: none;
+                    border: none;
+                    border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                    padding: clamp(22px, 3vw, 30px) 6px;
+                    cursor: pointer;
+                    color: inherit;
+                    font: inherit;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 13px;
+                    transition: background 0.2s;
+                  "
+                  style-hover="background:var(--s1,#fafafa)"
+                >
+                  <blockquote
+                    style="
+                      font-family: &quot;Newsreader&quot;, Georgia, serif;
+                      font-style: italic;
+                      font-size: clamp(21px, 2.6vw, 30px);
+                      line-height: 1.38;
+                      margin: 0;
+                      letter-spacing: -0.01em;
+                      max-width: 30ch;
+                    "
+                  >
+                    “{{ p.q }}”
+                  </blockquote>
+                  <figcaption
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 11.5px;
+                      letter-spacing: 0.06em;
+                      color: var(--t3, #71717a);
+                      display: flex;
+                      align-items: center;
+                      gap: 9px;
+                    "
+                  >
+                    — {{ p.s }} <span style="color: var(--t4, #a1a1aa)">·</span> {{ p.date }}
+                    <span style="color: var(--accent, #0a84ff)">↗</span>
+                  </figcaption>
+                </button>
+              </sc-for>
+              <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+            </div>
+          </section>
+        </sc-if>
+
+        <footer
+          style="
+            border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+            transition: border-color 0.35s;
+          "
+        >
+          <div
+            style="
+              max-width: 1180px;
+              margin: 0 auto;
+              padding: 24px clamp(20px, 4vw, 40px);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 16px;
+              flex-wrap: wrap;
+              font-family:
+                &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+              font-size: 11px;
+              letter-spacing: 0.04em;
+              color: var(--t3, #71717a);
+            "
+          >
+            <span>© 2026 Junhyung Kim</span>
+            <span>Pianist · Seoul</span>
+          </div>
+        </footer>
+
+        <!-- WORK MODAL -->
+        <sc-if value="{{ workOpen }}" hint-placeholder-val="{{ false }}">
+          <div
+            style="
+              position: fixed;
+              inset: 0;
+              z-index: 80;
+              background: rgba(0, 0, 0, 0.5);
+              backdrop-filter: blur(6px);
+              display: flex;
+              align-items: flex-start;
+              justify-content: center;
+              overflow-y: auto;
+              padding: clamp(14px, 5vw, 52px);
+            "
+          >
+            <div
+              style="
+                background: var(--bg, #fff);
+                color: var(--text, #18181b);
+                max-width: 920px;
+                width: 100%;
+                border: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                box-shadow: var(--shadow);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding: 17px clamp(20px, 3vw, 34px);
+                  border-bottom: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                "
+              >
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    font-size: 11px;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: var(--t3, #71717a);
+                  "
+                  >{{ workCur.tag }} · {{ L.recital }}</span
+                >
+                <button
+                  onClick="{{ close }}"
+                  style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: var(--text, #18181b);
+                    font-size: 22px;
+                    line-height: 1;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  ×
+                </button>
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 290px 1fr;
+                  gap: clamp(24px, 4vw, 46px);
+                  padding: clamp(24px, 4vw, 42px);
+                "
+              >
+                <image-slot
+                  id="{{ workCur.posterId }}"
+                  shape="rect"
+                  placeholder="{{ L.dropPoster }}"
+                  style="display: block; width: 100%; aspect-ratio: 3/4"
+                ></image-slot>
+                <div>
+                  <h3
+                    style="
+                      font-family: &quot;Newsreader&quot;, Georgia, serif;
+                      font-size: clamp(28px, 3.8vw, 44px);
+                      font-weight: 500;
+                      letter-spacing: -0.02em;
+                      line-height: 1.02;
+                      margin: 0 0 6px;
+                    "
+                  >
+                    {{ workCur.t }}
+                  </h3>
+                  <div
+                    style="
+                      font-family: &quot;Newsreader&quot;, Georgia, serif;
+                      font-style: italic;
+                      font-size: 18px;
+                      color: var(--t3, #71717a);
+                      margin-bottom: 18px;
+                    "
+                  >
+                    {{ workCur.sub }}
+                  </div>
+                  <div
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                      font-size: 12.5px;
+                      color: var(--t3, #71717a);
+                      line-height: 1.7;
+                      margin-bottom: 22px;
+                    "
+                  >
+                    {{ workCur.d }} · {{ workCur.time }}<br />{{ workCur.v }}
+                  </div>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px">
+                    <a
+                      href="#"
+                      style="
+                        text-decoration: none;
+                        background: var(--accent, #0a84ff);
+                        color: #fff;
+                        font-size: 13.5px;
+                        font-weight: 600;
+                        padding: 12px 24px;
+                      "
+                      >{{ L.book }}</a
+                    >
+                    <a
+                      href="#"
+                      style="
+                        text-decoration: none;
+                        border: 1px solid var(--line2, rgba(17, 17, 20, 0.16));
+                        color: var(--text, #18181b);
+                        font-size: 13.5px;
+                        font-weight: 600;
+                        padding: 11px 22px;
+                      "
+                      >{{ L.share }}</a
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-size: 11px;
+                      font-weight: 600;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      color: var(--t3, #71717a);
+                      margin-bottom: 10px;
+                    "
+                  >
+                    {{ L.program }}
+                  </div>
+                  <div>
+                    <sc-for list="{{ workCur.program }}" as="pp" hint-placeholder-count="4">
+                      <div
+                        style="
+                          display: flex;
+                          gap: 14px;
+                          align-items: baseline;
+                          padding: 10px 0;
+                          border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                        "
+                      >
+                        <span
+                          style="
+                            font-family:
+                              &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui,
+                              sans-serif;
+                            font-size: 10px;
+                            color: var(--t4, #a1a1aa);
+                            flex: 0 0 24px;
+                          "
+                          >{{ pp.n }}</span
+                        ><span style="font-size: 14px; line-height: 1.4">{{ pp.t }}</span>
+                      </div>
+                    </sc-for>
+                    <div style="border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08))"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 0 clamp(24px, 4vw, 42px) clamp(24px, 4vw, 42px)">
+                <p
+                  style="
+                    font-size: 15px;
+                    line-height: 1.75;
+                    color: var(--t2, #3f3f46);
+                    margin: 0 0 28px;
+                    max-width: 62ch;
+                  "
+                >
+                  {{ workCur.desc }}
+                </p>
+                <div
+                  style="
+                    font-size: 11px;
+                    font-weight: 600;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: var(--t3, #71717a);
+                    margin-bottom: 12px;
+                  "
+                >
+                  {{ L.gallery }}
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px">
+                  <sc-for list="{{ workCur.gimg }}" as="g" hint-placeholder-count="3">
+                    <image-slot
+                      id="{{ g }}"
+                      shape="rect"
+                      placeholder="{{ L.dropImg }}"
+                      style="display: block; width: 100%; aspect-ratio: 4/3"
+                    ></image-slot>
+                  </sc-for>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div style="padding:0 clamp(24px,4vw,42px) clamp(24px,4vw,42px)">
-          <p style="font-size:15px;line-height:1.75;color:var(--t2,#3f3f46);margin:0 0 28px;max-width:62ch">{{ workCur.desc }}</p>
-          <div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a);margin-bottom:12px">{{ L.gallery }}</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-            <sc-for list="{{ workCur.gimg }}" as="g" hint-placeholder-count="3">
-              <image-slot id="{{ g }}" shape="rect" placeholder="{{ L.dropImg }}" style="display:block;width:100%;aspect-ratio:4/3"></image-slot>
-            </sc-for>
+        </sc-if>
+
+        <!-- AWARD MODAL -->
+        <sc-if value="{{ awardOpen }}" hint-placeholder-val="{{ false }}">
+          <div
+            style="
+              position: fixed;
+              inset: 0;
+              z-index: 80;
+              background: rgba(0, 0, 0, 0.5);
+              backdrop-filter: blur(6px);
+              display: flex;
+              align-items: flex-start;
+              justify-content: center;
+              overflow-y: auto;
+              padding: clamp(14px, 5vw, 60px);
+            "
+          >
+            <div
+              style="
+                background: var(--bg, #fff);
+                color: var(--text, #18181b);
+                max-width: 600px;
+                width: 100%;
+                border: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                box-shadow: var(--shadow);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding: 17px clamp(20px, 3vw, 32px);
+                  border-bottom: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                "
+              >
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    font-size: 11px;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: var(--t3, #71717a);
+                  "
+                  >{{ L.awardTag }} · {{ awardCur.y }}</span
+                >
+                <button
+                  onClick="{{ close }}"
+                  style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: var(--text, #18181b);
+                    font-size: 22px;
+                    line-height: 1;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  ×
+                </button>
+              </div>
+              <div style="padding: clamp(26px, 4vw, 40px)">
+                <image-slot
+                  id="{{ awardCur.imgId }}"
+                  shape="rect"
+                  placeholder="{{ L.dropImg }}"
+                  style="display: block; width: 100%; aspect-ratio: 16/10; margin-bottom: 26px"
+                ></image-slot>
+                <div
+                  style="
+                    font-family: &quot;Newsreader&quot;, Georgia, serif;
+                    font-size: clamp(38px, 6.5vw, 62px);
+                    font-weight: 500;
+                    letter-spacing: -0.02em;
+                    line-height: 1;
+                    margin-bottom: 16px;
+                  "
+                >
+                  {{ awardCur.y }}
+                </div>
+                <h3
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    font-size: clamp(20px, 2.6vw, 26px);
+                    font-weight: 600;
+                    letter-spacing: -0.02em;
+                    line-height: 1.25;
+                    margin: 0 0 8px;
+                  "
+                >
+                  {{ awardCur.n }}
+                </h3>
+                <div
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    font-size: 12.5px;
+                    color: var(--t3, #71717a);
+                    margin-bottom: 22px;
+                  "
+                >
+                  {{ awardCur.place }}
+                </div>
+                <p
+                  style="
+                    font-size: 15px;
+                    line-height: 1.75;
+                    color: var(--t2, #3f3f46);
+                    margin: 0;
+                    border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                    padding-top: 22px;
+                  "
+                >
+                  {{ awardCur.desc }}
+                </p>
+                <a
+                  href="{{ awardCur.linkUrl }}"
+                  style="
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    margin-top: 22px;
+                    font-size: 13.5px;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    color: var(--accent, #0a84ff);
+                  "
+                  >{{ awardCur.linkLabel }}
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    "
+                    >↗</span
+                  ></a
+                >
+              </div>
+            </div>
           </div>
-        </div>
+        </sc-if>
+
+        <!-- PRESS MODAL -->
+        <sc-if value="{{ pressOpen }}" hint-placeholder-val="{{ false }}">
+          <div
+            style="
+              position: fixed;
+              inset: 0;
+              z-index: 80;
+              background: rgba(0, 0, 0, 0.5);
+              backdrop-filter: blur(6px);
+              display: flex;
+              align-items: flex-start;
+              justify-content: center;
+              overflow-y: auto;
+              padding: clamp(14px, 5vw, 60px);
+            "
+          >
+            <div
+              style="
+                background: var(--bg, #fff);
+                color: var(--text, #18181b);
+                max-width: 640px;
+                width: 100%;
+                border: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                box-shadow: var(--shadow);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding: 17px clamp(20px, 3vw, 32px);
+                  border-bottom: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                "
+              >
+                <span
+                  style="
+                    font-family:
+                      &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    font-size: 11px;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: var(--t3, #71717a);
+                  "
+                  >{{ L.pressTag }} · {{ pressCur.s }} · {{ pressCur.date }}</span
+                >
+                <button
+                  onClick="{{ close }}"
+                  style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: var(--text, #18181b);
+                    font-size: 22px;
+                    line-height: 1;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  ×
+                </button>
+              </div>
+              <div style="padding: clamp(28px, 4vw, 44px)">
+                <blockquote
+                  style="
+                    font-family: &quot;Newsreader&quot;, Georgia, serif;
+                    font-style: italic;
+                    font-size: clamp(26px, 3.6vw, 38px);
+                    line-height: 1.3;
+                    letter-spacing: -0.015em;
+                    margin: 0 0 26px;
+                  "
+                >
+                  “{{ pressCur.q }}”
+                </blockquote>
+                <p
+                  style="
+                    font-size: 15.5px;
+                    line-height: 1.8;
+                    color: var(--t2, #3f3f46);
+                    margin: 0 0 28px;
+                    border-top: 1px solid var(--line, rgba(17, 17, 20, 0.08));
+                    padding-top: 24px;
+                  "
+                >
+                  {{ pressCur.excerpt }}
+                </p>
+                <a
+                  href="#"
+                  style="
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    font-size: 13.5px;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    color: var(--accent, #0a84ff);
+                  "
+                  >{{ L.readOrig }}
+                  <span
+                    style="
+                      font-family:
+                        &quot;Schibsted Grotesk&quot;, &quot;Pretendard&quot;, system-ui, sans-serif;
+                    "
+                    >↗</span
+                  ></a
+                >
+              </div>
+            </div>
+          </div>
+        </sc-if>
       </div>
-    </div>
-  </sc-if>
 
-  <!-- AWARD MODAL -->
-  <sc-if value="{{ awardOpen }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:clamp(14px,5vw,60px)">
-      <div style="background:var(--bg,#fff);color:var(--text,#18181b);max-width:600px;width:100%;border:1px solid var(--line,rgba(17,17,20,0.08));box-shadow:var(--shadow)">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:17px clamp(20px,3vw,32px);border-bottom:1px solid var(--line,rgba(17,17,20,0.08))">
-          <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a)">{{ L.awardTag }} · {{ awardCur.y }}</span>
-          <button onClick="{{ close }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font-size:22px;line-height:1;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center">×</button>
-        </div>
-        <div style="padding:clamp(26px,4vw,40px)">
-          <image-slot id="{{ awardCur.imgId }}" shape="rect" placeholder="{{ L.dropImg }}" style="display:block;width:100%;aspect-ratio:16/10;margin-bottom:26px"></image-slot>
-          <div style="font-family:'Newsreader',Georgia,serif;font-size:clamp(38px,6.5vw,62px);font-weight:500;letter-spacing:-.02em;line-height:1;margin-bottom:16px">{{ awardCur.y }}</div>
-          <h3 style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:clamp(20px,2.6vw,26px);font-weight:600;letter-spacing:-.02em;line-height:1.25;margin:0 0 8px">{{ awardCur.n }}</h3>
-          <div style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:12.5px;color:var(--t3,#71717a);margin-bottom:22px">{{ awardCur.place }}</div>
-          <p style="font-size:15px;line-height:1.75;color:var(--t2,#3f3f46);margin:0;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:22px">{{ awardCur.desc }}</p>
-          <a href="{{ awardCur.linkUrl }}" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;margin-top:22px;font-size:13.5px;font-weight:600;white-space:nowrap;color:var(--accent,#0a84ff)">{{ awardCur.linkLabel }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">↗</span></a>
-        </div>
-      </div>
-    </div>
-  </sc-if>
-
-  <!-- PRESS MODAL -->
-  <sc-if value="{{ pressOpen }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:clamp(14px,5vw,60px)">
-      <div style="background:var(--bg,#fff);color:var(--text,#18181b);max-width:640px;width:100%;border:1px solid var(--line,rgba(17,17,20,0.08));box-shadow:var(--shadow)">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:17px clamp(20px,3vw,32px);border-bottom:1px solid var(--line,rgba(17,17,20,0.08))">
-          <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3,#71717a)">{{ L.pressTag }} · {{ pressCur.s }} · {{ pressCur.date }}</span>
-          <button onClick="{{ close }}" style="background:none;border:none;cursor:pointer;color:var(--text,#18181b);font-size:22px;line-height:1;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center">×</button>
-        </div>
-        <div style="padding:clamp(28px,4vw,44px)">
-          <blockquote style="font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:clamp(26px,3.6vw,38px);line-height:1.3;letter-spacing:-.015em;margin:0 0 26px">“{{ pressCur.q }}”</blockquote>
-          <p style="font-size:15.5px;line-height:1.8;color:var(--t2,#3f3f46);margin:0 0 28px;border-top:1px solid var(--line,rgba(17,17,20,0.08));padding-top:24px">{{ pressCur.excerpt }}</p>
-          <a href="#" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;white-space:nowrap;color:var(--accent,#0a84ff)">{{ L.readOrig }} <span style="font-family:'Schibsted Grotesk','Pretendard',system-ui,sans-serif">↗</span></a>
-        </div>
-      </div>
-    </div>
-  </sc-if>
-
-</div>
-
-<template id="__bundler_thumbnail" data-bg-color="#ffffff">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#ffffff"></rect>
-    <text x="600" y="440" font-family="Georgia, serif" font-size="180" font-style="italic" font-weight="500" fill="#18181b" text-anchor="middle">JK</text>
-    <circle cx="712" cy="305" r="15" fill="#0a84ff"></circle>
-  </svg>
-</template></x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { theme: 'light', lang: 'ko', page: 'home', modal: null, langMenuOpen: false, pendingScroll: null };
-  componentDidMount() {
-    this._key = (e) => { if (e.key === 'Escape') this.setState({ modal: null, langMenuOpen: false }); };
-    window.addEventListener('keydown', this._key);
-  }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
-  componentDidUpdate() {
-    if (this.state.pendingScroll && this.state.page === 'home') {
-      const id = this.state.pendingScroll;
-      window.requestAnimationFrame(() => { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 72, behavior: 'smooth' }); });
-      this.setState({ pendingScroll: null });
-    }
-  }
-  _nav(id) {
-    if (this.state.page !== 'home') { this.setState({ page: 'home', pendingScroll: id }); }
-    else { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 72, behavior: 'smooth' }); }
-  }
-  _page(p) { this.setState({ page: p, modal: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  renderVals() {
-    const { theme, lang, page, modal } = this.state;
-    const t = theme === 'dark'
-      ? { bg:'#000000', s1:'#0d0d0f', s2:'#151517', line:'rgba(255,255,255,0.09)', line2:'rgba(255,255,255,0.18)', text:'#fafafa', t2:'#c7c7cd', t3:'#8a8a93', t4:'#5a5a62', photo:'#161618', accent:'#2b95ff', shadow:'0 1px 2px rgba(0,0,0,0.5), 0 8px 28px rgba(0,0,0,0.45)' }
-      : { bg:'#ffffff', s1:'#fafafa', s2:'#f3f3f5', line:'rgba(17,17,20,0.08)', line2:'rgba(17,17,20,0.16)', text:'#18181b', t2:'#3f3f46', t3:'#71717a', t4:'#a1a1aa', photo:'#ececef', accent:'#0a84ff', shadow:'0 1px 2px rgba(17,17,20,0.04), 0 8px 24px rgba(17,17,20,0.06)' };
-    const k = lang === 'ko';
-    const dict = {
-      ko: {
-        bioNav:'약력', worksNav:'연주', scheduleNav:'일정', mediaNav:'영상', contactNav:'연락처',
-        bio:'약력', career:'경력 · 학력', works:'연주 목록', schedule:'공연 일정', awards:'수상 경력', press:'보도 · 평론', media:'영상 · 오디오', contact:'연락처',
-        bioDesc:'서울 기반 · 독주와 협연', careerDesc:'상주 · 이력 · 교육', worksDesc:'포스터를 끌어 넣고, ↗로 자세히', scheduleDesc:'2026 시즌', awardsDesc:'국내·국제 콩쿠르', pressDesc:'언론 · 평론', mediaDesc:'실황과 음원', contactDesc:'공연·협업 문의',
-        bioLead:'서울을 기반으로 활동하는 피아니스트. 슈베르트와 라흐마니노프 사이를 오가며, 정교한 구조 감각과 노래하는 음색으로 무대를 만듭니다.',
-        bioBody:'독주와 협연, 가곡 반주를 넘나들며 국내외 무대에 선다.',
-        bioBody2:'작품의 구조를 명료하게 드러내면서도 한 음 한 음의 노래를 놓치지 않는 연주로 평가받는다. 슈베르트 연가곡과 라흐마니노프 협주곡을 중심으로 레퍼토리를 넓혀가고 있다.',
-        m1l:'활동', m1:'독주 · 협연 · 리트', m2l:'데뷔', m2:'2016, 서울', m3l:'소속', m3:'Artist Management', m4l:'악기', m4:'Steinway & Sons',
-        careerL:'경력', eduL:'학력',
-        ticket:'예매', live:'실황 영상', mediaAll:'전체 영상 보기',
-        contactLead:'함께 무대를 만들 분을 기다립니다.', agencyL:'공연 문의', socialL:'소셜',
-        recital:'프로그램 · 예매', program:'프로그램', book:'예매하기', share:'공유', gallery:'갤러리',
-        seeWorks:'전체 연주 목록', seeSchedule:'전체 공연 일정', seePress:'전체 보도 · 평론', backHome:'홈으로',
-        worksPageTitle:'연주 목록', schedulePageTitle:'공연 일정', pressPageTitle:'보도 · 평론',
-        awardTag:'수상', pressTag:'평론', readOrig:'원문 보기',
-        dropPortrait:'프로필 사진을 끌어다 놓으세요', dropPoster:'포스터', dropImg:'이미지를 끌어다 놓으세요'
-      },
-      en: {
-        bioNav:'About', worksNav:'Works', scheduleNav:'Dates', mediaNav:'Media', contactNav:'Contact',
-        bio:'Biography', career:'Career & Education', works:'Repertoire', schedule:'Schedule', awards:'Awards', press:'Press', media:'Media', contact:'Contact',
-        bioDesc:'Based in Seoul · Solo & Concerto', careerDesc:'Positions · Education', worksDesc:'Drop a poster, open with ↗', scheduleDesc:'2026 Season', awardsDesc:'National & International', pressDesc:'Press · Reviews', mediaDesc:'Live & audio', contactDesc:'Concerts & collaborations',
-        bioLead:'A pianist based in Seoul, moving between Schubert and Rachmaninoff with a clear sense of structure and a singing tone.',
-        bioBody:'At home in solo, concerto and lieder repertoire, on stages at home and abroad.',
-        bioBody2:'Praised for playing that reveals a work\u2019s architecture without ever losing the song in a single note — building a repertoire centred on Schubert song cycles and the Rachmaninoff concertos.',
-        m1l:'Focus', m1:'Solo · Concerto · Lieder', m2l:'Debut', m2:'2016, Seoul', m3l:'Mgmt', m3:'Artist Management', m4l:'Instrument', m4:'Steinway & Sons',
-        careerL:'Career', eduL:'Education',
-        ticket:'Tickets', live:'Live video', mediaAll:'See all videos',
-        contactLead:'For concerts and collaborations.', agencyL:'Bookings', socialL:'Social',
-        recital:'Programme · Tickets', program:'Programme', book:'Book now', share:'Share', gallery:'Gallery',
-        seeWorks:'All repertoire', seeSchedule:'All dates', seePress:'All press', backHome:'Home',
-        worksPageTitle:'Repertoire', schedulePageTitle:'Schedule', pressPageTitle:'Press',
-        awardTag:'Award', pressTag:'Review', readOrig:'Read original',
-        dropPortrait:'Drop a portrait', dropPoster:'Poster', dropImg:'Drop an image'
+      <template id="__bundler_thumbnail" data-bg-color="#ffffff">
+        <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+          <rect width="1200" height="800" fill="#ffffff"></rect>
+          <text
+            x="600"
+            y="440"
+            font-family="Georgia, serif"
+            font-size="180"
+            font-style="italic"
+            font-weight="500"
+            fill="#18181b"
+            text-anchor="middle"
+          >
+            JK
+          </text>
+          <circle cx="712" cy="305" r="15" fill="#0a84ff"></circle>
+        </svg> </template
+    ></x-dc>
+    <script type="text/x-dc" data-dc-script>
+      class Component extends DCLogic {
+        state = { theme: 'light', lang: 'ko', page: 'home', modal: null, langMenuOpen: false, pendingScroll: null };
+        componentDidMount() {
+          this._key = (e) => { if (e.key === 'Escape') this.setState({ modal: null, langMenuOpen: false }); };
+          window.addEventListener('keydown', this._key);
+        }
+        componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+        componentDidUpdate() {
+          if (this.state.pendingScroll && this.state.page === 'home') {
+            const id = this.state.pendingScroll;
+            window.requestAnimationFrame(() => { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 72, behavior: 'smooth' }); });
+            this.setState({ pendingScroll: null });
+          }
+        }
+        _nav(id) {
+          if (this.state.page !== 'home') { this.setState({ page: 'home', pendingScroll: id }); }
+          else { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 72, behavior: 'smooth' }); }
+        }
+        _page(p) { this.setState({ page: p, modal: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        renderVals() {
+          const { theme, lang, page, modal } = this.state;
+          const t = theme === 'dark'
+            ? { bg:'#000000', s1:'#0d0d0f', s2:'#151517', line:'rgba(255,255,255,0.09)', line2:'rgba(255,255,255,0.18)', text:'#fafafa', t2:'#c7c7cd', t3:'#8a8a93', t4:'#5a5a62', photo:'#161618', accent:'#2b95ff', shadow:'0 1px 2px rgba(0,0,0,0.5), 0 8px 28px rgba(0,0,0,0.45)' }
+            : { bg:'#ffffff', s1:'#fafafa', s2:'#f3f3f5', line:'rgba(17,17,20,0.08)', line2:'rgba(17,17,20,0.16)', text:'#18181b', t2:'#3f3f46', t3:'#71717a', t4:'#a1a1aa', photo:'#ececef', accent:'#0a84ff', shadow:'0 1px 2px rgba(17,17,20,0.04), 0 8px 24px rgba(17,17,20,0.06)' };
+          const k = lang === 'ko';
+          const dict = {
+            ko: {
+              bioNav:'약력', worksNav:'연주', scheduleNav:'일정', mediaNav:'영상', contactNav:'연락처',
+              bio:'약력', career:'경력 · 학력', works:'연주 목록', schedule:'공연 일정', awards:'수상 경력', press:'보도 · 평론', media:'영상 · 오디오', contact:'연락처',
+              bioDesc:'서울 기반 · 독주와 협연', careerDesc:'상주 · 이력 · 교육', worksDesc:'포스터를 끌어 넣고, ↗로 자세히', scheduleDesc:'2026 시즌', awardsDesc:'국내·국제 콩쿠르', pressDesc:'언론 · 평론', mediaDesc:'실황과 음원', contactDesc:'공연·협업 문의',
+              bioLead:'서울을 기반으로 활동하는 피아니스트. 슈베르트와 라흐마니노프 사이를 오가며, 정교한 구조 감각과 노래하는 음색으로 무대를 만듭니다.',
+              bioBody:'독주와 협연, 가곡 반주를 넘나들며 국내외 무대에 선다.',
+              bioBody2:'작품의 구조를 명료하게 드러내면서도 한 음 한 음의 노래를 놓치지 않는 연주로 평가받는다. 슈베르트 연가곡과 라흐마니노프 협주곡을 중심으로 레퍼토리를 넓혀가고 있다.',
+              m1l:'활동', m1:'독주 · 협연 · 리트', m2l:'데뷔', m2:'2016, 서울', m3l:'소속', m3:'Artist Management', m4l:'악기', m4:'Steinway & Sons',
+              careerL:'경력', eduL:'학력',
+              ticket:'예매', live:'실황 영상', mediaAll:'전체 영상 보기',
+              contactLead:'함께 무대를 만들 분을 기다립니다.', agencyL:'공연 문의', socialL:'소셜',
+              recital:'프로그램 · 예매', program:'프로그램', book:'예매하기', share:'공유', gallery:'갤러리',
+              seeWorks:'전체 연주 목록', seeSchedule:'전체 공연 일정', seePress:'전체 보도 · 평론', backHome:'홈으로',
+              worksPageTitle:'연주 목록', schedulePageTitle:'공연 일정', pressPageTitle:'보도 · 평론',
+              awardTag:'수상', pressTag:'평론', readOrig:'원문 보기',
+              dropPortrait:'프로필 사진을 끌어다 놓으세요', dropPoster:'포스터', dropImg:'이미지를 끌어다 놓으세요'
+            },
+            en: {
+              bioNav:'About', worksNav:'Works', scheduleNav:'Dates', mediaNav:'Media', contactNav:'Contact',
+              bio:'Biography', career:'Career & Education', works:'Repertoire', schedule:'Schedule', awards:'Awards', press:'Press', media:'Media', contact:'Contact',
+              bioDesc:'Based in Seoul · Solo & Concerto', careerDesc:'Positions · Education', worksDesc:'Drop a poster, open with ↗', scheduleDesc:'2026 Season', awardsDesc:'National & International', pressDesc:'Press · Reviews', mediaDesc:'Live & audio', contactDesc:'Concerts & collaborations',
+              bioLead:'A pianist based in Seoul, moving between Schubert and Rachmaninoff with a clear sense of structure and a singing tone.',
+              bioBody:'At home in solo, concerto and lieder repertoire, on stages at home and abroad.',
+              bioBody2:'Praised for playing that reveals a work\u2019s architecture without ever losing the song in a single note — building a repertoire centred on Schubert song cycles and the Rachmaninoff concertos.',
+              m1l:'Focus', m1:'Solo · Concerto · Lieder', m2l:'Debut', m2:'2016, Seoul', m3l:'Mgmt', m3:'Artist Management', m4l:'Instrument', m4:'Steinway & Sons',
+              careerL:'Career', eduL:'Education',
+              ticket:'Tickets', live:'Live video', mediaAll:'See all videos',
+              contactLead:'For concerts and collaborations.', agencyL:'Bookings', socialL:'Social',
+              recital:'Programme · Tickets', program:'Programme', book:'Book now', share:'Share', gallery:'Gallery',
+              seeWorks:'All repertoire', seeSchedule:'All dates', seePress:'All press', backHome:'Home',
+              worksPageTitle:'Repertoire', schedulePageTitle:'Schedule', pressPageTitle:'Press',
+              awardTag:'Award', pressTag:'Review', readOrig:'Read original',
+              dropPortrait:'Drop a portrait', dropPoster:'Poster', dropImg:'Drop an image'
+            }
+          };
+          const L = dict[lang];
+          const social = [ { t:'Instagram', h:'#' }, { t:'YouTube', h:'#' }, { t:'Email', h:'mailto:hello@junhyungkim.com' } ];
+          const careerData = [
+            { p:'2023 —', t:k?'금호아트홀 상주음악가':'Kumho Art Hall, Resident Artist' },
+            { p:'2021 – 2023', t:k?'서울시립교향악단 협력 아티스트':'Seoul Phil., Associate Artist' },
+            { p:'2019 —', t:k?'평창대관령음악제 참여 아티스트':'PyeongChang Festival, Artist' }
+          ];
+          const eduData = [
+            { p:'2018 – 2020', t:k?'한국예술종합학교 전문사':'Korea Nat\u2019l Univ. of Arts, M.M.' },
+            { p:'2014 – 2018', t:k?'한국예술종합학교 예술사':'Korea Nat\u2019l Univ. of Arts, B.M.' },
+            { p:'2011 – 2014', t:k?'서울예술고등학교':'Seoul Arts High School' }
+          ];
+          const worksData = [
+            { t:'Winterreise', sub:'Schubert · D.911', d:'2026.03.14', time:'19:30', v:'예술의전당 콘서트홀', tag:k?'리사이틀':'Recital', program:['Gute Nacht','Die Wetterfahne','Gefrorne Tränen','Erstarrung','Der Lindenbaum'], desc:k?'슈베르트 최후의 연가곡 《겨울 나그네》. 24개의 노래로 이어지는 한 편의 겨울 여정을 한 무대에 담는다.':'Schubert\u2019s final song cycle — a winter journey across 24 songs in a single evening.' },
+            { t:'Chopin Recital', sub:'Chopin', d:'2025.11.02', time:'17:00', v:'롯데콘서트홀', tag:k?'리사이틀':'Recital', program:['Ballade No.1 in G minor','Nocturne Op.27 No.2','Scherzo No.2','24 Préludes Op.28 (sel.)'], desc:k?'쇼팽의 발라드와 녹턴, 프렐류드를 엮은 단독 리사이틀.':'A solo programme of Chopin ballades, nocturnes and preludes.' },
+            { t:'Rachmaninoff No.2', sub:'with KBS Symphony', d:'2025.06.20', time:'20:00', v:'세종문화회관 대극장', tag:k?'협연':'Concerto', program:['Piano Concerto No.2 in C minor, Op.18'], desc:k?'오케스트라와 함께하는 라흐마니노프 피아노 협주곡 2번.':'Rachmaninoff\u2019s Second Piano Concerto with orchestra.' },
+            { t:'Schubert Sonatas', sub:'Schubert', d:'2025.02.15', time:'19:30', v:'금호아트홀 연세', tag:k?'리사이틀':'Recital', program:['Sonata in A, D.959','Sonata in B-flat, D.960'], desc:k?'슈베르트 후기 소나타 두 곡을 하룻밤에.':'Two late Schubert sonatas in one evening.' },
+            { t:'New Year Gala', sub:'Various', d:'2025.01.01', time:'17:00', v:'예술의전당', tag:k?'갈라':'Gala', program:['Liszt · Liebestraum No.3','Debussy · Clair de lune','Encore Selections'], desc:k?'새해를 여는 갈라 콘서트.':'A gala concert to open the new year.' },
+            { t:'Brahms & Schumann', sub:'Duo', d:'2024.10.08', time:'19:30', v:'예술의전당 IBK챔버홀', tag:k?'협연':'Duo', program:['Brahms · Cello Sonata No.1','Schumann · Fantasiestücke'], desc:k?'첼로와 함께한 브람스·슈만 듀오 무대.':'A Brahms and Schumann duo programme with cello.' },
+            { t:'Debussy · Ravel', sub:'French Programme', d:'2024.05.19', time:'17:00', v:'금호아트홀', tag:k?'리사이틀':'Recital', program:['Debussy · Estampes','Ravel · Gaspard de la nuit'], desc:k?'프랑스 인상주의 레퍼토리로 구성한 리사이틀.':'A recital of French impressionist repertoire.' },
+            { t:'Goldberg Variations', sub:'J.S. Bach', d:'2024.02.11', time:'19:00', v:'LG아트센터', tag:k?'리사이틀':'Recital', program:['Goldberg Variations, BWV 988'], desc:k?'바흐 골드베르크 변주곡 전곡.':'Bach\u2019s complete Goldberg Variations.' },
+            { t:'Mozart Concertos', sub:'with Korean Chamber', d:'2023.11.23', time:'20:00', v:'롯데콘서트홀', tag:k?'협연':'Concerto', program:['Concerto No.20 in D minor, K.466','Concerto No.23 in A, K.488'], desc:k?'실내악단과 함께한 모차르트 협주곡의 밤.':'An evening of Mozart concertos with chamber orchestra.' }
+          ];
+          worksData.forEach((w, i) => { w.posterId = 'wposter-' + i; w.gimg = ['wg-' + i + '-1', 'wg-' + i + '-2', 'wg-' + i + '-3']; });
+          const works = worksData.map((w, i) => ({ ...w, onOpen: () => this.setState({ modal: { type: 'work', i } }) }));
+          const worksPreview = works.slice(0, 6);
+          const scheduleData = [
+            { d:'07.12', y:'2026', t:'Summer Solo Recital', v:'예술의전당 IBK챔버홀', status:k?'예매 중':'On sale' },
+            { d:'08.03', y:'2026', t:'Beethoven Concerto No.5 “Emperor”', v:'롯데콘서트홀', status:k?'예매 중':'On sale' },
+            { d:'09.21', y:'2026', t:'Duo Concert — with cello', v:'금호아트홀 연세', status:k?'오픈 예정':'Soon' },
+            { d:'10.15', y:'2026', t:'Autumn Lieder Evening', v:'금호아트홀', status:k?'오픈 예정':'Soon' },
+            { d:'11.30', y:'2026', t:'Year-End Concerto Gala', v:'세종문화회관 대극장', status:k?'오픈 예정':'Soon' }
+          ];
+          const schedulePreview = scheduleData.slice(0, 3);
+          const awardsData = [
+            { y:'2024', n:k?'국제 피아노 콩쿠르 — 파이널리스트':'International Piano Competition — Finalist', place:'Geneva, CH', desc:k?'세계적 권위의 콩쿠르 결선에 올라 협주곡 라운드를 연주했다.':'Reached the concerto final at one of the most prestigious international competitions.' },
+            { y:'2022', n:k?'부조니 콩쿠르 — 2위':'Busoni Competition — 2nd Prize', place:'Bolzano, IT', desc:k?'부조니 국제 피아노 콩쿠르에서 2위와 함께 청중상을 받았다.':'Awarded 2nd Prize and the audience prize at the Busoni International Competition.' },
+            { y:'2021', n:k?'리즈 콩쿠르 — 세미파이널':'Leeds Competition — Semi-finalist', place:'Leeds, UK', desc:k?'리즈 국제 피아노 콩쿠르 준결선에 진출했다.':'Advanced to the semi-final round of the Leeds International Piano Competition.' },
+            { y:'2020', n:k?'서울 음악 콩쿠르 — 1위':'Seoul Music Competition — 1st Prize', place:'Seoul, KR', desc:k?'국내 최정상 콩쿠르에서 1위를 차지했다.':'First Prize at one of Korea\u2019s leading music competitions.' },
+            { y:'2019', n:k?'한국 청년 음악가상':'Korean Young Musician Award', place:'Seoul, KR', desc:k?'그해 가장 주목받은 신예 음악가에게 주어지는 상을 받았다.':'Recognised as the most promising young musician of the year.' },
+            { y:'2018', n:k?'영 콘서트 아티스트 — 수상':'Young Concert Artists — Winner', place:'New York, US', desc:k?'국제 오디션을 통해 북미 데뷔 무대 기회를 얻었다.':'Won the international auditions, earning a North American debut series.' }
+          ];
+          awardsData.forEach((a, i) => { a.imgId = 'award-' + i; a.linkUrl = '#'; a.linkLabel = k ? '관련 기사 보기' : 'Read more'; });
+          const awards = awardsData.map((a, i) => ({ ...a, onOpen: () => this.setState({ modal: { type: 'award', i } }) }));
+          const pressData = [
+            { q:'정교한 구조 감각과 노래하는 음색.', s:k?'음악 월간지':'Music Monthly', date:'2025.11', excerpt:k?'그의 손에서 작품은 설계도처럼 또렷하게 드러난다. 그러면서도 선율은 한순간도 노래이기를 멈추지 않는다. 구조와 노래가 한자리에 머무는, 드문 균형의 연주였다.':'In his hands the work emerges as clear as a blueprint, yet the line never stops singing — a rare balance of architecture and song.' },
+            { q:'두려움 없는 표현과 빛나는 테크닉.', s:k?'일간지 문화면':'Daily Arts', date:'2025.06', excerpt:k?'협주곡의 클라이맥스에서 그는 망설임 없이 모든 것을 걸었고, 오케스트라는 그 대담함에 화답했다.':'At the concerto\u2019s climax he held nothing back, and the orchestra answered his daring in kind.' },
+            { q:'드물게 시적인 피아니스트.', s:k?'공연 리뷰':'Concert Review', date:'2025.02', excerpt:k?'느린 악장에서의 침묵마저 음악이 되는 순간들. 시간이 늘어나고 줄어드는 그 감각이 인상적이었다.':'Even the silences in the slow movement became music — a striking sense of time stretching and contracting.' },
+            { q:'한 음 한 음이 노래가 되는 순간.', s:k?'클래식 웹진':'Classical Webzine', date:'2024.10', excerpt:k?'리트 반주에서 보여준 섬세함은 성악가의 호흡을 그대로 읽어내는 듯했다.':'His sensitivity as a song accompanist seemed to read the singer\u2019s every breath.' }
+          ];
+          const press = pressData.map((p, i) => ({ ...p, onOpen: () => this.setState({ modal: { type: 'press', i } }) }));
+          const pressPreview = press.slice(0, 3);
+          const tracks = [
+            { t:'Schubert · Impromptu Op.90 No.3', dur:'6:12' },
+            { t:'Rachmaninoff · Prélude Op.23 No.5', dur:'4:08' },
+            { t:'Debussy · Clair de lune', dur:'5:01' }
+          ];
+          const mt = modal && modal.type;
+          const workCur = mt === 'work' ? { ...worksData[modal.i], program: worksData[modal.i].program.map((tt, i) => ({ t: tt, n: String(i + 1).padStart(2, '0') })) } : {};
+          const awardCur = mt === 'award' ? awardsData[modal.i] : {};
+          const pressCur = mt === 'press' ? pressData[modal.i] : {};
+          return {
+            bg:t.bg, s1:t.s1, s2:t.s2, line:t.line, line2:t.line2, text:t.text, t2:t.t2, t3:t.t3, t4:t.t4, photo:t.photo, accent:t.accent, shadow:t.shadow,
+            L, social, careerData, eduData, works, worksPreview, worksTotal: worksData.length,
+            schedule: scheduleData, schedulePreview, scheduleTotal: scheduleData.length,
+            awards, press, pressPreview, pressTotal: pressData.length, tracks,
+            isHome: page === 'home', isWorksPage: page === 'works', isSchedulePage: page === 'schedule', isPressPage: page === 'press',
+            workOpen: mt === 'work', awardOpen: mt === 'award', pressOpen: mt === 'press',
+            workCur, awardCur, pressCur,
+            themeIcon: theme === 'dark' ? '☾' : '☀',
+            langMenuOpen: this.state.langMenuOpen,
+            koCheck: k ? 1 : 0, enCheck: k ? 0 : 1,
+            toggleTheme: () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+            toggleLangMenu: () => this.setState(s => ({ langMenuOpen: !s.langMenuOpen })),
+            closeLangMenu: () => this.setState({ langMenuOpen: false }),
+            pickKo: () => this.setState({ lang:'ko', langMenuOpen: false }),
+            pickEn: () => this.setState({ lang:'en', langMenuOpen: false }),
+            navBio: () => this._nav('bio'), navWorks: () => this._nav('works'), navSchedule: () => this._nav('schedule'), navMedia: () => this._nav('media'), navContact: () => this._nav('contact'),
+            goWorks: () => this._page('works'), goSchedule: () => this._page('schedule'), goPress: () => this._page('press'), goHome: () => this._page('home'),
+            homeTop: () => this._page('home'),
+            close: () => this.setState({ modal: null })
+          };
+        }
       }
-    };
-    const L = dict[lang];
-    const social = [ { t:'Instagram', h:'#' }, { t:'YouTube', h:'#' }, { t:'Email', h:'mailto:hello@junhyungkim.com' } ];
-    const careerData = [
-      { p:'2023 —', t:k?'금호아트홀 상주음악가':'Kumho Art Hall, Resident Artist' },
-      { p:'2021 – 2023', t:k?'서울시립교향악단 협력 아티스트':'Seoul Phil., Associate Artist' },
-      { p:'2019 —', t:k?'평창대관령음악제 참여 아티스트':'PyeongChang Festival, Artist' }
-    ];
-    const eduData = [
-      { p:'2018 – 2020', t:k?'한국예술종합학교 전문사':'Korea Nat\u2019l Univ. of Arts, M.M.' },
-      { p:'2014 – 2018', t:k?'한국예술종합학교 예술사':'Korea Nat\u2019l Univ. of Arts, B.M.' },
-      { p:'2011 – 2014', t:k?'서울예술고등학교':'Seoul Arts High School' }
-    ];
-    const worksData = [
-      { t:'Winterreise', sub:'Schubert · D.911', d:'2026.03.14', time:'19:30', v:'예술의전당 콘서트홀', tag:k?'리사이틀':'Recital', program:['Gute Nacht','Die Wetterfahne','Gefrorne Tränen','Erstarrung','Der Lindenbaum'], desc:k?'슈베르트 최후의 연가곡 《겨울 나그네》. 24개의 노래로 이어지는 한 편의 겨울 여정을 한 무대에 담는다.':'Schubert\u2019s final song cycle — a winter journey across 24 songs in a single evening.' },
-      { t:'Chopin Recital', sub:'Chopin', d:'2025.11.02', time:'17:00', v:'롯데콘서트홀', tag:k?'리사이틀':'Recital', program:['Ballade No.1 in G minor','Nocturne Op.27 No.2','Scherzo No.2','24 Préludes Op.28 (sel.)'], desc:k?'쇼팽의 발라드와 녹턴, 프렐류드를 엮은 단독 리사이틀.':'A solo programme of Chopin ballades, nocturnes and preludes.' },
-      { t:'Rachmaninoff No.2', sub:'with KBS Symphony', d:'2025.06.20', time:'20:00', v:'세종문화회관 대극장', tag:k?'협연':'Concerto', program:['Piano Concerto No.2 in C minor, Op.18'], desc:k?'오케스트라와 함께하는 라흐마니노프 피아노 협주곡 2번.':'Rachmaninoff\u2019s Second Piano Concerto with orchestra.' },
-      { t:'Schubert Sonatas', sub:'Schubert', d:'2025.02.15', time:'19:30', v:'금호아트홀 연세', tag:k?'리사이틀':'Recital', program:['Sonata in A, D.959','Sonata in B-flat, D.960'], desc:k?'슈베르트 후기 소나타 두 곡을 하룻밤에.':'Two late Schubert sonatas in one evening.' },
-      { t:'New Year Gala', sub:'Various', d:'2025.01.01', time:'17:00', v:'예술의전당', tag:k?'갈라':'Gala', program:['Liszt · Liebestraum No.3','Debussy · Clair de lune','Encore Selections'], desc:k?'새해를 여는 갈라 콘서트.':'A gala concert to open the new year.' },
-      { t:'Brahms & Schumann', sub:'Duo', d:'2024.10.08', time:'19:30', v:'예술의전당 IBK챔버홀', tag:k?'협연':'Duo', program:['Brahms · Cello Sonata No.1','Schumann · Fantasiestücke'], desc:k?'첼로와 함께한 브람스·슈만 듀오 무대.':'A Brahms and Schumann duo programme with cello.' },
-      { t:'Debussy · Ravel', sub:'French Programme', d:'2024.05.19', time:'17:00', v:'금호아트홀', tag:k?'리사이틀':'Recital', program:['Debussy · Estampes','Ravel · Gaspard de la nuit'], desc:k?'프랑스 인상주의 레퍼토리로 구성한 리사이틀.':'A recital of French impressionist repertoire.' },
-      { t:'Goldberg Variations', sub:'J.S. Bach', d:'2024.02.11', time:'19:00', v:'LG아트센터', tag:k?'리사이틀':'Recital', program:['Goldberg Variations, BWV 988'], desc:k?'바흐 골드베르크 변주곡 전곡.':'Bach\u2019s complete Goldberg Variations.' },
-      { t:'Mozart Concertos', sub:'with Korean Chamber', d:'2023.11.23', time:'20:00', v:'롯데콘서트홀', tag:k?'협연':'Concerto', program:['Concerto No.20 in D minor, K.466','Concerto No.23 in A, K.488'], desc:k?'실내악단과 함께한 모차르트 협주곡의 밤.':'An evening of Mozart concertos with chamber orchestra.' }
-    ];
-    worksData.forEach((w, i) => { w.posterId = 'wposter-' + i; w.gimg = ['wg-' + i + '-1', 'wg-' + i + '-2', 'wg-' + i + '-3']; });
-    const works = worksData.map((w, i) => ({ ...w, onOpen: () => this.setState({ modal: { type: 'work', i } }) }));
-    const worksPreview = works.slice(0, 6);
-    const scheduleData = [
-      { d:'07.12', y:'2026', t:'Summer Solo Recital', v:'예술의전당 IBK챔버홀', status:k?'예매 중':'On sale' },
-      { d:'08.03', y:'2026', t:'Beethoven Concerto No.5 “Emperor”', v:'롯데콘서트홀', status:k?'예매 중':'On sale' },
-      { d:'09.21', y:'2026', t:'Duo Concert — with cello', v:'금호아트홀 연세', status:k?'오픈 예정':'Soon' },
-      { d:'10.15', y:'2026', t:'Autumn Lieder Evening', v:'금호아트홀', status:k?'오픈 예정':'Soon' },
-      { d:'11.30', y:'2026', t:'Year-End Concerto Gala', v:'세종문화회관 대극장', status:k?'오픈 예정':'Soon' }
-    ];
-    const schedulePreview = scheduleData.slice(0, 3);
-    const awardsData = [
-      { y:'2024', n:k?'국제 피아노 콩쿠르 — 파이널리스트':'International Piano Competition — Finalist', place:'Geneva, CH', desc:k?'세계적 권위의 콩쿠르 결선에 올라 협주곡 라운드를 연주했다.':'Reached the concerto final at one of the most prestigious international competitions.' },
-      { y:'2022', n:k?'부조니 콩쿠르 — 2위':'Busoni Competition — 2nd Prize', place:'Bolzano, IT', desc:k?'부조니 국제 피아노 콩쿠르에서 2위와 함께 청중상을 받았다.':'Awarded 2nd Prize and the audience prize at the Busoni International Competition.' },
-      { y:'2021', n:k?'리즈 콩쿠르 — 세미파이널':'Leeds Competition — Semi-finalist', place:'Leeds, UK', desc:k?'리즈 국제 피아노 콩쿠르 준결선에 진출했다.':'Advanced to the semi-final round of the Leeds International Piano Competition.' },
-      { y:'2020', n:k?'서울 음악 콩쿠르 — 1위':'Seoul Music Competition — 1st Prize', place:'Seoul, KR', desc:k?'국내 최정상 콩쿠르에서 1위를 차지했다.':'First Prize at one of Korea\u2019s leading music competitions.' },
-      { y:'2019', n:k?'한국 청년 음악가상':'Korean Young Musician Award', place:'Seoul, KR', desc:k?'그해 가장 주목받은 신예 음악가에게 주어지는 상을 받았다.':'Recognised as the most promising young musician of the year.' },
-      { y:'2018', n:k?'영 콘서트 아티스트 — 수상':'Young Concert Artists — Winner', place:'New York, US', desc:k?'국제 오디션을 통해 북미 데뷔 무대 기회를 얻었다.':'Won the international auditions, earning a North American debut series.' }
-    ];
-    awardsData.forEach((a, i) => { a.imgId = 'award-' + i; a.linkUrl = '#'; a.linkLabel = k ? '관련 기사 보기' : 'Read more'; });
-    const awards = awardsData.map((a, i) => ({ ...a, onOpen: () => this.setState({ modal: { type: 'award', i } }) }));
-    const pressData = [
-      { q:'정교한 구조 감각과 노래하는 음색.', s:k?'음악 월간지':'Music Monthly', date:'2025.11', excerpt:k?'그의 손에서 작품은 설계도처럼 또렷하게 드러난다. 그러면서도 선율은 한순간도 노래이기를 멈추지 않는다. 구조와 노래가 한자리에 머무는, 드문 균형의 연주였다.':'In his hands the work emerges as clear as a blueprint, yet the line never stops singing — a rare balance of architecture and song.' },
-      { q:'두려움 없는 표현과 빛나는 테크닉.', s:k?'일간지 문화면':'Daily Arts', date:'2025.06', excerpt:k?'협주곡의 클라이맥스에서 그는 망설임 없이 모든 것을 걸었고, 오케스트라는 그 대담함에 화답했다.':'At the concerto\u2019s climax he held nothing back, and the orchestra answered his daring in kind.' },
-      { q:'드물게 시적인 피아니스트.', s:k?'공연 리뷰':'Concert Review', date:'2025.02', excerpt:k?'느린 악장에서의 침묵마저 음악이 되는 순간들. 시간이 늘어나고 줄어드는 그 감각이 인상적이었다.':'Even the silences in the slow movement became music — a striking sense of time stretching and contracting.' },
-      { q:'한 음 한 음이 노래가 되는 순간.', s:k?'클래식 웹진':'Classical Webzine', date:'2024.10', excerpt:k?'리트 반주에서 보여준 섬세함은 성악가의 호흡을 그대로 읽어내는 듯했다.':'His sensitivity as a song accompanist seemed to read the singer\u2019s every breath.' }
-    ];
-    const press = pressData.map((p, i) => ({ ...p, onOpen: () => this.setState({ modal: { type: 'press', i } }) }));
-    const pressPreview = press.slice(0, 3);
-    const tracks = [
-      { t:'Schubert · Impromptu Op.90 No.3', dur:'6:12' },
-      { t:'Rachmaninoff · Prélude Op.23 No.5', dur:'4:08' },
-      { t:'Debussy · Clair de lune', dur:'5:01' }
-    ];
-    const mt = modal && modal.type;
-    const workCur = mt === 'work' ? { ...worksData[modal.i], program: worksData[modal.i].program.map((tt, i) => ({ t: tt, n: String(i + 1).padStart(2, '0') })) } : {};
-    const awardCur = mt === 'award' ? awardsData[modal.i] : {};
-    const pressCur = mt === 'press' ? pressData[modal.i] : {};
-    return {
-      bg:t.bg, s1:t.s1, s2:t.s2, line:t.line, line2:t.line2, text:t.text, t2:t.t2, t3:t.t3, t4:t.t4, photo:t.photo, accent:t.accent, shadow:t.shadow,
-      L, social, careerData, eduData, works, worksPreview, worksTotal: worksData.length,
-      schedule: scheduleData, schedulePreview, scheduleTotal: scheduleData.length,
-      awards, press, pressPreview, pressTotal: pressData.length, tracks,
-      isHome: page === 'home', isWorksPage: page === 'works', isSchedulePage: page === 'schedule', isPressPage: page === 'press',
-      workOpen: mt === 'work', awardOpen: mt === 'award', pressOpen: mt === 'press',
-      workCur, awardCur, pressCur,
-      themeIcon: theme === 'dark' ? '☾' : '☀',
-      langMenuOpen: this.state.langMenuOpen,
-      koCheck: k ? 1 : 0, enCheck: k ? 0 : 1,
-      toggleTheme: () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
-      toggleLangMenu: () => this.setState(s => ({ langMenuOpen: !s.langMenuOpen })),
-      closeLangMenu: () => this.setState({ langMenuOpen: false }),
-      pickKo: () => this.setState({ lang:'ko', langMenuOpen: false }),
-      pickEn: () => this.setState({ lang:'en', langMenuOpen: false }),
-      navBio: () => this._nav('bio'), navWorks: () => this._nav('works'), navSchedule: () => this._nav('schedule'), navMedia: () => this._nav('media'), navContact: () => this._nav('contact'),
-      goWorks: () => this._page('works'), goSchedule: () => this._page('schedule'), goPress: () => this._page('press'), goHome: () => this._page('home'),
-      homeTop: () => this._page('home'),
-      close: () => this.setState({ modal: null })
-    };
-  }
-}
-</script>
-</body>
+    </script>
+  </body>
 </html>

@@ -7,15 +7,21 @@
   padding-bottom: var(--s-10);
   border-bottom: 1px solid var(--line);
 }
+.eyebrow {
+  margin-bottom: var(--s-3);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
 .name {
   font-family: var(--font-display);
   font-size: clamp(2.4rem, 5vw, 3.6rem);
   font-weight: 500;
-  line-height: 1.05;
+  line-height: 1.1;
   letter-spacing: -0.02em;
-}
-.name em {
-  font-style: italic;
+  max-width: 20ch;
 }
 .bio {
   margin-top: var(--s-5);
@@ -23,21 +29,6 @@
   color: var(--text-2);
   font-size: 1.05rem;
   line-height: 1.7;
-}
-.contact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-5);
-  margin-top: var(--s-6);
-}
-.link {
-  font-size: var(--t-small);
-  font-weight: 600;
-  color: var(--accent);
-  white-space: nowrap;
-}
-.link:hover {
-  color: var(--accent-press);
 }
 .stats {
   display: grid;

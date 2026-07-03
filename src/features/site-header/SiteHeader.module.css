@@ -5,6 +5,9 @@
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
+  transition:
+    background 0.35s,
+    border-color 0.35s;
 }
 .inner {
   display: flex;
@@ -25,10 +28,11 @@
 
 .brand {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 500;
   letter-spacing: -0.01em;
   white-space: nowrap;
+  color: var(--text);
 }
 @media (min-width: 768px) {
   .brand {
@@ -37,33 +41,107 @@
 }
 .dot {
   color: var(--accent);
+  transition: color 0.35s;
 }
 
-.nav {
+/* ===== mega-menu (desktop only) ===== */
+.mega {
   display: none;
   margin-left: var(--s-4);
+  height: 100%;
   gap: 2px;
 }
 @media (min-width: 768px) {
-  .nav {
+  .mega {
     display: flex;
   }
 }
-.navLink {
-  font-size: 13.5px;
+.megaItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.megaBtn {
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
   font-weight: 500;
   color: var(--text-3);
-  padding: 9px 14px;
+  padding: 8px 14px;
+  transition: color 0.2s;
+}
+/* 호버 = 해당 섹션 색(활성 섹션의 --accent가 아니라 각 섹션 고정색). 연락처는 data-section 없음 → 아래 기본(검정). */
+.megaItem:hover .megaBtn {
+  color: var(--text);
+}
+.megaItem[data-section="photo"]:hover .megaBtn {
+  color: var(--accent-photo);
+}
+.megaItem[data-section="music"]:hover .megaBtn {
+  color: var(--accent-music);
+}
+.megaItem[data-section="dev"]:hover .megaBtn {
+  color: var(--accent-dev);
+}
+.megaItem[data-section="contact"]:hover .megaBtn {
+  color: var(--accent-contact);
+}
+.current .megaBtn {
+  color: var(--accent);
+}
+.megaPanel {
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 0;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop);
+  padding: 7px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
   transition:
-    color var(--dur),
-    background var(--dur);
+    opacity 0.2s var(--ease),
+    transform 0.2s var(--ease),
+    visibility 0.2s;
+  z-index: 46;
 }
-.navLink:hover {
-  color: var(--text);
+.megaItem:hover .megaPanel,
+.megaItem:focus-within .megaPanel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
 }
-.navLinkActive {
-  color: var(--text);
+/* 섹션 하나가 활성(.current)일 땐 그 섹션 드롭다운만 hover 로 열림 — 다른 섹션 hover 는 억제(사용자 요청).
+   홈(활성 섹션 없음)에선 위 규칙대로 전부 열린다. */
+.mega:has(.current) .megaItem:hover .megaPanel,
+.mega:has(.current) .megaItem:focus-within .megaPanel {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+}
+.mega:has(.current) .megaItem.current:hover .megaPanel,
+.mega:has(.current) .megaItem.current:focus-within .megaPanel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+.megaLink {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-2);
+  padding: 9px 11px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.megaLink:hover {
   background: var(--surface-2);
+  color: var(--text);
 }
 
 .spacer {
@@ -74,11 +152,4 @@
   display: flex;
   align-items: center;
   gap: 2px;
-}
-
-@media (min-width: 768px) {
-  .avatar {
-    width: 34px;
-    height: 34px;
-  }
 }

@@ -1,0 +1,172 @@
+.hero {
+  min-height: calc(100svh - 58px);
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 768px) {
+  .hero {
+    min-height: calc(100svh - 76px);
+  }
+}
+.inner {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(44px, 8vw, 104px) clamp(20px, 4vw, 40px) clamp(24px, 3vw, 44px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.type {
+  display: flex;
+  align-items: center;
+  height: 1.6em; /* 고정 — 타이핑 중 텍스트 유무로 높이가 흔들리지 않게(min-height는 자연 높이보다 작아 미세 점프) */
+  line-height: 1.6;
+  margin: clamp(14px, 2vw, 22px) 0 0;
+  font-family: var(--font-mono);
+  font-size: clamp(16px, 2.2vw, 28px);
+  letter-spacing: 0.02em;
+  color: var(--role-accent, var(--accent));
+  transition: color 0.5s var(--ease);
+}
+.type::before {
+  content: "";
+  flex: none;
+  width: 34px;
+  height: 1px;
+  margin-right: 14px;
+  background: var(--role-accent, var(--accent));
+  transition: background 0.5s var(--ease);
+}
+.typed {
+  white-space: nowrap;
+}
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  margin-left: 3px;
+  background: var(--role-accent, var(--accent));
+  animation: blink 1s step-end infinite;
+  transition: background 0.5s var(--ease);
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(52px, 11vw, 148px);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.dot {
+  color: var(--role-accent, var(--accent));
+  transition: color 0.5s var(--ease);
+}
+
+.lead {
+  max-width: 52ch;
+  margin: clamp(22px, 3vw, 34px) 0 0;
+  font-size: clamp(15px, 1.7vw, 19px);
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: clamp(28px, 3.5vw, 40px) 0 0;
+}
+.row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.row[data-section="photo"] {
+  --accent: var(--accent-photo);
+}
+.row[data-section="music"] {
+  --accent: var(--accent-music);
+}
+.row[data-section="dev"] {
+  --accent: var(--accent-dev);
+}
+.rowTitle {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.rowCta {
+  font-size: 14px;
+  color: var(--text-4);
+  transition: color 0.2s;
+}
+.row:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.row:hover .rowCta {
+  color: #fff;
+}
+
+/* 진입 애니메이션 — 스태거 fade-up */
+.name,
+.type,
+.lead,
+.rows {
+  animation: landIn 0.7s var(--ease) both;
+}
+.name {
+  animation-delay: 0.05s;
+}
+.type {
+  animation-delay: 0.15s;
+}
+.lead {
+  animation-delay: 0.25s;
+}
+.rows {
+  animation-delay: 0.35s;
+}
+@keyframes landIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .name,
+  .type,
+  .lead,
+  .rows {
+    animation: none;
+  }
+}

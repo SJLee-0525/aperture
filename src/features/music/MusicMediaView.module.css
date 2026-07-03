@@ -1,0 +1,90 @@
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
+}
+.title {
+  margin-bottom: var(--s-6);
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.empty {
+  padding: var(--s-16) 0;
+  color: var(--text-2);
+  font-size: var(--t-body);
+  text-align: center;
+}
+
+.vid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(14px, 2vw, 22px);
+}
+@media (max-width: 720px) {
+  .vid {
+    grid-template-columns: 1fr;
+  }
+}
+.v {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0a0a0c;
+}
+.trigger {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.facade {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px;
+  background: linear-gradient(120deg, #1a1a1f, #0a0a0c);
+}
+.play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+}
+.play svg {
+  width: 22px;
+  height: 22px;
+  margin-left: 3px;
+  fill: #fff;
+}
+.vt {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: #fff;
+}
+.vs {
+  position: relative;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}

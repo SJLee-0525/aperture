@@ -52,6 +52,12 @@
   --like: #ff2d55;
   --like-soft: rgba(255, 45, 85, 0.12);
 
+  /* --- 섹션 팔레트 (랜딩 진입 행 + html[data-section] 공용 단일 출처) --- */
+  --accent-photo: #0a84ff;
+  --accent-music: #e5484d;
+  --accent-dev: #16a34a;
+  --accent-contact: #f5820d;
+
   /* --- Motion --- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
@@ -113,7 +119,45 @@
   --accent-soft: rgba(43, 149, 255, 0.16);
   --like: #ff375f;
   --like-soft: rgba(255, 55, 95, 0.18);
+  --accent-music: #ff5b60;
+  --accent-dev: #2ecc71;
+  --accent-contact: #fb923c;
   color-scheme: dark;
+}
+
+/* ===================== 섹션 액센트 (html[data-section] — design/ver_2 site.css 이식) =====================
+   SectionAccent(client)가 라우트별로 data-section 을 세팅 → 컴포넌트는 --accent 만 참조(섹션 색 하드코딩 금지).
+   선택자 명시도(0,1,1)가 [data-theme](0,1,0)보다 높아 다크에서도 섹션색이 우선하며, 다크 전용 보정은 (0,2,1)로 덮는다. */
+html[data-section="photo"],
+html[data-section="home"] {
+  --accent: var(--accent-photo);
+  --accent-press: #0066d6;
+  --accent-soft: rgba(10, 132, 255, 0.12);
+}
+html[data-section="music"] {
+  --accent: var(--accent-music);
+  --accent-press: #c0393e;
+  --accent-soft: rgba(229, 72, 77, 0.13);
+}
+html[data-section="dev"] {
+  --accent: var(--accent-dev);
+  --accent-press: #15803d;
+  --accent-soft: rgba(22, 163, 74, 0.14);
+}
+html[data-section="contact"] {
+  --accent: var(--accent-contact);
+  --accent-press: #cc6a00;
+  --accent-soft: rgba(245, 130, 13, 0.14);
+}
+/* 다크: --accent 는 --accent-music/dev/contact 가 자동 전환 → soft 톤만 보정 */
+html[data-theme="dark"][data-section="music"] {
+  --accent-soft: rgba(255, 91, 96, 0.16);
+}
+html[data-theme="dark"][data-section="dev"] {
+  --accent-soft: rgba(46, 204, 113, 0.16);
+}
+html[data-theme="dark"][data-section="contact"] {
+  --accent-soft: rgba(251, 146, 60, 0.16);
 }
 
 /* ===================== Reset + Base ===================== */

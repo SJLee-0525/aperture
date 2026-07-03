@@ -77,7 +77,7 @@ src/
 │   ├── export/  likes/          # ExportModal·framePreview·use-export / LikeButton·use-like
 │   ├── music/                   # MusicView(연주·일정·수상·영상·연락처), WorkModal, AwardModal, use-music-modal, use-typing
 │   ├── dev/                     # DevView(소개·스택·프로젝트·경력), ProjectModal, use-dev-modal, use-reveal, use-typing
-│   ├── site-header/             # SiteHeader(mega-menu), MobileTabBar/MenuOverlay, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
+│   ├── site-header/             # SiteHeader(mega-menu), MobileTabBar/MenuOverlay, ThemeToggleButton, LangMenu, SearchBox(항상 노출)
 │   ├── theme/  lang/            # html[data-theme] 토글 · ko/en Context(useSyncExternalStore)
 │   ├── auth/                    # LoginForm, AuthGuard, use-auth
 │   ├── image-upload/            # ImageUploader (exifr 추출 + 압축 + Storage 업로드)
@@ -240,7 +240,7 @@ export default async function WorkPage() {
 
 - **워드마크 = `Sungjoon Lee.`** (site nav). 사진 섹션 내부만 서브브랜드 `Aperture.` 유지. 원본: `design/ver_2/Sungjoon Lee.html` `#site-nav`.
 - **데스크톱 mega-menu**: 사진/음악/개발 3개 상위 + hover 드롭다운 패널(하위 링크). `constants/navigation.ts` 의 구조 상수로 렌더. 각 링크는 `href`(사진=라우트) 또는 앵커(음악·개발 인-페이지).
-- **검색창 = 가장 우측**(언어·테마 토글 옆), **사진 섹션에서만 노출** (사용자 확정). `SearchBox` 는 pathname 이 `/photo*` 일 때만 렌더. **아바타/유저 아이콘은 이식하지 않음**(디자인의 `.avatar` 제거).
+- **검색창 = 가장 우측**(언어·테마 토글 옆), **항상 노출**(전 섹션, 사용자 확정). 제출 시 사진 검색(`/photo?q=`)으로 이동. 모바일은 버거 메뉴 안. **아바타/유저 아이콘은 이식하지 않음**(디자인의 `.avatar` 제거).
 - **섹션 액센트**: `SectionAccent`(client, `(public)/layout.tsx` 마운트)가 pathname → `document.documentElement.dataset.section` (`home`/`photo`/`music`/`dev`) 설정. 색은 `globals.css`(=site.css 이식)의 `html[data-section]` 규칙이 `--accent` 오버라이드. **컴포넌트에서 섹션 색 하드코딩 금지.**
 - **모바일**: 앱바(워드마크+테마+버거) + **섹션별 하단 탭바**(섹션마다 탭 세트 다름) + 버거 메뉴 시트(사진/음악/개발 아코디언 + 검색). 원본: `Sungjoon Lee - Mobile.html`.
 - **랜딩(`/`)**: 이름·태그라인(Photographer · Pianist · Developer)·소개 + 사진/음악/개발 진입 행. reveal-on-scroll(IntersectionObserver 또는 `motion`). `features/landing/`.
@@ -295,7 +295,7 @@ export default async function WorkPage() {
 PR/변경 마무리 전:
 
 - [ ] 디자인 프로토타입(`design/ver_2/`)과 대조했는가 (색·타이포·간격 — `/design-check`), **문서화된 의도적 이탈 외 임의 변경 없는가**
-- [ ] 검색창이 상단 우측·**사진 섹션 한정**인가, **아바타/유저 아이콘을 추가하지 않았는가**
+- [ ] 검색창이 상단 우측·**항상 노출**인가, **아바타/유저 아이콘을 추가하지 않았는가**
 - [ ] 섹션 액센트가 `[data-section]` → `--accent` 경유인가 (섹션 색 하드코딩 없음)
 - [ ] 모바일 폭(~390px)에서 하단 탭바(섹션별)·바텀시트 레이아웃 확인했는가
 - [ ] `"use client"` 필요한 곳에만 (공개 페이지 Server Component 우선)

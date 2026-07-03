@@ -1,0 +1,205 @@
+/* 언어·테마 토글(.btn)과 크기·라운드·호버 통일 */
+.burger {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: var(--r-pill);
+  transition:
+    background var(--dur),
+    color var(--dur);
+}
+.burger:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.burger svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (min-width: 768px) {
+  .burger {
+    display: none;
+  }
+}
+
+/* 시트는 헤더(58px) 아래에서 내려온다 — 버거는 헤더에 남아 클릭 가능(X 토글). */
+.scrim {
+  position: fixed;
+  top: 58px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 39;
+  animation: fade 0.2s var(--ease);
+}
+.panel {
+  position: fixed;
+  top: 58px;
+  left: 0;
+  right: 0;
+  max-height: calc(100dvh - 58px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 16px 20px;
+  z-index: 41;
+  transform-origin: top;
+  /* 내비에서 펼쳐지듯 위→아래로 열림(슬라이드가 아니라 언폴드) */
+  animation: menuUnfold 0.42s var(--ease-spring) both;
+}
+/* 항목은 아래에서 살짝 올라오며 순차 등장(cascade) */
+.panel > * {
+  animation: menuItemIn 0.45s var(--ease) both;
+}
+.panel > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.panel > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.panel > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.panel > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.panel > *:nth-child(5) {
+  animation-delay: 0.25s;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes menuUnfold {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes menuItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .panel,
+  .panel > * {
+    animation: none;
+  }
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  margin-bottom: 10px;
+  color: var(--text-3);
+}
+.search input {
+  border: 0;
+  background: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  width: 100%;
+}
+.search input::placeholder {
+  color: var(--text-3);
+}
+
+.group {
+  border-top: 1px solid var(--line);
+}
+.groupBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 17px 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.groupLabel {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.plus {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-4);
+  transition: transform 0.25s var(--ease);
+}
+.groupOpen .plus {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
+.subs {
+  display: none;
+  flex-direction: column;
+  padding: 0 4px 14px;
+  gap: 1px;
+}
+.groupOpen .subs {
+  display: flex;
+}
+.sub {
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+.sub:hover {
+  color: var(--accent);
+}
+
+/* 연락처 — 아코디언이 아닌 평면 링크(그룹 헤더와 동일한 디스플레이 타이포) */
+.flatLink {
+  display: block;
+  width: 100%;
+  padding: 17px 4px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: color 0.15s;
+}
+.flatLink:hover {
+  color: var(--accent);
+}

@@ -17,6 +17,8 @@ const getSiteConfig = async (): Promise<SiteConfig> => {
     const data = snap.data();
     return {
       name: data.name ?? MOCK_SITE.name,
+      tagline: data.tagline ?? MOCK_SITE.tagline,
+      landingLead: data.landingLead ?? MOCK_SITE.landingLead,
       bio: data.bio ?? { ko: "", en: "" },
       links: data.links ?? [],
       tags: data.tags ?? [],

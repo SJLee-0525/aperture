@@ -71,7 +71,7 @@ allowed-tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 
 - [ ] 색이 `tokens.css`에서 추출한 `:root` 변수 경유인가 (hex 직박 없음)
 - [ ] **섹션 액센트가 `[data-section]` → `--accent` 경유인가** (photo 블루·music 레드·dev 그린, 섹션 색 하드코딩 없음)
-- [ ] **검색창이 상단 우측·사진 섹션 한정인가, 아바타/유저 아이콘이 없는가**
+- [ ] **검색창이 상단 우측·항상 노출인가, 아바타/유저 아이콘이 없는가**
 - [ ] 폰트 3종(Newsreader·Schibsted Grotesk·Spline Sans Mono) next/font 등록·용도(제목/UI/수치) 맞는가
 - [ ] radius 각짐(0), 태그 칩만 pill 인가
 - [ ] 모바일 폭(~390px)에서 하단 탭바(섹션별)·바텀시트가 `Sungjoon Lee - Mobile.html` 과 같은가

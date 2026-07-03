@@ -52,7 +52,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
           />
         </m.div>
         <div className={styles.scrim} />
-        <Link href={ROUTES.ALBUMS} className={styles.back}>
+        <Link href={ROUTES.PHOTO_ALBUMS} className={styles.back}>
           ← {dict.albumsNav}
         </Link>
         <m.div

@@ -1,3 +1,4 @@
+import { mockContentEnabled } from "@/lib/content/content-source";
 import { fetchPublishedPhotos, isFirebaseConfigured } from "@/lib/firebase/firestore-rest";
 import { MOCK_PHOTOS } from "@/mocks/photos";
 import type { Photo } from "@/types/photo";
@@ -13,7 +14,7 @@ const mockPhotos = (): Photo[] =>
  * 호출부(app/(public)/*)는 이 시그니처만 알면 됨 — 소스가 교체돼도 무변경.
  */
 const getPhotos = async (): Promise<Photo[]> => {
-  if (!isFirebaseConfigured()) return mockPhotos();
+  if (mockContentEnabled() || !isFirebaseConfigured()) return mockPhotos();
   try {
     return await fetchPublishedPhotos();
   } catch (error) {

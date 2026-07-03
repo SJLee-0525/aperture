@@ -1,0 +1,194 @@
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
+}
+.title {
+  margin-bottom: var(--s-6);
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.empty {
+  padding: var(--s-16) 0;
+  color: var(--text-2);
+  font-size: var(--t-body);
+  text-align: center;
+}
+
+.works {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2.4vw, 28px);
+}
+@media (max-width: 900px) {
+  .works {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .works {
+    grid-template-columns: 1fr;
+  }
+}
+.work {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.poster {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--photo-bg);
+  color: var(--text-4);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+.posterImg {
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+.work:hover .posterImg {
+  transform: scale(1.045);
+}
+.tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 9px;
+  background: var(--bg);
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.wt {
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.ws {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-3);
+}
+.wm {
+  margin-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ===== 연주 상세 모달 ===== */
+.rec {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 34px;
+}
+@media (max-width: 680px) {
+  .rec {
+    grid-template-columns: 1fr;
+  }
+}
+.recPoster {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--photo-bg);
+  color: var(--text-4);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+.rt {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 500;
+  line-height: 1;
+}
+.rsub {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--text-3);
+}
+.rmeta {
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-2);
+}
+.rv {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-3);
+}
+.rbtns {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+.book {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.book:hover {
+  background: var(--accent-press);
+}
+.prog {
+  margin-top: 26px;
+}
+.ph {
+  margin-bottom: 4px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+.pr {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-4);
+}
+.pt {
+  font-size: 15px;
+}
+.rdesc {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-3);
+}

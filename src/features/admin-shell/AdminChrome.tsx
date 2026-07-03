@@ -25,7 +25,7 @@ const AdminChrome = ({ children }: { children: ReactNode }) => {
           Aperture.<span className={styles.tag}>관리자</span>
         </Link>
         <div className={styles.right}>
-          <Link href={ROUTES.HOME} className={styles.link}>
+          <Link href={ROUTES.LANDING} className={styles.link}>
             사이트 보기 ↗
           </Link>
           <button type="button" className={styles.logout} onClick={onLogout}>

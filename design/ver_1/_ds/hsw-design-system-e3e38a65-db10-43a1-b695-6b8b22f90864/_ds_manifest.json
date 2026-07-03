@@ -1,1 +1,435 @@
-{"namespace":"HSWDesignSystem_e3e38a","components":[],"startingPoints":[],"cards":[{"path":"preview/brand-icons.html","group":"Brand","viewport":"700x140","subtitle":"Material Symbols Outlined · wght 400","name":"Iconography"},{"path":"preview/brand-logos.html","group":"Brand","viewport":"700x140","subtitle":"Full · compact · mark","name":"Logos"},{"path":"preview/colors-gold.html","group":"Colors","viewport":"700x140","subtitle":"The only chromatic accent","name":"Gold Scale"},{"path":"preview/colors-semantic.html","group":"Colors","viewport":"700x140","subtitle":"All gold — no green, no red","name":"Semantic Colors"},{"path":"preview/colors-surfaces.html","group":"Colors","viewport":"700x140","subtitle":"Obsidian stack · 6 tiers","name":"Surfaces"},{"path":"preview/colors-text.html","group":"Colors","viewport":"700x110","subtitle":"White → #606060, 9 steps, cool only","name":"Text Ramp"},{"path":"preview/components-buttons.html","group":"Components","viewport":"700x120","subtitle":"Primary gold · ghost · tertiary","name":"Buttons"},{"path":"preview/components-panels.html","group":"Components","viewport":"700x160","subtitle":"Cluster-glass + gold status card","name":"Panels"},{"path":"preview/components-progress-input.html","group":"Components","viewport":"700x200","subtitle":"Gold bars (8/2.5/1.5px) · underline fields","name":"Progress & Inputs"},{"path":"preview/components-status.html","group":"Components","viewport":"700x180","subtitle":"Active · queued · done — gold left-border","name":"Status Badges & Cards"},{"path":"preview/components-terminal.html","group":"Components","viewport":"700x180","subtitle":"HUD terminal · blinking cursor","name":"Terminal Console"},{"path":"preview/spacing-elevation.html","group":"Spacing","viewport":"700x220","subtitle":"4px grid · tonal elevation · gold glow","name":"Spacing & Elevation"},{"path":"preview/textures.html","group":"Spacing","viewport":"700x170","subtitle":"hex · carbon · scanline · gold radial","name":"Textures"},{"path":"preview/type-body.html","group":"Type","viewport":"700x220","subtitle":"H3/H4 · body · labels · sublabels","name":"Body & Labels"},{"path":"preview/type-display.html","group":"Type","viewport":"700x220","subtitle":"Space Grotesk 900 · italic display","name":"Display Type"},{"path":"preview/type-mono.html","group":"Type","viewport":"700x220","subtitle":"JetBrains Mono — metrics, timestamps, terminal","name":"Mono & Terminal"},{"path":"ui_kits/dashboard/index.html","group":"UI Kit — Dashboard","viewport":"1280x820","subtitle":"Interactive dashboard — sidebar, gauges, pipeline, terminal","name":"Cockpit UI Kit"}],"globalCssPaths":["colors_and_type.css","ui_kits/dashboard/styles.css"],"tokens":[{"name":"--void","value":"#000000","kind":"color","definedIn":"colors_and_type.css"},{"name":"--surface","value":"#000000","kind":"color","definedIn":"colors_and_type.css"},{"name":"--surface-low","value":"#080808","kind":"color","definedIn":"colors_and_type.css"},{"name":"--recessed","value":"#0a0a0a","kind":"color","definedIn":"colors_and_type.css"},{"name":"--surface-mid","value":"#141414","kind":"color","definedIn":"colors_and_type.css"},{"name":"--surface-high","value":"#1c1c1c","kind":"color","definedIn":"colors_and_type.css"},{"name":"--surface-highest","value":"#252525","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold","value":"#FFC000","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-soft","value":"#FFE3AD","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-dark","value":"#D4A000","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-deep","value":"#917300","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-warm","value":"#C49A4A","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-glow","value":"rgba(255, 192, 0, 0.06)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-10","value":"rgba(255, 192, 0, 0.10)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-20","value":"rgba(255, 192, 0, 0.20)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-30","value":"rgba(255, 192, 0, 0.30)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--gold-60","value":"rgba(255, 192, 0, 0.60)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--ai-cyan","value":"#00DDFE","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-primary","value":"#ffffff","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-high","value":"#e0e0e0","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-medium","value":"#d0d0d0","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-secondary","value":"#b0b0b0","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-tertiary","value":"#a0a0a0","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-muted","value":"#909090","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-subtle","value":"#808080","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-dim","value":"#707070","kind":"color","definedIn":"colors_and_type.css"},{"name":"--fg-ghost","value":"#606060","kind":"color","definedIn":"colors_and_type.css"},{"name":"--success","value":"var(--gold)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--warning","value":"var(--gold-warm)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--error","value":"var(--gold-deep)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--info","value":"var(--fg-tertiary)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--border-subtle","value":"rgba(255, 255, 255, 0.04)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--border-default","value":"rgba(255, 255, 255, 0.06)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--border-strong","value":"rgba(255, 255, 255, 0.10)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--border-gold-faint","value":"rgba(255, 192, 0, 0.10)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--border-gold-medium","value":"rgba(255, 192, 0, 0.20)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--border-gold-strong","value":"rgba(255, 192, 0, 0.30)","kind":"color","definedIn":"colors_and_type.css"},{"name":"--font-heading","value":"'Space Grotesk', ui-sans-serif, system-ui, sans-serif","kind":"font","definedIn":"colors_and_type.css"},{"name":"--font-sans","value":"'Inter', ui-sans-serif, system-ui, sans-serif","kind":"font","definedIn":"colors_and_type.css"},{"name":"--font-mono","value":"'JetBrains Mono', ui-monospace, 'Courier New', monospace","kind":"font","definedIn":"colors_and_type.css"},{"name":"--tracking-tight","value":"-0.02em","kind":"font","definedIn":"colors_and_type.css"},{"name":"--tracking-normal","value":"0","kind":"font","definedIn":"colors_and_type.css"},{"name":"--tracking-wide","value":"0.1em","kind":"font","definedIn":"colors_and_type.css"},{"name":"--tracking-widest","value":"0.15em","kind":"font","definedIn":"colors_and_type.css"},{"name":"--tracking-2em","value":"0.2em","kind":"font","definedIn":"colors_and_type.css"},{"name":"--tracking-3em","value":"0.3em","kind":"font","definedIn":"colors_and_type.css"},{"name":"--radius","value":"0px","kind":"radius","definedIn":"colors_and_type.css"},{"name":"--elev-inset","value":"inset 0 0 20px rgba(0, 0, 0, 0.5)","kind":"shadow","definedIn":"colors_and_type.css"},{"name":"--elev-gold-glow-soft","value":"0 0 20px rgba(255, 192, 0, 0.1)","kind":"shadow","definedIn":"colors_and_type.css"},{"name":"--elev-gold-glow-mid","value":"0 0 8px rgba(255, 192, 0, 0.6)","kind":"shadow","definedIn":"colors_and_type.css"},{"name":"--space-1","value":"4px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-2","value":"8px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-3","value":"12px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-4","value":"16px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-5","value":"20px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-6","value":"24px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-8","value":"32px","kind":"spacing","definedIn":"colors_and_type.css"},{"name":"--space-12","value":"48px","kind":"spacing","definedIn":"colors_and_type.css"}],"themes":[],"fonts":[],"brandFonts":[{"family":"Space Grotesk","status":"ok","tokens":["--font-heading"],"path":"colors_and_type.css"},{"family":"Inter","status":"ok","tokens":["--font-sans"],"path":"colors_and_type.css"},{"family":"JetBrains Mono","status":"ok","tokens":["--font-mono"],"path":"colors_and_type.css"}],"source":"spa"}
+{
+  "namespace": "HSWDesignSystem_e3e38a",
+  "components": [],
+  "startingPoints": [],
+  "cards": [
+    {
+      "path": "preview/brand-icons.html",
+      "group": "Brand",
+      "viewport": "700x140",
+      "subtitle": "Material Symbols Outlined · wght 400",
+      "name": "Iconography"
+    },
+    {
+      "path": "preview/brand-logos.html",
+      "group": "Brand",
+      "viewport": "700x140",
+      "subtitle": "Full · compact · mark",
+      "name": "Logos"
+    },
+    {
+      "path": "preview/colors-gold.html",
+      "group": "Colors",
+      "viewport": "700x140",
+      "subtitle": "The only chromatic accent",
+      "name": "Gold Scale"
+    },
+    {
+      "path": "preview/colors-semantic.html",
+      "group": "Colors",
+      "viewport": "700x140",
+      "subtitle": "All gold — no green, no red",
+      "name": "Semantic Colors"
+    },
+    {
+      "path": "preview/colors-surfaces.html",
+      "group": "Colors",
+      "viewport": "700x140",
+      "subtitle": "Obsidian stack · 6 tiers",
+      "name": "Surfaces"
+    },
+    {
+      "path": "preview/colors-text.html",
+      "group": "Colors",
+      "viewport": "700x110",
+      "subtitle": "White → #606060, 9 steps, cool only",
+      "name": "Text Ramp"
+    },
+    {
+      "path": "preview/components-buttons.html",
+      "group": "Components",
+      "viewport": "700x120",
+      "subtitle": "Primary gold · ghost · tertiary",
+      "name": "Buttons"
+    },
+    {
+      "path": "preview/components-panels.html",
+      "group": "Components",
+      "viewport": "700x160",
+      "subtitle": "Cluster-glass + gold status card",
+      "name": "Panels"
+    },
+    {
+      "path": "preview/components-progress-input.html",
+      "group": "Components",
+      "viewport": "700x200",
+      "subtitle": "Gold bars (8/2.5/1.5px) · underline fields",
+      "name": "Progress & Inputs"
+    },
+    {
+      "path": "preview/components-status.html",
+      "group": "Components",
+      "viewport": "700x180",
+      "subtitle": "Active · queued · done — gold left-border",
+      "name": "Status Badges & Cards"
+    },
+    {
+      "path": "preview/components-terminal.html",
+      "group": "Components",
+      "viewport": "700x180",
+      "subtitle": "HUD terminal · blinking cursor",
+      "name": "Terminal Console"
+    },
+    {
+      "path": "preview/spacing-elevation.html",
+      "group": "Spacing",
+      "viewport": "700x220",
+      "subtitle": "4px grid · tonal elevation · gold glow",
+      "name": "Spacing & Elevation"
+    },
+    {
+      "path": "preview/textures.html",
+      "group": "Spacing",
+      "viewport": "700x170",
+      "subtitle": "hex · carbon · scanline · gold radial",
+      "name": "Textures"
+    },
+    {
+      "path": "preview/type-body.html",
+      "group": "Type",
+      "viewport": "700x220",
+      "subtitle": "H3/H4 · body · labels · sublabels",
+      "name": "Body & Labels"
+    },
+    {
+      "path": "preview/type-display.html",
+      "group": "Type",
+      "viewport": "700x220",
+      "subtitle": "Space Grotesk 900 · italic display",
+      "name": "Display Type"
+    },
+    {
+      "path": "preview/type-mono.html",
+      "group": "Type",
+      "viewport": "700x220",
+      "subtitle": "JetBrains Mono — metrics, timestamps, terminal",
+      "name": "Mono & Terminal"
+    },
+    {
+      "path": "ui_kits/dashboard/index.html",
+      "group": "UI Kit — Dashboard",
+      "viewport": "1280x820",
+      "subtitle": "Interactive dashboard — sidebar, gauges, pipeline, terminal",
+      "name": "Cockpit UI Kit"
+    }
+  ],
+  "globalCssPaths": ["colors_and_type.css", "ui_kits/dashboard/styles.css"],
+  "tokens": [
+    { "name": "--void", "value": "#000000", "kind": "color", "definedIn": "colors_and_type.css" },
+    {
+      "name": "--surface",
+      "value": "#000000",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--surface-low",
+      "value": "#080808",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--recessed",
+      "value": "#0a0a0a",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--surface-mid",
+      "value": "#141414",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--surface-high",
+      "value": "#1c1c1c",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--surface-highest",
+      "value": "#252525",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    { "name": "--gold", "value": "#FFC000", "kind": "color", "definedIn": "colors_and_type.css" },
+    {
+      "name": "--gold-soft",
+      "value": "#FFE3AD",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-dark",
+      "value": "#D4A000",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-deep",
+      "value": "#917300",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-warm",
+      "value": "#C49A4A",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-glow",
+      "value": "rgba(255, 192, 0, 0.06)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-10",
+      "value": "rgba(255, 192, 0, 0.10)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-20",
+      "value": "rgba(255, 192, 0, 0.20)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-30",
+      "value": "rgba(255, 192, 0, 0.30)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--gold-60",
+      "value": "rgba(255, 192, 0, 0.60)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--ai-cyan",
+      "value": "#00DDFE",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-primary",
+      "value": "#ffffff",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-high",
+      "value": "#e0e0e0",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-medium",
+      "value": "#d0d0d0",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-secondary",
+      "value": "#b0b0b0",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-tertiary",
+      "value": "#a0a0a0",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-muted",
+      "value": "#909090",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--fg-subtle",
+      "value": "#808080",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    { "name": "--fg-dim", "value": "#707070", "kind": "color", "definedIn": "colors_and_type.css" },
+    {
+      "name": "--fg-ghost",
+      "value": "#606060",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--success",
+      "value": "var(--gold)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--warning",
+      "value": "var(--gold-warm)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--error",
+      "value": "var(--gold-deep)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--info",
+      "value": "var(--fg-tertiary)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--border-subtle",
+      "value": "rgba(255, 255, 255, 0.04)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--border-default",
+      "value": "rgba(255, 255, 255, 0.06)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--border-strong",
+      "value": "rgba(255, 255, 255, 0.10)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--border-gold-faint",
+      "value": "rgba(255, 192, 0, 0.10)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--border-gold-medium",
+      "value": "rgba(255, 192, 0, 0.20)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--border-gold-strong",
+      "value": "rgba(255, 192, 0, 0.30)",
+      "kind": "color",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--font-heading",
+      "value": "'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--font-sans",
+      "value": "'Inter', ui-sans-serif, system-ui, sans-serif",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--font-mono",
+      "value": "'JetBrains Mono', ui-monospace, 'Courier New', monospace",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--tracking-tight",
+      "value": "-0.02em",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--tracking-normal",
+      "value": "0",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--tracking-wide",
+      "value": "0.1em",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--tracking-widest",
+      "value": "0.15em",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--tracking-2em",
+      "value": "0.2em",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--tracking-3em",
+      "value": "0.3em",
+      "kind": "font",
+      "definedIn": "colors_and_type.css"
+    },
+    { "name": "--radius", "value": "0px", "kind": "radius", "definedIn": "colors_and_type.css" },
+    {
+      "name": "--elev-inset",
+      "value": "inset 0 0 20px rgba(0, 0, 0, 0.5)",
+      "kind": "shadow",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--elev-gold-glow-soft",
+      "value": "0 0 20px rgba(255, 192, 0, 0.1)",
+      "kind": "shadow",
+      "definedIn": "colors_and_type.css"
+    },
+    {
+      "name": "--elev-gold-glow-mid",
+      "value": "0 0 8px rgba(255, 192, 0, 0.6)",
+      "kind": "shadow",
+      "definedIn": "colors_and_type.css"
+    },
+    { "name": "--space-1", "value": "4px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-2", "value": "8px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-3", "value": "12px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-4", "value": "16px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-5", "value": "20px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-6", "value": "24px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-8", "value": "32px", "kind": "spacing", "definedIn": "colors_and_type.css" },
+    { "name": "--space-12", "value": "48px", "kind": "spacing", "definedIn": "colors_and_type.css" }
+  ],
+  "themes": [],
+  "fonts": [],
+  "brandFonts": [
+    {
+      "family": "Space Grotesk",
+      "status": "ok",
+      "tokens": ["--font-heading"],
+      "path": "colors_and_type.css"
+    },
+    { "family": "Inter", "status": "ok", "tokens": ["--font-sans"], "path": "colors_and_type.css" },
+    {
+      "family": "JetBrains Mono",
+      "status": "ok",
+      "tokens": ["--font-mono"],
+      "path": "colors_and_type.css"
+    }
+  ],
+  "source": "spa"
+}

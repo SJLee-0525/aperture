@@ -54,6 +54,34 @@ const PATHS: Record<string, ReactNode> = {
       <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
     </>
   ),
+  music: (
+    <>
+      <path d="M9 18V5l10-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="16" cy="16" r="3" />
+    </>
+  ),
+  cal: (
+    <>
+      <rect x="3" y="4" width="18" height="17" />
+      <path d="M3 9h18M8 2v4M16 2v4" />
+    </>
+  ),
+  play: <path d="M6 4l14 8-14 8z" />,
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" />
+      <path d="M3 6l9 7 9-7" />
+    </>
+  ),
+  code: <path d="M8 8l-4 4 4 4M16 8l4 4-4 4" />,
+  folder: <path d="M3 7h6l2 2h10v10H3z" />,
+  award: (
+    <>
+      <circle cx="12" cy="9" r="6" />
+      <path d="M9 14l-1 7 4-2 4 2-1-7" />
+    </>
+  ),
 };
 
 type IconName = keyof typeof PATHS;
