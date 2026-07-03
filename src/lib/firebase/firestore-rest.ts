@@ -1,7 +1,8 @@
-import { COLLECTIONS, SITE_DOC, SITE_MUSIC_DOC } from "@/constants/collections";
+import { COLLECTIONS, SITE_DEV_DOC, SITE_DOC, SITE_MUSIC_DOC } from "@/constants/collections";
 import { isFirebaseConfigured } from "@/lib/firebase/config";
 import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
+import type { DevConfig, DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
@@ -191,6 +192,35 @@ const restToMusicConfig = (d: Record<string, unknown>): MusicConfig => ({
   education: (d.education as TimelineEntry[]) ?? [],
 });
 
+const restToDevProject = (id: string, d: Record<string, unknown>): DevProject => ({
+  id,
+  title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+  category: (d.category as LocalizedText) ?? EMPTY_LOCALIZED,
+  year: (d.year as string) ?? "",
+  summary: (d.summary as LocalizedText) ?? EMPTY_LOCALIZED,
+  overview: (d.overview as LocalizedText) ?? EMPTY_LOCALIZED,
+  roles: (d.roles as LocalizedText[]) ?? [],
+  troubleshooting: (d.troubleshooting as LocalizedText[]) ?? [],
+  techTags: (d.techTags as string[]) ?? [],
+  links: (d.links as SiteLink[]) ?? [],
+  cover: (d.cover as ImageMeta | null) ?? null,
+  images: (d.images as ImageMeta[]) ?? [],
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
+});
+
+const restToDevConfig = (d: Record<string, unknown>): DevConfig => ({
+  heroLead: (d.heroLead as LocalizedText) ?? EMPTY_LOCALIZED,
+  typeWords: (d.typeWords as string[]) ?? [],
+  interview: (d.interview as DevConfig["interview"]) ?? [],
+  stack: (d.stack as DevConfig["stack"]) ?? [],
+  timeline: (d.timeline as DevConfig["timeline"]) ?? [],
+  githubUrl: (d.githubUrl as string) ?? "",
+  resumeUrl: (d.resumeUrl as string) ?? "",
+  contactEmail: (d.contactEmail as string) ?? "",
+  social: (d.social as SiteLink[]) ?? [],
+});
+
 // ── 공개 read API (도메인 타입 반환) ────────────────────────────────────────
 
 /** 공개 사진 — published==true, order 순. */
@@ -250,9 +280,29 @@ const fetchMusicConfig = async (): Promise<MusicConfig | null> => {
   return restToMusicConfig(decodeFields(doc.fields ?? {}));
 };
 
+/** 공개 프로젝트 목록 — published==true, order 순. */
+const fetchPublishedDevProjects = async (): Promise<DevProject[]> => {
+  const rows = await runQuery(publishedOrderedQuery(COLLECTIONS.DEV_PROJECTS));
+  return rows.map((row) => restToDevProject(row.id, row.data));
+};
+
+/** site/dev 설정 문서(read: if true). 문서가 없으면 null → 호출부가 mock 폴백. */
+const fetchDevConfig = async (): Promise<DevConfig | null> => {
+  const res = await fetch(`${documentsUrl()}/${COLLECTIONS.SITE}/${SITE_DEV_DOC}?key=${API_KEY}`, {
+    next: { revalidate: REVALIDATE_SECONDS },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Firestore dev config 읽기 실패 (${res.status})`);
+
+  const doc = (await res.json()) as RestDocument;
+  return restToDevConfig(decodeFields(doc.fields ?? {}));
+};
+
 export {
+  fetchDevConfig,
   fetchMusicConfig,
   fetchPublishedAlbums,
+  fetchPublishedDevProjects,
   fetchPublishedMusicAwards,
   fetchPublishedMusicMedia,
   fetchPublishedMusicWorks,

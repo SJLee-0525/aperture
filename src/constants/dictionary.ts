@@ -30,6 +30,12 @@ type UIDict = {
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
+  devOverviewLabel: string;
+  devRolesLabel: string;
+  devTroubleLabel: string;
+  devStackLabel: string;
+  devTechLabel: string;
+  devFieldLabel: string;
   comingSoon: string;
   // 음악 섹션 UI
   musicContactLead: string;
@@ -104,6 +110,12 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
+    devOverviewLabel: "개요",
+    devRolesLabel: "담당 · 주요 작업",
+    devTroubleLabel: "트러블슈팅",
+    devStackLabel: "기술 스택",
+    devTechLabel: "사용 기술",
+    devFieldLabel: "분야",
     comingSoon: "곧 공개됩니다",
     musicContactLead: "함께 무대를 만들 분을 기다립니다.",
     musicBookingLabel: "공연 문의",
@@ -172,6 +184,12 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
+    devOverviewLabel: "Overview",
+    devRolesLabel: "Role & Work",
+    devTroubleLabel: "Troubleshooting",
+    devStackLabel: "Stack",
+    devTechLabel: "Tech Used",
+    devFieldLabel: "Fields",
     comingSoon: "Coming soon",
     musicContactLead: "Looking for someone to build the stage together.",
     musicBookingLabel: "Booking",

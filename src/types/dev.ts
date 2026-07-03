@@ -14,7 +14,8 @@ type DevProject = {
   troubleshooting: LocalizedText[];
   techTags: string[]; // 기술명 (언어 무관 평면)
   links: SiteLink[]; // GitHub / Live / 열기
-  image: ImageMeta | null; // 썸네일 (선택)
+  cover: ImageMeta | null; // 목록 카드 대표 이미지 (선택)
+  images: ImageMeta[]; // 상세 모달 갤러리 (0장 이상)
   order: number;
   published: boolean;
 };
@@ -22,8 +23,11 @@ type DevProject = {
 /** 소개 인터뷰 Q&A (site/dev.interview) */
 type DevInterview = { q: LocalizedText; a: LocalizedText };
 
+/** 기술 스택 항목 — 이름 + 배경/글자색(기술별 브랜드 색, 관리자 편집). 색은 hex 데이터. */
+type DevStackItem = { name: string; bg: string; fg: string };
+
 /** 기술 스택 그룹 (site/dev.stack) */
-type DevStackGroup = { category: string; items: string[] };
+type DevStackGroup = { category: string; items: DevStackItem[] };
 
 /** 경력 타임라인 항목 (site/dev.timeline) */
 type DevTimelineEntry = {
@@ -46,4 +50,4 @@ type DevConfig = {
   social: SiteLink[];
 };
 
-export type { DevProject, DevInterview, DevStackGroup, DevTimelineEntry, DevConfig };
+export type { DevProject, DevInterview, DevStackItem, DevStackGroup, DevTimelineEntry, DevConfig };
