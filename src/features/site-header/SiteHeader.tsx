@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { CONTACT_NAV, MEGA_MENU } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
@@ -24,6 +25,27 @@ const SiteHeader = () => {
   const pathname = usePathname();
   const section = sectionFromPath(pathname);
 
+  // 클릭으로 고정(pin)한 섹션. null = 미고정 → 자유 hover. 라우트(.current)와 무관한 상호작용 상태.
+  const [pinned, setPinned] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // 고정 상태에서만 바깥 클릭·Esc 로 해제.
+  useEffect(() => {
+    if (!pinned) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setPinned(null);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPinned(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [pinned]);
+
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -31,16 +53,29 @@ const SiteHeader = () => {
           Sungjoon Lee<span className={styles.dot}>.</span>
         </Link>
 
-        <nav className={styles.mega} aria-label="Primary">
+        <nav
+          ref={navRef}
+          className={styles.mega}
+          aria-label="Primary"
+          data-pinned={pinned ?? undefined}
+        >
           {MEGA_MENU.map((group) => (
             <div
               key={group.section}
               data-section={group.section}
-              className={`${styles.megaItem} ${section === group.section ? styles.current : ""}`}
+              className={`${styles.megaItem} ${section === group.section ? styles.current : ""} ${
+                pinned === group.section ? styles.pinned : ""
+              }`}
             >
-              <Link href={group.href} className={styles.megaBtn}>
+              <button
+                type="button"
+                className={styles.megaBtn}
+                aria-haspopup="menu"
+                aria-expanded={pinned === group.section}
+                onClick={() => setPinned((prev) => (prev === group.section ? null : group.section))}
+              >
                 {dict[group.labelKey]}
-              </Link>
+              </button>
               <div className={styles.megaPanel} role="menu">
                 {group.links.map((link) => (
                   <Link
@@ -48,6 +83,7 @@ const SiteHeader = () => {
                     href={link.href}
                     className={styles.megaLink}
                     role="menuitem"
+                    onClick={() => setPinned(null)}
                   >
                     {dict[link.labelKey]}
                   </Link>
@@ -61,7 +97,11 @@ const SiteHeader = () => {
               pathname.startsWith(ROUTES.CONTACT) ? styles.current : ""
             }`}
           >
-            <Link href={CONTACT_NAV.href} className={styles.megaBtn}>
+            <Link
+              href={CONTACT_NAV.href}
+              className={styles.megaBtn}
+              onClick={() => setPinned(null)}
+            >
               {dict[CONTACT_NAV.labelKey]}
             </Link>
           </div>
