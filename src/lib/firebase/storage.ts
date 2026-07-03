@@ -2,17 +2,12 @@ import { deleteObject, getDownloadURL, listAll, ref, uploadBytes } from "firebas
 
 import { storage } from "@/lib/firebase/client";
 
-const photoFolder = (photoId: string) => `photos/${photoId}`;
-
 /**
- * webp blob 을 photos/{photoId}/{uuid}.webp 에 업로드하고 {url, path} 반환.
+ * webp blob 을 {folder}/{uuid}.webp 에 업로드하고 {url, path} 반환.
  * uuid 파일명 — 같은 경로 덮어쓰기는 CDN·브라우저 캐시가 스테일되므로 항상 새 파일.
  */
-const uploadPhotoImage = async (
-  photoId: string,
-  blob: Blob,
-): Promise<{ url: string; path: string }> => {
-  const path = `${photoFolder(photoId)}/${crypto.randomUUID()}.webp`;
+const uploadWebp = async (folder: string, blob: Blob): Promise<{ url: string; path: string }> => {
+  const path = `${folder}/${crypto.randomUUID()}.webp`;
   try {
     const target = ref(storage, path);
     await uploadBytes(target, blob, { contentType: "image/webp" });
@@ -23,11 +18,19 @@ const uploadPhotoImage = async (
   }
 };
 
-/** 사진 폴더(photos/{photoId}) 전체 삭제 — 사진 문서 삭제 시 Storage 정리. */
-const deletePhotoImages = async (photoId: string): Promise<void> => {
-  const listing = await listAll(ref(storage, photoFolder(photoId)));
+/** 폴더 전체 삭제 — 문서 삭제 시 Storage 정리. */
+const deleteFolder = async (folder: string): Promise<void> => {
+  const listing = await listAll(ref(storage, folder));
   await Promise.all(listing.items.map((item) => deleteObject(item)));
 };
+
+/** 사진: photos/{photoId}/{uuid}.webp (EXIF 는 업로드 前 use-image-upload 에서 추출). */
+const uploadPhotoImage = (photoId: string, blob: Blob) => uploadWebp(`photos/${photoId}`, blob);
+const deletePhotoImages = (photoId: string) => deleteFolder(`photos/${photoId}`);
+
+/** 음악 포스터: music/{workId}/{uuid}.webp (EXIF 추출 없음 — 포스터는 좌표·촬영정보 불필요). */
+const uploadMusicPoster = (workId: string, blob: Blob) => uploadWebp(`music/${workId}`, blob);
+const deleteMusicImages = (workId: string) => deleteFolder(`music/${workId}`);
 
 /** 개별 path 삭제 — 이미지 교체 시 구 파일 정리(없으면 무시). */
 const deleteImageAt = async (path: string): Promise<void> => {
@@ -38,4 +41,4 @@ const deleteImageAt = async (path: string): Promise<void> => {
   }
 };
 
-export { deleteImageAt, deletePhotoImages, uploadPhotoImage };
+export { deleteImageAt, deleteMusicImages, deletePhotoImages, uploadMusicPoster, uploadPhotoImage };
