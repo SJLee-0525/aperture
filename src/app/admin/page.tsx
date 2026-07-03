@@ -7,22 +7,21 @@ import { useAuth } from "@/features/auth/use-auth";
 
 import styles from "./page.module.css";
 
-/** 관리자 섹션 — href 가 있으면 링크 카드, 없으면 "곧 제공". */
+/** 관리자 섹션 허브 — 섹션 단위로 묶고 각 허브에서 세부 관리로 진입. href 없으면 "곧 제공". */
 const SECTIONS: { key: string; label: string; desc: string; href?: string }[] = [
   {
-    key: "photos",
+    key: "photo",
     label: "사진",
-    desc: "업로드 · EXIF 자동추출 · 좌표 · 태그 · 드래그 정렬",
-    href: ROUTES.ADMIN_PHOTOS,
+    desc: "작업 · 앨범 · 태그 · 소개",
+    href: ROUTES.ADMIN_PHOTO,
   },
   {
-    key: "albums",
-    label: "앨범",
-    desc: "사진 묶음 · 커버 · 표시 순서",
-    href: ROUTES.ADMIN_ALBUMS,
+    key: "music",
+    label: "음악",
+    desc: "연주 · 수상 · 영상 · 소개 설정",
+    href: ROUTES.ADMIN_MUSIC,
   },
-  { key: "tags", label: "태그 사전", desc: "필터 칩 ko/en 정의", href: ROUTES.ADMIN_TAGS },
-  { key: "site", label: "소개", desc: "이름 · 바이오 · 연락처 링크", href: ROUTES.ADMIN_SITE },
+  // 전역·소개(랜딩·연락), 개발 섹션 CMS 는 추후 추가.
 ];
 
 const AdminHomePage = () => {
