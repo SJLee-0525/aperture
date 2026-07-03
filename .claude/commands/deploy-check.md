@@ -32,6 +32,7 @@ npm run lint
 - [ ] `.env.local` 의 `NEXT_PUBLIC_*` 키(Firebase 6개 + `ADMIN_UID`)가 Vercel env 에도 등록됨
 - [ ] 번들에 들어가면 안 되는 값이 `NEXT_PUBLIC_` 접두사를 달고 있지 않음
 - [ ] **진짜 시크릿(LLM/비전 API 키 등)이 코드·env 에 없음** (아키텍처 원칙 #8 — 이 프로젝트엔 애초에 없어야 함)
+- [ ] **`NEXT_PUBLIC_USE_MOCK` 이 프로덕션(Vercel)에 `1` 로 설정돼 있지 않음** — 설정 시 실서비스가 mock 을 노출한다 (🔴). 미설정이 정상(prod=실데이터)
 - [ ] `git status` 에 `.env*` / 서비스 계정 JSON 이 staged 되어 있지 않음
 
 ### Step 4 — 무료 한도 영향

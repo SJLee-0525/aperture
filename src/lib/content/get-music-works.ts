@@ -1,3 +1,4 @@
+import { mockContentEnabled } from "@/lib/content/content-source";
 import { fetchPublishedMusicWorks, isFirebaseConfigured } from "@/lib/firebase/firestore-rest";
 import { MOCK_MUSIC_WORKS } from "@/mocks/music";
 import type { MusicWork } from "@/types/music";
@@ -11,7 +12,7 @@ const mockWorks = (): MusicWork[] =>
  * Firebase 설정 시 항상 실데이터(빈 컬렉션이면 빈 배열). mock 은 env 미설정일 때만.
  */
 const getMusicWorks = async (): Promise<MusicWork[]> => {
-  if (!isFirebaseConfigured()) return mockWorks();
+  if (mockContentEnabled() || !isFirebaseConfigured()) return mockWorks();
   try {
     return await fetchPublishedMusicWorks();
   } catch (error) {

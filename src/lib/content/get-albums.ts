@@ -1,3 +1,4 @@
+import { mockContentEnabled } from "@/lib/content/content-source";
 import { fetchPublishedAlbums, isFirebaseConfigured } from "@/lib/firebase/firestore-rest";
 import { MOCK_ALBUMS } from "@/mocks/albums";
 import type { Album } from "@/types/album";
@@ -13,7 +14,7 @@ const mockAlbums = (): Album[] =>
  * mock 은 오직 env 미설정일 때만. REST 오류 시엔 빈 배열(mock 오염 방지, 오류는 로그).
  */
 const getAlbums = async (): Promise<Album[]> => {
-  if (!isFirebaseConfigured()) return mockAlbums();
+  if (mockContentEnabled() || !isFirebaseConfigured()) return mockAlbums();
   try {
     return await fetchPublishedAlbums();
   } catch (error) {

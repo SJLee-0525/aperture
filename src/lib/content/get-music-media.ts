@@ -1,3 +1,4 @@
+import { mockContentEnabled } from "@/lib/content/content-source";
 import { fetchPublishedMusicMedia, isFirebaseConfigured } from "@/lib/firebase/firestore-rest";
 import { MOCK_MUSIC_MEDIA } from "@/mocks/music";
 import type { MusicMedia } from "@/types/music";
@@ -8,7 +9,7 @@ const mockMedia = (): MusicMedia[] =>
 
 /** 공개 영상 목록 — published 필터 + order 정렬. Firebase 설정 시 실데이터, 아니면 mock. */
 const getMusicMedia = async (): Promise<MusicMedia[]> => {
-  if (!isFirebaseConfigured()) return mockMedia();
+  if (mockContentEnabled() || !isFirebaseConfigured()) return mockMedia();
   try {
     return await fetchPublishedMusicMedia();
   } catch (error) {
