@@ -94,14 +94,16 @@
   border-color: var(--accent);
   color: var(--accent);
 }
-.primary {
+/* .links a 보다 명시도 우선(0,2,0 > 0,1,1) — 흰 글자가 var(--text) 에 덮이지 않게 */
+.links .primary {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
 }
-.primary:hover {
+.links .primary:hover {
   background: var(--accent-press);
   color: #fff;
+  border-color: var(--accent-press);
 }
 
 /* ===== section ===== */

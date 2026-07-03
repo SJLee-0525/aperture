@@ -64,7 +64,7 @@ const SiteHeader = () => {
           <MobileMenu />
         </div>
 
-        {section === "photo" ? <SearchBox /> : null}
+        <SearchBox />
       </div>
     </header>
   );
