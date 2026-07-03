@@ -4,9 +4,10 @@
   padding: var(--s-5);
 }
 @media (max-width: 760px) {
+  /* 모바일: 지도가 위로 오므로(MapView order) 구분선을 리스트 상단으로 이동 */
   .list {
     border-right: 0;
-    border-bottom: 1px solid var(--line);
+    border-top: 1px solid var(--line);
   }
 }
 .head {

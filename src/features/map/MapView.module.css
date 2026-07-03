@@ -1,15 +1,9 @@
+/* 베이스 규칙 먼저 → 미디어쿼리 마지막. (미디어쿼리가 베이스 뒤에 와야 모바일 override가 이긴다.
+   과거엔 base .stage{min-height:340px}가 미디어쿼리 뒤에 있어 모바일 60vh가 무시되던 버그가 있었음.) */
 .view {
   display: grid;
   grid-template-columns: 320px 1fr;
   min-height: calc(100dvh - 200px);
-}
-@media (max-width: 760px) {
-  .view {
-    grid-template-columns: 1fr;
-  }
-  .stage {
-    min-height: 60vh;
-  }
 }
 .stage {
   position: relative;
@@ -21,4 +15,14 @@
   position: absolute;
   inset: 0;
   background: var(--map-land);
+}
+@media (max-width: 760px) {
+  .view {
+    grid-template-columns: 1fr;
+  }
+  /* 모바일: 지도를 위치 리스트 위로 + 높이 60vh (스켈레톤 loading.module.css와 정합) */
+  .stage {
+    min-height: 60vh;
+    order: -1;
+  }
 }
