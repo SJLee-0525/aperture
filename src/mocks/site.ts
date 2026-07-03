@@ -25,6 +25,14 @@ const TAGS: Tag[] = [
 /** P1 mock 사이트 설정 — bio(ko)는 디자인 원본. links는 관리자가 자유 편집(P2). */
 const MOCK_SITE: SiteConfig = {
   name: { ko: "이성준", en: "Sungjoon Lee" },
+  tagline: {
+    ko: "Photographer · Pianist · Developer",
+    en: "Photographer · Pianist · Developer",
+  },
+  landingLead: {
+    ko: "사진, 피아노, 그리고 코드 — 세 개의 언어로 같은 이야기를 합니다. 빛과 정적, 구조와 노래, 흐름과 인터랙션.",
+    en: "Photography, piano, and code — three languages telling one story. Light and stillness, structure and song, flow and interaction.",
+  },
   bio: {
     ko: "빛과 정적의 도시 풍경. 서울·도쿄·제주에서 장노출과 거리 사진을 찍습니다. 모든 컷에는 촬영 데이터가 함께 기록됩니다. 의뢰·프린트 문의는 언제나 환영합니다.",
     en: "Quiet light in the city. Long exposures and street frames from Seoul, Tokyo, and Jeju — each recorded with its capture data. Commissions and print inquiries always welcome.",

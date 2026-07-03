@@ -138,6 +138,8 @@ const restToAlbum = (id: string, d: Record<string, unknown>): Album => ({
 
 const restToSite = (d: Record<string, unknown>): SiteConfig => ({
   name: (d.name as LocalizedText) ?? { ko: "", en: "" },
+  tagline: (d.tagline as LocalizedText) ?? { ko: "", en: "" },
+  landingLead: (d.landingLead as LocalizedText) ?? { ko: "", en: "" },
   bio: (d.bio as LocalizedText) ?? { ko: "", en: "" },
   links: (d.links as SiteLink[]) ?? [],
   tags: (d.tags as Tag[]) ?? [],

@@ -1,9 +1,21 @@
 /** 라우트 단일 출처 */
 const ROUTES = {
-  HOME: "/", // 작업(Work)
+  // 통합 셸
+  LANDING: "/", // 랜딩 허브 (A3)
+  // ⚠️ legacy 사진 경로 — 현행 페이지가 사용 중. A1에서 /photo/* 로 이동하며 제거·redirect.
+  HOME: "/", // 작업(Work) — 현행
   ALBUMS: "/albums",
   MAP: "/map",
   ABOUT: "/about",
+  // 사진 섹션 (/photo/*) — A1 이후 활성
+  PHOTO: "/photo", // 작업(Work)
+  PHOTO_ALBUMS: "/photo/albums",
+  PHOTO_MAP: "/photo/map",
+  PHOTO_ABOUT: "/photo/about",
+  // 음악 · 개발 섹션 (단일 스크롤)
+  MUSIC: "/music",
+  DEV: "/dev",
+  // 관리자
   ADMIN: "/admin",
   LOGIN: "/admin/login",
   ADMIN_PHOTOS: "/admin/photos",
@@ -12,18 +24,41 @@ const ROUTES = {
   ADMIN_ALBUM_NEW: "/admin/albums/new",
   ADMIN_TAGS: "/admin/tags",
   ADMIN_SITE: "/admin/site",
+  ADMIN_MUSIC: "/admin/music",
+  ADMIN_MUSIC_WORKS: "/admin/music/works",
+  ADMIN_MUSIC_SCHEDULE: "/admin/music/schedule",
+  ADMIN_MUSIC_AWARDS: "/admin/music/awards",
+  ADMIN_MUSIC_MEDIA: "/admin/music/media",
+  ADMIN_MUSIC_CONFIG: "/admin/music/config",
+  ADMIN_DEV: "/admin/dev",
+  ADMIN_DEV_PROJECTS: "/admin/dev/projects",
+  ADMIN_DEV_CONFIG: "/admin/dev/config",
 } as const;
 
-/** 앨범 상세 경로 */
-const albumRoute = (id: string) => `/albums/${id}`;
+/** 앨범 상세 경로 — 현행 /albums/[id] (A1에서 /photo/albums/[id] 로 이동) */
+const albumRoute = (id: string) => `${ROUTES.ALBUMS}/${id}`;
 
 /** 관리자 사진 수정 경로 */
-const adminPhotoRoute = (id: string) => `/admin/photos/${id}`;
+const adminPhotoRoute = (id: string) => `${ROUTES.ADMIN_PHOTOS}/${id}`;
 
 /** 관리자 앨범 수정 경로 */
-const adminAlbumRoute = (id: string) => `/admin/albums/${id}`;
+const adminAlbumRoute = (id: string) => `${ROUTES.ADMIN_ALBUMS}/${id}`;
 
 /** 사진 상세 모달 딥링크 쿼리 (현재 페이지에 ?photo= 부착) */
 const photoQuery = (id: string) => `?photo=${id}`;
 
-export { ROUTES, albumRoute, adminAlbumRoute, adminPhotoRoute, photoQuery };
+/** 연주 상세 모달 딥링크 쿼리 (/music 에 ?work= 부착) */
+const workQuery = (id: string) => `?work=${id}`;
+
+/** 프로젝트 상세 모달 딥링크 쿼리 (/dev 에 ?project= 부착) */
+const projectQuery = (id: string) => `?project=${id}`;
+
+export {
+  ROUTES,
+  albumRoute,
+  adminAlbumRoute,
+  adminPhotoRoute,
+  photoQuery,
+  workQuery,
+  projectQuery,
+};

@@ -6,6 +6,19 @@ type UIDict = {
   albumsNav: string;
   mapNav: string;
   aboutNav: string;
+  // 통합 셸 · 섹션 네비 (mega-menu / 모바일 탭)
+  sectionPhoto: string;
+  sectionMusic: string;
+  sectionDev: string;
+  musicWorksNav: string;
+  musicScheduleNav: string;
+  musicMediaNav: string;
+  musicAwardsNav: string;
+  musicContactNav: string;
+  devAboutNav: string;
+  devStackNav: string;
+  devProjectsNav: string;
+  devCareerNav: string;
   searchPlaceholder: string;
   allTag: string;
   filterLabel: string;
@@ -50,6 +63,18 @@ const DICTIONARY: Record<Lang, UIDict> = {
     albumsNav: "앨범",
     mapNav: "지도",
     aboutNav: "소개",
+    sectionPhoto: "사진",
+    sectionMusic: "음악",
+    sectionDev: "개발",
+    musicWorksNav: "연주 목록",
+    musicScheduleNav: "공연 일정",
+    musicMediaNav: "영상",
+    musicAwardsNav: "수상",
+    musicContactNav: "연락처",
+    devAboutNav: "소개",
+    devStackNav: "기술 스택",
+    devProjectsNav: "프로젝트",
+    devCareerNav: "경력",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     allTag: "전체",
     filterLabel: "필터",
@@ -89,6 +114,18 @@ const DICTIONARY: Record<Lang, UIDict> = {
     albumsNav: "Albums",
     mapNav: "Map",
     aboutNav: "About",
+    sectionPhoto: "Photo",
+    sectionMusic: "Music",
+    sectionDev: "Dev",
+    musicWorksNav: "Works",
+    musicScheduleNav: "Dates",
+    musicMediaNav: "Media",
+    musicAwardsNav: "Awards",
+    musicContactNav: "Contact",
+    devAboutNav: "About",
+    devStackNav: "Stack",
+    devProjectsNav: "Projects",
+    devCareerNav: "Career",
     searchPlaceholder: "Search · tag / gear / place",
     allTag: "All",
     filterLabel: "Filter",
