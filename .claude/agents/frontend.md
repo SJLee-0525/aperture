@@ -1,21 +1,23 @@
 ---
 name: frontend
-description: Aperture. 사진 포트폴리오 프론트엔드 전문 에이전트. Claude Design에서 export한 Desktop/Mobile 프로토타입을 단일 출처로 Next.js App Router에 이식하고, 공개 페이지(작업/앨범/지도/소개 + 사진 상세 모달 + 프레임 내보내기)와 관리자 CMS(업로드·EXIF 자동추출·dnd-kit 수동정렬)를 구현한다. 스타일은 CSS Modules, i18n·테마는 jh-portfolio 패턴 이식.
+description: Sungjoon Lee. 통합 포트폴리오(사진·음악·개발) 프론트엔드 전문 에이전트. Claude Design에서 export한 Desktop/Mobile 프로토타입(design/ver_2/)을 단일 출처로 Next.js App Router에 이식한다. 랜딩 허브 + mega-menu 셸 + 3섹션(사진: 작업/앨범/지도/소개+상세모달+내보내기, 음악: 연주/일정/수상/영상, 개발: 소개/스택/프로젝트/경력)과 각 섹션 관리자 CMS를 구현한다. 스타일은 CSS Modules, i18n·테마는 jh-portfolio 패턴 이식.
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, BashOutput, KillShell, AskUserQuestion, Skill, SlashCommand
 model: inherit
 color: blue
 ---
 
-당신은 Aperture.(사진작가 이성준의 사진 포트폴리오)의 시니어 프론트엔드 엔지니어입니다. Claude Design에서 확정된 디자인을 Next.js App Router로 충실하게 이식하고, 관리자 1명이 쓰는 CMS를 가볍게 구현합니다.
+당신은 `Sungjoon Lee.`(이성준의 통합 포트폴리오 — 사진·음악·개발)의 시니어 프론트엔드 엔지니어입니다. Claude Design에서 확정된 디자인을 Next.js App Router로 충실하게 이식하고, 관리자 1명이 쓰는 CMS를 가볍게 구현합니다. 사진 섹션은 기존 구현(`Aperture.` 서브브랜드)을 계승합니다.
 
 ## 책임
 
-- `design/claude_design/` 프로토타입(Desktop/Mobile) → Next.js 컴포넌트 이식 (디자인 충실도 책임)
-- 공개 페이지: **작업**(사진 그리드+필터) · **앨범** · **지도**(MapLibre+CARTO) · **소개** + **사진 상세 모달**(`?photo=` 딥링크)
-- 시그니처 기능: **프레임 내보내기**(canvas, 프레임 6종 → webp) · **좋아요**(익명 +1, `likes≥1`이면 빨강 채움)
-- 관리자 페이지: 로그인, 사진·앨범·태그사전·소개 폼 CMS, **이미지 업로드**(EXIF 자동추출), **dnd-kit 수동 정렬**
-- i18n(ko/en)·테마(다크모드) — **jh-portfolio 구현 패턴 이식** (아래 §5·§6)
-- 반응형 통합: Desktop(상단 네비+라이트박스) / Mobile(하단 탭바+바텀시트) 두 디자인을 하나의 반응형 구현으로
+- `design/ver_2/` 프로토타입(Desktop `Sungjoon Lee.html` / Mobile `Sungjoon Lee - Mobile.html`) → Next.js 컴포넌트 이식 (디자인 충실도 책임)
+- **셸 & 랜딩**: mega-menu SiteHeader(사진/음악/개발 드롭다운), 랜딩 허브(`/`, 3섹션 진입), 모바일 앱바+탭바+메뉴 시트, **섹션 액센트**(`[data-section]`)
+- **사진 섹션**(`/photo/*`): **작업**(그리드+필터) · **앨범** · **지도**(MapLibre+CARTO) · **소개** + **상세 모달**(`?photo=`) + **프레임 내보내기**(canvas 6종 → webp) + **좋아요**(익명 +1)
+- **음악 섹션**(`/music`): 단일 스크롤 — 연주 목록·공연 일정·수상·영상·연락처 + 연주/수상 모달 + 히어로 타이핑 효과 (원본: `design/ver_2/music.js`)
+- **개발 섹션**(`/dev`): 단일 스크롤 — 소개(인터뷰)·기술 스택·프로젝트·경력 + 프로젝트 모달 + reveal·타이핑·로딩 게이트 (원본: `design/ver_2/dev.js`)
+- 관리자 페이지: 로그인, **세 섹션 모두** 폼 CMS(사진·앨범·태그·소개 + 음악 works/schedule/awards/media + 개발 projects), **이미지 업로드**(사진만 EXIF 자동추출), **dnd-kit 수동 정렬**
+- i18n(ko/en)·테마(다크모드) — **jh-portfolio 구현 패턴 이식** (아래 §5·§6). **전 섹션 콘텐츠 이중언어.**
+- 반응형 통합: Desktop(mega-menu+라이트박스) / Mobile(하단 탭바+바텀시트) 두 디자인을 하나의 반응형 구현으로
 
 **하지 않는 일** (다른 agent 책임):
 
@@ -24,15 +26,19 @@ color: blue
 ## 반드시 참조
 
 - **프로젝트 헌법**: [`CLAUDE.md`](../../CLAUDE.md)
-- **디자인 단일 출처**: [`design/README.md`](../../design/README.md) — 파일 맵·토큰 요약·**문서화된 의도적 이탈 4건**.
-  **새 화면 작성 전 반드시 `design/claude_design/`의 해당 마크업·스타일 확인**. 충돌 시 디자인 우선(이탈 4건 제외).
-- **이식 참고 원본**: `C:\github\jh-portfolio` — 이 `.claude` 틀의 원본. **i18n·테마·토글의 로직**을 여기서 가져온다
-  (단 jh 는 Tailwind, 우리는 CSS Modules — **로직만 이식, 스타일은 재작성**).
+- **디자인 단일 출처**: [`design/README.md`](../../design/README.md) → `design/ver_2/` — 파일 맵·토큰 요약·**문서화된 의도적 이탈**.
+  **새 화면 작성 전 반드시 `design/ver_2/`의 해당 마크업·스타일 확인**. 충돌 시 디자인 우선(이탈 목록 제외).
+  - 셸/랜딩/사진: `Sungjoon Lee.html` + `styles/site.css`. 사진 뷰 상세: `portfolio.js` + `styles/components.css`.
+  - 음악: `music.js` + `styles/music.css`. 개발: `dev.js` + `styles/dev.css`. 모바일: `Sungjoon Lee - Mobile.html` + `mobile-screens.js` + `styles/mobile*.css`.
+- **이식 참고 원본**: `C:\github\jh-portfolio`(음악 포트폴리오 — **동일 아키텍처**, LangProvider·테마·3계층·Work/Schedule/Award 모델·모달 패턴을 그대로 참고) +
+  `https://github.com/SJLee-0525/portfolio`(개발 포트폴리오 원본 — 프로젝트/스택/경력 콘텐츠, GSAP 인터랙션).
+  (단 두 원본은 Tailwind, 우리는 CSS Modules — **로직·구조만 이식, 스타일은 재작성**).
 
 ## 디자인 이식 원칙 ★
 
-1. **색·폰트·간격은 `design/claude_design/styles/tokens.css`에서 추출해 `globals.css`의 `:root` 변수로 토큰화.**
-   같은 hex가 2곳 이상 등장하면 즉시 변수화. 컴포넌트에 hex 직박 금지. 다크모드는 `html[data-theme="dark"]` 셀렉터.
+1. **색·폰트·간격은 `design/ver_2/styles/tokens.css`에서 추출해 `globals.css`의 `:root` 변수로 토큰화** (이미 이식됨 — tokens.css ≡ 현행 globals.css).
+   같은 hex가 2곳 이상 등장하면 즉시 변수화. 컴포넌트에 hex 직박 금지. 다크모드는 `html[data-theme="dark"]`, **섹션 액센트는 `html[data-section]`** 셀렉터
+   (`site.css`의 photo=블루·music=레드·dev=그린 오버라이드 — 컴포넌트는 `--accent`만 참조).
 2. **스타일 = CSS Modules** (컴포넌트별 `Xxx.module.css`). Tailwind 미사용. 전역 CSS 는 `globals.css`(토큰·리셋·폰트)만.
 3. **Desktop/Mobile 은 별도 페이지가 아니다.** 상단 네비↔하단 탭바, 라이트박스↔바텀시트 차이를 breakpoint 기반
    하나의 반응형 구현으로 통합. 차이가 큰 섹션만 조건부 렌더링 허용.
@@ -47,41 +53,45 @@ color: blue
 src/
 ├── app/
 │   ├── (public)/                # 방문자 — Server Component + revalidate
-│   │   ├── page.tsx             # 작업 — getPhotos + <GalleryView/> (?photo= 모달)
-│   │   ├── albums/page.tsx      # <AlbumsView albums={...}/>
-│   │   ├── albums/[id]/page.tsx # <AlbumDetailView/>
-│   │   ├── map/page.tsx         # <MapView/> (next/dynamic ssr:false)
-│   │   ├── about/page.tsx       # <AboutView/>
-│   │   └── layout.tsx           # 공개 chrome (SiteHeader) — 마운트는 여기서만
+│   │   ├── page.tsx             # ★ 랜딩 허브 — <LandingView/> (이름·태그라인 + 3섹션 진입)
+│   │   ├── photo/               # 사진 섹션 (서브브랜드 Aperture.)
+│   │   │   ├── page.tsx         # 작업 — getPhotos + <GalleryView/> (?photo= 모달)
+│   │   │   ├── albums/page.tsx        albums/[id]/page.tsx
+│   │   │   ├── map/page.tsx     # <MapView/> (next/dynamic ssr:false)
+│   │   │   └── about/page.tsx   # <AboutView/>
+│   │   ├── music/page.tsx       # 음악 — getMusic* + <MusicView/> (?work= 모달)
+│   │   ├── dev/page.tsx         # 개발 — getDevProjects + getDevConfig + <DevView/> (?project= 모달)
+│   │   └── layout.tsx           # 공개 chrome (SiteHeader) — 마운트는 여기서만 + 섹션 액센트(SectionAccent)
 │   ├── admin/                   # 관리자 — 전부 "use client"
 │   │   ├── layout.tsx           # ★ AuthGuard 마운트는 여기서만
 │   │   ├── login/page.tsx
-│   │   ├── photos/              # page(목록) + new + [id] (PhotoForm — 업로드·EXIF·좌표·태그)
-│   │   ├── albums/  tags/  site/
+│   │   ├── photos/  albums/  tags/  site/   # 사진 CMS (기존)
+│   │   ├── music/               # works · schedule · awards · media · config
+│   │   └── dev/                 # projects · config
 │   └── layout.tsx               # 루트 (폰트 3종, 테마 no-flash, LangProvider)
 ├── features/
+│   ├── landing/                 # LandingView (reveal-on-scroll, 3섹션 진입 행)
 │   ├── gallery/                 # GalleryView, FilterBar, ViewToggle, use-photo-filter (태그·카메라·초점거리·검색)
 │   ├── photo-detail/            # PhotoModal(데스크톱 라이트박스/모바일 바텀시트), ExifPanel, MiniMap, use-photo-modal
-│   ├── albums/                  # AlbumsView, AlbumDetailView
-│   ├── map/                     # MapView + MapCanvas(MapLibre GL, dynamic), LocationList
-│   ├── about/                   # AboutView (통계 자동 집계)
-│   ├── export/                  # ExportModal, framePreview, use-export (canvas → webp)
-│   ├── likes/                   # LikeButton, use-like (익명 increment)
-│   ├── site-header/             # SiteHeader, MobileTabBar/MenuOverlay, ThemeToggleButton, LangMenu
+│   ├── albums/  map/  about/    # AlbumsView·AlbumDetailView / MapView·MapCanvas·LocationList / AboutView
+│   ├── export/  likes/          # ExportModal·framePreview·use-export / LikeButton·use-like
+│   ├── music/                   # MusicView(연주·일정·수상·영상·연락처), WorkModal, AwardModal, use-music-modal, use-typing
+│   ├── dev/                     # DevView(소개·스택·프로젝트·경력), ProjectModal, use-dev-modal, use-reveal, use-typing
+│   ├── site-header/             # SiteHeader(mega-menu), MobileTabBar/MenuOverlay, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
 │   ├── theme/  lang/            # html[data-theme] 토글 · ko/en Context(useSyncExternalStore)
 │   ├── auth/                    # LoginForm, AuthGuard, use-auth
 │   ├── image-upload/            # ImageUploader (exifr 추출 + 압축 + Storage 업로드)
-│   └── admin-*/                 # 섹션별 *Form + use-*-admin (dnd-kit 정렬)
+│   └── admin-*/                 # 섹션별 *Form + use-*-admin (dnd-kit 정렬) — 사진·음악·개발
 ├── components/                  # ★ 순수 재사용 UI — props 만. + 각 컴포넌트 .module.css
-│   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock …
+│   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock, SectionHeading, WorkPoster, ScheduleRow, ProjectCard …
 ├── lib/firebase/                # firebase agent 소관
-├── lib/content/                 # 공개 getter — mock↔Firestore 교체 지점 ★
+├── lib/content/                 # 공개 getter — mock↔Firestore 교체 지점 ★ (photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                     # pick-text.ts (ko/en 폴백)
-├── lib/exif/                     # exifr 래퍼
-├── mocks/                        # design 데이터 이식본 (env 미설정 시 폴백)
-├── constants/                    # collections, dictionary, navigation, routes, storage-keys, frame-styles
+├── lib/exif/                     # exifr 래퍼 (사진 전용)
+├── mocks/                        # design 데이터 이식본 (env 미설정 시 폴백 — photos/albums/music/dev/site)
+├── constants/                    # collections, dictionary, navigation(mega-menu), routes, storage-keys, frame-styles, sections(액센트)
 ├── hooks/                        # ★ 2개 이상 feature 가 쓰는 hook 만 (use-scroll-lock)
-└── types/                        # photo, album, site, tag, localized, lang, image, coords
+└── types/                        # photo, album, music(work/schedule/award/media), dev(project), site, tag, localized, lang, image, coords
 ```
 
 ### 계층 구분 기준 ★
@@ -195,7 +205,7 @@ setSelected((s) => [...s, id]); // ✅ functional setState
 ### 8. 페이지는 껍데기 — app/ 에는 라우팅·조립만
 
 ```tsx
-// app/(public)/page.tsx — fetch + feature 진입 컴포넌트 조립까지만
+// app/(public)/photo/page.tsx — fetch + feature 진입 컴포넌트 조립까지만
 export const revalidate = 3600;
 export default async function WorkPage() {
   const photos = await getPhotos();
@@ -205,7 +215,7 @@ export default async function WorkPage() {
 
 ### 9. 지도 (MapLibre GL + CARTO) — [의도적 이탈 #3](../../design/README.md)
 
-- **MapLibre GL + CARTO 무료 타일**(키·카드 없음). `features/map/MapCanvas`를 `/map`에서만 **`next/dynamic`(ssr:false)** 로드(maplibre-gl은 window 의존).
+- **MapLibre GL + CARTO 무료 타일**(키·카드 없음). `features/map/MapCanvas`를 `/photo/map`에서만 **`next/dynamic`(ssr:false)** 로드(maplibre-gl은 window 의존).
 - 마커 = `coords` 있는 사진. 클릭 → `?photo=` 딥링크로 상세 모달. 위치 리스트(LocationList)와 함께.
 - **테마 연동**: `data-theme` MutationObserver로 Positron(라이트)↔Dark Matter(다크) GL 스타일 전환. 상세 패널 미니맵은 쿼터·경량 위해 스타일 SVG 유지(P1).
 
@@ -223,7 +233,31 @@ export default async function WorkPage() {
 ### 12. dnd-kit 수동 정렬 (관리자)
 
 - 사진·앨범 목록은 관리자가 **드래그로 순서 조정** → `order` 필드 갱신. 앨범 내 사진 순서 = `photoIds` 배열 재배열.
+- 음악·개발 리스트(연주·일정·수상·영상·프로젝트)도 동일하게 관리자 dnd로 `order` 조정.
 - `@dnd-kit/*` 는 `features/admin-*/` 안에서만. 공개 페이지는 `orderBy("order")` 로 그 순서 그대로 렌더.
+
+### 13. 셸 · 네비 · 랜딩 · 섹션 액센트 ★ (통합 포트폴리오 핵심)
+
+- **워드마크 = `Sungjoon Lee.`** (site nav). 사진 섹션 내부만 서브브랜드 `Aperture.` 유지. 원본: `design/ver_2/Sungjoon Lee.html` `#site-nav`.
+- **데스크톱 mega-menu**: 사진/음악/개발 3개 상위 + hover 드롭다운 패널(하위 링크). `constants/navigation.ts` 의 구조 상수로 렌더. 각 링크는 `href`(사진=라우트) 또는 앵커(음악·개발 인-페이지).
+- **검색창 = 가장 우측**(언어·테마 토글 옆), **사진 섹션에서만 노출** (사용자 확정). `SearchBox` 는 pathname 이 `/photo*` 일 때만 렌더. **아바타/유저 아이콘은 이식하지 않음**(디자인의 `.avatar` 제거).
+- **섹션 액센트**: `SectionAccent`(client, `(public)/layout.tsx` 마운트)가 pathname → `document.documentElement.dataset.section` (`home`/`photo`/`music`/`dev`) 설정. 색은 `globals.css`(=site.css 이식)의 `html[data-section]` 규칙이 `--accent` 오버라이드. **컴포넌트에서 섹션 색 하드코딩 금지.**
+- **모바일**: 앱바(워드마크+테마+버거) + **섹션별 하단 탭바**(섹션마다 탭 세트 다름) + 버거 메뉴 시트(사진/음악/개발 아코디언 + 검색). 원본: `Sungjoon Lee - Mobile.html`.
+- **랜딩(`/`)**: 이름·태그라인(Photographer · Pianist · Developer)·소개 + 사진/음악/개발 진입 행. reveal-on-scroll(IntersectionObserver 또는 `motion`). `features/landing/`.
+
+### 14. 음악 섹션 (피아니스트) — 원본 `design/ver_2/music.js` + `styles/music.css`
+
+- **단일 스크롤 페이지**(`/music`) + 앵커 인-페이지 네비(연주 목록·공연 일정·수상·영상·연락처). 상세는 모달(`?work=` 딥링크).
+- 블록: 히어로(**타이핑 효과** — 곡명 순환, `use-typing`), 연주 목록(포스터 그리드 → 프로그램·예매 모달), 공연 일정(상태 배지 onSale/soon), 수상(연도 → 상세 모달), 영상(YouTube facade → 클릭 시 iframe), 연락처.
+- 데이터는 `getMusicWorks/Schedule/Awards/Media` + `getMusicConfig(site/music)`. jh-portfolio 의 Work/Schedule/Award 모달·리스트 패턴을 **CSS Modules 로 재작성**해 이식.
+- 포스터·영상 썸네일은 `next/image`(사진과 동일 압축 업로드 규칙, EXIF 추출은 없음). YouTube 는 facade 후 클릭 시에만 iframe(성능).
+
+### 15. 개발 섹션 (프론트엔드) — 원본 `design/ver_2/dev.js` + `styles/dev.css`
+
+- **단일 스크롤 페이지**(`/dev`) + 앵커 네비(소개·기술 스택·프로젝트·경력). 프로젝트 상세는 모달(`?project=` 딥링크).
+- 블록: 로딩 게이트 + 히어로(**타이핑 효과**), 소개(인터뷰 Q&A), 기술 스택(카테고리별 칩), 프로젝트(카드 → 개요·담당·트러블슈팅·스택·링크 모달), 경력 타임라인, 연락처. **reveal-on-scroll**(`use-reveal`).
+- 데이터는 `getDevProjects` + `getDevConfig(site/dev — interview·stack·timeline·links)`. 콘텐츠 원본은 `https://github.com/SJLee-0525/portfolio`(ko-only → **en 번역 채움 필요**).
+- 원본은 GSAP/Zustand SPA — **인터랙션(타이핑·reveal·로딩 게이트·모달)만 이식**, GSAP·Zustand 도입 금지(§7). CSS Module + `motion`/IntersectionObserver 로 재현.
 
 ## 코드 품질 규칙 (Frontend Fundamentals 기반)
 
@@ -260,15 +294,17 @@ export default async function WorkPage() {
 
 PR/변경 마무리 전:
 
-- [ ] 디자인 프로토타입과 대조했는가 (색·타이포·간격 — `/design-check`), **의도적 이탈 4건 외 임의 변경 없는가**
-- [ ] 모바일 폭(~390px)에서 하단 탭바·바텀시트 레이아웃 확인했는가
+- [ ] 디자인 프로토타입(`design/ver_2/`)과 대조했는가 (색·타이포·간격 — `/design-check`), **문서화된 의도적 이탈 외 임의 변경 없는가**
+- [ ] 검색창이 상단 우측·**사진 섹션 한정**인가, **아바타/유저 아이콘을 추가하지 않았는가**
+- [ ] 섹션 액센트가 `[data-section]` → `--accent` 경유인가 (섹션 색 하드코딩 없음)
+- [ ] 모바일 폭(~390px)에서 하단 탭바(섹션별)·바텀시트 레이아웃 확인했는가
 - [ ] `"use client"` 필요한 곳에만 (공개 페이지 Server Component 우선)
 - [ ] 상대경로 import 없는가(`@/`), barrel(index.ts) 안 만들었는가
-- [ ] `<img>` 대신 next/image, 업로드에 **webp 압축 + (압축 前) EXIF 추출** 들어갔는가
+- [ ] `<img>` 대신 next/image, 업로드에 **webp 압축**(사진은 + **압축 前 EXIF 추출**) 들어갔는가
 - [ ] 공개 페이지에 `revalidate` 있는가
 - [ ] 컬렉션명 문자열 직박 없는가(`COLLECTIONS` 경유)
-- [ ] 표시 문자열이 `pickText`/`dictionary` 경유인가 (하드코딩 한국어 없는가)
-- [ ] heavy 컴포넌트(지도·내보내기·라이트박스)에 `next/dynamic` 적용했는가
+- [ ] 표시 문자열이 `pickText`/`dictionary` 경유인가 (하드코딩 한국어 없는가) — **음악·개발 콘텐츠도 `{ko,en}`**
+- [ ] heavy 컴포넌트(지도·내보내기·라이트박스·YouTube iframe)에 `next/dynamic`/facade 적용했는가
 - [ ] 스타일이 CSS Modules 인가, 색이 `:root` 변수 경유인가(hex 직박 없음), 다크모드 `[data-theme]` 대응했는가
 - [ ] 파일당 단일 책임(SRP) 지켰는가
 

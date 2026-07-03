@@ -1,44 +1,66 @@
-# Aperture. — Sungjoon Lee 사진 포트폴리오
+# Sungjoon Lee. — 통합 포트폴리오 (사진 · 음악 · 개발)
 
-> 디자인 단일 출처: [`design/`](design/README.md) — Claude Design에서 export한 Desktop/Mobile 프로토타입.
-> 구현과 디자인이 충돌하면 **디자인이 우선** (단, [문서화된 의도적 이탈 4건](design/README.md) 예외).
-> 운영 철학: **서버 0대, 월 $0**. 관리자(사진작가 본인) 1명 + 불특정 방문자 구조이므로
+> 디자인 단일 출처: [`design/README.md`](design/README.md) → `design/ver_2/` (Claude Design에서 export한 Desktop/Mobile 프로토타입).
+> 구현과 디자인이 충돌하면 **디자인이 우선** (단, [문서화된 의도적 이탈](design/README.md) 예외).
+> 운영 철학: **서버 0대, 월 $0**. 관리자(본인) 1명 + 불특정 방문자 구조이므로
 > 상시 가동 백엔드 대신 Firebase BaaS + 정적 우선 렌더링.
+>
+> ⚠️ **이 저장소는 사진 포트폴리오 `Aperture.` 에서 출발**해 지금은 **이성준 개인 통합 포트폴리오 `Sungjoon Lee.`** 로 확장 중이다.
+> 사진 섹션은 기존 구현(P1·P2 완료)을 그대로 계승하고 브랜드만 서브브랜드 `Aperture.` 로 유지한다.
+> 확장 로드맵은 [`docs/plan/00-plan-v2.md`](docs/plan/00-plan-v2.md) (v1 = 사진 전용 [`docs/plan/00-plan.md`](docs/plan/00-plan.md), 대부분 완료).
 
 ## Project Vision
 
-사진작가 **이성준(Sungjoon Lee)** 의 개인 사진 포트폴리오. 워드마크 `Aperture.`
+**이성준(Sungjoon Lee)** 의 개인 통합 포트폴리오. 사이트 워드마크 `Sungjoon Lee.`, 태그라인 **Photographer · Pianist · Developer**.
+하나의 셸(상단 mega-menu 네비 + 랜딩 허브) 아래 **세 개의 섹션**이 각자의 액센트 색과 콘텐츠를 갖는다.
 
-- **방문자**: 작업(사진 그리드)·앨범·지도·소개를 본다. 로그인 없음, **ko/en 토글**, 다크모드.
-  사진 상세에서 EXIF(조리개·셔터·감도…)·촬영 위치·태그를 함께 본다. **좋아요**(익명 카운트)·**프레임 내보내기** 가능.
-- **관리자(본인 1명)**: 로그인 후 사진·앨범·태그 사전·소개 관리. 업로드 시 **EXIF 자동 추출**, **드래그로 수동 정렬**.
+| 섹션          | 경로       | 액센트                | 정체성 / 콘텐츠                                                                    |
+| ------------- | ---------- | --------------------- | --------------------------------------------------------------------------------- |
+| **랜딩**      | `/`        | 블루                  | 3섹션 진입 허브 — 이름·태그라인·소개 + 사진/음악/개발 이동 행                     |
+| **사진**      | `/photo/*` | **블루** `#0a84ff`    | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달 + 프레임 내보내기       |
+| **음악**      | `/music`   | **레드** `#e5484d`    | 피아니스트 — 연주 목록·공연 일정·수상·영상·연락처 (단일 스크롤 + 앵커 네비)       |
+| **개발**      | `/dev`     | **그린** `#16a34a`    | 프론트엔드 개발자 — 소개·기술 스택·프로젝트·경력 (단일 스크롤 + 프로젝트 모달)    |
+
+- **방문자**: 로그인 없음, **ko/en 토글**, 다크모드. 각 섹션을 자유 열람.
+  - 사진: EXIF·촬영 위치·태그, **좋아요**(익명 카운트)·**프레임 내보내기**.
+  - 음악: 연주 프로그램·예매 정보·영상 임베드.
+  - 개발: 프로젝트 상세(개요·담당·트러블슈팅·스택·링크).
+- **관리자(본인 1명)**: 로그인 후 **세 섹션 모두** 콘텐츠 관리(CMS). 사진 업로드 시 **EXIF 자동 추출**, **드래그로 수동 정렬**.
 
 ## 확정 스택 & 결정 기록
 
 | 레이어     | 선택                       | 왜 (결정 사유)                                                                          |
 | ---------- | -------------------------- | --------------------------------------------------------------------------------------- |
-| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거                                              |
+| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                            |
 | 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                |
 | 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                             |
-| DB         | Firestore                  | **무활동 일시정지 없음** (Supabase 무료 DB의 7일 정지 회피가 선택 이유)                 |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축**                                                 |
+| DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)               |
+| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축** (사진·음악 포스터·개발 썸네일)                   |
 | 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**  |
-| i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음)                           |
+| i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음). **전 섹션 이중언어**     |
 | 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter) |
 | EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)         |
 | 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                        |
+| 애니메이션 | CSS + `motion`             | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피            |
 
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
 > **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **결제 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
+
+### 상단 네비게이션 규칙 (사용자 확정) ★
+
+- **검색창**: 데스크톱 상단 네비의 **가장 우측**(테마/언어 토글 옆). **사진 섹션에서만 노출** (검색 대상이 사진).
+- **로그인 유저 아이콘(아바타) 없음.** 디자인 프로토타입의 `.avatar` 요소는 이식하지 않는다. 관리자 진입은 `/admin` 직접 접근.
+- 데스크톱 = mega-menu(사진/음악/개발 + 드롭다운 패널) / 모바일 = 앱바(워드마크+테마+버거) + 섹션별 하단 탭바 + 버거 메뉴 시트(아코디언).
 
 ## 아키텍처 원칙 (서버리스)
 
 1. **별도 백엔드 서버 없음.** 보안 경계는 Firestore/Storage **Security Rules가 전부**다.
    클라이언트 코드의 인증 가드는 UX 편의일 뿐, 보안이 아니다.
 2. **관리자 판별 = 단일 UID 비교.** Rules의 `isAdmin()` 함수에서 본인 UID 하드코딩.
-3. **이미지 흐름**: 브라우저에서 ① `exifr`로 EXIF·좌표 추출(**압축 前 ★**) → ② 원본 dimension 추출 →
-   ③ `browser-image-compression`으로 webp(~2048px) 압축 → ④ Storage 직접 업로드 → ⑤ 다운로드 URL + EXIF를 Firestore에 저장.
-4. **방문자 read 규칙**: `published == true` 문서만. 초안은 관리자만 읽기 가능.
+3. **이미지 흐름**: 브라우저에서 ① `exifr`로 EXIF·좌표 추출(**압축 前 ★**, 사진만) → ② 원본 dimension 추출 →
+   ③ `browser-image-compression`으로 webp(~2048px) 압축 → ④ Storage 직접 업로드 → ⑤ 다운로드 URL + 메타를 Firestore에 저장.
+   (음악 포스터·개발 썸네일은 EXIF 추출 없이 ②③④⑤만.)
+4. **방문자 read 규칙**: `published == true` 문서만. 초안은 관리자만 읽기 가능. **전 컬렉션 공통.**
 5. **firebase-admin SDK 사용 금지.** 서비스 계정 키가 필요해지는 순간 서버리스 원칙이 깨진다.
    (hook이 서비스 계정 키 파일 수정을 차단함)
 6. **공개 페이지 서버 읽기 = Firestore REST API + `fetch`** (`lib/firebase/firestore-rest.ts`),
@@ -46,29 +68,55 @@
    재빌드 전까지 공개 페이지가 안 바뀐다. REST는 `fetch` 기반이라 ISR·`revalidatePath`와 정상 연동.
    published 문서·`site`는 Rules가 무인증 read를 허용 → 웹 API 키만으로 충분. **쓰기·관리자 읽기만 클라 SDK**(`firestore.ts`).
 7. **★ 좋아요 = 유일하게 허용된 무인증 쓰기.** `photos.likes` 필드를 **+1** 하는 업데이트만 Rules가 허용
-   (delta 가드). 그 외 무인증 쓰기는 전면 금지. 원칙 #1의 유일한 명문화된 예외. (firebase agent 참조)
+   (delta 가드). 그 외 무인증 쓰기는 **전 컬렉션 전면 금지**(음악·개발 포함). 원칙 #1의 유일한 명문화된 예외. (firebase agent 참조)
 8. **★ AI(Phase 3 태그 추천) = 브라우저 내 추론(`transformers.js`)만.** 클라우드 비전/LLM API 금지 —
    진짜 시크릿 키를 클라에 둘 수 없고, 프록시할 서버가 없다(원칙 #1·#5와 충돌).
+9. **★ 섹션 액센트 = `html[data-section]`.** 라우트에 따라 `photo`(블루)/`music`(레드)/`dev`(그린)/`home`(블루)를 설정,
+   `globals.css`가 `--accent` 계열을 오버라이드. 컴포넌트는 항상 `--accent` 변수만 참조(섹션별 색 하드코딩 금지).
 
 ## 데이터 모델 (Firestore)
 
-> ko/en 이중언어 필드는 `{ko, en}` map. 언어 무관 필드(카메라·렌즈·EXIF 수치·좌표·날짜·파일명)는 평면 값.
-> 모든 시간 필드는 Timestamp, 표시 포맷은 렌더 시.
+> ko/en 이중언어 필드는 `{ko, en}` map. 언어 무관 필드(카메라·렌즈·EXIF 수치·좌표·날짜·파일명·기술 태그·URL)는 평면 값.
+> 모든 시간 필드는 Timestamp, 표시 포맷은 렌더 시. **전 리스트 컬렉션 공통**: `order`(수동 정렬) · `published` · `createdAt` · `updatedAt`.
+> 공개 쿼리 = `where(published==true) + orderBy(order)` → 컬렉션마다 **복합 인덱스 1개** (`firestore.indexes.json`).
 
-| 컬렉션   | 역할               | 주요 필드                                                                                                                                                                                                                                                                |
-| -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `photos` | 사진 (작업)        | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, **likes**, **order**, published, createdAt, updatedAt |
-| `albums` | 앨범 (사진 묶음)   | title{ko,en}, subtitle{ko,en}, **coverPhotoId**(소속 사진 중 하나), photoIds[](**수동 순서**), **order**, published, createdAt, updatedAt                                                                                                                                |
-| `site`   | 고정 문서 `config` | name{ko,en}, bio{ko,en}, links[{label, href}](관리자 자유 추가), **tags[{id, ko, en}]**(태그 사전)                                                                                                                                                                       |
+### 사진 섹션 (기존)
 
+| 컬렉션   | 역할               | 주요 필드                                                                                                                                                                                                                        |
+| -------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `photos` | 사진 (작업)        | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, **likes**, order, published |
+| `albums` | 앨범 (사진 묶음)   | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, photoIds[](**수동 순서**), order, published                                                                                                                                     |
+
+### 음악 섹션 (신규)
+
+| 컬렉션          | 역할          | 주요 필드                                                                                                                            |
+| --------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `musicWorks`    | 연주 목록     | title{ko,en}, subtitle{ko,en}(작곡가·작품번호), performedAt(TS), time, venue{ko,en}, category{ko,en}(리사이틀/협연/갈라), program[](곡명 평면), description{ko,en}, poster{url,path,w,h}, ticketUrl, order, published |
+| `musicSchedule` | 공연 일정     | title{ko,en}, date(TS), venue{ko,en}, status("onSale"\|"soon"), ticketUrl, order, published                                          |
+| `musicAwards`   | 수상 경력     | year(number), name{ko,en}, place, description{ko,en}, order, published                                                               |
+| `musicMedia`    | 영상          | title{ko,en}, source{ko,en}, youtubeId, order, published                                                                             |
+
+### 개발 섹션 (신규)
+
+| 컬렉션        | 역할     | 주요 필드                                                                                                                                                                    |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `devProjects` | 프로젝트 | title{ko,en}, category{ko,en}, year, summary{ko,en}, overview{ko,en}, roles[]{ko,en}(담당·작업), troubleshooting[]{ko,en}, techTags[](평면), links[]{label,href}, image{url,path,w,h}\|null, order, published |
+
+### 고정 config 문서 (`site` 컬렉션)
+
+| 문서 ID      | 역할               | 주요 필드                                                                                                          |
+| ------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `config`     | 전역 + 사진        | name{ko,en}, **tagline{ko,en}**, **landingLead{ko,en}**, bio{ko,en}, links[]{label,href}, **tags[]{id,ko,en}**(사진 태그 사전) |
+| `music`      | 음악 섹션 설정     | heroLead{ko,en}, typeWords[](타이핑 효과 문구), bookingEmail, social[]{label,href}                                 |
+| `dev`        | 개발 섹션 설정     | heroLead{ko,en}, typeWords[], interview[]{q{ko,en},a{ko,en}}, stack[]{category,items[]}, timeline[]{period,title{ko,en},role{ko,en},desc{ko,en}}, githubUrl, resumeUrl, contactEmail, social[] |
+
+설계 메모:
 - **정렬 = 수동 `order` 필드** (dnd-kit로 관리자가 드래그). 앨범 내 사진 순서 = `photoIds` 배열 순서.
-  공개 쿼리 = `where(published==true) + orderBy(order)` → **복합 인덱스 2개** (photos/albums, `firestore.indexes.json`).
-- **태그는 통제 사전** — `site/config.tags`에 `{id, ko, en}`을 한 번 정의, 사진은 **id만 참조**
-  (필터 칩 정체성 일관 + ko/en 한 번만 정의). **카메라·초점거리 필터는 photos EXIF에서 파생** (사전 불요).
-- **좌표는 EXIF GPS 자동** 또는 GPS 없으면 **관리자 지도 클릭으로 수동 지정**. coords 있는 사진만 지도 핀.
-- 이미지 필드는 `{url, path, w, h}` — path는 삭제 시 Storage 정리용, w/h는 next/image CLS 방지 (업로드 시점 추출 필수).
-- slug 없음 — 사진 상세는 **모달**(`?photo=` 딥링크), 문서 ID가 식별자. 앨범 상세 = `/albums/[id]`.
-- 콘텐츠 소량 → **페이지네이션 없음**, 전체 fetch + 클라이언트 필터/검색.
+- **사진 태그는 통제 사전** — `site/config.tags`에 `{id, ko, en}`을 정의, 사진은 **id만 참조**. 카메라·초점거리 필터는 photos EXIF에서 파생.
+- **음악 program·개발 techTags**는 평면 배열(곡명·기술명은 언어 무관). category/name/설명 등 서술 필드만 `{ko,en}`.
+- **좌표는 사진 전용** — EXIF GPS 자동 또는 관리자 지도 클릭. 음악·개발엔 좌표 없음.
+- 콘텐츠 소량 → **페이지네이션 없음**, 전체 fetch + 클라이언트 필터/검색. 검색은 사진 섹션 한정.
+- slug 없음 — 사진 상세·연주 상세·프로젝트 상세는 **모달**(`?photo=`/`?work=`/`?project=` 딥링크), 문서 ID가 식별자. 앨범 상세 = `/photo/albums/[id]`.
 
 상세 설계·Rules 패턴은 [`firebase` agent](.claude/agents/firebase.md) 참조.
 
@@ -78,43 +126,54 @@
 src/
 ├── app/                        # ★ 라우팅 껍데기만 (fetch + features 조립)
 │   ├── (public)/               # 방문자 — Server Component + revalidate
-│   │   ├── page.tsx            # 작업 — 사진 그리드 + 필터 (?photo= 모달)
-│   │   ├── albums/page.tsx     # 앨범 그리드
-│   │   ├── albums/[id]/page.tsx# 앨범 상세 (히어로 + 메이슨리, ?photo= 모달)
-│   │   ├── map/page.tsx        # 지도 (MapLibre+CARTO — next/dynamic ssr:false)
-│   │   ├── about/page.tsx      # 소개 (통계 파생)
-│   │   └── layout.tsx          # chrome(SiteHeader) 마운트는 여기서만
+│   │   ├── page.tsx            # ★ 랜딩 허브 (/ — 이름·태그라인 + 3섹션 진입 행)
+│   │   ├── photo/              # 사진 섹션 (서브브랜드 Aperture.)
+│   │   │   ├── page.tsx        # 작업 — 사진 그리드 + 필터 (?photo= 모달)
+│   │   │   ├── albums/page.tsx        albums/[id]/page.tsx
+│   │   │   ├── map/page.tsx    # 지도 (MapLibre+CARTO — next/dynamic ssr:false)
+│   │   │   └── about/page.tsx  # 소개 (통계 파생)
+│   │   ├── music/page.tsx      # 음악 — 단일 스크롤 + 앵커 네비 (?work= 모달)
+│   │   ├── dev/page.tsx        # 개발 — 단일 스크롤 + reveal (?project= 모달)
+│   │   └── layout.tsx          # chrome(SiteHeader) 마운트는 여기서만 + 섹션 액센트 세팅
 │   ├── admin/                  # 관리자 — 전부 client, AuthGuard 마운트는 admin/layout.tsx
 │   │   ├── login/
-│   │   ├── photos/             # 목록 + new + [id] 폼 (업로드·EXIF·좌표·태그)
-│   │   ├── albums/  tags/  site/
+│   │   ├── photos/  albums/  tags/  site/   # 사진 CMS (기존)
+│   │   ├── music/              # 음악 CMS: works · schedule · awards · media · config
+│   │   └── dev/                # 개발 CMS: projects · config
 │   └── layout.tsx              # 폰트 3종 + 테마 no-flash + LangProvider
 ├── features/                   # ★ 기능 단위 조합 — 비즈니스 로직 있음
+│   ├── landing/                # 랜딩 허브 (reveal-on-scroll, 3섹션 진입)
 │   ├── gallery/                # 작업 그리드, 필터바(태그·카메라·초점거리), 뷰토글, use-photo-filter
 │   ├── photo-detail/           # 라이트박스/바텀시트 + EXIF 패널 + 미니맵 + use-photo-modal
-│   ├── albums/                 # 앨범 그리드·상세 뷰
-│   ├── map/                    # MapLibre 지도(MapCanvas, dynamic) + 위치 리스트
-│   ├── about/                  # 소개 (통계 자동 집계)
-│   ├── export/                 # 프레임 내보내기 (canvas, 프레임 6종)
-│   ├── likes/                  # 하트 버튼 + use-like (익명 +1)
-│   ├── site-header/            # SiteHeader, 모바일 탭/메뉴, ThemeToggleButton, LangMenu
+│   ├── albums/  map/  about/   # 사진 섹션 뷰
+│   ├── export/  likes/         # 프레임 내보내기 · 좋아요(익명 +1)
+│   ├── music/                  # 음악 섹션: MusicView(연주·일정·수상·영상·연락처) + 연주/수상 모달 + 타이핑 훅
+│   ├── dev/                    # 개발 섹션: DevView(소개·스택·프로젝트·경력) + 프로젝트 모달 + reveal 훅
+│   ├── site-header/            # SiteHeader(mega-menu), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
 │   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context
 │   ├── auth/                   # LoginForm, AuthGuard, use-auth
 │   ├── image-upload/           # exifr 추출 + 압축 + Storage 업로드
-│   └── admin-*/                # 섹션별 폼 + use-*-admin hook (dnd-kit 정렬 포함)
+│   └── admin-*/                # 섹션별 폼 + use-*-admin hook (dnd-kit 정렬 포함) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
-│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard …) + 각 컴포넌트 .module.css
+│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard …) + 각 .module.css
 ├── lib/firebase/               # client.ts, auth.ts, firestore.ts, firestore-rest.ts, storage.ts
-├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★
+├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
-├── lib/exif/                   # exifr 래퍼
-├── mocks/                      # Phase 1 mock (design 데이터 이식, env 미설정 시 폴백)
-├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION, ROUTES, STORAGE_KEYS, FRAME_STYLES
+├── lib/exif/                   # exifr 래퍼 (사진 전용)
+├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
+├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES, STORAGE_KEYS, FRAME_STYLES, SECTIONS(액센트)
 ├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-scroll-lock)
-└── types/                      # photo, album, site, tag, localized, lang, image, coords
+└── types/                      # photo, album, music(work/schedule/award/media), dev(project), site, tag, localized, lang, image, coords
 ```
 
 의존 방향: `app → features → components` (역방향 금지). barrel export(index.ts) 금지 — 직접 경로 import.
+
+### 라우팅 & URL 마이그레이션
+
+- `/` = **랜딩**(신규). 사진 작업 그리드는 `/photo` 로 이동.
+- 기존 사진 URL은 **`next.config` redirects** 로 보존: `/albums → /photo/albums`, `/map → /photo/map`, `/about → /photo/about`.
+- 음악·개발은 **단일 스크롤 페이지**(`/music`, `/dev`) + 앵커 인-페이지 네비 + 상세 모달 딥링크(`?work=`/`?project=`).
+- `/admin/*` 는 세 섹션 CMS를 모두 포함(사진·음악·개발).
 
 ## 환경변수 (`.env.local` — hook이 자동 수정 차단, 직접 편집)
 
@@ -129,7 +188,6 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드용 (보안은 Rules의 isAdmi
 ```
 
 > 지도(MapLibre+CARTO)는 **키가 없다** — CARTO 무료 타일 사용.
-
 > Firebase 웹 키(`AIza…`)는 공개돼도 보안 위험이 아니다 — 보안은 Rules가 담당.
 > LLM/비전 API 키 같은 **진짜 시크릿은 이 프로젝트에 없다**(아키텍처 원칙 #8). 코드 하드코딩 시 secret_scan hook이 경고.
 
@@ -137,10 +195,10 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드용 (보안은 Rules의 isAdmi
 
 | 리소스       | 무료 한도                          | 이 프로젝트 대응                                             |
 | ------------ | ---------------------------------- | ------------------------------------------------------------ |
-| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 좋아요 쓰기는 view당 1회 |
+| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약(섹션 늘어도 페이지당 fetch). 좋아요 쓰기는 view당 1회 |
 | Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image    |
 | Vercel       | 100GB 대역폭/월                    | next/image 최적화                                            |
-| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/map` 라우트에서만 dynamic 로드          |
+| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드    |
 
 ## 개발 명령어
 
@@ -158,23 +216,27 @@ firebase deploy --only firestore:rules,storage   # Rules만 배포
 - 브랜치: `main` + `feature/{요약}` 단순 전략 — [git-branch-strategy](.claude/skills/git-branch-strategy/SKILL.md)
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](.claude/memory/feedback_srp_per_file.md))
 - 상대경로 import(`../`) 금지 → `@/` alias (hook이 경고)
-- UI 표시 문자열은 ko/en 사전 경유 / 영어 코드·변수명
+- UI 표시 문자열은 ko/en 사전 경유 / 영어 코드·변수명. **전 섹션 콘텐츠 이중언어**(음악·개발 포함)
 - **스타일 = CSS Modules** (컴포넌트별 `.module.css`). 색·간격은 `globals.css`의 `:root` 변수 경유
-  (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터.
+  (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
 
 ## .claude 구성
 
 | 종류     | 항목                                                                                                                    |
 | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI), [`firebase`](.claude/agents/firebase.md) (데이터·Rules·인증) |
+| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·Rules·인증) |
 | commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                    |
 | hooks    | env_file_guard(차단), secret_scan(경고), frontend_convention_check(경고) — [README](.claude/hooks/README.md)            |
 
-## Phase 계획
+## Phase 계획 (v2 — 통합 포트폴리오)
 
-- **Phase 1 — 디자인 이식 (정적)**: `design/` 프로토타입 → Next.js 컴포넌트. mock 데이터, 반응형 통합,
-  다크모드·ko/en 토글. 4뷰(작업/앨범/지도/소개) + 상세 모달 + 내보내기 + 지도(mock 좌표).
-- **Phase 2 — Firebase 연동**: Auth(관리자 로그인) + Firestore(photos·albums·site) + Storage(exifr + webp 압축) +
-  관리자 CMS(폼 + dnd-kit 수동 정렬) + 좋아요 delta-guard Rule. (지도 MapLibre+CARTO는 P1에서 완료)
-- **Phase 3 — 선택**: **AI 태그 추천**(브라우저 내 `transformers.js` CLIP zero-shot), 지도 고도화,
-  OG 이미지·SEO 강화, `/api/revalidate` 즉시 반영.
+> 사진 전용 v1(P1 디자인 이식 + P2 Firebase 연동)은 **대부분 완료**. 아래는 통합 확장 로드맵 요약이며 상세는 [`docs/plan/00-plan-v2.md`](docs/plan/00-plan-v2.md).
+
+- **Phase A — 셸 & 랜딩**: 라우트 재구성(사진 `/photo/*` 이동 + redirects), mega-menu SiteHeader(검색 우측·아바타 제거),
+  섹션 액센트(`[data-section]`), 랜딩 허브, 모바일 탭바/메뉴 3섹션 대응.
+- **Phase B — 음악 섹션**: 타입·mock·getter·Firestore 컬렉션(musicWorks/schedule/awards/media + site/music) + Rules·인덱스 +
+  공개 `MusicView`(연주·일정·수상·영상·연락처, 연주/수상 모달) + 관리자 CMS(`/admin/music/*`).
+- **Phase C — 개발 섹션**: 타입·mock·getter·Firestore 컬렉션(devProjects + site/dev) + Rules·인덱스 +
+  공개 `DevView`(소개·스택·프로젝트·경력, 프로젝트 모달, reveal·타이핑) + 관리자 CMS(`/admin/dev/*`).
+- **Phase D — 마감**: 전 섹션 ko/en 번역 채움, 반응형·다크·접근성 점검, SEO/OG(섹션별), `/design-check`·`/deploy-check` 통과, 배포.
+- **Phase 3(선택)**: AI 태그 추천(브라우저 `transformers.js`), 지도 고도화, `/api/revalidate` 즉시 반영.
