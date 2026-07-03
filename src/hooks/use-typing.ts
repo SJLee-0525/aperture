@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
  * 타이핑 효과 — words 를 한 글자씩 타이핑 → 잠시 멈춤 → 삭제 → 다음 단어 순환.
  * 한글 완성형은 `[...word]` 로 코드포인트 분해(바이트 단위 깨짐 방지).
  * setState 는 setTimeout 콜백 안에서만 호출(effect 직접 setState 금지 규칙 준수).
- * 랜딩(역할)·개발(향후) 등 2개 이상 feature 가 공유 → hooks 승격.
+ * `index`(현재 단어 인덱스)를 함께 반환 → 호출부가 단어별 색상 등을 매길 수 있다.
+ * ⚠️ words 는 안정 참조여야 함(매 렌더 새 배열이면 effect 재시작 → 첫 글자에서 멈춤). 호출부에서 useMemo.
  */
-const useTyping = (words: string[]): string => {
+const useTyping = (words: string[]): { text: string; index: number } => {
   const [text, setText] = useState("");
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     if (words.length === 0) return;
@@ -21,6 +23,7 @@ const useTyping = (words: string[]): string => {
     function tick() {
       const chars = [...words[wordIndex]];
       setText(chars.slice(0, charIndex).join(""));
+      setIndex(wordIndex);
 
       if (!deleting && charIndex >= chars.length) {
         deleting = true;
@@ -40,7 +43,7 @@ const useTyping = (words: string[]): string => {
     return () => clearTimeout(timer);
   }, [words]);
 
-  return text;
+  return { text, index };
 };
 
 export { useTyping };

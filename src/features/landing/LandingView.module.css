@@ -27,7 +27,8 @@
   font-family: var(--font-mono);
   font-size: clamp(16px, 2.2vw, 28px);
   letter-spacing: 0.02em;
-  color: var(--accent);
+  color: var(--role-accent, var(--accent));
+  transition: color 0.5s var(--ease);
 }
 .type::before {
   content: "";
@@ -35,7 +36,8 @@
   width: 34px;
   height: 1px;
   margin-right: 14px;
-  background: var(--accent);
+  background: var(--role-accent, var(--accent));
+  transition: background 0.5s var(--ease);
 }
 .typed {
   white-space: nowrap;
@@ -45,8 +47,9 @@
   width: 3px;
   height: 1em;
   margin-left: 3px;
-  background: var(--accent);
+  background: var(--role-accent, var(--accent));
   animation: blink 1s step-end infinite;
+  transition: background 0.5s var(--ease);
 }
 @keyframes blink {
   50% {
@@ -69,7 +72,8 @@
   color: var(--text);
 }
 .dot {
-  color: var(--accent);
+  color: var(--role-accent, var(--accent));
+  transition: color 0.5s var(--ease);
 }
 
 .lead {

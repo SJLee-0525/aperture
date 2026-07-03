@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { type CSSProperties, useMemo } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/use-lang";
@@ -18,6 +18,13 @@ const SECTIONS = [
   { key: "dev", href: ROUTES.DEV, labelKey: "sectionDev" },
 ] as const;
 
+/** 타이핑 중인 역할 → 섹션 액센트(다크 변형은 --accent-* 변수가 자동 처리). 이름 매칭이라 순서 무관. */
+const ROLE_ACCENT: Record<string, string> = {
+  Photographer: "var(--accent-photo)",
+  Pianist: "var(--accent-music)",
+  Developer: "var(--accent-dev)",
+};
+
 /**
  * 랜딩 허브(/) — 이름(언어 무관 항상 "Sungjoon Lee") + 역할 타이핑(Photographer/Pianist/Developer)
  * + 소개 + 사진/음악/개발 진입. 타이핑 단어는 tagline 을 '·' 로 분해해 파생. 진입 애니메이션은 CSS 스태거.
@@ -33,10 +40,12 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
         .filter(Boolean),
     [site.tagline, lang],
   );
-  const typed = useTyping(roles);
+  const { text: typed, index } = useTyping(roles);
+  // 현재 타이핑 중인 역할의 색을 --role-accent 로 흘려보내면 이름의 '.'·타이핑·커서가 함께(스무스) 바뀐다.
+  const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
 
   return (
-    <section className={styles.hero}>
+    <section className={styles.hero} style={{ "--role-accent": roleAccent } as CSSProperties}>
       <div className={styles.inner}>
         <h1 className={styles.name}>
           Sungjoon Lee<span className={styles.dot}>.</span>
