@@ -21,7 +21,6 @@ type UIDict = {
   musicContactNav: string;
   // 연락처 페이지 (전역)
   contactNav: string;
-  contactLead: string;
   contactName: string;
   contactEmail: string;
   contactMessage: string;
@@ -100,8 +99,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicGenresLabel: "장르",
     musicContactNav: "연락처",
     contactNav: "연락",
-    contactLead:
-      "공연·촬영·개발 어떤 이야기든 좋습니다. 아래 폼으로 메일을 보내거나, 바로 연락해 주세요.",
     contactName: "이름",
     contactEmail: "이메일",
     contactMessage: "메시지",
@@ -174,8 +171,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicGenresLabel: "Genres",
     musicContactNav: "Contact",
     contactNav: "Contact",
-    contactLead:
-      "Performances, shoots, or code — any conversation is welcome. Send a message below, or reach me directly.",
     contactName: "Name",
     contactEmail: "Email",
     contactMessage: "Message",

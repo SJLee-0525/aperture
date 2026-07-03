@@ -22,6 +22,7 @@ const ROUTES = {
   // 관리자
   ADMIN: "/admin",
   LOGIN: "/admin/login",
+  ADMIN_GLOBAL: "/admin/global", // 전역 — 랜딩(타이핑·리드)·연락(리드·링크)
   ADMIN_PHOTO: "/admin/photo", // 사진 관리 허브 (작업·앨범·태그·소개 묶음)
   ADMIN_PHOTOS: "/admin/photos",
   ADMIN_PHOTO_NEW: "/admin/photos/new",

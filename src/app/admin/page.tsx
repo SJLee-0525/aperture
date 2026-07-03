@@ -27,7 +27,12 @@ const SECTIONS: { key: string; label: string; desc: string; href?: string }[] = 
     desc: "프로젝트 · 소개",
     href: ROUTES.ADMIN_DEV,
   },
-  // 전역·소개(랜딩·연락) CMS 는 추후 추가.
+  {
+    key: "global",
+    label: "랜딩 · 연락",
+    desc: "메인 순환 타이핑·리드 · 연락 리드·링크",
+    href: ROUTES.ADMIN_GLOBAL,
+  },
 ];
 
 const AdminHomePage = () => {

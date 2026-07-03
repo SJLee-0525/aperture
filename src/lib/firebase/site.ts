@@ -19,6 +19,7 @@ const getSiteConfig = async (): Promise<SiteConfig> => {
       name: data.name ?? MOCK_SITE.name,
       tagline: data.tagline ?? MOCK_SITE.tagline,
       landingLead: data.landingLead ?? MOCK_SITE.landingLead,
+      contactLead: data.contactLead ?? MOCK_SITE.contactLead,
       bio: data.bio ?? { ko: "", en: "" },
       links: data.links ?? [],
       tags: data.tags ?? [],

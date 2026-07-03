@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 
 import { useLang } from "@/features/lang/use-lang";
+import { pickText } from "@/lib/i18n/pick-text";
 import type { SiteConfig, SiteLink } from "@/types/site";
 
 import styles from "./ContactView.module.css";
@@ -47,7 +48,7 @@ const SocialGlyph = ({ label }: { label: string }) => {
 
 /** 연락처 (/contact) — mailto 폼 + 직접 연락 버튼(사이트 링크). */
 const ContactView = ({ site }: { site: SiteConfig }) => {
-  const { dict } = useLang();
+  const { dict, lang } = useLang();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -72,7 +73,7 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
       <header className={styles.head}>
         <p className={styles.eyebrow}>Contact</p>
         <h1 className={styles.title}>{dict.contactNav}</h1>
-        <p className={styles.lead}>{dict.contactLead}</p>
+        <p className={styles.lead}>{pickText(site.contactLead, lang)}</p>
       </header>
 
       <div className={styles.socials}>
