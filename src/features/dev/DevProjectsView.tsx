@@ -1,19 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 
 import { Modal } from "@/components/Modal";
 import { useLang } from "@/features/lang/use-lang";
+import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { DevProject } from "@/types/dev";
 
 import styles from "./DevProjectsView.module.css";
 
-/** 프로젝트 (/dev/projects) — 카드 그리드. 클릭 시 개요·담당·트러블슈팅·스택·링크 모달. */
+/** 프로젝트 (/dev/projects) — 카드 그리드. 클릭 시 상세 모달(?project= 딥링크). */
 const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
   const { dict, lang } = useLang();
-  const [selected, setSelected] = useState<DevProject | null>(null);
+  const { active: selected, open, select, close } = useQueryModal("project", projects);
 
   return (
     <main className={styles.main}>
@@ -28,7 +28,7 @@ const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
               type="button"
               key={project.id}
               className={styles.card}
-              onClick={() => setSelected(project)}
+              onClick={() => select(project.id)}
             >
               <div className={styles.cover}>
                 {project.cover?.url ? (
@@ -60,8 +60,8 @@ const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
       )}
 
       <Modal
-        open={selected != null}
-        onClose={() => setSelected(null)}
+        open={open}
+        onClose={close}
         maxWidth={720}
         crumb={selected ? `${pickText(selected.category, lang)} · ${selected.year}` : ""}
         label={selected ? pickText(selected.title, lang) : ""}

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
 import { useLang } from "@/features/lang/use-lang";
+import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { MusicAward, MusicConfig } from "@/types/music";
 import type { TimelineEntry } from "@/types/timeline";
@@ -13,10 +12,10 @@ import styles from "./MusicCareerView.module.css";
 
 type Props = { config: MusicConfig; awards: MusicAward[] };
 
-/** 경력 (/music/career) — 학력 + 경력 타임라인 + 수상(클릭 시 상세 모달). */
+/** 경력 (/music/career) — 학력 + 경력 타임라인 + 수상(클릭 시 상세 모달, ?award= 딥링크). */
 const MusicCareerView = ({ config, awards }: Props) => {
   const { dict, lang } = useLang();
-  const [selected, setSelected] = useState<MusicAward | null>(null);
+  const { active: selected, open, select, close } = useQueryModal("award", awards);
 
   const toRows = (entries: TimelineEntry[]) =>
     entries.map((entry) => ({ period: entry.period, text: pickText(entry.title, lang) }));
@@ -39,7 +38,7 @@ const MusicCareerView = ({ config, awards }: Props) => {
             type="button"
             key={award.id}
             className={styles.row}
-            onClick={() => setSelected(award)}
+            onClick={() => select(award.id)}
           >
             <span className={styles.yr}>{award.year}</span>
             <span className={styles.an}>{pickText(award.name, lang)}</span>
@@ -50,8 +49,8 @@ const MusicCareerView = ({ config, awards }: Props) => {
       </section>
 
       <Modal
-        open={selected != null}
-        onClose={() => setSelected(null)}
+        open={open}
+        onClose={close}
         maxWidth={600}
         crumb={selected ? `${dict.musicAwardsNav} · ${selected.year}` : ""}
         label={selected ? pickText(selected.name, lang) : ""}

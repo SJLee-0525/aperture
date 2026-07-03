@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 
 import { Modal } from "@/components/Modal";
 import { useLang } from "@/features/lang/use-lang";
+import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { MusicWork } from "@/types/music";
 
@@ -16,7 +16,7 @@ const ymd = (d: Date) => `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.ge
 /** 연주 목록 (/music) — 포스터 그리드. 클릭 시 프로그램·예매 모달. */
 const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   const { dict, lang } = useLang();
-  const [selected, setSelected] = useState<MusicWork | null>(null);
+  const { active: selected, open, select, close } = useQueryModal("work", works);
 
   return (
     <main className={styles.main}>
@@ -30,7 +30,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
               type="button"
               key={work.id}
               className={styles.work}
-              onClick={() => setSelected(work)}
+              onClick={() => select(work.id)}
             >
               <div className={styles.poster}>
                 {work.poster.url ? (
@@ -57,8 +57,8 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
       )}
 
       <Modal
-        open={selected != null}
-        onClose={() => setSelected(null)}
+        open={open}
+        onClose={close}
         maxWidth={920}
         crumb={selected ? pickText(selected.category, lang) : ""}
         label={selected ? pickText(selected.title, lang) : ""}
