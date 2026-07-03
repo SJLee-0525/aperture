@@ -113,22 +113,10 @@
     visibility 0.2s;
   z-index: 46;
 }
-.megaItem:hover .megaPanel,
-.megaItem:focus-within .megaPanel {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-}
-/* 상위 메뉴를 클릭하면 그 섹션이 고정(pin)된다(JS 상태 → nav[data-pinned]).
-   고정 상태에선 다른 섹션 hover 는 억제하고, 고정된 섹션만 계속 열어 둔다(사용자 요청).
-   미고정(홈·섹션 페이지 공통)에선 위 기본 규칙대로 hover 로 전부 열린다. */
-.mega[data-pinned] .megaItem:hover .megaPanel,
-.mega[data-pinned] .megaItem:focus-within .megaPanel {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-6px);
-}
-.mega[data-pinned] .megaItem.pinned .megaPanel {
+/* 패널 표시는 JS 제어(SiteHeader) — hover/포커스로 열린 섹션(hovered) 또는 클릭 고정(pinned) 섹션에만
+   .open 을 부여한다. 고정 시엔 다른 섹션 hover 억제, 하위 링크 클릭·라우트 이동 시 즉시 닫힘(순수 CSS
+   :hover 로는 이동 후에도 포인터가 얹혀 있으면 안 닫혀서 상태 기반으로 전환). */
+.megaItem.open .megaPanel {
   opacity: 1;
   visibility: visible;
   transform: none;

@@ -25,9 +25,17 @@ const SiteHeader = () => {
   const pathname = usePathname();
   const section = sectionFromPath(pathname);
 
-  // 클릭으로 고정(pin)한 섹션. null = 미고정 → 자유 hover. 라우트(.current)와 무관한 상호작용 상태.
+  // 드롭다운 열림 = JS 상태. hovered(hover/포커스로 임시 열림) + pinned(클릭 고정). shown = 실제 표시 섹션.
+  // 고정 시 다른 섹션 hover 억제(pinned 우선), 하위 링크 클릭 시 둘 다 비워 라우트 이동 후에도 닫히게 한다.
+  const [hovered, setHovered] = useState<string | null>(null);
   const [pinned, setPinned] = useState<string | null>(null);
+  const shown = pinned ?? hovered;
   const navRef = useRef<HTMLElement>(null);
+
+  const closeMenu = () => {
+    setPinned(null);
+    setHovered(null);
+  };
 
   // 고정 상태에서만 바깥 클릭·Esc 로 해제.
   useEffect(() => {
@@ -36,7 +44,7 @@ const SiteHeader = () => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) setPinned(null);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPinned(null);
+      if (e.key === "Escape") closeMenu();
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -53,25 +61,28 @@ const SiteHeader = () => {
           Sungjoon Lee<span className={styles.dot}>.</span>
         </Link>
 
-        <nav
-          ref={navRef}
-          className={styles.mega}
-          aria-label="Primary"
-          data-pinned={pinned ?? undefined}
-        >
+        <nav ref={navRef} className={styles.mega} aria-label="Primary">
           {MEGA_MENU.map((group) => (
             <div
               key={group.section}
               data-section={group.section}
               className={`${styles.megaItem} ${section === group.section ? styles.current : ""} ${
-                pinned === group.section ? styles.pinned : ""
+                shown === group.section ? styles.open : ""
               }`}
+              onMouseEnter={() => setHovered(group.section)}
+              onMouseLeave={() => setHovered((h) => (h === group.section ? null : h))}
+              onFocus={() => setHovered(group.section)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setHovered((h) => (h === group.section ? null : h));
+                }
+              }}
             >
               <button
                 type="button"
                 className={styles.megaBtn}
                 aria-haspopup="menu"
-                aria-expanded={pinned === group.section}
+                aria-expanded={shown === group.section}
                 onClick={() => setPinned((prev) => (prev === group.section ? null : group.section))}
               >
                 {dict[group.labelKey]}
@@ -83,7 +94,7 @@ const SiteHeader = () => {
                     href={link.href}
                     className={styles.megaLink}
                     role="menuitem"
-                    onClick={() => setPinned(null)}
+                    onClick={closeMenu}
                   >
                     {dict[link.labelKey]}
                   </Link>
@@ -97,11 +108,7 @@ const SiteHeader = () => {
               pathname.startsWith(ROUTES.CONTACT) ? styles.current : ""
             }`}
           >
-            <Link
-              href={CONTACT_NAV.href}
-              className={styles.megaBtn}
-              onClick={() => setPinned(null)}
-            >
+            <Link href={CONTACT_NAV.href} className={styles.megaBtn} onClick={closeMenu}>
               {dict[CONTACT_NAV.labelKey]}
             </Link>
           </div>
