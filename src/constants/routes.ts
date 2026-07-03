@@ -2,12 +2,13 @@
 const ROUTES = {
   // 통합 셸
   LANDING: "/", // 랜딩 허브 (A3)
-  // ⚠️ legacy 사진 경로 — 현행 페이지가 사용 중. A1에서 /photo/* 로 이동하며 제거·redirect.
-  HOME: "/", // 작업(Work) — 현행
-  ALBUMS: "/albums",
-  MAP: "/map",
-  ABOUT: "/about",
-  // 사진 섹션 (/photo/*) — A1 이후 활성
+  // ⚠️ legacy 별칭 — 값은 A1에서 /photo/* 로 이동 완료. 현행 SiteHeader/NAV_ITEMS/링크가 참조.
+  //    A2(mega-menu 재작성) 때 이 4개 키를 제거하고 아래 PHOTO* 로 일원화한다.
+  HOME: "/photo", // 작업(Work)
+  ALBUMS: "/photo/albums",
+  MAP: "/photo/map",
+  ABOUT: "/photo/about",
+  // 사진 섹션 (/photo/*) — 정식 키
   PHOTO: "/photo", // 작업(Work)
   PHOTO_ALBUMS: "/photo/albums",
   PHOTO_MAP: "/photo/map",
