@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/use-lang";
+import { useTyping } from "@/hooks/use-typing";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { SiteConfig } from "@/types/site";
 
@@ -17,20 +19,32 @@ const SECTIONS = [
 ] as const;
 
 /**
- * 랜딩 허브(/) — 이름·태그라인·소개 + 사진/음악/개발 진입. 진입 애니메이션은 CSS 스태거(fade-up).
- * 콘텐츠는 site/config(name·tagline·landingLead)에서 온다.
+ * 랜딩 허브(/) — 이름(언어 무관 항상 "Sungjoon Lee") + 역할 타이핑(Photographer/Pianist/Developer)
+ * + 소개 + 사진/음악/개발 진입. 타이핑 단어는 tagline 을 '·' 로 분해해 파생. 진입 애니메이션은 CSS 스태거.
  */
 const LandingView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
+  // useTyping 이 매 렌더 setText → 재렌더하므로, roles 배열 참조를 안정화(useMemo)해야 effect 가 재시작되지 않는다.
+  const roles = useMemo(
+    () =>
+      pickText(site.tagline, lang)
+        .split("·")
+        .map((role) => role.trim())
+        .filter(Boolean),
+    [site.tagline, lang],
+  );
+  const typed = useTyping(roles);
 
   return (
     <section className={styles.hero}>
       <div className={styles.inner}>
-        <p className={styles.eyebrow}>{pickText(site.tagline, lang)}</p>
         <h1 className={styles.name}>
-          {pickText(site.name, lang)}
-          <span className={styles.dot}>.</span>
+          Sungjoon Lee<span className={styles.dot}>.</span>
         </h1>
+        <div className={styles.type}>
+          <span className={styles.typed}>{typed}</span>
+          <span className={styles.cursor} aria-hidden="true" />
+        </div>
         <p className={styles.lead}>{pickText(site.landingLead, lang)}</p>
         <nav className={styles.rows} aria-label="Sections">
           {SECTIONS.map((section) => (

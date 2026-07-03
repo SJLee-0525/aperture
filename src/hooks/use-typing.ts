@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
  * 타이핑 효과 — words 를 한 글자씩 타이핑 → 잠시 멈춤 → 삭제 → 다음 단어 순환.
  * 한글 완성형은 `[...word]` 로 코드포인트 분해(바이트 단위 깨짐 방지).
  * setState 는 setTimeout 콜백 안에서만 호출(effect 직접 setState 금지 규칙 준수).
+ * 랜딩(역할)·개발(향후) 등 2개 이상 feature 가 공유 → hooks 승격.
  */
 const useTyping = (words: string[]): string => {
   const [text, setText] = useState("");

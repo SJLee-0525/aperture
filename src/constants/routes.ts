@@ -7,9 +7,15 @@ const ROUTES = {
   PHOTO_ALBUMS: "/photo/albums",
   PHOTO_MAP: "/photo/map",
   PHOTO_ABOUT: "/photo/about",
-  // 음악 · 개발 섹션 (단일 스크롤)
-  MUSIC: "/music",
-  DEV: "/dev",
+  // 음악 섹션 (/music/*) — 사진처럼 개별 페이지
+  MUSIC: "/music", // 연주 목록
+  MUSIC_SCHEDULE: "/music/schedule",
+  MUSIC_AWARDS: "/music/awards",
+  MUSIC_MEDIA: "/music/media",
+  // 개발 섹션 (/dev/*) — Phase C. 소개 없음
+  DEV: "/dev", // 기술 스택
+  DEV_PROJECTS: "/dev/projects",
+  DEV_CAREER: "/dev/career",
   // 관리자
   ADMIN: "/admin",
   LOGIN: "/admin/login",

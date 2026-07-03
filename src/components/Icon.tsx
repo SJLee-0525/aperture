@@ -76,6 +76,12 @@ const PATHS: Record<string, ReactNode> = {
   ),
   code: <path d="M8 8l-4 4 4 4M16 8l4 4-4 4" />,
   folder: <path d="M3 7h6l2 2h10v10H3z" />,
+  award: (
+    <>
+      <circle cx="12" cy="9" r="6" />
+      <path d="M9 14l-1 7 4-2 4 2-1-7" />
+    </>
+  ),
 };
 
 type IconName = keyof typeof PATHS;

@@ -11,11 +11,10 @@ import { useLang } from "@/features/lang/use-lang";
 
 import styles from "./MobileTabBar.module.css";
 
-/** 인-페이지 앵커(#) 탭은 활성 표시 안 함(스크롤 스파이는 B·C). 사진 루트(/photo)는 정확히 일치. */
-const isTabActive = (href: string, pathname: string): boolean => {
-  if (href.includes("#")) return false;
-  return href === ROUTES.PHOTO ? pathname === ROUTES.PHOTO : pathname.startsWith(href);
-};
+/** 섹션 루트(/photo·/music·/dev)는 정확히 일치, 하위 경로는 prefix 매치(루트 탭이 하위에서도 켜지는 것 방지). */
+const SECTION_ROOTS: string[] = [ROUTES.PHOTO, ROUTES.MUSIC, ROUTES.DEV];
+const isTabActive = (href: string, pathname: string): boolean =>
+  SECTION_ROOTS.includes(href) ? pathname === href : pathname.startsWith(href);
 
 /** 모바일 하단 탭바 — 현재 섹션(사진/음악/개발)의 탭 세트. 랜딩(home)에선 숨김. 데스크톱은 CSS로 숨김. */
 const MobileTabBar = () => {

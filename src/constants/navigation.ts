@@ -35,10 +35,10 @@ const MEGA_MENU: MegaSection[] = [
     labelKey: "sectionMusic",
     href: ROUTES.MUSIC,
     links: [
-      { labelKey: "musicWorksNav", href: `${ROUTES.MUSIC}#works` },
-      { labelKey: "musicScheduleNav", href: `${ROUTES.MUSIC}#schedule` },
-      { labelKey: "musicMediaNav", href: `${ROUTES.MUSIC}#media` },
-      { labelKey: "musicAwardsNav", href: `${ROUTES.MUSIC}#awards` },
+      { labelKey: "musicWorksNav", href: ROUTES.MUSIC },
+      { labelKey: "musicScheduleNav", href: ROUTES.MUSIC_SCHEDULE },
+      { labelKey: "musicAwardsNav", href: ROUTES.MUSIC_AWARDS },
+      { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA },
     ],
   },
   {
@@ -46,10 +46,9 @@ const MEGA_MENU: MegaSection[] = [
     labelKey: "sectionDev",
     href: ROUTES.DEV,
     links: [
-      { labelKey: "devAboutNav", href: `${ROUTES.DEV}#about` },
-      { labelKey: "devStackNav", href: `${ROUTES.DEV}#stack` },
-      { labelKey: "devProjectsNav", href: `${ROUTES.DEV}#projects` },
-      { labelKey: "devCareerNav", href: `${ROUTES.DEV}#career` },
+      { labelKey: "devStackNav", href: ROUTES.DEV },
+      { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
+      { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER },
     ],
   },
 ];
@@ -63,16 +62,15 @@ const MOBILE_TABS: Record<NavSection, NavItem[]> = {
     { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT, icon: "user" },
   ],
   music: [
-    { labelKey: "musicWorksNav", href: `${ROUTES.MUSIC}#works`, icon: "music" },
-    { labelKey: "musicScheduleNav", href: `${ROUTES.MUSIC}#schedule`, icon: "cal" },
-    { labelKey: "musicMediaNav", href: `${ROUTES.MUSIC}#media`, icon: "play" },
-    { labelKey: "musicContactNav", href: `${ROUTES.MUSIC}#contact`, icon: "mail" },
+    { labelKey: "musicWorksNav", href: ROUTES.MUSIC, icon: "music" },
+    { labelKey: "musicScheduleNav", href: ROUTES.MUSIC_SCHEDULE, icon: "cal" },
+    { labelKey: "musicAwardsNav", href: ROUTES.MUSIC_AWARDS, icon: "award" },
+    { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA, icon: "play" },
   ],
   dev: [
-    { labelKey: "devAboutNav", href: `${ROUTES.DEV}#about`, icon: "user" },
-    { labelKey: "devStackNav", href: `${ROUTES.DEV}#stack`, icon: "code" },
-    { labelKey: "devProjectsNav", href: `${ROUTES.DEV}#projects`, icon: "folder" },
-    { labelKey: "devCareerNav", href: `${ROUTES.DEV}#career`, icon: "cal" },
+    { labelKey: "devStackNav", href: ROUTES.DEV, icon: "code" },
+    { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
+    { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER, icon: "cal" },
   ],
 };
 

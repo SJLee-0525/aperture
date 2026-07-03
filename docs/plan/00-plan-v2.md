@@ -12,8 +12,9 @@
 - **현재**: 사진 포트폴리오 `Aperture.` 완성 — 작업/앨범/지도(클러스터링)/소개 + 상세 모달 + 관리자 CMS + Firebase(Auth·Firestore·Storage) + 익명 좋아요. `/`·`/albums`·`/map`·`/about`·`/admin/*` 라우트.
 - **목표**: 하나의 셸(mega-menu + 랜딩 허브) 아래 **3섹션**으로 확장.
   - **사진** `/photo/*` — 기존 구현 계승(서브브랜드 `Aperture.`), 액센트 **블루**.
-  - **음악** `/music` — 피아니스트(연주·일정·수상·영상·연락처), 액센트 **레드**.
-  - **개발** `/dev` — 프론트엔드(소개·스택·프로젝트·경력), 액센트 **그린**.
+  - **음악** `/music/*` — 피아니스트: 연주 목록(`/music`)·공연 일정·수상·영상 **개별 페이지**(사진 섹션처럼). **히어로·연락처 없음**. 액센트 **레드**.
+  - **개발** `/dev/*` — 프론트엔드: 기술 스택(`/dev`)·프로젝트·경력 **개별 페이지**. **소개 없음**. 액센트 **그린**.
+  - 랜딩(`/`)은 이름(항상 "Sungjoon Lee") + **역할 타이핑**(Photographer/Pianist/Developer). 타이핑 효과는 여기로 모음(음악 히어로에서 이동).
   - **랜딩** `/` — 이름·태그라인 + 3섹션 진입 허브.
 
 ### 확정 결정 (사용자, 2026-07-03)
@@ -79,13 +80,13 @@
 - **Rules**: `musicWorks·musicSchedule·musicAwards·musicMedia` (read=published·write=admin, **무인증 쓰기 없음**). `firestore.indexes.json` **인덱스 4개**(published+order). **Emulator 테스트**(무인증 write 거부 포함) 통과 후 배포.
 - **완료**: getter가 mock/실데이터 반환, Rules·인덱스 배포, 좋아요 예외가 photos에만 있음 확인.
 
-### Slice B1 — 공개 MusicView
+### Slice B1 — 공개 음악 뷰 (개별 페이지 4개) ✅
 
-- `features/music/MusicView`: 히어로(**타이핑** `use-typing`) + 연주 목록(포스터 그리드) + 공연 일정(상태 배지 onSale/soon) + 수상 + 영상(**YouTube facade** → 클릭 시 iframe) + 연락처. 앵커 인-페이지 네비(`#works`·`#schedule`…).
-- components: `WorkPoster`, `ScheduleRow`, `AwardRow`, `VideoFacade`, `SectionHeading`(공용).
-- 모달: `WorkModal`(프로그램·예매), `AwardModal` + `use-music-modal`(`?work=` 딥링크). `use-scroll-lock` 재사용.
-- `(public)/music/page.tsx`: fetch + `<MusicView/>`, `revalidate`.
-- **완료**: 단일 스크롤·앵커 네비·모달 딥링크·타이핑·YouTube facade, 반응형(모바일 탭바)·다크·ko/en.
+- **사진 섹션처럼 개별 페이지**: `/music`(연주 목록)·`/music/schedule`·`/music/awards`·`/music/media`. 히어로·연락처 없음(타이핑은 랜딩으로 이동). 네비는 mega-menu + 모바일 탭.
+- 뷰: `MusicWorksView`(포스터 그리드)·`MusicScheduleView`(상태 배지 onSale/soon)·`MusicAwardsView`·`MusicMediaView`(YouTube facade). 각 페이지 `.main`+`.title`(사진 뷰 패턴), 빈 상태 = `comingSoon`.
+- 페이지: `(public)/music/{page,schedule,awards,media}/page.tsx` = 해당 getter + 뷰, `revalidate`.
+- **B1-b(남음)**: 연주/수상 **모달** + `?work=` 딥링크 + 영상 **YouTube iframe**(facade 클릭 재생).
+- 참고: `use-typing` 은 `hooks/`로 승격(랜딩·개발 공유). `MusicConfig`(히어로·연락처용)는 현재 미사용 — 정리 후보.
 
 ### Slice B2 — 음악 관리자 CMS
 
@@ -107,11 +108,10 @@
 
 ### Slice C1 — 공개 DevView
 
-- `features/dev/DevView`: 로딩 게이트 + 히어로(타이핑) + 소개(인터뷰 Q&A) + 기술 스택(카테고리 칩) + 프로젝트(카드) + 경력 타임라인 + 연락처. **reveal-on-scroll** `use-reveal`. 앵커 네비.
-- components: `ProjectCard`, `StackGroup`, `TimelineRow`, `InterviewBlock`.
-- 모달: `ProjectModal`(개요·담당·트러블슈팅·스택·링크) + `use-dev-modal`(`?project=` 딥링크).
-- `(public)/dev/page.tsx`: fetch + `<DevView/>`, `revalidate`.
-- **완료**: 단일 스크롤·reveal·타이핑·프로젝트 모달 딥링크, 반응형·다크·ko/en. (GSAP·Zustand 미도입 — `motion`/IntersectionObserver로 재현.)
+- **음악처럼 개별 페이지**(사용자 확정): 기술 스택(`/dev`)·프로젝트(`/dev/projects`)·경력(`/dev/career`). **소개(인터뷰) 없음**. 네비는 mega-menu + 모바일 탭(이미 3개로 정리됨).
+- 뷰: `DevStackView`(카테고리 칩)·`DevProjectsView`(카드)·`DevCareerView`(타임라인). `.main`+`.title` 패턴. reveal-on-scroll(`use-reveal`)·프로젝트 모달(`?project=`)은 선택.
+- components: `ProjectCard`, `StackGroup`, `TimelineRow`.
+- `(public)/dev/{page,projects,career}/page.tsx`: 해당 getter + 뷰, `revalidate`. (GSAP·Zustand 미도입 — `motion`/IntersectionObserver로 재현.)
 
 ### Slice C2 — 개발 관리자 CMS
 
@@ -176,7 +176,7 @@
 
 - **라우트 이동 회귀** — `?photo=` 딥링크·내부 링크·redirect 누락 위험. `ROUTES` 상수 경유 + old URL redirect + 전수 점검으로 흡수. **Slice A1을 순수 리팩터로 격리**(기능 변경 동반 금지).
 - **`[data-section]` 초기 flash** — SSR 시 섹션 미상 → 첫 페인트에 잘못된 액센트 가능. pathname은 서버에서 알 수 있으므로 `(public)/layout.tsx`에서 `<html data-section>`(또는 route-group별 wrapper)로 서버 세팅 검토. 안 되면 no-flash 스크립트에 section 추가.
-- **음악·개발 단일 스크롤 vs SEO** — 하위 앵커는 별도 URL 아님(모달만 딥링크). 섹션 페이지에 h1·메타 충실히. 필요 시 후속으로 sub-route 분해.
+- **음악·개발 = 개별 페이지**(사진처럼) — 각 요소가 별도 URL이라 SEO·딥링크 유리. 각 페이지 h1·메타 충실히. (단일 스크롤 계획에서 변경됨.)
 - **en 번역 부채** — pickText 폴백으로 안 깨지지만 en 품질은 수동. Phase D에서 일괄 채움.
 - **Firestore 읽기** — 공개 페이지 3개 증가하지만 ISR 캐싱으로 5만/일 여유. 좋아요 외 쓰기는 관리자만.
 - **콘텐츠 실재성** — 음악(공연 이력)·개발(프로젝트) 데이터는 본인 실제 이력으로 교체 필요(mock은 디자인 예시).

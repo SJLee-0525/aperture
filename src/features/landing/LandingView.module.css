@@ -19,22 +19,44 @@
   justify-content: center;
 }
 
-.eyebrow {
+.type {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 0 clamp(18px, 3vw, 30px);
+  min-height: 1.5em;
+  margin: clamp(14px, 2vw, 22px) 0 0;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-3);
+  font-size: clamp(16px, 2.2vw, 28px);
+  letter-spacing: 0.02em;
+  color: var(--accent);
 }
-.eyebrow::before {
+.type::before {
   content: "";
+  flex: none;
   width: 34px;
   height: 1px;
+  margin-right: 14px;
   background: var(--accent);
+}
+.typed {
+  white-space: nowrap;
+}
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  margin-left: 3px;
+  background: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
 }
 
 .name {
@@ -107,23 +129,23 @@
 }
 
 /* 진입 애니메이션 — 스태거 fade-up */
-.eyebrow,
 .name,
+.type,
 .lead,
 .rows {
   animation: landIn 0.7s var(--ease) both;
 }
-.eyebrow {
+.name {
   animation-delay: 0.05s;
 }
-.name {
-  animation-delay: 0.12s;
+.type {
+  animation-delay: 0.15s;
 }
 .lead {
-  animation-delay: 0.22s;
+  animation-delay: 0.25s;
 }
 .rows {
-  animation-delay: 0.32s;
+  animation-delay: 0.35s;
 }
 @keyframes landIn {
   from {
@@ -136,8 +158,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .eyebrow,
   .name,
+  .type,
   .lead,
   .rows {
     animation: none;
