@@ -47,6 +47,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── 개발 섹션 — 무인증 쓰기 없음 ──
+    match /devProjects/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
     match /site/{id} {
       allow read:  if true;      // name·bio·links·태그 사전은 공개
       allow write: if isAdmin();

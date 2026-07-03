@@ -211,14 +211,9 @@ const restToDevProject = (id: string, d: Record<string, unknown>): DevProject =>
 
 const restToDevConfig = (d: Record<string, unknown>): DevConfig => ({
   heroLead: (d.heroLead as LocalizedText) ?? EMPTY_LOCALIZED,
-  typeWords: (d.typeWords as string[]) ?? [],
   interview: (d.interview as DevConfig["interview"]) ?? [],
   stack: (d.stack as DevConfig["stack"]) ?? [],
   timeline: (d.timeline as DevConfig["timeline"]) ?? [],
-  githubUrl: (d.githubUrl as string) ?? "",
-  resumeUrl: (d.resumeUrl as string) ?? "",
-  contactEmail: (d.contactEmail as string) ?? "",
-  social: (d.social as SiteLink[]) ?? [],
 });
 
 // ── 공개 read API (도메인 타입 반환) ────────────────────────────────────────

@@ -178,7 +178,6 @@ const MOCK_DEV_CONFIG: DevConfig = {
     ko: "사용자에게 명확하게 전달되는 흐름을 설계하고, GSAP 기반 애니메이션과 반응형 레이아웃으로 주목도를 높이는 프론트엔드 개발자입니다.",
     en: "A frontend developer who designs clear user flows and heightens focus with GSAP-based animation and responsive layouts.",
   },
-  typeWords: ["Frontend Engineer", "React Developer", "UI Craftsman", "Interaction Designer"],
   interview: [
     {
       q: { ko: "Q. 어떤 개발자인가요?", en: "Q. What kind of developer are you?" },
@@ -273,10 +272,6 @@ const MOCK_DEV_CONFIG: DevConfig = {
       },
     },
   ],
-  githubUrl: "https://github.com/SJLee-0525",
-  resumeUrl: "#",
-  contactEmail: "dev@sungjoonlee.com",
-  social: [{ label: "GitHub", href: "https://github.com/SJLee-0525" }],
 };
 
 export { MOCK_DEV_PROJECTS, MOCK_DEV_CONFIG };

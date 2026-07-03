@@ -37,17 +37,13 @@ type DevTimelineEntry = {
   desc: LocalizedText;
 };
 
-/** site/dev 설정 문서 — 히어로·인터뷰·스택·경력·연락처 */
+/** site/dev 설정 문서 — 소개 리드·인터뷰·스택·경력.
+ *  (연락처·소셜은 /contact 로 일원화, 히어로 타이핑은 랜딩 소관 → dev config 에 두지 않음) */
 type DevConfig = {
-  heroLead: LocalizedText;
-  typeWords: string[]; // 히어로 타이핑 순환 문구 (언어 무관)
+  heroLead: LocalizedText; // 소개 페이지 리드 문단
   interview: DevInterview[];
   stack: DevStackGroup[];
   timeline: DevTimelineEntry[];
-  githubUrl: string;
-  resumeUrl: string;
-  contactEmail: string;
-  social: SiteLink[];
 };
 
 export type { DevProject, DevInterview, DevStackItem, DevStackGroup, DevTimelineEntry, DevConfig };
