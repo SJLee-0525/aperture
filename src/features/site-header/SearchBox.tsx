@@ -21,7 +21,7 @@ const SearchBox = () => {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const query = value.trim();
-    router.push(query ? `${ROUTES.HOME}?q=${encodeURIComponent(query)}` : ROUTES.HOME);
+    router.push(query ? `${ROUTES.PHOTO}?q=${encodeURIComponent(query)}` : ROUTES.PHOTO);
   };
 
   return (

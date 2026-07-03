@@ -116,6 +116,34 @@
   color-scheme: dark;
 }
 
+/* ===================== 섹션 액센트 (html[data-section] — design/ver_2 site.css 이식) =====================
+   SectionAccent(client)가 라우트별로 data-section 을 세팅 → 컴포넌트는 --accent 만 참조(섹션 색 하드코딩 금지).
+   선택자 명시도(0,1,1)가 [data-theme](0,1,0)보다 높아 다크에서도 섹션색이 우선하며, 다크 전용 보정은 (0,2,1)로 덮는다. */
+html[data-section="photo"],
+html[data-section="home"] {
+  --accent: #0a84ff;
+  --accent-press: #0066d6;
+  --accent-soft: rgba(10, 132, 255, 0.12);
+}
+html[data-section="music"] {
+  --accent: #e5484d;
+  --accent-press: #c0393e;
+  --accent-soft: rgba(229, 72, 77, 0.13);
+}
+html[data-section="dev"] {
+  --accent: #16a34a;
+  --accent-press: #15803d;
+  --accent-soft: rgba(22, 163, 74, 0.14);
+}
+html[data-theme="dark"][data-section="music"] {
+  --accent: #ff5b60;
+  --accent-soft: rgba(255, 91, 96, 0.16);
+}
+html[data-theme="dark"][data-section="dev"] {
+  --accent: #2ecc71;
+  --accent-soft: rgba(46, 204, 113, 0.16);
+}
+
 /* ===================== Reset + Base ===================== */
 * {
   box-sizing: border-box;

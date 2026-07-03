@@ -19,6 +19,7 @@ type UIDict = {
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
+  comingSoon: string;
   searchPlaceholder: string;
   allTag: string;
   filterLabel: string;
@@ -75,6 +76,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
+    comingSoon: "곧 공개됩니다",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     allTag: "전체",
     filterLabel: "필터",
@@ -126,6 +128,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
+    comingSoon: "Coming soon",
     searchPlaceholder: "Search · tag / gear / place",
     allTag: "All",
     filterLabel: "Filter",
