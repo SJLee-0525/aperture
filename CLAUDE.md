@@ -143,19 +143,20 @@ src/
 │   │   └── dev/                # 개발 CMS: projects · config
 │   └── layout.tsx              # 폰트 3종 + 테마 no-flash + LangProvider
 ├── features/                   # ★ 기능 단위 조합 — 비즈니스 로직 있음
-│   ├── landing/                # 랜딩 허브 (reveal-on-scroll, 3섹션 진입)
-│   ├── gallery/                # 작업 그리드, 필터바(태그·카메라·초점거리), 뷰토글, use-photo-filter
-│   ├── photo-detail/           # 라이트박스/바텀시트 + EXIF 패널 + 미니맵 + use-photo-modal
-│   ├── albums/  map/  about/   # 사진 섹션 뷰
+│   │                           # ★ 폴더 내부 = 타입별 하위폴더: _components/(*.tsx + 동거 *.module.css) · _hooks/(use-*.ts) · _lib/(그 외 *.ts)
+│   ├── gallery/                # 예) _components/{GalleryView,FilterBar}.tsx(+.module.css) · _hooks/use-photo-filter · _lib/filter-photos
+│   ├── landing/                # _components/LandingView (reveal-on-scroll, 3섹션 진입)
+│   ├── photo-detail/           # _components/{PhotoModal(라이트박스/바텀시트),ExifPanel,미니맵} · _hooks/use-photo-modal
+│   ├── albums/  map/  about/   # 사진 섹션 뷰 (_components/)
 │   ├── export/  likes/         # 프레임 내보내기 · 좋아요(익명 +1)
-│   ├── contact/                # 연락 페이지: ContactView(mailto 폼 + 소셜 링크)
-│   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달
-│   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon)
-│   ├── site-header/            # SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
-│   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context
-│   ├── auth/                   # LoginForm, AuthGuard, use-auth
-│   ├── image-upload/           # exifr 추출 + 압축 + Storage 업로드
-│   └── admin-*/                # 섹션별 폼 + use-*-admin hook (dnd-kit 정렬 포함) — 사진·음악·개발
+│   ├── contact/                # _components/ContactView (mailto 폼 + 소셜 링크)
+│   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
+│   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon) (_components/)
+│   ├── site-header/            # _components/: SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
+│   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context — _hooks/·_lib/·_components/
+│   ├── auth/                   # _components/{LoginForm,AuthGuard} · _hooks/use-auth
+│   ├── image-upload/           # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
+│   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
 │   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard …) + 각 .module.css
 ├── lib/firebase/               # client.ts, auth.ts, firestore.ts, firestore-rest.ts, storage.ts
@@ -169,6 +170,10 @@ src/
 ```
 
 의존 방향: `app → features → components` (역방향 금지). barrel export(index.ts) 금지 — 직접 경로 import.
+
+**features/ 폴더 내부 정리 규칙 ★**: 각 feature 폴더는 파일을 타입별 하위폴더로 나눈다 — `_components/`(`*.tsx` + 짝 `*.module.css` 동거) · `_hooks/`(`use-*.ts`) · `_lib/`(그 외 순수 `*.ts` 유틸). 해당 타입 파일이 없으면 그 하위폴더도 없음.
+import는 **같은 하위폴더면 `./`**(예: `_components/` 안의 컴포넌트↔짝 CSS↔형제 컴포넌트), **다른 하위폴더면 `@/features/<폴더>/<하위>/…` alias**(`../` 금지 — hook 경고). 예: `@/features/gallery/_components/GalleryView`, `@/features/gallery/_hooks/use-photo-filter`, `@/features/gallery/_lib/filter-photos`.
+(단 `components/`·`lib/` 등 features 밖은 이 규칙 대상 아님 — 기존대로 평면 + CSS 동거.)
 
 ### 라우팅 & URL 마이그레이션
 
@@ -223,8 +228,9 @@ firebase deploy --only firestore:rules,storage   # Rules만 배포
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](.claude/memory/feedback_srp_per_file.md))
 - 상대경로 import(`../`) 금지 → `@/` alias (hook이 경고)
 - UI 표시 문자열은 ko/en 사전 경유 / 영어 코드·변수명. **전 섹션 콘텐츠 이중언어**(음악·개발 포함)
-- **스타일 = CSS Modules** (컴포넌트별 `.module.css`). 색·간격은 `globals.css`의 `:root` 변수 경유
+- **스타일 = CSS Modules** (컴포넌트별 `.module.css`, 짝 `.tsx`와 같은 폴더에 동거 — features에선 `_components/` 안). 색·간격은 `globals.css`의 `:root` 변수 경유
   (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
+- **features/ 내부 = 타입별 하위폴더**(`_components/`·`_hooks/`·`_lib/`) — 위 「디렉토리 구조」 섹션 참조.
 
 ## .claude 구성
 

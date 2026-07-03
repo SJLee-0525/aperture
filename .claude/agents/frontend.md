@@ -69,19 +69,19 @@ src/
 │   │   ├── music/               # works · schedule · awards · media · config
 │   │   └── dev/                 # projects · config
 │   └── layout.tsx               # 루트 (폰트 3종, 테마 no-flash, LangProvider)
-├── features/
-│   ├── landing/                 # LandingView (reveal-on-scroll, 3섹션 진입 행)
-│   ├── gallery/                 # GalleryView, FilterBar, ViewToggle, use-photo-filter (태그·카메라·초점거리·검색)
-│   ├── photo-detail/            # PhotoModal(데스크톱 라이트박스/모바일 바텀시트), ExifPanel, MiniMap, use-photo-modal
-│   ├── albums/  map/  about/    # AlbumsView·AlbumDetailView / MapView·MapCanvas·LocationList / AboutView
-│   ├── export/  likes/          # ExportModal·framePreview·use-export / LikeButton·use-like
-│   ├── music/                   # MusicView(연주·일정·수상·영상·연락처), WorkModal, AwardModal, use-music-modal, use-typing
-│   ├── dev/                     # DevView(소개·스택·프로젝트·경력), ProjectModal, use-dev-modal, use-reveal, use-typing
-│   ├── site-header/             # SiteHeader(mega-menu), MobileTabBar/MenuOverlay, ThemeToggleButton, LangMenu, SearchBox(항상 노출)
-│   ├── theme/  lang/            # html[data-theme] 토글 · ko/en Context(useSyncExternalStore)
-│   ├── auth/                    # LoginForm, AuthGuard, use-auth
-│   ├── image-upload/            # ImageUploader (exifr 추출 + 압축 + Storage 업로드)
-│   └── admin-*/                 # 섹션별 *Form + use-*-admin (dnd-kit 정렬) — 사진·음악·개발
+├── features/                    # ★ 폴더 내부 = 타입별 하위폴더: _components/(*.tsx + 동거 *.module.css) · _hooks/(use-*.ts) · _lib/(그 외 *.ts)
+│   ├── gallery/                 # _components/{GalleryView,FilterBar}(+.module.css) · _hooks/use-photo-filter · _lib/filter-photos
+│   ├── landing/                 # _components/LandingView (reveal-on-scroll, 3섹션 진입 행)
+│   ├── photo-detail/            # _components/{PhotoModal(데스크톱 라이트박스/모바일 바텀시트),ExifPanel,MiniMap} · _hooks/use-photo-modal
+│   ├── albums/  map/  about/    # _components/: AlbumsView·AlbumDetailView / MapView·MapCanvas·LocationList / AboutView
+│   ├── export/  likes/          # _components/{ExportModal,LikeButton} · _hooks/{use-export,use-like} · _lib/{framePreview,liked-store}
+│   ├── music/                   # _components/: MusicWorksView·MusicCareerView·MusicMediaView·MusicAboutView (+ 연주/수상 모달)
+│   ├── dev/                     # _components/: DevStackView·DevProjectsView·DevCareerView·DevAboutView (+ 프로젝트 모달, reveal·타이핑)
+│   ├── site-header/             # _components/: SiteHeader(mega-menu), MobileTabBar/MobileMenu, ThemeToggleButton, LangMenu, SearchBox, SectionAccent
+│   ├── theme/  lang/            # _hooks/use-theme-toggle·_lib/theme-script / _components/LangProvider·_hooks/use-lang (useSyncExternalStore)
+│   ├── auth/                    # _components/{LoginForm,AuthGuard} · _hooks/use-auth
+│   ├── image-upload/            # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
+│   └── admin-*/                 # _components/*Form·*Row + _hooks/use-*-admin (dnd-kit 정렬) — 사진·음악·개발
 ├── components/                  # ★ 순수 재사용 UI — props 만. + 각 컴포넌트 .module.css
 │   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock, SectionHeading, WorkPoster, ScheduleRow, ProjectCard …
 ├── lib/firebase/                # firebase agent 소관
@@ -105,7 +105,11 @@ src/
 | 예시          | PhotoTile, Modal, ExifList | GalleryView, PhotoModal, ExportModal | page.tsx          |
 
 **의존 방향 (역방향 금지)**: `app → features → components`. `components/` 가 `features/` 를 import 하면 위반(hook 경고).
-**barrel export 금지**: `index.ts` 를 만들지 않는다. 항상 직접 경로 import: `@/features/gallery/GalleryView`.
+**barrel export 금지**: `index.ts` 를 만들지 않는다. 항상 직접 경로 import: `@/features/gallery/_components/GalleryView`.
+**★ features/ 폴더 내부 = 타입별 하위폴더**: `_components/`(`*.tsx` + 짝 `*.module.css` 동거) · `_hooks/`(`use-*.ts`) · `_lib/`(그 외 순수 `*.ts`).
+import은 **같은 하위폴더면 `./`**(컴포넌트↔짝 CSS↔형제 컴포넌트), **다른 하위폴더면 `@/features/<폴더>/<하위>/…` alias**(`../` 금지):
+`@/features/gallery/_components/FilterBar` · `@/features/gallery/_hooks/use-photo-filter` · `@/features/gallery/_lib/filter-photos`.
+(`components/`·`lib/` 등 features 밖은 이 규칙 대상 아님 — 평면 + CSS 동거 유지.)
 
 핵심 관행:
 
@@ -127,8 +131,9 @@ const PhotoTile = ({ photo, onOpen }: Props) => (
 );
 export { PhotoTile }; // named export
 
-// features/gallery/GalleryView.tsx — 조합 + 로직
+// features/gallery/_components/GalleryView.tsx — 조합 + 로직
 ("use client");
+import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter"; // 다른 하위폴더 → @/ alias
 const GalleryView = ({ photos }: Props) => {
   const { visible, filter } = usePhotoFilter(photos);
   return <PhotoGrid photos={visible} />;
@@ -143,9 +148,12 @@ export { GalleryView };
 ### 2. Import 경로
 
 ```tsx
-import { GalleryView } from "@/features/gallery/GalleryView"; // ✅ @/ alias + 직접 경로
+import { GalleryView } from "@/features/gallery/_components/GalleryView"; // ✅ @/ alias + 직접 경로(_하위폴더 포함)
+import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
+import { filterPhotos } from "@/features/gallery/_lib/filter-photos";
+import styles from "./GalleryView.module.css"; // ✅ 같은 _components/ 안이면 ./ 유지
 import { COLLECTIONS } from "@/constants/collections";
-// ❌ 상대경로("../../components/…"), ❌ barrel("@/features/gallery") — hook 경고
+// ❌ 상대경로("../_hooks/…" 등 ../ 거슬러가기), ❌ barrel("@/features/gallery") — hook 경고
 ```
 
 ### 3. 데이터 페칭
@@ -281,7 +289,8 @@ export default async function WorkPage() {
 
 ### 응집도
 
-10. **함께 수정되는 코드는 가까이** — feature 전용 hook·타입·하위 컴포넌트·`.module.css` 는 그 feature 디렉토리에 동거.
+10. **함께 수정되는 코드는 가까이** — feature 전용 하위 컴포넌트·hook·유틸·`.module.css` 는 그 feature 디렉토리에 동거,
+    폴더 안에서 타입별 하위폴더(`_components/`·`_hooks/`·`_lib/`)로 정리(`.module.css`는 짝 `.tsx`와 `_components/`에 함께).
     2개 이상 feature 에서 쓰일 때만 `@/hooks`(로직) 또는 `@/components`(UI) 승격.
 
 ### 결합도
@@ -299,7 +308,7 @@ PR/변경 마무리 전:
 - [ ] 섹션 액센트가 `[data-section]` → `--accent` 경유인가 (섹션 색 하드코딩 없음)
 - [ ] 모바일 폭(~390px)에서 하단 탭바(섹션별)·바텀시트 레이아웃 확인했는가
 - [ ] `"use client"` 필요한 곳에만 (공개 페이지 Server Component 우선)
-- [ ] 상대경로 import 없는가(`@/`), barrel(index.ts) 안 만들었는가
+- [ ] 상대경로(`../`) import 없는가(`@/` alias), barrel(index.ts) 안 만들었는가, **features 파일이 타입별 하위폴더(`_components/`·`_hooks/`·`_lib/`)에 있는가**
 - [ ] `<img>` 대신 next/image, 업로드에 **webp 압축**(사진은 + **압축 前 EXIF 추출**) 들어갔는가
 - [ ] 공개 페이지에 `revalidate` 있는가
 - [ ] 컬렉션명 문자열 직박 없는가(`COLLECTIONS` 경유)
