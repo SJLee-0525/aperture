@@ -20,14 +20,25 @@ type MegaSection = {
 /** 데스크톱 상단 mega-menu 구조 (A2 SiteHeader 소비) */
 const MEGA_MENU: MegaSection[] = [
   {
+    section: "dev",
+    labelKey: "sectionDev",
+    href: ROUTES.DEV,
+    links: [
+      { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT },
+      { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER },
+      { labelKey: "devStackNav", href: ROUTES.DEV },
+      { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
+    ],
+  },
+  {
     section: "photo",
     labelKey: "sectionPhoto",
     href: ROUTES.PHOTO,
     links: [
+      { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT },
       { labelKey: "workNav", href: ROUTES.PHOTO },
       { labelKey: "albumsNav", href: ROUTES.PHOTO_ALBUMS },
       { labelKey: "mapNav", href: ROUTES.PHOTO_MAP },
-      { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT },
     ],
   },
   {
@@ -35,21 +46,10 @@ const MEGA_MENU: MegaSection[] = [
     labelKey: "sectionMusic",
     href: ROUTES.MUSIC,
     links: [
-      { labelKey: "musicWorksNav", href: ROUTES.MUSIC },
-      { labelKey: "musicCareerNav", href: ROUTES.MUSIC_CAREER },
-      { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA },
       { labelKey: "aboutNav", href: ROUTES.MUSIC_ABOUT },
-    ],
-  },
-  {
-    section: "dev",
-    labelKey: "sectionDev",
-    href: ROUTES.DEV,
-    links: [
-      { labelKey: "devStackNav", href: ROUTES.DEV },
-      { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
-      { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER },
-      { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT },
+      { labelKey: "musicCareerNav", href: ROUTES.MUSIC_CAREER },
+      { labelKey: "musicWorksNav", href: ROUTES.MUSIC },
+      { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA },
     ],
   },
 ];
@@ -62,23 +62,23 @@ const CONTACT_NAV: MegaLink = { labelKey: "contactNav", href: ROUTES.CONTACT };
 
 /** 모바일 섹션별 하단 탭 — 섹션에 따라 탭 세트가 다름 (A2 MobileTabBar 소비) */
 const MOBILE_TABS: Record<NavSection, NavItem[]> = {
+  dev: [
+    { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT, icon: "user" },
+    { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER, icon: "cal" },
+    { labelKey: "devStackNav", href: ROUTES.DEV, icon: "code" },
+    { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
+  ],
   photo: [
+    { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT, icon: "user" },
     { labelKey: "workNav", href: ROUTES.PHOTO, icon: "work" },
     { labelKey: "albumsNav", href: ROUTES.PHOTO_ALBUMS, icon: "album" },
     { labelKey: "mapNav", href: ROUTES.PHOTO_MAP, icon: "map" },
-    { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT, icon: "user" },
   ],
   music: [
-    { labelKey: "musicWorksNav", href: ROUTES.MUSIC, icon: "music" },
-    { labelKey: "musicCareerNav", href: ROUTES.MUSIC_CAREER, icon: "award" },
-    { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA, icon: "play" },
     { labelKey: "aboutNav", href: ROUTES.MUSIC_ABOUT, icon: "user" },
-  ],
-  dev: [
-    { labelKey: "devStackNav", href: ROUTES.DEV, icon: "code" },
-    { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
-    { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER, icon: "cal" },
-    { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT, icon: "user" },
+    { labelKey: "musicCareerNav", href: ROUTES.MUSIC_CAREER, icon: "award" },
+    { labelKey: "musicWorksNav", href: ROUTES.MUSIC, icon: "music" },
+    { labelKey: "musicMediaNav", href: ROUTES.MUSIC_MEDIA, icon: "play" },
   ],
 };
 
