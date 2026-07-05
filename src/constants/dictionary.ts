@@ -18,14 +18,12 @@ type UIDict = {
   musicRepertoireLabel: string; // 소개 페이지 컬럼 — 레퍼토리
   musicVenuesLabel: string; // 소개 페이지 컬럼 — 무대
   musicGenresLabel: string; // 소개 페이지 컬럼 — 장르
-  musicContactNav: string;
   // 연락처 페이지 (전역)
   contactNav: string;
   contactName: string;
   contactEmail: string;
   contactMessage: string;
   contactSend: string;
-  devAboutNav: string;
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
@@ -37,9 +35,6 @@ type UIDict = {
   devFieldLabel: string;
   comingSoon: string;
   // 음악 섹션 UI
-  musicContactLead: string;
-  musicBookingLabel: string;
-  socialLabel: string;
   musicBook: string;
   musicProgram: string;
   searchPlaceholder: string;
@@ -99,13 +94,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicRepertoireLabel: "레퍼토리",
     musicVenuesLabel: "무대",
     musicGenresLabel: "장르",
-    musicContactNav: "연락처",
     contactNav: "연락",
     contactName: "이름",
     contactEmail: "이메일",
     contactMessage: "메시지",
     contactSend: "메일 보내기",
-    devAboutNav: "소개",
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
@@ -116,9 +109,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devTechLabel: "사용 기술",
     devFieldLabel: "분야",
     comingSoon: "곧 공개됩니다",
-    musicContactLead: "함께 무대를 만들 분을 기다립니다.",
-    musicBookingLabel: "공연 문의",
-    socialLabel: "소셜",
     musicBook: "예매하기",
     musicProgram: "프로그램",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
@@ -173,13 +163,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicRepertoireLabel: "Repertoire",
     musicVenuesLabel: "Venues",
     musicGenresLabel: "Genres",
-    musicContactNav: "Contact",
     contactNav: "Contact",
     contactName: "Name",
     contactEmail: "Email",
     contactMessage: "Message",
     contactSend: "Send email",
-    devAboutNav: "About",
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
@@ -190,9 +178,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devTechLabel: "Tech Used",
     devFieldLabel: "Fields",
     comingSoon: "Coming soon",
-    musicContactLead: "Looking for someone to build the stage together.",
-    musicBookingLabel: "Booking",
-    socialLabel: "Social",
     musicBook: "Book tickets",
     musicProgram: "Programme",
     searchPlaceholder: "Search · tag / gear / place",
