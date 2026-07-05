@@ -51,6 +51,10 @@
 .mSearch input::placeholder {
   color: var(--text-3);
 }
+/* 무한스크롤 트리거 — 화면 밖에서도 rootMargin(600px)으로 미리 걸리도록 하단에 둔 얇은 감시 대상. */
+.sentinel {
+  height: 1px;
+}
 @media (min-width: 768px) {
   .mSearch {
     display: none;

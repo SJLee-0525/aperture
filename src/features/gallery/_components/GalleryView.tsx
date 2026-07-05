@@ -7,6 +7,7 @@ import { Icon } from "@/components/Icon";
 import { PhotoGrid } from "@/components/PhotoGrid";
 import { ViewToggle } from "@/components/ViewToggle";
 import { FilterBar } from "@/features/gallery/_components/FilterBar";
+import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
@@ -28,6 +29,8 @@ const GalleryView = ({ photos, tags }: Props) => {
 
   const [square, setSquare] = useState(false);
   const filter = usePhotoFilter(photos, initialQuery);
+  // 필터된 목록을 화면엔 점진 렌더(무한스크롤) — 필터/검색이 바뀌면 자동으로 처음부터.
+  const { visible: windowed, hasMore, attachSentinel } = useInfiniteScroll(filter.visible);
   const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
 
   return (
@@ -72,12 +75,12 @@ const GalleryView = ({ photos, tags }: Props) => {
           filtersActive={filter.filtersActive}
         />
 
-        <PhotoGrid
-          photos={filter.visible}
-          lang={lang}
-          square={square}
-          emptyLabel={dict.emptyResults}
-        />
+        <PhotoGrid photos={windowed} lang={lang} square={square} emptyLabel={dict.emptyResults} />
+
+        {/* 무한스크롤 트리거 — 남은 사진이 있을 때만. 보이면 다음 페이지 렌더. */}
+        {hasMore ? (
+          <div ref={attachSentinel} className={styles.sentinel} aria-hidden="true" />
+        ) : null}
       </main>
 
       {/* 상세 모달: 딥링크 견고성을 위해 전체 photos 전달(?photo=id는 필터와 무관하게 항상 열림) */}
