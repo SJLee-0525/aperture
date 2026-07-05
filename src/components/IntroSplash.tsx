@@ -10,7 +10,7 @@ import styles from "./IntroSplash.module.css";
  * - prefers-reduced-motion 시 CSS 규칙이 스플래시를 생략(즉시 콘텐츠 노출).
  */
 const IntroSplash = () => (
-  <div aria-hidden="true" className={styles.splash}>
+  <div aria-hidden="true" data-intro-splash className={styles.splash}>
     <BrandLoader />
   </div>
 );

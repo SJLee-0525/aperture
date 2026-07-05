@@ -72,9 +72,35 @@
   letter-spacing: -0.03em;
   color: var(--text);
 }
+.word {
+  display: inline-block;
+  white-space: nowrap; /* 단어 중간 줄바꿈 방지 — 줄바꿈은 단어 사이 공백에서만 */
+}
+.char {
+  display: inline-block;
+  color: var(--role-accent, var(--accent));
+  will-change: transform, opacity, filter;
+}
+/* 색 플래시는 진입 시작(started) 때 클래스로 켠다 — 스플래시에 가려 미리 재생되는 걸 방지. */
+.charFlash {
+  animation: charFlash 0.62s var(--ease) both; /* delay 는 인라인(글자별 스태거) */
+}
+/* 글자 착지 시 액센트색 → 본문색으로 가라앉음(공 색과 연결). var(--text) 참조라 다크 전환에도 안전. */
+@keyframes charFlash {
+  0%,
+  45% {
+    color: var(--role-accent, var(--accent));
+  }
+  100% {
+    color: var(--text);
+  }
+}
 .dot {
+  display: inline-block;
+  transform-origin: 50% 90%; /* 바닥에서 스쿼시 */
   color: var(--role-accent, var(--accent));
   transition: color 0.5s var(--ease);
+  will-change: transform;
 }
 
 .lead {
@@ -133,40 +159,14 @@
   color: #fff;
 }
 
-/* 진입 애니메이션 — 스태거 fade-up */
-.name,
-.type,
-.lead,
-.rows {
-  animation: landIn 0.7s var(--ease) both;
-}
-.name {
-  animation-delay: 0.05s;
-}
-.type {
-  animation-delay: 0.15s;
-}
-.lead {
-  animation-delay: 0.25s;
-}
-.rows {
-  animation-delay: 0.35s;
-}
-@keyframes landIn {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
+/* 진입 애니메이션은 motion(LandingView)이 지휘 — 글자 캐스케이드 → 마침표 낙하·바운스 → 소개·행 순차.
+   CSS 는 글자 색 플래시(charFlash)만 담당. reduced-motion 은 MotionConfig(reducedMotion="user")가
+   transform 을 끄고, 색 플래시도 아래에서 비활성 → 정적 최종 상태로 안착. */
 @media (prefers-reduced-motion: reduce) {
-  .name,
-  .type,
-  .lead,
-  .rows {
+  .char {
+    color: var(--text);
+  }
+  .charFlash {
     animation: none;
   }
 }
