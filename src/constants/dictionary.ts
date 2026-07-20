@@ -24,6 +24,9 @@ type UIDict = {
   contactEmail: string;
   contactMessage: string;
   contactSend: string;
+  contactSending: string;
+  contactSent: string;
+  contactSendError: string;
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
@@ -99,6 +102,9 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactEmail: "이메일",
     contactMessage: "메시지",
     contactSend: "메일 보내기",
+    contactSending: "보내는 중…",
+    contactSent: "메일이 전송되었습니다. 확인 후 회신드릴게요.",
+    contactSendError: "전송에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
@@ -168,6 +174,9 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactEmail: "Email",
     contactMessage: "Message",
     contactSend: "Send email",
+    contactSending: "Sending…",
+    contactSent: "Your message has been sent. I'll get back to you soon.",
+    contactSendError: "Failed to send. Please try again in a moment.",
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",

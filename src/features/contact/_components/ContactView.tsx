@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo } from "react";
 
+import { useContactForm } from "@/features/contact/_hooks/use-contact-form";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { SiteConfig, SiteLink } from "@/types/site";
 
 import styles from "./ContactView.module.css";
 
-/** 서버가 없으므로 폼 제출 = 방문자 메일 클라이언트를 여는 mailto (원칙 #1 서버리스). */
+/** Web3Forms 키 미설정 시 mailto 폴백 대상 — site.links 에 mailto 가 없을 때의 최후 폴백. */
 const FALLBACK_EMAIL = "hello@example.com";
 
 /** 링크 라벨 → 브랜드 글리프. GitHub만 채움(fill), 나머지는 라인(stroke). */
@@ -46,27 +47,18 @@ const SocialGlyph = ({ label }: { label: string }) => {
   );
 };
 
-/** 연락처 (/contact) — mailto 폼 + 직접 연락 버튼(사이트 링크). */
+/** 연락처 (/contact) — Web3Forms 발송 폼(키 미설정 시 mailto 폴백) + 직접 연락 버튼. */
 const ContactView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
 
-  /** 폼 mailto 대상 = site.links 중 mailto 링크, 없으면 폴백. */
+  /** mailto 폴백 대상 = site.links 중 mailto 링크, 없으면 폴백. */
   const to = useMemo(() => {
     const mail = site.links.find((link) => link.href.startsWith("mailto:"));
     return mail ? mail.href.replace(/^mailto:/, "") : FALLBACK_EMAIL;
   }, [site.links]);
 
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    const subject = `[Portfolio] ${name.trim() || "Contact"}`;
-    const body = `${message.trim()}\n\n— ${name.trim()} (${email.trim()})`;
-    window.location.href = `mailto:${to}?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
-  };
+  const { name, setName, email, setEmail, message, setMessage, status, submit } =
+    useContactForm(to);
 
   return (
     <main className={styles.main}>
@@ -125,9 +117,19 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
             required
           />
         </label>
-        <button type="submit" className={styles.send}>
-          {dict.contactSend}
+        <button type="submit" className={styles.send} disabled={status === "sending"}>
+          {status === "sending" ? dict.contactSending : dict.contactSend}
         </button>
+        {status === "sent" && (
+          <p className={styles.status} role="status">
+            {dict.contactSent}
+          </p>
+        )}
+        {status === "error" && (
+          <p className={`${styles.status} ${styles.statusError}`} role="alert">
+            {dict.contactSendError}
+          </p>
+        )}
       </form>
     </main>
   );
