@@ -1,19 +1,20 @@
+import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { mockContentEnabled } from "@/lib/content/content-source";
 import { fetchDevConfig, isFirebaseConfigured } from "@/lib/firebase/firestore-rest";
 import { MOCK_DEV_CONFIG } from "@/mocks/dev";
 import type { DevConfig } from "@/types/dev";
 
 /**
- * site/dev 설정 문서(스택·인터뷰·경력 등). 문서가 없으면(첫 배포 전) mock 시드로 폴백 —
- * get-music-config 와 동일 패턴(단일 config 문서라 mock 시드 허용).
+ * site/dev 설정 문서(스택·인터뷰·경력 등). mock 은 오직 개발 모드·env 미설정일 때만.
+ * 실데이터 모드에선 문서 없음·REST 오류 시 **빈 설정** — mock 문구 노출 방지(get-site 와 동일 정책).
  */
 const getDevConfig = async (): Promise<DevConfig> => {
   if (mockContentEnabled() || !isFirebaseConfigured()) return MOCK_DEV_CONFIG;
   try {
-    return (await fetchDevConfig()) ?? MOCK_DEV_CONFIG;
+    return (await fetchDevConfig()) ?? EMPTY_DEV_CONFIG;
   } catch (error) {
-    console.warn("[content] getDevConfig: Firestore REST 실패 — mock 폴백", error);
-    return MOCK_DEV_CONFIG;
+    console.warn("[content] getDevConfig: Firestore REST 실패 — 빈 설정", error);
+    return EMPTY_DEV_CONFIG;
   }
 };
 

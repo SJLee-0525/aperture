@@ -8,6 +8,8 @@ import {
 } from "firebase/firestore";
 
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
+import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
+import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
 import type { LocalizedText } from "@/types/localized";
@@ -63,7 +65,7 @@ const musicMedia = listCrud<MusicMedia>(COLLECTIONS.MUSIC_MEDIA, toMusicMedia, "
 const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
   try {
     const snap = await getDoc(doc(db, COLLECTIONS.SITE, SITE_MUSIC_DOC));
-    if (!snap.exists()) return { intro: { ko: "", en: "" }, career: [], education: [] };
+    if (!snap.exists()) return EMPTY_MUSIC_CONFIG;
     const d = snap.data();
     return { intro: asText(d.intro), career: d.career ?? [], education: d.education ?? [] };
   } catch {
@@ -80,6 +82,7 @@ const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
   } catch {
     throw new Error("음악 설정 저장에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 type MusicWorkInput = Omit<MusicWork, "id">;

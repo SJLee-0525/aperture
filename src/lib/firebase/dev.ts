@@ -1,6 +1,8 @@
 import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from "firebase/firestore";
 
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
+import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
+import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
 import type { DevConfig, DevProject } from "@/types/dev";
@@ -26,13 +28,6 @@ const toDevProject = (id: string, d: DocumentData): DevProject => ({
 });
 
 const devProjects = listCrud<DevProject>(COLLECTIONS.DEV_PROJECTS, toDevProject, "프로젝트");
-
-const EMPTY_DEV_CONFIG: DevConfig = {
-  heroLead: { ko: "", en: "" },
-  interview: [],
-  stack: [],
-  timeline: [],
-};
 
 /**
  * site/dev 설정(소개 리드·인터뷰·스택·경력 등) 읽기/저장 — 단일 문서.
@@ -63,6 +58,7 @@ const updateDevConfig = async (config: DevConfig): Promise<void> => {
   } catch {
     throw new Error("개발 설정 저장에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 type DevProjectInput = Omit<DevProject, "id">;
