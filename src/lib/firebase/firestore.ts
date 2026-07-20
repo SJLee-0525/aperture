@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 
 import { COLLECTIONS } from "@/constants/collections";
+import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import type { Photo } from "@/types/photo";
 
@@ -91,6 +92,7 @@ const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
   } catch {
     throw new Error("사진 저장에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 /** 수정 — likes·createdAt 은 건드리지 않는다. */
@@ -100,6 +102,7 @@ const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
   } catch {
     throw new Error("사진 수정에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 const deletePhoto = async (id: string): Promise<void> => {
@@ -108,6 +111,7 @@ const deletePhoto = async (id: string): Promise<void> => {
   } catch {
     throw new Error("사진 삭제에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 /** 순서만 갱신 (dnd 정렬) — 전체 입력 없이 order 필드만. */
@@ -117,6 +121,7 @@ const updatePhotoOrder = async (id: string, order: number): Promise<void> => {
   } catch {
     throw new Error("순서 저장에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 /** 공개 여부만 토글. */
@@ -126,6 +131,7 @@ const setPhotoPublished = async (id: string, published: boolean): Promise<void> 
   } catch {
     throw new Error("공개 상태 변경에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 export {

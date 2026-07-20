@@ -12,6 +12,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
+import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 
 type WithId = { id: string };
@@ -58,6 +59,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error(`${label} 저장에 실패했습니다.`);
       }
+      requestPublicRevalidate();
     },
     update: async (id: string, input: Input): Promise<void> => {
       try {
@@ -65,6 +67,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error(`${label} 수정에 실패했습니다.`);
       }
+      requestPublicRevalidate();
     },
     /** 순서만 갱신 (dnd 정렬). */
     updateOrder: async (id: string, order: number): Promise<void> => {
@@ -73,6 +76,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error("순서 저장에 실패했습니다.");
       }
+      requestPublicRevalidate();
     },
     setPublished: async (id: string, published: boolean): Promise<void> => {
       try {
@@ -80,6 +84,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error("공개 상태 변경에 실패했습니다.");
       }
+      requestPublicRevalidate();
     },
     remove: async (id: string): Promise<void> => {
       try {
@@ -87,6 +92,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error(`${label} 삭제에 실패했습니다.`);
       }
+      requestPublicRevalidate();
     },
   };
 };

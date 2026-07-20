@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 
 import { COLLECTIONS } from "@/constants/collections";
+import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import type { Album } from "@/types/album";
 
@@ -61,6 +62,7 @@ const createAlbum = async (id: string, input: AlbumInput): Promise<void> => {
   } catch {
     throw new Error("앨범 저장에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 const updateAlbum = async (id: string, input: AlbumInput): Promise<void> => {
@@ -69,6 +71,7 @@ const updateAlbum = async (id: string, input: AlbumInput): Promise<void> => {
   } catch {
     throw new Error("앨범 수정에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 /** 순서만 갱신 (dnd 정렬). */
@@ -78,6 +81,7 @@ const updateAlbumOrder = async (id: string, order: number): Promise<void> => {
   } catch {
     throw new Error("순서 저장에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 const setAlbumPublished = async (id: string, published: boolean): Promise<void> => {
@@ -86,6 +90,7 @@ const setAlbumPublished = async (id: string, published: boolean): Promise<void> 
   } catch {
     throw new Error("공개 상태 변경에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 /** 앨범 삭제 — 사진은 지우지 않는다(앨범은 참조만 보유). */
@@ -95,6 +100,7 @@ const deleteAlbum = async (id: string): Promise<void> => {
   } catch {
     throw new Error("앨범 삭제에 실패했습니다.");
   }
+  requestPublicRevalidate();
 };
 
 export {
