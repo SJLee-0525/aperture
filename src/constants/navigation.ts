@@ -83,4 +83,4 @@ const MOBILE_TABS: Record<NavSection, NavItem[]> = {
 };
 
 export { MEGA_MENU, CONTACT_NAV, MOBILE_TABS };
-export type { NavItem, NavSection, MegaLink, MegaSection };
+export type { NavSection };

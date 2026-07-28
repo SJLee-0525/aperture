@@ -42,5 +42,4 @@ const filterPhotos = (photos: Photo[], f: FilterState): Photo[] => {
   });
 };
 
-export { filterPhotos, parseFocal, ALL, FOCAL_MIN, FOCAL_MAX };
-export type { FilterState };
+export { filterPhotos, ALL, FOCAL_MIN, FOCAL_MAX };

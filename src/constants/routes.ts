@@ -63,15 +63,6 @@ const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`
 /** 관리자 개발 프로젝트 수정 경로 */
 const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}`;
 
-/** 사진 상세 모달 딥링크 쿼리 (현재 페이지에 ?photo= 부착) */
-const photoQuery = (id: string) => `?photo=${id}`;
-
-/** 연주 상세 모달 딥링크 쿼리 (/music 에 ?work= 부착) */
-const workQuery = (id: string) => `?work=${id}`;
-
-/** 프로젝트 상세 모달 딥링크 쿼리 (/dev 에 ?project= 부착) */
-const projectQuery = (id: string) => `?project=${id}`;
-
 export {
   ROUTES,
   albumRoute,
@@ -81,7 +72,4 @@ export {
   adminMusicMediaRoute,
   adminDevProjectRoute,
   adminPhotoRoute,
-  photoQuery,
-  workQuery,
-  projectQuery,
 };

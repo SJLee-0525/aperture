@@ -33,4 +33,4 @@ type Photo = {
   published: boolean;
 };
 
-export type { Photo, Exif };
+export type { Photo };

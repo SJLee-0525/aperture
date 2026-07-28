@@ -30,27 +30,8 @@ const deletePhotoImages = (photoId: string) => deleteFolder(`photos/${photoId}`)
 
 /** 음악 포스터: music/{workId}/{uuid}.webp (EXIF 추출 없음 — 포스터는 좌표·촬영정보 불필요). */
 const uploadMusicPoster = (workId: string, blob: Blob) => uploadWebp(`music/${workId}`, blob);
-const deleteMusicImages = (workId: string) => deleteFolder(`music/${workId}`);
 
 /** 개발 프로젝트 이미지(대표·갤러리): dev/{projectId}/{uuid}.webp (EXIF 추출 없음). */
 const uploadDevImage = (projectId: string, blob: Blob) => uploadWebp(`dev/${projectId}`, blob);
-const deleteDevImages = (projectId: string) => deleteFolder(`dev/${projectId}`);
 
-/** 개별 path 삭제 — 이미지 교체 시 구 파일 정리(없으면 무시). */
-const deleteImageAt = async (path: string): Promise<void> => {
-  try {
-    await deleteObject(ref(storage, path));
-  } catch {
-    // 이미 없거나 권한 밖 — 교체 흐름에서는 조용히 무시.
-  }
-};
-
-export {
-  deleteDevImages,
-  deleteImageAt,
-  deleteMusicImages,
-  deletePhotoImages,
-  uploadDevImage,
-  uploadMusicPoster,
-  uploadPhotoImage,
-};
+export { deletePhotoImages, uploadDevImage, uploadMusicPoster, uploadPhotoImage };

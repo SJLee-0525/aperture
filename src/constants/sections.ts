@@ -20,5 +20,5 @@ const sectionFromPath = (pathname: string): SectionId =>
   SECTION_BY_PREFIX.find(({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`))
     ?.section ?? DEFAULT_SECTION;
 
-export { sectionFromPath, DEFAULT_SECTION };
+export { sectionFromPath };
 export type { SectionId };

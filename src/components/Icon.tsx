@@ -84,8 +84,6 @@ const PATHS: Record<string, ReactNode> = {
   ),
 };
 
-type IconName = keyof typeof PATHS;
-
 type Props = {
   name: string;
   size?: number;
@@ -110,4 +108,3 @@ const Icon = ({ name, size = 20, className }: Props) => (
 );
 
 export { Icon };
-export type { IconName };

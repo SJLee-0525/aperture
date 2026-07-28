@@ -73,4 +73,3 @@ const LangProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export { LangContext, LangProvider };
-export type { LangContextValue };
