@@ -4,7 +4,7 @@ import styles from "./SiteFooter.module.css";
 const GITHUB_URL = "https://github.com/SJLee-0525";
 
 /**
- * 전역 푸터 (jh-portfolio SiteFooter 스타일 이식 — Tailwind → CSS Modules).
+ * 전역 푸터
  * 좌측 © + 3역할, 우측 조용한 GitHub 크레딧. 공개 레이아웃 하단에만 마운트.
  */
 const SiteFooter = () => {

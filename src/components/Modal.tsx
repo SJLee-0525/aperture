@@ -19,7 +19,7 @@ type Props = {
 };
 
 /**
- * 다이얼로그 모달 (jh-portfolio 스타일) — 수직 중앙 정렬 + 스크롤 가능한 백드롭, 패널 y+scale 등장.
+ * 다이얼로그 모달 — 수직 중앙 정렬 + 스크롤 가능한 백드롭, 패널 y+scale 등장.
  * document.body 로 포털 — 헤더/섹션 래퍼의 stacking context 밖으로 빼내 네비 뒤에 가리지 않게 한다.
  * 스크림 클릭·ESC·스크롤 잠금. 음악·개발 상세 공용 순수 UI. 액센트는 상위 [data-section] 이 결정.
  */
