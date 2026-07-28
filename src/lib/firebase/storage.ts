@@ -24,14 +24,37 @@ const deleteFolder = async (folder: string): Promise<void> => {
   await Promise.all(listing.items.map((item) => deleteObject(item)));
 };
 
+const deleteImages = async (paths: Iterable<string>): Promise<void> => {
+  const uniquePaths = [...new Set(paths)].filter(Boolean);
+  await Promise.all(
+    uniquePaths.map(async (path) => {
+      try {
+        await deleteObject(ref(storage, path));
+      } catch (caught) {
+        if ((caught as { code?: string }).code !== "storage/object-not-found") throw caught;
+      }
+    }),
+  );
+};
+
 /** 사진: photos/{photoId}/{uuid}.webp (EXIF 는 업로드 前 use-image-upload 에서 추출). */
 const uploadPhotoImage = (photoId: string, blob: Blob) => uploadWebp(`photos/${photoId}`, blob);
 const deletePhotoImages = (photoId: string) => deleteFolder(`photos/${photoId}`);
 
 /** 음악 포스터: music/{workId}/{uuid}.webp (EXIF 추출 없음 — 포스터는 좌표·촬영정보 불필요). */
 const uploadMusicPoster = (workId: string, blob: Blob) => uploadWebp(`music/${workId}`, blob);
+const deleteMusicWorkImages = (workId: string) => deleteFolder(`music/${workId}`);
 
 /** 개발 프로젝트 이미지(대표·갤러리): dev/{projectId}/{uuid}.webp (EXIF 추출 없음). */
 const uploadDevImage = (projectId: string, blob: Blob) => uploadWebp(`dev/${projectId}`, blob);
+const deleteDevProjectImages = (projectId: string) => deleteFolder(`dev/${projectId}`);
 
-export { deletePhotoImages, uploadDevImage, uploadMusicPoster, uploadPhotoImage };
+export {
+  deleteDevProjectImages,
+  deleteImages,
+  deleteMusicWorkImages,
+  deletePhotoImages,
+  uploadDevImage,
+  uploadMusicPoster,
+  uploadPhotoImage,
+};

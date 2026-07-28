@@ -88,4 +88,3 @@ const DevTimelineRow = ({
 );
 
 export { DevTimelineRow };
-export type { LocalizedField };

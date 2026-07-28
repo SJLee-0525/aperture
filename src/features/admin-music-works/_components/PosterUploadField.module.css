@@ -88,6 +88,18 @@
   font-size: var(--t-small);
   color: var(--text-3);
 }
+.remove {
+  align-self: flex-start;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-3);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+.remove:hover {
+  color: var(--like);
+}
 .error {
   font-size: var(--t-small);
   color: var(--like);

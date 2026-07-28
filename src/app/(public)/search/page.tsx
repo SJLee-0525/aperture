@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { SearchResults } from "@/features/search/_components/SearchResults";
+import { createSearchDocuments } from "@/features/search/_lib/search-documents";
 import { getAlbums } from "@/lib/content/get-albums";
 import { getDevProjects } from "@/lib/content/get-dev-projects";
 import { getMusicAwards } from "@/lib/content/get-music-awards";
@@ -23,17 +24,11 @@ export default async function SearchPage() {
     getMusicMedia(),
     getDevProjects(),
   ]);
+  const documents = createSearchDocuments({ photos, albums, works, awards, media, projects });
 
   return (
     <Suspense>
-      <SearchResults
-        photos={photos}
-        albums={albums}
-        works={works}
-        awards={awards}
-        media={media}
-        projects={projects}
-      />
+      <SearchResults documents={documents} />
     </Suspense>
   );
 }

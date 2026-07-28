@@ -64,7 +64,7 @@
 
 - `features/landing/LandingView`: 이름·태그라인(Photographer · Pianist · Developer)·소개(`landingLead`) + 사진/음악/개발 진입 행 + **reveal-on-scroll**. 데이터 = `getSite()`.
 - `(public)/page.tsx` = `<LandingView site={...}/>`, `revalidate`.
-- **완료**: `/` 랜딩, 행 클릭 → 섹션 이동, reveal 애니(reduced-motion 대응), 반응형·다크.
+- **완료**: `/` 랜딩, 개발 행 클릭 → 프로젝트(`/dev/projects`)로 바로 이동, 사진·음악 행 클릭 → 각 섹션 루트로 이동, reveal 애니(reduced-motion 대응), 반응형·다크.
 
 **완료기준(MA)**: Slice A0–A3 → 통합 셸 위에서 사진 섹션이 `/photo/*`, 랜딩이 `/`, 음악·개발은 placeholder 라우트로 진입 가능.
 

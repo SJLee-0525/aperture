@@ -13,8 +13,8 @@ const ROUTES = {
   MUSIC_MEDIA: "/music/media",
   MUSIC_ABOUT: "/music/about", // 소개
   // 개발 섹션 (/dev/*) — Phase C
-  DEV: "/dev", // 기술 스택
-  DEV_PROJECTS: "/dev/projects",
+  DEV: "/dev", // 기술 스택(개발 섹션 내부 루트)
+  DEV_PROJECTS: "/dev/projects", // 랜딩의 개발 진입 목적지
   DEV_CAREER: "/dev/career",
   DEV_ABOUT: "/dev/about", // 소개
   // 연락처 (섹션 아님 — 전역 페이지)

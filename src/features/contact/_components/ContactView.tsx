@@ -57,8 +57,7 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
     return mail ? mail.href.replace(/^mailto:/, "") : FALLBACK_EMAIL;
   }, [site.links]);
 
-  const { name, setName, email, setEmail, message, setMessage, status, submit } =
-    useContactForm(to);
+  const { draft, status, submit, update } = useContactForm(to);
 
   return (
     <main className={styles.main}>
@@ -89,8 +88,8 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
             <span className={styles.label}>{dict.contactName}</span>
             <input
               className={styles.input}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
+              value={draft.name}
+              onChange={(event) => update("name", event.target.value)}
               autoComplete="name"
               required
             />
@@ -100,8 +99,8 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
             <input
               className={styles.input}
               type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              value={draft.email}
+              onChange={(event) => update("email", event.target.value)}
               autoComplete="email"
               required
             />
@@ -111,8 +110,8 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
           <span className={styles.label}>{dict.contactMessage}</span>
           <textarea
             className={styles.textarea}
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
+            value={draft.message}
+            onChange={(event) => update("message", event.target.value)}
             rows={6}
             required
           />

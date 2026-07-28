@@ -8,25 +8,24 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import { listPhotosAdmin } from "@/lib/firebase/firestore";
 import type { Photo } from "@/types/photo";
 
 import styles from "./AlbumPhotoPicker.module.css";
 import { SelectedPhotoChip } from "./SelectedPhotoChip";
 
-type Status = "loading" | "ready" | "error";
-
 type Props = {
-  /** 앨범에 포함된 사진 id (순서 = 표시 순서). */
+  photos: Photo[];
+  status: "loading" | "ready" | "error";
+  error: string | null;
   photoIds: string[];
-  /** 커버로 지정된 사진 id. */
   coverPhotoId: string;
-  onChangePhotoIds: (photoIds: string[]) => void;
-  onChangeCover: (coverPhotoId: string) => void;
+  onToggle: (id: string) => void;
+  onReorder: (activeId: string, overId: string) => void;
+  onSetCover: (id: string) => void;
 };
 
 /**
@@ -35,29 +34,17 @@ type Props = {
  * - 상단 스트립: 선택된 사진 → dnd-kit 으로 순서 변경, 커버 지정.
  * 제외 시 커버였다면 남은 첫 사진으로 커버 이전(없으면 빈 값).
  */
-const AlbumPhotoPicker = ({ photoIds, coverPhotoId, onChangePhotoIds, onChangeCover }: Props) => {
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [status, setStatus] = useState<Status>("loading");
-  const [error, setError] = useState<string | null>(null);
+const AlbumPhotoPicker = ({
+  photos,
+  status,
+  error,
+  photoIds,
+  coverPhotoId,
+  onToggle,
+  onReorder,
+  onSetCover,
+}: Props) => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
-
-  useEffect(() => {
-    let alive = true;
-    listPhotosAdmin()
-      .then((loaded) => {
-        if (!alive) return;
-        setPhotos(loaded);
-        setStatus("ready");
-      })
-      .catch((caught: Error) => {
-        if (!alive) return;
-        setError(caught.message);
-        setStatus("error");
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
 
   const photoById = useMemo(() => new Map(photos.map((p) => [p.id, p])), [photos]);
   const selectedSet = useMemo(() => new Set(photoIds), [photoIds]);
@@ -68,29 +55,10 @@ const AlbumPhotoPicker = ({ photoIds, coverPhotoId, onChangePhotoIds, onChangeCo
     [photoIds, photoById],
   );
 
-  const toggle = (id: string) => {
-    if (selectedSet.has(id)) {
-      const next = photoIds.filter((pid) => pid !== id);
-      onChangePhotoIds(next);
-      // 커버였던 사진을 제외하면 남은 첫 사진으로 커버 이전.
-      if (coverPhotoId === id) onChangeCover(next[0] ?? "");
-    } else {
-      const next = [...photoIds, id];
-      onChangePhotoIds(next);
-      // 첫 사진이면 자동으로 커버 지정.
-      if (!coverPhotoId) onChangeCover(id);
-    }
-  };
-
-  const removeSelected = (id: string) => toggle(id);
-
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const from = photoIds.indexOf(String(active.id));
-    const to = photoIds.indexOf(String(over.id));
-    if (from < 0 || to < 0) return;
-    onChangePhotoIds(arrayMove(photoIds, from, to));
+    onReorder(String(active.id), String(over.id));
   };
 
   if (status === "loading") return <p className={styles.state}>사진을 불러오는 중…</p>;
@@ -119,8 +87,8 @@ const AlbumPhotoPicker = ({ photoIds, coverPhotoId, onChangePhotoIds, onChangeCo
                     key={photo.id}
                     photo={photo}
                     isCover={photo.id === coverPhotoId}
-                    onSetCover={onChangeCover}
-                    onRemove={removeSelected}
+                    onSetCover={onSetCover}
+                    onRemove={onToggle}
                   />
                 ))}
               </ul>
@@ -142,7 +110,7 @@ const AlbumPhotoPicker = ({ photoIds, coverPhotoId, onChangePhotoIds, onChangeCo
                   <button
                     type="button"
                     className={`${styles.tile} ${on ? styles.tileOn : ""}`}
-                    onClick={() => toggle(photo.id)}
+                    onClick={() => onToggle(photo.id)}
                     aria-pressed={on}
                     title={photo.title.ko || "사진"}
                   >

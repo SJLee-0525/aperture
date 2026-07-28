@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import {
+  editDevConfig,
+  type DevConfigEdit,
+} from "@/features/admin-dev-config/_lib/edit-dev-config";
 import { getDevConfigAdmin, updateDevConfig } from "@/lib/firebase/dev";
 import type { DevConfig } from "@/types/dev";
 
@@ -15,9 +19,8 @@ const EMPTY: DevConfig = {
 };
 
 /**
- * 관리자 개발 설정(site/dev) 상태 관리 — 전체 로드 → 편집 → 전체 저장.
+ * 관리자 개발 설정(site/dev)의 로드·저장 lifecycle과 편집 상태 연결.
  * dev.ts 의 updateDevConfig 가 문서를 통째로 덮어쓰므로 필드 유실이 없다.
- * 페이지 컴포넌트는 이 훅이 돌려주는 config·setter 만 렌더한다(SRP).
  */
 const useDevConfigAdmin = () => {
   const [config, setConfig] = useState<DevConfig>(EMPTY);
@@ -44,9 +47,8 @@ const useDevConfigAdmin = () => {
     };
   }, []);
 
-  /** 부분 갱신 — 어떤 필드든 이 하나로 편집하고 저장 상태를 dirty 로 되돌린다. */
-  const patch = useCallback((next: Partial<DevConfig>) => {
-    setConfig((prev) => ({ ...prev, ...next }));
+  const edit = useCallback((command: DevConfigEdit) => {
+    setConfig((current) => editDevConfig(current, command));
     setSaved(false);
   }, []);
 
@@ -63,7 +65,15 @@ const useDevConfigAdmin = () => {
     }
   }, [config]);
 
-  return { config, status, error, saving, saved, patch, save };
+  return {
+    config,
+    status,
+    error,
+    saving,
+    saved,
+    edit,
+    save,
+  };
 };
 
 export { useDevConfigAdmin };

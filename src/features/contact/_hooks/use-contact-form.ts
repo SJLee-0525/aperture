@@ -12,21 +12,30 @@ const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
 const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
 type SendStatus = "idle" | "sending" | "sent" | "error";
+type ContactField = "name" | "email" | "message";
+type ContactDraft = Record<ContactField, string>;
+
+const EMPTY_DRAFT: ContactDraft = { name: "", email: "", message: "" };
 
 const useContactForm = (mailtoTo: string) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [draft, setDraft] = useState<ContactDraft>(EMPTY_DRAFT);
   const [status, setStatus] = useState<SendStatus>("idle");
+  const update = useCallback((field: ContactField, value: string) => {
+    setDraft((current) => ({ ...current, [field]: value }));
+    setStatus("idle");
+  }, []);
 
   const submit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
-      const subject = `[Portfolio] ${name.trim() || "Contact"}`;
+      const name = draft.name.trim();
+      const email = draft.email.trim();
+      const message = draft.message.trim();
+      const subject = `[Portfolio] ${name || "Contact"}`;
 
       // 키 미설정 → mailto 폴백 (dev·미구성 환경에서도 폼이 죽지 않게).
       if (!ACCESS_KEY) {
-        const body = `${message.trim()}\n\n— ${name.trim()} (${email.trim()})`;
+        const body = `${message}\n\n— ${name} (${email})`;
         window.location.href = `mailto:${mailtoTo}?subject=${encodeURIComponent(
           subject,
         )}&body=${encodeURIComponent(body)}`;
@@ -41,26 +50,24 @@ const useContactForm = (mailtoTo: string) => {
           body: JSON.stringify({
             access_key: ACCESS_KEY,
             subject,
-            name: name.trim(),
-            email: email.trim(), // Web3Forms 가 Reply-To 로 사용 → 받은 메일에서 바로 회신 가능
-            message: message.trim(),
+            name,
+            email,
+            message,
           }),
         });
         const data = (await res.json()) as { success: boolean };
         if (!data.success) throw new Error("Web3Forms 실패");
 
         setStatus("sent");
-        setName("");
-        setEmail("");
-        setMessage("");
+        setDraft(EMPTY_DRAFT);
       } catch {
         setStatus("error");
       }
     },
-    [name, email, message, mailtoTo],
+    [draft, mailtoTo],
   );
 
-  return { name, setName, email, setEmail, message, setMessage, status, submit };
+  return { draft, status, submit, update };
 };
 
 export { useContactForm };

@@ -2,19 +2,22 @@
 
 import { m } from "motion/react";
 import Link from "next/link";
-import { type CSSProperties, Fragment, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useMemo } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
+import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
 import { useTyping } from "@/hooks/use-typing";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { SiteConfig } from "@/types/site";
 
+import { AnimatedWordmark } from "./AnimatedWordmark";
 import styles from "./LandingView.module.css";
 
 /** 랜딩 진입 행 — 각 섹션의 액센트를 미리 보여준다(hover 채움). */
 const SECTIONS = [
-  { key: "dev", href: ROUTES.DEV, labelKey: "sectionDev" },
+  { key: "dev", href: ROUTES.DEV_PROJECTS, labelKey: "sectionDev" },
   { key: "photo", href: ROUTES.PHOTO, labelKey: "sectionPhoto" },
   { key: "music", href: ROUTES.MUSIC, labelKey: "sectionMusic" },
 ] as const;
@@ -26,81 +29,14 @@ const ROLE_ACCENT: Record<string, string> = {
   Pianist: "var(--accent-music)",
 };
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 /** 진입 전(started=false)엔 타이핑을 멈춰 둔다 — 안정 참조여야 effect 재시작 안 함. */
 const NO_ROLES: string[] = [];
 
-/** 이름 = 단어 단위로 묶어 좁은 화면에서 단어 중간 줄바꿈 방지(글자별 스태거는 유지). */
-const NAME_WORDS = ["Sungjoon", "Lee"];
-const NAME_CHAR_COUNT = NAME_WORDS.join("").length;
-
 /* 진입 타임라인(초) — started 시점 기준: 글자 캐스케이드 → 마침표 낙하·바운스 → 소개·행 순차. */
-const NAME_DELAY = 0.05;
-const CHAR_STAGGER = 0.04;
-const CHAR_DUR = 0.62;
-const BALL_DELAY = NAME_DELAY + (NAME_CHAR_COUNT - 1) * CHAR_STAGGER + CHAR_DUR * 0.45;
-const BALL_DUR = 1.15;
 const ROLE_DELAY = 0.55;
-const REVEAL_DELAY = BALL_DELAY + 0.45;
 const ROW_STAGGER = 0.09;
 
-/* 마침표 = 공 낙하 → 착지 스쿼시 → 감쇠 바운스. 구간별 이징(낙하=ease-in, 반등=ease-out)이 중력감을 만든다. */
-const BALL_KEYFRAMES = {
-  y: [-220, 0, -78, 0, -24, 0],
-  scaleY: [1, 0.55, 1.12, 0.74, 1.04, 1],
-  scaleX: [1, 1.4, 0.9, 1.2, 0.97, 1],
-};
-const BALL_TIMES = [0, 0.3, 0.55, 0.72, 0.87, 1];
-const BALL_EASE = [
-  [0.55, 0, 1, 0.45],
-  [0.15, 0.85, 0.3, 1],
-  [0.55, 0, 1, 0.45],
-  [0.15, 0.85, 0.3, 1],
-  [0.55, 0, 1, 0.45],
-] as [number, number, number, number][];
-
-/* hidden/show 상태 — started 로 토글. */
-const CHAR_HIDDEN = { opacity: 0, y: 30, filter: "blur(16px)" };
-const CHAR_SHOW = { opacity: 1, y: 0, filter: "blur(0px)" };
-const DOT_HIDDEN = { opacity: 0, y: -220 };
-const DOT_SHOW = { opacity: 1, ...BALL_KEYFRAMES };
-
 const MotionLink = m.create(Link);
-
-/**
- * 진입 시작 신호. 하드 로드(첫 방문·새로고침)엔 IntroSplash 가 화면을 덮으므로,
- * 스플래시가 실제로 사라질 때(animationend)까지 애니메이션을 미룬다 — 스플래시에 가려 헛재생되는 걸 방지.
- * 소프트 내비(스플래시 없음·이미 사라짐)나 reduced-motion(스플래시 display:none)이면 즉시 시작.
- * 시간 하드코딩이 아니라 스플래시 존재/상태를 감지한다.
- */
-const useIntroReady = (): boolean => {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const start = () => setReady(true);
-    const splash = document.querySelector<HTMLElement>("[data-intro-splash]");
-    const cs = splash && getComputedStyle(splash);
-    // 스플래시가 지금 화면을 덮고 있는가 (하드 로드) — 아니면(소프트 내비·생략) 바로 시작.
-    const covering =
-      !!cs && cs.display !== "none" && cs.visibility !== "hidden" && Number(cs.opacity) > 0;
-    if (!covering) {
-      // 다음 프레임에 시작 — hidden 초기 상태를 한 번 그린 뒤 애니메이션(effect 본문 동기 setState 회피).
-      const raf = requestAnimationFrame(start);
-      return () => cancelAnimationFrame(raf);
-    }
-    // 하드 로드: 스플래시 디스미스가 끝나는 시점에 시작(시간 하드코딩 아님 — 실제 상태/이벤트 구독).
-    splash.addEventListener("animationend", start, { once: true });
-    // animationend 유실 대비 안전장치 — 스플래시 실제 지속시간에서 파생(여유 300ms).
-    const fallback = window.setTimeout(
-      start,
-      (parseFloat(cs.animationDuration) || 1.4) * 1000 + 300,
-    );
-    return () => {
-      splash.removeEventListener("animationend", start);
-      window.clearTimeout(fallback);
-    };
-  }, []);
-  return ready;
-};
 
 /**
  * 랜딩 허브(/) — 이름(언어 무관 항상 "Sungjoon Lee") + 역할 타이핑(Photographer/Pianist/Developer)
@@ -125,63 +61,16 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
   // 현재 타이핑 중인 역할의 색을 --role-accent 로 흘려보내면 이름의 '.'·타이핑·커서가 함께(스무스) 바뀐다.
   const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
 
-  let charIndex = 0;
-
   return (
     <section className={styles.hero} style={{ "--role-accent": roleAccent } as CSSProperties}>
       <div className={styles.inner}>
-        <h1 className={styles.name} aria-label="Sungjoon Lee.">
-          {NAME_WORDS.map((word, wordIndex) => {
-            const isLast = wordIndex === NAME_WORDS.length - 1;
-            return (
-              <Fragment key={word}>
-                {wordIndex > 0 ? " " : null}
-                <span className={styles.word}>
-                  {[...word].map((char) => {
-                    const delay = NAME_DELAY + charIndex * CHAR_STAGGER;
-                    charIndex += 1;
-                    return (
-                      <m.span
-                        key={`${word}-${delay}`}
-                        className={`${styles.char}${started ? ` ${styles.charFlash}` : ""}`}
-                        aria-hidden="true"
-                        initial={CHAR_HIDDEN}
-                        animate={started ? CHAR_SHOW : CHAR_HIDDEN}
-                        transition={{ duration: CHAR_DUR, ease: EASE, delay }}
-                        style={{ animationDelay: `${delay}s` }}
-                      >
-                        {char}
-                      </m.span>
-                    );
-                  })}
-                  {isLast ? (
-                    <m.span
-                      className={styles.dot}
-                      aria-hidden="true"
-                      initial={DOT_HIDDEN}
-                      animate={started ? DOT_SHOW : DOT_HIDDEN}
-                      transition={{
-                        delay: BALL_DELAY,
-                        duration: BALL_DUR,
-                        times: BALL_TIMES,
-                        ease: BALL_EASE,
-                        opacity: { delay: BALL_DELAY, duration: 0.01 },
-                      }}
-                    >
-                      .
-                    </m.span>
-                  ) : null}
-                </span>
-              </Fragment>
-            );
-          })}
-        </h1>
+        <AnimatedWordmark started={started} />
 
         <m.div
           className={styles.type}
           initial={{ opacity: 0, y: 14 }}
           animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-          transition={{ duration: 0.5, ease: EASE, delay: ROLE_DELAY }}
+          transition={{ duration: 0.5, ease: LANDING_EASE, delay: ROLE_DELAY }}
         >
           <span className={styles.typed}>{typed}</span>
           <span className={styles.cursor} aria-hidden="true" />
@@ -191,7 +80,7 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           className={styles.lead}
           initial={{ opacity: 0, y: 16 }}
           animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.5, ease: EASE, delay: REVEAL_DELAY }}
+          transition={{ duration: 0.5, ease: LANDING_EASE, delay: LANDING_REVEAL_DELAY }}
         >
           {pickText(site.landingLead, lang)}
         </m.p>
@@ -207,8 +96,8 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
               animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
               transition={{
                 duration: 0.5,
-                ease: EASE,
-                delay: REVEAL_DELAY + 0.1 + i * ROW_STAGGER,
+                ease: LANDING_EASE,
+                delay: LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER,
               }}
             >
               <span className={styles.rowTitle}>{dict[section.labelKey]}</span>

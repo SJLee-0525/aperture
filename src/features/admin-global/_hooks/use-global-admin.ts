@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getSiteConfig, updateSiteConfig } from "@/lib/firebase/site";
+import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
 import type { LocalizedText } from "@/types/localized";
-import type { SiteConfig, SiteLink } from "@/types/site";
+import type { SiteLink } from "@/types/site";
 
 type Status = "loading" | "ready" | "error";
 
@@ -12,11 +12,10 @@ const EMPTY_LINK: SiteLink = { label: "", href: "" };
 
 /**
  * 관리자 전역(랜딩·연락) 상태 관리 — tagline(순환 타이핑)·landingLead·contactLead·links 편집.
- * site/config 전체를 로드해 두고 이 필드만 교체해 저장한다(name·bio·tags 는 로드값 보존 — 문서 공유).
+ * site/config에서 편집 필드를 로드하고, 저장 시 이 화면이 소유한 필드만 병합한다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
  */
 const useGlobalAdmin = () => {
-  const [config, setConfig] = useState<SiteConfig | null>(null);
   const [tagline, setTagline] = useState<LocalizedText>({ ko: "", en: "" });
   const [landingLead, setLandingLead] = useState<LocalizedText>({ ko: "", en: "" });
   const [contactLead, setContactLead] = useState<LocalizedText>({ ko: "", en: "" });
@@ -31,7 +30,6 @@ const useGlobalAdmin = () => {
     getSiteConfig()
       .then((loaded) => {
         if (!alive) return;
-        setConfig(loaded);
         setTagline(loaded.tagline);
         setLandingLead(loaded.landingLead);
         setContactLead(loaded.contactLead);
@@ -85,22 +83,19 @@ const useGlobalAdmin = () => {
     setSaved(false);
   }, []);
 
-  /** 로드한 전체 설정에서 편집 필드만 교체(name·bio·tags 유지)해 저장. */
+  /** 이 화면이 소유한 전역 필드만 저장한다. */
   const save = useCallback(async () => {
-    if (!config) return;
     setError(null);
     setSaving(true);
     try {
-      const next: SiteConfig = { ...config, tagline, landingLead, contactLead, links };
-      await updateSiteConfig(next);
-      setConfig(next);
+      await updateSiteConfigFields({ tagline, landingLead, contactLead, links });
       setSaved(true);
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [config, tagline, landingLead, contactLead, links]);
+  }, [tagline, landingLead, contactLead, links]);
 
   return {
     tagline,

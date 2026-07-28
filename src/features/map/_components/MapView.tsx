@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
+import { ROUTES } from "@/constants/routes";
 import { LocationList } from "@/features/map/_components/LocationList";
 import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
 import type { Photo } from "@/types/photo";
@@ -27,7 +28,7 @@ const MapView = ({ photos, tags }: Props) => {
   const router = useRouter();
   const geotagged = useMemo(() => photos.filter((photo) => photo.coords != null), [photos]);
   const onSelect = useCallback(
-    (id: string) => router.replace(`/map?photo=${id}`, { scroll: false }),
+    (id: string) => router.replace(`${ROUTES.PHOTO_MAP}?photo=${id}`, { scroll: false }),
     [router],
   );
 

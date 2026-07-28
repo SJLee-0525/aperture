@@ -1,11 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-
-import { ROUTES } from "@/constants/routes";
-import { musicWorks, type MusicWorkInput } from "@/lib/firebase/music";
-import type { ImageMeta } from "@/types/image";
+import { useWorkEditor } from "@/features/admin-music-works/_hooks/use-work-editor";
+import { fromDateValue, toDateValue } from "@/features/admin-music-works/_lib/work-form-data";
 import type { MusicWork } from "@/types/music";
 
 import { PosterUploadField } from "./PosterUploadField";
@@ -17,95 +13,26 @@ type Props = {
   initial?: MusicWork;
 };
 
-/** Date → date input 값("YYYY-MM-DD"). */
-const toDateValue = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
-
-/** date input 값("YYYY-MM-DD") → 로컬 자정 Date. */
-const fromDateValue = (value: string): Date => {
-  const [y, m, d] = value.split("-").map(Number);
-  return new Date(y, (m || 1) - 1, d || 1);
-};
-
-/** 빈 연주 초기 상태. */
-const emptyInput = (): MusicWorkInput => ({
-  title: { ko: "", en: "" },
-  subtitle: { ko: "", en: "" },
-  performedAt: new Date(),
-  time: "",
-  venue: { ko: "", en: "" },
-  category: { ko: "", en: "" },
-  program: [],
-  description: { ko: "", en: "" },
-  poster: { url: "", path: "", w: 0, h: 0 },
-  ticketUrl: "",
-  // 새 연주는 order 0 — 목록 상단에 오며, dnd 정렬로 조정한다.
-  order: 0,
-  published: false,
-});
-
-const fromWork = (work: MusicWork): MusicWorkInput => {
-  const { id: _id, ...rest } = work;
-  void _id;
-  return rest;
-};
-
 /** 공유 연주 폼 — 이중언어 필드 + 일시·프로그램·포스터·예매 + 저장. */
 const WorkForm = ({ workId, initial }: Props) => {
-  const router = useRouter();
-  const isEdit = initial != null;
-
-  const [form, setForm] = useState<MusicWorkInput>(() =>
-    initial ? fromWork(initial) : emptyInput(),
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const patch = (next: Partial<MusicWorkInput>) => setForm((prev) => ({ ...prev, ...next }));
-
-  const onPosterUploaded = (poster: ImageMeta) => patch({ poster });
-
-  const addProgram = () => patch({ program: [...form.program, ""] });
-  const editProgram = (index: number, value: string) =>
-    patch({ program: form.program.map((p, i) => (i === index ? value : p)) });
-  const removeProgram = (index: number) =>
-    patch({ program: form.program.filter((_, i) => i !== index) });
-
-  const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    if (!form.title.ko.trim()) {
-      setError("제목(한국어)을 입력하세요.");
-      return;
-    }
-
-    // 빈 프로그램 항목은 저장 시 제거.
-    const input: MusicWorkInput = {
-      ...form,
-      program: form.program.map((p) => p.trim()).filter(Boolean),
-    };
-
-    setSaving(true);
-    try {
-      if (isEdit) {
-        await musicWorks.update(workId, input);
-      } else {
-        await musicWorks.create(workId, input);
-      }
-      router.replace(ROUTES.ADMIN_MUSIC_WORKS);
-    } catch (caught) {
-      setError((caught as Error).message);
-      setSaving(false);
-    }
-  };
+  const {
+    form,
+    isEdit,
+    error,
+    saving,
+    uploading,
+    patch,
+    addProgram,
+    editProgram,
+    removeProgram,
+    onPosterChange,
+    onUploadPendingChange,
+    cancel,
+    submit,
+  } = useWorkEditor(workId, initial);
 
   return (
-    <form className={styles.form} onSubmit={onSubmit} noValidate>
+    <form className={styles.form} onSubmit={submit} noValidate>
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "연주 수정" : "새 연주"}</h1>
       </header>
@@ -266,7 +193,7 @@ const WorkForm = ({ workId, initial }: Props) => {
                   className={styles.input}
                   value={piece}
                   placeholder="곡명 (언어 무관)"
-                  onChange={(e) => editProgram(index, e.target.value)}
+                  onChange={(event) => editProgram(index, event.target.value)}
                 />
                 <button
                   type="button"
@@ -286,7 +213,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         <PosterUploadField
           workId={workId}
           poster={form.poster.url ? form.poster : null}
-          onUploaded={onPosterUploaded}
+          onChange={onPosterChange}
+          onPendingChange={onUploadPendingChange}
         />
       </section>
 
@@ -321,14 +249,14 @@ const WorkForm = ({ workId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving}>
+        <button type="submit" className={styles.submit} disabled={saving || uploading}>
           {saving ? "저장 중…" : isEdit ? "수정 저장" : "연주 저장"}
         </button>
         <button
           type="button"
           className={styles.cancel}
-          onClick={() => router.replace(ROUTES.ADMIN_MUSIC_WORKS)}
-          disabled={saving}
+          onClick={cancel}
+          disabled={saving || uploading}
         >
           취소
         </button>

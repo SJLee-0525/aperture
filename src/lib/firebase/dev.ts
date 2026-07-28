@@ -6,6 +6,7 @@ import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
+import { deleteDevProjectImages } from "@/lib/firebase/storage";
 import type { DevConfig, DevProject } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
 
@@ -32,7 +33,14 @@ const toDevProject = (id: string, d: DocumentData): DevProject => ({
   published: d.published ?? false,
 });
 
-const devProjects = listCrud<DevProject>(COLLECTIONS.DEV_PROJECTS, toDevProject, "프로젝트");
+const devProjectsCrud = listCrud<DevProject>(COLLECTIONS.DEV_PROJECTS, toDevProject, "프로젝트");
+const devProjects = {
+  ...devProjectsCrud,
+  remove: async (id: string): Promise<void> => {
+    await devProjectsCrud.remove(id);
+    await deleteDevProjectImages(id).catch(() => undefined);
+  },
+};
 
 /**
  * site/dev 설정(소개 리드·인터뷰·스택·경력 등) 읽기/저장 — 단일 문서.

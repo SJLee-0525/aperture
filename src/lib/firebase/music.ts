@@ -12,6 +12,7 @@ import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
+import { deleteMusicWorkImages } from "@/lib/firebase/storage";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
@@ -54,7 +55,14 @@ const toMusicMedia = (id: string, d: DocumentData): MusicMedia => ({
   published: d.published ?? false,
 });
 
-const musicWorks = listCrud<MusicWork>(COLLECTIONS.MUSIC_WORKS, toMusicWork, "연주");
+const musicWorksCrud = listCrud<MusicWork>(COLLECTIONS.MUSIC_WORKS, toMusicWork, "연주");
+const musicWorks = {
+  ...musicWorksCrud,
+  remove: async (id: string): Promise<void> => {
+    await musicWorksCrud.remove(id);
+    await deleteMusicWorkImages(id).catch(() => undefined);
+  },
+};
 const musicAwards = listCrud<MusicAward>(COLLECTIONS.MUSIC_AWARDS, toMusicAward, "수상");
 const musicMedia = listCrud<MusicMedia>(COLLECTIONS.MUSIC_MEDIA, toMusicMedia, "영상");
 

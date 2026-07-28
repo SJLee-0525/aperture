@@ -31,19 +31,24 @@ const getSiteConfig = async (): Promise<SiteConfig> => {
 };
 
 /**
- * site/config 전체 저장. 태그·소개 CMS 모두 "현재 전체 설정 로드 → 자기 부분 편집 → 전체 저장"
- * 흐름이라 부분 저장으로 인한 다른 필드 유실이 없다.
+ * 관리자 화면이 소유한 site/config 필드만 병합 저장한다.
+ * 서로 다른 화면이 오래된 전체 snapshot으로 다른 화면의 최신 변경을 덮어쓰지 않도록
+ * 전체 문서 교체는 이 seam 밖에 노출하지 않는다.
  */
-const updateSiteConfig = async (config: SiteConfig): Promise<void> => {
+const updateSiteConfigFields = async (fields: Partial<SiteConfig>): Promise<void> => {
   try {
-    await setDoc(doc(db, COLLECTIONS.SITE, SITE_DOC), {
-      ...config,
-      updatedAt: serverTimestamp(),
-    });
+    await setDoc(
+      doc(db, COLLECTIONS.SITE, SITE_DOC),
+      {
+        ...fields,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
   } catch {
     throw new Error("사이트 설정 저장에 실패했습니다.");
   }
   requestPublicRevalidate();
 };
 
-export { getSiteConfig, updateSiteConfig };
+export { getSiteConfig, updateSiteConfigFields };

@@ -1,0 +1,132 @@
+"use client";
+
+import { arrayMove } from "@dnd-kit/sortable";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+
+import { ROUTES } from "@/constants/routes";
+import {
+  albumToInput,
+  emptyAlbumInput,
+  normalizeAlbumInput,
+  validateAlbumInput,
+} from "@/features/admin-albums/_lib/album-form-data";
+import { createAlbum, updateAlbum, type AlbumInput } from "@/lib/firebase/albums";
+import { listPhotosAdmin } from "@/lib/firebase/firestore";
+import type { Album } from "@/types/album";
+import type { Photo } from "@/types/photo";
+
+type PhotoStatus = "loading" | "ready" | "error";
+
+const useAlbumEditor = (albumId: string, initial?: Album) => {
+  const router = useRouter();
+  const isEdit = initial != null;
+  const [form, setForm] = useState<AlbumInput>(() =>
+    initial ? albumToInput(initial) : emptyAlbumInput(),
+  );
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [photoStatus, setPhotoStatus] = useState<PhotoStatus>("loading");
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    listPhotosAdmin()
+      .then((loaded) => {
+        if (!active) return;
+        setPhotos(loaded);
+        setPhotoStatus("ready");
+      })
+      .catch((caught: Error) => {
+        if (!active) return;
+        setPhotoError(caught.message);
+        setPhotoStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const patch = useCallback(
+    (next: Partial<AlbumInput>) => setForm((current) => ({ ...current, ...next })),
+    [],
+  );
+
+  const togglePhoto = useCallback((id: string) => {
+    setForm((current) => {
+      const removing = current.photoIds.includes(id);
+      const photoIds = removing
+        ? current.photoIds.filter((photoId) => photoId !== id)
+        : [...current.photoIds, id];
+      const coverPhotoId =
+        current.coverPhotoId === id
+          ? (photoIds[0] ?? "")
+          : current.coverPhotoId || (removing ? "" : id);
+      return { ...current, photoIds, coverPhotoId };
+    });
+  }, []);
+
+  const reorderPhotos = useCallback((activeId: string, overId: string) => {
+    setForm((current) => {
+      const from = current.photoIds.indexOf(activeId);
+      const to = current.photoIds.indexOf(overId);
+      if (from < 0 || to < 0 || from === to) return current;
+      return { ...current, photoIds: arrayMove(current.photoIds, from, to) };
+    });
+  }, []);
+
+  const setCover = useCallback((coverPhotoId: string) => {
+    setForm((current) =>
+      current.photoIds.includes(coverPhotoId) ? { ...current, coverPhotoId } : current,
+    );
+  }, []);
+
+  const availableIds = useMemo(() => new Set(photos.map((photo) => photo.id)), [photos]);
+  const selectedPhotoIds = useMemo(
+    () =>
+      photoStatus === "ready" ? form.photoIds.filter((id) => availableIds.has(id)) : form.photoIds,
+    [availableIds, form.photoIds, photoStatus],
+  );
+
+  const cancel = useCallback(() => router.replace(ROUTES.ADMIN_ALBUMS), [router]);
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+
+    const input = normalizeAlbumInput({ ...form, photoIds: selectedPhotoIds });
+    const validationError = validateAlbumInput(input);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await (isEdit ? updateAlbum(albumId, input) : createAlbum(albumId, input));
+      router.replace(ROUTES.ADMIN_ALBUMS);
+    } catch (caught) {
+      setError((caught as Error).message);
+      setSaving(false);
+    }
+  };
+
+  return {
+    cancel,
+    error,
+    form,
+    isEdit,
+    patch,
+    photoError,
+    photos,
+    photoStatus,
+    reorderPhotos,
+    saving,
+    selectedPhotoIds,
+    setCover,
+    submit,
+    togglePhoto,
+  };
+};
+
+export { useAlbumEditor };

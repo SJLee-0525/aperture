@@ -3,21 +3,17 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import { useCallback, useEffect, useState } from "react";
 
-import { getSiteConfig, updateSiteConfig } from "@/lib/firebase/site";
-import type { SiteConfig } from "@/types/site";
+import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
 import type { Tag } from "@/types/tag";
 
 type Status = "loading" | "ready" | "error";
 
 /**
  * 관리자 태그 사전 상태 관리 — 로드·편집·추가·삭제·드래그 정렬·저장.
- * 전체 SiteConfig 를 보관하고 tags 만 편집한 뒤, 저장 시 나머지 필드를 그대로 넘겨
- * 다른 섹션(이름·바이오·링크)의 값이 유실되지 않게 한다.
+ * 저장 시 이 화면이 소유한 tags만 병합해 다른 설정 화면의 최신 값을 보존한다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
  */
 const useTagsAdmin = () => {
-  // 로드한 전체 설정(이름·바이오·링크 보존용). tags 는 아래 별도 상태에서 편집.
-  const [config, setConfig] = useState<SiteConfig | null>(null);
   const [tags, setTags] = useState<Tag[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +25,6 @@ const useTagsAdmin = () => {
     getSiteConfig()
       .then((loaded) => {
         if (!alive) return;
-        setConfig(loaded);
         setTags(loaded.tags);
         setStatus("ready");
       })
@@ -84,21 +79,19 @@ const useTagsAdmin = () => {
     markDirty();
   }, []);
 
-  /** 로드한 전체 설정에서 tags 만 교체해 저장. */
+  /** 이 화면이 소유한 tags만 저장한다. */
   const save = useCallback(async () => {
-    if (!config) return;
     setError(null);
     setSaving(true);
     try {
-      await updateSiteConfig({ ...config, tags });
-      setConfig((prev) => (prev ? { ...prev, tags } : prev));
+      await updateSiteConfigFields({ tags });
       setSaved(true);
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [config, tags]);
+  }, [tags]);
 
   return { tags, status, error, saving, saved, editLabel, addTag, removeTag, reorder, save };
 };

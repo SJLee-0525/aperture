@@ -1,14 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-
-import { ROUTES } from "@/constants/routes";
-import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
-import { createPhoto, updatePhoto, type PhotoInput } from "@/lib/firebase/firestore";
-import type { Coords } from "@/types/coords";
 import type { Photo } from "@/types/photo";
 
+import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor";
 import { fromDatetimeLocal, toDatetimeLocal } from "@/features/admin-photos/_lib/datetime-local";
 import { PhotoUploadField } from "./PhotoUploadField";
 import { PlaceField } from "./PlaceField";
@@ -33,128 +27,28 @@ const EXIF_FIELDS: { key: keyof Photo["exif"]; label: string; placeholder: strin
   { key: "flash", label: "플래시", placeholder: "발광 안 함" },
 ];
 
-/** Photo → 편집용 초기 상태(PhotoInput 형태). initial 없으면 빈 사진. */
-const emptyInput = (): PhotoInput => ({
-  title: { ko: "", en: "" },
-  shotAt: new Date(),
-  camera: "",
-  lens: "",
-  exif: {
-    aperture: "",
-    shutter: "",
-    iso: "",
-    focalLength: "",
-    ev: "",
-    wb: "",
-    metering: "",
-    flash: "",
-  },
-  fileName: undefined,
-  dimensions: { w: 0, h: 0 },
-  aspectRatio: 1,
-  place: { ko: "", en: "" },
-  coords: null,
-  tags: [],
-  image: { url: "", path: "", w: 0, h: 0 },
-  // 새 사진은 order 0 — 목록 상단에 오며, dnd 정렬로 조정한다(Date.now 미사용).
-  order: 0,
-  published: false,
-});
-
-const fromPhoto = (photo: Photo): PhotoInput => {
-  // id·likes 제외한 나머지를 그대로 편집 상태로.
-  const { id: _id, likes: _likes, ...rest } = photo;
-  void _id;
-  void _likes;
-  return rest;
-};
-
 /** 공유 사진 폼 — 업로드(EXIF 자동 채움) + 이중언어·EXIF·좌표·태그 편집 + 저장. */
 const PhotoForm = ({ photoId, initial }: Props) => {
-  const router = useRouter();
-  const isEdit = initial != null;
-
-  const [form, setForm] = useState<PhotoInput>(() => (initial ? fromPhoto(initial) : emptyInput()));
-  // 좌표는 빈 문자열 허용을 위해 별도 문자열 상태로 관리 → 저장 시 number|null 로 변환.
-  const [lat, setLat] = useState(() => (initial?.coords ? String(initial.coords.lat) : ""));
-  const [lng, setLng] = useState(() => (initial?.coords ? String(initial.coords.lng) : ""));
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const patch = (next: Partial<PhotoInput>) => setForm((prev) => ({ ...prev, ...next }));
-  const patchExif = (key: keyof Photo["exif"], value: string) =>
-    setForm((prev) => ({ ...prev, exif: { ...prev.exif, [key]: value } }));
-
-  /** 업로드 성공 → image·dimensions·EXIF·shotAt·coords 자동 채움. */
-  const onUploaded = (result: UploadResult) => {
-    const { exif } = result;
-    setForm((prev) => ({
-      ...prev,
-      image: result.image,
-      dimensions: result.dimensions,
-      aspectRatio: result.aspectRatio,
-      camera: exif.camera,
-      lens: exif.lens,
-      fileName: exif.fileName,
-      exif: {
-        aperture: exif.aperture,
-        shutter: exif.shutter,
-        iso: exif.iso,
-        focalLength: exif.focalLength,
-        ev: exif.ev,
-        wb: exif.wb,
-        metering: exif.metering,
-        flash: exif.flash,
-      },
-      shotAt: exif.shotAt ?? prev.shotAt,
-      coords: exif.coords ?? prev.coords,
-    }));
-    if (exif.coords) {
-      setLat(String(exif.coords.lat));
-      setLng(String(exif.coords.lng));
-    }
-  };
-
-  /** lat/lng 문자열 → Coords|null (둘 다 유효 숫자일 때만 좌표). */
-  const resolveCoords = (): Coords | null => {
-    if (lat.trim() === "" || lng.trim() === "") return null;
-    const nLat = Number(lat);
-    const nLng = Number(lng);
-    if (Number.isNaN(nLat) || Number.isNaN(nLng)) return null;
-    return { lat: nLat, lng: nLng };
-  };
-
-  const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    if (!form.title.ko.trim()) {
-      setError("제목(한국어)을 입력하세요.");
-      return;
-    }
-    if (!form.image.url) {
-      setError("이미지를 먼저 업로드하세요.");
-      return;
-    }
-
-    const input: PhotoInput = { ...form, coords: resolveCoords() };
-
-    setSaving(true);
-    try {
-      if (isEdit) {
-        await updatePhoto(photoId, input);
-      } else {
-        await createPhoto(photoId, input);
-      }
-      router.replace(ROUTES.ADMIN_PHOTOS);
-    } catch (caught) {
-      setError((caught as Error).message);
-      setSaving(false);
-    }
-  };
+  const {
+    cancel,
+    error,
+    form,
+    isEdit,
+    lat,
+    lng,
+    onUploaded,
+    onUploadPendingChange,
+    patch,
+    patchExif,
+    saving,
+    uploading,
+    setLat,
+    setLng,
+    submit,
+  } = usePhotoEditor(photoId, initial);
 
   return (
-    <form className={styles.form} onSubmit={onSubmit} noValidate>
+    <form className={styles.form} onSubmit={submit} noValidate>
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "사진 수정" : "새 사진"}</h1>
       </header>
@@ -165,6 +59,7 @@ const PhotoForm = ({ photoId, initial }: Props) => {
           photoId={photoId}
           image={form.image.url ? form.image : null}
           onUploaded={onUploaded}
+          onPendingChange={onUploadPendingChange}
         />
       </section>
 
@@ -279,14 +174,14 @@ const PhotoForm = ({ photoId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving}>
+        <button type="submit" className={styles.submit} disabled={saving || uploading}>
           {saving ? "저장 중…" : isEdit ? "수정 저장" : "사진 저장"}
         </button>
         <button
           type="button"
           className={styles.cancel}
-          onClick={() => router.replace(ROUTES.ADMIN_PHOTOS)}
-          disabled={saving}
+          onClick={cancel}
+          disabled={saving || uploading}
         >
           취소
         </button>

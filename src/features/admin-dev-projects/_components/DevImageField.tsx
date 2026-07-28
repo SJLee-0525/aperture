@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
 import type { ImageMeta } from "@/types/image";
@@ -16,16 +16,28 @@ type Props = {
   images: ImageMeta[];
   onCoverChange: (cover: ImageMeta | null) => void;
   onImagesChange: (images: ImageMeta[]) => void;
+  onPendingChange: (pending: boolean) => void;
 };
 
 /**
  * 개발 프로젝트 이미지 필드 — 대표(cover) 1장 + 갤러리(images) 여러 장.
  * cover·gallery 모두 useDevImageUpload(projectId) 로 webp 압축 후 Storage 업로드.
  */
-const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange }: Props) => {
-  const { process, pending, error } = useDevImageUpload(projectId);
+const DevImageField = ({
+  projectId,
+  cover,
+  images,
+  onCoverChange,
+  onImagesChange,
+  onPendingChange,
+}: Props) => {
+  const { process, processBatch, pending, pendingCount, error } = useDevImageUpload(projectId);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    onPendingChange(pending);
+  }, [onPendingChange, pending]);
 
   const onCoverSelect = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,12 +50,7 @@ const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange
 
   const onGallerySelect = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
-    // 파일별 순차 업로드 후 성공한 것만 갤러리에 추가.
-    const added: ImageMeta[] = [];
-    for (const file of files) {
-      const result = await process(file);
-      if (result) added.push(result);
-    }
+    const added = await processBatch(files);
     if (added.length > 0) onImagesChange([...images, ...added]);
     if (galleryInputRef.current) galleryInputRef.current.value = "";
   };
@@ -87,7 +94,12 @@ const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange
             />
           </label>
           {cover?.url ? (
-            <button type="button" className={styles.remove} onClick={() => onCoverChange(null)}>
+            <button
+              type="button"
+              className={styles.remove}
+              disabled={pending}
+              onClick={() => onCoverChange(null)}
+            >
               대표 제거
             </button>
           ) : null}
@@ -132,7 +144,7 @@ const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange
                     type="button"
                     className={styles.move}
                     aria-label="앞으로"
-                    disabled={index === 0}
+                    disabled={pending || index === 0}
                     onClick={() => moveImage(index, -1)}
                   >
                     ↑
@@ -141,7 +153,7 @@ const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange
                     type="button"
                     className={styles.move}
                     aria-label="뒤로"
-                    disabled={index === images.length - 1}
+                    disabled={pending || index === images.length - 1}
                     onClick={() => moveImage(index, 1)}
                   >
                     ↓
@@ -149,6 +161,7 @@ const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange
                   <button
                     type="button"
                     className={styles.remove}
+                    disabled={pending}
                     onClick={() => removeImage(index)}
                   >
                     삭제
@@ -160,7 +173,11 @@ const DevImageField = ({ projectId, cover, images, onCoverChange, onImagesChange
         )}
       </div>
 
-      {pending ? <p className={styles.note}>이미지 처리 중…</p> : null}
+      {pending ? (
+        <p className={styles.note} aria-live="polite">
+          이미지 처리 중… 남은 파일 {pendingCount}개
+        </p>
+      ) : null}
       {error ? (
         <p className={styles.error} role="alert">
           {error}

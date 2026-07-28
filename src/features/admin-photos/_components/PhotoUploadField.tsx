@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { useImageUpload, type UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 import type { ImageMeta } from "@/types/image";
@@ -14,15 +14,20 @@ type Props = {
   image: ImageMeta | null;
   /** 업로드 파이프라인 성공 시 폼 자동 채움에 필요한 산출물 전달. */
   onUploaded: (result: UploadResult) => void;
+  onPendingChange: (pending: boolean) => void;
 };
 
 /**
  * 이미지 업로드 필드 — 파일 선택 → EXIF 추출(압축 前)·webp 압축·Storage 업로드.
  * 산출물(image·dimensions·exif)은 onUploaded 로 상위 폼에 넘겨 자동 채움한다.
  */
-const PhotoUploadField = ({ photoId, image, onUploaded }: Props) => {
+const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props) => {
   const { process, pending, error } = useImageUpload(photoId);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    onPendingChange(pending);
+  }, [onPendingChange, pending]);
 
   const onSelect = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
