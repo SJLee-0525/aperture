@@ -62,6 +62,11 @@
 @media (max-width: 640px) {
   .overlayFull {
     padding: 0;
+    /* 오버레이 자체 스크롤바가 우측 거터를 만들지 않게 숨김 — 터치/휠 스크롤은 유지 */
+    scrollbar-width: none;
+  }
+  .overlayFull::-webkit-scrollbar {
+    display: none;
   }
   .panelFull {
     min-height: 100dvh;
