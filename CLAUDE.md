@@ -242,6 +242,20 @@ firebase deploy --only firestore:rules,storage   # Rules만 배포
 | commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                          |
 | hooks    | env_file_guard(차단), secret_scan(경고), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                  |
 
+## Agent skills
+
+### Issue tracker
+
+작업과 PRD는 GitHub Issues에서 관리한다. 자세한 규칙은 `docs/agents/issue-tracker.md`를 따른다.
+
+### Triage labels
+
+`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`를 사용한다. 자세한 매핑은 `docs/agents/triage-labels.md`를 따른다.
+
+### Domain docs
+
+루트 `CONTEXT.md`와 `docs/adr/`를 사용하는 single-context 구조다. 자세한 규칙은 `docs/agents/domain.md`를 따른다.
+
 ## Phase 계획 (v2 — 통합 포트폴리오)
 
 > 사진 전용 v1(P1 디자인 이식 + P2 Firebase 연동)은 **대부분 완료**. 아래는 통합 확장 로드맵 요약이며 상세는 [`docs/plan/00-plan-v2.md`](docs/plan/00-plan-v2.md).

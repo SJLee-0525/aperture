@@ -1,0 +1,70 @@
+# Aperture Domain Context
+
+## Product
+
+`Sungjoon Lee.`는 이성준의 사진, 음악, 개발 작업을 하나의 공개 셸에서 보여주는 통합 포트폴리오다. 사진 섹션은 `Aperture.` 서브브랜드를 유지한다.
+
+방문자는 로그인하지 않는다. 한국어와 영어, 라이트와 다크 테마를 선택하며 공개 콘텐츠를 탐색한다. `Admin`은 본인 한 명을 위한 CMS이며 공개 사용자 흐름과 E2E 범위에서 분리한다.
+
+## Public areas
+
+| Term         | Route           | User-facing responsibility            |
+| ------------ | --------------- | ------------------------------------- |
+| Landing      | `/`             | Photo, Music, Dev 진입 허브           |
+| Photo Work   | `/photo`        | 사진 탐색, 검색, 필터, 사진 상세 모달 |
+| Photo Albums | `/photo/albums` | 앨범 목록과 `/photo/albums/[id]` 상세 |
+| Photo Map    | `/photo/map`    | 촬영 위치 목록과 지도                 |
+| Photo About  | `/photo/about`  | 사진가 소개와 통계                    |
+| Music Works  | `/music`        | 연주 목록과 연주 상세 모달            |
+| Music Career | `/music/career` | 학력, 경력, 수상과 수상 상세 모달     |
+| Music Media  | `/music/media`  | 연주 영상 목록                        |
+| Music About  | `/music/about`  | 피아니스트 소개                       |
+| Dev Stack    | `/dev`          | 기술 스택                             |
+| Dev Projects | `/dev/projects` | 프로젝트 목록과 프로젝트 상세 모달    |
+| Dev Career   | `/dev/career`   | 개발 경력                             |
+| Dev About    | `/dev/about`    | 개발자 소개                           |
+| Contact      | `/contact`      | 연락 양식과 외부 연락 링크            |
+| Search       | `/search`       | 공개 콘텐츠 통합 검색 결과            |
+
+`Photo`, `Music`, `Dev`는 각 섹션의 공식 명칭이다. 테스트와 문서에서 임의의 동의어 대신 이 명칭을 사용한다.
+
+## Content source
+
+공개 페이지는 `src/lib/content/`의 getter를 통해 콘텐츠를 읽는다. `NEXT_PUBLIC_USE_MOCK=1`은 모든 공개 getter가 `src/mocks/`의 결정적인 데이터를 사용하도록 강제한다. E2E는 이 모드로 전용 Next.js 서버를 시작하며 Firebase 데이터나 관리자 인증에 의존하지 않는다.
+
+mock 콘텐츠는 단순한 테스트 대역이 아니라 공개 UI를 완전히 탐색할 수 있는 로컬 데모 데이터다. E2E는 mock 데이터의 대표 항목을 통해 목록, 상세, 필터, 검색과 모달 행동을 검증한다.
+
+## Navigation and detail behavior
+
+- 데스크톱은 상단 mega-menu와 전역 검색을 사용한다.
+- 모바일은 앱바, 버거 메뉴와 섹션별 하단 탭을 사용한다.
+- 사진, 연주, 수상, 개발 프로젝트 상세는 별도 페이지가 아니라 query 기반 모달이다.
+- query key는 각각 `photo`, `work`, `award`, `project`다.
+- 앨범 상세만 `/photo/albums/[id]` 경로를 사용한다.
+- 모달은 열기, 콘텐츠 확인, 닫기와 URL query 동기화가 사용자에게 관찰 가능해야 한다.
+
+## Architecture boundaries
+
+Next.js App Router 단일 앱이며 의존 방향은 `app → features → components`다.
+
+- `app`: 라우팅, 공개 콘텐츠 fetch, feature 조립
+- `features`: 사용자 행동과 도메인 UI
+- `components`: props 기반 재사용 UI
+- `lib/content`: mock과 Firestore 콘텐츠 소스의 교체 지점
+- `mocks`: 결정적인 공개 데모 콘텐츠
+- `admin`: 인증된 CMS이며 공개 E2E에서 제외
+
+공개 페이지의 서버 읽기는 Firestore REST를 사용하고 관리 기능은 Firebase client SDK를 사용한다. E2E mock 모드는 이 외부 경계를 통과하지 않는다. 지도 타일과 외부 링크는 제3자 시스템이므로 E2E는 앱의 컨테이너, 링크와 위치 데이터까지만 검증한다.
+
+## E2E behavior contract
+
+E2E는 데스크톱과 모바일에서 다음 사용자 관점의 행동을 보장한다.
+
+- 모든 공개 정적 라우트와 대표 mock 앨범 상세가 오류 없이 열린다.
+- 각 페이지의 고유 heading과 대표 mock 콘텐츠가 보인다.
+- 현재 viewport에 맞는 navigation이 동작한다.
+- 페이지의 핵심 클릭 가능 요소가 실제로 열리거나 이동한다.
+- Photo, Music Career, Music Works, Dev Projects의 상세 모달이 열리고 닫힌다.
+- 검색과 필터가 mock 결과를 변경한다.
+- 심각한 브라우저 console error와 처리되지 않은 page error가 없다.
+- 외부 지도 타일, mail client, YouTube와 외부 프로젝트 사이트의 성공 여부는 검사하지 않는다.

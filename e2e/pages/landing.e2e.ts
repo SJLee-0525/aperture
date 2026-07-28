@@ -1,0 +1,19 @@
+import { test } from "@playwright/test";
+
+import { commonAssertions } from "../utils/assertions/common.assertions";
+import { landingAssertions } from "../utils/assertions/landing.assertions";
+
+test.describe("Landing", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+  });
+
+  test("공개 허브와 세 섹션 진입점이 보인다", async ({ page }) => {
+    await commonAssertions.publicPageLoaded(page, "/");
+    await landingAssertions.loaded(page);
+  });
+
+  test("Dev 진입점을 클릭해 프로젝트로 이동한다", async ({ page }) => {
+    await landingAssertions.enterDev(page);
+  });
+});
