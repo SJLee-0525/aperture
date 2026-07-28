@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "knip": "knip",
+    "check": "tsc --noEmit",
+    "jscpd": "jscpd src",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:rules": "firebase emulators:exec --project demo-aperture --only firestore \"node --test test/firestore-rules.test.mjs\""
@@ -26,11 +29,16 @@
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "eslint-plugin-boundaries": "^7.1.0",
+    "firebase-tools": "^15.24.0",
+    "jscpd": "^5.0.14",
+    "knip": "^6.29.0",
     "prettier": "^3.8.4",
     "typescript": "^5"
   }

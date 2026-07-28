@@ -1,0 +1,8 @@
+{
+  "threshold": 10,
+  "reporters": ["console"],
+  "format": ["typescript", "tsx"],
+  "minLines": 5,
+  "minTokens": 50,
+  "gitignore": true
+}

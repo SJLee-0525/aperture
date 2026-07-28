@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["test/**/*.test.mjs"],
+  "ignore": ["design/**"],
+  "playwright": {
+    "config": ["playwright.config.ts"],
+    "entry": ["e2e/**/*.e2e.ts", "e2e/**/*.setup.ts"]
+  }
+}
