@@ -1,5 +1,6 @@
 import { COLLECTIONS, SITE_DEV_DOC, SITE_DOC, SITE_MUSIC_DOC } from "@/constants/collections";
 import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
 import type { DevConfig, DevProject } from "@/types/dev";
@@ -198,10 +199,14 @@ const restToDevProject = (id: string, d: Record<string, unknown>): DevProject =>
   title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
   category: (d.category as LocalizedText) ?? EMPTY_LOCALIZED,
   year: (d.year as string) ?? "",
+  period: (d.period as LocalizedText) ?? EMPTY_LOCALIZED,
+  position: (d.position as LocalizedText) ?? EMPTY_LOCALIZED,
   summary: (d.summary as LocalizedText) ?? EMPTY_LOCALIZED,
   overview: (d.overview as LocalizedText) ?? EMPTY_LOCALIZED,
+  features: (d.features as LocalizedText[]) ?? [],
   roles: (d.roles as LocalizedText[]) ?? [],
-  troubleshooting: (d.troubleshooting as LocalizedText[]) ?? [],
+  troubleshooting: normalizeTroubleshooting(d.troubleshooting),
+  achievements: (d.achievements as LocalizedText[]) ?? [],
   techTags: (d.techTags as string[]) ?? [],
   links: (d.links as SiteLink[]) ?? [],
   cover: (d.cover as ImageMeta | null) ?? null,

@@ -32,14 +32,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 17px clamp(20px, 3vw, 34px);
+  padding: 17px 22px;
   border-bottom: 1px solid var(--line);
 }
 .crumb {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--text-3);
 }
 .close {
@@ -55,8 +54,21 @@
   color: var(--accent);
 }
 .body {
-  padding: clamp(26px, 4vw, 40px);
+  /* 변수로 노출 — 자식 콘텐츠(캐러셀 등)가 음수 마진 full-bleed 시 단일 출처로 참조 */
+  --modal-pad: clamp(26px, 4vw, 40px);
+  padding: var(--modal-pad);
 }
+/* mobileFull — 모바일에서 화면 꽉 채움 (프로젝트·연주 상세) */
+@media (max-width: 640px) {
+  .overlayFull {
+    padding: 0;
+  }
+  .panelFull {
+    min-height: 100dvh;
+    border: none;
+  }
+}
+
 @keyframes mfade {
   from {
     opacity: 0;

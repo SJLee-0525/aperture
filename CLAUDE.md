@@ -100,7 +100,7 @@
 
 | 컬렉션        | 역할     | 주요 필드                                                                                                                                                                                                     |
 | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `devProjects` | 프로젝트 | title{ko,en}, category{ko,en}, year, summary{ko,en}, overview{ko,en}, roles[]{ko,en}(담당·작업), troubleshooting[]{ko,en}, techTags[](평면), links[]{label,href}, image{url,path,w,h}\|null, order, published |
+| `devProjects` | 프로젝트 | title{ko,en}, category{ko,en}, year, period{ko,en}, position{ko,en}, summary{ko,en}, overview{ko,en}, features[]{ko,en}(제품 기능), roles[]{ko,en}(담당·작업), troubleshooting[]{title,problem,solution,result?}(각 {ko,en}), achievements[]{ko,en}(성과·수상·지표), techTags[](평면), links[]{label,href}, cover{url,path,w,h}\|null, images[], order, published |
 
 ### 고정 config 문서 (`site` 컬렉션)
 
@@ -115,6 +115,8 @@
 - **정렬 = 수동 `order` 필드** (dnd-kit로 관리자가 드래그). 앨범 내 사진 순서 = `photoIds` 배열 순서.
 - **사진 태그는 통제 사전** — `site/config.tags`에 `{id, ko, en}`을 정의, 사진은 **id만 참조**. 카메라·초점거리 필터는 photos EXIF에서 파생.
 - **음악 program·개발 techTags**는 평면 배열(곡명·기술명은 언어 무관). category/name/설명 등 서술 필드만 `{ko,en}`.
+  개발 troubleshooting 은 구조화 map 배열({title,problem,solution,result?})이며 그 텍스트 하위 필드가 `{ko,en}`.
+  구형 평문 `{ko,en}` 항목은 디코더의 `normalize-troubleshooting` 이 하위호환 정규화(재저장 시 신형 이행).
 - **좌표는 사진 전용** — EXIF GPS 자동 또는 관리자 지도 클릭. 음악·개발엔 좌표 없음.
 - 콘텐츠 소량 → **페이지네이션 없음**, 전체 fetch + 클라이언트 필터/검색. 검색은 사진 섹션 한정.
 - slug 없음 — 사진 상세·연주 상세·프로젝트 상세는 **모달**(`?photo=`/`?work=`/`?project=` 딥링크), 문서 ID가 식별자. 앨범 상세 = `/photo/albums/[id]`.

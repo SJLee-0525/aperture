@@ -101,48 +101,54 @@
   color: var(--text-3);
 }
 
-/* ── modal ── */
+/* ── modal — 위계는 크기·굵기·여백으로만. 장식선·장식색 없음(액센트는 인터랙티브 요소 전용) ── */
 .detail {
   display: flex;
   flex-direction: column;
 }
-.gallery {
+
+.mhead {
   display: flex;
   flex-direction: column;
-  gap: var(--s-3);
-  /* 하단 여백 0 — 이미지→첫 섹션(개요) 간격은 .secL margin-top 이 담당(섹션 간 간격과 통일) */
-  margin-bottom: 0;
+  gap: var(--s-2);
 }
-.shot {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: var(--r-md);
-  background: var(--surface-2);
+.mtitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--text);
 }
-.shotImg {
-  object-fit: cover;
+.msub {
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--text-2);
 }
-.shotEmpty {
-  font-family: var(--font-mono);
-  font-size: var(--t-micro);
-  letter-spacing: 0.2em;
-  color: var(--text-4);
+.mmeta {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--text-3);
 }
+
+/* full-bleed — Modal body 패딩(--modal-pad)을 음수 마진으로 상쇄해 패널 좌우·상단 끝까지.
+   하단은 섹션 간격(--s-10)과 같은 리듬으로 제목과 여유 있게 분리 */
+.media {
+  margin: calc(var(--modal-pad, 26px) * -1);
+  margin-bottom: var(--s-10);
+}
+
 .secL {
   margin-top: var(--s-10);
-  margin-bottom: var(--s-2);
-  font-family: var(--font-mono);
-  font-size: var(--t-small);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--accent);
+  margin-bottom: var(--s-3);
+  font-size: var(--t-h3);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
 }
-.secL:first-child {
-  margin-top: 0;
-}
+
 .p {
   /* flex 컨테이너(.detail)라 마진이 collapse 안 됨 — UA <p> 마진 제거해 라벨→본문 간격을 다른 섹션(8px)과 통일 */
   margin: 0;
@@ -150,6 +156,7 @@
   line-height: 1.7;
   color: var(--text-2);
 }
+
 .ul {
   margin: 0;
   padding-left: var(--s-5);
@@ -158,6 +165,54 @@
   gap: var(--s-2);
 }
 .ul li {
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.tsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.tsItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+.tsTitle {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+}
+.tsRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+.tsLabel {
+  flex: none;
+  min-width: 44px;
+  text-align: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+.tsResultLabel {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tsText {
+  margin: 0;
+  padding-top: 2px;
   font-size: var(--t-body);
   line-height: 1.6;
   color: var(--text-2);

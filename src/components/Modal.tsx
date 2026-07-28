@@ -13,6 +13,8 @@ type Props = {
   crumb?: string;
   label?: string;
   maxWidth?: number; // 패널 최대 폭(px) — 연주 920 / 수상 600 등
+  /** 모바일(≤640px)에서 패널을 화면 꽉 채움 — 콘텐츠 긴 상세 모달용(프로젝트·연주). */
+  mobileFull?: boolean;
   children: React.ReactNode;
 };
 
@@ -21,7 +23,7 @@ type Props = {
  * document.body 로 포털 — 헤더/섹션 래퍼의 stacking context 밖으로 빼내 네비 뒤에 가리지 않게 한다.
  * 스크림 클릭·ESC·스크롤 잠금. 음악·개발 상세 공용 순수 UI. 액센트는 상위 [data-section] 이 결정.
  */
-const Modal = ({ open, onClose, crumb, label, maxWidth, children }: Props) => {
+const Modal = ({ open, onClose, crumb, label, maxWidth, mobileFull, children }: Props) => {
   useScrollLock(open);
 
   useEffect(() => {
@@ -37,10 +39,10 @@ const Modal = ({ open, onClose, crumb, label, maxWidth, children }: Props) => {
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay}>
+    <div className={mobileFull ? `${styles.overlay} ${styles.overlayFull}` : styles.overlay}>
       <button type="button" className={styles.scrim} aria-label="Close" onClick={onClose} />
       <div
-        className={styles.panel}
+        className={mobileFull ? `${styles.panel} ${styles.panelFull}` : styles.panel}
         role="dialog"
         aria-modal="true"
         aria-label={label}

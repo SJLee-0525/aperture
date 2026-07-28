@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 
+import { ImageCarousel } from "@/components/ImageCarousel";
 import { Modal } from "@/components/Modal";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
+import { hasText } from "@/lib/i18n/has-text";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { DevProject } from "@/types/dev";
 
@@ -14,6 +16,15 @@ import styles from "./DevProjectsView.module.css";
 const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("project", projects);
+
+  // 상세 미디어 — 갤러리가 비면 커버로 폴백, 둘 다 없으면 미디어 블록 생략.
+  const media = selected
+    ? selected.images.length > 0
+      ? selected.images
+      : selected.cover
+        ? [selected.cover]
+        : []
+    : [];
 
   return (
     <main className={styles.main}>
@@ -63,33 +74,45 @@ const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
         open={open}
         onClose={close}
         maxWidth={720}
+        mobileFull
         crumb={selected ? `${pickText(selected.category, lang)} · ${selected.year}` : ""}
         label={selected ? pickText(selected.title, lang) : ""}
       >
         {selected ? (
           <div className={styles.detail}>
-            <div className={styles.gallery}>
-              {selected.images.length > 0 ? (
-                selected.images.map((img, index) => (
-                  <div key={img.path || index} className={styles.shot}>
-                    <Image
-                      src={img.url}
-                      alt={`${pickText(selected.title, lang)} — ${index + 1}`}
-                      fill
-                      sizes="(max-width: 760px) 100vw, 680px"
-                      className={styles.shotImg}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className={styles.shot}>
-                  <span className={styles.shotEmpty}>NO IMAGE</span>
-                </div>
-              )}
-            </div>
+            {media.length > 0 ? (
+              <div className={styles.media}>
+                <ImageCarousel images={media} alt={pickText(selected.title, lang)} />
+              </div>
+            ) : null}
+
+            <header className={styles.mhead}>
+              <h2 className={styles.mtitle}>{pickText(selected.title, lang)}</h2>
+              {hasText(selected.summary) ? (
+                <p className={styles.msub}>{pickText(selected.summary, lang)}</p>
+              ) : null}
+              {hasText(selected.period) || hasText(selected.position) ? (
+                <p className={styles.mmeta}>
+                  {[pickText(selected.period, lang), pickText(selected.position, lang)]
+                    .filter((text) => text.trim())
+                    .join(" · ")}
+                </p>
+              ) : null}
+            </header>
 
             <div className={styles.secL}>{dict.devOverviewLabel}</div>
             <p className={styles.p}>{pickText(selected.overview, lang)}</p>
+
+            {selected.features.length > 0 ? (
+              <>
+                <div className={styles.secL}>{dict.devFeaturesLabel}</div>
+                <ul className={styles.ul}>
+                  {selected.features.map((feature, index) => (
+                    <li key={index}>{pickText(feature, lang)}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
 
             {selected.roles.length > 0 ? (
               <>
@@ -105,9 +128,44 @@ const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
             {selected.troubleshooting.length > 0 ? (
               <>
                 <div className={styles.secL}>{dict.devTroubleLabel}</div>
-                <ul className={styles.ul}>
+                <div className={styles.tsList}>
                   {selected.troubleshooting.map((item, index) => (
-                    <li key={index}>{pickText(item, lang)}</li>
+                    <div key={index} className={styles.tsItem}>
+                      {hasText(item.title) ? (
+                        <div className={styles.tsTitle}>{pickText(item.title, lang)}</div>
+                      ) : null}
+                      {hasText(item.problem) ? (
+                        <div className={styles.tsRow}>
+                          <span className={styles.tsLabel}>{dict.devTroubleProblemLabel}</span>
+                          <p className={styles.tsText}>{pickText(item.problem, lang)}</p>
+                        </div>
+                      ) : null}
+                      {hasText(item.solution) ? (
+                        <div className={styles.tsRow}>
+                          <span className={styles.tsLabel}>{dict.devTroubleSolutionLabel}</span>
+                          <p className={styles.tsText}>{pickText(item.solution, lang)}</p>
+                        </div>
+                      ) : null}
+                      {item.result && hasText(item.result) ? (
+                        <div className={styles.tsRow}>
+                          <span className={`${styles.tsLabel} ${styles.tsResultLabel}`}>
+                            {dict.devTroubleResultLabel}
+                          </span>
+                          <p className={styles.tsText}>{pickText(item.result, lang)}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
+
+            {selected.achievements.length > 0 ? (
+              <>
+                <div className={styles.secL}>{dict.devAchievementsLabel}</div>
+                <ul className={styles.ul}>
+                  {selected.achievements.map((achievement, index) => (
+                    <li key={index}>{pickText(achievement, lang)}</li>
                   ))}
                 </ul>
               </>

@@ -31,8 +31,15 @@ type UIDict = {
   devProjectsNav: string;
   devCareerNav: string;
   devOverviewLabel: string;
+  devPeriodLabel: string;
+  devPositionLabel: string;
+  devFeaturesLabel: string;
   devRolesLabel: string;
   devTroubleLabel: string;
+  devTroubleProblemLabel: string;
+  devTroubleSolutionLabel: string;
+  devTroubleResultLabel: string;
+  devAchievementsLabel: string;
   devStackLabel: string;
   devTechLabel: string;
   devFieldLabel: string;
@@ -109,8 +116,15 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
     devOverviewLabel: "개요",
+    devPeriodLabel: "기간",
+    devPositionLabel: "포지션",
+    devFeaturesLabel: "주요 기능",
     devRolesLabel: "담당 · 주요 작업",
     devTroubleLabel: "트러블슈팅",
+    devTroubleProblemLabel: "문제",
+    devTroubleSolutionLabel: "해결",
+    devTroubleResultLabel: "결과",
+    devAchievementsLabel: "성과",
     devStackLabel: "기술 스택",
     devTechLabel: "사용 기술",
     devFieldLabel: "분야",
@@ -181,8 +195,15 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devProjectsNav: "Projects",
     devCareerNav: "Career",
     devOverviewLabel: "Overview",
+    devPeriodLabel: "Period",
+    devPositionLabel: "Position",
+    devFeaturesLabel: "Features",
     devRolesLabel: "Role & Work",
     devTroubleLabel: "Troubleshooting",
+    devTroubleProblemLabel: "Problem",
+    devTroubleSolutionLabel: "Solution",
+    devTroubleResultLabel: "Result",
+    devAchievementsLabel: "Achievements",
     devStackLabel: "Stack",
     devTechLabel: "Tech Used",
     devFieldLabel: "Fields",

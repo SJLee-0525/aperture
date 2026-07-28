@@ -5,13 +5,15 @@ import { useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { devProjects, type DevProjectInput } from "@/lib/firebase/dev";
-import type { DevProject } from "@/types/dev";
+import { hasText } from "@/lib/i18n/has-text";
+import type { DevProject, DevTroubleshooting } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { SiteLink } from "@/types/site";
 
 import { DevImageField } from "./DevImageField";
 import styles from "./ProjectForm.module.css";
+import { TroubleshootingField } from "./TroubleshootingField";
 
 type Props = {
   projectId: string;
@@ -24,10 +26,14 @@ const emptyInput = (): DevProjectInput => ({
   title: { ko: "", en: "" },
   category: { ko: "", en: "" },
   year: "",
+  period: { ko: "", en: "" },
+  position: { ko: "", en: "" },
   summary: { ko: "", en: "" },
   overview: { ko: "", en: "" },
+  features: [],
   roles: [],
   troubleshooting: [],
+  achievements: [],
   techTags: [],
   links: [],
   cover: null,
@@ -43,8 +49,8 @@ const fromProject = (project: DevProject): DevProjectInput => {
   return rest;
 };
 
-/** 이중언어 배열(roles·troubleshooting) 편집을 한 종류 로직으로 다루기 위한 키. */
-type LocalizedArrayKey = "roles" | "troubleshooting";
+/** 이중언어 배열(features·roles·achievements) 편집을 한 종류 로직으로 다루기 위한 키. */
+type LocalizedArrayKey = "features" | "roles" | "achievements";
 
 /** 공유 프로젝트 폼 — 이중언어 필드 + 담당·트러블슈팅·기술·링크·이미지 + 저장. */
 const ProjectForm = ({ projectId, initial }: Props) => {
@@ -117,12 +123,29 @@ const ProjectForm = ({ projectId, initial }: Props) => {
     }
 
     // 빈 배열 항목은 저장 시 제거.
-    const cleanLocalized = (items: LocalizedText[]) =>
-      items.filter((item) => item.ko.trim() || item.en.trim());
+    const cleanLocalized = (items: LocalizedText[]) => items.filter(hasText);
+    // 전부 빈 항목 드롭 + result 빈 값이면 키 자체 생략 — Firestore 는 배열 내부 map 의 undefined 값을 거부한다.
+    const cleanTroubleshooting = (items: DevTroubleshooting[]): DevTroubleshooting[] =>
+      items
+        .filter(
+          (t) =>
+            hasText(t.title) ||
+            hasText(t.problem) ||
+            hasText(t.solution) ||
+            (t.result != null && hasText(t.result)),
+        )
+        .map(({ title, problem, solution, result }) => ({
+          title,
+          problem,
+          solution,
+          ...(result != null && hasText(result) ? { result } : {}),
+        }));
     const input: DevProjectInput = {
       ...form,
+      features: cleanLocalized(form.features),
       roles: cleanLocalized(form.roles),
-      troubleshooting: cleanLocalized(form.troubleshooting),
+      troubleshooting: cleanTroubleshooting(form.troubleshooting),
+      achievements: cleanLocalized(form.achievements),
       techTags: form.techTags.map((t) => t.trim()).filter(Boolean),
       links: form.links.filter((link) => link.label.trim() || link.href.trim()),
     };
@@ -246,6 +269,48 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles.legend}>기간 · 포지션</h2>
+        <div className={styles.grid2}>
+          <label className={styles.field}>
+            <span className={styles.label}>기간 (한국어)</span>
+            <input
+              className={styles.input}
+              value={form.period.ko}
+              placeholder="2025. 12. — 현재"
+              onChange={(e) => patch({ period: { ...form.period, ko: e.target.value } })}
+            />
+          </label>
+          <label className={styles.field}>
+            <span className={styles.label}>기간 (English)</span>
+            <input
+              className={styles.input}
+              value={form.period.en}
+              placeholder="Dec 2025 — Present"
+              onChange={(e) => patch({ period: { ...form.period, en: e.target.value } })}
+            />
+          </label>
+          <label className={styles.field}>
+            <span className={styles.label}>포지션 (한국어)</span>
+            <input
+              className={styles.input}
+              value={form.position.ko}
+              placeholder="Frontend 전체 · 6인 팀 (FE 1 · BE 2 · AI 3)"
+              onChange={(e) => patch({ position: { ...form.position, ko: e.target.value } })}
+            />
+          </label>
+          <label className={styles.field}>
+            <span className={styles.label}>포지션 (English)</span>
+            <input
+              className={styles.input}
+              value={form.position.en}
+              placeholder="Sole frontend engineer · team of 6"
+              onChange={(e) => patch({ position: { ...form.position, en: e.target.value } })}
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles.legend}>요약 (카드 한 줄)</h2>
         <div className={styles.grid2}>
           <label className={styles.field}>
@@ -293,8 +358,18 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         </div>
       </section>
 
+      {renderLocalizedArray("features", "주요 기능", "+ 항목 추가")}
       {renderLocalizedArray("roles", "담당 · 주요 작업", "+ 항목 추가")}
-      {renderLocalizedArray("troubleshooting", "트러블슈팅", "+ 항목 추가")}
+
+      <section className={styles.section}>
+        <h2 className={styles.legend}>트러블슈팅</h2>
+        <TroubleshootingField
+          entries={form.troubleshooting}
+          onChange={(troubleshooting) => patch({ troubleshooting })}
+        />
+      </section>
+
+      {renderLocalizedArray("achievements", "성과 · 수상", "+ 항목 추가")}
 
       <section className={styles.section}>
         <div className={styles.arrayHead}>

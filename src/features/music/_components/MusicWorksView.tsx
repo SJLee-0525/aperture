@@ -60,6 +60,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
         open={open}
         onClose={close}
         maxWidth={920}
+        mobileFull
         crumb={selected ? pickText(selected.category, lang) : ""}
         label={selected ? pickText(selected.title, lang) : ""}
       >

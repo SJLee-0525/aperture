@@ -1,0 +1,77 @@
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+}
+
+.track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: var(--surface-2);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  cursor: zoom-in;
+}
+.img {
+  object-fit: cover;
+}
+
+.frame {
+  position: relative;
+}
+
+/* 표준 캐러셀 내비 — 이미지 양옆 수직 중앙 오버레이 원형 버튼 */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  color: var(--text-2);
+  font-size: 20px;
+  line-height: 1;
+  padding-bottom: 2px;
+  cursor: pointer;
+  opacity: 0.92;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+.prev {
+  left: var(--s-3);
+}
+.next {
+  right: var(--s-3);
+}
+.nav:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+}
+.nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+

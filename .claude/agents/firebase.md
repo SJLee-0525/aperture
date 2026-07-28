@@ -65,7 +65,7 @@ color: green
 
 | 컬렉션        | 문서 ID | 주요 필드                                                                                                                                                                                                                                     |
 | ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `devProjects` | auto    | title{ko,en}, category{ko,en}, year(string), summary{ko,en}, overview{ko,en}, roles(array of {ko,en}), troubleshooting(array of {ko,en}), techTags(string[] 평면), links(array of {label, href}), image{url,path,w,h}\|null, order, published |
+| `devProjects` | auto    | title{ko,en}, category{ko,en}, year(string), period{ko,en}, position{ko,en}, summary{ko,en}, overview{ko,en}, features(array of {ko,en}), roles(array of {ko,en}), troubleshooting(array of {title{ko,en}, problem{ko,en}, solution{ko,en}, result{ko,en}?} — 구형 평문 {ko,en}는 디코더가 정규화), achievements(array of {ko,en}), techTags(string[] 평면), links(array of {label, href}), cover{url,path,w,h}\|null, images(array of ImageMeta), order, published |
 
 ### 고정 config 문서 (`site` 컬렉션)
 

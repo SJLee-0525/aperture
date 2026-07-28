@@ -10,6 +10,11 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     title: { ko: "개인 포트폴리오", en: "Personal Portfolio" },
     category: { ko: "웹 · 개인", en: "Web · Personal" },
     year: "2025",
+    period: { ko: "2025. 08. — 2025. 10.", en: "Aug 2025 — Oct 2025" },
+    position: {
+      ko: "개인 프로젝트 · 기획/디자인/개발 전담",
+      en: "Solo project · planning, design, development",
+    },
     summary: {
       ko: "GSAP 애니메이션과 반응형 레이아웃으로 만든 개발자 포트폴리오. Lighthouse 50 → 90+.",
       en: "A developer portfolio built with GSAP animation and responsive layout. Lighthouse 50 → 90+.",
@@ -18,6 +23,20 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
       ko: "개발자로서의 성장과 경험을 정리하고, 기술 스택과 프로젝트를 소개하기 위해 제작한 개인 포트폴리오 웹사이트.",
       en: "A personal portfolio site built to organise my growth as a developer and present my tech stack and projects.",
     },
+    features: [
+      {
+        ko: "섹션 단위 스크롤 내비게이션과 타이핑 인트로",
+        en: "Section-based scroll navigation and a typing intro",
+      },
+      {
+        ko: "프로젝트 상세 모달과 기술 스택 필터",
+        en: "Project detail modal and tech-stack filter",
+      },
+      {
+        ko: "GSAP 타임라인 기반 진입 애니메이션",
+        en: "GSAP-timeline entrance animations",
+      },
+    ],
     roles: [
       {
         ko: "메인·기술스택·자기소개·프로젝트 목록 페이지 UI/UX 설계 및 구현",
@@ -39,16 +58,51 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     ],
     troubleshooting: [
       {
-        ko: "스크롤 방지 시 스크롤바 제거로 레이아웃 깨짐 → 스크롤바 너비만큼 padding-right 보정",
-        en: "Scroll-lock removed the scrollbar and shifted layout → compensated with padding-right equal to the scrollbar width",
+        title: { ko: "스크롤 잠금 시 레이아웃 시프트", en: "Layout shift on scroll lock" },
+        problem: {
+          ko: "스크롤 방지 시 스크롤바 제거로 레이아웃 깨짐",
+          en: "Scroll-lock removed the scrollbar and shifted the layout",
+        },
+        solution: {
+          ko: "스크롤바 너비만큼 padding-right 보정",
+          en: "Compensated with padding-right equal to the scrollbar width",
+        },
+        result: {
+          ko: "모달 개폐 시 화면 흔들림 제거",
+          en: "No more visual jump when opening the modal",
+        },
       },
       {
-        ko: "새로고침 시 스크롤 위치 복원 → scrollRestoration='manual' + hash 초기화",
-        en: "Scroll position restored on refresh → scrollRestoration='manual' + hash reset",
+        title: { ko: "새로고침 스크롤 위치 복원", en: "Scroll restoration on refresh" },
+        problem: {
+          ko: "새로고침 시 브라우저가 이전 스크롤 위치를 복원해 인트로가 스킵됨",
+          en: "The browser restored the previous scroll position on refresh, skipping the intro",
+        },
+        solution: {
+          ko: "scrollRestoration='manual' + hash 초기화",
+          en: "scrollRestoration='manual' + hash reset",
+        },
       },
       {
-        ko: "타이핑 효과 한글 깨짐 → spread operator로 완성형 문자 기준 배열화",
-        en: "Hangul broke in the typing effect → arrayified by composed characters via the spread operator",
+        title: { ko: "타이핑 효과 한글 깨짐", en: "Hangul breaking in the typing effect" },
+        problem: {
+          ko: "글자 단위 슬라이스에서 한글 자모가 분리돼 표시됨",
+          en: "Per-character slicing tore Hangul into jamo fragments",
+        },
+        solution: {
+          ko: "spread operator로 완성형 문자 기준 배열화",
+          en: "Arrayified by composed characters via the spread operator",
+        },
+      },
+    ],
+    achievements: [
+      {
+        ko: "Lighthouse 성능 50점대 → 90+ 개선",
+        en: "Improved Lighthouse performance from the 50s to 90+",
+      },
+      {
+        ko: "이미지 lazy-load·코드 스플리팅으로 초기 로드 40% 단축",
+        en: "Cut initial load by 40% with image lazy-loading and code splitting",
       },
     ],
     techTags: ["React", "TypeScript", "TailwindCSS", "GSAP", "Vite", "Zustand"],
@@ -57,7 +111,12 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
       { label: "Live", href: "https://sjlee12.netlify.app/" },
     ],
     cover: null,
-    images: [],
+    // 캐러셀 UI 테스트용 샘플 (design-samples 재사용) — 실데이터는 관리자 업로드 이미지.
+    images: [
+      { url: "/design-samples/tone01.png", path: "design-samples/tone01.png", w: 1600, h: 900 },
+      { url: "/design-samples/tone02.png", path: "design-samples/tone02.png", w: 1600, h: 900 },
+      { url: "/design-samples/tone03.png", path: "design-samples/tone03.png", w: 1600, h: 900 },
+    ],
     order: 0,
     published: true,
   },
@@ -66,6 +125,11 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     title: { ko: "사진 포트폴리오", en: "Photo Portfolio" },
     category: { ko: "웹 · 개인", en: "Web · Personal" },
     year: "2025",
+    period: { ko: "2025. 11. — 현재", en: "Nov 2025 — Present" },
+    position: {
+      ko: "개인 프로젝트 · 기획/디자인/개발 전담",
+      en: "Solo project · planning, design, development",
+    },
     summary: {
       ko: "사진가를 위한 메타데이터 중심 갤러리. EXIF 스펙시트·지도·프레임 내보내기.",
       en: "A metadata-driven gallery for photographers — EXIF spec sheet, map, and frame export.",
@@ -74,6 +138,20 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
       ko: "조리개·셔터·ISO 등 EXIF를 계기판처럼 보여주고, 앨범·지도·라이트박스·내보내기 프레임까지 갖춘 사진 포트폴리오.",
       en: "A photo portfolio that shows EXIF (aperture, shutter, ISO) like a dashboard, with albums, a map, a lightbox, and export frames.",
     },
+    features: [
+      {
+        ko: "EXIF 계기판(조리개·셔터·ISO)과 노출 삼각형 시각화",
+        en: "EXIF dashboard (aperture, shutter, ISO) with an exposure-triangle visual",
+      },
+      {
+        ko: "촬영 좌표 지도 핀과 앨범 묶음",
+        en: "Map pins from shooting coordinates and album grouping",
+      },
+      {
+        ko: "프레임 6종 EXIF 각인 내보내기",
+        en: "Six frame styles with EXIF-engraved export",
+      },
+    ],
     roles: [
       {
         ko: "EXIF 스펙시트·노출 삼각형 컴포넌트",
@@ -90,12 +168,32 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     ],
     troubleshooting: [
       {
-        ko: "웹컴포넌트 shadow DOM 이미지 캡처 이슈 → 상태 검증으로 우회",
-        en: "Web-component shadow-DOM image capture issue → worked around via state validation",
+        title: { ko: "shadow DOM 이미지 캡처 실패", en: "Shadow-DOM image capture failure" },
+        problem: {
+          ko: "웹컴포넌트 shadow DOM 내부 이미지가 canvas 캡처에서 누락됨",
+          en: "Images inside web-component shadow DOM were missing from canvas capture",
+        },
+        solution: {
+          ko: "로드 상태 검증 후 직접 드로잉으로 우회",
+          en: "Worked around by validating load state and drawing directly",
+        },
       },
       {
-        ko: "프레임 텍스트 오버플로 → overflow 클리핑 + 말줄임",
-        en: "Frame text overflow → overflow clipping + ellipsis",
+        title: { ko: "프레임 텍스트 오버플로", en: "Frame text overflow" },
+        problem: {
+          ko: "긴 촬영지·렌즈명이 프레임 여백을 침범",
+          en: "Long place and lens names overflowed the frame margins",
+        },
+        solution: {
+          ko: "overflow 클리핑 + 말줄임 처리",
+          en: "Overflow clipping + ellipsis",
+        },
+      },
+    ],
+    achievements: [
+      {
+        ko: "업로드 파이프라인(EXIF 추출→webp 압축→업로드) 자동화",
+        en: "Automated the upload pipeline (EXIF extraction → webp compression → upload)",
       },
     ],
     techTags: ["React", "HTML/CSS", "Canvas", "Vanilla JS"],
@@ -110,6 +208,11 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     title: { ko: "실시간 협업 대시보드", en: "Realtime Collaboration Dashboard" },
     category: { ko: "웹 · 팀", en: "Web · Team" },
     year: "2024",
+    period: { ko: "2024. 03. — 2024. 08.", en: "Mar 2024 — Aug 2024" },
+    position: {
+      ko: "Frontend 리드 · 5인 팀 (FE 2 · BE 3)",
+      en: "Frontend lead · team of 5 (FE 2 · BE 3)",
+    },
     summary: {
       ko: "WebSocket 기반 팀 대시보드. 상태 동기화와 낙관적 업데이트.",
       en: "A WebSocket-based team dashboard with state sync and optimistic updates.",
@@ -118,6 +221,16 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
       ko: "여러 사용자가 동시에 작업하는 대시보드. 실시간 상태 동기화와 낙관적 UI 업데이트를 구현.",
       en: "A dashboard for simultaneous multi-user work, with real-time state sync and optimistic UI updates.",
     },
+    features: [
+      {
+        ko: "실시간 다중 사용자 편집과 변경 사항 브로드캐스트",
+        en: "Real-time multi-user editing with change broadcasting",
+      },
+      {
+        ko: "권한(뷰어/편집자/관리자)별 화면 구성",
+        en: "Views composed by role (viewer / editor / admin)",
+      },
+    ],
     roles: [
       {
         ko: "WebSocket 이벤트 기반 상태 스토어 설계",
@@ -128,10 +241,37 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     ],
     troubleshooting: [
       {
-        ko: "동시 편집 충돌 → 서버 타임스탬프 기준 병합",
-        en: "Concurrent-edit conflicts → merged by server timestamp",
+        title: { ko: "동시 편집 충돌", en: "Concurrent-edit conflicts" },
+        problem: {
+          ko: "두 사용자가 같은 항목을 동시에 수정하면 마지막 쓰기가 이전 변경을 덮어씀",
+          en: "Two users editing the same item caused last-write-wins data loss",
+        },
+        solution: {
+          ko: "서버 타임스탬프 기준 병합 전략 도입",
+          en: "Introduced a merge strategy keyed on server timestamps",
+        },
+        result: {
+          ko: "편집 유실 리포트 0건 유지",
+          en: "Zero lost-edit reports since",
+        },
       },
-      { ko: "재연결 시 상태 복원 로직", en: "State restoration logic on reconnect" },
+      {
+        title: { ko: "재연결 시 상태 불일치", en: "State divergence on reconnect" },
+        problem: {
+          ko: "네트워크 재연결 후 로컬 상태가 서버와 어긋남",
+          en: "Local state diverged from the server after network reconnects",
+        },
+        solution: {
+          ko: "재연결 시 스냅숏 재수신 후 로컬 큐 재적용",
+          en: "Re-fetched a snapshot on reconnect and replayed the local queue",
+        },
+      },
+    ],
+    achievements: [
+      {
+        ko: "동시 접속 30명 기준 실시간 동기화 지연 200ms 이하",
+        en: "Kept sync latency under 200ms with 30 concurrent users",
+      },
     ],
     techTags: ["React", "TypeScript", "WebSocket", "Zustand"],
     links: [{ label: "GitHub", href: "#" }],
@@ -145,6 +285,11 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     title: { ko: "디자인 시스템 UI 키트", en: "Design System UI Kit" },
     category: { ko: "라이브러리 · 팀", en: "Library · Team" },
     year: "2024",
+    period: { ko: "2024. 09. — 2024. 12.", en: "Sep 2024 — Dec 2024" },
+    position: {
+      ko: "디자인 시스템 담당 · 4인 팀 (FE 3 · 디자인 1)",
+      en: "Design-system owner · team of 4 (FE 3 · Design 1)",
+    },
     summary: {
       ko: "재사용 가능한 컴포넌트 라이브러리와 토큰 시스템.",
       en: "A reusable component library and token system.",
@@ -153,6 +298,16 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
       ko: "팀 전반에서 쓰는 버튼·폼·모달 등 컴포넌트를 토큰 기반으로 정리한 UI 키트.",
       en: "A UI kit organising team-wide components (buttons, forms, modals) on a token system.",
     },
+    features: [
+      {
+        ko: "라이트/다크 토큰과 시맨틱 컬러 레이어",
+        en: "Light/dark tokens with a semantic colour layer",
+      },
+      {
+        ko: "버튼·폼·모달 등 공용 컴포넌트와 Storybook 문서",
+        en: "Shared components (buttons, forms, modals) with Storybook docs",
+      },
+    ],
     roles: [
       { ko: "CSS 변수 기반 라이트/다크 토큰", en: "Light/dark tokens via CSS variables" },
       { ko: "접근성 고려한 폼·모달 컴포넌트", en: "Accessible form and modal components" },
@@ -160,8 +315,21 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     ],
     troubleshooting: [
       {
-        ko: "토큰 네이밍 충돌 → 시맨틱 레이어 분리",
-        en: "Token naming collisions → separated a semantic layer",
+        title: { ko: "토큰 네이밍 충돌", en: "Token naming collisions" },
+        problem: {
+          ko: "컴포넌트별 색 토큰이 난립하며 이름이 충돌하고 다크모드 매핑이 어긋남",
+          en: "Per-component colour tokens proliferated, colliding in name and breaking dark-mode mapping",
+        },
+        solution: {
+          ko: "원시 토큰과 시맨틱 레이어를 분리해 참조 방향을 고정",
+          en: "Split primitive tokens from a semantic layer with a fixed reference direction",
+        },
+      },
+    ],
+    achievements: [
+      {
+        ko: "공용 컴포넌트 20종 배포 — 신규 화면 개발 시간 단축",
+        en: "Shipped 20 shared components, cutting new-screen build time",
       },
     ],
     techTags: ["React", "TypeScript", "Storybook", "CSS Vars"],

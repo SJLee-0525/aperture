@@ -1,0 +1,124 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120; /* Modal(100) 위 */
+  display: grid;
+  place-items: center;
+  outline: none;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(4px);
+  cursor: zoom-out;
+  animation: lbfade 0.25s linear;
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  width: min(94vw, 1400px);
+  height: min(88vh, 940px);
+  pointer-events: none;
+  animation: lbpop 0.3s var(--ease-spring);
+}
+.img {
+  object-fit: contain;
+}
+
+.close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--r-pill);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.close:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--r-pill);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  padding-bottom: 2px;
+  cursor: pointer;
+  transition:
+    background var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+.nav:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.6);
+}
+.nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.prev {
+  left: 16px;
+}
+.next {
+  right: 16px;
+}
+
+.counter {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-size: var(--t-small);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@keyframes lbfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lbpop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .stage {
+    animation: none;
+  }
+}

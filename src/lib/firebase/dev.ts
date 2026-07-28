@@ -5,6 +5,7 @@ import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
+import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import type { DevConfig, DevProject } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
 
@@ -15,10 +16,14 @@ const toDevProject = (id: string, d: DocumentData): DevProject => ({
   title: asText(d.title),
   category: asText(d.category),
   year: d.year ?? "",
+  period: asText(d.period),
+  position: asText(d.position),
   summary: asText(d.summary),
   overview: asText(d.overview),
+  features: d.features ?? [],
   roles: d.roles ?? [],
-  troubleshooting: d.troubleshooting ?? [],
+  troubleshooting: normalizeTroubleshooting(d.troubleshooting),
+  achievements: d.achievements ?? [],
   techTags: d.techTags ?? [],
   links: d.links ?? [],
   cover: d.cover ?? null,
