@@ -43,6 +43,19 @@ type UIDict = {
   devStackLabel: string;
   devTechLabel: string;
   devFieldLabel: string;
+  // 소개 페이지 통계 라벨 (사진·음악·개발)
+  statPhotos: string;
+  statAlbums: string;
+  statLocations: string;
+  statCameras: string;
+  statWorks: string;
+  statAwards: string;
+  statVideos: string;
+  statStages: string;
+  statProjects: string;
+  statStack: string;
+  statCareer: string;
+  statTags: string;
   comingSoon: string;
   // 음악 섹션 UI
   musicBook: string;
@@ -128,6 +141,18 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackLabel: "기술 스택",
     devTechLabel: "사용 기술",
     devFieldLabel: "분야",
+    statPhotos: "사진",
+    statAlbums: "앨범",
+    statLocations: "촬영지",
+    statCameras: "카메라",
+    statWorks: "연주",
+    statAwards: "수상",
+    statVideos: "영상",
+    statStages: "무대",
+    statProjects: "프로젝트",
+    statStack: "스택",
+    statCareer: "경력",
+    statTags: "기술 태그",
     comingSoon: "곧 공개됩니다",
     musicBook: "예매하기",
     musicProgram: "프로그램",
@@ -207,6 +232,18 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackLabel: "Stack",
     devTechLabel: "Tech Used",
     devFieldLabel: "Fields",
+    statPhotos: "Photos",
+    statAlbums: "Albums",
+    statLocations: "Locations",
+    statCameras: "Cameras",
+    statWorks: "Works",
+    statAwards: "Awards",
+    statVideos: "Videos",
+    statStages: "Stages",
+    statProjects: "Projects",
+    statStack: "Stack",
+    statCareer: "Career",
+    statTags: "Tags",
     comingSoon: "Coming soon",
     musicBook: "Book tickets",
     musicProgram: "Programme",

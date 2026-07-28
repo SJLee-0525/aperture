@@ -52,10 +52,10 @@ const MusicAboutView = ({ config, works, awards, media }: Props) => {
       summary={summary}
       body={body}
       stats={[
-        { value: works.length, label: "WORKS" },
-        { value: awards.length, label: "AWARDS" },
-        { value: media.length, label: "VIDEOS" },
-        { value: venues.length, label: "STAGES" },
+        { value: works.length, label: dict.statWorks },
+        { value: awards.length, label: dict.statAwards },
+        { value: media.length, label: dict.statVideos },
+        { value: venues.length, label: dict.statStages },
       ]}
       cols={[
         { label: dict.musicRepertoireLabel, items: composers },

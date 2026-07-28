@@ -48,7 +48,14 @@ const ImageLightbox = ({ images, index, alt, onClose, onNavigate }: Props) => {
   if (!image) return null;
 
   return createPortal(
-    <div className={styles.overlay} ref={containerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={alt}>
+    <div
+      className={styles.overlay}
+      ref={containerRef}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt}
+    >
       <button type="button" className={styles.scrim} aria-label="Close" onClick={onClose} />
       <div className={styles.stage}>
         <Image

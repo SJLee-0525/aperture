@@ -44,10 +44,10 @@ const AboutView = ({ site, photos, albums }: Props) => {
       summary={summary}
       body={body}
       stats={[
-        { value: photos.length, label: "PHOTOS" },
-        { value: albums.length, label: "ALBUMS" },
-        { value: regions.length, label: "LOCATIONS" },
-        { value: cameras.length, label: "BODIES" },
+        { value: photos.length, label: dict.statPhotos },
+        { value: albums.length, label: dict.statAlbums },
+        { value: regions.length, label: dict.statLocations },
+        { value: cameras.length, label: dict.statCameras },
       ]}
       cols={[
         { label: dict.cameraLabel, items: cameras },

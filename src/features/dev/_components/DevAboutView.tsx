@@ -44,10 +44,10 @@ const DevAboutView = ({ config, projects }: Props) => {
       summary={summary}
       body={body}
       stats={[
-        { value: projects.length, label: "PROJECTS" },
-        { value: stackCount, label: "STACK" },
-        { value: config.timeline.length, label: "CAREER" },
-        { value: techTags.length, label: "TAGS" },
+        { value: projects.length, label: dict.statProjects },
+        { value: stackCount, label: dict.statStack },
+        { value: config.timeline.length, label: dict.statCareer },
+        { value: techTags.length, label: dict.statTags },
       ]}
       cols={[
         { label: dict.devTechLabel, items: techTags },
