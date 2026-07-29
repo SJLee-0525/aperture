@@ -5,7 +5,10 @@ import { m } from "motion/react";
 import { AlbumCard } from "@/components/AlbumCard";
 import { albumRoute } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { resolveAlbumCover } from "@/features/albums/_lib/resolve-album-cover";
+import {
+  countVisibleAlbumPhotos,
+  resolveAlbumCover,
+} from "@/features/albums/_lib/resolve-album-cover";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
@@ -50,7 +53,7 @@ const AlbumsView = ({ albums, photos }: Props) => {
                 href={albumRoute(album.id)}
                 coverUrl={resolveAlbumCover(album, photos)}
                 coverAlt={title}
-                count={album.photoIds.length}
+                count={countVisibleAlbumPhotos(album, photos)}
                 title={title}
                 subtitle={pickText(album.subtitle, lang)}
               />

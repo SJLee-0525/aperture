@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveAlbumCover } from "@/features/albums/_lib/resolve-album-cover";
+import {
+  countVisibleAlbumPhotos,
+  resolveAlbumCover,
+} from "@/features/albums/_lib/resolve-album-cover";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 
@@ -32,5 +35,11 @@ describe("resolveAlbumCover", () => {
 
   it("앨범 사진이 없을 때 무관한 전체 목록 사진을 사용하지 않는다", () => {
     expect(resolveAlbumCover(album(), [photo("other-photo")])).toBeNull();
+  });
+});
+
+describe("countVisibleAlbumPhotos", () => {
+  it("삭제되거나 비공개라 공개 목록에 없는 사진은 세지 않는다", () => {
+    expect(countVisibleAlbumPhotos(album(), [photo("photo-2"), photo("other-photo")])).toBe(1);
   });
 });

@@ -1,7 +1,6 @@
 import {
   Timestamp,
   collection,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -10,12 +9,15 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
   type DocumentData,
 } from "firebase/firestore";
 
 import { COLLECTIONS } from "@/constants/collections";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
+import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
+import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 
 /** 사진 쓰기 입력 — 문서 id는 저장 필드에서 제외한다. */
@@ -105,7 +107,26 @@ const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
 
 const deletePhoto = async (id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, COLLECTIONS.PHOTOS, id));
+    const albums = await getDocs(collection(db, COLLECTIONS.ALBUMS));
+    const batch = writeBatch(db);
+
+    batch.delete(doc(db, COLLECTIONS.PHOTOS, id));
+    albums.docs.forEach((albumDoc) => {
+      const album = albumDoc.data() as Album;
+      if (!album.photoIds?.includes(id) && album.coverPhotoId !== id) return;
+      batch.update(albumDoc.ref, {
+        ...removePhotoFromAlbum(
+          {
+            coverPhotoId: album.coverPhotoId ?? "",
+            photoIds: album.photoIds ?? [],
+          },
+          id,
+        ),
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
   } catch {
     throw new Error("사진 삭제에 실패했습니다.");
   }
