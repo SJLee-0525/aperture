@@ -31,9 +31,8 @@ const createEmptyPhotoInput = (): PhotoInput => ({
 
 const createPhotoInput = (photo?: Photo): PhotoInput => {
   if (!photo) return createEmptyPhotoInput();
-  const { id: _id, likes: _likes, ...input } = photo;
+  const { id: _id, ...input } = photo;
   void _id;
-  void _likes;
   return input;
 };
 

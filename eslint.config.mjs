@@ -42,7 +42,7 @@ const config = [
         {
           // 여러 feature가 소비하는 횡단 기능. 일반 feature와 달리 다른 feature를 참조할 수 없다.
           type: "platform",
-          pattern: "src/features/(lang|theme|image-upload|photo-detail|likes)",
+          pattern: "src/features/(lang|theme|image-upload|photo-detail)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {

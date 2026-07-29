@@ -33,7 +33,6 @@ type Raw = {
   lat: number;
   lng: number;
   tags: string[];
-  likes: number;
 };
 
 const RAW: Raw[] = [
@@ -58,7 +57,6 @@ const RAW: Raw[] = [
     lat: 35.6586,
     lng: 139.7454,
     tags: ["night", "tokyo", "seascape"],
-    likes: 248,
   },
   {
     id: "p02",
@@ -81,7 +79,6 @@ const RAW: Raw[] = [
     lat: 37.5662,
     lng: 126.991,
     tags: ["street", "seoul", "film"],
-    likes: 182,
   },
   {
     id: "p03",
@@ -104,7 +101,6 @@ const RAW: Raw[] = [
     lat: 37.5707,
     lng: 128.39,
     tags: ["landscape", "fog", "bw"],
-    likes: 301,
   },
   {
     id: "p04",
@@ -127,7 +123,6 @@ const RAW: Raw[] = [
     lat: 35.0917,
     lng: 129.068,
     tags: ["sea", "busan"],
-    likes: 97,
   },
   {
     id: "p05",
@@ -150,7 +145,6 @@ const RAW: Raw[] = [
     lat: 35.6938,
     lng: 139.7036,
     tags: ["night", "tokyo"],
-    likes: 415,
   },
   {
     id: "p06",
@@ -173,7 +167,6 @@ const RAW: Raw[] = [
     lat: 43.5882,
     lng: 142.4669,
     tags: ["landscape", "snow", "minimal"],
-    likes: 268,
   },
   {
     id: "p07",
@@ -196,7 +189,6 @@ const RAW: Raw[] = [
     lat: 33.2541,
     lng: 126.56,
     tags: ["sea", "jeju", "longexposure"],
-    likes: 153,
   },
   {
     id: "p08",
@@ -219,7 +211,6 @@ const RAW: Raw[] = [
     lat: 37.5172,
     lng: 126.9963,
     tags: ["night", "seoul"],
-    likes: 204,
   },
   {
     id: "p09",
@@ -242,7 +233,6 @@ const RAW: Raw[] = [
     lat: 37.491,
     lng: 126.5,
     tags: ["sunset", "sea"],
-    likes: 176,
   },
   {
     id: "p10",
@@ -265,7 +255,6 @@ const RAW: Raw[] = [
     lat: 34.6659,
     lng: 135.501,
     tags: ["street", "rain", "night"],
-    likes: 329,
   },
   {
     id: "p11",
@@ -288,7 +277,6 @@ const RAW: Raw[] = [
     lat: 35.84,
     lng: 129.289,
     tags: ["landscape", "minimal", "bw"],
-    likes: 142,
   },
   {
     id: "p12",
@@ -311,7 +299,6 @@ const RAW: Raw[] = [
     lat: 37.773,
     lng: 128.947,
     tags: ["sea", "longexposure", "seascape"],
-    likes: 221,
   },
 ];
 
@@ -343,7 +330,6 @@ const MOCK_PHOTOS: Photo[] = RAW.map((r, i) => ({
     w: 1600,
     h: Math.round(1600 / r.ar),
   },
-  likes: r.likes,
   order: i,
   published: true,
 }));

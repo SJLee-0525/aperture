@@ -28,7 +28,6 @@ type Photo = {
   coords: Coords | null; // GPS 없으면 null → 지도 핀 없음
   tags: string[]; // 태그 id 참조 (site/config.tags)
   image: ImageMeta; // 저장된 webp
-  likes: number; // 익명 +1 공개 카운트
   order: number; // 수동 정렬 (dnd-kit)
   published: boolean;
 };

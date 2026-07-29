@@ -18,8 +18,6 @@ export default defineConfig({
         "src/hooks/use-focus-trap.ts",
         "src/hooks/use-scroll-lock.ts",
         "src/features/contact/_hooks/use-contact-form.ts",
-        "src/features/likes/_hooks/use-like.ts",
-        "src/features/likes/_components/LikeButton.tsx",
         "src/features/search/_components/SearchResults.tsx",
         "src/components/Modal.tsx",
       ],

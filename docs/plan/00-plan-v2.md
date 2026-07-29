@@ -9,7 +9,7 @@
 
 ## 0. 현재 상태 & 목표
 
-- **현재**: 사진 포트폴리오 `Aperture.` 완성 — 작업/앨범/지도(클러스터링)/소개 + 상세 모달 + 관리자 CMS + Firebase(Auth·Firestore·Storage) + 익명 좋아요. `/`·`/albums`·`/map`·`/about`·`/admin/*` 라우트.
+- **현재**: 사진 포트폴리오 `Aperture.` 완성 — 작업/앨범/지도(클러스터링)/소개 + 상세 모달 + 관리자 CMS + Firebase(Auth·Firestore·Storage). `/`·`/albums`·`/map`·`/about`·`/admin/*` 라우트.
 - **목표**: 하나의 셸(mega-menu + 랜딩 허브) 아래 **3섹션**으로 확장.
   - **사진** `/photo/*` — 기존 구현 계승(서브브랜드 `Aperture.`), 액센트 **블루**.
   - **음악** `/music/*` — 피아니스트: 연주 목록(`/music`)·공연 일정·수상·영상 **개별 페이지**(사진 섹션처럼). **히어로·연락처 없음**. 액센트 **레드**.
@@ -78,7 +78,7 @@
 - `lib/content/`: `get-music-works.ts`·`get-music-schedule.ts`·`get-music-awards.ts`·`get-music-media.ts`·`get-music-config.ts`(site/music) — mock↔REST.
 - `lib/firebase/firestore-rest.ts`: `restToMusicWork` 등 매핑 추가. `firestore.ts`: 관리자 write 래퍼.
 - **Rules**: `musicWorks·musicSchedule·musicAwards·musicMedia` (read=published·write=admin, **무인증 쓰기 없음**). `firestore.indexes.json` **인덱스 4개**(published+order). **Emulator 테스트**(무인증 write 거부 포함) 통과 후 배포.
-- **완료**: getter가 mock/실데이터 반환, Rules·인덱스 배포, 좋아요 예외가 photos에만 있음 확인.
+- **완료**: getter가 mock/실데이터 반환, Rules·인덱스 배포, 모든 공개 쓰기 금지 확인.
 
 ### Slice B1 — 공개 음악 뷰 (개별 페이지 4개) ✅
 
@@ -142,7 +142,7 @@
 - **전역/사진 config 확장**: `site/config` 에 `tagline{ko,en}` · `landingLead{ko,en}` 추가.
 - **공통**: 리스트 컬렉션은 `order`·`published`·`createdAt`·`updatedAt`. 서술 필드만 `{ko,en}`, 곡명·techTags·URL은 평면.
 - **인덱스**: 컬렉션당 `published+order` 1개 → **총 7개**(photos·albums·musicWorks·musicSchedule·musicAwards·musicMedia·devProjects).
-- **Rules**: 신규 전 컬렉션 `read=published || admin` · `write=admin`. **좋아요 +1 무인증 예외는 photos 전용** — 음악·개발 복붙 금지.
+- **Rules**: 전 컬렉션 `read=published || admin` · `write=admin`. 무인증 쓰기 예외 없음.
 - **이미지**: `music/{id}/`·`dev/{id}/` 경로. Storage Rules(image/*·10MB·관리자)는 전 경로 공통이라 추가 규칙 불필요. **EXIF 추출은 사진만.**
 
 ---
@@ -178,7 +178,7 @@
 - **`[data-section]` 초기 flash** — SSR 시 섹션 미상 → 첫 페인트에 잘못된 액센트 가능. pathname은 서버에서 알 수 있으므로 `(public)/layout.tsx`에서 `<html data-section>`(또는 route-group별 wrapper)로 서버 세팅 검토. 안 되면 no-flash 스크립트에 section 추가.
 - **음악·개발 = 개별 페이지**(사진처럼) — 각 요소가 별도 URL이라 SEO·딥링크 유리. 각 페이지 h1·메타 충실히. (단일 스크롤 계획에서 변경됨.)
 - **en 번역 부채** — pickText 폴백으로 안 깨지지만 en 품질은 수동. Phase D에서 일괄 채움.
-- **Firestore 읽기** — 공개 페이지 3개 증가하지만 ISR 캐싱으로 5만/일 여유. 좋아요 외 쓰기는 관리자만.
+- **Firestore 읽기** — 공개 페이지 3개 증가하지만 ISR 캐싱으로 5만/일 여유. 쓰기는 관리자만.
 - **콘텐츠 실재성** — 음악(공연 이력)·개발(프로젝트) 데이터는 본인 실제 이력으로 교체 필요(mock은 디자인 예시).
 
 ---

@@ -125,7 +125,6 @@ const restToPhoto = (id: string, d: Record<string, unknown>): Photo => ({
   coords: (d.coords as Coords | null) ?? null,
   tags: (d.tags as string[]) ?? [],
   image: d.image as ImageMeta,
-  likes: (d.likes as number) ?? 0,
   order: (d.order as number) ?? 0,
   published: (d.published as boolean) ?? false,
 });

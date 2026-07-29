@@ -18,8 +18,8 @@ import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import type { Photo } from "@/types/photo";
 
-/** 사진 쓰기 입력 — id(선발급)·likes(항상 0 생성) 제외. */
-type PhotoInput = Omit<Photo, "id" | "likes">;
+/** 사진 쓰기 입력 — 문서 id는 저장 필드에서 제외한다. */
+type PhotoInput = Omit<Photo, "id">;
 
 const EMPTY_EXIF: Photo["exif"] = {
   aperture: "",
@@ -47,7 +47,6 @@ const toPhoto = (id: string, data: DocumentData): Photo => ({
   coords: data.coords ?? null,
   tags: data.tags ?? [],
   image: data.image,
-  likes: data.likes ?? 0,
   order: data.order ?? 0,
   published: data.published ?? false,
 });
@@ -81,12 +80,11 @@ const getPhotoAdmin = async (id: string): Promise<Photo | null> => {
   }
 };
 
-/** 생성 — likes 는 항상 0(Rules delta 가드 전제), createdAt/updatedAt 서버시간. */
+/** 생성 — createdAt/updatedAt은 서버 시간으로 기록한다. */
 const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
   try {
     await setDoc(doc(db, COLLECTIONS.PHOTOS, id), {
       ...toDoc(input),
-      likes: 0,
       createdAt: serverTimestamp(),
     });
   } catch {
@@ -95,7 +93,7 @@ const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
   requestPublicRevalidate();
 };
 
-/** 수정 — likes·createdAt 은 건드리지 않는다. */
+/** 수정 — createdAt은 건드리지 않는다. */
 const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
   try {
     await updateDoc(doc(db, COLLECTIONS.PHOTOS, id), toDoc(input));

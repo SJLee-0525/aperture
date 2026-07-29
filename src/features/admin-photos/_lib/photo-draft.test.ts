@@ -93,14 +93,13 @@ describe("createPhotoInput", () => {
     });
   });
 
-  it("기존 사진에서 문서 id와 좋아요 수만 제외한다", () => {
+  it("기존 사진에서 문서 id만 제외한다", () => {
     const source = MOCK_PHOTOS[0];
     const input = createPhotoInput(source);
 
     expect(input).not.toHaveProperty("id");
-    expect(input).not.toHaveProperty("likes");
     expect(input).toEqual(
-      Object.fromEntries(Object.entries(source).filter(([key]) => key !== "id" && key !== "likes")),
+      Object.fromEntries(Object.entries(source).filter(([key]) => key !== "id")),
     );
   });
 });

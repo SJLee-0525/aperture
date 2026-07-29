@@ -2,7 +2,7 @@ rules_version = '2';
 
 // Aperture. — Firestore Security Rules
 // 이 프로젝트에는 백엔드 서버가 없다. 이 Rules 가 보안 경계의 전부다 (CLAUDE.md 아키텍처 원칙 #1).
-// 관리자 = 단일 UID 비교. 유일한 무인증 쓰기 예외 = photos.likes +1 (원칙 #7).
+// 관리자 = 단일 UID 비교. 공개 쓰기는 없으며 모든 컬렉션 쓰기는 관리자만 허용한다.
 // ⚠️ NEXT_PUBLIC_ADMIN_UID(.env.local) 와 아래 UID 는 수동 동기화 — 둘 다 같은 값이어야 한다.
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -12,20 +12,9 @@ service cloud.firestore {
           && request.auth.uid == "KBBvgyMIssPngwx9n0OXaL2THwy1";
     }
 
-    // ★ 유일한 무인증 쓰기: photos.likes 를 정확히 +1.
-    //   likes 필드만 변경 + (기존+1) + published 문서 — 셋 다 만족해야 허용.
-    //   감소(-1)·+2 이상·타 필드 동시 변경은 모두 거부 (증가 전용, decrement 어뷰징 봉쇄).
-    function isLikeIncrement() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
-          && request.resource.data.likes == resource.data.likes + 1
-          && request.resource.data.likes >= 1
-          && resource.data.published == true;
-    }
-
     match /photos/{id} {
-      allow read:           if resource.data.published == true || isAdmin();
-      allow create, delete: if isAdmin();
-      allow update:         if isAdmin() || isLikeIncrement();
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
     }
 
     match /albums/{id} {
@@ -33,7 +22,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ── 음악 섹션 — 무인증 쓰기 없음 (좋아요 +1 예외는 photos 전용) ──
+    // ── 음악 섹션 — 무인증 쓰기 없음 ──
     match /musicWorks/{id} {
       allow read:  if resource.data.published == true || isAdmin();
       allow write: if isAdmin();

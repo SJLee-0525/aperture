@@ -23,7 +23,7 @@
 | **연락** | `/contact` | **주황** `#f5820d` | 전역 연락 페이지 — mailto 폼 + 인스타·깃헙·메일 링크 (섹션 아니지만 자체 액센트)          |
 
 - **방문자**: 로그인 없음, **ko/en 토글**, 다크모드. 각 섹션을 자유 열람.
-  - 사진: EXIF·촬영 위치·태그, **좋아요**(익명 카운트)·**프레임 내보내기**.
+  - 사진: EXIF·촬영 위치·태그·**프레임 내보내기**.
   - 음악: 연주 프로그램·예매 정보·영상 임베드.
   - 개발: 프로젝트 상세(개요·담당·트러블슈팅·스택·링크).
 - **관리자(본인 1명)**: 로그인 후 **세 섹션 모두** 콘텐츠 관리(CMS). 사진 업로드 시 **EXIF 자동 추출**, **드래그로 수동 정렬**.
@@ -68,8 +68,8 @@
    클라이언트 SDK 아님. 클라 SDK를 서버 렌더(ISR 재생성)에서 쓰면 stale/실패 → 재생성이 폐기되고
    재빌드 전까지 공개 페이지가 안 바뀐다. REST는 `fetch` 기반이라 ISR·`revalidatePath`와 정상 연동.
    published 문서·`site`는 Rules가 무인증 read를 허용 → 웹 API 키만으로 충분. **쓰기·관리자 읽기만 클라 SDK**(`firestore.ts`).
-7. **★ 좋아요 = 유일하게 허용된 무인증 쓰기.** `photos.likes` 필드를 **+1** 하는 업데이트만 Rules가 허용
-   (delta 가드). 그 외 무인증 쓰기는 **전 컬렉션 전면 금지**(음악·개발 포함). 원칙 #1의 유일한 명문화된 예외. (firebase agent 참조)
+7. **★ 무인증 쓰기 전면 금지.** 방문자는 모든 컬렉션을 읽기만 하며, Firestore·Storage 쓰기는 관리자만 허용한다.
+   공개 server action도 Firebase ID token을 검증하고 관리자 UID와 일치할 때만 실행한다.
 8. **★ AI(Phase 3 태그 추천) = 브라우저 내 추론(`transformers.js`)만.** 클라우드 비전/LLM API 금지 —
    진짜 시크릿 키를 클라에 둘 수 없고, 프록시할 서버가 없다(원칙 #1·#5와 충돌).
 9. **★ 섹션 액센트 = `html[data-section]`.** 라우트에 따라 `photo`(블루)/`music`(레드)/`dev`(그린)/`home`(블루)를 설정,
@@ -83,10 +83,10 @@
 
 ### 사진 섹션 (기존)
 
-| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                                      |
-| -------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, **likes**, order, published |
-| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, photoIds[](**수동 순서**), order, published                                                                                                                                                   |
+| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                           |
+| -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, order, published |
+| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, photoIds[](**수동 순서**), order, published                                                                                                                                        |
 
 ### 음악 섹션 (신규)
 
@@ -150,7 +150,7 @@ src/
 │   ├── landing/                # _components/LandingView (reveal-on-scroll, 3섹션 진입)
 │   ├── photo-detail/           # _components/{PhotoModal(라이트박스/바텀시트),ExifPanel,미니맵} · _hooks/use-photo-modal
 │   ├── albums/  map/  about/   # 사진 섹션 뷰 (_components/)
-│   ├── export/  likes/         # 프레임 내보내기 · 좋아요(익명 +1)
+│   ├── export/                 # 프레임 내보내기
 │   ├── contact/                # _components/ContactView (mailto 폼 + 소셜 링크)
 │   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
 │   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon) (_components/)
@@ -193,7 +193,7 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_ADMIN_UID=                 # UI 가드용 (보안은 Rules의 isAdmin()이 담당)
+NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비교(Rules 하드코딩 UID와 동기화)
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션에 '1' 금지
 ```
 
@@ -206,12 +206,12 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드용 (보안은 Rules의 isAdmi
 
 ## 무료 한도 가드
 
-| 리소스       | 무료 한도                          | 이 프로젝트 대응                                                                         |
-| ------------ | ---------------------------------- | ---------------------------------------------------------------------------------------- |
-| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약(섹션 늘어도 페이지당 fetch). 좋아요 쓰기는 view당 1회 |
-| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image                                |
-| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                                                        |
-| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드                                |
+| 리소스       | 무료 한도                          | 이 프로젝트 대응                                          |
+| ------------ | ---------------------------------- | --------------------------------------------------------- |
+| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 쓰기는 관리자만 허용  |
+| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image |
+| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                         |
+| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드 |
 
 ## 개발 명령어
 
