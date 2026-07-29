@@ -63,6 +63,14 @@ jobs:
         env:
           NEXT_DIST_DIR: .next-playwright-v7
           NEXT_PUBLIC_USE_MOCK: "1"
+          # Client Components are evaluated during prerendering, so Firebase Auth needs
+          # syntactically valid public web config even though E2E content uses mocks.
+          NEXT_PUBLIC_FIREBASE_API_KEY: ci-mock-api-key
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-mock.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-mock
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ci-mock.appspot.com
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:000000000000:web:0000000000000000000000"
 
       - name: Upload production build
         uses: actions/upload-artifact@v4
