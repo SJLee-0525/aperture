@@ -149,7 +149,7 @@
   transition: color var(--dur) var(--ease);
 }
 .remove:hover {
-  color: var(--like);
+  color: var(--danger);
 }
 
 .note {
@@ -158,7 +158,7 @@
 }
 .error {
   font-size: var(--t-small);
-  color: var(--like);
+  color: var(--danger);
 }
 
 @media (max-width: 640px) {

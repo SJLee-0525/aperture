@@ -50,7 +50,7 @@
 }
 .stateError {
   font-size: var(--t-small);
-  color: var(--like);
+  color: var(--danger);
 }
 
 .empty {

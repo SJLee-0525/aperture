@@ -82,5 +82,5 @@
 }
 .removeBtn:hover {
   border-color: var(--line-strong);
-  color: var(--like);
+  color: var(--danger);
 }

@@ -49,8 +49,8 @@
   --accent: #0a84ff;
   --accent-press: #0066d6;
   --accent-soft: rgba(10, 132, 255, 0.12);
-  --like: #ff2d55;
-  --like-soft: rgba(255, 45, 85, 0.12);
+  --danger: #ff2d55;
+  --danger-soft: rgba(255, 45, 85, 0.12);
 
   /* --- 섹션 팔레트 (랜딩 진입 행 + html[data-section] 공용 단일 출처) --- */
   --accent-photo: #0a84ff;
@@ -117,8 +117,8 @@
 
   --accent: #2b95ff;
   --accent-soft: rgba(43, 149, 255, 0.16);
-  --like: #ff375f;
-  --like-soft: rgba(255, 55, 95, 0.18);
+  --danger: #ff375f;
+  --danger-soft: rgba(255, 55, 95, 0.18);
   --accent-music: #ff5b60;
   --accent-dev: #2ecc71;
   --accent-contact: #fb923c;

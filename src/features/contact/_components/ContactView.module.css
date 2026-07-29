@@ -103,7 +103,7 @@
   color: var(--accent);
 }
 .statusError {
-  color: var(--like);
+  color: var(--danger);
 }
 
 /* ===== 직접 연락 (폼 위, 라벨 없음) — 헤더와의 보더 제거, 보더는 폼 위(아래)에만 ===== */

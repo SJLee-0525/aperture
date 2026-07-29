@@ -205,7 +205,7 @@
   transition: color var(--dur) var(--ease);
 }
 .chipRemove:hover {
-  color: var(--like);
+  color: var(--danger);
 }
 
 .remove {
@@ -219,7 +219,7 @@
   transition: color var(--dur) var(--ease);
 }
 .remove:hover {
-  color: var(--like);
+  color: var(--danger);
 }
 .linkRow .remove {
   padding-top: 0;
@@ -247,7 +247,7 @@
 
 .error {
   font-size: var(--t-small);
-  color: var(--like);
+  color: var(--danger);
 }
 
 .actions {

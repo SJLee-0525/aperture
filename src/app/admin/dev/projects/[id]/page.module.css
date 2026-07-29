@@ -4,5 +4,5 @@
 }
 .stateError {
   font-size: var(--t-body);
-  color: var(--like);
+  color: var(--danger);
 }

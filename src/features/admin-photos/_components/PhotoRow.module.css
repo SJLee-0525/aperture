@@ -100,7 +100,7 @@
   transition: color var(--dur) var(--ease);
 }
 .delete:hover {
-  color: var(--like);
+  color: var(--danger);
 }
 
 @media (max-width: 640px) {

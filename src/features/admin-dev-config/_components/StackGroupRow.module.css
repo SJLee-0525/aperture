@@ -73,7 +73,7 @@
   transition: color var(--dur) var(--ease);
 }
 .delete:hover {
-  color: var(--like);
+  color: var(--danger);
 }
 
 .items {
@@ -156,7 +156,7 @@
   transition: color var(--dur) var(--ease);
 }
 .itemDelete:hover {
-  color: var(--like);
+  color: var(--danger);
 }
 
 .addItem {
