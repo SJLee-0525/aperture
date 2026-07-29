@@ -1,5 +1,5 @@
-import { mockContentEnabled } from "@/lib/content/content-source";
-import { fetchPublishedMusicAwards, isFirebaseConfigured } from "@/lib/firebase/firestore-rest";
+import { shouldUseMockContent } from "@/lib/content/content-source";
+import { fetchPublishedMusicAwards } from "@/lib/firebase/firestore-rest";
 import { MOCK_MUSIC_AWARDS } from "@/mocks/music";
 import type { MusicAward } from "@/types/music";
 
@@ -9,13 +9,8 @@ const mockAwards = (): MusicAward[] =>
 
 /** 공개 수상 목록 — published 필터 + order 정렬. Firebase 설정 시 실데이터, 아니면 mock. */
 const getMusicAwards = async (): Promise<MusicAward[]> => {
-  if (mockContentEnabled() || !isFirebaseConfigured()) return mockAwards();
-  try {
-    return await fetchPublishedMusicAwards();
-  } catch (error) {
-    console.warn("[content] getMusicAwards: Firestore REST 실패 — 빈 목록", error);
-    return [];
-  }
+  if (shouldUseMockContent()) return mockAwards();
+  return fetchPublishedMusicAwards();
 };
 
 export { getMusicAwards };

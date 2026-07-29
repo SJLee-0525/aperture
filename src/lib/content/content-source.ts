@@ -1,5 +1,7 @@
+import { isFirebaseConfigured } from "@/lib/firebase/config";
+
 /**
- * 콘텐츠 소스 스위치 (개발 편의). getter 들이 실 Firestore 대신 mock 을 쓸지 결정한다.
+ * 콘텐츠 소스 스위치. getter 들이 실 Firestore 대신 mock 을 쓸지 결정한다.
  *
  * - 기본: **개발(`npm run dev`)에선 mock 우선** — 실 컬렉션이 비어도 UI가 채워져 테스트가 쉽다.
  *   음악·개발 섹션이 완성되기 전까지의 편의 (사용자 요청).
@@ -15,4 +17,19 @@ const mockContentEnabled = (): boolean => {
   return process.env.NODE_ENV !== "production";
 };
 
-export { mockContentEnabled };
+/**
+ * 개발 환경은 Firebase 설정이 없으면 mock 으로 동작할 수 있지만, 운영 환경에서는
+ * 설정 누락을 콘텐츠 없음으로 위장하지 않는다. 명시적 mock 빌드만 예외다.
+ */
+const shouldUseMockContent = (): boolean => {
+  if (mockContentEnabled()) return true;
+  if (isFirebaseConfigured()) return false;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Firebase 공개 콘텐츠 설정이 없습니다. NEXT_PUBLIC_FIREBASE_PROJECT_ID와 NEXT_PUBLIC_FIREBASE_API_KEY를 확인하세요.",
+    );
+  }
+  return true;
+};
+
+export { mockContentEnabled, shouldUseMockContent };
