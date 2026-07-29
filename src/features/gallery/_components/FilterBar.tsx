@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Chip } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
@@ -31,6 +31,18 @@ type Props = {
 const FilterBar = (props: Props) => {
   const { dict, lang } = useLang();
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <div className={styles.bar}>
@@ -48,6 +60,7 @@ const FilterBar = (props: Props) => {
 
       <div className={styles.filters}>
         <button
+          ref={triggerRef}
           type="button"
           className={styles.filterBtn}
           aria-label={dict.filterLabel}
