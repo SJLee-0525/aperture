@@ -5,6 +5,7 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const port = 3100;
 const baseURL = `http://127.0.0.1:${port}`;
+const production = process.env.E2E_PRODUCTION === "1";
 const serverEnv = {
   ...process.env,
   NEXT_DIST_DIR: ".next-playwright-v7",
@@ -12,23 +13,21 @@ const serverEnv = {
   NEXT_PUBLIC_USE_MOCK: "1",
 };
 
-const server = spawn(
-  process.execPath,
-  [
-    "node_modules/next/dist/bin/next",
-    "dev",
-    "--webpack",
-    "--hostname",
-    "127.0.0.1",
-    "--port",
-    String(port),
-  ],
-  {
-    cwd: root,
-    env: serverEnv,
-    stdio: "ignore",
-  },
-);
+const serverArgs = [
+  "node_modules/next/dist/bin/next",
+  production ? "start" : "dev",
+  ...(!production ? ["--webpack"] : []),
+  "--hostname",
+  "127.0.0.1",
+  "--port",
+  String(port),
+];
+
+const server = spawn(process.execPath, serverArgs, {
+  cwd: root,
+  env: serverEnv,
+  stdio: "ignore",
+});
 
 function stopServer() {
   if (server.exitCode !== null) return;
