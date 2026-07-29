@@ -1,5 +1,5 @@
 ---
-description: 배포 전 점검. 빌드 통과, Security Rules 안전성(전체 공개 금지 + 좋아요 예외 정확성), 환경변수(Firebase), 무료 한도 영향, 시크릿 누출을 확인한다. Vercel 배포·Rules 배포 직전에 실행.
+description: 배포 전 점검. 빌드 통과, Security Rules 안전성(무인증 쓰기 전면 금지), 환경변수(Firebase), 무료 한도 영향, 시크릿 누출을 확인한다. Vercel 배포·Rules 배포 직전에 실행.
 allowed-tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 ---
 
@@ -19,13 +19,10 @@ npm run lint
 - `firestore.rules` / `storage.rules` Read 후 확인:
   - [ ] `allow write: if true` 또는 match-all 허용 규칙 **없음** (있으면 🔴 즉시 중단)
   - [ ] `isAdmin()` 의 UID 가 실제 관리자 UID 와 일치 (firestore + storage 두 파일)
-  - [ ] 새로 추가된 컬렉션이 Rules 에 누락되지 않음 (photos·albums·**musicWorks·musicSchedule·musicAwards·musicMedia·devProjects**·site)
-  - [ ] **좋아요 예외가 정확함** — `photos` update 에서 익명 허용 조건이 아래 **셋 다** 있는가:
-        `diff().affectedKeys().hasOnly(['likes'])` + `== resource.data.likes + 1` + `published == true`.
-        하나라도 빠지면 🔴 (익명이 다른 필드 조작 / 임의값 세팅 / 초안 조작 가능해짐)
-  - [ ] **좋아요 예외가 photos 에만 있는가** — 음악·개발 컬렉션에 무인증 write 예외가 새어들지 않았는가 (music*·dev* 는 read=published·write=admin 뿐)
-  - [ ] `photos` 에서 익명 **create·delete·감소(-1)** 가 불가한가
-- Rules 가 변경됐다면: Emulator 테스트 통과 확인 (`firebase` agent 체크리스트 — 특히 좋아요 +2/-1/타필드 거부, 음악·개발 무인증 write 거부)
+  - [ ] 새로 추가된 컬렉션이 Rules 에 누락되지 않음 (photos·albums·**musicWorks·musicAwards·musicMedia·devProjects**·site)
+  - [ ] 모든 컬렉션의 create/update/delete 가 관리자 UID에만 허용되는가
+  - [ ] Storage 개별 파일 get만 공개이고 list/write/delete는 관리자로 제한되는가
+- Rules 가 변경됐다면: Emulator 테스트 통과 확인 (전체 컬렉션 무인증 write 거부 + Storage 제한)
 
 ### Step 3 — 환경변수·시크릿
 
@@ -38,9 +35,8 @@ npm run lint
 ### Step 4 — 무료 한도 영향
 
 - [ ] 새 공개 페이지(랜딩·음악·개발 포함)에 `revalidate` 있음 (Firestore 읽기 5만/일 보호)
-- [ ] 공개 쿼리(`published + order`)마다 인덱스가 `firestore.indexes.json` 에 있는가 (컬렉션당 1개 · 총 7개)
+- [ ] 공개 쿼리(`published + order`)마다 인덱스가 `firestore.indexes.json` 에 있는가 (컬렉션당 1개 · 총 6개)
 - [ ] 업로드 경로(사진·음악 포스터·개발 썸네일)에 이미지 압축(webp ~2048px) 적용됨 (Storage 다운로드 1GB/일 보호)
-- [ ] 좋아요 쓰기가 과도하지 않은가 (Firestore 쓰기 2만/일 — view 당 1회 수준)
 - [ ] 지도가 `/photo/map` 라우트에서만 dynamic 로드되는가 (MapLibre 스크립트 code-split), 음악 YouTube 는 facade 후 클릭 시 iframe 인가
 - [ ] (최초 배포 시) **GCP 예산 알림 $1 등록됨** (Firebase 결제 표면 — 지도는 CARTO 무료라 과금 없음)
 
@@ -50,7 +46,7 @@ npm run lint
 ## deploy-check 결과
 
 빌드: ✅/❌
-Rules: 🟢 안전 / 🔴 차단 사유 (좋아요 예외 포함)
+Rules: 🟢 안전 / 🔴 차단 사유
 환경변수: ✅/❌ 누락 목록
 무료 한도: 🟢/🟡 주의사항
 
@@ -62,5 +58,5 @@ Rules: 🟢 안전 / 🔴 차단 사유 (좋아요 예외 포함)
 
 ## 참조
 
-- [`firebase` agent](../agents/firebase.md) — Rules 표준 패턴·좋아요 예외·Emulator 테스트
+- [`firebase` agent](../agents/firebase.md) — Rules 표준 패턴·Emulator 테스트
 - [`CLAUDE.md`](../../CLAUDE.md) — 무료 한도 가드 표

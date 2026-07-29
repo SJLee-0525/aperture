@@ -8,4 +8,4 @@
 
 ## 프로젝트 결정
 
-- [decision_stack_firebase.md](./decision_stack_firebase.md) — **Aperture. 사진 포트폴리오** 스택·정체성·핵심 기능 결정 (Firebase 선택 사유 + 2026-07-01 사진 전환 그릴링 확정본: photos/albums/site 모델·통제 태그사전·수동 order 정렬·exifr·익명 좋아요·지도(MapLibre+CARTO)·내보내기·P3 브라우저 AI).
+- [decision_stack_firebase.md](./decision_stack_firebase.md) — **Aperture. 사진 포트폴리오** 스택·정체성·핵심 기능 결정 (Firebase 선택 사유 + photos/albums/site 모델·통제 태그사전·수동 order 정렬·exifr·지도(MapLibre+CARTO)·내보내기·P3 브라우저 AI). 익명 쓰기 기능은 제거됨.

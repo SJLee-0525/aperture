@@ -41,11 +41,10 @@ allowed-tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 아래는 **디자인과 다른 게 정상** — 위반으로 보고하지 말 것 (전체·최신 목록은 [design/README.md](../../design/README.md)):
 
 1. 언어 토글 UI 추가 (디자인엔 없음)
-2. 좋아요 = 익명 공개 카운트 (`likes≥1` 빨강 채움) — 디자인은 로컬 토글
-3. 지도 = MapLibre+CARTO 실제 지도 — 디자인은 추상 SVG 맵
-4. 내보내기 해상도 "원본" 옵션 제거 (저장 webp 해상도까지만)
-5. 사진 상단바 `.avatar`(유저 아이콘) 제거 — 관리자 진입은 `/admin` 직접
-6. 음악·개발 콘텐츠 = Firestore CMS + ko/en (디자인은 정적 ko)
+2. 지도 = MapLibre+CARTO 실제 지도 — 디자인은 추상 SVG 맵
+3. 내보내기 해상도 "원본" 옵션 제거 (저장 webp 해상도까지만)
+4. 사진 상단바 `.avatar`(유저 아이콘) 제거 — 관리자 진입은 `/admin` 직접
+5. 음악·개발 콘텐츠 = Firestore CMS + ko/en (디자인은 정적 ko)
 
 ### Step 5 — 차이 보고
 

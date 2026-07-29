@@ -27,7 +27,7 @@
 - **태그 = 통제 사전** (`site/config.tags` 에 `{id,ko,en}`), 사진은 id 참조. 카메라·초점거리 필터는 EXIF 파생.
 - **정렬 = 수동 `order` 필드 + dnd-kit 드래그** (날짜 정렬 아님 — **큐레이션 우선**이 사용자 결정).
 - **이미지**: `exifr` 로 **압축 前** EXIF·GPS 추출 → webp ~2048px 압축. **원본 미보관.** GPS 없으면 지도 클릭 수동 좌표.
-- **좋아요**: 익명 **+1 전용** 공개 카운트, `likes≥1` 빨강. Rules delta-guard = **유일하게 허용된 무인증 쓰기**.
+- **쓰기 보안**: 익명 쓰기 기능은 제거. Firestore·Storage 쓰기는 관리자 UID만 허용.
 - **지도**: **MapLibre GL + CARTO 무료 타일**(Positron/Dark Matter, 테마 연동). 키·카드 없음, `/map` 에서만 dynamic 로드(ssr:false). (Google Maps는 카드·비용 이슈로 기각 — 2026-07-02)
 - **내보내기**: 클라이언트 canvas 프레임 6종 → webp, 저장 해상도(원본 옵션 제거).
 - **AI 태그 추천**: **Phase 3**, **브라우저 내 `transformers.js` CLIP zero-shot 만** (클라우드 비전/LLM API 는 시크릿 키·서버 필요 → 아키텍처상 금지).

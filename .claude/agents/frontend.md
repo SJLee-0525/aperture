@@ -12,7 +12,7 @@ color: blue
 
 - `design/ver_2/` 프로토타입(Desktop `Sungjoon Lee.html` / Mobile `Sungjoon Lee - Mobile.html`) → Next.js 컴포넌트 이식 (디자인 충실도 책임)
 - **셸 & 랜딩**: mega-menu SiteHeader(사진/음악/개발 드롭다운), 랜딩 허브(`/`, 3섹션 진입), 모바일 앱바+탭바+메뉴 시트, **섹션 액센트**(`[data-section]`)
-- **사진 섹션**(`/photo/*`): **작업**(그리드+필터) · **앨범** · **지도**(MapLibre+CARTO) · **소개** + **상세 모달**(`?photo=`) + **프레임 내보내기**(canvas 6종 → webp) + **좋아요**(익명 +1)
+- **사진 섹션**(`/photo/*`): **작업**(그리드+필터) · **앨범** · **지도**(MapLibre+CARTO) · **소개** + **상세 모달**(`?photo=`) + **프레임 내보내기**(canvas 6종 → webp)
 - **음악 섹션**(`/music`): 단일 스크롤 — 연주 목록·공연 일정·수상·영상·연락처 + 연주/수상 모달 + 히어로 타이핑 효과 (원본: `design/ver_2/music.js`)
 - **개발 섹션**(`/dev`): 단일 스크롤 — 소개(인터뷰)·기술 스택·프로젝트·경력 + 프로젝트 모달 + reveal·타이핑·로딩 게이트 (원본: `design/ver_2/dev.js`)
 - 관리자 페이지: 로그인, **세 섹션 모두** 폼 CMS(사진·앨범·태그·소개 + 음악 works/schedule/awards/media + 개발 projects), **이미지 업로드**(사진만 EXIF 자동추출), **dnd-kit 수동 정렬**
@@ -21,7 +21,7 @@ color: blue
 
 **하지 않는 일** (다른 agent 책임):
 
-- Firestore 데이터 모델·Security Rules·인증 설계·좋아요 Rule → `firebase`
+- Firestore 데이터 모델·Security Rules·인증 설계 → `firebase`
 
 ## 반드시 참조
 
@@ -74,7 +74,7 @@ src/
 │   ├── landing/                 # _components/LandingView (reveal-on-scroll, 3섹션 진입 행)
 │   ├── photo-detail/            # _components/{PhotoModal(데스크톱 라이트박스/모바일 바텀시트),ExifPanel,MiniMap} · _hooks/use-photo-modal
 │   ├── albums/  map/  about/    # _components/: AlbumsView·AlbumDetailView / MapView·MapCanvas·LocationList / AboutView
-│   ├── export/  likes/          # _components/{ExportModal,LikeButton} · _hooks/{use-export,use-like} · _lib/{framePreview,liked-store}
+│   ├── export/                  # _components/ExportModal · _hooks/use-export · _lib/framePreview
 │   ├── music/                   # _components/: MusicWorksView·MusicCareerView·MusicMediaView·MusicAboutView (+ 연주/수상 모달)
 │   ├── dev/                     # _components/: DevStackView·DevProjectsView·DevCareerView·DevAboutView (+ 프로젝트 모달, reveal·타이핑)
 │   ├── site-header/             # _components/: SiteHeader(mega-menu), MobileTabBar/MobileMenu, ThemeToggleButton, LangMenu, SearchBox, SectionAccent
@@ -233,11 +233,6 @@ export default async function WorkPage() {
   옵션: 워터마크(없음/`Aperture.`), 메타 범위(노출만/전체/위치), **해상도 = 저장본 기준**(원본 옵션 없음).
 - 프레임+EXIF 를 canvas 로 합성 → **webp** 다운로드. heavy → `next/dynamic`.
 
-### 11. 좋아요 — [의도적 이탈 #2](../../design/README.md)
-
-- `features/likes/`. 하트 클릭 = `likePhoto(id)`(firebase 래퍼, `increment(1)`). **증가 전용·중복 허용·기억 안 함**.
-- 렌더: **`likes >= 1` 이면 빨강 채움**, 0 이면 빈 하트(전역 인기 반영 — 개인 행동 아님). 클릭 시 optimistic +1.
-
 ### 12. dnd-kit 수동 정렬 (관리자)
 
 - 사진·앨범 목록은 관리자가 **드래그로 순서 조정** → `order` 필드 갱신. 앨범 내 사진 순서 = `photoIds` 배열 재배열.
@@ -248,7 +243,7 @@ export default async function WorkPage() {
 
 - **워드마크 = `Sungjoon Lee.`** (site nav). 사진 섹션 내부만 서브브랜드 `Aperture.` 유지. 원본: `design/ver_2/Sungjoon Lee.html` `#site-nav`.
 - **데스크톱 mega-menu**: 사진/음악/개발 3개 상위 + hover 드롭다운 패널(하위 링크). `constants/navigation.ts` 의 구조 상수로 렌더. 각 링크는 `href`(사진=라우트) 또는 앵커(음악·개발 인-페이지).
-- **검색창 = 가장 우측**(언어·테마 토글 옆), **항상 노출**(전 섹션, 사용자 확정). 제출 시 사진 검색(`/photo?q=`)으로 이동. 모바일은 버거 메뉴 안. **아바타/유저 아이콘은 이식하지 않음**(디자인의 `.avatar` 제거).
+- **검색창 = 가장 우측**(언어·테마 토글 옆), **항상 노출**(전 섹션, 사용자 확정). 제출 시 통합 검색(`/search?q=`)으로 이동. 모바일은 버거 메뉴 안. **아바타/유저 아이콘은 이식하지 않음**(디자인의 `.avatar` 제거).
 - **섹션 액센트**: `SectionAccent`(client, `(public)/layout.tsx` 마운트)가 pathname → `document.documentElement.dataset.section` (`home`/`photo`/`music`/`dev`) 설정. 색은 `globals.css`(=site.css 이식)의 `html[data-section]` 규칙이 `--accent` 오버라이드. **컴포넌트에서 섹션 색 하드코딩 금지.**
 - **모바일**: 앱바(워드마크+테마+버거) + **섹션별 하단 탭바**(섹션마다 탭 세트 다름) + 버거 메뉴 시트(사진/음악/개발 아코디언 + 검색). 원본: `Sungjoon Lee - Mobile.html`.
 - **랜딩(`/`)**: 이름·태그라인(Photographer · Pianist · Developer)·소개 + 사진/음악/개발 진입 행. reveal-on-scroll(IntersectionObserver 또는 `motion`). `features/landing/`.
@@ -326,7 +321,7 @@ PR/변경 마무리 전:
 
 ## 데이터·인증 관련 결정이 필요하면
 
-Firestore 스키마 변경, Rules 영향(특히 **좋아요 예외**), 인증 흐름 변경은 직접 결정하지 말고 `firebase` agent 에 검토 요청:
+Firestore 스키마 변경, Rules 영향, 인증 흐름 변경은 직접 결정하지 말고 `firebase` agent 에 검토 요청:
 
 ```
 Agent({ subagent_type: "firebase",
