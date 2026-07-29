@@ -11,6 +11,7 @@ import styles from "./Modal.module.css";
 type Props = {
   open: boolean;
   onClose: () => void;
+  closeLabel: string;
   crumb?: string;
   label?: string;
   maxWidth?: number; // 패널 최대 폭(px) — 연주 920 / 수상 600 등
@@ -24,7 +25,16 @@ type Props = {
  * document.body 로 포털 — 헤더/섹션 래퍼의 stacking context 밖으로 빼내 네비 뒤에 가리지 않게 한다.
  * 스크림 클릭·ESC·스크롤 잠금. 음악·개발 상세 공용 순수 UI. 액센트는 상위 [data-section] 이 결정.
  */
-const Modal = ({ open, onClose, crumb, label, maxWidth, mobileFull, children }: Props) => {
+const Modal = ({
+  open,
+  onClose,
+  closeLabel,
+  crumb,
+  label,
+  maxWidth,
+  mobileFull,
+  children,
+}: Props) => {
   useScrollLock(open);
   const panelRef = useFocusTrap(open);
 
@@ -42,7 +52,7 @@ const Modal = ({ open, onClose, crumb, label, maxWidth, mobileFull, children }: 
 
   return createPortal(
     <div className={mobileFull ? `${styles.overlay} ${styles.overlayFull}` : styles.overlay}>
-      <button type="button" className={styles.scrim} aria-label="Close" onClick={onClose} />
+      <button type="button" className={styles.scrim} aria-label={closeLabel} onClick={onClose} />
       <div
         ref={panelRef}
         className={mobileFull ? `${styles.panel} ${styles.panelFull}` : styles.panel}
@@ -54,7 +64,7 @@ const Modal = ({ open, onClose, crumb, label, maxWidth, mobileFull, children }: 
       >
         <div className={styles.head}>
           <span className={styles.crumb}>{crumb}</span>
-          <button type="button" className={styles.close} aria-label="Close" onClick={onClose}>
+          <button type="button" className={styles.close} aria-label={closeLabel} onClick={onClose}>
             ×
           </button>
         </div>

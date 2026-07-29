@@ -17,7 +17,7 @@ const OPTIONS: { code: Lang; label: string }[] = [
  * 데스크톱·모바일 헤더 공용.
  */
 const LangMenu = () => {
-  const { lang, setLang } = useLang();
+  const { dict, lang, setLang } = useLang();
   const [open, setOpen] = useState(false);
 
   const pick = (next: Lang) => {
@@ -30,7 +30,7 @@ const LangMenu = () => {
       <button
         type="button"
         onClick={() => setOpen((isOpen) => !isOpen)}
-        aria-label="Language"
+        aria-label={dict.languageLabel}
         aria-haspopup="menu"
         aria-expanded={open}
         className={styles.btn}

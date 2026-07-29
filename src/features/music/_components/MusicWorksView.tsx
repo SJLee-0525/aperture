@@ -59,6 +59,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
       <Modal
         open={open}
         onClose={close}
+        closeLabel={dict.closeLabel}
         maxWidth={920}
         mobileFull
         crumb={selected ? pickText(selected.category, lang) : ""}

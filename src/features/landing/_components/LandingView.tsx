@@ -85,7 +85,7 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           {pickText(site.landingLead, lang)}
         </m.p>
 
-        <nav className={styles.rows} aria-label="Sections">
+        <nav className={styles.rows} aria-label={dict.sectionsLabel}>
           {SECTIONS.map((section, i) => (
             <MotionLink
               key={section.key}

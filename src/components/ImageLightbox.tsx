@@ -14,6 +14,9 @@ type Props = {
   images: ImageMeta[];
   index: number;
   alt: string;
+  closeLabel: string;
+  previousLabel: string;
+  nextLabel: string;
   onClose: () => void;
   onNavigate: (index: number) => void;
 };
@@ -24,7 +27,16 @@ type Props = {
  * EXIF 등 도메인 결합 없이 이미지 확대만 담당한다. ESC 는 capture 단계에서 소비해
  * 아래에 열려 있는 Modal(문서 bubble 리스너)이 함께 닫히지 않게 한다.
  */
-const ImageLightbox = ({ images, index, alt, onClose, onNavigate }: Props) => {
+const ImageLightbox = ({
+  images,
+  index,
+  alt,
+  closeLabel,
+  previousLabel,
+  nextLabel,
+  onClose,
+  onNavigate,
+}: Props) => {
   const count = images.length;
   const containerRef = useFocusTrap(true);
   useScrollLock(true);
@@ -56,7 +68,7 @@ const ImageLightbox = ({ images, index, alt, onClose, onNavigate }: Props) => {
       aria-modal="true"
       aria-label={alt}
     >
-      <button type="button" className={styles.scrim} aria-label="Close" onClick={onClose} />
+      <button type="button" className={styles.scrim} aria-label={closeLabel} onClick={onClose} />
       <div className={styles.stage}>
         <Image
           key={image.url}
@@ -69,7 +81,7 @@ const ImageLightbox = ({ images, index, alt, onClose, onNavigate }: Props) => {
         />
       </div>
 
-      <button type="button" className={styles.close} aria-label="Close" onClick={onClose}>
+      <button type="button" className={styles.close} aria-label={closeLabel} onClick={onClose}>
         ×
       </button>
 
@@ -78,7 +90,7 @@ const ImageLightbox = ({ images, index, alt, onClose, onNavigate }: Props) => {
           <button
             type="button"
             className={`${styles.nav} ${styles.prev}`}
-            aria-label="Previous image"
+            aria-label={previousLabel}
             disabled={index === 0}
             onClick={() => onNavigate(index - 1)}
           >
@@ -87,7 +99,7 @@ const ImageLightbox = ({ images, index, alt, onClose, onNavigate }: Props) => {
           <button
             type="button"
             className={`${styles.nav} ${styles.next}`}
-            aria-label="Next image"
+            aria-label={nextLabel}
             disabled={index === count - 1}
             onClick={() => onNavigate(index + 1)}
           >

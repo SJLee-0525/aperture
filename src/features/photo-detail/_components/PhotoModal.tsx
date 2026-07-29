@@ -72,7 +72,7 @@ const chevRight = (
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
  */
 const PhotoModal = ({ photos, tags }: Props) => {
-  const { lang } = useLang();
+  const { dict, lang } = useLang();
   const { photo, open, close, next, prev } = usePhotoModal(photos);
   const [expanded, setExpanded] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -117,7 +117,12 @@ const PhotoModal = ({ photos, tags }: Props) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
         >
-          <button type="button" className={styles.scrim} aria-label="Close" onClick={close} />
+          <button
+            type="button"
+            className={styles.scrim}
+            aria-label={dict.closeLabel}
+            onClick={close}
+          />
           <m.div
             className={styles.inner}
             initial={{ opacity: 0, scale: 0.985 }}
@@ -155,7 +160,7 @@ const PhotoModal = ({ photos, tags }: Props) => {
               <button
                 type="button"
                 className={`${styles.nav} ${styles.close}`}
-                aria-label="Close"
+                aria-label={dict.closeLabel}
                 onClick={close}
               >
                 {closeIcon}
@@ -163,7 +168,7 @@ const PhotoModal = ({ photos, tags }: Props) => {
               <button
                 type="button"
                 className={`${styles.nav} ${styles.prev}`}
-                aria-label="Previous"
+                aria-label={dict.previousImageLabel}
                 onClick={prev}
               >
                 {chevLeft}
@@ -171,7 +176,7 @@ const PhotoModal = ({ photos, tags }: Props) => {
               <button
                 type="button"
                 className={`${styles.nav} ${styles.next}`}
-                aria-label="Next"
+                aria-label={dict.nextImageLabel}
                 onClick={next}
               >
                 {chevRight}

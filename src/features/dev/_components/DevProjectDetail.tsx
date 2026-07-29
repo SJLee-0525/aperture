@@ -28,6 +28,7 @@ const DevProjectDetail = ({ project, open, onClose }: Props) => {
     <Modal
       open={open}
       onClose={onClose}
+      closeLabel={dict.closeLabel}
       maxWidth={720}
       mobileFull
       crumb={project ? `${pickText(project.category, lang)} · ${project.year}` : ""}
@@ -37,7 +38,13 @@ const DevProjectDetail = ({ project, open, onClose }: Props) => {
         <div className={styles.detail}>
           {media.length > 0 ? (
             <div className={styles.media}>
-              <ImageCarousel images={media} alt={pickText(project.title, lang)} />
+              <ImageCarousel
+                images={media}
+                alt={pickText(project.title, lang)}
+                closeLabel={dict.closeLabel}
+                previousLabel={dict.previousImageLabel}
+                nextLabel={dict.nextImageLabel}
+              />
             </div>
           ) : null}
 

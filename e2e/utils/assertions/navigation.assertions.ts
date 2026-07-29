@@ -20,7 +20,7 @@ const navigationAssertions = {
   },
 
   async mobileTab(page: Page) {
-    const tabs = page.getByRole("navigation", { name: "Mobile navigation" });
+    const tabs = page.getByRole("navigation", { name: "모바일 내비게이션" });
     await tabs.getByRole("link", { name: "앨범" }).click();
     await expect(page).toHaveURL(/\/photo\/albums$/);
   },

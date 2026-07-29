@@ -64,6 +64,13 @@ type UIDict = {
   menuOpenLabel: string;
   menuCloseLabel: string;
   homeLabel: string;
+  closeLabel: string;
+  previousImageLabel: string;
+  nextImageLabel: string;
+  languageLabel: string;
+  themeLabel: string;
+  mobileNavigationLabel: string;
+  sectionsLabel: string;
   searchPlaceholder: string;
   searchPrompt: string;
   searchEmpty: string;
@@ -164,6 +171,13 @@ const DICTIONARY: Record<Lang, UIDict> = {
     menuOpenLabel: "메뉴 열기",
     menuCloseLabel: "메뉴 닫기",
     homeLabel: "이성준 홈",
+    closeLabel: "닫기",
+    previousImageLabel: "이전 이미지",
+    nextImageLabel: "다음 이미지",
+    languageLabel: "언어",
+    themeLabel: "테마 전환",
+    mobileNavigationLabel: "모바일 내비게이션",
+    sectionsLabel: "섹션",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     searchPrompt: "검색어를 입력하세요.",
     searchEmpty: "검색 결과가 없습니다.",
@@ -259,6 +273,13 @@ const DICTIONARY: Record<Lang, UIDict> = {
     menuOpenLabel: "Open menu",
     menuCloseLabel: "Close menu",
     homeLabel: "Sungjoon Lee home",
+    closeLabel: "Close",
+    previousImageLabel: "Previous image",
+    nextImageLabel: "Next image",
+    languageLabel: "Language",
+    themeLabel: "Toggle theme",
+    mobileNavigationLabel: "Mobile navigation",
+    sectionsLabel: "Sections",
     searchPlaceholder: "Search · tag / gear / place",
     searchPrompt: "Type to search.",
     searchEmpty: "No results found.",

@@ -26,7 +26,7 @@ const MobileTabBar = () => {
   if (section === "home" || section === "contact") return null;
 
   return (
-    <nav className={styles.tabbar} aria-label="Mobile navigation">
+    <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel}>
       {MOBILE_TABS[section].map((tab) => (
         <Link
           key={tab.href}

@@ -51,6 +51,7 @@ const MusicCareerView = ({ config, awards }: Props) => {
       <Modal
         open={open}
         onClose={close}
+        closeLabel={dict.closeLabel}
         maxWidth={600}
         crumb={selected ? `${dict.musicAwardsNav} · ${selected.year}` : ""}
         label={selected ? pickText(selected.name, lang) : ""}

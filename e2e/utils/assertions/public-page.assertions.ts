@@ -16,7 +16,7 @@ const publicPageAssertions = {
   async themeCanBeChanged(page: Page) {
     const html = page.locator("html");
     const before = await html.getAttribute("data-theme");
-    await page.getByRole("button", { name: "Theme" }).click();
+    await page.getByRole("button", { name: "테마 전환" }).click();
     await expect(html).not.toHaveAttribute("data-theme", before ?? "");
   },
 };

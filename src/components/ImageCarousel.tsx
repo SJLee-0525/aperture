@@ -11,6 +11,9 @@ import styles from "./ImageCarousel.module.css";
 type Props = {
   images: ImageMeta[];
   alt: string;
+  closeLabel: string;
+  previousLabel: string;
+  nextLabel: string;
   sizes?: string;
 };
 
@@ -19,7 +22,14 @@ type Props = {
  * 슬라이드 클릭 시 ImageLightbox 로 확대. 순수 UI: 이미지 목록과 alt 만 받는다.
  * 1장이면 내비·도트를 숨기고 정지 이미지로 동작.
  */
-const ImageCarousel = ({ images, alt, sizes = "(max-width: 760px) 100vw, 680px" }: Props) => {
+const ImageCarousel = ({
+  images,
+  alt,
+  closeLabel,
+  previousLabel,
+  nextLabel,
+  sizes = "(max-width: 760px) 100vw, 680px",
+}: Props) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -68,7 +78,7 @@ const ImageCarousel = ({ images, alt, sizes = "(max-width: 760px) 100vw, 680px" 
             <button
               type="button"
               className={`${styles.nav} ${styles.prev}`}
-              aria-label="Previous image"
+              aria-label={previousLabel}
               disabled={index === 0}
               onClick={() => goTo(index - 1)}
             >
@@ -77,7 +87,7 @@ const ImageCarousel = ({ images, alt, sizes = "(max-width: 760px) 100vw, 680px" 
             <button
               type="button"
               className={`${styles.nav} ${styles.next}`}
-              aria-label="Next image"
+              aria-label={nextLabel}
               disabled={index === count - 1}
               onClick={() => goTo(index + 1)}
             >
@@ -92,6 +102,9 @@ const ImageCarousel = ({ images, alt, sizes = "(max-width: 760px) 100vw, 680px" 
           images={images}
           index={lightbox}
           alt={alt}
+          closeLabel={closeLabel}
+          previousLabel={previousLabel}
+          nextLabel={nextLabel}
           onClose={() => setLightbox(null)}
           onNavigate={(next) => {
             setLightbox(next);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useThemeToggle } from "@/features/theme/_hooks/use-theme-toggle";
+import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import styles from "./ThemeToggleButton.module.css";
 
@@ -10,10 +11,11 @@ import styles from "./ThemeToggleButton.module.css";
  * 첫 로드엔 transition이 안 걸려 정지 상태로 그려진다.
  */
 const ThemeToggleButton = () => {
+  const { dict } = useLang();
   const { toggleTheme } = useThemeToggle();
 
   return (
-    <button type="button" onClick={toggleTheme} aria-label="Theme" className={styles.btn}>
+    <button type="button" onClick={toggleTheme} aria-label={dict.themeLabel} className={styles.btn}>
       <span className={styles.icons}>
         <span className={styles.sun}>
           <svg

@@ -15,7 +15,7 @@ const commonAssertions = {
 
   async closeDialog(page: Page) {
     const dialog = page.getByRole("dialog");
-    await dialog.getByRole("button", { name: "Close" }).last().click();
+    await dialog.getByRole("button", { name: "닫기" }).last().click();
     await expect(dialog).toBeHidden();
   },
 };
