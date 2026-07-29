@@ -10,7 +10,7 @@ import {
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import { deleteDoc, doc, getDoc, setDoc, setLogLevel, updateDoc } from "firebase/firestore";
-import { deleteObject, getBytes, ref, uploadBytes } from "firebase/storage";
+import { deleteObject, getBytes, listAll, ref, uploadBytes } from "firebase/storage";
 
 const ADMIN_UID = "KBBvgyMIssPngwx9n0OXaL2THwy1";
 const OTHER_UID = "not-the-admin-uid";
@@ -143,6 +143,13 @@ describe("Storage Rules", () => {
   it("누구나 공개 파일을 읽을 수 있다", async () => {
     const storage = testEnv.unauthenticatedContext().storage();
     await assertSucceeds(getBytes(ref(storage, "seed/public.webp")));
+  });
+
+  it("경로 목록 조회는 관리자만 할 수 있다", async () => {
+    const anonymous = testEnv.unauthenticatedContext().storage();
+    const admin = testEnv.authenticatedContext(ADMIN_UID).storage();
+    await assertFails(listAll(ref(anonymous, "seed")));
+    await assertSucceeds(listAll(ref(admin, "seed")));
   });
 
   it("비로그인과 비관리자는 업로드·삭제할 수 없다", async () => {
