@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { AlbumDetailView } from "@/features/albums/_components/AlbumDetailView";
+import { resolveAlbumCover } from "@/features/albums/_lib/resolve-album-cover";
 import { getAlbum } from "@/lib/content/get-album";
 import { getAlbums } from "@/lib/content/get-albums";
 import { getPhotos } from "@/lib/content/get-photos";
@@ -27,7 +28,7 @@ export default async function AlbumDetailPage({ params }: Props) {
   const albumPhotos = album.photoIds
     .map((photoId) => byId.get(photoId))
     .filter((photo): photo is Photo => photo != null);
-  const coverUrl = byId.get(album.coverPhotoId)?.image.url ?? albumPhotos[0]?.image.url ?? "";
+  const coverUrl = resolveAlbumCover(album, albumPhotos);
 
   return (
     <Suspense>

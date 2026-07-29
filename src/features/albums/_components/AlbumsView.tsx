@@ -5,6 +5,7 @@ import { m } from "motion/react";
 import { AlbumCard } from "@/components/AlbumCard";
 import { albumRoute } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { resolveAlbumCover } from "@/features/albums/_lib/resolve-album-cover";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
@@ -28,11 +29,6 @@ type Props = {
 const AlbumsView = ({ albums, photos }: Props) => {
   const { dict, lang } = useLang();
 
-  const coverUrlOf = (album: Album) =>
-    photos.find((photo) => photo.id === album.coverPhotoId)?.image.url ??
-    photos[0]?.image.url ??
-    "";
-
   if (albums.length === 0) {
     return (
       <main className={styles.main}>
@@ -52,7 +48,7 @@ const AlbumsView = ({ albums, photos }: Props) => {
             <m.div key={album.id} variants={CARD}>
               <AlbumCard
                 href={albumRoute(album.id)}
-                coverUrl={coverUrlOf(album)}
+                coverUrl={resolveAlbumCover(album, photos)}
                 coverAlt={title}
                 count={album.photoIds.length}
                 title={title}

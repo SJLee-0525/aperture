@@ -20,7 +20,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 type Props = {
   album: Album;
   photos: Photo[];
-  coverUrl: string;
+  coverUrl: string | null;
   tags: Tag[];
 };
 
@@ -42,14 +42,16 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
           animate={{ scale: 1 }}
           transition={{ duration: 0.9, ease: EASE }}
         >
-          <Image
-            src={coverUrl}
-            alt={title}
-            fill
-            sizes="100vw"
-            className={styles.heroImg}
-            priority
-          />
+          {coverUrl ? (
+            <Image
+              src={coverUrl}
+              alt={title}
+              fill
+              sizes="100vw"
+              className={styles.heroImg}
+              priority
+            />
+          ) : null}
         </m.div>
         <div className={styles.scrim} />
         <Link href={ROUTES.PHOTO_ALBUMS} className={styles.back}>

@@ -25,7 +25,6 @@ const photo = (overrides: Partial<Photo> = {}): Photo => ({
   coords: { lat: 35.1796, lng: 129.0756 },
   tags: ["dawn", "sea"],
   image: { url: "/photo.webp", path: "photos/photo.webp", w: 2048, h: 1365 },
-  likes: 0,
   order: 0,
   published: true,
   ...overrides,
@@ -79,13 +78,24 @@ describe("filterPhotos", () => {
     ).toEqual(["min", "max"]);
   });
 
-  it("초점거리가 없거나 숫자로 시작하지 않으면 범위 검색에서 제외한다", () => {
+  it("기본 범위에서는 초점거리가 없거나 숫자가 아니어도 사진을 보여준다", () => {
     const photos = [
       photo({ id: "empty", exif: { ...photo().exif, focalLength: "" } }),
       photo({ id: "invalid", exif: { ...photo().exif, focalLength: "unknown" } }),
     ];
 
-    expect(filterPhotos(photos, allFilters)).toEqual([]);
+    expect(filterPhotos(photos, allFilters)).toEqual(photos);
+  });
+
+  it("사용자가 초점거리 범위를 좁히면 초점거리를 알 수 없는 사진을 제외한다", () => {
+    const photos = [
+      photo({ id: "empty", exif: { ...photo().exif, focalLength: "" } }),
+      photo({ id: "known", exif: { ...photo().exif, focalLength: "35 mm" } }),
+    ];
+
+    expect(filterPhotos(photos, { ...allFilters, focalMin: 24, focalMax: 70 })).toEqual([
+      photos[1],
+    ]);
   });
 
   it("태그·카메라·초점거리·검색어 조건을 모두 만족해야 한다", () => {

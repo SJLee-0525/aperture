@@ -5,7 +5,7 @@ import styles from "./AlbumCard.module.css";
 
 type Props = {
   href: string;
-  coverUrl: string;
+  coverUrl: string | null;
   coverAlt: string;
   count: number;
   title: string;
@@ -16,13 +16,15 @@ type Props = {
 const AlbumCard = ({ href, coverUrl, coverAlt, count, title, subtitle }: Props) => (
   <Link href={href} className={styles.card}>
     <div className={styles.cover}>
-      <Image
-        src={coverUrl}
-        alt={coverAlt}
-        fill
-        sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
-        className={styles.img}
-      />
+      {coverUrl ? (
+        <Image
+          src={coverUrl}
+          alt={coverAlt}
+          fill
+          sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
+          className={styles.img}
+        />
+      ) : null}
       <span className={styles.count}>{count}</span>
     </div>
     <div className={styles.info}>
