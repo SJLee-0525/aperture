@@ -6,9 +6,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Modal } from "@/components/Modal";
 
 describe("Modal", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
 
   it("열리면 접근 가능한 대화상자와 콘텐츠를 document body에 표시한다", () => {
+    const focus = vi.spyOn(HTMLElement.prototype, "focus");
     render(
       <Modal open onClose={vi.fn()} closeLabel="닫기" label="프로젝트 상세" crumb="개발">
         <p>상세 내용</p>
@@ -18,6 +22,7 @@ describe("Modal", () => {
     expect(screen.getByRole("dialog", { name: "프로젝트 상세" })).toBeTruthy();
     expect(screen.getByText("상세 내용")).toBeTruthy();
     expect(screen.getByText("개발")).toBeTruthy();
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
   });
 
   it("닫혀 있으면 대화상자와 콘텐츠를 표시하지 않는다", () => {

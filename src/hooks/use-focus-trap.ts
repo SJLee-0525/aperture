@@ -20,7 +20,8 @@ const useFocusTrap = (active: boolean) => {
     if (!container) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    container.focus();
+    // 긴 모달에서 기본 focus()는 컨테이너를 보이게 하려고 오버레이를 아래로 스크롤한다.
+    container.focus({ preventScroll: true });
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
@@ -46,7 +47,7 @@ const useFocusTrap = (active: boolean) => {
     container.addEventListener("keydown", onKeyDown);
     return () => {
       container.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus?.();
+      previouslyFocused?.focus?.({ preventScroll: true });
     };
   }, [active]);
 

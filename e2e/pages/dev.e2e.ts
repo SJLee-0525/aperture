@@ -21,4 +21,17 @@ test.describe("Dev", () => {
 
     await expect(page).toHaveURL(/\/dev\/projects$/);
   });
+
+  test("프로젝트 모달은 스크롤 최상단에서 열린다", async ({ page }) => {
+    await page.goto("/dev/projects");
+    await page.getByRole("button", { name: /개인 포트폴리오/ }).click();
+    const dialog = page.getByRole("dialog", { name: "개인 포트폴리오" });
+    await expect(dialog).toBeVisible();
+
+    const overlayScrollTop = await dialog.evaluate(
+      (element) => element.parentElement?.scrollTop ?? -1,
+    );
+
+    expect(overlayScrollTop).toBe(0);
+  });
 });
