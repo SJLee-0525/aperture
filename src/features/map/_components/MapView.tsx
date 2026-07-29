@@ -28,7 +28,7 @@ const MapView = ({ photos, tags }: Props) => {
   const router = useRouter();
   const geotagged = useMemo(() => photos.filter((photo) => photo.coords != null), [photos]);
   const onSelect = useCallback(
-    (id: string) => router.replace(`${ROUTES.PHOTO_MAP}?photo=${id}`, { scroll: false }),
+    (id: string) => router.push(`${ROUTES.PHOTO_MAP}?photo=${id}`, { scroll: false }),
     [router],
   );
 

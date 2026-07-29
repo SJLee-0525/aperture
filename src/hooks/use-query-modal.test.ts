@@ -6,13 +6,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useQueryModal } from "@/hooks/use-query-modal";
 
 const navigation = vi.hoisted(() => ({
+  back: vi.fn(),
+  push: vi.fn(),
   replace: vi.fn(),
   pathname: "/dev/projects",
   searchParams: new URLSearchParams(),
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: navigation.replace }),
+  useRouter: () => ({
+    back: navigation.back,
+    push: navigation.push,
+    replace: navigation.replace,
+  }),
   usePathname: () => navigation.pathname,
   useSearchParams: () => navigation.searchParams,
 }));
@@ -21,12 +27,18 @@ const projects = [{ id: "project-1" }, { id: "project-2" }];
 
 describe("useQueryModal", () => {
   beforeEach(() => {
+    navigation.back.mockReset();
+    navigation.push.mockReset();
     navigation.replace.mockReset();
     navigation.pathname = "/dev/projects";
     navigation.searchParams = new URLSearchParams();
+    vi.spyOn(window.history, "replaceState");
   });
 
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
 
   it("쿼리 id와 일치하는 항목을 열린 모달 상태로 반환한다", () => {
     navigation.searchParams = new URLSearchParams("project=project-2");
@@ -52,27 +64,31 @@ describe("useQueryModal", () => {
 
     act(() => result.current.select("project-1"));
 
-    expect(navigation.replace).toHaveBeenCalledWith(
-      "/dev/projects?lang=en&page=2&project=project-1",
-      { scroll: false },
-    );
+    expect(navigation.push).toHaveBeenCalledWith("/dev/projects?lang=en&page=2&project=project-1", {
+      scroll: false,
+    });
   });
 
-  it("모달을 닫을 때 해당 id만 제거하고 나머지 쿼리를 유지한다", () => {
+  it("직접 진입한 모달을 닫으면 해당 id만 제거하고 나머지 쿼리를 유지한다", () => {
     navigation.searchParams = new URLSearchParams("lang=en&project=project-1");
     const { result } = renderHook(() => useQueryModal("project", projects));
 
     act(() => result.current.close());
 
-    expect(navigation.replace).toHaveBeenCalledWith("/dev/projects?lang=en", { scroll: false });
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      window.history.state,
+      "",
+      "/dev/projects?lang=en",
+    );
   });
 
-  it("마지막 쿼리를 제거하면 query separator 없이 pathname으로 이동한다", () => {
-    navigation.searchParams = new URLSearchParams("project=project-1");
+  it("페이지에서 연 모달을 닫으면 이전 히스토리로 돌아간다", () => {
     const { result } = renderHook(() => useQueryModal("project", projects));
 
-    act(() => result.current.select(null));
+    act(() => result.current.select("project-1"));
+    act(() => result.current.close());
 
-    expect(navigation.replace).toHaveBeenCalledWith("/dev/projects", { scroll: false });
+    expect(navigation.back).toHaveBeenCalledOnce();
+    expect(window.history.replaceState).not.toHaveBeenCalled();
   });
 });

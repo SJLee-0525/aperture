@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { Photo } from "@/types/photo";
 
@@ -18,6 +18,14 @@ const usePhotoModal = (photos: Photo[]) => {
   const index = activeId ? photos.findIndex((photo) => photo.id === activeId) : -1;
   const photo = index >= 0 ? photos[index] : null;
   const open = photo != null;
+  const wasOpen = useRef(open);
+  const openedHere = useRef(false);
+
+  useEffect(() => {
+    if (!wasOpen.current && open) openedHere.current = true;
+    if (!open) openedHere.current = false;
+    wasOpen.current = open;
+  }, [open]);
 
   const goto = useCallback(
     (id: string | null) => {
@@ -28,12 +36,24 @@ const usePhotoModal = (photos: Photo[]) => {
         params.delete("photo");
       }
       const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      const href = qs ? `${pathname}?${qs}` : pathname;
+      if (id) router.replace(href, { scroll: false });
+      else {
+        window.history.replaceState(window.history.state, "", href);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+      }
     },
     [router, pathname, searchParams],
   );
 
-  const close = useCallback(() => goto(null), [goto]);
+  const close = useCallback(() => {
+    if (openedHere.current) {
+      openedHere.current = false;
+      router.back();
+      return;
+    }
+    goto(null);
+  }, [router, goto]);
 
   const step = useCallback(
     (delta: number) => {
