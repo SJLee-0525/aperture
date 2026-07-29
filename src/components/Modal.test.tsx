@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Modal } from "@/components/Modal";
@@ -75,5 +75,38 @@ describe("Modal", () => {
       </Modal>,
     );
     expect(document.body.style.overflow).toBe("auto");
+  });
+
+  it("Tab 포커스를 대화상자 안에서 순환시키고 닫히면 트리거로 복귀한다", () => {
+    const trigger = document.createElement("button");
+    trigger.textContent = "열기";
+    document.body.appendChild(trigger);
+    trigger.focus();
+
+    const { rerender } = render(
+      <Modal open onClose={vi.fn()} label="프로젝트 상세">
+        <button type="button">첫 작업</button>
+        <button type="button">마지막 작업</button>
+      </Modal>,
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "프로젝트 상세" });
+    const buttons = within(dialog).getAllByRole("button");
+    for (const button of buttons) {
+      Object.defineProperty(button, "offsetParent", { configurable: true, value: dialog });
+    }
+    const lastButton = buttons.at(-1);
+    lastButton?.focus();
+    fireEvent.keyDown(lastButton!, { key: "Tab" });
+
+    expect(document.activeElement).toBe(buttons[0]);
+
+    rerender(
+      <Modal open={false} onClose={vi.fn()} label="프로젝트 상세">
+        <button type="button">첫 작업</button>
+      </Modal>,
+    );
+    expect(document.activeElement).toBe(trigger);
+    trigger.remove();
   });
 });

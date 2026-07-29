@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import styles from "./Modal.module.css";
@@ -25,6 +26,7 @@ type Props = {
  */
 const Modal = ({ open, onClose, crumb, label, maxWidth, mobileFull, children }: Props) => {
   useScrollLock(open);
+  const panelRef = useFocusTrap(open);
 
   useEffect(() => {
     if (!open) return;
@@ -42,10 +44,12 @@ const Modal = ({ open, onClose, crumb, label, maxWidth, mobileFull, children }: 
     <div className={mobileFull ? `${styles.overlay} ${styles.overlayFull}` : styles.overlay}>
       <button type="button" className={styles.scrim} aria-label="Close" onClick={onClose} />
       <div
+        ref={panelRef}
         className={mobileFull ? `${styles.panel} ${styles.panelFull}` : styles.panel}
         role="dialog"
         aria-modal="true"
         aria-label={label}
+        tabIndex={-1}
         style={maxWidth ? { maxWidth: `${maxWidth}px` } : undefined}
       >
         <div className={styles.head}>
