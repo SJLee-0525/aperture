@@ -32,4 +32,4 @@ const shouldUseMockContent = (): boolean => {
   return true;
 };
 
-export { mockContentEnabled, shouldUseMockContent };
+export { shouldUseMockContent };

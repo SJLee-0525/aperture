@@ -1,5 +1,4 @@
 import { COLLECTIONS, SITE_DEV_DOC, SITE_DOC, SITE_MUSIC_DOC } from "@/constants/collections";
-import { isFirebaseConfigured } from "@/lib/firebase/config";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
@@ -308,5 +307,4 @@ export {
   fetchPublishedMusicWorks,
   fetchPublishedPhotos,
   fetchSiteConfig,
-  isFirebaseConfigured,
 };
