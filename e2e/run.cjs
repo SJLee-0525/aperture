@@ -8,7 +8,7 @@ const baseURL = `http://127.0.0.1:${port}`;
 const production = process.env.E2E_PRODUCTION === "1";
 const serverEnv = {
   ...process.env,
-  NEXT_DIST_DIR: ".next-playwright-v7",
+  NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? ".next-playwright-v7",
   NEXT_FONT_GOOGLE_MOCKED_RESPONSES: path.resolve(__dirname, "fixtures/google-font-responses.cjs"),
   NEXT_PUBLIC_USE_MOCK: "1",
 };
