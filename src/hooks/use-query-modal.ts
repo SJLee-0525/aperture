@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useRef } from "react";
 
+import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
+
 /**
  * URL 쿼리(?param=id)로 열리는 상세 모달 상태 — 딥링크·검색 결과에서 항목을 바로 열 수 있게 한다.
  * id 매칭 항목을 돌려주고, select/close 는 쿼리만 갱신(스크롤 유지). ESC·스크림 닫기는 Modal 이 처리.
@@ -30,10 +32,7 @@ const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
       const qs = params.toString();
       const href = qs ? `${pathname}?${qs}` : pathname;
       if (id) router.push(href, { scroll: false });
-      else {
-        window.history.replaceState(window.history.state, "", href);
-        window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
-      }
+      else replaceCurrentUrl(href);
     },
     [router, pathname, searchParams, param],
   );

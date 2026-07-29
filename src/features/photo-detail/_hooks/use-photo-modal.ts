@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
+import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 import type { Photo } from "@/types/photo";
 
 /**
@@ -38,10 +39,7 @@ const usePhotoModal = (photos: Photo[]) => {
       const qs = params.toString();
       const href = qs ? `${pathname}?${qs}` : pathname;
       if (id) router.replace(href, { scroll: false });
-      else {
-        window.history.replaceState(window.history.state, "", href);
-        window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
-      }
+      else replaceCurrentUrl(href);
     },
     [router, pathname, searchParams],
   );
