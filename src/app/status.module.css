@@ -49,7 +49,7 @@
 .retry {
   padding: var(--s-3) var(--s-6);
   background: var(--accent);
-  color: #fff;
+  color: var(--text-inverse);
   border: none;
   font-family: var(--font-sans);
   font-size: var(--t-small);

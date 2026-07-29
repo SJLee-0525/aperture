@@ -51,6 +51,7 @@
   --accent-soft: rgba(10, 132, 255, 0.12);
   --danger: #ff2d55;
   --danger-soft: rgba(255, 45, 85, 0.12);
+  --text-inverse: #fff;
 
   /* --- 섹션 팔레트 (랜딩 진입 행 + html[data-section] 공용 단일 출처) --- */
   --accent-photo: #0a84ff;

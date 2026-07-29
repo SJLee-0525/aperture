@@ -27,7 +27,7 @@
   opacity: 1;
 }
 .t {
-  color: #fff;
+  color: var(--text-inverse);
   font-family: var(--font-display);
   font-size: 1rem;
 }

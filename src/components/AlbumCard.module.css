@@ -23,7 +23,7 @@
   border-radius: var(--r-pill);
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
-  color: #fff;
+  color: var(--text-inverse);
   font-family: var(--font-mono);
   font-size: 11px;
 }

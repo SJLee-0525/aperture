@@ -32,7 +32,7 @@
 .glass .seg {
   position: relative;
   padding: 5px 14px;
-  color: #fff;
+  color: var(--text-inverse);
 }
 .glass .seg + .seg::before {
   content: "";

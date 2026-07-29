@@ -151,7 +151,7 @@
   align-items: center;
   padding: 11px 18px;
   background: var(--accent);
-  color: #fff;
+  color: var(--text-inverse);
   border: 1px solid var(--accent);
   font-family: var(--font-sans);
   font-size: 14px;

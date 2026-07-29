@@ -141,7 +141,7 @@
   height: 44px;
   padding: 0 var(--s-6);
   background: var(--accent);
-  color: #fff;
+  color: var(--text-inverse);
   border: none;
   border-radius: var(--r-sm);
   font-size: var(--t-body);

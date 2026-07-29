@@ -42,7 +42,7 @@
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--r-pill);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -64,7 +64,7 @@
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--r-pill);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: 24px;
   line-height: 1;
   padding-bottom: 2px;

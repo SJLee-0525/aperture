@@ -35,7 +35,7 @@
   left: var(--s-1);
   padding: 2px var(--s-2);
   background: var(--accent);
-  color: #fff;
+  color: var(--text-inverse);
   font-family: var(--font-mono);
   font-size: var(--t-micro);
   letter-spacing: var(--tracking-label);
