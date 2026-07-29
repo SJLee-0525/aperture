@@ -60,6 +60,10 @@ type UIDict = {
   // 음악 섹션 UI
   musicBook: string;
   musicProgram: string;
+  primaryNavLabel: string;
+  menuOpenLabel: string;
+  menuCloseLabel: string;
+  homeLabel: string;
   searchPlaceholder: string;
   searchPrompt: string;
   searchEmpty: string;
@@ -156,6 +160,10 @@ const DICTIONARY: Record<Lang, UIDict> = {
     comingSoon: "곧 공개됩니다",
     musicBook: "예매하기",
     musicProgram: "프로그램",
+    primaryNavLabel: "주요 메뉴",
+    menuOpenLabel: "메뉴 열기",
+    menuCloseLabel: "메뉴 닫기",
+    homeLabel: "이성준 홈",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     searchPrompt: "검색어를 입력하세요.",
     searchEmpty: "검색 결과가 없습니다.",
@@ -247,6 +255,10 @@ const DICTIONARY: Record<Lang, UIDict> = {
     comingSoon: "Coming soon",
     musicBook: "Book tickets",
     musicProgram: "Programme",
+    primaryNavLabel: "Primary navigation",
+    menuOpenLabel: "Open menu",
+    menuCloseLabel: "Close menu",
+    homeLabel: "Sungjoon Lee home",
     searchPlaceholder: "Search · tag / gear / place",
     searchPrompt: "Type to search.",
     searchEmpty: "No results found.",

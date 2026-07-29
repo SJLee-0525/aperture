@@ -57,11 +57,11 @@ const SiteHeader = () => {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link href={ROUTES.LANDING} className={styles.brand} aria-label="Sungjoon Lee home">
+        <Link href={ROUTES.LANDING} className={styles.brand} aria-label={dict.homeLabel}>
           Sungjoon Lee<span className={styles.dot}>.</span>
         </Link>
 
-        <nav ref={navRef} className={styles.mega} aria-label="Primary">
+        <nav ref={navRef} className={styles.mega} aria-label={dict.primaryNavLabel}>
           {MEGA_MENU.map((group) => (
             <div
               key={group.section}
@@ -81,19 +81,17 @@ const SiteHeader = () => {
               <button
                 type="button"
                 className={styles.megaBtn}
-                aria-haspopup="menu"
                 aria-expanded={shown === group.section}
                 onClick={() => setPinned((prev) => (prev === group.section ? null : group.section))}
               >
                 {dict[group.labelKey]}
               </button>
-              <div className={styles.megaPanel} role="menu">
+              <div className={styles.megaPanel}>
                 {group.links.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     className={styles.megaLink}
-                    role="menuitem"
                     onClick={closeMenu}
                   >
                     {dict[link.labelKey]}

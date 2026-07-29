@@ -9,6 +9,7 @@ import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation"
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import styles from "./MobileMenu.module.css";
@@ -26,6 +27,7 @@ const MobileMenu = () => {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<NavSection | null>(null);
   const [query, setQuery] = useState("");
+  const panelRef = useFocusTrap(open);
 
   useScrollLock(open);
 
@@ -62,7 +64,7 @@ const MobileMenu = () => {
       <button
         type="button"
         className={styles.burger}
-        aria-label="Menu"
+        aria-label={open ? dict.menuCloseLabel : dict.menuOpenLabel}
         aria-expanded={open}
         onClick={open ? close : openMenu}
       >
@@ -73,8 +75,20 @@ const MobileMenu = () => {
 
       {open ? (
         <>
-          <button type="button" className={styles.scrim} aria-label="Close menu" onClick={close} />
-          <div className={styles.panel}>
+          <button
+            type="button"
+            className={styles.scrim}
+            aria-label={dict.menuCloseLabel}
+            onClick={close}
+          />
+          <div
+            ref={panelRef}
+            className={styles.panel}
+            role="dialog"
+            aria-modal="true"
+            aria-label={dict.primaryNavLabel}
+            tabIndex={-1}
+          >
             <form className={styles.search} onSubmit={submitSearch} role="search">
               <input
                 type="text"
