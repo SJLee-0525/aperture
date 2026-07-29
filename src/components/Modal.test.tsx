@@ -109,4 +109,25 @@ describe("Modal", () => {
     expect(document.activeElement).toBe(trigger);
     trigger.remove();
   });
+
+  it("비활성화된 폼 컨트롤은 포커스 순환 대상에서 제외한다", () => {
+    render(
+      <Modal open onClose={vi.fn()} label="프로젝트 상세">
+        <input aria-label="사용 가능" />
+        <input aria-label="사용 불가" disabled />
+      </Modal>,
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "프로젝트 상세" });
+    const enabled = screen.getByRole("textbox", { name: "사용 가능" });
+    const disabled = screen.getByRole("textbox", { name: "사용 불가" });
+    const closeButton = within(dialog).getAllByRole("button")[0];
+    for (const element of [closeButton, enabled, disabled]) {
+      Object.defineProperty(element, "offsetParent", { configurable: true, value: dialog });
+    }
+    enabled.focus();
+    fireEvent.keyDown(enabled, { key: "Tab" });
+
+    expect(document.activeElement).toBe(closeButton);
+  });
 });

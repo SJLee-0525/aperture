@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 const FOCUSABLE =
-  'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  'a[href]:not([aria-disabled="true"]), button:not(:disabled), input:not(:disabled):not([type="hidden"]), select:not(:disabled), textarea:not(:disabled), [contenteditable="true"], [tabindex]:not([tabindex="-1"]):not([aria-disabled="true"])';
 
 /**
  * 모달·오버레이 포커스 트랩. active인 동안:
@@ -25,7 +25,10 @@ const useFocusTrap = (active: boolean) => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
       const items = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        (el) => el.offsetParent !== null,
+        (el) =>
+          el.offsetParent !== null &&
+          !el.hasAttribute("hidden") &&
+          el.getAttribute("aria-hidden") !== "true",
       );
       if (items.length === 0) return;
       const first = items[0];
