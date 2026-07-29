@@ -37,7 +37,7 @@
     "@playwright/test": "^1.62.0",
     "@testing-library/react": "^16.3.2",
     "@types/geojson": "^7946.0.16",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.10",

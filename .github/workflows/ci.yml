@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     name: Unit tests and static checks
@@ -56,6 +60,17 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_DIST_DIR: .next-playwright-v7
+          NEXT_PUBLIC_USE_MOCK: "1"
+
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: .next-playwright-v7
+          include-hidden-files: true
+          retention-days: 1
 
   rules:
     name: Firebase security rules
@@ -86,6 +101,7 @@ jobs:
 
   e2e:
     name: Production E2E
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -105,11 +121,11 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Build mock-backed production app
-        run: npm run build
-        env:
-          NEXT_DIST_DIR: .next-playwright-v7
-          NEXT_PUBLIC_USE_MOCK: "1"
+      - name: Download production build
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: .next-playwright-v7
 
       - name: Run production E2E
         run: npm run test:e2e
