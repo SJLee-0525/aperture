@@ -17,7 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "node e2e/run.cjs",
     "test:e2e:headed": "node e2e/run.cjs --headed",
-    "test:rules": "firebase emulators:exec --project demo-aperture --only firestore \"node --test test/firestore-rules.test.mjs\""
+    "test:rules": "firebase emulators:exec --project demo-aperture --only firestore,storage \"node --test test/security-rules.test.mjs\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
