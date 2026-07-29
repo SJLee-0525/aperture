@@ -2,15 +2,16 @@ import { expect, type Page } from "@playwright/test";
 
 const navigationAssertions = {
   async desktopMegaMenu(page: Page) {
-    const primary = page.getByRole("navigation", { name: "Primary" });
+    const primary = page.getByRole("navigation", { name: "주요 메뉴" });
     await primary.getByRole("button", { name: "사진" }).click();
-    await expect(primary.getByRole("menu")).toBeVisible();
-    await primary.getByRole("menuitem", { name: "앨범" }).click();
+    const albums = primary.getByRole("link", { name: "앨범" });
+    await expect(albums).toBeVisible();
+    await albums.click();
     await expect(page).toHaveURL(/\/photo\/albums$/);
   },
 
   async mobileMenu(page: Page) {
-    await page.getByRole("button", { name: "Menu" }).click();
+    await page.getByRole("button", { name: "메뉴 열기" }).click();
     const dev = page.getByRole("button", { name: "개발" });
     await dev.click();
     await expect(dev).toHaveAttribute("aria-expanded", "true");

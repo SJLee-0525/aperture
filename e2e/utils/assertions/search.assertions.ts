@@ -3,7 +3,7 @@ import { expect, type Page } from "@playwright/test";
 const searchAssertions = {
   async submit(page: Page, mobile: boolean) {
     if (mobile) {
-      await page.getByRole("button", { name: "Menu" }).click();
+      await page.getByRole("button", { name: "메뉴 열기" }).click();
     }
 
     const search = page.getByRole("search");
