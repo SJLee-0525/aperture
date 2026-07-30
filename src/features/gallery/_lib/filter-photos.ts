@@ -20,8 +20,22 @@ const parseFocal = (focalLength: string): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+/** 사진 한 장의 텍스트 검색 haystack */
+const haystackOf = (photo: GalleryPhoto): string =>
+  [photo.title.ko, photo.title.en, photo.camera, photo.lens, photo.place.ko, photo.place.en]
+    .join(" ")
+    .toLowerCase();
+
+/** 검색 haystack 사전 계산 — 사진 목록이 바뀔 때 한 번만 만들고 키스트로크마다 재조합하지 않는다. */
+const buildSearchIndex = (photos: GalleryPhoto[]): Map<string, string> =>
+  new Map(photos.map((photo) => [photo.id, haystackOf(photo)]));
+
 /** 순수 필터 — 태그·카메라·초점거리·텍스트. 정렬은 getter에서 이미 완료(order). */
-const filterPhotos = (photos: GalleryPhoto[], f: FilterState): GalleryPhoto[] => {
+const filterPhotos = (
+  photos: GalleryPhoto[],
+  f: FilterState,
+  searchIndex?: Map<string, string>,
+): GalleryPhoto[] => {
   const query = f.query.trim().toLowerCase();
   const focalFilterActive = f.focalMin > FOCAL_MIN || f.focalMax < FOCAL_MAX;
   return photos.filter((photo) => {
@@ -32,20 +46,11 @@ const filterPhotos = (photos: GalleryPhoto[], f: FilterState): GalleryPhoto[] =>
       if (focal == null || focal < f.focalMin || focal > f.focalMax) return false;
     }
     if (query) {
-      const hay = [
-        photo.title.ko,
-        photo.title.en,
-        photo.camera,
-        photo.lens,
-        photo.place.ko,
-        photo.place.en,
-      ]
-        .join(" ")
-        .toLowerCase();
+      const hay = searchIndex?.get(photo.id) ?? haystackOf(photo);
       if (!hay.includes(query)) return false;
     }
     return true;
   });
 };
 
-export { filterPhotos, ALL, FOCAL_MIN, FOCAL_MAX };
+export { buildSearchIndex, filterPhotos, ALL, FOCAL_MIN, FOCAL_MAX };

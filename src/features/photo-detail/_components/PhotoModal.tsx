@@ -2,7 +2,7 @@
 
 import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 import { ExifStrip } from "@/components/ExifStrip";
@@ -145,23 +145,25 @@ const PhotoModal = ({
   }, [open, photo?.id]);
 
   const alt = photo ? pickText(photo.title, lang) : "";
+  // 렌더마다(크롬 토글·스크롤 상태 변화) 반복되는 id 조회는 Map으로 — O(사진×이웃), O(태그×사진태그) 제거.
+  const photoById = useMemo(() => new Map(photos.map((item) => [item.id, item])), [photos]);
+  const tagById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag])), [tags]);
   const navigationIds = photoIds ?? photos.map((item) => item.id);
   const photoIndex = photo ? navigationIds.indexOf(photo.id) : -1;
   const adjacentPhotos =
     photoIndex >= 0 && navigationIds.length > 1
       ? [
-          navigationIds[(photoIndex - 1 + navigationIds.length) % navigationIds.length],
-          navigationIds[(photoIndex + 1) % navigationIds.length],
+          ...new Set([
+            navigationIds[(photoIndex - 1 + navigationIds.length) % navigationIds.length],
+            navigationIds[(photoIndex + 1) % navigationIds.length],
+          ]),
         ]
-          .map((id) => photos.find((item) => item.id === id))
-          .filter(
-            (item, index, items): item is Photo =>
-              item != null && items.findIndex((candidate) => candidate?.id === item.id) === index,
-          )
+          .map((id) => photoById.get(id))
+          .filter((item): item is Photo => item != null)
       : [];
   const tagLabels = photo
     ? photo.tags.map((id) => {
-        const found = tags.find((tag) => tag.id === id);
+        const found = tagById.get(id);
         return found ? pickText(found, lang) : id;
       })
     : [];

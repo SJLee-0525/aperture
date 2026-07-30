@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useSyncExternalStore } from "react";
+import { createContext, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { DICTIONARY, type UIDict } from "@/constants/dictionary";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
@@ -65,11 +65,10 @@ const LangProvider = ({ children }: { children: React.ReactNode }) => {
     document.documentElement.lang = lang;
   }, [lang]);
 
-  return (
-    <LangContext.Provider value={{ lang, dict: DICTIONARY[lang], setLang: writeLang }}>
-      {children}
-    </LangContext.Provider>
-  );
+  // 값 객체 정체성 고정 — lang이 그대로면 useLang 소비자(헤더·메뉴·모달 등) 재렌더를 만들지 않는다.
+  const value = useMemo(() => ({ lang, dict: DICTIONARY[lang], setLang: writeLang }), [lang]);
+
+  return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 };
 
 export { LangContext, LangProvider };

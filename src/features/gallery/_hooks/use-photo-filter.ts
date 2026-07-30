@@ -2,7 +2,13 @@
 
 import { useMemo, useState } from "react";
 
-import { ALL, FOCAL_MAX, FOCAL_MIN, filterPhotos } from "@/features/gallery/_lib/filter-photos";
+import {
+  ALL,
+  FOCAL_MAX,
+  FOCAL_MIN,
+  buildSearchIndex,
+  filterPhotos,
+} from "@/features/gallery/_lib/filter-photos";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 
 /**
@@ -23,9 +29,11 @@ const usePhotoFilter = (photos: GalleryPhoto[], initialQuery: string) => {
     setQuery(initialQuery);
   }
 
+  // haystack은 사진 목록 기준으로 한 번만 — 키스트로크마다 전체 join·toLowerCase를 반복하지 않는다.
+  const searchIndex = useMemo(() => buildSearchIndex(photos), [photos]);
   const visible = useMemo(
-    () => filterPhotos(photos, { tag, query, camera, focalMin, focalMax }),
-    [photos, tag, query, camera, focalMin, focalMax],
+    () => filterPhotos(photos, { tag, query, camera, focalMin, focalMax }, searchIndex),
+    [photos, tag, query, camera, focalMin, focalMax, searchIndex],
   );
 
   const setFocal = (low: number, high: number) => {
