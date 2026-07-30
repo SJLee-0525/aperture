@@ -83,10 +83,10 @@
 
 ### 사진 섹션 (기존)
 
-| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                           |
-| -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h}, order, published |
-| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, photoIds[](**수동 순서**), order, published                                                                                                                                        |
+| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                                                    |
+| -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h,thumbnail?{url,path,w,h}}, order, published |
+| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, cover?(관리자 목록용 이미지 스냅샷), photoIds[](**수동 순서**), order, published                                                                                                                            |
 
 ### 음악 섹션 (신규)
 

@@ -1,8 +1,8 @@
 import { deleteImages } from "@/lib/firebase/storage";
-import type { ImageMeta } from "@/types/image";
+import { imagePaths as imageMetaPaths, type ImageMeta } from "@/types/image";
 
 const imagePaths = (images: Array<ImageMeta | null | undefined>): string[] =>
-  images.flatMap((image) => (image?.path ? [image.path] : []));
+  images.flatMap(imageMetaPaths);
 
 /**
  * 편집을 완료한 뒤 초기 자산과 이번 세션 업로드 중 최종 문서가 참조하지 않는 객체만 제거한다.

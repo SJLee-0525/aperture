@@ -41,8 +41,8 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
       program: previous.program.filter((_, itemIndex) => itemIndex !== index),
     }));
   const onPosterChange = (poster: ImageMeta | null) => {
-    if (poster?.path && !initialPaths.current.has(poster.path)) {
-      uploadedPaths.current.add(poster.path);
+    for (const path of imagePaths([poster])) {
+      if (!initialPaths.current.has(path)) uploadedPaths.current.add(path);
     }
     patch({ poster: poster ?? { url: "", path: "", w: 0, h: 0 } });
   };

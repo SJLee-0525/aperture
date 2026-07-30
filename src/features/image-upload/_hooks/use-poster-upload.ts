@@ -2,10 +2,10 @@
 
 import { useCallback, useState } from "react";
 
-import { uploadMusicPoster } from "@/lib/firebase/storage";
+import { uploadMusicPoster, uploadMusicPosterThumbnail } from "@/lib/firebase/storage";
 import type { ImageMeta } from "@/types/image";
 
-import { compressToWebp } from "@/features/image-upload/_lib/compress";
+import { compressThumbnailToWebp, compressToWebp } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
 /**
@@ -22,10 +22,21 @@ const usePosterUpload = (workId: string) => {
       setPending(true);
       setError(null);
       try {
-        const compressed = await compressToWebp(file);
-        const { w, h } = await readDimensions(compressed);
-        const { url, path } = await uploadMusicPoster(workId, compressed);
-        return { url, path, w, h };
+        const [compressed, thumbnail] = await Promise.all([
+          compressToWebp(file),
+          compressThumbnailToWebp(file),
+        ]);
+        const [size, thumbnailSize, mainUpload, thumbnailUpload] = await Promise.all([
+          readDimensions(compressed),
+          readDimensions(thumbnail),
+          uploadMusicPoster(workId, compressed),
+          uploadMusicPosterThumbnail(workId, thumbnail),
+        ]);
+        return {
+          ...mainUpload,
+          ...size,
+          thumbnail: { ...thumbnailUpload, ...thumbnailSize },
+        };
       } catch (caught) {
         setError((caught as Error).message || "이미지 처리에 실패했습니다.");
         return null;

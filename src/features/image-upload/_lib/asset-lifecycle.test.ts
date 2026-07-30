@@ -19,8 +19,25 @@ describe("imagePaths", () => {
         undefined,
         { url: "/missing.webp", path: "", w: 100, h: 100 },
         { url: "/two.webp", path: "dev/id/two.webp", w: 200, h: 100 },
+        {
+          url: "/three.webp",
+          path: "dev/id/three.webp",
+          w: 200,
+          h: 100,
+          thumbnail: {
+            url: "/three-thumb.webp",
+            path: "dev/id/thumbnails/three.webp",
+            w: 100,
+            h: 50,
+          },
+        },
       ]),
-    ).toEqual(["dev/id/one.webp", "dev/id/two.webp"]);
+    ).toEqual([
+      "dev/id/one.webp",
+      "dev/id/two.webp",
+      "dev/id/three.webp",
+      "dev/id/thumbnails/three.webp",
+    ]);
   });
 });
 

@@ -38,8 +38,8 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
     [],
   );
   const onUploaded = useCallback((result: UploadResult) => {
-    if (result.image.path && !initialPaths.current.has(result.image.path)) {
-      uploadedPaths.current.add(result.image.path);
+    for (const path of imagePaths([result.image])) {
+      if (!initialPaths.current.has(path)) uploadedPaths.current.add(path);
     }
     setForm((previous) => applyUploadResult(previous, result));
     if (result.exif.coords) {

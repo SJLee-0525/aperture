@@ -3,10 +3,10 @@
 import { useCallback, useState } from "react";
 
 import { extractExif, type ExtractedExif } from "@/lib/exif/extract";
-import { uploadPhotoImage } from "@/lib/firebase/storage";
+import { uploadPhotoImage, uploadPhotoThumbnail } from "@/lib/firebase/storage";
 import type { ImageMeta } from "@/types/image";
 
-import { compressToWebp } from "@/features/image-upload/_lib/compress";
+import { compressThumbnailToWebp, compressToWebp } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
 /** 업로드 파이프라인 산출물 — 관리자 폼 자동 채움에 필요한 값 일체. */
@@ -32,11 +32,23 @@ const useImageUpload = (photoId: string) => {
       try {
         const exif = await extractExif(file); // ① 압축 前 EXIF·GPS
         const dimensions = await readDimensions(file); // ② 원본 크기
-        const compressed = await compressToWebp(file); // ③ webp 압축
+        const [compressed, thumbnail] = await Promise.all([
+          compressToWebp(file),
+          compressThumbnailToWebp(file),
+        ]); // ③ 메인·목록용 webp 병렬 압축
         const stored = await readDimensions(compressed); // 저장본 크기
-        const { url, path } = await uploadPhotoImage(photoId, compressed); // ④ 업로드
+        const thumbnailSize = await readDimensions(thumbnail);
+        const [mainUpload, thumbnailUpload] = await Promise.all([
+          uploadPhotoImage(photoId, compressed),
+          uploadPhotoThumbnail(photoId, thumbnail),
+        ]); // ④ 메인·썸네일 병렬 업로드
         return {
-          image: { url, path, w: stored.w, h: stored.h },
+          image: {
+            ...mainUpload,
+            w: stored.w,
+            h: stored.h,
+            thumbnail: { ...thumbnailUpload, w: thumbnailSize.w, h: thumbnailSize.h },
+          },
           dimensions,
           aspectRatio: dimensions.h > 0 ? dimensions.w / dimensions.h : 1,
           exif,
