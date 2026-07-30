@@ -37,7 +37,10 @@ const MusicAboutView = ({ intro, workFacts, awardCount, mediaCount }: Props) => 
   const composers = useMemo(
     () => [
       ...new Set(
-        workFacts.map((work) => pickText(work.subtitle, lang).split("·")[0].trim()).filter(Boolean),
+        workFacts.flatMap((work) => {
+          const composer = pickText(work.subtitle, lang).split("·")[0].trim();
+          return composer ? [composer] : [];
+        }),
       ),
     ],
     [workFacts, lang],

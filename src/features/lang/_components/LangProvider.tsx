@@ -3,7 +3,7 @@
 import { createContext, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { DICTIONARY, type UIDict } from "@/constants/dictionary";
-import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 import { DEFAULT_LANG, LANGS, type Lang } from "@/types/lang";
 
 type LangContextValue = {
@@ -30,8 +30,14 @@ const readLangSnapshot = (): Lang => {
     return langCache;
   }
   try {
-    const saved = localStorage.getItem(STORAGE_KEYS.LANG);
+    const current = localStorage.getItem(STORAGE_KEYS.LANG);
+    const legacy = current == null ? localStorage.getItem(LEGACY_STORAGE_KEYS.LANG) : null;
+    const saved = current ?? legacy;
     if (saved && LANGS.includes(saved as Lang)) {
+      if (legacy != null) {
+        localStorage.setItem(STORAGE_KEYS.LANG, saved);
+        localStorage.removeItem(LEGACY_STORAGE_KEYS.LANG);
+      }
       langCache = saved as Lang;
       return langCache;
     }
@@ -47,6 +53,7 @@ const writeLang = (next: Lang) => {
   langCache = next;
   try {
     localStorage.setItem(STORAGE_KEYS.LANG, next);
+    localStorage.removeItem(LEGACY_STORAGE_KEYS.LANG);
   } catch {
     // 영속만 포기
   }

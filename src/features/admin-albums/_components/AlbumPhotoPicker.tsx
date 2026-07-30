@@ -56,7 +56,11 @@ const AlbumPhotoPicker = ({
 
   /** 순서 유지한 채 실제 존재하는 사진만 매핑(삭제된 참조는 걸러짐). */
   const selectedPhotos = useMemo(
-    () => photoIds.map((id) => photoById.get(id)).filter((p): p is AdminPhotoListItem => p != null),
+    () =>
+      photoIds.flatMap((id) => {
+        const photo = photoById.get(id);
+        return photo ? [photo] : [];
+      }),
     [photoIds, photoById],
   );
   const normalizedQuery = query.trim().toLocaleLowerCase();

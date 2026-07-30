@@ -27,33 +27,29 @@ const SearchResults = ({ documents }: Props) => {
 
   const groups = useMemo<Group[]>(() => {
     if (!ql) return [];
-    const hitsBySection = (section: SearchSection): Hit[] =>
-      documents
-        .filter(
-          (document) =>
-            document.section === section &&
-            pickText(document.text, lang).toLowerCase().includes(ql),
-        )
-        .map((document) => ({
-          key: document.key,
-          title: pickText(document.title, lang),
-          meta:
-            document.metaLabel === "albums"
-              ? dict.albumsNav
-              : document.meta
-                ? pickText(document.meta, lang)
-                : "",
-          href: document.href,
-          imageUrl: document.imageUrl,
-        }));
+    const hits: Record<SearchSection, Hit[]> = { photo: [], music: [], dev: [] };
 
-    return (
-      [
-        { section: "photo", label: dict.sectionPhoto, hits: hitsBySection("photo") },
-        { section: "music", label: dict.sectionMusic, hits: hitsBySection("music") },
-        { section: "dev", label: dict.sectionDev, hits: hitsBySection("dev") },
-      ] as Group[]
-    ).filter((g) => g.hits.length > 0);
+    for (const document of documents) {
+      if (!pickText(document.text, lang).toLowerCase().includes(ql)) continue;
+      hits[document.section].push({
+        key: document.key,
+        title: pickText(document.title, lang),
+        meta:
+          document.metaLabel === "albums"
+            ? dict.albumsNav
+            : document.meta
+              ? pickText(document.meta, lang)
+              : "",
+        href: document.href,
+        imageUrl: document.imageUrl,
+      });
+    }
+
+    return [
+      { section: "photo", label: dict.sectionPhoto, hits: hits.photo },
+      { section: "music", label: dict.sectionMusic, hits: hits.music },
+      { section: "dev", label: dict.sectionDev, hits: hits.dev },
+    ].filter((group) => group.hits.length > 0) as Group[];
   }, [ql, lang, dict, documents]);
 
   const total = groups.reduce((n, g) => n + g.hits.length, 0);

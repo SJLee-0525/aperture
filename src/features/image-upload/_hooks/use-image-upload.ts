@@ -30,18 +30,20 @@ const useImageUpload = (photoId: string) => {
       setPending(true);
       setError(null);
       try {
-        const exif = await extractExif(file); // ① 압축 前 EXIF·GPS
-        const dimensions = await readDimensions(file); // ② 원본 크기
+        const [exif, dimensions] = await Promise.all([
+          extractExif(file), // ① 압축 前 EXIF·GPS
+          readDimensions(file), // ② 원본 크기
+        ]);
         const [compressed, thumbnail] = await Promise.all([
           compressToWebp(file),
           compressThumbnailToWebp(file),
         ]); // ③ 메인·목록용 webp 병렬 압축
-        const stored = await readDimensions(compressed); // 저장본 크기
-        const thumbnailSize = await readDimensions(thumbnail);
-        const [mainUpload, thumbnailUpload] = await Promise.all([
+        const [stored, thumbnailSize, mainUpload, thumbnailUpload] = await Promise.all([
+          readDimensions(compressed),
+          readDimensions(thumbnail),
           uploadPhotoImage(photoId, compressed),
           uploadPhotoThumbnail(photoId, thumbnail),
-        ]); // ④ 메인·썸네일 병렬 업로드
+        ]); // ④ 크기 확인과 메인·썸네일 업로드 병렬 실행
         return {
           image: {
             ...mainUpload,

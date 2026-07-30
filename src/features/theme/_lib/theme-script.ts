@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 /**
  * 다크모드 no-flash 스크립트.
@@ -6,6 +6,6 @@ import { STORAGE_KEYS } from "@/constants/storage-keys";
  * 기본값이 light이므로 prefers-color-scheme 자동 추종은 하지 않고
  * 사용자가 토글해 저장한 dark 값만 복원한다.
  */
-const THEME_INIT_SCRIPT = `(function(){try{if(localStorage.getItem("${STORAGE_KEYS.THEME}")==="dark"){document.documentElement.dataset.theme="dark";}}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var key="${STORAGE_KEYS.THEME}",legacyKey="${LEGACY_STORAGE_KEYS.THEME}",theme=localStorage.getItem(key);if(theme===null){theme=localStorage.getItem(legacyKey);if(theme!==null){localStorage.setItem(key,theme);localStorage.removeItem(legacyKey);}}if(theme==="dark"){document.documentElement.dataset.theme="dark";}}catch(e){}})();`;
 
 export { THEME_INIT_SCRIPT };

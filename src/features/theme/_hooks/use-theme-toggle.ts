@@ -1,6 +1,6 @@
 "use client";
 
-import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 /**
  * 테마 상태의 단일 원천은 React state가 아니라 html[data-theme] 속성.
@@ -20,6 +20,7 @@ const useThemeToggle = () => {
 
     try {
       localStorage.setItem(STORAGE_KEYS.THEME, nextTheme);
+      localStorage.removeItem(LEGACY_STORAGE_KEYS.THEME);
     } catch {
       // localStorage 비활성 환경(시크릿 모드 등)에서는 영속만 포기
     }

@@ -31,7 +31,17 @@ const AboutView = ({ bio, photoFacts, albumCount }: Props) => {
   }, [bio, lang]);
 
   const cameras = useMemo(() => [...new Set(photoFacts.map((fact) => fact.camera))], [photoFacts]);
-  const lenses = useMemo(() => [...new Set(photoFacts.map((fact) => fact.lens))], [photoFacts]);
+  const lenses = useMemo(
+    () => [
+      ...new Set(
+        photoFacts.flatMap((fact) => {
+          const lens = fact.lens.trim();
+          return lens ? [lens] : [];
+        }),
+      ),
+    ],
+    [photoFacts],
+  );
   // 활동 지역 = 장소에서 도시만 추출 (ko "도쿄 미나토구"→도쿄, en "Minato, Tokyo"→Tokyo)
   const regions = useMemo(() => {
     const cityOf = (place: PhotoFact["place"]) => {

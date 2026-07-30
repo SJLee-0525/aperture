@@ -38,15 +38,16 @@ const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) =
     return () => window.removeEventListener("resize", sync);
   }, []);
 
-  const columns = useMemo(
-    () =>
-      Array.from({ length: columnCount }, (_, column) =>
-        photos
-          .map((photo, index) => ({ photo, index }))
-          .filter(({ index }) => index % columnCount === column),
-      ),
-    [photos, columnCount],
-  );
+  const columns = useMemo(() => {
+    const distributed: Array<Array<{ photo: GalleryPhoto; index: number }>> = Array.from(
+      { length: columnCount },
+      () => [],
+    );
+    photos.forEach((photo, index) => {
+      distributed[index % columnCount].push({ photo, index });
+    });
+    return distributed;
+  }, [photos, columnCount]);
 
   const tile = (photo: GalleryPhoto, index: number) => (
     <m.div
