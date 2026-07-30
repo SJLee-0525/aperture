@@ -34,11 +34,6 @@ const DevProjectCard = ({ project, lang, onSelect }: Props) => {
         <div className={styles.pt}>{pickText(project.title, lang)}</div>
         <div className={styles.pc}>{pickText(project.category, lang)}</div>
         <p className={styles.pd}>{pickText(project.summary, lang)}</p>
-        <div className={styles.tags}>
-          {project.techTags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
-        </div>
       </div>
     </button>
   );

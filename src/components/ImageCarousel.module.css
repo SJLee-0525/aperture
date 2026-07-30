@@ -29,7 +29,7 @@
   cursor: zoom-in;
 }
 .img {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .frame {
