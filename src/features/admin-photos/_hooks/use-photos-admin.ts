@@ -2,17 +2,13 @@
 
 import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
 import type { OrderedAdminAdapter } from "@/hooks/use-ordered-admin";
-import {
-  deletePhoto,
-  listPhotosAdmin,
-  setPhotoPublished,
-  updatePhotoOrder,
-} from "@/lib/firebase/firestore";
+import { deletePhoto, setPhotoPublished, updatePhotoOrder } from "@/lib/firebase/firestore";
+import { listPhotoItemsAdmin } from "@/lib/firebase/admin-list-rest";
 import { deletePhotoImages } from "@/lib/firebase/storage";
-import type { Photo } from "@/types/photo";
+import type { AdminPhotoListItem } from "@/types/admin";
 
-const photosAdapter: OrderedAdminAdapter<Photo> = {
-  list: listPhotosAdmin,
+const photosAdapter: OrderedAdminAdapter<AdminPhotoListItem> = {
+  list: listPhotoItemsAdmin,
   updateOrder: updatePhotoOrder,
   setPublished: setPhotoPublished,
   remove: async (id) => {

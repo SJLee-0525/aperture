@@ -6,18 +6,20 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminPhotoRoute } from "@/constants/routes";
-import type { Photo } from "@/types/photo";
+import type { AdminPhotoListItem } from "@/types/admin";
+import { imagePreviewUrl } from "@/types/image";
 
 import styles from "./PhotoRow.module.css";
 
 type Props = {
-  photo: Photo;
+  photo: AdminPhotoListItem;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
 
 /** 정렬 가능한 사진 행 — 드래그 핸들·썸네일·제목·공개 토글·수정/삭제. */
 const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
+  const previewUrl = imagePreviewUrl(photo.image);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
   });
@@ -49,9 +51,9 @@ const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
       </button>
 
       <span className={styles.thumb}>
-        {photo.image?.url ? (
+        {previewUrl ? (
           <Image
-            src={photo.image.url}
+            src={previewUrl}
             alt={photo.title.ko || "사진"}
             fill
             sizes="72px"

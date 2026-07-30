@@ -25,6 +25,7 @@ const toAlbum = (id: string, data: DocumentData): Album => ({
   title: data.title ?? { ko: "", en: "" },
   subtitle: data.subtitle ?? { ko: "", en: "" },
   coverPhotoId: data.coverPhotoId ?? "",
+  cover: data.cover ?? null,
   photoIds: data.photoIds ?? [],
   order: data.order ?? 0,
   published: data.published ?? false,

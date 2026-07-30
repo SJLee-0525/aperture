@@ -4,12 +4,13 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 
-import type { Photo } from "@/types/photo";
+import type { AdminPhotoListItem } from "@/types/admin";
+import { imagePreviewUrl } from "@/types/image";
 
 import styles from "./SelectedPhotoChip.module.css";
 
 type Props = {
-  photo: Photo;
+  photo: AdminPhotoListItem;
   isCover: boolean;
   onSetCover: (id: string) => void;
   onRemove: (id: string) => void;
@@ -17,6 +18,7 @@ type Props = {
 
 /** 선택된 사진 한 장 — 드래그로 순서 이동, 커버 지정, 제외. 순서 = photoIds 배열 순서. */
 const SelectedPhotoChip = ({ photo, isCover, onSetCover, onRemove }: Props) => {
+  const previewUrl = imagePreviewUrl(photo.image);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
   });
@@ -36,9 +38,9 @@ const SelectedPhotoChip = ({ photo, isCover, onSetCover, onRemove }: Props) => {
         {...attributes}
         {...listeners}
       >
-        {photo.image?.url ? (
+        {previewUrl ? (
           <Image
-            src={photo.image.url}
+            src={previewUrl}
             alt={photo.title.ko || "사진"}
             fill
             sizes="96px"

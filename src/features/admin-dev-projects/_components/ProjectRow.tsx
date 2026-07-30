@@ -6,18 +6,20 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminDevProjectRoute } from "@/constants/routes";
-import type { DevProject } from "@/types/dev";
+import type { AdminDevProjectListItem } from "@/types/admin";
+import { imagePreviewUrl } from "@/types/image";
 
 import styles from "./ProjectRow.module.css";
 
 type Props = {
-  project: DevProject;
+  project: AdminDevProjectListItem;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
 
 /** 정렬 가능한 프로젝트 행 — 드래그 핸들·대표 썸네일·제목·연도·공개 토글·수정/삭제. */
 const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
+  const previewUrl = imagePreviewUrl(project.cover);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: project.id,
   });
@@ -47,9 +49,9 @@ const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
       </button>
 
       <span className={styles.thumb}>
-        {project.cover?.url ? (
+        {previewUrl ? (
           <Image
-            src={project.cover.url}
+            src={previewUrl}
             alt={project.title.ko || "프로젝트"}
             fill
             sizes="64px"

@@ -6,12 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminAlbumRoute } from "@/constants/routes";
-import type { Album } from "@/types/album";
+import type { AdminAlbumListItem } from "@/types/admin";
 
 import styles from "./AlbumRow.module.css";
 
 type Props = {
-  album: Album;
+  album: AdminAlbumListItem;
   /** coverPhotoId → 이미지 URL (없으면 빈 썸네일). */
   coverUrl: string;
   onTogglePublished: (id: string, next: boolean) => void;

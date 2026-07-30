@@ -12,9 +12,9 @@ import {
   validateAlbumInput,
 } from "@/features/admin-albums/_lib/album-form-data";
 import { createAlbum, updateAlbum, type AlbumInput } from "@/lib/firebase/albums";
-import { listPhotosAdmin } from "@/lib/firebase/firestore";
+import { listPhotoItemsAdmin } from "@/lib/firebase/admin-list-rest";
+import type { AdminPhotoListItem } from "@/types/admin";
 import type { Album } from "@/types/album";
-import type { Photo } from "@/types/photo";
 
 type PhotoStatus = "loading" | "ready" | "error";
 
@@ -24,7 +24,7 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   const [form, setForm] = useState<AlbumInput>(() =>
     initial ? albumToInput(initial) : emptyAlbumInput(),
   );
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [photos, setPhotos] = useState<AdminPhotoListItem[]>([]);
   const [photoStatus, setPhotoStatus] = useState<PhotoStatus>("loading");
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,7 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
 
   useEffect(() => {
     let active = true;
-    listPhotosAdmin()
+    listPhotoItemsAdmin()
       .then((loaded) => {
         if (!active) return;
         setPhotos(loaded);
@@ -94,7 +94,11 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
     event.preventDefault();
     setError(null);
 
-    const input = normalizeAlbumInput({ ...form, photoIds: selectedPhotoIds });
+    const normalized = normalizeAlbumInput({ ...form, photoIds: selectedPhotoIds });
+    const input = {
+      ...normalized,
+      cover: photos.find((photo) => photo.id === normalized.coverPhotoId)?.image ?? null,
+    };
     const validationError = validateAlbumInput(input);
     if (validationError) {
       setError(validationError);

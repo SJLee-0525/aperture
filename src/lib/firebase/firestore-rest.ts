@@ -133,6 +133,7 @@ const restToAlbum = (id: string, d: Record<string, unknown>): Album => ({
   title: (d.title as LocalizedText) ?? { ko: "", en: "" },
   subtitle: (d.subtitle as LocalizedText) ?? { ko: "", en: "" },
   coverPhotoId: (d.coverPhotoId as string) ?? "",
+  cover: (d.cover as ImageMeta | null) ?? null,
   photoIds: (d.photoIds as string[]) ?? [],
   order: (d.order as number) ?? 0,
   published: (d.published as boolean) ?? false,

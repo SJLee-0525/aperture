@@ -10,15 +10,16 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-import type { Photo } from "@/types/photo";
+import type { AdminPhotoListItem } from "@/types/admin";
+import { imagePreviewUrl } from "@/types/image";
 
 import styles from "./AlbumPhotoPicker.module.css";
 import { SelectedPhotoChip } from "./SelectedPhotoChip";
 
 type Props = {
-  photos: Photo[];
+  photos: AdminPhotoListItem[];
   status: "loading" | "ready" | "error";
   error: string | null;
   photoIds: string[];
@@ -27,6 +28,8 @@ type Props = {
   onReorder: (activeId: string, overId: string) => void;
   onSetCover: (id: string) => void;
 };
+
+const PAGE_SIZE = 60;
 
 /**
  * 앨범 사진 선택·순서·커버 UI.
@@ -45,15 +48,30 @@ const AlbumPhotoPicker = ({
   onSetCover,
 }: Props) => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const [query, setQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const photoById = useMemo(() => new Map(photos.map((p) => [p.id, p])), [photos]);
   const selectedSet = useMemo(() => new Set(photoIds), [photoIds]);
 
   /** 순서 유지한 채 실제 존재하는 사진만 매핑(삭제된 참조는 걸러짐). */
   const selectedPhotos = useMemo(
-    () => photoIds.map((id) => photoById.get(id)).filter((p): p is Photo => p != null),
+    () => photoIds.map((id) => photoById.get(id)).filter((p): p is AdminPhotoListItem => p != null),
     [photoIds, photoById],
   );
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const filteredPhotos = useMemo(
+    () =>
+      normalizedQuery
+        ? photos.filter((photo) =>
+            [photo.title.ko, photo.title.en, photo.id].some((value) =>
+              value.toLocaleLowerCase().includes(normalizedQuery),
+            ),
+          )
+        : photos,
+    [normalizedQuery, photos],
+  );
+  const visiblePhotos = filteredPhotos.slice(0, visibleCount);
 
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -100,35 +118,64 @@ const AlbumPhotoPicker = ({
       </div>
 
       <div className={styles.block}>
-        <p className={styles.blockLabel}>전체 사진 — 눌러서 추가/제외</p>
+        <div className={styles.photoToolbar}>
+          <p className={styles.blockLabel}>전체 사진 — 눌러서 추가/제외</p>
+          <label className={styles.search}>
+            <span className={styles.searchLabel}>사진 검색</span>
+            <input
+              type="search"
+              value={query}
+              placeholder="제목 또는 ID"
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setVisibleCount(PAGE_SIZE);
+              }}
+            />
+          </label>
+        </div>
         {photos.length > 0 ? (
-          <ul className={styles.grid}>
-            {photos.map((photo) => {
-              const on = selectedSet.has(photo.id);
-              return (
-                <li key={photo.id} className={styles.gridItem}>
-                  <button
-                    type="button"
-                    className={`${styles.tile} ${on ? styles.tileOn : ""}`}
-                    onClick={() => onToggle(photo.id)}
-                    aria-pressed={on}
-                    title={photo.title.ko || "사진"}
-                  >
-                    {photo.image?.url ? (
-                      <Image
-                        src={photo.image.url}
-                        alt={photo.title.ko || "사진"}
-                        fill
-                        sizes="96px"
-                        className={styles.tileImg}
-                      />
-                    ) : null}
-                    {on ? <span className={styles.check}>✓</span> : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            <ul className={styles.grid}>
+              {visiblePhotos.map((photo) => {
+                const on = selectedSet.has(photo.id);
+                const previewUrl = imagePreviewUrl(photo.image);
+                return (
+                  <li key={photo.id} className={styles.gridItem}>
+                    <button
+                      type="button"
+                      className={`${styles.tile} ${on ? styles.tileOn : ""}`}
+                      onClick={() => onToggle(photo.id)}
+                      aria-pressed={on}
+                      title={photo.title.ko || "사진"}
+                    >
+                      {previewUrl ? (
+                        <Image
+                          src={previewUrl}
+                          alt={photo.title.ko || "사진"}
+                          fill
+                          sizes="96px"
+                          className={styles.tileImg}
+                        />
+                      ) : null}
+                      {on ? <span className={styles.check}>✓</span> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            {visibleCount < filteredPhotos.length ? (
+              <button
+                type="button"
+                className={styles.more}
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              >
+                더 보기 ({visibleCount}/{filteredPhotos.length})
+              </button>
+            ) : null}
+            {filteredPhotos.length === 0 ? (
+              <p className={styles.emptySel}>검색 결과가 없습니다.</p>
+            ) : null}
+          </>
         ) : (
           <p className={styles.emptySel}>등록된 사진이 없습니다. 먼저 사진을 추가하세요.</p>
         )}

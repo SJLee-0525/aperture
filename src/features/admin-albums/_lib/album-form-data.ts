@@ -5,6 +5,7 @@ const emptyAlbumInput = (): AlbumInput => ({
   title: { ko: "", en: "" },
   subtitle: { ko: "", en: "" },
   coverPhotoId: "",
+  cover: null,
   photoIds: [],
   order: 0,
   published: false,

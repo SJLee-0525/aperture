@@ -14,12 +14,13 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { AlbumRow } from "@/features/admin-albums/_components/AlbumRow";
 import { useAlbumsAdmin } from "@/features/admin-albums/_hooks/use-albums-admin";
+import { imagePreviewUrl } from "@/types/image";
 
 import styles from "./AdminAlbumsList.module.css";
 
 /** 관리자 앨범 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useAlbumsAdmin. */
 const AdminAlbumsPage = () => {
-  const { albums, coverUrls, status, error, reorder, togglePublished, remove } = useAlbumsAdmin();
+  const { albums, status, error, reorder, togglePublished, remove } = useAlbumsAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -66,7 +67,7 @@ const AdminAlbumsPage = () => {
                 <AlbumRow
                   key={album.id}
                   album={album}
-                  coverUrl={coverUrls.get(album.coverPhotoId) ?? ""}
+                  coverUrl={imagePreviewUrl(album.cover)}
                   onTogglePublished={togglePublished}
                   onDelete={remove}
                 />

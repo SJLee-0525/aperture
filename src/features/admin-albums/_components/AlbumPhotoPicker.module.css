@@ -35,6 +35,51 @@
 }
 .gridItem {
   list-style: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 96px;
+}
+
+.photoToolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.search {
+  display: grid;
+  gap: var(--s-1);
+  width: min(280px, 100%);
+}
+
+.searchLabel {
+  font-size: var(--t-micro);
+  color: var(--text-4);
+}
+
+.search input {
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+
+.more {
+  align-self: center;
+  min-height: 40px;
+  padding: 0 var(--s-5);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .photoToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .tile {

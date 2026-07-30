@@ -3,9 +3,13 @@
 import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
 import type { OrderedAdminAdapter } from "@/hooks/use-ordered-admin";
 import { musicWorks } from "@/lib/firebase/music";
-import type { MusicWork } from "@/types/music";
+import { listMusicWorkItemsAdmin } from "@/lib/firebase/admin-list-rest";
+import type { AdminMusicWorkListItem } from "@/types/admin";
 
-const musicWorksAdapter: OrderedAdminAdapter<MusicWork> = musicWorks;
+const musicWorksAdapter: OrderedAdminAdapter<AdminMusicWorkListItem> = {
+  ...musicWorks,
+  list: listMusicWorkItemsAdmin,
+};
 
 const useMusicWorksAdmin = () => {
   const { items: works, ...admin } = useOrderedAdmin(musicWorksAdapter);

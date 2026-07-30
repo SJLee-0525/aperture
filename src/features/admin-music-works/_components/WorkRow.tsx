@@ -6,12 +6,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminMusicWorkRoute } from "@/constants/routes";
-import type { MusicWork } from "@/types/music";
+import type { AdminMusicWorkListItem } from "@/types/admin";
+import { imagePreviewUrl } from "@/types/image";
 
 import styles from "./WorkRow.module.css";
 
 type Props = {
-  work: MusicWork;
+  work: AdminMusicWorkListItem;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -26,6 +27,7 @@ const formatDate = (date: Date): string => {
 
 /** 정렬 가능한 연주 행 — 드래그 핸들·포스터 썸네일·제목·날짜·공개 토글·수정/삭제. */
 const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
+  const previewUrl = imagePreviewUrl(work.poster);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: work.id,
   });
@@ -55,9 +57,9 @@ const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
       </button>
 
       <span className={styles.thumb}>
-        {work.poster.url ? (
+        {previewUrl ? (
           <Image
-            src={work.poster.url}
+            src={previewUrl}
             alt={work.title.ko || "연주"}
             fill
             sizes="48px"
