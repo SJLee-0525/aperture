@@ -9,27 +9,26 @@ import styles from "./DevProjectsView.module.css";
 type Props = {
   project: DevProject;
   lang: Lang;
-  noImageLabel: string;
   onSelect: (id: string) => void;
 };
 
 /** 목록에서 사용하는 프로젝트 요약 카드. */
-const DevProjectCard = ({ project, lang, noImageLabel, onSelect }: Props) => {
+const DevProjectCard = ({ project, lang, onSelect }: Props) => {
+  const coverUrl = project.cover?.url;
+  const hasCover = Boolean(coverUrl);
+
   return (
     <button type="button" className={styles.card} onClick={() => onSelect(project.id)}>
       <div className={styles.cover} data-protected-image>
-        {project.cover?.url ? (
-          <Image
-            src={project.cover.url}
-            alt={pickText(project.title, lang)}
-            fill
-            sizes="(max-width: 720px) 100vw, 560px"
-            className={styles.coverImg}
-            draggable={false}
-          />
-        ) : (
-          <span className={styles.coverEmpty}>{noImageLabel}</span>
-        )}
+        <Image
+          src={coverUrl || "/opengraph-image"}
+          alt={hasCover ? pickText(project.title, lang) : ""}
+          fill
+          sizes="(max-width: 720px) 100vw, 560px"
+          className={styles.coverImg}
+          draggable={false}
+          unoptimized={!hasCover}
+        />
       </div>
       <div className={styles.cardBody}>
         <div className={styles.year}>{project.year}</div>

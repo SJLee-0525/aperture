@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         hostname: "firebasestorage.googleapis.com",
         pathname: "/v0/b/**",
       },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        pathname: "/vi/**",
+      },
     ],
   },
   // 사진 섹션이 /photo/* 로 이동(A1) — 기존 URL 보존. `/` 는 (public)/page.tsx 가 처리.

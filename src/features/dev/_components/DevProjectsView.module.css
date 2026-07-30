@@ -57,12 +57,6 @@
 .coverImg {
   object-fit: cover;
 }
-.coverEmpty {
-  font-family: var(--font-mono);
-  font-size: var(--t-micro);
-  letter-spacing: 0.2em;
-  color: var(--text-4);
-}
 .cardBody {
   display: flex;
   flex-direction: column;

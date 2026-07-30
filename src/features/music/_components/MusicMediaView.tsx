@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -41,6 +42,10 @@ const MusicMediaView = ({ media }: { media: MusicMedia[] }) => {
                 </div>
               );
             }
+            const thumbnailSrc = item.youtubeId
+              ? `https://i.ytimg.com/vi/${item.youtubeId}/hqdefault.jpg`
+              : "/opengraph-image";
+
             return (
               <div key={item.id} className={styles.v}>
                 <button
@@ -49,6 +54,14 @@ const MusicMediaView = ({ media }: { media: MusicMedia[] }) => {
                   onClick={() => setPlaying(item.id)}
                   aria-label={pickText(item.title, lang)}
                 >
+                  <Image
+                    src={thumbnailSrc}
+                    alt=""
+                    fill
+                    sizes="(max-width: 720px) 100vw, 590px"
+                    className={styles.thumbnail}
+                    draggable={false}
+                  />
                   <div className={styles.facade}>
                     <div className={styles.vt}>{pickText(item.title, lang)}</div>
                     <div className={styles.vs}>
