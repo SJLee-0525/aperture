@@ -2,9 +2,13 @@
 .view {
   display: grid;
   grid-template-columns: 320px 1fr;
-  min-height: calc(100dvh - 200px);
+  height: calc(100dvh - 76px);
+  min-height: 520px;
+  overflow: hidden;
 }
 .list {
+  min-height: 0;
+  overflow: hidden;
   padding: var(--s-5);
   border-right: 1px solid var(--line);
 }
@@ -32,6 +36,9 @@
 @media (max-width: 760px) {
   .view {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(240px, 52%) minmax(0, 48%);
+    height: calc(100dvh - 58px - 62px - env(safe-area-inset-bottom, 0px));
+    min-height: 520px;
   }
   /* 모바일: 실제 MapView와 동일하게 지도 stage를 리스트 위로, 구분선은 리스트 상단으로 */
   .list {
@@ -39,7 +46,7 @@
     border-top: 1px solid var(--line);
   }
   .stage {
-    min-height: 60vh;
+    min-height: 0;
     order: -1;
   }
 }

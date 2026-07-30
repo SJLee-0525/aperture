@@ -3,7 +3,9 @@
 .view {
   display: grid;
   grid-template-columns: 320px 1fr;
-  min-height: calc(100dvh - 200px);
+  height: calc(100dvh - 76px);
+  min-height: 520px;
+  overflow: hidden;
 }
 .stage {
   position: relative;
@@ -19,10 +21,13 @@
 @media (max-width: 760px) {
   .view {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(240px, 52%) minmax(0, 48%);
+    height: calc(100dvh - 58px - 62px - env(safe-area-inset-bottom, 0px));
+    min-height: 520px;
   }
   /* 모바일: 지도를 위치 리스트 위로 + 높이 60vh (스켈레톤 loading.module.css와 정합) */
   .stage {
-    min-height: 60vh;
+    min-height: 0;
     order: -1;
   }
 }
