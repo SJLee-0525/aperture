@@ -3,6 +3,8 @@
   --cursor-width: 12px;
   --cursor-height: 12px;
   --cursor-radius: 999px;
+  --cursor-hint-x: 50%;
+  --cursor-hint-y: 50%;
 
   position: fixed;
   top: 0;
@@ -18,22 +20,39 @@
 }
 
 .shape {
+  position: relative;
   display: block;
   width: var(--cursor-width);
   height: var(--cursor-height);
   border-radius: var(--cursor-radius);
-  background: var(--cursor-accent);
+  background-color: var(--cursor-accent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 30%, transparent);
   transform: translate(-50%, -50%);
   transition:
-    width 0.14s var(--ease),
-    height 0.14s var(--ease),
-    border-radius 0.08s linear,
-    background 0.12s var(--ease),
-    box-shadow 0.12s var(--ease),
-    transform 0.08s var(--ease);
+    width 0.36s cubic-bezier(0.2, 1.25, 0.4, 1),
+    height 0.36s cubic-bezier(0.2, 1.25, 0.4, 1),
+    border-radius 0.1s var(--ease),
+    background-color 0.44s var(--ease),
+    transform 0.3s cubic-bezier(0.2, 1.25, 0.4, 1);
   contain: layout style;
   will-change: width, height;
+}
+
+.shape::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle 22px at var(--cursor-hint-x) var(--cursor-hint-y),
+      color-mix(in srgb, var(--cursor-accent) 40%, transparent) 0%,
+      color-mix(in srgb, var(--cursor-accent) 12%, transparent) 0%,
+      transparent 100%
+    ),
+    color-mix(in srgb, var(--cursor-accent) 16%, transparent);
+  content: "";
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
 }
 
 .cursor[data-visible="true"] {
@@ -48,15 +67,23 @@
 
 .cursor[data-mode="snap"] .shape {
   /* 테두리 대신 연한 면칠 — 대상 요소의 기초 호버 배경은 [data-cursor-snapped]가 끈다. */
-  background: color-mix(in srgb, var(--cursor-accent) 12%, transparent);
-  box-shadow: none;
+  background-color: transparent;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 8%, transparent),
+    0 5px 14px color-mix(in srgb, var(--cursor-accent) 9%, transparent);
+  border-radius: var(--cursor-radius);
+  transform: translate(-50%, -50%) scale(1.008);
+}
+
+.cursor[data-mode="snap"] .shape::after {
+  opacity: 1;
 }
 
 .cursor[data-mode="ring"] .shape {
   --cursor-width: 34px;
   --cursor-height: 34px;
   --cursor-radius: 999px;
-  background: color-mix(in srgb, var(--cursor-accent) 10%, transparent);
+  background-color: color-mix(in srgb, var(--cursor-accent) 10%, transparent);
   box-shadow: inset 0 0 0 1.5px var(--cursor-accent);
 }
 

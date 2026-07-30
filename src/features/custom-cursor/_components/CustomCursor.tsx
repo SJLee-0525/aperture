@@ -33,7 +33,6 @@ const CustomCursor = () => {
     let targetCircular = false;
     let targetPill = false;
     let targetCompact = false;
-    let targetRadius = 0;
     let targetDirty = false;
     let snapped: HTMLElement | null = null;
     let currentAccent = "";
@@ -98,11 +97,11 @@ const CustomCursor = () => {
       }
 
       targetRect = target.getBoundingClientRect();
-      targetCompact = targetRect.width <= 220 && targetRect.height <= 72;
+      targetCompact = targetRect.width <= 320 && targetRect.height <= 72;
       if (!targetCompact) return;
 
       targetPill = target.dataset.cursorShape === "pill";
-      targetRadius = Number.parseFloat(getComputedStyle(target).borderRadius) || 0;
+      const targetRadius = Number.parseFloat(getComputedStyle(target).borderRadius) || 0;
       targetCircular =
         Math.abs(targetRect.width - targetRect.height) <= 4 &&
         targetRadius >= Math.min(targetRect.width, targetRect.height) / 2 - 2;
@@ -123,7 +122,13 @@ const CustomCursor = () => {
 
       if (target && targetRect) {
         if (targetCompact) {
-          const size = Math.max(targetRect.width, targetRect.height) + 4;
+          const expansion = 5;
+          const size = Math.max(targetRect.width, targetRect.height) + expansion;
+          const localX = Math.min(Math.max(pointerX - targetRect.left, 0), targetRect.width);
+          const localY = Math.min(Math.max(pointerY - targetRect.top, 0), targetRect.height);
+          const hintX = targetRect.width ? (localX / targetRect.width) * 100 : 50;
+          const hintY = targetRect.height ? (localY / targetRect.height) * 100 : 50;
+
           setSnapped(target);
           setMode("snap");
           cursor.style.transform = `translate3d(${
@@ -131,16 +136,18 @@ const CustomCursor = () => {
           }px, ${targetRect.top + targetRect.height / 2}px, 0)`;
           cursor.style.setProperty(
             "--cursor-width",
-            `${targetCircular ? size : targetRect.width + 4}px`,
+            `${targetCircular ? size : targetRect.width + expansion}px`,
           );
           cursor.style.setProperty(
             "--cursor-height",
-            `${targetCircular ? size : targetRect.height + 4}px`,
+            `${targetCircular ? size : targetRect.height + expansion}px`,
           );
           cursor.style.setProperty(
             "--cursor-radius",
-            targetCircular || targetPill ? "999px" : `${targetRadius}px`,
+            targetCircular || targetPill ? "999px" : "5px",
           );
+          cursor.style.setProperty("--cursor-hint-x", `${hintX}%`);
+          cursor.style.setProperty("--cursor-hint-y", `${hintY}%`);
           return;
         }
 
@@ -161,7 +168,7 @@ const CustomCursor = () => {
     const onPointerMove = (event: PointerEvent) => {
       pointerX = event.clientX;
       pointerY = event.clientY;
-      if (!targetCompact) scheduleDraw();
+      scheduleDraw();
     };
 
     const onPointerOver = (event: PointerEvent) => {
