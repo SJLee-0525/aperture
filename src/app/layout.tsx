@@ -4,6 +4,7 @@ import { Newsreader, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/googl
 import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { MotionProvider } from "@/features/motion/_components/MotionProvider";
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
+import { SITE_URL } from "@/lib/seo/site-url";
 
 import "./globals.css";
 
@@ -31,8 +32,42 @@ const splineMono = Spline_Sans_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aperture. — Sungjoon Lee",
-  description: "사진작가 이성준(Sungjoon Lee)의 사진 포트폴리오. 작업 · 앨범 · 지도 · 소개.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Sungjoon Lee — Photographer, Pianist, Developer",
+    template: "%s | Sungjoon Lee",
+  },
+  description: "사진, 음악, 개발 작업을 소개하는 이성준(Sungjoon Lee)의 포트폴리오.",
+  applicationName: "Sungjoon Lee",
+  authors: [{ name: "Sungjoon Lee", url: "/" }],
+  creator: "Sungjoon Lee",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Sungjoon Lee",
+    title: "Sungjoon Lee — Photographer, Pianist, Developer",
+    description: "사진, 음악, 개발 작업을 소개하는 이성준의 포트폴리오.",
+    url: "/",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sungjoon Lee — Photographer, Pianist, Developer",
+    description: "사진, 음악, 개발 작업을 소개하는 이성준의 포트폴리오.",
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: {
+      ...(process.env.NAVER_SITE_VERIFICATION
+        ? { "naver-site-verification": process.env.NAVER_SITE_VERIFICATION }
+        : {}),
+      ...(process.env.BING_SITE_VERIFICATION
+        ? { msvalidate01: process.env.BING_SITE_VERIFICATION }
+        : {}),
+    },
+  },
 };
 
 export default function RootLayout({

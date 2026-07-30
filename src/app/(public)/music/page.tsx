@@ -2,6 +2,13 @@ import { Suspense } from "react";
 
 import { MusicWorksView } from "@/features/music/_components/MusicWorksView";
 import { getMusicWorks } from "@/lib/content/get-music-works";
+import { pageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = pageMetadata({
+  title: "연주",
+  description: "이성준의 공연과 연주 프로그램을 소개합니다.",
+  pathname: "/music",
+});
 
 export const revalidate = 3600;
 

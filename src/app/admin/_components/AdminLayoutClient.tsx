@@ -1,0 +1,28 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+
+import { ROUTES } from "@/constants/routes";
+import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
+import { AuthGuard } from "@/features/auth/_components/AuthGuard";
+
+/**
+ * 관리자 클라이언트 셸. 서버 레이아웃은 noindex 메타데이터를 내보내고,
+ * 경로에 따른 로그인/관리자 크롬 분기는 이 컴포넌트가 담당한다.
+ */
+const AdminLayoutClient = ({ children }: { children: ReactNode }) => {
+  const pathname = usePathname();
+
+  if (pathname === ROUTES.LOGIN) {
+    return <AuthGuard>{children}</AuthGuard>;
+  }
+
+  return (
+    <AuthGuard>
+      <AdminChrome>{children}</AdminChrome>
+    </AuthGuard>
+  );
+};
+
+export { AdminLayoutClient };

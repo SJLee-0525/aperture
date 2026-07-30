@@ -3,7 +3,14 @@ import { Suspense } from "react";
 import { GalleryView } from "@/features/gallery/_components/GalleryView";
 import { getPhotos } from "@/lib/content/get-photos";
 import { getTags } from "@/lib/content/get-tags";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { toGalleryPhotos } from "@/types/gallery-photo";
+
+export const metadata = pageMetadata({
+  title: "사진 작업",
+  description: "이성준의 사진 작업을 주제와 촬영 정보별로 살펴보세요.",
+  pathname: "/photo",
+});
 
 export const revalidate = 3600;
 

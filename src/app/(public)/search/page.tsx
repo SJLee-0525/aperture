@@ -8,6 +8,19 @@ import { getMusicAwards } from "@/lib/content/get-music-awards";
 import { getMusicMedia } from "@/lib/content/get-music-media";
 import { getMusicWorks } from "@/lib/content/get-music-works";
 import { getPhotos } from "@/lib/content/get-photos";
+import { pageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = {
+  ...pageMetadata({
+    title: "검색",
+    description: "이성준의 사진, 음악, 개발 작업을 검색합니다.",
+    pathname: "/search",
+  }),
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export const revalidate = 3600;
 
