@@ -22,6 +22,7 @@ const DevProjectCard = ({ project, lang, onSelect, onPreload }: Props) => {
     <button
       type="button"
       className={styles.card}
+      data-cursor-large="frame"
       onClick={() => onSelect(project.id)}
       onFocus={onPreload}
       onMouseEnter={onPreload}

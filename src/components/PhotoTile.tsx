@@ -30,6 +30,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }:
       prefetch={false}
       aria-label={title}
       className={styles.tile}
+      data-cursor-large="frame"
       data-protected-image
       style={{ aspectRatio: square ? "1 / 1" : `${photo.aspectRatio}` }}
       onPointerEnter={onPreload}

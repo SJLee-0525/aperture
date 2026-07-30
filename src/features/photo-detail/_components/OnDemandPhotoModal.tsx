@@ -15,6 +15,7 @@ import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 import type { Photo } from "@/types/photo";
 import type { Tag } from "@/types/tag";
+import { setCursorLoading } from "@/utils/custom-cursor-events";
 
 import styles from "./OnDemandPhotoModal.module.css";
 
@@ -123,6 +124,14 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
   const mounted = useMounted();
   // 로딩 프레임 → 실제 모달 전환 중에도 한 소유자가 잠금을 계속 유지한다.
   useScrollLock(activeId != null);
+
+  useEffect(() => {
+    if (!activeId) return;
+    const loadingId = `photo-detail:${activeId}`;
+    const pending = readyId !== activeId && failedId !== activeId;
+    setCursorLoading(loadingId, pending);
+    return () => setCursorLoading(loadingId, false);
+  }, [activeId, failedId, readyId]);
 
   if (!activeId) return null;
 
