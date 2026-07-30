@@ -40,6 +40,7 @@ const ROUTES = {
   ADMIN_DEV: "/admin/dev",
   ADMIN_DEV_PROJECTS: "/admin/dev/projects",
   ADMIN_DEV_CONFIG: "/admin/dev/config",
+  ADMIN_MAINTENANCE: "/admin/maintenance",
 } as const;
 
 /** 앨범 상세 경로 (/photo/albums/[id]) */

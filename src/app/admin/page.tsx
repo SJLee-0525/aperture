@@ -33,6 +33,12 @@ const SECTIONS: { key: string; label: string; desc: string; href?: string }[] = 
     desc: "메인 순환 타이핑·리드 · 연락 리드·링크",
     href: ROUTES.ADMIN_GLOBAL,
   },
+  {
+    key: "maintenance",
+    label: "데이터 관리",
+    desc: "이미지 썸네일 · 앨범 커버 마이그레이션",
+    href: ROUTES.ADMIN_MAINTENANCE,
+  },
 ];
 
 const AdminHomePage = () => {
