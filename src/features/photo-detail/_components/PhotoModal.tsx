@@ -2,7 +2,7 @@
 
 import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 import { ExifStrip } from "@/components/ExifStrip";
@@ -25,6 +25,18 @@ type Props = {
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const MOBILE_QUERY = "(max-width: 900px)";
+const CLOSE_TOUCH_THRESHOLD = 56;
+const CLOSE_WHEEL_THRESHOLD = 80;
+const CHROME_TRANSITION = { duration: 0.2, ease: EASE } as const;
+
+const subscribeMobile = (onChange: () => void) => {
+  const query = window.matchMedia(MOBILE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+const readMobile = () => window.matchMedia(MOBILE_QUERY).matches;
+const readServerMobile = () => false;
 
 const closeIcon = (
   <svg
@@ -73,20 +85,64 @@ const chevRight = (
  */
 const PhotoModal = ({ photos, tags }: Props) => {
   const { dict, lang } = useLang();
-  const { photo, open, close, next, prev } = usePhotoModal(photos);
   const [expanded, setExpanded] = useState(false);
+  const [photoChromeVisible, setPhotoChromeVisible] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const mobile = useSyncExternalStore(subscribeMobile, readMobile, readServerMobile);
+  const navigationLocked = mobile && expanded;
+  const showPhotoChrome = !navigationLocked && photoChromeVisible;
+  const onNavigateStart = useCallback(() => setImgLoaded(false), []);
+  const { photo, open, close, next, prev } = usePhotoModal(
+    photos,
+    !navigationLocked && imgLoaded,
+    onNavigateStart,
+  );
   const [seenId, setSeenId] = useState<string | undefined>(photo?.id);
+  const touchStartY = useRef<number | null>(null);
+  const collapsePullStartY = useRef<number | null>(null);
+  const wheelTravel = useRef(0);
+  const panelRef = useRef<HTMLElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
   // 사진이 바뀌면(prev/next·열기) 로더/스켈레톤을 다시 표시 — effect 없이 render-time reseed.
   if (photo && photo.id !== seenId) {
     setSeenId(photo.id);
     setImgLoaded(false);
+    setExpanded(false);
+    setPhotoChromeVisible(true);
   }
   const trapRef = useFocusTrap(open);
   const mounted = useMounted();
   useScrollLock(open);
 
+  useEffect(() => {
+    const node = photoRef.current;
+    if (!open || !node) return;
+    const prevent = (event: Event) => event.preventDefault();
+
+    // Chrome DevTools 모바일 에뮬레이션은 데스크톱 contextmenu 경로를 사용할 수 있어
+    // React 버블 핸들러보다 앞선 네이티브 캡처 단계에서 이미지 기본 동작을 차단한다.
+    node.addEventListener("contextmenu", prevent, true);
+    node.addEventListener("dragstart", prevent, true);
+    node.addEventListener("selectstart", prevent, true);
+    return () => {
+      node.removeEventListener("contextmenu", prevent, true);
+      node.removeEventListener("dragstart", prevent, true);
+      node.removeEventListener("selectstart", prevent, true);
+    };
+  }, [open, photo?.id]);
+
   const alt = photo ? pickText(photo.title, lang) : "";
+  const photoIndex = photo ? photos.findIndex((item) => item.id === photo.id) : -1;
+  const adjacentPhotos =
+    photoIndex >= 0 && photos.length > 1
+      ? [
+          photos[(photoIndex - 1 + photos.length) % photos.length],
+          photos[(photoIndex + 1) % photos.length],
+        ].filter(
+          (item, index, items): item is Photo =>
+            item != null && items.findIndex((candidate) => candidate?.id === item.id) === index,
+        )
+      : [];
   const tagLabels = photo
     ? photo.tags.map((id) => {
         const found = tags.find((tag) => tag.id === id);
@@ -94,9 +150,50 @@ const PhotoModal = ({ photos, tags }: Props) => {
       })
     : [];
 
-  const onPanelClick = (event: React.MouseEvent) => {
-    if ((event.target as HTMLElement).closest("button")) return;
-    setExpanded((value) => !value);
+  const collapsePanel = (panel: HTMLElement) => {
+    touchStartY.current = null;
+    collapsePullStartY.current = null;
+    wheelTravel.current = 0;
+    panel.scrollTo({ top: 0 });
+    setExpanded(false);
+    setPhotoChromeVisible(true);
+  };
+
+  const expandPanel = (panel: HTMLElement) => {
+    wheelTravel.current = 0;
+    collapsePullStartY.current = null;
+    panel.scrollTo({ top: 0 });
+    setExpanded(true);
+  };
+
+  const onPanelScroll = (event: React.UIEvent<HTMLElement>) => {
+    if (!expanded && event.currentTarget.scrollTop > 8) expandPanel(event.currentTarget);
+  };
+
+  const onPanelTouchMove = (event: React.TouchEvent<HTMLElement>) => {
+    const nextY = event.touches[0]?.clientY;
+    if (nextY == null) return;
+    const panel = event.currentTarget;
+
+    if (!expanded && touchStartY.current != null) {
+      const openTravel = nextY - touchStartY.current;
+      if (openTravel < -8) {
+        touchStartY.current = nextY;
+        expandPanel(panel);
+      }
+      return;
+    }
+
+    // 내부 콘텐츠를 모두 올린 뒤, 최상단에서 추가로 당긴 거리만 축소 임계치에 포함한다.
+    if (panel.scrollTop > 1) {
+      collapsePullStartY.current = null;
+      return;
+    }
+    if (collapsePullStartY.current == null || nextY < collapsePullStartY.current) {
+      collapsePullStartY.current = nextY;
+      return;
+    }
+    if (nextY - collapsePullStartY.current > CLOSE_TOUCH_THRESHOLD) collapsePanel(panel);
   };
 
   if (!mounted) return null;
@@ -130,7 +227,20 @@ const PhotoModal = ({ photos, tags }: Props) => {
             exit={{ opacity: 0, scale: 0.985 }}
             transition={{ duration: 0.28, ease: EASE }}
           >
-            <div className={styles.photo}>
+            <div
+              ref={photoRef}
+              className={styles.photo}
+              onContextMenu={(event) => event.preventDefault()}
+              onDragStart={(event) => event.preventDefault()}
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest("button")) return;
+                if (mobile && expanded && panelRef.current) {
+                  collapsePanel(panelRef.current);
+                } else {
+                  setPhotoChromeVisible((visible) => !visible);
+                }
+              }}
+            >
               <Image
                 key={photo.id}
                 src={photo.image.url}
@@ -138,25 +248,50 @@ const PhotoModal = ({ photos, tags }: Props) => {
                 fill
                 sizes="100vw"
                 className={styles.img}
+                draggable={false}
+                onContextMenu={(event) => event.preventDefault()}
+                onDragStart={(event) => event.preventDefault()}
                 priority
                 onLoad={() => setImgLoaded(true)}
                 onError={() => setImgLoaded(true)}
               />
+              <div className={styles.preloads} aria-hidden="true">
+                {adjacentPhotos.map((adjacent) => (
+                  <Image
+                    key={adjacent.id}
+                    src={adjacent.image.url}
+                    alt=""
+                    width={adjacent.image.w}
+                    height={adjacent.image.h}
+                    sizes="100vw"
+                    draggable={false}
+                  />
+                ))}
+              </div>
               {imgLoaded ? null : (
                 <div className={styles.imgLoader} aria-hidden="true">
                   <span className={styles.spinner} />
                 </div>
               )}
-              {imgLoaded ? (
-                <div className={styles.strip}>
-                  <ExifStrip
-                    aperture={photo.exif.aperture}
-                    shutter={photo.exif.shutter}
-                    iso={photo.exif.iso}
-                    glass
-                  />
-                </div>
-              ) : null}
+              <AnimatePresence>
+                {imgLoaded && showPhotoChrome ? (
+                  <m.div
+                    key="exif-strip"
+                    className={styles.strip}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={CHROME_TRANSITION}
+                  >
+                    <ExifStrip
+                      aperture={photo.exif.aperture}
+                      shutter={photo.exif.shutter}
+                      iso={photo.exif.iso}
+                      glass
+                    />
+                  </m.div>
+                ) : null}
+              </AnimatePresence>
               <button
                 type="button"
                 className={`${styles.nav} ${styles.close}`}
@@ -165,32 +300,110 @@ const PhotoModal = ({ photos, tags }: Props) => {
               >
                 {closeIcon}
               </button>
-              <button
-                type="button"
-                className={`${styles.nav} ${styles.prev}`}
-                aria-label={dict.previousImageLabel}
-                onClick={prev}
-              >
-                {chevLeft}
-              </button>
-              <button
-                type="button"
-                className={`${styles.nav} ${styles.next}`}
-                aria-label={dict.nextImageLabel}
-                onClick={next}
-              >
-                {chevRight}
-              </button>
+              <AnimatePresence>
+                {showPhotoChrome ? (
+                  <m.button
+                    key="previous"
+                    type="button"
+                    className={`${styles.nav} ${styles.prev}`}
+                    aria-label={dict.previousImageLabel}
+                    onClick={prev}
+                    disabled={!imgLoaded}
+                    initial={{ opacity: 0, x: -6, y: "-50%" }}
+                    animate={{ opacity: 1, x: 0, y: "-50%" }}
+                    exit={{ opacity: 0, x: -6, y: "-50%" }}
+                    transition={CHROME_TRANSITION}
+                  >
+                    {chevLeft}
+                  </m.button>
+                ) : null}
+                {showPhotoChrome ? (
+                  <m.button
+                    key="next"
+                    type="button"
+                    className={`${styles.nav} ${styles.next}`}
+                    aria-label={dict.nextImageLabel}
+                    onClick={next}
+                    disabled={!imgLoaded}
+                    initial={{ opacity: 0, x: 6, y: "-50%" }}
+                    animate={{ opacity: 1, x: 0, y: "-50%" }}
+                    exit={{ opacity: 0, x: 6, y: "-50%" }}
+                    transition={CHROME_TRANSITION}
+                  >
+                    {chevRight}
+                  </m.button>
+                ) : null}
+              </AnimatePresence>
             </div>
             <aside
+              ref={panelRef}
               className={`${styles.panel} ${expanded ? styles.expanded : ""}`}
-              onClick={onPanelClick}
+              onScroll={onPanelScroll}
+              onTouchStart={(event) => {
+                const startY = event.touches[0]?.clientY ?? null;
+                touchStartY.current = startY;
+                collapsePullStartY.current =
+                  expanded && event.currentTarget.scrollTop <= 1 ? startY : null;
+              }}
+              onTouchMove={onPanelTouchMove}
+              onTouchEnd={() => {
+                touchStartY.current = null;
+                collapsePullStartY.current = null;
+              }}
+              onWheel={(event) => {
+                const panel = event.currentTarget;
+
+                if (expanded) {
+                  // 최상단에 닿기 전의 역스크롤은 축소 임계치에 누적하지 않는다.
+                  if (panel.scrollTop > 1 || event.deltaY >= 0) {
+                    wheelTravel.current = 0;
+                    return;
+                  }
+                  wheelTravel.current += event.deltaY;
+                  if (wheelTravel.current < -CLOSE_WHEEL_THRESHOLD) collapsePanel(panel);
+                  return;
+                }
+
+                const sameDirection =
+                  wheelTravel.current === 0 ||
+                  Math.sign(wheelTravel.current) === Math.sign(event.deltaY);
+                wheelTravel.current = sameDirection
+                  ? wheelTravel.current + event.deltaY
+                  : event.deltaY;
+
+                if (wheelTravel.current > 8 && !expanded) {
+                  expandPanel(panel);
+                }
+              }}
             >
-              <span className={styles.handle} />
+              <button
+                type="button"
+                className={styles.handleButton}
+                aria-label={
+                  lang === "ko"
+                    ? expanded
+                      ? "사진 정보 접기"
+                      : "사진 정보 펼치기"
+                    : expanded
+                      ? "Collapse photo information"
+                      : "Expand photo information"
+                }
+                aria-expanded={expanded}
+                onClick={(event) => {
+                  const panel = event.currentTarget.closest("aside");
+                  if (expanded && panel) {
+                    collapsePanel(panel);
+                  } else if (panel) {
+                    expandPanel(panel);
+                  }
+                }}
+              >
+                <span className={styles.handle} />
+              </button>
               {imgLoaded ? (
                 <ExifPanel photo={photo} tagLabels={tagLabels} />
               ) : (
-                <ExifPanelSkeleton />
+                <ExifPanelSkeleton photo={photo} tagCount={tagLabels.length} />
               )}
             </aside>
           </m.div>

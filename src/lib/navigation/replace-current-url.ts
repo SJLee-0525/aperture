@@ -10,4 +10,13 @@ const replaceCurrentUrl = (href: string): void => {
   window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
 };
 
-export { replaceCurrentUrl };
+/**
+ * 새 history entry로 URL을 추가하고 App Router의 useSearchParams를 동기화한다.
+ * 목록→모달 진입처럼 뒤로가기가 모달을 닫아야 하는 경우에 사용한다.
+ */
+const pushCurrentUrl = (href: string): void => {
+  window.history.pushState(window.history.state, "", href);
+  window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+};
+
+export { pushCurrentUrl, replaceCurrentUrl };

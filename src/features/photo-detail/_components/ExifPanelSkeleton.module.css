@@ -1,17 +1,18 @@
 /* 실제 ExifPanel 각 구간의 측정 높이를 그대로 예약해 로드 시 CLS(튐)를 없앤다.
-   head 62 / exifHead 41(+mb s-6) / triangle 63(+mb s-8) / row 35×N / minimap 148 / tags 30, panel gap s-5. */
+   title 40 / exifHead 64(+mb s-6) / triangle 63(+mb s-8) / row 35×N / minimap 148 / tags 30, panel gap s-3. */
 .panel {
   display: flex;
   flex-direction: column;
-  gap: var(--s-5);
+  gap: var(--s-3);
 }
 
 .head {
-  min-height: 62px;
+  min-height: 40px;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 6px;
 }
 .titleWrap {
   flex: 1;
@@ -22,22 +23,16 @@
   display: flex;
   align-items: center;
 }
-.dateLine {
-  height: 18px;
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-}
-
 .exifHead {
-  height: 41px;
+  min-height: 64px;
   box-sizing: border-box;
+  padding-bottom: var(--s-4);
   margin-bottom: var(--s-6);
   border-bottom: 1px solid var(--line);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-3);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 .triangle {
   height: 63px;

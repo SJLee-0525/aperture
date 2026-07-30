@@ -10,7 +10,7 @@ import type { Photo } from "@/types/photo";
  * 사진 상세 모달 상태 — URL(?photo=id)이 단일 출처(딥링크·공유).
  * prev/next는 넘겨받은 photos 배열을 순환, 키보드(←/→/ESC) 지원.
  */
-const usePhotoModal = (photos: Photo[]) => {
+const usePhotoModal = (photos: Photo[], navigationEnabled = true, onNavigateStart?: () => void) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -38,10 +38,9 @@ const usePhotoModal = (photos: Photo[]) => {
       }
       const qs = params.toString();
       const href = qs ? `${pathname}?${qs}` : pathname;
-      if (id) router.replace(href, { scroll: false });
-      else replaceCurrentUrl(href);
+      replaceCurrentUrl(href);
     },
-    [router, pathname, searchParams],
+    [pathname, searchParams],
   );
 
   const close = useCallback(() => {
@@ -55,23 +54,24 @@ const usePhotoModal = (photos: Photo[]) => {
 
   const step = useCallback(
     (delta: number) => {
-      if (index < 0 || photos.length === 0) return;
+      if (!navigationEnabled || index < 0 || photos.length === 0) return;
       const nextIndex = (index + delta + photos.length) % photos.length;
+      onNavigateStart?.();
       goto(photos[nextIndex].id);
     },
-    [index, photos, goto],
+    [navigationEnabled, index, photos, onNavigateStart, goto],
   );
 
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
-      else if (event.key === "ArrowLeft") step(-1);
-      else if (event.key === "ArrowRight") step(1);
+      else if (navigationEnabled && event.key === "ArrowLeft") step(-1);
+      else if (navigationEnabled && event.key === "ArrowRight") step(1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, close, step]);
+  }, [open, navigationEnabled, close, step]);
 
   return {
     photo,

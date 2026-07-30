@@ -14,7 +14,7 @@ type Props = {
   tagLabels: string[];
 };
 
-/** 상세 정보 패널 — 제목·촬영일시 + 노출 삼각 + EXIF 리스트 + 미니맵 + 태그. */
+/** 상세 정보 패널 — 제목 + 노출 삼각 + EXIF 리스트 + 미니맵 + 태그. */
 const ExifPanel = ({ photo, tagLabels }: Props) => {
   const { dict, lang } = useLang();
   const exif = photo.exif;
@@ -35,15 +35,14 @@ const ExifPanel = ({ photo, tagLabels }: Props) => {
       <div className={styles.head}>
         <div className={styles.titleWrap}>
           <div className={styles.title}>{pickText(photo.title, lang)}</div>
-          <div className={styles.date}>{formatShotAt(photo.shotAt)}</div>
         </div>
-      </div>
-
-      <div className={styles.exif}>
         <div className={styles.exifHead}>
           <span className={styles.cam}>{photo.camera}</span>
           <span className={styles.lens}>{photo.lens}</span>
         </div>
+      </div>
+
+      <div className={styles.exif}>
         <div className={styles.triangle}>
           <div className={styles.tri}>
             <span className={styles.triLab}>{dict.exifAperture}</span>

@@ -62,10 +62,29 @@ describe("usePhotoModal", () => {
 
   it("이전·다음 사진은 히스토리를 늘리지 않고 현재 항목을 교체한다", () => {
     navigation.searchParams = new URLSearchParams("photo=photo-1");
-    const { result } = renderHook(() => usePhotoModal(photos));
+    const onNavigateStart = vi.fn();
+    const { result } = renderHook(() => usePhotoModal(photos, true, onNavigateStart));
 
     act(() => result.current.next());
 
-    expect(navigation.replace).toHaveBeenCalledWith("/photo?photo=photo-2", { scroll: false });
+    expect(onNavigateStart).toHaveBeenCalledOnce();
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      window.history.state,
+      "",
+      "/photo?photo=photo-2",
+    );
+    expect(navigation.replace).not.toHaveBeenCalled();
+  });
+
+  it("상세 패널이 확장되어 이동이 잠기면 버튼과 방향키로 사진을 바꾸지 않는다", () => {
+    navigation.searchParams = new URLSearchParams("photo=photo-1");
+    const { result } = renderHook(() => usePhotoModal(photos, false));
+
+    act(() => {
+      result.current.next();
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+    });
+
+    expect(navigation.replace).not.toHaveBeenCalled();
   });
 });
