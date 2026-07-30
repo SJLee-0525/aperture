@@ -1,0 +1,95 @@
+.cursor {
+  --cursor-accent: var(--accent);
+  --cursor-width: 12px;
+  --cursor-height: 12px;
+  --cursor-radius: 999px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-40px, -40px, 0);
+  transition: opacity 0.1s var(--ease);
+  will-change: transform;
+}
+
+.shape {
+  display: block;
+  width: var(--cursor-width);
+  height: var(--cursor-height);
+  border-radius: var(--cursor-radius);
+  background: var(--cursor-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 30%, transparent);
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.14s var(--ease),
+    height 0.14s var(--ease),
+    border-radius 0.08s linear,
+    background 0.12s var(--ease),
+    box-shadow 0.12s var(--ease),
+    transform 0.08s var(--ease);
+  contain: layout style;
+  will-change: width, height;
+}
+
+.cursor[data-visible="true"] {
+  opacity: 1;
+}
+
+.cursor[data-mode="dot"] .shape {
+  --cursor-width: 12px;
+  --cursor-height: 12px;
+  --cursor-radius: 999px;
+}
+
+.cursor[data-mode="snap"] .shape {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--cursor-accent);
+}
+
+.cursor[data-mode="ring"] .shape {
+  --cursor-width: 34px;
+  --cursor-height: 34px;
+  --cursor-radius: 999px;
+  background: color-mix(in srgb, var(--cursor-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--cursor-accent);
+}
+
+.cursor[data-pressed="true"] .shape {
+  transform: translate(-50%, -50%) scale(0.86);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-custom-cursor]),
+  :global(html[data-custom-cursor] body),
+  :global(html[data-custom-cursor] body *) {
+    cursor: none !important;
+  }
+  :global(html[data-custom-cursor] input:not([type])),
+  :global(html[data-custom-cursor] input[type="text"]),
+  :global(html[data-custom-cursor] input[type="search"]),
+  :global(html[data-custom-cursor] input[type="email"]),
+  :global(html[data-custom-cursor] input[type="url"]),
+  :global(html[data-custom-cursor] input[type="tel"]),
+  :global(html[data-custom-cursor] input[type="password"]),
+  :global(html[data-custom-cursor] textarea),
+  :global(html[data-custom-cursor] [contenteditable="true"]) {
+    cursor: text !important;
+  }
+  :global(html[data-custom-cursor] input[type="checkbox"]),
+  :global(html[data-custom-cursor] input[type="radio"]),
+  :global(html[data-custom-cursor] input[type="range"]),
+  :global(html[data-custom-cursor] select) {
+    cursor: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    display: none;
+  }
+}

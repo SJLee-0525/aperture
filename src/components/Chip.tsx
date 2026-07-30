@@ -12,6 +12,7 @@ const Chip = ({ label, active, onClick }: Props) => (
     type="button"
     onClick={onClick}
     className={`${styles.chip} ${active ? styles.active : ""}`}
+    data-cursor-shape="pill"
   >
     {label}
   </button>
