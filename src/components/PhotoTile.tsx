@@ -14,10 +14,12 @@ type Props = {
   square?: boolean;
   /** LCP 보호 — 상단(첫 화면)에 오는 타일만 eager 로드 */
   priority?: boolean;
+  /** hover/focus/터치 시작 시 상세 모달 리소스 프리로드 */
+  onPreload?: () => void;
 };
 
 /** 사진 타일 — 클릭 시 ?photo= 딥링크(상세 모달). 호버 시 제목·노출값 오버레이. */
-const PhotoTile = ({ photo, lang, square = false, priority = false }: Props) => {
+const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }: Props) => {
   const title = pickText(photo.title, lang);
   const meta = `${photo.exif.aperture} · ${photo.exif.shutter} · ISO${photo.exif.iso} · ${photo.exif.focalLength}`;
 
@@ -30,6 +32,9 @@ const PhotoTile = ({ photo, lang, square = false, priority = false }: Props) => 
       className={styles.tile}
       data-protected-image
       style={{ aspectRatio: square ? "1 / 1" : `${photo.aspectRatio}` }}
+      onPointerEnter={onPreload}
+      onPointerDown={onPreload}
+      onFocus={onPreload}
       onClick={(event) => {
         // 수정키·중클릭은 링크의 새 탭/새 창 동작을 보존하고 일반 좌클릭만 빠르게 연다.
         if (

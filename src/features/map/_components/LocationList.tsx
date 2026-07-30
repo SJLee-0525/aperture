@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { MapLocation } from "@/features/map/_types/map-location";
+import { preloadPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
 import { formatCoords } from "@/lib/format/format-coords";
 import { pickText } from "@/lib/i18n/pick-text";
 
@@ -64,6 +65,9 @@ const LocationList = ({ locations }: Props) => {
           prefetch={false}
           scroll={false}
           className={styles.item}
+          onPointerEnter={preloadPhotoModal}
+          onPointerDown={preloadPhotoModal}
+          onFocus={preloadPhotoModal}
         >
           <span className={styles.thumb} data-thumbnail-id={location.id} data-protected-image>
             {visibleIds.has(location.id) ? (

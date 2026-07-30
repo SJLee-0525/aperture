@@ -14,6 +14,8 @@ type Props = {
   lang: Lang;
   square: boolean;
   emptyLabel: string;
+  /** 타일 hover/focus 시 상세 모달 리소스 프리로드 */
+  onTilePreload?: () => void;
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -26,7 +28,7 @@ const columnCountFor = (width: number) => (width <= 760 ? 2 : width <= 1100 ? 3 
  * 뷰 토글(메이슨리↔정사각) 시에도 layout 이 타일 크기·위치 변화를 부드럽게 잇는다.
  * initial={false} — 최초 로드는 애니메이션 없이 즉시(LCP 보호, 페이지 전환 페이드로 충분).
  */
-const PhotoGrid = ({ photos, lang, square, emptyLabel }: Props) => {
+const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) => {
   const [columnCount, setColumnCount] = useState(4);
 
   useEffect(() => {
@@ -58,10 +60,15 @@ const PhotoGrid = ({ photos, lang, square, emptyLabel }: Props) => {
         ease: EASE,
         layout: { duration: 0.45, ease: EASE },
       }}
-      className={styles.cell}
       data-photo-index={index}
     >
-      <PhotoTile photo={photo} lang={lang} square={square} priority={index < 4} />
+      <PhotoTile
+        photo={photo}
+        lang={lang}
+        square={square}
+        priority={index < 4}
+        onPreload={onTilePreload}
+      />
     </m.div>
   );
 

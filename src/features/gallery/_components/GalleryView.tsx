@@ -10,7 +10,10 @@ import { FilterBar } from "@/features/gallery/_components/FilterBar";
 import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { OnDemandPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+import {
+  OnDemandPhotoModal,
+  preloadPhotoModal,
+} from "@/features/photo-detail/_components/OnDemandPhotoModal";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 
@@ -76,7 +79,13 @@ const GalleryView = ({ photos, tags }: Props) => {
           filtersActive={filter.filtersActive}
         />
 
-        <PhotoGrid photos={windowed} lang={lang} square={square} emptyLabel={dict.emptyResults} />
+        <PhotoGrid
+          photos={windowed}
+          lang={lang}
+          square={square}
+          emptyLabel={dict.emptyResults}
+          onTilePreload={preloadPhotoModal}
+        />
 
         {/* 무한스크롤 트리거 — 남은 사진이 있을 때만. 보이면 다음 페이지 렌더. */}
         {hasMore ? (
