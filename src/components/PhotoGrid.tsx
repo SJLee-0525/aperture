@@ -4,13 +4,13 @@ import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { PhotoTile } from "@/components/PhotoTile";
+import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Lang } from "@/types/lang";
-import type { Photo } from "@/types/photo";
 
 import styles from "./PhotoGrid.module.css";
 
 type Props = {
-  photos: Photo[];
+  photos: GalleryPhoto[];
   lang: Lang;
   square: boolean;
   emptyLabel: string;
@@ -46,7 +46,7 @@ const PhotoGrid = ({ photos, lang, square, emptyLabel }: Props) => {
     [photos, columnCount],
   );
 
-  const tile = (photo: Photo, index: number) => (
+  const tile = (photo: GalleryPhoto, index: number) => (
     <m.div
       key={photo.id}
       layout

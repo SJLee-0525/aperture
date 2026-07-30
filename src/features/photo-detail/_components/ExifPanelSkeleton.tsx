@@ -4,7 +4,7 @@ import type { Photo } from "@/types/photo";
 import styles from "./ExifPanelSkeleton.module.css";
 
 type Props = {
-  photo: Photo;
+  photo?: Pick<Photo, "fileName">;
   tagCount: number;
 };
 
@@ -17,7 +17,7 @@ const TAG_WIDTHS = [54, 70, 46] as const;
  */
 const ExifPanelSkeleton = ({ photo, tagCount }: Props) => {
   // 실제 패널은 기본 EXIF 7행 + 파일명이 있을 때만 1행을 추가한다.
-  const rowCount = photo.fileName ? 8 : 7;
+  const rowCount = photo?.fileName ? 8 : 7;
 
   return (
     <div className={styles.panel} aria-hidden="true">

@@ -24,6 +24,8 @@ type Props = {
   tags: Tag[];
   photoIds?: string[];
   onClose?: () => void;
+  animateOnOpen?: boolean;
+  onImageReady?: (id: string) => void;
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -85,7 +87,14 @@ const chevRight = (
  * document.body로 포털 렌더 → sticky 헤더 등 어떤 조상 스태킹 컨텍스트에도 안 갇히고 항상 최상단.
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
  */
-const PhotoModal = ({ photos, tags, photoIds, onClose }: Props) => {
+const PhotoModal = ({
+  photos,
+  tags,
+  photoIds,
+  onClose,
+  animateOnOpen = true,
+  onImageReady,
+}: Props) => {
   const { dict, lang } = useLang();
   const [expanded, setExpanded] = useState(false);
   const [photoChromeVisible, setPhotoChromeVisible] = useState(true);
@@ -216,7 +225,7 @@ const PhotoModal = ({ photos, tags, photoIds, onClose }: Props) => {
           role="dialog"
           aria-modal="true"
           aria-label={alt}
-          initial={{ opacity: 0 }}
+          initial={animateOnOpen ? { opacity: 0 } : false}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
@@ -229,7 +238,7 @@ const PhotoModal = ({ photos, tags, photoIds, onClose }: Props) => {
           />
           <m.div
             className={styles.inner}
-            initial={{ opacity: 0, scale: 0.985 }}
+            initial={animateOnOpen ? { opacity: 0, scale: 0.985 } : false}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.985 }}
             transition={{ duration: 0.28, ease: EASE }}
@@ -237,6 +246,7 @@ const PhotoModal = ({ photos, tags, photoIds, onClose }: Props) => {
             <div
               ref={photoRef}
               className={styles.photo}
+              data-photo-modal-image-area="ready"
               onContextMenu={(event) => event.preventDefault()}
               onDragStart={(event) => event.preventDefault()}
               onClick={(event) => {
@@ -259,8 +269,14 @@ const PhotoModal = ({ photos, tags, photoIds, onClose }: Props) => {
                 onContextMenu={(event) => event.preventDefault()}
                 onDragStart={(event) => event.preventDefault()}
                 priority
-                onLoad={() => setImgLoaded(true)}
-                onError={() => setImgLoaded(true)}
+                onLoad={() => {
+                  setImgLoaded(true);
+                  onImageReady?.(photo.id);
+                }}
+                onError={() => {
+                  setImgLoaded(true);
+                  onImageReady?.(photo.id);
+                }}
               />
               <div className={styles.preloads} aria-hidden="true">
                 {adjacentPhotos.map((adjacent) => (

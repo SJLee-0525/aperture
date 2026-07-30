@@ -13,8 +13,7 @@ type Context = {
 export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
   const [photos, tags] = await Promise.all([getPhotos(), getTags()]);
-  const geotagged = photos.filter((photo) => photo.coords != null);
-  const selected = adjacentPhotos(geotagged, id);
+  const selected = adjacentPhotos(photos, id);
 
   if (selected.length === 0) {
     return NextResponse.json({ error: "Photo not found" }, { status: 404 });

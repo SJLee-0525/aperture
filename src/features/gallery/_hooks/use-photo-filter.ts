@@ -3,13 +3,13 @@
 import { useMemo, useState } from "react";
 
 import { ALL, FOCAL_MAX, FOCAL_MIN, filterPhotos } from "@/features/gallery/_lib/filter-photos";
-import type { Photo } from "@/types/photo";
+import type { GalleryPhoto } from "@/types/gallery-photo";
 
 /**
  * 작업 그리드 필터 상태 + 파생 목록.
  * 검색어는 헤더(?q)에서 초기 시드를 받고 이후 로컬 상태로 관리(모바일 인갤러리 검색이 직접 갱신).
  */
-const usePhotoFilter = (photos: Photo[], initialQuery: string) => {
+const usePhotoFilter = (photos: GalleryPhoto[], initialQuery: string) => {
   const [tag, setTag] = useState<string>(ALL);
   const [query, setQuery] = useState<string>(initialQuery);
   const [camera, setCamera] = useState<string>(ALL);

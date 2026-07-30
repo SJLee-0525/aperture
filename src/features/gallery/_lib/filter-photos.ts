@@ -1,4 +1,4 @@
-import type { Photo } from "@/types/photo";
+import type { GalleryPhoto } from "@/types/gallery-photo";
 
 /** 태그 필터의 "전체" 센티넬 (특정 태그 id와 겹치지 않는 값) */
 const ALL = "__all__";
@@ -21,7 +21,7 @@ const parseFocal = (focalLength: string): number | null => {
 };
 
 /** 순수 필터 — 태그·카메라·초점거리·텍스트. 정렬은 getter에서 이미 완료(order). */
-const filterPhotos = (photos: Photo[], f: FilterState): Photo[] => {
+const filterPhotos = (photos: GalleryPhoto[], f: FilterState): GalleryPhoto[] => {
   const query = f.query.trim().toLowerCase();
   const focalFilterActive = f.focalMin > FOCAL_MIN || f.focalMax < FOCAL_MAX;
   return photos.filter((photo) => {

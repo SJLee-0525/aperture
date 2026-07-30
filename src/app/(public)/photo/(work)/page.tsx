@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { GalleryView } from "@/features/gallery/_components/GalleryView";
 import { getPhotos } from "@/lib/content/get-photos";
 import { getTags } from "@/lib/content/get-tags";
+import { toGalleryPhotos } from "@/types/gallery-photo";
 
 export const revalidate = 3600;
 
@@ -12,7 +13,7 @@ export default async function WorkPage() {
 
   return (
     <Suspense>
-      <GalleryView photos={photos} tags={tags} />
+      <GalleryView photos={toGalleryPhotos(photos)} tags={tags} />
     </Suspense>
   );
 }

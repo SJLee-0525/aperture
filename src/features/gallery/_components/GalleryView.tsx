@@ -10,14 +10,14 @@ import { FilterBar } from "@/features/gallery/_components/FilterBar";
 import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
-import type { Photo } from "@/types/photo";
+import { OnDemandPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 
 import styles from "./GalleryView.module.css";
 
 type Props = {
-  photos: Photo[];
+  photos: GalleryPhoto[];
   tags: Tag[];
 };
 
@@ -32,6 +32,7 @@ const GalleryView = ({ photos, tags }: Props) => {
   // 필터된 목록을 화면엔 점진 렌더(무한스크롤) — 필터/검색이 바뀌면 자동으로 처음부터.
   const { visible: windowed, hasMore, attachSentinel } = useInfiniteScroll(filter.visible);
   const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
+  const photoIds = useMemo(() => photos.map((photo) => photo.id), [photos]);
 
   return (
     <>
@@ -83,8 +84,8 @@ const GalleryView = ({ photos, tags }: Props) => {
         ) : null}
       </main>
 
-      {/* 상세 모달: 딥링크 견고성을 위해 전체 photos 전달(?photo=id는 필터와 무관하게 항상 열림) */}
-      <PhotoModal photos={photos} tags={tags} />
+      {/* 상세 모달은 필터와 무관한 전체 ID 순서를 유지하고 현재·양옆 상세만 가져온다. */}
+      <OnDemandPhotoModal photoIds={photoIds} endpoint="/api/photos" initialTags={tags} />
     </>
   );
 };

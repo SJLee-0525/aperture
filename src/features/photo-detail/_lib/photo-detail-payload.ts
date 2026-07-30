@@ -3,7 +3,7 @@ import type { Tag } from "@/types/tag";
 
 type SerializedPhoto = Omit<Photo, "shotAt"> & { shotAt: string };
 
-type MapPhotoPayload = {
+type PhotoDetailPayload = {
   photos: SerializedPhoto[];
   tags: Tag[];
 };
@@ -33,4 +33,4 @@ const revivePhoto = (photo: SerializedPhoto): Photo => ({
 });
 
 export { adjacentPhotos, revivePhoto, serializePhoto };
-export type { MapPhotoPayload };
+export type { PhotoDetailPayload };

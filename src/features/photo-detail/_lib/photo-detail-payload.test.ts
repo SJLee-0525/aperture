@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { adjacentPhotos, revivePhoto, serializePhoto } from "@/features/map/_lib/map-photo-payload";
+import {
+  adjacentPhotos,
+  revivePhoto,
+  serializePhoto,
+} from "@/features/photo-detail/_lib/photo-detail-payload";
 import type { Photo } from "@/types/photo";
 
 const photos = [
@@ -9,7 +13,7 @@ const photos = [
   { id: "third", shotAt: new Date("2026-01-03T00:00:00.000Z") },
 ] as Photo[];
 
-describe("map photo payload", () => {
+describe("photo detail payload", () => {
   it("현재 사진과 순환하는 양옆 사진만 선택한다", () => {
     expect(adjacentPhotos(photos, "first").map((photo) => photo.id)).toEqual([
       "third",

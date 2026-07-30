@@ -3,13 +3,13 @@ import Link from "next/link";
 
 import { pickText } from "@/lib/i18n/pick-text";
 import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
+import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Lang } from "@/types/lang";
-import type { Photo } from "@/types/photo";
 
 import styles from "./PhotoTile.module.css";
 
 type Props = {
-  photo: Photo;
+  photo: GalleryPhoto;
   lang: Lang;
   square?: boolean;
   /** LCP 보호 — 상단(첫 화면)에 오는 타일만 eager 로드 */
