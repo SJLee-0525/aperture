@@ -3,11 +3,13 @@
   top: 0;
   z-index: 40;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
   transition:
     background 0.35s,
-    border-color 0.35s;
+    border-color 0.35s,
+    backdrop-filter 0.35s;
 }
 .inner {
   display: flex;
@@ -16,7 +18,7 @@
   height: 58px;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 var(--s-4);
+  padding: 0 var(--s-3) 0 var(--s-4);
 }
 @media (min-width: 768px) {
   .inner {
@@ -144,4 +146,48 @@
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+@media (max-width: 767px) {
+  :global(html[data-mobile-menu-open]) .header {
+    background: transparent;
+    border-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .header {
+    transition: none;
+  }
+  .brand,
+  .controls > :not([data-mobile-menu-trigger]) {
+    transition:
+      opacity 0.22s var(--ease),
+      visibility 0.22s;
+  }
+  :global(html[data-mobile-navigation-hidden]) .header {
+    background: transparent;
+    border-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    pointer-events: none;
+  }
+  :global(html[data-mobile-navigation-hidden]) .brand,
+  :global(html[data-mobile-navigation-hidden])
+    .controls
+    > :not([data-mobile-menu-trigger]):not([data-mobile-menu-layer]) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  :global(html[data-mobile-navigation-hidden]) [data-mobile-menu-trigger],
+  :global(html[data-mobile-navigation-hidden]) [data-mobile-menu-layer] {
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .brand,
+  .controls > :not([data-mobile-menu-trigger]) {
+    transition: none;
+  }
 }

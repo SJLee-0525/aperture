@@ -9,10 +9,30 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--bg);
   border-top: 1px solid var(--line);
+  transition:
+    transform 0.28s var(--ease),
+    opacity 0.22s var(--ease);
+}
+@media (max-width: 767px) {
+  :global(html[data-mobile-menu-open]) .tabbar {
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+  :global(html[data-mobile-navigation-hidden]) .tabbar {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(100%);
+  }
 }
 @media (min-width: 768px) {
   .tabbar {
     display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabbar {
+    transition: none;
   }
 }
 .tab {

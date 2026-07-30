@@ -13,6 +13,19 @@
     background var(--dur),
     color var(--dur);
 }
+@media (max-width: 767px) {
+  :global(html[data-mobile-navigation-hidden]) .burger {
+    position: fixed;
+    top: 10px;
+    right: 16px;
+    z-index: 42;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-pop);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
 .burger:hover {
   background: var(--surface-2);
   color: var(--text);
@@ -32,33 +45,52 @@
   }
 }
 
-/* 시트는 헤더(58px) 아래에서 내려온다 — 버거는 헤더에 남아 클릭 가능(X 토글). */
-.scrim {
+/* 패널과 스크림을 상하로 분리해 패널 뒤에 어두운 스크림이 이중 합성되지 않게 한다. */
+.layer {
   position: fixed;
-  top: 58px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  border: 0;
-  background: rgba(0, 0, 0, 0.35);
   z-index: 39;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.surface {
+  flex: none;
+  width: 100%;
+  max-height: 100dvh;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+.headerSpace {
+  height: 58px;
+}
+.scrim {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.22);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
   animation: fade 0.2s var(--ease);
 }
 .panel {
-  position: fixed;
-  top: 58px;
-  left: 0;
-  right: 0;
+  flex: none;
+  width: 100%;
   max-height: calc(100dvh - 58px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  background: transparent;
   padding: 8px 16px 20px;
-  z-index: 41;
-  transform-origin: top;
-  /* 내비에서 펼쳐지듯 위→아래로 열림(슬라이드가 아니라 언폴드) */
+  pointer-events: auto;
+  /* clip-path는 iOS Safari에서 backdrop-filter 합성을 누락시켜 opacity로 전환한다. */
   animation: menuUnfold 0.42s var(--ease-spring) both;
 }
 /* 항목은 아래에서 살짝 올라오며 순차 등장(cascade) */
@@ -90,10 +122,7 @@
 }
 @keyframes menuUnfold {
   from {
-    clip-path: inset(0 0 100% 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
+    opacity: 0;
   }
 }
 @keyframes menuItemIn {
@@ -185,13 +214,35 @@
   color: var(--accent);
 }
 .subs {
-  display: none;
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.34s var(--ease),
+    opacity 0.2s var(--ease),
+    visibility 0s linear 0.34s;
+}
+.subsInner {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
   flex-direction: column;
-  padding: 0 4px 14px;
+  padding: 0 4px;
   gap: 1px;
+  transition: padding-bottom 0.34s var(--ease);
 }
 .groupOpen .subs {
-  display: flex;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.34s var(--ease),
+    opacity 0.24s var(--ease),
+    visibility 0s;
+}
+.groupOpen .subsInner {
+  padding-bottom: 14px;
 }
 .sub {
   padding: 10px 12px;
@@ -218,4 +269,11 @@
 }
 .flatLink:hover {
   color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subs,
+  .subsInner {
+    transition: none;
+  }
 }
