@@ -9,11 +9,12 @@ import styles from "./DevProjectsView.module.css";
 type Props = {
   project: DevProject;
   lang: Lang;
+  noImageLabel: string;
   onSelect: (id: string) => void;
 };
 
 /** 목록에서 사용하는 프로젝트 요약 카드. */
-const DevProjectCard = ({ project, lang, onSelect }: Props) => {
+const DevProjectCard = ({ project, lang, noImageLabel, onSelect }: Props) => {
   return (
     <button type="button" className={styles.card} onClick={() => onSelect(project.id)}>
       <div className={styles.cover} data-protected-image>
@@ -27,7 +28,7 @@ const DevProjectCard = ({ project, lang, onSelect }: Props) => {
             draggable={false}
           />
         ) : (
-          <span className={styles.coverEmpty}>NO IMAGE</span>
+          <span className={styles.coverEmpty}>{noImageLabel}</span>
         )}
       </div>
       <div className={styles.cardBody}>

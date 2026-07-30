@@ -21,7 +21,13 @@ const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
       ) : (
         <div className={styles.grid}>
           {projects.map((project) => (
-            <DevProjectCard key={project.id} project={project} lang={lang} onSelect={select} />
+            <DevProjectCard
+              key={project.id}
+              project={project}
+              lang={lang}
+              noImageLabel={dict.noImageLabel}
+              onSelect={select}
+            />
           ))}
         </div>
       )}

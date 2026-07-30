@@ -67,8 +67,11 @@ type UIDict = {
   closeLabel: string;
   previousImageLabel: string;
   nextImageLabel: string;
+  expandPhotoInfoLabel: string;
+  collapsePhotoInfoLabel: string;
   photoLoadingLabel: string;
   photoLoadError: string;
+  noImageLabel: string;
   languageLabel: string;
   themeLabel: string;
   mobileNavigationLabel: string;
@@ -176,8 +179,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     closeLabel: "닫기",
     previousImageLabel: "이전 이미지",
     nextImageLabel: "다음 이미지",
+    expandPhotoInfoLabel: "사진 정보 펼치기",
+    collapsePhotoInfoLabel: "사진 정보 접기",
     photoLoadingLabel: "사진 불러오는 중",
     photoLoadError: "사진을 불러오지 못했습니다.",
+    noImageLabel: "이미지 없음",
     languageLabel: "언어",
     themeLabel: "테마 전환",
     mobileNavigationLabel: "모바일 내비게이션",
@@ -280,8 +286,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     closeLabel: "Close",
     previousImageLabel: "Previous image",
     nextImageLabel: "Next image",
+    expandPhotoInfoLabel: "Expand photo information",
+    collapsePhotoInfoLabel: "Collapse photo information",
     photoLoadingLabel: "Loading photo",
     photoLoadError: "Couldn’t load the photo.",
+    noImageLabel: "No image",
     languageLabel: "Language",
     themeLabel: "Toggle theme",
     mobileNavigationLabel: "Mobile navigation",

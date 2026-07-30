@@ -402,15 +402,7 @@ const PhotoModal = ({
               <button
                 type="button"
                 className={styles.handleButton}
-                aria-label={
-                  lang === "ko"
-                    ? expanded
-                      ? "사진 정보 접기"
-                      : "사진 정보 펼치기"
-                    : expanded
-                      ? "Collapse photo information"
-                      : "Expand photo information"
-                }
+                aria-label={expanded ? dict.collapsePhotoInfoLabel : dict.expandPhotoInfoLabel}
                 aria-expanded={expanded}
                 onClick={(event) => {
                   const panel = event.currentTarget.closest("aside");

@@ -11,7 +11,7 @@ const SiteFooter = () => {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        <span>© 2026 Sungjoon Lee · Photographer · Pianist · Developer</span>
+        <span>© 2026 Sungjoon Lee · Seoul, Republic of Korea</span>
         <a
           href={GITHUB_URL}
           target="_blank"
