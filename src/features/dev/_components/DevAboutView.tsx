@@ -29,10 +29,6 @@ const DevAboutView = ({ config, projects }: Props) => {
     () => [...new Set(projects.flatMap((project) => project.techTags))],
     [projects],
   );
-  const fields = useMemo(
-    () => [...new Set(projects.map((project) => pickText(project.category, lang)))],
-    [projects, lang],
-  );
   const stackCount = useMemo(
     () => config.stack.reduce((total, group) => total + group.items.length, 0),
     [config.stack],
@@ -51,7 +47,6 @@ const DevAboutView = ({ config, projects }: Props) => {
       ]}
       cols={[
         { label: dict.devTechLabel, items: techTags },
-        { label: dict.devFieldLabel, items: fields },
         { label: dict.devStackLabel, items: config.stack.map((group) => group.category) },
       ]}
     >

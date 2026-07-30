@@ -3,11 +3,11 @@ import { Skeleton } from "@/components/Skeleton";
 import styles from "./loading.module.css";
 
 const STAT_COUNT = 4;
-const LIST_COLUMNS = 3;
+const LIST_COLUMNS = 2;
 const BIO_LINES = ["100%", "96%", "62%"];
 const LIST_ROW_WIDTHS = ["78%", "64%", "70%", "52%"];
 
-/** 소개 RSC fetch 동안의 스켈레톤 — AboutView 셸(히어로 + 통계 4칸 + 3열 리스트)을 흉내. */
+/** 소개 RSC fetch 동안의 스켈레톤 — AboutView 셸(히어로 + 통계 4칸 + 2열 리스트)을 흉내. */
 export default function AboutLoading() {
   return (
     <main className={styles.about}>

@@ -30,7 +30,7 @@ type Props = {
   body: string;
   /** 숫자 통계 (CountUp) — 보통 4개. */
   stats: Stat[];
-  /** 파생 목록 3열 (카메라·렌즈·지역 / 레퍼토리·무대·장르 / 기술·분야·스택 등). */
+  /** 파생 목록 2열. */
   cols: Col[];
   /** 섹션 하단 추가 콘텐츠 (예: 개발 소개의 인터뷰 Q&A). */
   children?: ReactNode;

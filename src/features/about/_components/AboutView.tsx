@@ -52,7 +52,6 @@ const AboutView = ({ site, photos, albums }: Props) => {
       cols={[
         { label: dict.cameraLabel, items: cameras },
         { label: dict.lensLabel, items: lenses },
-        { label: dict.regionsLabel, items: regions },
       ]}
     />
   );

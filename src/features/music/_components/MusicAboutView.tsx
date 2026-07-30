@@ -41,11 +41,6 @@ const MusicAboutView = ({ config, works, awards, media }: Props) => {
     () => [...new Set(works.map((work) => pickText(work.venue, lang)))],
     [works, lang],
   );
-  const genres = useMemo(
-    () => [...new Set(works.map((work) => pickText(work.category, lang)))],
-    [works, lang],
-  );
-
   return (
     <AboutSection
       eyebrow={EYEBROW}
@@ -60,7 +55,6 @@ const MusicAboutView = ({ config, works, awards, media }: Props) => {
       cols={[
         { label: dict.musicRepertoireLabel, items: composers },
         { label: dict.musicVenuesLabel, items: venues },
-        { label: dict.musicGenresLabel, items: genres },
       ]}
     />
   );
