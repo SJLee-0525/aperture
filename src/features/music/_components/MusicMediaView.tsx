@@ -61,6 +61,7 @@ const MusicMediaView = ({ media }: { media: MusicMedia[] }) => {
                     sizes="(max-width: 720px) 100vw, 590px"
                     className={styles.thumbnail}
                     draggable={false}
+                    unoptimized={!item.youtubeId}
                   />
                   <div className={styles.facade}>
                     <div className={styles.vt}>{pickText(item.title, lang)}</div>
