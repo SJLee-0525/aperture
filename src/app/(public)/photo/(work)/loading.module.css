@@ -23,21 +23,23 @@
   align-items: center;
   gap: var(--s-4);
 }
-/* FilterBar .bar/.tagbar 미러 — 태그칩(가변, ~2줄) + 깔때기 버튼 */
+/* FilterBar 모바일 기본값 미러 — 한 줄, 필터 버튼 고정 */
 .bar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--s-5);
-  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
   margin-bottom: var(--s-5);
 }
 .tagbar {
   flex: 1;
-  min-width: 200px;
+  min-width: 0;
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.tagbar > * {
+  flex: none;
 }
 .mason {
   columns: 4;
@@ -55,5 +57,23 @@
 @media (max-width: 760px) {
   .mason {
     columns: 2;
+  }
+}
+@media (max-width: 767px) {
+  .tagbar > :nth-child(n + 3) {
+    display: none;
+  }
+}
+@media (min-width: 768px) {
+  .bar {
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-5);
+    flex-wrap: wrap;
+  }
+  .tagbar {
+    min-width: 200px;
+    flex-wrap: wrap;
+    overflow: visible;
   }
 }

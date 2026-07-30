@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import { Icon } from "@/components/Icon";
 import { PhotoGrid } from "@/components/PhotoGrid";
 import { ViewToggle } from "@/components/ViewToggle";
 import { FilterBar } from "@/features/gallery/_components/FilterBar";
@@ -52,18 +51,6 @@ const GalleryView = ({ photos, tags }: Props) => {
             />
           </div>
         </div>
-
-        {/* 모바일 인갤러리 검색 (데스크톱은 헤더 검색 사용) */}
-        <label className={styles.mSearch}>
-          <Icon name="search" size={15} />
-          <input
-            type="text"
-            value={filter.query}
-            onChange={(event) => filter.setQuery(event.target.value)}
-            placeholder={dict.searchPlaceholder}
-            aria-label={dict.searchPlaceholder}
-          />
-        </label>
 
         <FilterBar
           tags={tags}

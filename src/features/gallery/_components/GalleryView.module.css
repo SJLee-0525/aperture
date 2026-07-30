@@ -28,35 +28,7 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.mSearch {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: 42px;
-  padding: 0 14px;
-  margin-bottom: var(--s-4);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--text-3);
-}
-.mSearch input {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  outline: none;
-  color: var(--text);
-  font-family: var(--font-sans);
-  font-size: var(--t-small);
-}
-.mSearch input::placeholder {
-  color: var(--text-3);
-}
 /* 무한스크롤 트리거 — 화면 밖에서도 rootMargin(600px)으로 미리 걸리도록 하단에 둔 얇은 감시 대상. */
 .sentinel {
   height: 1px;
-}
-@media (min-width: 768px) {
-  .mSearch {
-    display: none;
-  }
 }
