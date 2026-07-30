@@ -24,6 +24,7 @@
   align-items: center;
 }
 .exifHead {
+  width: 100%;
   min-height: 64px;
   box-sizing: border-box;
   padding-bottom: var(--s-4);
