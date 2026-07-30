@@ -19,8 +19,7 @@ const searchAssertions = {
       // 제목·메타는 hitText 래퍼 안의 중첩 span — 결과에 썸네일 span이 있든 없든 동일하게 잡힌다.
       const textSpans = firstResult.locator("span span");
       await textSpans.last().evaluate((meta) => {
-        meta.textContent =
-          "서울역, 세종대로, 봉래동2가, 회현동, 중구, 서울특별시, 04509, 대한민국";
+        meta.textContent = "서울역, 세종대로, 봉래동2가, 회현동, 중구, 서울특별시, 04509, 대한민국";
       });
 
       const [titleBox, metaBox] = await Promise.all([
