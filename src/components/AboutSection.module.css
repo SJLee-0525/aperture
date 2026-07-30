@@ -66,8 +66,24 @@
 }
 .list li {
   font-size: var(--t-small);
-  color: var(--text-2);
   font-variant-numeric: tabular-nums;
+}
+.list a {
+  color: var(--text-2);
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition:
+    color var(--dur) var(--ease),
+    text-decoration-color var(--dur) var(--ease);
+}
+.list a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+.list a:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 @media (max-width: 760px) {
   .stats {

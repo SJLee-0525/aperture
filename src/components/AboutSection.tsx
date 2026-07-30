@@ -1,9 +1,11 @@
 "use client";
 
 import { m } from "motion/react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { CountUp } from "@/components/CountUp";
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./AboutSection.module.css";
 
@@ -68,7 +70,9 @@ const AboutSection = ({ eyebrow, summary, body, stats, cols, children }: Props) 
             <div className="u-label">{col.label}</div>
             <ul className={styles.list}>
               {col.items.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>
+                  <Link href={{ pathname: ROUTES.SEARCH, query: { q: item } }}>{item}</Link>
+                </li>
               ))}
             </ul>
           </div>
