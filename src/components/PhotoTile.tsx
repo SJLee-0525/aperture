@@ -28,6 +28,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false }: Props) => 
       prefetch={false}
       aria-label={title}
       className={styles.tile}
+      data-protected-image
       style={{ aspectRatio: square ? "1 / 1" : `${photo.aspectRatio}` }}
       onClick={(event) => {
         // 수정키·중클릭은 링크의 새 탭/새 창 동작을 보존하고 일반 좌클릭만 빠르게 연다.
@@ -53,6 +54,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false }: Props) => 
         priority={priority}
         sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
         className={styles.photo}
+        draggable={false}
       />
       <span className={styles.ov}>
         <span className={styles.t}>{title}</span>

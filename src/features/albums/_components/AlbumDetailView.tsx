@@ -35,7 +35,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
 
   return (
     <>
-      <div className={styles.hero}>
+      <div className={styles.hero} data-protected-image>
         <m.div
           className={styles.heroImgWrap}
           initial={{ scale: 1.08 }}
@@ -49,6 +49,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
               fill
               sizes="100vw"
               className={styles.heroImg}
+              draggable={false}
               priority
             />
           ) : null}

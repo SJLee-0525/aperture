@@ -65,7 +65,7 @@ const LocationList = ({ locations }: Props) => {
           scroll={false}
           className={styles.item}
         >
-          <span className={styles.thumb} data-thumbnail-id={location.id}>
+          <span className={styles.thumb} data-thumbnail-id={location.id} data-protected-image>
             {visibleIds.has(location.id) ? (
               <Image
                 src={location.thumbnailUrl}
@@ -73,6 +73,7 @@ const LocationList = ({ locations }: Props) => {
                 fill
                 sizes="46px"
                 className={styles.thumbImg}
+                draggable={false}
               />
             ) : null}
           </span>

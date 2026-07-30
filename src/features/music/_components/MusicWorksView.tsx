@@ -32,7 +32,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
               className={styles.work}
               onClick={() => select(work.id)}
             >
-              <div className={styles.poster}>
+              <div className={styles.poster} data-protected-image>
                 {work.poster.url ? (
                   <Image
                     src={work.poster.url}
@@ -40,6 +40,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                     fill
                     sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
                     className={styles.posterImg}
+                    draggable={false}
                   />
                 ) : (
                   "POSTER"
@@ -67,7 +68,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
       >
         {selected ? (
           <div className={styles.rec}>
-            <div className={styles.recPoster}>
+            <div className={styles.recPoster} data-protected-image>
               {selected.poster.url ? (
                 <Image
                   src={selected.poster.url}
@@ -75,6 +76,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                   fill
                   sizes="300px"
                   className={styles.posterImg}
+                  draggable={false}
                 />
               ) : (
                 "POSTER"
