@@ -11,8 +11,17 @@ export const metadata = pageMetadata({
 
 export const revalidate = 3600;
 
-/** 개발 — 소개 (/dev/about): 공통 소개 레이아웃(프로젝트·스택 파생 통계) + 인터뷰 Q&A. */
+/** 개발 — 소개 (/dev/about): 공통 소개 레이아웃(프로젝트·스택 파생 통계) + 인터뷰 Q&A.
+ *  뷰가 소비하는 config 필드와 프로젝트별 techTags만 투영해 직렬화. */
 export default async function DevAboutPage() {
   const [config, projects] = await Promise.all([getDevConfig(), getDevProjects()]);
-  return <DevAboutView config={config} projects={projects} />;
+  return (
+    <DevAboutView
+      heroLead={config.heroLead}
+      stack={config.stack}
+      interview={config.interview}
+      timelineCount={config.timeline.length}
+      projectTechTags={projects.map((p) => p.techTags)}
+    />
+  );
 }

@@ -1,4 +1,5 @@
 import { AlbumsView } from "@/features/albums/_components/AlbumsView";
+import { toAlbumCards } from "@/features/albums/_lib/album-cards";
 import { getAlbums } from "@/lib/content/get-albums";
 import { getPhotos } from "@/lib/content/get-photos";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -11,8 +12,8 @@ export const metadata = pageMetadata({
 
 export const revalidate = 3600;
 
-/** 앨범 목록 — 커버 해석을 위해 사진도 함께 로드. */
+/** 앨범 목록 — 커버 해석·장수 집계는 서버 투영으로 끝내고 카드 데이터만 직렬화. */
 export default async function AlbumsPage() {
   const [albums, photos] = await Promise.all([getAlbums(), getPhotos()]);
-  return <AlbumsView albums={albums} photos={photos} />;
+  return <AlbumsView albums={toAlbumCards(albums, photos)} />;
 }

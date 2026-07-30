@@ -5,13 +5,8 @@ import { m } from "motion/react";
 import { AlbumCard } from "@/components/AlbumCard";
 import { albumRoute } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import {
-  countVisibleAlbumPhotos,
-  resolveAlbumCover,
-} from "@/features/albums/_lib/resolve-album-cover";
+import type { AlbumCard as AlbumCardData } from "@/features/albums/_lib/album-cards";
 import { pickText } from "@/lib/i18n/pick-text";
-import type { Album } from "@/types/album";
-import type { Photo } from "@/types/photo";
 
 import styles from "./AlbumsView.module.css";
 
@@ -24,12 +19,11 @@ const CARD = {
 };
 
 type Props = {
-  albums: Album[];
-  photos: Photo[];
+  albums: AlbumCardData[];
 };
 
-/** 앨범 그리드 — 커버는 각 앨범의 coverPhotoId를 사진에서 해석. */
-const AlbumsView = ({ albums, photos }: Props) => {
+/** 앨범 그리드 — 커버·장수는 서버에서 투영된 카드 데이터를 그대로 표시. */
+const AlbumsView = ({ albums }: Props) => {
   const { dict, lang } = useLang();
 
   if (albums.length === 0) {
@@ -51,9 +45,9 @@ const AlbumsView = ({ albums, photos }: Props) => {
             <m.div key={album.id} variants={CARD}>
               <AlbumCard
                 href={albumRoute(album.id)}
-                coverUrl={resolveAlbumCover(album, photos)}
+                coverUrl={album.coverUrl}
                 coverAlt={title}
-                count={countVisibleAlbumPhotos(album, photos)}
+                count={album.count}
                 title={title}
                 subtitle={pickText(album.subtitle, lang)}
               />

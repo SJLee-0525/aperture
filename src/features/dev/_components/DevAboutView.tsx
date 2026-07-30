@@ -5,33 +5,38 @@ import { useMemo } from "react";
 import { AboutSection } from "@/components/AboutSection";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
-import type { DevConfig, DevProject } from "@/types/dev";
+import type { DevConfig } from "@/types/dev";
 
 import styles from "./DevAboutView.module.css";
 
 /** eyebrow 역할 라벨 — 태그라인 규칙상 언어 무관(고정). */
 const EYEBROW = "Developer";
 
-type Props = { config: DevConfig; projects: DevProject[] };
+/** site/dev 중 이 뷰가 소비하는 필드만 + 프로젝트별 기술 태그 —
+ *  전체 DevConfig(typeWords·URL·social)·DevProject(트러블슈팅·이미지 등)는 불필요. */
+type Props = {
+  heroLead: DevConfig["heroLead"];
+  stack: DevConfig["stack"];
+  interview: DevConfig["interview"];
+  timelineCount: number;
+  projectTechTags: string[][];
+};
 
 /** 소개 (/dev/about) — 공통 AboutSection(리드·통계·목록) + 하단 인터뷰 Q&A(dev 전용). */
-const DevAboutView = ({ config, projects }: Props) => {
+const DevAboutView = ({ heroLead, stack, interview, timelineCount, projectTechTags }: Props) => {
   const { dict, lang } = useLang();
 
   // heroLead 첫 문장 = 요약 헤드라인, 나머지 = 본문 (사진·음악 소개와 동일 패턴)
   const [summary, body] = useMemo(() => {
-    const text = pickText(config.heroLead, lang);
+    const text = pickText(heroLead, lang);
     const at = text.indexOf(". ");
     return at === -1 ? [text, ""] : [text.slice(0, at), text.slice(at + 2)];
-  }, [config.heroLead, lang]);
+  }, [heroLead, lang]);
 
-  const techTags = useMemo(
-    () => [...new Set(projects.flatMap((project) => project.techTags))],
-    [projects],
-  );
+  const techTags = useMemo(() => [...new Set(projectTechTags.flat())], [projectTechTags]);
   const stackCount = useMemo(
-    () => config.stack.reduce((total, group) => total + group.items.length, 0),
-    [config.stack],
+    () => stack.reduce((total, group) => total + group.items.length, 0),
+    [stack],
   );
 
   return (
@@ -40,18 +45,18 @@ const DevAboutView = ({ config, projects }: Props) => {
       summary={summary}
       body={body}
       stats={[
-        { value: projects.length, label: dict.statProjects },
+        { value: projectTechTags.length, label: dict.statProjects },
         { value: stackCount, label: dict.statStack },
-        { value: config.timeline.length, label: dict.statCareer },
+        { value: timelineCount, label: dict.statCareer },
         { value: techTags.length, label: dict.statTags },
       ]}
       cols={[
         { label: dict.devTechLabel, items: techTags },
-        { label: dict.devStackLabel, items: config.stack.map((group) => group.category) },
+        { label: dict.devStackLabel, items: stack.map((group) => group.category) },
       ]}
     >
       <div className={styles.qa}>
-        {config.interview.map((item, index) => (
+        {interview.map((item, index) => (
           <div key={index} className={styles.item}>
             <div className={styles.q}>{pickText(item.q, lang)}</div>
             <p className={styles.a}>{pickText(item.a, lang)}</p>

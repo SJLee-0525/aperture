@@ -12,8 +12,9 @@ export const metadata = pageMetadata({
 
 export const revalidate = 3600;
 
-/** 소개 — 통계는 사진·앨범에서 자동 집계. */
+/** 소개 — 통계는 사진·앨범에서 자동 집계. 파생에 쓰는 필드만 투영해 직렬화. */
 export default async function AboutPage() {
   const [site, photos, albums] = await Promise.all([getSite(), getPhotos(), getAlbums()]);
-  return <AboutView site={site} photos={photos} albums={albums} />;
+  const photoFacts = photos.map(({ camera, lens, place }) => ({ camera, lens, place }));
+  return <AboutView bio={site.bio} photoFacts={photoFacts} albumCount={albums.length} />;
 }
