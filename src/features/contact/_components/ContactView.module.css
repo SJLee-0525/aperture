@@ -91,7 +91,7 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.send:hover {
+.send:hover:not([data-cursor-snapped]) {
   background: var(--accent-press);
 }
 .send:disabled {

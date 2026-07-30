@@ -33,7 +33,7 @@
 .canvas :global(.maplibregl-ctrl-group button + button) {
   border-top: 1px solid var(--line);
 }
-.canvas :global(.maplibregl-ctrl-group button:hover) {
+.canvas :global(.maplibregl-ctrl-group button:hover:not([data-cursor-snapped])) {
   background: var(--surface-2);
   color: var(--accent);
 }

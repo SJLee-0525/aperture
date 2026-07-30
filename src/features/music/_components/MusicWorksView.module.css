@@ -158,7 +158,7 @@
   font-weight: 600;
   transition: background 0.2s;
 }
-.book:hover {
+.book:hover:not([data-cursor-snapped]) {
   background: var(--accent-press);
 }
 .prog {

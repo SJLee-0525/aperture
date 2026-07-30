@@ -35,7 +35,7 @@
   font-size: var(--t-small);
   font-weight: 600;
 }
-.back:hover {
+.back:hover:not([data-cursor-snapped]) {
   background: rgba(0, 0, 0, 0.58);
 }
 .heroText {

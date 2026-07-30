@@ -42,7 +42,7 @@
   gap: 12px;
   padding: 9px;
 }
-.item:hover {
+.item:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
 }
 .thumb {

@@ -230,7 +230,7 @@
     background var(--dur) var(--ease),
     color var(--dur) var(--ease);
 }
-.btn:hover {
+.btn:hover:not([data-cursor-snapped]) {
   background: var(--accent);
   color: var(--bg);
 }

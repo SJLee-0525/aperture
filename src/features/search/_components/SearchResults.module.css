@@ -91,7 +91,7 @@
   min-width: 0;
   gap: var(--s-4);
 }
-.hit:hover {
+.hit:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
 }
 .hitTitle {

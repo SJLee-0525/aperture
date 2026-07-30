@@ -84,7 +84,7 @@
   cursor: pointer;
   transition: background var(--dur) var(--ease);
 }
-.close:hover {
+.close:hover:not([data-cursor-snapped]) {
   background: rgba(0, 0, 0, 0.6);
 }
 
@@ -106,7 +106,7 @@
     background var(--dur) var(--ease),
     opacity var(--dur) var(--ease);
 }
-.nav:hover:not(:disabled) {
+.nav:hover:not(:disabled):not([data-cursor-snapped]) {
   background: rgba(0, 0, 0, 0.6);
 }
 .nav:disabled {

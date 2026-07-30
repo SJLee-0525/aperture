@@ -26,7 +26,7 @@
     backdrop-filter: blur(12px);
   }
 }
-.burger:hover {
+.burger:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
   color: var(--text);
 }

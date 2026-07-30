@@ -79,8 +79,8 @@
     background var(--dur) var(--ease),
     color var(--dur) var(--ease);
 }
-.opt:hover,
-.optActive:hover {
+.opt:hover:not([data-cursor-snapped]),
+.optActive:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
   color: var(--text);
 }

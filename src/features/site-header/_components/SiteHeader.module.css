@@ -133,7 +133,7 @@
     background 0.15s,
     color 0.15s;
 }
-.megaLink:hover {
+.megaLink:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
   color: var(--text);
 }

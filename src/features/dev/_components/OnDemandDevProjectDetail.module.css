@@ -27,7 +27,7 @@
   cursor: pointer;
 }
 
-.retry:hover {
+.retry:hover:not([data-cursor-snapped]) {
   background: var(--accent);
   color: var(--bg);
 }

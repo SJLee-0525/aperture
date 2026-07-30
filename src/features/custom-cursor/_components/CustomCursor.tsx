@@ -33,7 +33,9 @@ const CustomCursor = () => {
     let targetCircular = false;
     let targetPill = false;
     let targetCompact = false;
+    let targetRadius = 0;
     let targetDirty = false;
+    let snapped: HTMLElement | null = null;
     let currentAccent = "";
     let currentMode = "";
     let visible = false;
@@ -51,6 +53,15 @@ const CustomCursor = () => {
       if (next === pressed) return;
       pressed = next;
       cursor.dataset.pressed = String(next);
+    };
+
+    // 스냅된 요소에만 마킹 — 각 컴포넌트의 배경형 :hover가 :not([data-cursor-snapped])로
+    // 자신을 끄게 해서 커서 면칠과 기초 호버 배경이 겹치지 않게 한다.
+    const setSnapped = (next: HTMLElement | null) => {
+      if (next === snapped) return;
+      if (snapped) delete snapped.dataset.cursorSnapped;
+      snapped = next;
+      if (snapped) snapped.dataset.cursorSnapped = "true";
     };
 
     const setMode = (next: "dot" | "ring" | "snap") => {
@@ -91,7 +102,7 @@ const CustomCursor = () => {
       if (!targetCompact) return;
 
       targetPill = target.dataset.cursorShape === "pill";
-      const targetRadius = Number.parseFloat(getComputedStyle(target).borderRadius) || 0;
+      targetRadius = Number.parseFloat(getComputedStyle(target).borderRadius) || 0;
       targetCircular =
         Math.abs(targetRect.width - targetRect.height) <= 4 &&
         targetRadius >= Math.min(targetRect.width, targetRect.height) / 2 - 2;
@@ -104,6 +115,7 @@ const CustomCursor = () => {
       if (targetDirty) measureTarget();
 
       if (mapTargetHovered) {
+        setSnapped(null);
         setMode("ring");
         cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
         return;
@@ -112,6 +124,7 @@ const CustomCursor = () => {
       if (target && targetRect) {
         if (targetCompact) {
           const size = Math.max(targetRect.width, targetRect.height) + 7;
+          setSnapped(target);
           setMode("snap");
           cursor.style.transform = `translate3d(${
             targetRect.left + targetRect.width / 2
@@ -126,13 +139,15 @@ const CustomCursor = () => {
           );
           cursor.style.setProperty(
             "--cursor-radius",
-            targetCircular || targetPill ? "999px" : "0px",
+            targetCircular || targetPill ? "999px" : `${targetRadius}px`,
           );
           return;
         }
 
+        setSnapped(null);
         setMode("ring");
       } else {
+        setSnapped(null);
         setMode("dot");
       }
 
@@ -196,6 +211,7 @@ const CustomCursor = () => {
         root.setAttribute("data-custom-cursor", "");
       } else {
         root.removeAttribute("data-custom-cursor");
+        setSnapped(null);
         setVisible(false);
       }
     };
@@ -219,6 +235,7 @@ const CustomCursor = () => {
 
     return () => {
       root.removeAttribute("data-custom-cursor");
+      setSnapped(null);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerover", onPointerOver);
       window.removeEventListener("pointerdown", onPointerDown);

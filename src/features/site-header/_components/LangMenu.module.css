@@ -15,7 +15,7 @@
     background var(--dur),
     color var(--dur);
 }
-.btn:hover {
+.btn:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
   color: var(--text);
 }
@@ -68,7 +68,7 @@
   cursor: pointer;
   transition: background var(--dur);
 }
-.option:hover {
+.option:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
 }
 .check {
