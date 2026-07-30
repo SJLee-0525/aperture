@@ -2,14 +2,14 @@
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
-import type { DevProject } from "@/types/dev";
+import type { DevProjectCardData } from "@/types/dev";
 
 import { DevProjectCard } from "./DevProjectCard";
-import { DevProjectDetail } from "./DevProjectDetail";
+import { OnDemandDevProjectDetail, preloadDevProjectDetail } from "./OnDemandDevProjectDetail";
 import styles from "./DevProjectsView.module.css";
 
 /** 프로젝트 목록과 URL 기반 상세 선택을 조율한다. */
-const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
+const DevProjectsView = ({ projects }: { projects: DevProjectCardData[] }) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("project", projects);
 
@@ -21,11 +21,22 @@ const DevProjectsView = ({ projects }: { projects: DevProject[] }) => {
       ) : (
         <div className={styles.grid}>
           {projects.map((project) => (
-            <DevProjectCard key={project.id} project={project} lang={lang} onSelect={select} />
+            <DevProjectCard
+              key={project.id}
+              project={project}
+              lang={lang}
+              onSelect={select}
+              onPreload={preloadDevProjectDetail}
+            />
           ))}
         </div>
       )}
-      <DevProjectDetail project={selected} open={open} onClose={close} />
+      <OnDemandDevProjectDetail
+        project={selected}
+        open={open}
+        onClose={close}
+        endpoint="/api/dev-projects"
+      />
     </main>
   );
 };

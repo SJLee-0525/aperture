@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
+import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
 import { getDevProjects } from "@/lib/content/get-dev-projects";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -17,7 +18,7 @@ export default async function DevProjectsPage() {
   const projects = await getDevProjects();
   return (
     <Suspense>
-      <DevProjectsView projects={projects} />
+      <DevProjectsView projects={toDevProjectCards(projects)} />
     </Suspense>
   );
 }

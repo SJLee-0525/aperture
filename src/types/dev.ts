@@ -32,6 +32,12 @@ type DevProject = {
   published: boolean;
 };
 
+/** 프로젝트 목록 Client Component에 전달하는 최소 카드 데이터. */
+type DevProjectCardData = Pick<
+  DevProject,
+  "id" | "title" | "category" | "year" | "summary" | "cover"
+>;
+
 /** 소개 인터뷰 Q&A (site/dev.interview) */
 type DevInterview = { q: LocalizedText; a: LocalizedText };
 
@@ -60,6 +66,7 @@ type DevConfig = {
 
 export type {
   DevProject,
+  DevProjectCardData,
   DevTroubleshooting,
   DevInterview,
   DevStackItem,

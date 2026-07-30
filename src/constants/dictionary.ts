@@ -43,6 +43,8 @@ type UIDict = {
   devStackLabel: string;
   devTechLabel: string;
   devFieldLabel: string;
+  devProjectLoadingLabel: string;
+  devProjectLoadError: string;
   // 소개 페이지 통계 라벨 (사진·음악·개발)
   statPhotos: string;
   statAlbums: string;
@@ -157,6 +159,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackLabel: "기술 스택",
     devTechLabel: "사용 기술",
     devFieldLabel: "분야",
+    devProjectLoadingLabel: "프로젝트 불러오는 중",
+    devProjectLoadError: "프로젝트를 불러오지 못했습니다.",
     statPhotos: "사진",
     statAlbums: "앨범",
     statLocations: "촬영지",
@@ -264,6 +268,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackLabel: "Stack",
     devTechLabel: "Tech Used",
     devFieldLabel: "Fields",
+    devProjectLoadingLabel: "Loading project",
+    devProjectLoadError: "Couldn’t load the project.",
     statPhotos: "Photos",
     statAlbums: "Albums",
     statLocations: "Locations",
