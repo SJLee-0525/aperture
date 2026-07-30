@@ -57,6 +57,7 @@
 
 .markerDot,
 .markerArrow,
+.rangeIndicator,
 .loadingOrbit,
 .corner {
   position: absolute;
@@ -70,11 +71,54 @@
 }
 
 .markerArrow {
+  top: -12px;
+  left: 5px;
+  width: 12px;
+  height: 12px;
   color: var(--cursor-accent);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
+}
+
+.markerArrow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.markerArrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rangeIndicator {
+  top: -9px;
+  left: -17px;
+  width: 34px;
+  height: 18px;
+  color: var(--cursor-accent);
+  transition: transform 0.18s cubic-bezier(0.2, 1.25, 0.4, 1);
+}
+
+.rangeIndicator svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.rangeIndicator path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rangeIndicator circle {
+  fill: currentColor;
 }
 
 .loadingOrbit {
@@ -232,8 +276,6 @@
 }
 
 .cursor[data-mode="link"] .markerArrow {
-  top: -14px;
-  left: 5px;
   opacity: 0.9;
   transform: translateY(2px);
   transition:
@@ -242,7 +284,7 @@
 }
 
 .cursor[data-mode="link"][data-visible="true"] .markerArrow {
-  transform: translateY(0);
+  transform: translateY(-2px);
 }
 
 .cursor[data-mode="loading"] .shape {
@@ -253,6 +295,19 @@
 .cursor[data-mode="loading"] .loadingOrbit {
   opacity: 1;
   animation: loadingOrbit 0.72s linear infinite;
+}
+
+.cursor[data-mode="range"] .shape {
+  background: transparent;
+  box-shadow: none;
+}
+
+.cursor[data-mode="range"] .rangeIndicator {
+  opacity: 1;
+}
+
+.cursor[data-mode="range"][data-pressed="true"] .rangeIndicator {
+  transform: scaleX(0.8);
 }
 
 .cursor[data-mode="scroll"] .shape {
@@ -325,7 +380,6 @@
   }
   :global(html[data-custom-cursor] input[type="checkbox"]),
   :global(html[data-custom-cursor] input[type="radio"]),
-  :global(html[data-custom-cursor] input[type="range"]),
   :global(html[data-custom-cursor] select) {
     cursor: auto !important;
   }

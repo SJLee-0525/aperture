@@ -60,3 +60,8 @@
   cursor: pointer;
   pointer-events: auto;
 }
+/* 커스텀 커서 활성 시 브라우저 thumb 가상 요소의 손가락 커서를 제거한다. */
+:global(html[data-custom-cursor]) .input::-webkit-slider-thumb,
+:global(html[data-custom-cursor]) .input::-moz-range-thumb {
+  cursor: none !important;
+}

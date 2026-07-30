@@ -26,8 +26,8 @@ const TEXT_SELECTOR = [
   "textarea",
   '[contenteditable="true"]',
 ].join(", ");
-const NATIVE_CONTROL_SELECTOR =
-  'input[type="checkbox"], input[type="radio"], input[type="range"], select';
+const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
+const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select';
 const SECTION_ACCENTS: Record<string, string> = {
   photo: "var(--accent-photo)",
   music: "var(--accent-music)",
@@ -89,6 +89,7 @@ const CustomCursor = () => {
     let pressed = false;
     let mapTargetHovered = false;
     let textTargetHovered = false;
+    let rangeTargetHovered = false;
     let scrolling = false;
     let loading = false;
     const loadingIds = new Set<string>();
@@ -120,7 +121,7 @@ const CustomCursor = () => {
     };
 
     const setMode = (
-      next: "dot" | "ring" | "scroll" | "snap" | "text" | "frame" | "link" | "loading",
+      next: "dot" | "ring" | "scroll" | "snap" | "text" | "range" | "frame" | "link" | "loading",
     ) => {
       if (next === currentMode) return;
 
@@ -152,6 +153,10 @@ const CustomCursor = () => {
       } else if (next === "text") {
         cursor.style.setProperty("--cursor-width", "4px");
         cursor.style.setProperty("--cursor-height", "24px");
+        cursor.style.setProperty("--cursor-radius", "999px");
+      } else if (next === "range") {
+        cursor.style.setProperty("--cursor-width", "34px");
+        cursor.style.setProperty("--cursor-height", "18px");
         cursor.style.setProperty("--cursor-radius", "999px");
       } else if (next === "link") {
         cursor.style.setProperty("--cursor-width", "30px");
@@ -216,6 +221,13 @@ const CustomCursor = () => {
       if (textTargetHovered) {
         setSnapped(null);
         setMode("text");
+        cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
+        return;
+      }
+
+      if (rangeTargetHovered) {
+        setSnapped(null);
+        setMode("range");
         cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
         return;
       }
@@ -302,7 +314,9 @@ const CustomCursor = () => {
     const onPointerOver = (event: PointerEvent) => {
       const element = event.target instanceof Element ? event.target : null;
       const textElement = element?.closest(TEXT_SELECTOR) ?? null;
+      const rangeElement = element?.closest(RANGE_CONTROL_SELECTOR) ?? null;
       textTargetHovered = Boolean(textElement);
+      rangeTargetHovered = Boolean(rangeElement);
 
       if (textElement) {
         target = null;
@@ -311,6 +325,18 @@ const CustomCursor = () => {
         targetCircular = false;
         targetPill = false;
         setAccent(textElement);
+        setVisible(true);
+        scheduleDraw();
+        return;
+      }
+
+      if (rangeElement) {
+        target = null;
+        targetRect = null;
+        targetCompact = false;
+        targetCircular = false;
+        targetPill = false;
+        setAccent(rangeElement);
         setVisible(true);
         scheduleDraw();
         return;
@@ -495,7 +521,17 @@ const CustomCursor = () => {
     >
       <span className={styles.shape} />
       <span className={styles.markerDot} />
-      <span className={styles.markerArrow}>↗</span>
+      <span className={styles.markerArrow}>
+        <svg viewBox="0 0 14 14">
+          <path d="M2 2h8v8" />
+        </svg>
+      </span>
+      <span className={styles.rangeIndicator}>
+        <svg viewBox="0 0 34 18">
+          <path d="M7 5 3 9l4 4M27 5l4 4-4 4" />
+          <circle cx="17" cy="9" r="2.25" />
+        </svg>
+      </span>
       <span className={styles.loadingOrbit}>
         <svg viewBox="0 0 28 28">
           <circle cx="14" cy="14" r="10.5" />
