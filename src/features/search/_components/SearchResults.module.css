@@ -66,12 +66,30 @@
 }
 .hit {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--s-4);
   padding: var(--s-3) var(--s-2);
   border-radius: var(--r-sm);
   transition: background var(--dur) var(--ease);
+}
+.thumbnail {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--photo-bg);
+}
+.thumbnailImage {
+  object-fit: cover;
+}
+.hitText {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+  gap: var(--s-4);
 }
 .hit:hover {
   background: var(--surface-2);
@@ -96,6 +114,15 @@
 
 @media (max-width: 640px) {
   .hit {
+    align-items: center;
+  }
+
+  .thumbnail {
+    width: 56px;
+    height: 44px;
+  }
+
+  .hitText {
     align-items: stretch;
     flex-direction: column;
     gap: var(--s-1);

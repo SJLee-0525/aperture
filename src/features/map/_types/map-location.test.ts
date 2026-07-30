@@ -10,7 +10,18 @@ describe("toMapLocations", () => {
         id: "mapped",
         coords: { lat: 37.5, lng: 127 },
         place: { ko: "서울", en: "Seoul" },
-        image: { url: "thumb.webp", path: "photos/mapped", w: 100, h: 100 },
+        image: {
+          url: "main.webp",
+          path: "photos/mapped/main.webp",
+          w: 2048,
+          h: 1365,
+          thumbnail: {
+            url: "thumb.webp",
+            path: "photos/mapped/thumbnails/thumb.webp",
+            w: 320,
+            h: 213,
+          },
+        },
         camera: "camera must not be serialized",
       },
       { id: "hidden", coords: null },
@@ -24,5 +35,18 @@ describe("toMapLocations", () => {
         thumbnailUrl: "thumb.webp",
       },
     ]);
+  });
+
+  it("기존 사진에 썸네일이 없으면 메인 이미지로 폴백한다", () => {
+    const photos = [
+      {
+        id: "legacy",
+        coords: { lat: 37.5, lng: 127 },
+        place: { ko: "서울", en: "Seoul" },
+        image: { url: "main.webp", path: "photos/legacy/main.webp", w: 2048, h: 1365 },
+      },
+    ] as Photo[];
+
+    expect(toMapLocations(photos)[0]?.thumbnailUrl).toBe("main.webp");
   });
 });

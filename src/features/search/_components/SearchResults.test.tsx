@@ -27,6 +27,7 @@ const documents: SearchDocument[] = [
     title: { ko: "부산의 새벽", en: "Dawn in Busan" },
     text: { ko: "부산 항구 소니", en: "Busan harbor Sony" },
     meta: { ko: "부산", en: "Busan" },
+    imageUrl: "/photo-thumb.webp",
     href: "/photo?photo=1",
   },
   {
@@ -80,6 +81,7 @@ describe("SearchResults", () => {
       "/photo?photo=1",
     );
     expect(screen.getByText(DICTIONARY.ko.sectionPhoto)).toBeTruthy();
+    expect(document.querySelector("img")?.getAttribute("src")).toContain("photo-thumb.webp");
     expect(screen.queryByText("포트폴리오")).toBeNull();
   });
 

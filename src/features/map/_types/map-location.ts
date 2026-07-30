@@ -1,4 +1,5 @@
 import type { Coords } from "@/types/coords";
+import { imagePreviewUrl } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { Photo } from "@/types/photo";
 
@@ -17,7 +18,7 @@ const toMapLocations = (photos: Photo[]): MapLocation[] =>
             id: photo.id,
             coords: photo.coords,
             place: photo.place,
-            thumbnailUrl: photo.image.url,
+            thumbnailUrl: imagePreviewUrl(photo.image),
           },
         ]
       : [],

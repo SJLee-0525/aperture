@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -14,7 +15,7 @@ type Props = {
   documents: SearchDocument[];
 };
 
-type Hit = { key: string; title: string; meta: string; href: string };
+type Hit = { key: string; title: string; meta: string; href: string; imageUrl?: string };
 type Group = { section: SearchSection; label: string; hits: Hit[] };
 
 /** 통합 검색 결과 (/search?q=) — 서버가 투영한 최소 검색 문서를 q(useSearchParams)로 클라 필터.
@@ -43,6 +44,7 @@ const SearchResults = ({ documents }: Props) => {
                 ? pickText(document.meta, lang)
                 : "",
           href: document.href,
+          imageUrl: document.imageUrl,
         }));
 
     return (
@@ -78,8 +80,21 @@ const SearchResults = ({ documents }: Props) => {
               {group.hits.map((hitItem) => (
                 <li key={hitItem.key}>
                   <Link href={hitItem.href} className={styles.hit}>
-                    <span className={styles.hitTitle}>{hitItem.title}</span>
-                    {hitItem.meta ? <span className={styles.hitMeta}>{hitItem.meta}</span> : null}
+                    {hitItem.imageUrl ? (
+                      <span className={styles.thumbnail} data-protected-image>
+                        <Image
+                          src={hitItem.imageUrl}
+                          alt=""
+                          fill
+                          sizes="64px"
+                          className={styles.thumbnailImage}
+                        />
+                      </span>
+                    ) : null}
+                    <span className={styles.hitText}>
+                      <span className={styles.hitTitle}>{hitItem.title}</span>
+                      {hitItem.meta ? <span className={styles.hitMeta}>{hitItem.meta}</span> : null}
+                    </span>
                   </Link>
                 </li>
               ))}

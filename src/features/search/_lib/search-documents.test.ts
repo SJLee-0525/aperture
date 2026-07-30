@@ -40,6 +40,22 @@ describe("createSearchDocuments", () => {
     ]);
   });
 
+  it("이미지가 있는 콘텐츠에는 목록용 미리보기 URL을 포함한다", () => {
+    const documents = createSearchDocuments(sources);
+
+    expect(documents.find(({ key }) => key.startsWith("photo-"))?.imageUrl).toBe(
+      sources.photos[0].image.thumbnail?.url ?? sources.photos[0].image.url,
+    );
+    expect(documents.find(({ key }) => key.startsWith("album-"))?.imageUrl).toBeTruthy();
+    expect(documents.find(({ key }) => key.startsWith("work-"))?.imageUrl).toBe(
+      sources.works[0].poster.thumbnail?.url ?? sources.works[0].poster.url,
+    );
+    expect(documents.find(({ key }) => key.startsWith("proj-"))?.imageUrl).toBe(
+      sources.projects[0].cover?.thumbnail?.url ?? sources.projects[0].cover?.url ?? "",
+    );
+    expect(documents.find(({ key }) => key.startsWith("award-"))?.imageUrl).toBeUndefined();
+  });
+
   it("사진의 제목·장소·카메라·렌즈를 언어별 검색 텍스트에 포함한다", () => {
     const [document] = createSearchDocuments(sources);
     const source = sources.photos[0];
