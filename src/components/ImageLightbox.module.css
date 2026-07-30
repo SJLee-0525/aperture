@@ -5,6 +5,8 @@
   display: grid;
   place-items: center;
   outline: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .scrim {
@@ -18,16 +20,52 @@
   animation: lbfade 0.25s linear;
 }
 
+.track {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.track::-webkit-scrollbar {
+  display: none;
+}
+.slide {
+  display: grid;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
 .stage {
   position: relative;
-  z-index: 1;
-  width: min(94vw, 1400px);
-  height: min(88vh, 940px);
-  pointer-events: none;
+  max-height: 88vh;
   animation: lbpop 0.3s var(--ease-spring);
+  cursor: pointer;
 }
 .img {
   object-fit: contain;
+  -webkit-user-drag: none;
+}
+.imgLoader {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 .close {
@@ -41,9 +79,7 @@
   place-items: center;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--r-pill);
   color: var(--text-inverse);
-  font-size: 22px;
   line-height: 1;
   cursor: pointer;
   transition: background var(--dur) var(--ease);
@@ -63,11 +99,8 @@
   place-items: center;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--r-pill);
   color: var(--text-inverse);
-  font-size: 24px;
   line-height: 1;
-  padding-bottom: 2px;
   cursor: pointer;
   transition:
     background var(--dur) var(--ease),
@@ -115,10 +148,16 @@
     transform: none;
   }
 }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .scrim,
-  .stage {
+  .stage,
+  .spinner {
     animation: none;
   }
 }
