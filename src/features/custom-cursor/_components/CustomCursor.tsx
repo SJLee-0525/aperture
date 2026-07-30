@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { CUSTOM_CURSOR_MAP_HOVER_EVENT } from "@/utils/custom-cursor-events";
+
 import styles from "./CustomCursor.module.css";
 
 const ENABLE_QUERY =
@@ -36,6 +38,7 @@ const CustomCursor = () => {
     let currentMode = "";
     let visible = false;
     let pressed = false;
+    let mapTargetHovered = false;
     let frame = 0;
 
     const setVisible = (next: boolean) => {
@@ -99,6 +102,12 @@ const CustomCursor = () => {
       if (!media.matches) return;
 
       if (targetDirty) measureTarget();
+
+      if (mapTargetHovered) {
+        setMode("ring");
+        cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
+        return;
+      }
 
       if (target && targetRect) {
         if (targetCompact) {
@@ -178,6 +187,10 @@ const CustomCursor = () => {
     const onPointerLeave = () => {
       setVisible(false);
     };
+    const onMapTargetHover = (event: Event) => {
+      mapTargetHovered = (event as CustomEvent<boolean>).detail;
+      scheduleDraw();
+    };
     const onMediaChange = () => {
       if (media.matches) {
         root.setAttribute("data-custom-cursor", "");
@@ -193,6 +206,7 @@ const CustomCursor = () => {
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("pointerup", onPointerUp, { passive: true });
     window.addEventListener("blur", onPointerLeave);
+    window.addEventListener(CUSTOM_CURSOR_MAP_HOVER_EVENT, onMapTargetHover);
     document.documentElement.addEventListener("mouseleave", onPointerLeave);
     const onViewportChange = () => {
       if (target) targetDirty = true;
@@ -210,6 +224,7 @@ const CustomCursor = () => {
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("blur", onPointerLeave);
+      window.removeEventListener(CUSTOM_CURSOR_MAP_HOVER_EVENT, onMapTargetHover);
       document.documentElement.removeEventListener("mouseleave", onPointerLeave);
       window.removeEventListener("scroll", onViewportChange);
       window.removeEventListener("resize", onViewportChange);

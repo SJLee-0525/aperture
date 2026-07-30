@@ -2,3 +2,144 @@
   position: absolute;
   inset: 0;
 }
+
+/* MapLibre 기본 컨트롤을 사이트의 각진 glass chrome으로 통일한다. */
+.canvas :global(.maplibregl-ctrl-top-right) {
+  top: 12px;
+  right: 12px;
+}
+.canvas :global(.maplibregl-ctrl-top-right .maplibregl-ctrl) {
+  margin: 0;
+}
+.canvas :global(.maplibregl-ctrl-group) {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.canvas :global(.maplibregl-ctrl-group button) {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  background: transparent;
+  color: var(--text-2);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.canvas :global(.maplibregl-ctrl-group button + button) {
+  border-top: 1px solid var(--line);
+}
+.canvas :global(.maplibregl-ctrl-group button:hover) {
+  background: var(--surface-2);
+  color: var(--accent);
+}
+.canvas :global(.maplibregl-ctrl-group button:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+.canvas :global(.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon),
+.canvas :global(.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon) {
+  background-image: none;
+}
+.canvas :global(.maplibregl-ctrl-zoom-in::before),
+.canvas :global(.maplibregl-ctrl-zoom-in::after),
+.canvas :global(.maplibregl-ctrl-zoom-out::before) {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 13px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+.canvas :global(.maplibregl-ctrl-zoom-in::after) {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.canvas :global(.maplibregl-ctrl-bottom-right) {
+  right: 12px;
+  bottom: 8px;
+}
+.canvas :global(.maplibregl-ctrl-attrib) {
+  box-sizing: border-box;
+  min-height: 22px;
+  margin: 0;
+  padding: 2px 22px 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 14px;
+  box-shadow: var(--shadow-pop);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.canvas :global(.maplibregl-ctrl-attrib:not([open])) {
+  width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.canvas :global(.maplibregl-ctrl-attrib a) {
+  color: var(--text-2);
+}
+.canvas :global(.maplibregl-ctrl-attrib-button) {
+  top: 3px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-2);
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.canvas
+  :global(.maplibregl-ctrl-attrib:not(.maplibregl-attrib-empty) .maplibregl-ctrl-attrib-button) {
+  display: block;
+}
+.canvas :global(.maplibregl-ctrl-attrib-button::before) {
+  content: "i";
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+.canvas :global(.maplibregl-ctrl-attrib-button:hover) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .canvas :global(.maplibregl-ctrl-top-right) {
+    top: 10px;
+    right: 10px;
+  }
+  .canvas :global(.maplibregl-ctrl-bottom-right) {
+    right: 10px;
+    bottom: 8px;
+  }
+  .canvas :global(.maplibregl-ctrl-group button) {
+    width: 36px;
+    height: 36px;
+  }
+}

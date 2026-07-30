@@ -5,6 +5,7 @@ import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "react";
 
 import type { MapLocation } from "@/features/map/_types/map-location";
+import { setMapCursorHover } from "@/utils/custom-cursor-events";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import styles from "./MapCanvas.module.css";
@@ -90,7 +91,9 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
 
     // 소스·레이어 추가(멱등) — 최초 로드 + 테마 교체(setStyle)마다 재생성한다.
     const render = () => {
-      if (!map.isStyleLoaded() || map.getSource(SOURCE_ID)) return;
+      // style.load 시점에는 스타일 구조가 준비됐지만 베이스맵 소스는 아직 로딩 중이라
+      // isStyleLoaded()가 false일 수 있다. 이때도 사용자 소스·레이어 추가는 가능하다.
+      if (map.getSource(SOURCE_ID)) return;
       const { accent, bg } = readColors();
 
       map.addSource(SOURCE_ID, {
@@ -147,7 +150,9 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
     };
 
     map.on("load", render);
-    map.on("styledata", render); // 테마 교체 후 새 스타일이 로드되면 재생성
+    // setStyle 직후 styledata는 아직 isStyleLoaded=false일 수 있다.
+    // 완성된 새 스타일을 보장하는 style.load에서 사용자 소스·레이어를 다시 붙인다.
+    map.on("style.load", render);
 
     // 클러스터 클릭 → 확장 줌으로 이동(쪼개짐)
     map.on("click", CLUSTER_LAYER, (event) => {
@@ -170,13 +175,15 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
     for (const layer of [CLUSTER_LAYER, POINT_LAYER]) {
       map.on("mouseenter", layer, () => {
         map.getCanvas().style.cursor = "pointer";
+        setMapCursorHover(true);
       });
       map.on("mouseleave", layer, () => {
         map.getCanvas().style.cursor = "";
+        setMapCursorHover(false);
       });
     }
 
-    // 테마 토글에 맞춰 지도 스타일 교체 → styledata 에서 render 가 소스·레이어 재생성
+    // 테마 토글에 맞춰 지도 스타일 교체 → style.load 에서 render 가 소스·레이어 재생성
     const observer = new MutationObserver(() => {
       map.setStyle(STYLE_URL[currentTheme()]);
     });
@@ -187,6 +194,7 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
 
     return () => {
       observer.disconnect();
+      setMapCursorHover(false);
       map.remove();
     };
   }, [locations, onSelect]);
