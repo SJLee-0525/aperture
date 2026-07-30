@@ -1,11 +1,13 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
 import { fetchPublishedDevProjects } from "@/lib/firebase/firestore-rest";
-import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
 import type { DevProject } from "@/types/dev";
 
-/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published 필터 + order 정렬. */
-const mockProjects = (): DevProject[] =>
-  MOCK_DEV_PROJECTS.filter((project) => project.published).sort((a, b) => a.order - b.order);
+/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published 필터 + order 정렬.
+ *  mock 데이터는 이 시점에 동적 로드 — 실데이터 경로에서는 로드하지 않는다. */
+const mockProjects = async (): Promise<DevProject[]> => {
+  const { MOCK_DEV_PROJECTS } = await import("@/mocks/dev");
+  return MOCK_DEV_PROJECTS.filter((project) => project.published).sort((a, b) => a.order - b.order);
+};
 
 /**
  * 공개 프로젝트 목록 — published 필터 + order 정렬 완료 상태.

@@ -1,11 +1,13 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
 import { fetchPublishedMusicWorks } from "@/lib/firebase/firestore-rest";
-import { MOCK_MUSIC_WORKS } from "@/mocks/music";
 import type { MusicWork } from "@/types/music";
 
-/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published 필터 + order 정렬. */
-const mockWorks = (): MusicWork[] =>
-  MOCK_MUSIC_WORKS.filter((work) => work.published).sort((a, b) => a.order - b.order);
+/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published 필터 + order 정렬.
+ *  mock 데이터는 이 시점에 동적 로드 — 실데이터 경로에서는 로드하지 않는다. */
+const mockWorks = async (): Promise<MusicWork[]> => {
+  const { MOCK_MUSIC_WORKS } = await import("@/mocks/music");
+  return MOCK_MUSIC_WORKS.filter((work) => work.published).sort((a, b) => a.order - b.order);
+};
 
 /**
  * 공개 연주 목록 — published 필터 + order 정렬 완료 상태.

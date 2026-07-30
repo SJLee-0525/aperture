@@ -1,11 +1,13 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
 import { fetchPublishedAlbums } from "@/lib/firebase/firestore-rest";
-import { MOCK_ALBUMS } from "@/mocks/albums";
 import type { Album } from "@/types/album";
 
-/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published + order 정렬. */
-const mockAlbums = (): Album[] =>
-  MOCK_ALBUMS.filter((album) => album.published).sort((a, b) => a.order - b.order);
+/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published + order 정렬.
+ *  mock 데이터는 이 시점에 동적 로드 — 실데이터 경로에서는 로드하지 않는다. */
+const mockAlbums = async (): Promise<Album[]> => {
+  const { MOCK_ALBUMS } = await import("@/mocks/albums");
+  return MOCK_ALBUMS.filter((album) => album.published).sort((a, b) => a.order - b.order);
+};
 
 /**
  * 공개 앨범 목록 — published + order 정렬. ★ Firestore REST(원칙 #6).

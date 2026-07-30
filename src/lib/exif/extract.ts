@@ -1,5 +1,3 @@
-import exifr from "exifr";
-
 import type { Coords } from "@/types/coords";
 
 /** exifr 로 추출·정규화한 값 — 관리자 폼 자동 채움용(이후 수동 수정 가능). */
@@ -42,10 +40,12 @@ const asString = (value: unknown): string =>
 /**
  * ★ 압축 前 원본에서 EXIF·GPS 를 읽는다 (압축하면 메타데이터가 날아감).
  * 카메라/렌즈 이름은 EXIF 원문(SONY / ILCE-7M4) 그대로 — 관리자가 다듬는다.
+ * exifr는 파일 선택 시점에 동적 로드 — 관리자 폼 진입만으로는 번들에 싣지 않는다.
  */
 const extractExif = async (file: File): Promise<ExtractedExif> => {
   let tags: Record<string, unknown> = {};
   try {
+    const { default: exifr } = await import("exifr");
     tags = (await exifr.parse(file, { tiff: true, exif: true, gps: true })) ?? {};
   } catch {
     tags = {};

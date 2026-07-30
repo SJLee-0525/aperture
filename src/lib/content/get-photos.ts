@@ -1,11 +1,13 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
 import { fetchPublishedPhotos } from "@/lib/firebase/firestore-rest";
-import { MOCK_PHOTOS } from "@/mocks/photos";
 import type { Photo } from "@/types/photo";
 
-/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published 필터 + order 정렬 완료 상태. */
-const mockPhotos = (): Photo[] =>
-  MOCK_PHOTOS.filter((photo) => photo.published).sort((a, b) => a.order - b.order);
+/** Firebase 미설정(로컬 dev·데모)에서만 쓰는 폴백 — published 필터 + order 정렬 완료 상태.
+ *  mock 데이터는 이 시점에 동적 로드 — 실데이터 경로에서는 로드하지 않는다. */
+const mockPhotos = async (): Promise<Photo[]> => {
+  const { MOCK_PHOTOS } = await import("@/mocks/photos");
+  return MOCK_PHOTOS.filter((photo) => photo.published).sort((a, b) => a.order - b.order);
+};
 
 /**
  * 공개 사진 목록 — published 필터 + order 정렬 완료 상태로 반환.
