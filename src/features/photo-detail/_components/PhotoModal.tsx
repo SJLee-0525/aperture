@@ -22,6 +22,8 @@ import styles from "./PhotoModal.module.css";
 type Props = {
   photos: Photo[];
   tags: Tag[];
+  photoIds?: string[];
+  onClose?: () => void;
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -83,7 +85,7 @@ const chevRight = (
  * document.body로 포털 렌더 → sticky 헤더 등 어떤 조상 스태킹 컨텍스트에도 안 갇히고 항상 최상단.
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
  */
-const PhotoModal = ({ photos, tags }: Props) => {
+const PhotoModal = ({ photos, tags, photoIds, onClose }: Props) => {
   const { dict, lang } = useLang();
   const [expanded, setExpanded] = useState(false);
   const [photoChromeVisible, setPhotoChromeVisible] = useState(true);
@@ -96,6 +98,8 @@ const PhotoModal = ({ photos, tags }: Props) => {
     photos,
     !navigationLocked && imgLoaded,
     onNavigateStart,
+    photoIds,
+    onClose,
   );
   const [seenId, setSeenId] = useState<string | undefined>(photo?.id);
   const touchStartY = useRef<number | null>(null);
@@ -132,16 +136,19 @@ const PhotoModal = ({ photos, tags }: Props) => {
   }, [open, photo?.id]);
 
   const alt = photo ? pickText(photo.title, lang) : "";
-  const photoIndex = photo ? photos.findIndex((item) => item.id === photo.id) : -1;
+  const navigationIds = photoIds ?? photos.map((item) => item.id);
+  const photoIndex = photo ? navigationIds.indexOf(photo.id) : -1;
   const adjacentPhotos =
-    photoIndex >= 0 && photos.length > 1
+    photoIndex >= 0 && navigationIds.length > 1
       ? [
-          photos[(photoIndex - 1 + photos.length) % photos.length],
-          photos[(photoIndex + 1) % photos.length],
-        ].filter(
-          (item, index, items): item is Photo =>
-            item != null && items.findIndex((candidate) => candidate?.id === item.id) === index,
-        )
+          navigationIds[(photoIndex - 1 + navigationIds.length) % navigationIds.length],
+          navigationIds[(photoIndex + 1) % navigationIds.length],
+        ]
+          .map((id) => photos.find((item) => item.id === id))
+          .filter(
+            (item, index, items): item is Photo =>
+              item != null && items.findIndex((candidate) => candidate?.id === item.id) === index,
+          )
       : [];
   const tagLabels = photo
     ? photo.tags.map((id) => {

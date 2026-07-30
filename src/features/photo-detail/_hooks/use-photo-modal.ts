@@ -1,23 +1,33 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 import type { Photo } from "@/types/photo";
 
 /**
  * 사진 상세 모달 상태 — URL(?photo=id)이 단일 출처(딥링크·공유).
- * prev/next는 넘겨받은 photos 배열을 순환, 키보드(←/→/ESC) 지원.
+ * prev/next는 photoIds(생략 시 photos)를 순환하므로 상세 사진을 일부만 캐시해도 전체 탐색 순서를 유지한다.
  */
-const usePhotoModal = (photos: Photo[], navigationEnabled = true, onNavigateStart?: () => void) => {
+const usePhotoModal = (
+  photos: Photo[],
+  navigationEnabled = true,
+  onNavigateStart?: (id: string) => void,
+  photoIds?: string[],
+  onClose?: () => void,
+) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const navigationIds = useMemo(
+    () => photoIds ?? photos.map((photo) => photo.id),
+    [photoIds, photos],
+  );
 
   const activeId = searchParams.get("photo");
-  const index = activeId ? photos.findIndex((photo) => photo.id === activeId) : -1;
-  const photo = index >= 0 ? photos[index] : null;
+  const index = activeId ? navigationIds.indexOf(activeId) : -1;
+  const photo = activeId ? (photos.find((item) => item.id === activeId) ?? null) : null;
   const open = photo != null;
   const wasOpen = useRef(open);
   const openedHere = useRef(false);
@@ -44,22 +54,27 @@ const usePhotoModal = (photos: Photo[], navigationEnabled = true, onNavigateStar
   );
 
   const close = useCallback(() => {
+    if (onClose) {
+      onClose();
+      return;
+    }
     if (openedHere.current) {
       openedHere.current = false;
       router.back();
       return;
     }
     goto(null);
-  }, [router, goto]);
+  }, [onClose, router, goto]);
 
   const step = useCallback(
     (delta: number) => {
-      if (!navigationEnabled || index < 0 || photos.length === 0) return;
-      const nextIndex = (index + delta + photos.length) % photos.length;
-      onNavigateStart?.();
-      goto(photos[nextIndex].id);
+      if (!navigationEnabled || index < 0 || navigationIds.length === 0) return;
+      const nextIndex = (index + delta + navigationIds.length) % navigationIds.length;
+      const nextId = navigationIds[nextIndex];
+      onNavigateStart?.(nextId);
+      goto(nextId);
     },
-    [navigationEnabled, index, photos, onNavigateStart, goto],
+    [navigationEnabled, index, navigationIds, onNavigateStart, goto],
   );
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import type { FeatureCollection } from "geojson";
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "react";
 
-import type { Photo } from "@/types/photo";
+import type { MapLocation } from "@/features/map/_types/map-location";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import styles from "./MapCanvas.module.css";
@@ -34,7 +34,7 @@ const COUNT_LAYER = "cluster-count";
 const POINT_LAYER = "unclustered";
 
 type Props = {
-  photos: Photo[];
+  locations: MapLocation[];
   onSelect: (id: string) => void;
 };
 
@@ -45,24 +45,26 @@ type Props = {
  * 테마 토글 시 Positron↔Dark Matter 로 스타일 교체(교체 후 소스·레이어 재생성).
  * next/dynamic(ssr:false)로만 로드 — maplibre-gl은 window에 의존.
  */
-const MapCanvas = ({ photos, onSelect }: Props) => {
+const MapCanvas = ({ locations, onSelect }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const geotagged = photos.filter((photo) => photo.coords != null);
-    const points = geotagged.map(
-      (photo) => [photo.coords!.lng, photo.coords!.lat] as [number, number],
+    const points = locations.map(
+      (location) => [location.coords.lng, location.coords.lat] as [number, number],
     );
 
     const data: FeatureCollection = {
       type: "FeatureCollection",
-      features: geotagged.map((photo) => ({
+      features: locations.map((location) => ({
         type: "Feature",
-        geometry: { type: "Point", coordinates: [photo.coords!.lng, photo.coords!.lat] },
-        properties: { id: photo.id },
+        geometry: {
+          type: "Point",
+          coordinates: [location.coords.lng, location.coords.lat],
+        },
+        properties: { id: location.id },
       })),
     };
 
@@ -187,7 +189,7 @@ const MapCanvas = ({ photos, onSelect }: Props) => {
       observer.disconnect();
       map.remove();
     };
-  }, [photos, onSelect]);
+  }, [locations, onSelect]);
 
   return <div ref={containerRef} className={styles.canvas} />;
 };

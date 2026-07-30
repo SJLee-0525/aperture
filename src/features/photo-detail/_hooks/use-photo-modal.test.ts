@@ -67,7 +67,7 @@ describe("usePhotoModal", () => {
 
     act(() => result.current.next());
 
-    expect(onNavigateStart).toHaveBeenCalledOnce();
+    expect(onNavigateStart).toHaveBeenCalledWith("photo-2");
     expect(window.history.replaceState).toHaveBeenCalledWith(
       window.history.state,
       "",
@@ -86,5 +86,21 @@ describe("usePhotoModal", () => {
     });
 
     expect(navigation.replace).not.toHaveBeenCalled();
+  });
+
+  it("상세 데이터가 일부만 로드돼도 전체 ID 순서로 이동한다", () => {
+    navigation.searchParams = new URLSearchParams("photo=photo-1");
+    const loadedPhotos = [{ id: "photo-1" }] as Photo[];
+    const { result } = renderHook(() =>
+      usePhotoModal(loadedPhotos, true, undefined, ["photo-1", "photo-2", "photo-3"]),
+    );
+
+    act(() => result.current.prev());
+
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      window.history.state,
+      "",
+      "/photo?photo=photo-3",
+    );
   });
 });

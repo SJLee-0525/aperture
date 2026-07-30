@@ -6,9 +6,8 @@ import { useCallback, useMemo } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { LocationList } from "@/features/map/_components/LocationList";
-import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
-import type { Photo } from "@/types/photo";
-import type { Tag } from "@/types/tag";
+import { MapPhotoModal } from "@/features/map/_components/MapPhotoModal";
+import type { MapLocation } from "@/features/map/_types/map-location";
 
 import styles from "./MapView.module.css";
 
@@ -19,14 +18,13 @@ const MapCanvas = dynamic(() => import("@/features/map/_components/MapCanvas"), 
 });
 
 type Props = {
-  photos: Photo[];
-  tags: Tag[];
+  locations: MapLocation[];
 };
 
 /** 지도 — 위치 리스트 + 실제 지도(MapLibre+CARTO). 핀·리스트 클릭 → ?photo= 상세 모달. */
-const MapView = ({ photos, tags }: Props) => {
+const MapView = ({ locations }: Props) => {
   const router = useRouter();
-  const geotagged = useMemo(() => photos.filter((photo) => photo.coords != null), [photos]);
+  const photoIds = useMemo(() => locations.map((location) => location.id), [locations]);
   const onSelect = useCallback(
     (id: string) => router.push(`${ROUTES.PHOTO_MAP}?photo=${id}`, { scroll: false }),
     [router],
@@ -35,12 +33,12 @@ const MapView = ({ photos, tags }: Props) => {
   return (
     <>
       <div className={styles.view}>
-        <LocationList photos={geotagged} />
+        <LocationList locations={locations} />
         <div className={styles.stage}>
-          <MapCanvas photos={geotagged} onSelect={onSelect} />
+          <MapCanvas locations={locations} onSelect={onSelect} />
         </div>
       </div>
-      <PhotoModal photos={geotagged} tags={tags} />
+      <MapPhotoModal photoIds={photoIds} />
     </>
   );
 };
