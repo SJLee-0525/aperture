@@ -123,7 +123,7 @@ const CustomCursor = () => {
 
       if (target && targetRect) {
         if (targetCompact) {
-          const size = Math.max(targetRect.width, targetRect.height) + 7;
+          const size = Math.max(targetRect.width, targetRect.height) + 4;
           setSnapped(target);
           setMode("snap");
           cursor.style.transform = `translate3d(${
@@ -131,11 +131,11 @@ const CustomCursor = () => {
           }px, ${targetRect.top + targetRect.height / 2}px, 0)`;
           cursor.style.setProperty(
             "--cursor-width",
-            `${targetCircular ? size : targetRect.width + 7}px`,
+            `${targetCircular ? size : targetRect.width + 4}px`,
           );
           cursor.style.setProperty(
             "--cursor-height",
-            `${targetCircular ? size : targetRect.height + 7}px`,
+            `${targetCircular ? size : targetRect.height + 4}px`,
           );
           cursor.style.setProperty(
             "--cursor-radius",
