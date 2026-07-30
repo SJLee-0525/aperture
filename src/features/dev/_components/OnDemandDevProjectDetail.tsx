@@ -1,19 +1,68 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Modal } from "@/components/Modal";
+import { Skeleton } from "@/components/Skeleton";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { DevProject, DevProjectCardData } from "@/types/dev";
+import { setCursorLoading } from "@/utils/custom-cursor-events";
 
+import detailStyles from "./DevProjectsView.module.css";
 import styles from "./OnDemandDevProjectDetail.module.css";
 
+const DetailSkeleton = ({ hasMedia = true, label }: { hasMedia?: boolean; label?: string }) => (
+  <div
+    className={`${detailStyles.detail} ${styles.skeleton}`}
+    role={label ? "status" : undefined}
+    aria-label={label}
+  >
+    {hasMedia ? (
+      <div className={detailStyles.media}>
+        <Skeleton className={styles.skeletonMedia} aspectRatio={16 / 9} />
+      </div>
+    ) : null}
+
+    <header className={`${detailStyles.mhead} ${styles.skeletonHead}`}>
+      <Skeleton width="62%" height={34} />
+      <Skeleton width="88%" height={16} />
+      <Skeleton width="46%" height={12} />
+    </header>
+
+    <div className={detailStyles.btns}>
+      <Skeleton width={104} height={39} radius={6} />
+      <Skeleton width={88} height={39} radius={6} />
+    </div>
+
+    <div className={detailStyles.secL}>
+      <Skeleton width={96} height={20} />
+    </div>
+    <div className={styles.skeletonCopy}>
+      <Skeleton height={14} />
+      <Skeleton width="94%" height={14} />
+      <Skeleton width="72%" height={14} />
+    </div>
+
+    <div className={detailStyles.secL}>
+      <Skeleton width={76} height={20} />
+    </div>
+    <div className={detailStyles.mtags}>
+      {[72, 94, 64, 86].map((width) => (
+        <Skeleton key={width} width={width} height={27} radius={999} />
+      ))}
+    </div>
+  </div>
+);
+
 const loadDevProjectDetail = () => import("./DevProjectDetail");
-const DevProjectDetail = dynamic(
-  () => loadDevProjectDetail().then((module) => module.DevProjectDetail),
-  { ssr: false },
+const DevProjectDetailContent = dynamic(
+  () => loadDevProjectDetail().then((module) => module.DevProjectDetailContent),
+  {
+    ssr: false,
+    loading: () => <DetailSkeleton />,
+  },
 );
 
 const preloadDevProjectDetail = () => {
@@ -31,13 +80,23 @@ type Props = {
 const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) => {
   const { dict, lang } = useLang();
   const [projectsById, setProjectsById] = useState<Map<string, DevProject>>(() => new Map());
+  const projectsByIdRef = useRef(projectsById);
   const [failedId, setFailedId] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const activeId = project?.id ?? null;
   const detail = activeId ? projectsById.get(activeId) : undefined;
+  const failed = failedId === activeId;
+  const detailLoaded = detail != null;
 
   useEffect(() => {
-    if (!open || !activeId || projectsById.has(activeId)) return;
+    if (!open || !activeId) return;
+    const loadingId = `dev-project-detail:${activeId}`;
+    setCursorLoading(loadingId, !detailLoaded && !failed);
+    return () => setCursorLoading(loadingId, false);
+  }, [activeId, detailLoaded, failed, open]);
+
+  useEffect(() => {
+    if (!open || !activeId || projectsByIdRef.current.has(activeId)) return;
 
     preloadDevProjectDetail();
     const controller = new AbortController();
@@ -53,6 +112,7 @@ const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) =
         setProjectsById((current) => {
           const next = new Map(current);
           next.set(loadedProject.id, loadedProject);
+          projectsByIdRef.current = next;
           return next;
         });
       })
@@ -62,15 +122,10 @@ const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) =
       });
 
     return () => controller.abort();
-  }, [activeId, endpoint, open, projectsById, retry]);
+  }, [activeId, endpoint, open, retry]);
 
   if (!open || !project) return null;
 
-  if (detail) {
-    return <DevProjectDetail project={detail} open onClose={onClose} />;
-  }
-
-  const failed = failedId === activeId;
   const label = pickText(project.title, lang);
   const crumb = `${pickText(project.category, lang)} · ${project.year}`;
 
@@ -84,25 +139,25 @@ const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) =
       crumb={crumb}
       label={label}
     >
-      <div className={styles.state}>
-        {failed ? (
-          <>
-            <p>{dict.devProjectLoadError}</p>
-            <button
-              type="button"
-              className={styles.retry}
-              onClick={() => {
-                setFailedId(null);
-                setRetry((value) => value + 1);
-              }}
-            >
-              {dict.errorRetry}
-            </button>
-          </>
-        ) : (
-          <span className={styles.spinner} aria-label={dict.devProjectLoadingLabel} />
-        )}
-      </div>
+      {detail ? (
+        <DevProjectDetailContent project={detail} />
+      ) : !failed ? (
+        <DetailSkeleton hasMedia={Boolean(project.cover)} label={dict.devProjectLoadingLabel} />
+      ) : (
+        <div className={styles.state}>
+          <p>{dict.devProjectLoadError}</p>
+          <button
+            type="button"
+            className={styles.retry}
+            onClick={() => {
+              setFailedId(null);
+              setRetry((value) => value + 1);
+            }}
+          >
+            {dict.errorRetry}
+          </button>
+        </div>
+      )}
     </Modal>
   );
 };
