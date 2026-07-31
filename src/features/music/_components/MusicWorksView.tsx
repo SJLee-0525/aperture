@@ -30,6 +30,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
               type="button"
               key={work.id}
               className={styles.work}
+              data-cursor-large="frame"
               onClick={() => select(work.id)}
             >
               <div className={styles.poster} data-protected-image>
@@ -47,10 +48,12 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                 )}
                 <span className={styles.tag}>{pickText(work.category, lang)}</span>
               </div>
-              <div className={styles.wt}>{pickText(work.title, lang)}</div>
-              <div className={styles.ws}>{pickText(work.subtitle, lang)}</div>
-              <div className={styles.wm}>
-                {ymd(work.performedAt)} · {pickText(work.venue, lang)}
+              <div className={styles.workBody}>
+                <div className={styles.wt}>{pickText(work.title, lang)}</div>
+                <div className={styles.ws}>{pickText(work.subtitle, lang)}</div>
+                <div className={styles.wm}>
+                  {ymd(work.performedAt)} · {pickText(work.venue, lang)}
+                </div>
               </div>
             </button>
           ))}
