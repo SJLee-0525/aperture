@@ -28,6 +28,7 @@ const TEXT_SELECTOR = [
   '[contenteditable="true"]',
 ].join(", ");
 const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
+const PASSIVE_CURSOR_SELECTOR = "[data-cursor-passive]";
 const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
 const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select';
 const AUTO_SCROLL_EXCLUDED_SELECTOR = [
@@ -429,6 +430,7 @@ const CustomCursor = () => {
       const textElement = element?.closest(TEXT_SELECTOR) ?? null;
       const rangeElement = element?.closest(RANGE_CONTROL_SELECTOR) ?? null;
       const scrollbarElement = element?.closest(CUSTOM_SCROLLBAR_SELECTOR) ?? null;
+      const passiveElement = element?.closest(PASSIVE_CURSOR_SELECTOR) ?? null;
       textTargetHovered = Boolean(textElement);
       rangeTargetHovered = Boolean(rangeElement);
       scrollbarTargetHovered = Boolean(scrollbarElement);
@@ -464,6 +466,18 @@ const CustomCursor = () => {
         targetCircular = false;
         targetPill = false;
         setAccent(rangeElement);
+        setVisible(true);
+        scheduleDraw();
+        return;
+      }
+
+      if (passiveElement) {
+        target = null;
+        targetRect = null;
+        targetCompact = false;
+        targetCircular = false;
+        targetPill = false;
+        setAccent(passiveElement);
         setVisible(true);
         scheduleDraw();
         return;

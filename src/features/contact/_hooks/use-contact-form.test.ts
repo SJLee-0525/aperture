@@ -5,7 +5,20 @@ import type { FormEvent } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const fetchMock = vi.fn<typeof fetch>();
-const submitEvent = (): FormEvent => ({ preventDefault: vi.fn() }) as unknown as FormEvent;
+const submitEvent = (values: Partial<Record<"name" | "email" | "message", string>> = {}) => {
+  const form = document.createElement("form");
+  for (const name of ["name", "email", "message"] as const) {
+    const field = document.createElement(name === "message" ? "textarea" : "input");
+    field.name = name;
+    field.value = values[name] ?? "";
+    form.append(field);
+  }
+  const event = {
+    preventDefault: vi.fn(),
+    currentTarget: form,
+  } as unknown as FormEvent<HTMLFormElement>;
+  return { event, form };
+};
 
 describe("useContactForm", () => {
   beforeEach(() => {
@@ -30,12 +43,10 @@ describe("useContactForm", () => {
     );
     const { useContactForm } = await import("@/features/contact/_hooks/use-contact-form");
     const { result } = renderHook(() => useContactForm("hello@example.com"));
-    const event = submitEvent();
-
-    act(() => {
-      result.current.update("name", "  Sungjoon ");
-      result.current.update("email", " hello@example.com ");
-      result.current.update("message", " 안녕하세요. ");
+    const { event, form } = submitEvent({
+      name: "  Sungjoon ",
+      email: " hello@example.com ",
+      message: " 안녕하세요. ",
     });
     await act(() => result.current.submit(event));
 
@@ -52,7 +63,7 @@ describe("useContactForm", () => {
       }),
     });
     expect(result.current.status).toBe("sent");
-    expect(result.current.draft).toEqual({ name: "", email: "", message: "" });
+    expect(new FormData(form).get("message")).toBe("");
   });
 
   it("응답을 기다리는 동안 전송 중 상태를 보여준다", async () => {
@@ -65,9 +76,10 @@ describe("useContactForm", () => {
     const { useContactForm } = await import("@/features/contact/_hooks/use-contact-form");
     const { result } = renderHook(() => useContactForm("hello@example.com"));
     let submission!: Promise<void>;
+    const { event } = submitEvent();
 
     act(() => {
-      submission = result.current.submit(submitEvent());
+      submission = result.current.submit(event);
     });
     expect(result.current.status).toBe("sending");
 
@@ -83,22 +95,23 @@ describe("useContactForm", () => {
     fetchMock.mockImplementation(response);
     const { useContactForm } = await import("@/features/contact/_hooks/use-contact-form");
     const { result } = renderHook(() => useContactForm("hello@example.com"));
-    act(() => result.current.update("message", "보존할 메시지"));
+    const { event, form } = submitEvent({ message: "보존할 메시지" });
 
-    await act(() => result.current.submit(submitEvent()));
+    await act(() => result.current.submit(event));
 
     expect(result.current.status).toBe("error");
-    expect(result.current.draft.message).toBe("보존할 메시지");
+    expect(new FormData(form).get("message")).toBe("보존할 메시지");
   });
 
   it("전송 오류 후 입력을 수정하면 상태를 idle로 되돌린다", async () => {
     fetchMock.mockRejectedValue(new TypeError("network error"));
     const { useContactForm } = await import("@/features/contact/_hooks/use-contact-form");
     const { result } = renderHook(() => useContactForm("hello@example.com"));
-    await act(() => result.current.submit(submitEvent()));
+    const { event } = submitEvent();
+    await act(() => result.current.submit(event));
     await waitFor(() => expect(result.current.status).toBe("error"));
 
-    act(() => result.current.update("message", "다시 작성"));
+    act(() => result.current.resetStatus());
 
     expect(result.current.status).toBe("idle");
   });

@@ -124,4 +124,42 @@ test.describe("Custom cursor", () => {
 
     await expect(page.locator("[data-autoscroll-anchor]")).toHaveAttribute("data-visible", "false");
   });
+
+  test("문의 textarea 리사이즈 핸들에서도 커스텀 커서를 유지한다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "커스텀 커서는 fine pointer에서만 활성화");
+
+    await page.goto("/contact");
+    await page.waitForFunction(() => document.documentElement.hasAttribute("data-custom-cursor"));
+
+    const textarea = page.getByRole("textbox", { name: "메시지" });
+    await expect(textarea).toHaveCSS("resize", "none");
+
+    const handle = page.locator("[data-textarea-resizer]");
+    const handleBox = await handle.boundingBox();
+    expect(handleBox).not.toBeNull();
+    if (!handleBox) return;
+    expect(handleBox.width).toBeGreaterThanOrEqual(40);
+    expect(handleBox.height).toBeGreaterThanOrEqual(40);
+
+    const initialHeight = await textarea.evaluate(
+      (element) => (element as HTMLTextAreaElement).offsetHeight,
+    );
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2);
+    await expect(page.locator("[data-custom-cursor-ui]")).toHaveAttribute("data-mode", "dot");
+    await page.mouse.down();
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height + 48);
+    await page.mouse.up();
+    await expect
+      .poll(() => textarea.evaluate((element) => (element as HTMLTextAreaElement).offsetHeight))
+      .toBeGreaterThan(initialHeight);
+
+    const draggedHeight = await textarea.evaluate(
+      (element) => (element as HTMLTextAreaElement).offsetHeight,
+    );
+    await handle.focus();
+    await page.keyboard.press("ArrowDown");
+    await expect
+      .poll(() => textarea.evaluate((element) => (element as HTMLTextAreaElement).offsetHeight))
+      .toBeGreaterThan(draggedHeight);
+  });
 });

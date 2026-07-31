@@ -12,25 +12,21 @@ const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
 const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
 type SendStatus = "idle" | "sending" | "sent" | "error";
-type ContactField = "name" | "email" | "message";
-type ContactDraft = Record<ContactField, string>;
-
-const EMPTY_DRAFT: ContactDraft = { name: "", email: "", message: "" };
 
 const useContactForm = (mailtoTo: string) => {
-  const [draft, setDraft] = useState<ContactDraft>(EMPTY_DRAFT);
   const [status, setStatus] = useState<SendStatus>("idle");
-  const update = useCallback((field: ContactField, value: string) => {
-    setDraft((current) => ({ ...current, [field]: value }));
-    setStatus("idle");
+  const resetStatus = useCallback(() => {
+    setStatus((current) => (current === "idle" ? current : "idle"));
   }, []);
 
   const submit = useCallback(
-    async (event: FormEvent) => {
+    async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const name = draft.name.trim();
-      const email = draft.email.trim();
-      const message = draft.message.trim();
+      const form = event.currentTarget;
+      const formData = new FormData(form);
+      const name = String(formData.get("name") ?? "").trim();
+      const email = String(formData.get("email") ?? "").trim();
+      const message = String(formData.get("message") ?? "").trim();
       const subject = `[Portfolio] ${name || "Contact"}`;
 
       // 키 미설정 → mailto 폴백 (dev·미구성 환경에서도 폼이 죽지 않게).
@@ -59,15 +55,15 @@ const useContactForm = (mailtoTo: string) => {
         if (!data.success) throw new Error("Web3Forms 실패");
 
         setStatus("sent");
-        setDraft(EMPTY_DRAFT);
+        form.reset();
       } catch {
         setStatus("error");
       }
     },
-    [draft, mailtoTo],
+    [mailtoTo],
   );
 
-  return { draft, status, submit, update };
+  return { status, submit, resetStatus };
 };
 
 export { useContactForm };

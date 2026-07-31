@@ -68,9 +68,44 @@
     border-color 0.2s,
     background 0.2s;
 }
+.textareaWrap {
+  position: relative;
+}
 .textarea {
-  resize: vertical;
+  display: block;
+  resize: none;
   min-height: 132px;
+}
+.resizeHandle {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  place-items: center;
+  touch-action: none;
+  color: var(--text-3);
+}
+.resizeHandle svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+.resizeHandle:hover {
+  color: var(--accent);
+}
+.resizeHandle:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
 }
 .input:focus,
 .textarea:focus {
