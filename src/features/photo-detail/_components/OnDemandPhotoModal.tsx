@@ -11,6 +11,7 @@ import { mergePhotoCache } from "@/features/photo-detail/_lib/photo-cache";
 import type { PhotoDetailPayload } from "@/features/photo-detail/_lib/photo-detail-payload";
 import { revivePhoto } from "@/features/photo-detail/_lib/photo-detail-payload";
 import { useMounted } from "@/hooks/use-mounted";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 import type { Photo } from "@/types/photo";
@@ -122,6 +123,8 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
   const activePhoto = activeId ? photosById.get(activeId) : undefined;
   const knownActiveId = activeId ? photoIds.includes(activeId) : false;
   const mounted = useMounted();
+  const pendingOpen = activeId != null && readyId !== activeId;
+  const pendingRef = useFocusTrap(pendingOpen && mounted);
   // 로딩 프레임 → 실제 모달 전환 중에도 한 소유자가 잠금을 계속 유지한다.
   useScrollLock(activeId != null);
 
@@ -148,13 +151,15 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
           onImageReady={setReadyId}
         />
       ) : null}
-      {readyId !== activeId && mounted
+      {pendingOpen && mounted
         ? createPortal(
             <div
+              ref={pendingRef}
               className={styles.pending}
               role="dialog"
               aria-modal="true"
               aria-label={dict.photoLoadingLabel}
+              tabIndex={-1}
             >
               <div className={styles.scrim} aria-hidden="true" />
               <div className={styles.frame} data-photo-pending-frame>

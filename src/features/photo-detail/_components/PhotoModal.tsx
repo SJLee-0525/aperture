@@ -125,7 +125,7 @@ const PhotoModal = ({
     setExpanded(false);
     setPhotoChromeVisible(true);
   }
-  const trapRef = useFocusTrap(open);
+  const trapRef = useFocusTrap(open && revealed);
   const mounted = useMounted();
   useScrollLock(open);
 
@@ -226,9 +226,11 @@ const PhotoModal = ({
           ref={trapRef}
           tabIndex={-1}
           className={styles.modal}
-          role="dialog"
-          aria-modal="true"
-          aria-label={alt}
+          role={revealed ? "dialog" : undefined}
+          aria-modal={revealed ? "true" : undefined}
+          aria-label={revealed ? alt : undefined}
+          aria-hidden={revealed ? undefined : true}
+          inert={!revealed}
           initial={animateOnOpen ? { opacity: 0 } : false}
           animate={{ opacity: revealed ? 1 : 0 }}
           exit={{ opacity: 0 }}

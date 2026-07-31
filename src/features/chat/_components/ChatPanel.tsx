@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
@@ -50,6 +51,7 @@ const ChatPanel = ({ onClose }: Props) => {
   const titleId = useId();
   const panelRef = useFocusTrap(true);
   const listRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useScrollLock(true);
 
@@ -62,8 +64,11 @@ const ChatPanel = ({ onClose }: Props) => {
   }, [onClose]);
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, isReplying]);
+    listRef.current?.scrollTo({
+      top: listRef.current.scrollHeight,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }, [messages, isReplying, reduceMotion]);
 
   if (typeof document === "undefined") return null;
 
