@@ -6,13 +6,18 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { OnDemandPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
 import type { Photo } from "@/types/photo";
 
+const photoModalRender = vi.hoisted(() => vi.fn());
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ back: vi.fn() }),
   useSearchParams: () => new URLSearchParams("photo=p1"),
 }));
 vi.mock("next/dynamic", () => ({
   default: () => {
-    const Stub = () => null;
+    const Stub = (props: Record<string, unknown>) => {
+      photoModalRender(props);
+      return null;
+    };
     return Stub;
   },
 }));
@@ -47,7 +52,34 @@ const flushCycles = async () => {
 describe("OnDemandPhotoModal fetch 회귀", () => {
   afterEach(() => {
     cleanup();
+    photoModalRender.mockClear();
     vi.unstubAllGlobals();
+  });
+
+  it("캐시 여부와 무관하게 이미지가 준비되는 순간 실제 모달을 드러낸다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ photos: ["p3", "p1", "p2"].map(serialized), tags: [] }),
+      }),
+    );
+
+    render(<OnDemandPhotoModal photoIds={["p1", "p2", "p3"]} endpoint="/api/photos" />);
+
+    await waitFor(() =>
+      expect(photoModalRender.mock.calls.some(([props]) => props.revealed === false)).toBe(true),
+    );
+    const props = photoModalRender.mock.calls.at(-1)?.[0] as {
+      onImageReady: (id: string) => void;
+    };
+    act(() => props.onImageReady("p1"));
+
+    await waitFor(() =>
+      expect(photoModalRender.mock.calls.some(([nextProps]) => nextProps.revealed === true)).toBe(
+        true,
+      ),
+    );
   });
 
   it("태그가 0개인 사이트에서도 상세 요청은 1회로 끝난다", async () => {

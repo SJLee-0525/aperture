@@ -25,6 +25,7 @@ type Props = {
   photoIds?: string[];
   onClose?: () => void;
   animateOnOpen?: boolean;
+  revealed?: boolean;
   onImageReady?: (id: string) => void;
 };
 
@@ -93,6 +94,7 @@ const PhotoModal = ({
   photoIds,
   onClose,
   animateOnOpen = true,
+  revealed = true,
   onImageReady,
 }: Props) => {
   const { dict, lang } = useLang();
@@ -228,7 +230,7 @@ const PhotoModal = ({
           aria-modal="true"
           aria-label={alt}
           initial={animateOnOpen ? { opacity: 0 } : false}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: revealed ? 1 : 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
         >
@@ -241,7 +243,11 @@ const PhotoModal = ({
           <m.div
             className={styles.inner}
             initial={animateOnOpen ? { opacity: 0, scale: 0.985 } : false}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={
+              animateOnOpen
+                ? { opacity: revealed ? 1 : 0, scale: revealed ? 1 : 0.985 }
+                : { opacity: revealed ? 1 : 0, y: revealed ? 0 : 14 }
+            }
             exit={{ opacity: 0, scale: 0.985 }}
             transition={{ duration: 0.28, ease: EASE }}
           >

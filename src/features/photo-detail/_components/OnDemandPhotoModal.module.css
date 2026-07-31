@@ -1,6 +1,6 @@
 .pending {
   position: fixed;
-  z-index: 60;
+  z-index: 100; /* 실제 PhotoModal 전환 전에도 하위 전역 UI 입력을 차단 */
   inset: 0;
   display: flex;
 }

@@ -82,6 +82,18 @@ const PATHS: Record<string, ReactNode> = {
       <path d="M9 14l-1 7 4-2 4 2-1-7" />
     </>
   ),
+  chat: (
+    <>
+      <path d="M4 5h16v11H9l-5 4V5Z" />
+      <path d="M8 10h8M8 13h5" />
+    </>
+  ),
+  send: (
+    <>
+      <path d="m3 11 18-8-8 18-2-8-8-2Z" />
+      <path d="m11 13 4-4" />
+    </>
+  ),
 };
 
 type Props = {

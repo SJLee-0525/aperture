@@ -144,6 +144,7 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
           photoIds={photoIds}
           onClose={close}
           animateOnOpen={false}
+          revealed={readyId === activeId}
           onImageReady={setReadyId}
         />
       ) : null}

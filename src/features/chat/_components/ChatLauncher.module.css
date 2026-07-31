@@ -1,0 +1,62 @@
+.launcher {
+  position: fixed;
+  right: max(var(--s-6), env(safe-area-inset-right, 0px));
+  bottom: max(var(--s-6), env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--text-2);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+
+.launcher:hover {
+  background: var(--surface-3);
+  color: var(--accent);
+}
+
+.launcher:active {
+  transform: translateY(1px);
+}
+
+.launcher:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .launcher {
+    right: var(--s-4);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--s-4));
+    transition:
+      bottom 0.28s var(--ease),
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  :global(
+      html:is([data-section="photo"], [data-section="music"], [data-section="dev"]):not(
+          [data-mobile-navigation-hidden]
+        )
+    )
+    .launcher {
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px) + var(--s-4));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher {
+    transition: none;
+  }
+}
