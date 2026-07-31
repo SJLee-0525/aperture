@@ -19,7 +19,7 @@
   align-items: center;
   gap: 6px;
   line-height: 1;
-  color: var(--text-4);
+  color: var(--text-3);
   transition: color 0.2s;
 }
 .credit:hover {

@@ -63,7 +63,7 @@
   place-items: center;
   background: var(--photo-bg);
   border-bottom: 1px solid var(--line);
-  color: var(--text-4);
+  color: var(--text-3);
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
@@ -125,7 +125,7 @@
   place-items: center;
   overflow: hidden;
   background: var(--photo-bg);
-  color: var(--text-4);
+  color: var(--text-3);
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
@@ -164,7 +164,7 @@
   align-items: center;
   padding: 11px 18px;
   background: var(--accent);
-  color: var(--text-inverse);
+  color: var(--accent-contrast);
   border: 1px solid var(--accent);
   font-family: var(--font-sans);
   font-size: 14px;

@@ -62,7 +62,7 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
   const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
 
   return (
-    <section className={styles.hero} style={{ "--role-accent": roleAccent } as CSSProperties}>
+    <main className={styles.hero} style={{ "--role-accent": roleAccent } as CSSProperties}>
       <div className={styles.inner}>
         <AnimatedWordmark started={started} />
 
@@ -108,7 +108,7 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           ))}
         </nav>
       </div>
-    </section>
+    </main>
   );
 };
 

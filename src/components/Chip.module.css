@@ -19,6 +19,6 @@
 }
 .active {
   background: var(--accent-soft);
-  border-color: transparent;
+  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
   color: var(--accent);
 }

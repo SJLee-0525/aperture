@@ -46,18 +46,19 @@
   --s-20: 80px;
 
   /* --- Vivid accents (테마 무관, 절제 사용) --- */
-  --accent: #0a84ff;
-  --accent-press: #0066d6;
-  --accent-soft: rgba(10, 132, 255, 0.12);
+  --accent: #0066cc;
+  --accent-press: #004f9f;
+  --accent-soft: rgba(0, 102, 204, 0.1);
+  --accent-contrast: #fff;
   --danger: #ff2d55;
   --danger-soft: rgba(255, 45, 85, 0.12);
   --text-inverse: #fff;
 
   /* --- 섹션 팔레트 (랜딩 진입 행 + html[data-section] 공용 단일 출처) --- */
-  --accent-photo: #0a84ff;
-  --accent-music: #e5484d;
-  --accent-dev: #16a34a;
-  --accent-contact: #f5820d;
+  --accent-photo: #0066cc;
+  --accent-music: #b4232d;
+  --accent-dev: #087a32;
+  --accent-contact: #a84d00;
 
   /* --- Motion --- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -79,7 +80,7 @@
 
   --text: #18181b;
   --text-2: #3f3f46;
-  --text-3: #71717a;
+  --text-3: #686871;
   --text-4: #a1a1aa;
 
   --photo-bg: #ececef;
@@ -116,10 +117,12 @@
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 28px rgba(0, 0, 0, 0.45);
   --shadow-pop: 0 30px 70px rgba(0, 0, 0, 0.7);
 
-  --accent: #2b95ff;
+  --accent: #4da3ff;
   --accent-soft: rgba(43, 149, 255, 0.16);
+  --accent-contrast: #000;
   --danger: #ff375f;
   --danger-soft: rgba(255, 55, 95, 0.18);
+  --accent-photo: #4da3ff;
   --accent-music: #ff5b60;
   --accent-dev: #2ecc71;
   --accent-contact: #fb923c;
@@ -132,32 +135,40 @@
 html[data-section="photo"],
 html[data-section="home"] {
   --accent: var(--accent-photo);
-  --accent-press: #0066d6;
-  --accent-soft: rgba(10, 132, 255, 0.12);
+  --accent-press: #004f9f;
+  --accent-soft: rgba(0, 102, 204, 0.1);
 }
 html[data-section="music"] {
   --accent: var(--accent-music);
-  --accent-press: #c0393e;
-  --accent-soft: rgba(229, 72, 77, 0.13);
+  --accent-press: #8f1822;
+  --accent-soft: rgba(180, 35, 45, 0.11);
 }
 html[data-section="dev"] {
   --accent: var(--accent-dev);
-  --accent-press: #15803d;
-  --accent-soft: rgba(22, 163, 74, 0.14);
+  --accent-press: #056027;
+  --accent-soft: rgba(8, 122, 50, 0.11);
 }
 html[data-section="contact"] {
   --accent: var(--accent-contact);
-  --accent-press: #cc6a00;
-  --accent-soft: rgba(245, 130, 13, 0.14);
+  --accent-press: #803900;
+  --accent-soft: rgba(168, 77, 0, 0.11);
 }
 /* 다크: --accent 는 --accent-music/dev/contact 가 자동 전환 → soft 톤만 보정 */
+html[data-theme="dark"][data-section="photo"],
+html[data-theme="dark"][data-section="home"] {
+  --accent-press: #278bea;
+  --accent-soft: rgba(77, 163, 255, 0.16);
+}
 html[data-theme="dark"][data-section="music"] {
+  --accent-press: #e5484d;
   --accent-soft: rgba(255, 91, 96, 0.16);
 }
 html[data-theme="dark"][data-section="dev"] {
+  --accent-press: #20a85a;
   --accent-soft: rgba(46, 204, 113, 0.16);
 }
 html[data-theme="dark"][data-section="contact"] {
+  --accent-press: #d97706;
   --accent-soft: rgba(251, 146, 60, 0.16);
 }
 

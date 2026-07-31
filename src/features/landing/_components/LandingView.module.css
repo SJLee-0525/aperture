@@ -153,10 +153,10 @@
 .row:hover {
   border-color: var(--accent);
   background: var(--accent);
-  color: var(--text-inverse);
+  color: var(--accent-contrast);
 }
 .row:hover .rowCta {
-  color: var(--text-inverse);
+  color: var(--accent-contrast);
 }
 
 /* 진입 애니메이션은 motion(LandingView)이 지휘 — 글자 캐스케이드 → 마침표 낙하·바운스 → 소개·행 순차.

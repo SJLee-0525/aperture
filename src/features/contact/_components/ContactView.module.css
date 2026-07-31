@@ -84,7 +84,7 @@
   padding: 12px 24px;
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: var(--text-inverse);
+  color: var(--accent-contrast);
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
