@@ -1,8 +1,6 @@
 import { IntroSplash } from "@/components/IntroSplash";
 import { PublicImageProtection } from "@/components/PublicImageProtection";
 import { SiteFooter } from "@/components/SiteFooter";
-import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
-import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomScrollbar";
 import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
 import { MobileNavigationVisibility } from "@/features/site-header/_components/MobileNavigationVisibility";
 import { SectionAccent } from "@/features/site-header/_components/SectionAccent";
@@ -15,8 +13,6 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <PublicImageProtection />
-      <CustomCursor />
-      <CustomScrollbar />
       <MobileNavigationVisibility />
       <SectionAccent />
       <IntroSplash />
