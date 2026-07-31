@@ -62,6 +62,7 @@ jobs:
         run: npm run build
         env:
           NEXT_DIST_DIR: .next-playwright-v7
+          NEXT_FONT_GOOGLE_MOCKED_RESPONSES: ${{ github.workspace }}/e2e/fixtures/google-font-responses.cjs
           NEXT_PUBLIC_USE_MOCK: "1"
           # Client Components are evaluated during prerendering, so Firebase Auth needs
           # syntactically valid public web config even though E2E content uses mocks.
@@ -110,7 +111,9 @@ jobs:
   e2e:
     name: Production E2E
     needs: build
-    runs-on: ubuntu-latest
+    # Playwright pixel snapshots are OS-dependent. Keep the runner aligned with
+    # the Windows environment used to review and update the committed baselines.
+    runs-on: windows-latest
     timeout-minutes: 20
 
     steps:
