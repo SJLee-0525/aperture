@@ -62,7 +62,6 @@ jobs:
         run: npm run build
         env:
           NEXT_DIST_DIR: .next-playwright-v7
-          NEXT_FONT_GOOGLE_MOCKED_RESPONSES: ${{ github.workspace }}/e2e/fixtures/google-font-responses.cjs
           NEXT_PUBLIC_USE_MOCK: "1"
           # Client Components are evaluated during prerendering, so Firebase Auth needs
           # syntactically valid public web config even though E2E content uses mocks.
