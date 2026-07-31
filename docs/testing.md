@@ -17,7 +17,7 @@ $env:PLAYWRIGHT_BASE_URL = "http://127.0.0.1:3001"
 npm run test:visual
 ```
 
-의도한 디자인 변경일 때만 `test:visual:update`로 기준 이미지를 갱신하고 이미지 diff를
+의도한 디자인 변경일 때만 `test:visual:update`로 production build 기준 이미지를 갱신하고 이미지 diff를
 검토한다. CI 실패 시 `playwright-reports` 아티팩트에서 actual·expected·diff를 확인한다.
 
 ## 접근성

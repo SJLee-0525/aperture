@@ -17,10 +17,12 @@ test.describe("핵심 공개 화면 시각 회귀", () => {
       await page.locator("main").waitFor({ state: "visible" });
       await page.locator("img").evaluateAll((images) =>
         Promise.all(
-          images.map((element) => {
-            const image = element as HTMLImageElement;
-            return image.complete ? Promise.resolve() : image.decode().catch(() => undefined);
-          }),
+          images
+            .map((element) => element as HTMLImageElement)
+            .filter((image) => image.loading !== "lazy" || image.complete)
+            .map((image) =>
+              image.complete ? Promise.resolve() : image.decode().catch(() => undefined),
+            ),
         ),
       );
 

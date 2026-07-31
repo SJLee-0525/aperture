@@ -5,7 +5,9 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const port = 3100;
 const baseURL = `http://127.0.0.1:${port}`;
-const production = process.env.E2E_PRODUCTION === "1";
+const cliArgs = process.argv.slice(2);
+const production = process.env.E2E_PRODUCTION === "1" || cliArgs.includes("--production");
+const playwrightArgs = cliArgs.filter((argument) => argument !== "--production");
 const serverEnv = {
   ...process.env,
   NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? ".next-playwright-v7",
@@ -62,7 +64,7 @@ async function run() {
     await waitUntilReady();
     const playwright = spawn(
       process.execPath,
-      ["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)],
+      ["node_modules/@playwright/test/cli.js", "test", ...playwrightArgs],
       {
         cwd: root,
         env: { ...process.env, PLAYWRIGHT_BASE_URL: baseURL },

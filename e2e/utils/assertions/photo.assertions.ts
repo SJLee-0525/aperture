@@ -30,7 +30,7 @@ const photoAssertions = {
   async openMapPhoto(page: Page) {
     await page.locator("aside").getByRole("link").first().click();
     await expect(page).toHaveURL(/[?&]photo=/);
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByRole("dialog").last()).toBeVisible();
     await commonAssertions.closeDialog(page);
   },
 };
