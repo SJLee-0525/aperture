@@ -1,5 +1,32 @@
 import type { DevConfig, DevProject } from "@/types/dev";
 
+type AwardProjectSeed = {
+  id: string;
+  title: { ko: string; en: string };
+  category: { ko: string; en: string };
+  year: string;
+  period: { ko: string; en: string };
+  summary: { ko: string; en: string };
+  achievement: { ko: string; en: string };
+  techTags: string[];
+  order: number;
+};
+
+/** 수상 딥링크가 로컬·데모에서도 실제 상세 모달을 열도록 하는 최소 프로젝트 fixture. */
+const awardProject = (seed: AwardProjectSeed): DevProject => ({
+  ...seed,
+  position: { ko: "Frontend · SSAFY 팀 프로젝트", en: "Frontend · SSAFY team project" },
+  overview: seed.summary,
+  features: [],
+  roles: [],
+  troubleshooting: [],
+  achievements: [seed.achievement],
+  links: [],
+  cover: null,
+  images: [],
+  published: true,
+});
+
 /**
  * 개발 섹션 mock — design/ver_2/dev.js 이식(ko) + en 번역. 콘텐츠 원본: github.com/SJLee-0525/portfolio.
  * Firebase 미설정(로컬 dev·데모)에서만 폴백. 실운영 데이터는 관리자 CMS(Phase C2)로 입력.
@@ -339,6 +366,60 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     order: 3,
     published: true,
   },
+  awardProject({
+    id: "aidap",
+    title: { ko: "아이답 (AIDAP)", en: "AIDAP" },
+    category: { ko: "SSAFY 관통 프로젝트 · 금융", en: "SSAFY Team Project · FinTech" },
+    year: "2024",
+    period: { ko: "2024. 11. 18. ~ 2024. 11. 26.", en: "Nov 18, 2024 to Nov 26, 2024" },
+    summary: {
+      ko: "금융상품 비교, 이자 계산, 맞춤 추천과 AI 상담을 제공하는 금융 서비스.",
+      en: "A financial service for product comparison, interest calculations, recommendations, and AI consultation.",
+    },
+    achievement: {
+      ko: "SSAFY 12기 1학기 관통 프로젝트 최우수상 수상",
+      en: "Won the top award in the SSAFY 12th cohort first-semester final project",
+    },
+    techTags: ["Vue 3", "Django", "JavaScript"],
+    order: 4,
+  }),
+  awardProject({
+    id: "myhero",
+    title: { ko: "영웅이", en: "MyHero" },
+    category: { ko: "SSAFY 공통 프로젝트 · AIoT", en: "SSAFY Team Project · AIoT" },
+    year: "2025",
+    period: { ko: "2025. 01. 06. ~ 2025. 02. 21.", en: "Jan 6, 2025 to Feb 21, 2025" },
+    summary: {
+      ko: "독거노인의 안전과 정서 상태를 살피는 AIoT 실버케어 플랫폼.",
+      en: "An AIoT care platform monitoring the safety and emotional well-being of seniors living alone.",
+    },
+    achievement: {
+      ko: "SSAFY 12기 공통 프로젝트 우수상 수상",
+      en: "Won an excellence award in the SSAFY 12th cohort common project",
+    },
+    techTags: ["React", "TypeScript", "AIoT"],
+    order: 5,
+  }),
+  awardProject({
+    id: "recipedia",
+    title: { ko: "레시피디아", en: "Recipedia" },
+    category: {
+      ko: "SSAFY 특화 프로젝트 · 생성형 AI",
+      en: "SSAFY Team Project · Generative AI",
+    },
+    year: "2025",
+    period: { ko: "2025. 02. 24. ~ 2025. 04. 11.", en: "Feb 24, 2025 to Apr 11, 2025" },
+    summary: {
+      ko: "냉장고 속 재료와 가족별 취향을 바탕으로 레시피를 만드는 서비스.",
+      en: "A smart-fridge service that creates recipes from ingredients and family preferences.",
+    },
+    achievement: {
+      ko: "삼성전자 DA사업부 연계 프로젝트 우수상(2위) 수상",
+      en: "Won second place in a project with Samsung Electronics' Digital Appliances Business",
+    },
+    techTags: ["React", "TypeScript", "TanStack Query", "Zustand"],
+    order: 6,
+  }),
 ];
 
 const MOCK_DEV_CONFIG: DevConfig = {
@@ -371,44 +452,89 @@ const MOCK_DEV_CONFIG: DevConfig = {
   ],
   stack: [
     {
-      category: "Language",
+      category: "Workflow · Collaboration",
       items: [
+        { name: "Figma", bg: "#f24e1e", fg: "#000000" },
+        { name: "Jira", bg: "#0052cc", fg: "#ffffff" },
+        { name: "Git", bg: "#f05032", fg: "#000000" },
+        { name: "Claude Design", bg: "#d97757", fg: "#000000" },
+        { name: "Claude Code", bg: "#d97757", fg: "#000000" },
+        { name: "Codex", bg: "#10a37f", fg: "#000000" },
+        { name: "Google Antigravity", bg: "#4285f4", fg: "#000000" },
+      ],
+    },
+    {
+      category: "AI · Services",
+      items: [
+        { name: "OpenAI API", bg: "#10a37f", fg: "#000000" },
+        { name: "Google Gemini", bg: "#4285f4", fg: "#ffffff" },
+        { name: "ElevenLabs", bg: "#1f1f1f", fg: "#ffffff" },
+      ],
+    },
+    {
+      category: "Frontend",
+      items: [
+        { name: "Next.js 16", bg: "#111111", fg: "#ffffff" },
+        { name: "React 19", bg: "#61dafb", fg: "#000000" },
         { name: "TypeScript", bg: "#3178c6", fg: "#ffffff" },
         { name: "JavaScript", bg: "#f7df1e", fg: "#000000" },
-        { name: "HTML5", bg: "#e34f26", fg: "#ffffff" },
-      ],
-    },
-    {
-      category: "Framework · Library",
-      items: [
-        { name: "React.js", bg: "#61dafb", fg: "#000000" },
-        { name: "React Router", bg: "#ca4245", fg: "#ffffff" },
+        { name: "Vue 3", bg: "#42b883", fg: "#000000" },
+        { name: "TanStack Query", bg: "#ff4154", fg: "#000000" },
         { name: "Zustand", bg: "#443e38", fg: "#ffffff" },
+        { name: "Vite", bg: "#646cff", fg: "#000000" },
+        { name: "Electron 35", bg: "#47848f", fg: "#000000" },
+        { name: "WebSocket", bg: "#374151", fg: "#ffffff" },
       ],
     },
     {
-      category: "Styling · Motion",
+      category: "UI · Interaction",
       items: [
-        { name: "TailwindCSS", bg: "#06b6d4", fg: "#ffffff" },
+        { name: "CSS Modules", bg: "#1572b6", fg: "#ffffff" },
+        { name: "Tailwind CSS", bg: "#06b6d4", fg: "#000000" },
+        { name: "Bootstrap", bg: "#7952b3", fg: "#ffffff" },
+        { name: "Motion", bg: "#fff312", fg: "#000000" },
         { name: "GSAP", bg: "#0ae448", fg: "#000000" },
-        { name: "clsx", bg: "#6b7280", fg: "#ffffff" },
+        { name: "Web Audio API", bg: "#9333ea", fg: "#ffffff" },
       ],
     },
     {
-      category: "Build · Runtime",
+      category: "Backend · Data",
       items: [
-        { name: "Vite", bg: "#646cff", fg: "#ffffff" },
-        { name: "Node.js", bg: "#339933", fg: "#ffffff" },
-        { name: "Yarn PnP", bg: "#2188b6", fg: "#ffffff" },
+        { name: "FastAPI", bg: "#009688", fg: "#000000" },
+        { name: "Python 3.12", bg: "#3776ab", fg: "#ffffff" },
+        { name: "Django", bg: "#092e20", fg: "#ffffff" },
+        { name: "SQLAlchemy", bg: "#d71f00", fg: "#ffffff" },
+        { name: "PostgreSQL", bg: "#4169e1", fg: "#000000" },
+        { name: "pgvector", bg: "#336791", fg: "#ffffff" },
+        { name: "Redis", bg: "#dc382d", fg: "#ffffff" },
+        { name: "Firebase", bg: "#ffca28", fg: "#000000" },
+        { name: "SQLite", bg: "#003b57", fg: "#ffffff" },
       ],
     },
     {
-      category: "Quality",
+      category: "Testing · Quality",
       items: [
-        { name: "ESLint", bg: "#4b32c3", fg: "#ffffff" },
-        { name: "Prettier", bg: "#f7b93e", fg: "#000000" },
-        { name: "Lighthouse 90+", bg: "#f44b21", fg: "#ffffff" },
+        { name: "Vitest", bg: "#6e9f18", fg: "#000000" },
+        { name: "Playwright", bg: "#2e8067", fg: "#ffffff" },
+        { name: "Pytest", bg: "#0a9edc", fg: "#000000" },
       ],
+    },
+    {
+      category: "Infra · Deployment",
+      items: [
+        { name: "Vercel", bg: "#111111", fg: "#ffffff" },
+        { name: "Hugging Face Spaces", bg: "#ffd21e", fg: "#000000" },
+        { name: "Docker Compose", bg: "#2496ed", fg: "#000000" },
+      ],
+    },
+  ],
+  education: [
+    {
+      period: "2024 — 2025",
+      title: {
+        ko: "삼성 청년 SW 아카데미(SSAFY) 12기",
+        en: "Samsung Software Academy For Youth (SSAFY), 12th Cohort",
+      },
     },
   ],
   timeline: [
@@ -437,6 +563,50 @@ const MOCK_DEV_CONFIG: DevConfig = {
       desc: {
         ko: "JavaScript로 시작해 React 생태계로 확장. 상태관리와 컴포넌트 설계를 학습.",
         en: "Started with JavaScript and expanded into React; learned state management and component design.",
+      },
+    },
+  ],
+  awards: [
+    {
+      id: "recipedia-award",
+      year: "2025",
+      projectId: "recipedia",
+      name: {
+        ko: "삼성전자 DA사업부 연계 프로젝트 우수상",
+        en: "Samsung Electronics DA Collaboration Project Excellence Award",
+      },
+      place: { ko: "2위", en: "2nd Place" },
+      description: {
+        ko: "SSAFY 특화 프로젝트 Recipedia로 수상했습니다.",
+        en: "Awarded for Recipedia, a SSAFY specialized project.",
+      },
+    },
+    {
+      id: "myhero-award",
+      year: "2025",
+      projectId: "myhero",
+      name: {
+        ko: "SSAFY 12기 공통 프로젝트 우수상",
+        en: "SSAFY 12th Cohort Common Project Excellence Award",
+      },
+      place: { ko: "우수상", en: "Excellence Award" },
+      description: {
+        ko: "AIoT 프로젝트 MyHero로 수상했습니다.",
+        en: "Awarded for MyHero, an AIoT project.",
+      },
+    },
+    {
+      id: "aidap-award",
+      year: "2024",
+      projectId: "aidap",
+      name: {
+        ko: "SSAFY 12기 1학기 관통 프로젝트 최우수상",
+        en: "SSAFY 12th Cohort First-Semester Final Project Top Award",
+      },
+      place: { ko: "최우수상", en: "Top Award" },
+      description: {
+        ko: "핀테크 프로젝트 AIDAP으로 수상했습니다.",
+        en: "Awarded for AIDAP, a fintech project.",
       },
     },
   ],

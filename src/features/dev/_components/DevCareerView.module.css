@@ -4,11 +4,22 @@
   padding: var(--s-8) var(--s-6) var(--s-16);
 }
 .title {
-  margin-bottom: var(--s-8);
+  margin-bottom: var(--s-6);
   font-family: var(--font-display);
   font-size: var(--t-h1);
   font-weight: 500;
   letter-spacing: -0.01em;
+}
+.stacked {
+  margin-top: clamp(30px, 4vw, 46px);
+}
+.sectionLabel {
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 .empty {
   padding: var(--s-16) 0;
@@ -16,48 +27,112 @@
   text-align: center;
 }
 
-.timeline {
-  display: flex;
-  flex-direction: column;
-}
-.row {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: var(--s-5);
-  padding: var(--s-6) 0;
+.end {
   border-top: 1px solid var(--line);
 }
-.row:first-child {
-  border-top: 0;
-}
-@media (max-width: 640px) {
-  .row {
-    grid-template-columns: 1fr;
-    gap: var(--s-2);
-    padding: var(--s-5) 0;
-  }
-}
-
-.period {
-  font-family: var(--font-mono);
-  font-size: var(--t-small);
-  color: var(--text-3);
-  padding-top: 2px;
-}
-.rt {
-  font-size: var(--t-h3);
-  font-weight: 600;
-  color: var(--text);
-}
 .rr {
+  display: block;
   margin-top: 2px;
   font-size: var(--t-small);
   color: var(--accent);
 }
 .rd {
+  display: block;
   margin-top: var(--s-2);
   max-width: 70ch;
   font-size: var(--t-body);
   line-height: 1.6;
   color: var(--text-2);
+}
+
+.awardRow {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(16px, 2.5vw, 30px);
+  width: 100%;
+  padding: clamp(15px, 2vw, 19px) 8px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    padding-left 0.2s;
+}
+.awardRow:hover:not([data-cursor-snapped]) {
+  padding-left: 16px;
+  background: var(--surface-1);
+}
+.awardYear {
+  flex: none;
+  flex-basis: clamp(96px, 12vw, 150px);
+  transform: translateY(-2px);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+.awardName {
+  flex: 1;
+  font-size: clamp(16px, 1.8vw, 19px);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.awardPlace {
+  white-space: nowrap;
+  transform: translateY(-2px);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+.modalYear {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 6.5vw, 62px);
+  font-weight: 500;
+  line-height: 1;
+}
+.modalName {
+  margin-top: 12px;
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.modalPlace {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-4);
+}
+.modalDescription {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-2);
+}
+.projectLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid currentColor;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .awardRow {
+    flex-wrap: wrap;
+  }
+  .awardPlace {
+    width: 100%;
+    padding-left: calc(clamp(96px, 12vw, 150px) + clamp(16px, 2.5vw, 30px));
+  }
 }

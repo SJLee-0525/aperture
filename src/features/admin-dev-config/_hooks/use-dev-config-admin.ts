@@ -15,7 +15,9 @@ const EMPTY: DevConfig = {
   heroLead: { ko: "", en: "" },
   interview: [],
   stack: [],
+  education: [],
   timeline: [],
+  awards: [],
 };
 
 /**

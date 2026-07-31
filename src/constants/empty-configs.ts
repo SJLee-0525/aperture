@@ -31,7 +31,9 @@ const EMPTY_DEV_CONFIG: DevConfig = {
   heroLead: EMPTY_TEXT,
   interview: [],
   stack: [],
+  education: [],
   timeline: [],
+  awards: [],
 };
 
 export { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG };

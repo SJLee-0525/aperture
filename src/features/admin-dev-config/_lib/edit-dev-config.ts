@@ -5,6 +5,7 @@ type Lang = keyof LocalizedText;
 type MoveOffset = -1 | 1;
 type InterviewField = "q" | "a";
 type TimelineField = "title" | "role" | "desc";
+type AwardField = "name" | "place" | "description";
 
 type DevConfigEdit =
   | { type: "heroLead.edit"; lang: Lang; value: string }
@@ -41,7 +42,18 @@ type DevConfigEdit =
       value: string;
     }
   | { type: "timeline.move"; index: number; offset: MoveOffset }
-  | { type: "timeline.remove"; index: number };
+  | { type: "timeline.remove"; index: number }
+  | { type: "education.add" }
+  | { type: "education.period.edit"; index: number; value: string }
+  | { type: "education.title.edit"; index: number; lang: Lang; value: string }
+  | { type: "education.move"; index: number; offset: MoveOffset }
+  | { type: "education.remove"; index: number }
+  | { type: "award.add"; id: string }
+  | { type: "award.year.edit"; index: number; value: string }
+  | { type: "award.project.edit"; index: number; value: string }
+  | { type: "award.field.edit"; index: number; field: AwardField; lang: Lang; value: string }
+  | { type: "award.move"; index: number; offset: MoveOffset }
+  | { type: "award.remove"; index: number };
 
 const moveItem = <T>(list: T[], index: number, offset: MoveOffset): T[] => {
   const target = index + offset;
@@ -192,6 +204,76 @@ const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
         ...config,
         timeline: config.timeline.filter((_, index) => index !== edit.index),
       };
+    case "education.add":
+      return {
+        ...config,
+        education: [...config.education, { period: "", title: { ko: "", en: "" } }],
+      };
+    case "education.period.edit":
+      return {
+        ...config,
+        education: config.education.map((entry, index) =>
+          index === edit.index ? { ...entry, period: edit.value } : entry,
+        ),
+      };
+    case "education.title.edit":
+      return {
+        ...config,
+        education: config.education.map((entry, index) =>
+          index === edit.index
+            ? { ...entry, title: { ...entry.title, [edit.lang]: edit.value } }
+            : entry,
+        ),
+      };
+    case "education.move":
+      return { ...config, education: moveItem(config.education, edit.index, edit.offset) };
+    case "education.remove":
+      return {
+        ...config,
+        education: config.education.filter((_, index) => index !== edit.index),
+      };
+    case "award.add":
+      return {
+        ...config,
+        awards: [
+          ...config.awards,
+          {
+            id: edit.id,
+            year: "",
+            projectId: "",
+            name: { ko: "", en: "" },
+            place: { ko: "", en: "" },
+            description: { ko: "", en: "" },
+          },
+        ],
+      };
+    case "award.year.edit":
+      return {
+        ...config,
+        awards: config.awards.map((award, index) =>
+          index === edit.index ? { ...award, year: edit.value } : award,
+        ),
+      };
+    case "award.field.edit":
+      return {
+        ...config,
+        awards: config.awards.map((award, index) =>
+          index === edit.index
+            ? { ...award, [edit.field]: { ...award[edit.field], [edit.lang]: edit.value } }
+            : award,
+        ),
+      };
+    case "award.project.edit":
+      return {
+        ...config,
+        awards: config.awards.map((award, index) =>
+          index === edit.index ? { ...award, projectId: edit.value } : award,
+        ),
+      };
+    case "award.move":
+      return { ...config, awards: moveItem(config.awards, edit.index, edit.offset) };
+    case "award.remove":
+      return { ...config, awards: config.awards.filter((_, index) => index !== edit.index) };
   }
 };
 

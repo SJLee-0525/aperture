@@ -5,6 +5,7 @@ import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
+import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import { deleteDevProjectImages } from "@/lib/firebase/storage";
 import type { DevConfig, DevProject } from "@/types/dev";
@@ -55,7 +56,9 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
       heroLead: asText(d.heroLead),
       interview: d.interview ?? [],
       stack: d.stack ?? [],
+      education: d.education ?? [],
       timeline: d.timeline ?? [],
+      awards: normalizeDevAwards(d.awards),
     };
   } catch {
     throw new Error("개발 설정을 불러오지 못했습니다.");

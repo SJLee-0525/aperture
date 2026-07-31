@@ -30,6 +30,9 @@ type UIDict = {
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
+  devEducationLabel: string;
+  devAwardsLabel: string;
+  devAwardProjectLink: string;
   devOverviewLabel: string;
   devPeriodLabel: string;
   devPositionLabel: string;
@@ -146,6 +149,9 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
+    devEducationLabel: "학력",
+    devAwardsLabel: "수상",
+    devAwardProjectLink: "프로젝트 보기",
     devOverviewLabel: "개요",
     devPeriodLabel: "기간",
     devPositionLabel: "포지션",
@@ -255,6 +261,9 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
+    devEducationLabel: "Education",
+    devAwardsLabel: "Awards",
+    devAwardProjectLink: "View project",
     devOverviewLabel: "Overview",
     devPeriodLabel: "Period",
     devPositionLabel: "Position",

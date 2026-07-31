@@ -3,6 +3,8 @@
 import Link from "next/link";
 
 import { ROUTES } from "@/constants/routes";
+import { DevAwardRow } from "@/features/admin-dev-config/_components/DevAwardRow";
+import { DevEducationRow } from "@/features/admin-dev-config/_components/DevEducationRow";
 import { DevTimelineRow } from "@/features/admin-dev-config/_components/DevTimelineRow";
 import { InterviewRow } from "@/features/admin-dev-config/_components/InterviewRow";
 import { StackGroupRow } from "@/features/admin-dev-config/_components/StackGroupRow";
@@ -10,7 +12,7 @@ import { useDevConfigAdmin } from "@/features/admin-dev-config/_hooks/use-dev-co
 
 import styles from "./DevConfigEditor.module.css";
 
-/** 개발 설정 — 소개 리드·인터뷰·기술 스택·경력 편집. 조립만, 로직은 편집 Module과 hook.
+/** 개발 설정 — 소개 리드·인터뷰·기술 스택·학력·경력·수상 편집. 조립만, 로직은 편집 Module과 hook.
  *  (연락처·소셜은 /contact, 히어로 타이핑은 랜딩 소관 → 여기 없음.) */
 const DevConfigEditor = () => {
   const { config, status, error, saving, saved, edit, save } = useDevConfigAdmin();
@@ -19,7 +21,7 @@ const DevConfigEditor = () => {
     <div className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>소개</h1>
-        <p className={styles.hint}>소개 리드·인터뷰·기술 스택·경력을 편집합니다.</p>
+        <p className={styles.hint}>소개 리드·인터뷰·기술 스택·학력·경력·수상을 편집합니다.</p>
       </header>
 
       {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
@@ -62,6 +64,44 @@ const DevConfigEditor = () => {
 
           <section className={styles.section}>
             <div className={styles.arrayHead}>
+              <h2 className={styles.legend}>학력</h2>
+              <button
+                type="button"
+                className={styles.add}
+                onClick={() => edit({ type: "education.add" })}
+              >
+                + 항목 추가
+              </button>
+            </div>
+            {config.education.length === 0 ? (
+              <p className={styles.state}>아직 항목이 없습니다.</p>
+            ) : (
+              <ul className={styles.list}>
+                {config.education.map((entry, index) => (
+                  <DevEducationRow
+                    key={index}
+                    entry={entry}
+                    index={index}
+                    isFirst={index === 0}
+                    isLast={index === config.education.length - 1}
+                    onEditPeriod={(itemIndex, value) =>
+                      edit({ type: "education.period.edit", index: itemIndex, value })
+                    }
+                    onEditTitle={(itemIndex, lang, value) =>
+                      edit({ type: "education.title.edit", index: itemIndex, lang, value })
+                    }
+                    onMove={(itemIndex, offset) =>
+                      edit({ type: "education.move", index: itemIndex, offset })
+                    }
+                    onRemove={(itemIndex) => edit({ type: "education.remove", index: itemIndex })}
+                  />
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className={styles.section}>
+            <div className={styles.arrayHead}>
               <h2 className={styles.legend}>인터뷰 (Q&A)</h2>
               <button
                 type="button"
@@ -95,6 +135,47 @@ const DevConfigEditor = () => {
                       edit({ type: "interview.move", index: itemIndex, offset })
                     }
                     onRemove={(itemIndex) => edit({ type: "interview.remove", index: itemIndex })}
+                  />
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className={styles.section}>
+            <div className={styles.arrayHead}>
+              <h2 className={styles.legend}>수상</h2>
+              <button
+                type="button"
+                className={styles.add}
+                onClick={() => edit({ type: "award.add", id: crypto.randomUUID() })}
+              >
+                + 수상 추가
+              </button>
+            </div>
+            {config.awards.length === 0 ? (
+              <p className={styles.state}>아직 수상이 없습니다.</p>
+            ) : (
+              <ul className={styles.list}>
+                {config.awards.map((award, index) => (
+                  <DevAwardRow
+                    key={index}
+                    award={award}
+                    index={index}
+                    isFirst={index === 0}
+                    isLast={index === config.awards.length - 1}
+                    onEditYear={(itemIndex, value) =>
+                      edit({ type: "award.year.edit", index: itemIndex, value })
+                    }
+                    onEditProject={(itemIndex, value) =>
+                      edit({ type: "award.project.edit", index: itemIndex, value })
+                    }
+                    onEditField={(itemIndex, field, lang, value) =>
+                      edit({ type: "award.field.edit", index: itemIndex, field, lang, value })
+                    }
+                    onMove={(itemIndex, offset) =>
+                      edit({ type: "award.move", index: itemIndex, offset })
+                    }
+                    onRemove={(itemIndex) => edit({ type: "award.remove", index: itemIndex })}
                   />
                 ))}
               </ul>

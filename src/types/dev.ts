@@ -1,6 +1,7 @@
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { SiteLink } from "@/types/site";
+import type { TimelineEntry } from "@/types/timeline";
 
 /** 트러블슈팅 항목 — 제목 + 문제/해결(/결과) 구조. result 는 선택(없거나 빈 값이면 미표시). */
 type DevTroubleshooting = {
@@ -55,13 +56,25 @@ type DevTimelineEntry = {
   desc: LocalizedText;
 };
 
+/** 개발 수상 항목 (site/dev.awards) — 음악 수상과 같은 목록 규격, 개발 설정 문서에 포함. */
+type DevAward = {
+  id: string;
+  year: string;
+  projectId: string;
+  name: LocalizedText;
+  place: LocalizedText;
+  description: LocalizedText;
+};
+
 /** site/dev 설정 문서 — 소개 리드·인터뷰·스택·경력.
  *  (연락처·소셜은 /contact 로 일원화, 히어로 타이핑은 랜딩 소관 → dev config 에 두지 않음) */
 type DevConfig = {
   heroLead: LocalizedText; // 소개 페이지 리드 문단
   interview: DevInterview[];
   stack: DevStackGroup[];
+  education: TimelineEntry[];
   timeline: DevTimelineEntry[];
+  awards: DevAward[];
 };
 
 export type {
@@ -72,5 +85,6 @@ export type {
   DevStackItem,
   DevStackGroup,
   DevTimelineEntry,
+  DevAward,
   DevConfig,
 };

@@ -1,5 +1,6 @@
 import { COLLECTIONS, SITE_DEV_DOC, SITE_DOC, SITE_MUSIC_DOC } from "@/constants/collections";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
+import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
 import type { DevConfig, DevProject } from "@/types/dev";
@@ -218,7 +219,9 @@ const restToDevConfig = (d: Record<string, unknown>): DevConfig => ({
   heroLead: (d.heroLead as LocalizedText) ?? EMPTY_LOCALIZED,
   interview: (d.interview as DevConfig["interview"]) ?? [],
   stack: (d.stack as DevConfig["stack"]) ?? [],
+  education: (d.education as DevConfig["education"]) ?? [],
   timeline: (d.timeline as DevConfig["timeline"]) ?? [],
+  awards: normalizeDevAwards(d.awards),
 });
 
 // ── 공개 read API (도메인 타입 반환) ────────────────────────────────────────

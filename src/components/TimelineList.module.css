@@ -16,12 +16,17 @@
 .period {
   flex: none;
   flex-basis: clamp(96px, 12vw, 150px);
+  transform: translateY(-2px);
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--accent);
 }
-.text {
+.content {
   flex: 1;
+  min-width: 0;
+}
+.text {
+  display: block;
   font-size: clamp(16px, 1.8vw, 19px);
   font-weight: 500;
   line-height: 1.3;

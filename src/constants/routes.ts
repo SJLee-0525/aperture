@@ -64,6 +64,9 @@ const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`
 /** 관리자 개발 프로젝트 수정 경로 */
 const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}`;
 
+/** 개발 프로젝트 상세 모달 딥링크 */
+const devProjectRoute = (id: string) => `${ROUTES.DEV_PROJECTS}?project=${encodeURIComponent(id)}`;
+
 export {
   ROUTES,
   albumRoute,
@@ -73,4 +76,5 @@ export {
   adminMusicMediaRoute,
   adminDevProjectRoute,
   adminPhotoRoute,
+  devProjectRoute,
 };

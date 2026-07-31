@@ -19,6 +19,7 @@ const config = (): DevConfig => ({
       items: [{ name: "Firebase", bg: "#ffca28", fg: "#000000" }],
     },
   ],
+  education: [],
   timeline: [
     {
       period: "2025",
@@ -33,6 +34,7 @@ const config = (): DevConfig => ({
       desc: { ko: "설명 2", en: "Description 2" },
     },
   ],
+  awards: [],
 });
 
 describe("editDevConfig", () => {
@@ -160,5 +162,75 @@ describe("editDevConfig", () => {
 
     const removed = editDevConfig(moved, { type: "timeline.remove", index: 1 });
     expect(removed.timeline.map(({ period }) => period)).toEqual(["2026"]);
+  });
+
+  it("학력을 추가·편집·이동·제거한다", () => {
+    const source = {
+      ...config(),
+      education: [
+        { period: "2024", title: { ko: "첫 학력", en: "First education" } },
+        { period: "2025", title: { ko: "둘째 학력", en: "Second education" } },
+      ],
+    };
+    const added = editDevConfig(source, { type: "education.add" });
+    const periodEdited = editDevConfig(added, {
+      type: "education.period.edit",
+      index: 2,
+      value: "2026",
+    });
+    const titleEdited = editDevConfig(periodEdited, {
+      type: "education.title.edit",
+      index: 2,
+      lang: "ko",
+      value: "새 학력",
+    });
+    const moved = editDevConfig(titleEdited, { type: "education.move", index: 2, offset: -1 });
+    const removed = editDevConfig(moved, { type: "education.remove", index: 0 });
+
+    expect(removed.education.map(({ period }) => period)).toEqual(["2026", "2025"]);
+    expect(removed.education[0].title.ko).toBe("새 학력");
+  });
+
+  it("수상을 추가·편집·이동·제거한다", () => {
+    const source = {
+      ...config(),
+      awards: [
+        {
+          id: "existing-award",
+          year: "2025",
+          projectId: "existing-project",
+          name: { ko: "기존 수상", en: "Existing award" },
+          place: { ko: "우수상", en: "Excellence" },
+          description: { ko: "설명", en: "Description" },
+        },
+      ],
+    };
+    const added = editDevConfig(source, { type: "award.add", id: "new-award" });
+    const yearEdited = editDevConfig(added, {
+      type: "award.year.edit",
+      index: 1,
+      value: "2026",
+    });
+    const nameEdited = editDevConfig(yearEdited, {
+      type: "award.field.edit",
+      index: 1,
+      field: "name",
+      lang: "ko",
+      value: "새 수상",
+    });
+    const projectEdited = editDevConfig(nameEdited, {
+      type: "award.project.edit",
+      index: 1,
+      value: "new-project",
+    });
+    const moved = editDevConfig(projectEdited, { type: "award.move", index: 1, offset: -1 });
+    const removed = editDevConfig(moved, { type: "award.remove", index: 1 });
+
+    expect(removed.awards).toHaveLength(1);
+    expect(removed.awards[0]).toMatchObject({
+      year: "2026",
+      projectId: "new-project",
+      name: { ko: "새 수상" },
+    });
   });
 });
