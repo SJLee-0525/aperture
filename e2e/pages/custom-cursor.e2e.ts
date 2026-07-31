@@ -89,7 +89,7 @@ test.describe("Custom cursor", () => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 스크롤바는 fine pointer에서만 활성화");
 
     await page.goto("/photo?photo=p01");
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
     await expect(page.locator('[data-photo-modal-image-area="ready"]')).toBeVisible();
     await expect(page.locator("#photo-pending-scroll-container")).toHaveCount(0);
 
