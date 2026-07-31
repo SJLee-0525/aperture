@@ -29,8 +29,8 @@ const SECTIONS: { key: string; label: string; desc: string; href?: string }[] = 
   },
   {
     key: "global",
-    label: "랜딩 · 연락",
-    desc: "메인 순환 타이핑·리드 · 연락 리드·링크",
+    label: "랜딩 · 문의",
+    desc: "메인 순환 타이핑·리드 · 문의 리드·링크",
     href: ROUTES.ADMIN_GLOBAL,
   },
   {

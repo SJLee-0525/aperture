@@ -32,9 +32,9 @@ const AdminGlobalPage = () => {
   return (
     <div className={styles.page}>
       <header className={styles.head}>
-        <h1 className={styles.title}>랜딩 · 연락</h1>
+        <h1 className={styles.title}>랜딩 · 문의</h1>
         <p className={styles.hint}>
-          메인(/)의 순환 타이핑·리드와 연락(/contact) 리드·버튼 링크를 편집합니다.
+          메인(/)의 순환 타이핑·리드와 문의(/contact) 리드·버튼 링크를 편집합니다.
         </p>
       </header>
 
@@ -101,7 +101,7 @@ const AdminGlobalPage = () => {
           </section>
 
           <section className={styles.section}>
-            <h2 className={styles.legend}>연락 리드 (연락 페이지 상단 문단)</h2>
+            <h2 className={styles.legend}>문의 리드 (문의 페이지 상단 문단)</h2>
             <div className={styles.grid2}>
               <label className={styles.field}>
                 <span className={styles.label}>리드 (한국어)</span>
@@ -127,7 +127,7 @@ const AdminGlobalPage = () => {
           <section className={styles.section}>
             <div className={styles.linksHead}>
               <h2 className={styles.legend}>
-                연락 버튼 링크 (연락 페이지 · 헤더 · mailto 폼 대상)
+                문의 버튼 링크 (문의 페이지 · 헤더 · mailto 폼 대상)
               </h2>
               <button type="button" className={styles.add} onClick={addLink}>
                 + 링크 추가

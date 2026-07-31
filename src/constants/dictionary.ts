@@ -18,11 +18,14 @@ type UIDict = {
   musicRepertoireLabel: string; // 소개 페이지 컬럼 — 레퍼토리
   musicVenuesLabel: string; // 소개 페이지 컬럼 — 무대
   musicGenresLabel: string; // 소개 페이지 컬럼 — 장르
+  aboutShowMore: string;
+  aboutShowLess: string;
   // 연락처 페이지 (전역)
   contactNav: string;
   contactName: string;
   contactEmail: string;
   contactMessage: string;
+  contactResizeMessage: string;
   contactSend: string;
   contactSending: string;
   contactSent: string;
@@ -138,10 +141,13 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicRepertoireLabel: "레퍼토리",
     musicVenuesLabel: "무대",
     musicGenresLabel: "장르",
-    contactNav: "연락",
+    aboutShowMore: "더보기",
+    aboutShowLess: "접기",
+    contactNav: "문의",
     contactName: "이름",
     contactEmail: "이메일",
     contactMessage: "메시지",
+    contactResizeMessage: "메시지 입력란 크기 조절",
     contactSend: "메일 보내기",
     contactSending: "보내는 중…",
     contactSent: "메일이 전송되었습니다. 확인 후 회신드릴게요.",
@@ -250,10 +256,13 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicRepertoireLabel: "Repertoire",
     musicVenuesLabel: "Venues",
     musicGenresLabel: "Genres",
+    aboutShowMore: "Show more",
+    aboutShowLess: "Show less",
     contactNav: "Contact",
     contactName: "Name",
     contactEmail: "Email",
     contactMessage: "Message",
+    contactResizeMessage: "Resize message field",
     contactSend: "Send email",
     contactSending: "Sending…",
     contactSent: "Your message has been sent. I'll get back to you soon.",

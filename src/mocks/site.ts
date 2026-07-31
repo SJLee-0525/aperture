@@ -34,7 +34,7 @@ const MOCK_SITE: SiteConfig = {
     en: "Photography, piano, and code — three languages telling one story. Light and stillness, structure and song, flow and interaction.",
   },
   contactLead: {
-    ko: "공연·촬영·개발 어떤 이야기든 좋습니다. 아래 폼으로 메일을 보내거나, 바로 연락해 주세요.",
+    ko: "공연·촬영·개발 어떤 이야기든 좋습니다. 아래 폼으로 메일을 보내거나, 바로 문의해 주세요.",
     en: "Performances, shoots, or code — any conversation is welcome. Send a message below, or reach me directly.",
   },
   bio: {

@@ -18,7 +18,7 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   { path: "/music/about", expectedText: "Pianist" },
   { path: "/music/career", expectedText: "국제 피아노 콩쿠르" },
   { path: "/music/media", expectedText: "슈베르트 · 즉흥곡" },
-  { path: "/contact", expectedText: "연락" },
+  { path: "/contact", expectedText: "문의" },
   { path: "/search", expectedText: "검색 · 태그 / 장비 / 장소" },
 ];
 

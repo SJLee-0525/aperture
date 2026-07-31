@@ -6,7 +6,7 @@ const contactAssertions = {
     await form.getByLabel("이름").fill("테스트 사용자");
     const email = form.getByLabel("이메일");
     await email.fill("invalid-email");
-    await form.getByLabel("메시지").fill("E2E 연락 테스트");
+    await form.getByRole("textbox", { name: "메시지", exact: true }).fill("E2E 문의 테스트");
     expect(await email.evaluate((element: HTMLInputElement) => element.checkValidity())).toBe(
       false,
     );
