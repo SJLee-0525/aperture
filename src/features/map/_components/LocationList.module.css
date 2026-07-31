@@ -4,6 +4,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
   padding: var(--s-5);
 }
 @media (max-width: 760px) {
