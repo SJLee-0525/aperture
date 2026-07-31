@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import type { FormEvent } from "react";
 
 import { Icon } from "@/components/Icon";
 import { ROUTES } from "@/constants/routes";
@@ -16,11 +16,10 @@ import styles from "./SearchBox.module.css";
 const SearchBox = () => {
   const router = useRouter();
   const { dict } = useLang();
-  const [value, setValue] = useState("");
 
-  const submit = (event: React.FormEvent) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const query = value.trim();
+    const query = String(new FormData(event.currentTarget).get("q") ?? "").trim();
     router.push(query ? `${ROUTES.SEARCH}?q=${encodeURIComponent(query)}` : ROUTES.SEARCH);
   };
 
@@ -28,8 +27,8 @@ const SearchBox = () => {
     <form className={styles.box} onSubmit={submit} role="search">
       <input
         type="text"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        name="q"
+        autoComplete="off"
         placeholder={dict.searchPlaceholder}
         aria-label={dict.searchPlaceholder}
         className={styles.input}
