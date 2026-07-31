@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AboutSection } from "@/components/AboutSection";
@@ -12,6 +12,12 @@ vi.mock("motion/react", () => ({
   },
   animate: () => ({ stop: vi.fn() }),
   useReducedMotion: () => true,
+}));
+
+vi.mock("@/features/lang/_hooks/use-lang", () => ({
+  useLang: () => ({
+    dict: { aboutShowMore: "더보기", aboutShowLess: "접기" },
+  }),
 }));
 
 describe("AboutSection", () => {
@@ -49,5 +55,33 @@ describe("AboutSection", () => {
 
     const href = screen.getByRole("link", { name: "Sony α7 IV" }).getAttribute("href");
     expect(new URL(href!, "https://example.com").searchParams.get("q")).toBe("Sony α7 IV");
+  });
+
+  it("긴 컬럼을 접어 표시하고 공용 버튼으로 함께 확장한다", () => {
+    render(
+      <AboutSection
+        eyebrow="Developer"
+        summary="소개"
+        body=""
+        stats={[]}
+        collapsedItemCount={2}
+        cols={[
+          { label: "사용 기술", items: ["React", "Next.js", "TypeScript"] },
+          { label: "분야", items: ["Frontend", "Backend", "Design"] },
+        ]}
+      />,
+    );
+
+    expect(screen.queryByRole("link", { name: "TypeScript" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Design" })).toBeNull();
+
+    const toggle = screen.getByRole("button", { name: "더보기" });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(toggle.getAttribute("aria-controls")?.split(" ")).toHaveLength(2);
+    fireEvent.click(toggle);
+
+    expect(screen.getByRole("link", { name: "TypeScript" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Design" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "접기" }).getAttribute("aria-expanded")).toBe("true");
   });
 });
