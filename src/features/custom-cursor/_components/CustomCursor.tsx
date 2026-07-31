@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+import { autoScrollDirection, autoScrollVelocity } from "@/features/custom-cursor/_lib/auto-scroll";
 import {
   CUSTOM_CURSOR_LOADING_EVENT,
   CUSTOM_CURSOR_MAP_HOVER_EVENT,
@@ -28,6 +29,19 @@ const TEXT_SELECTOR = [
 ].join(", ");
 const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
 const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select';
+const AUTO_SCROLL_EXCLUDED_SELECTOR = [
+  "a",
+  "button",
+  "input",
+  "textarea",
+  "select",
+  "summary",
+  '[contenteditable="true"]',
+  '[role="button"]',
+  '[role="dialog"]',
+  "[data-autoscroll-disabled]",
+  ".maplibregl-map",
+].join(", ");
 const SECTION_ACCENTS: Record<string, string> = {
   photo: "var(--accent-photo)",
   music: "var(--accent-music)",
@@ -36,13 +50,13 @@ const SECTION_ACCENTS: Record<string, string> = {
 };
 const SCROLLABLE_OVERFLOW = new Set(["auto", "scroll", "overlay"]);
 
-const canScrollVertically = (eventTarget: EventTarget | null) => {
+const findVerticalScroller = (eventTarget: EventTarget | null): HTMLElement | null => {
   let element = eventTarget instanceof HTMLElement ? eventTarget : null;
 
   while (element && element !== document.body && element !== document.documentElement) {
     const overflowY = getComputedStyle(element).overflowY;
     if (SCROLLABLE_OVERFLOW.has(overflowY) && element.scrollHeight > element.clientHeight + 1) {
-      return true;
+      return element;
     }
     element = element.parentElement;
   }
@@ -50,17 +64,23 @@ const canScrollVertically = (eventTarget: EventTarget | null) => {
   const scroller = document.scrollingElement ?? document.documentElement;
   const rootOverflowY = getComputedStyle(document.documentElement).overflowY;
   const bodyOverflowY = getComputedStyle(document.body).overflowY;
-  return (
-    rootOverflowY !== "hidden" &&
-    rootOverflowY !== "clip" &&
-    bodyOverflowY !== "hidden" &&
-    bodyOverflowY !== "clip" &&
-    scroller.scrollHeight > scroller.clientHeight + 1
-  );
+  if (
+    !(scroller instanceof HTMLElement) ||
+    rootOverflowY === "hidden" ||
+    rootOverflowY === "clip" ||
+    bodyOverflowY === "hidden" ||
+    bodyOverflowY === "clip" ||
+    scroller.scrollHeight <= scroller.clientHeight + 1
+  ) {
+    return null;
+  }
+
+  return scroller;
 };
 
 const CustomCursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
+  const autoScrollAnchorRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -69,7 +89,8 @@ const CustomCursor = () => {
 
   useEffect(() => {
     const cursor = cursorRef.current;
-    if (!cursor) return;
+    const autoScrollAnchor = autoScrollAnchorRef.current;
+    if (!cursor || !autoScrollAnchor) return;
 
     const root = document.documentElement;
     const media = window.matchMedia(ENABLE_QUERY);
@@ -98,6 +119,13 @@ const CustomCursor = () => {
     let scrollEndTimer = 0;
     let frameExitTimer = 0;
     let frame = 0;
+    let autoScrollFrame = 0;
+    let autoScrollTarget: HTMLElement | null = null;
+    let autoScrollAnchorY = 0;
+    let autoScrollVelocityY = 0;
+    let autoScrollPreviousTime = 0;
+    let suppressNextClick = false;
+    let suppressNextAuxClick = false;
 
     const setVisible = (next: boolean) => {
       if (next === visible) return;
@@ -121,7 +149,17 @@ const CustomCursor = () => {
     };
 
     const setMode = (
-      next: "dot" | "ring" | "scroll" | "snap" | "text" | "range" | "frame" | "link" | "loading",
+      next:
+        | "dot"
+        | "ring"
+        | "scroll"
+        | "autoscroll"
+        | "snap"
+        | "text"
+        | "range"
+        | "frame"
+        | "link"
+        | "loading",
     ) => {
       if (next === currentMode) return;
 
@@ -150,6 +188,10 @@ const CustomCursor = () => {
         cursor.style.setProperty("--cursor-width", "18px");
         cursor.style.setProperty("--cursor-height", "28px");
         cursor.style.setProperty("--cursor-radius", "9px");
+      } else if (next === "autoscroll") {
+        cursor.style.setProperty("--cursor-width", "24px");
+        cursor.style.setProperty("--cursor-height", "24px");
+        cursor.style.setProperty("--cursor-radius", "999px");
       } else if (next === "text") {
         cursor.style.setProperty("--cursor-width", "4px");
         cursor.style.setProperty("--cursor-height", "24px");
@@ -175,6 +217,55 @@ const CustomCursor = () => {
       if (accent === currentAccent) return;
       currentAccent = accent;
       cursor.style.setProperty("--cursor-accent", accent);
+      autoScrollAnchor.style.setProperty("--cursor-accent", accent);
+    };
+
+    const stopAutoScroll = () => {
+      if (!autoScrollTarget) return;
+      autoScrollTarget = null;
+      autoScrollVelocityY = 0;
+      autoScrollPreviousTime = 0;
+      autoScrollAnchor.dataset.visible = "false";
+      delete cursor.dataset.scrollDirection;
+      if (autoScrollFrame) {
+        window.cancelAnimationFrame(autoScrollFrame);
+        autoScrollFrame = 0;
+      }
+      if (target) targetDirty = true;
+      scheduleDraw();
+    };
+
+    const runAutoScroll = (timestamp: number) => {
+      autoScrollFrame = 0;
+      if (!autoScrollTarget?.isConnected || autoScrollVelocityY === 0) {
+        autoScrollPreviousTime = timestamp;
+        return;
+      }
+
+      const elapsed = autoScrollPreviousTime
+        ? Math.min((timestamp - autoScrollPreviousTime) / 1000, 0.05)
+        : 0;
+      autoScrollPreviousTime = timestamp;
+      autoScrollTarget.scrollTop += autoScrollVelocityY * elapsed;
+      autoScrollFrame = window.requestAnimationFrame(runAutoScroll);
+    };
+
+    const scheduleAutoScroll = () => {
+      if (!autoScrollFrame && autoScrollTarget && autoScrollVelocityY !== 0) {
+        autoScrollFrame = window.requestAnimationFrame(runAutoScroll);
+      }
+    };
+
+    const updateAutoScrollVelocity = () => {
+      if (!autoScrollTarget) return;
+      autoScrollVelocityY = autoScrollVelocity(pointerY - autoScrollAnchorY);
+      cursor.dataset.scrollDirection = autoScrollDirection(autoScrollVelocityY);
+      if (autoScrollVelocityY === 0 && autoScrollFrame) {
+        window.cancelAnimationFrame(autoScrollFrame);
+        autoScrollFrame = 0;
+        autoScrollPreviousTime = 0;
+      }
+      scheduleAutoScroll();
     };
 
     const measureTarget = () => {
@@ -187,7 +278,7 @@ const CustomCursor = () => {
       }
 
       targetRect = target.getBoundingClientRect();
-      targetCompact = targetRect.width <= 320 && targetRect.height <= 72;
+      targetCompact = targetRect.width <= 450 && targetRect.height <= 72;
       targetLargeMode = target.dataset.cursorLarge === "frame" ? "frame" : "link";
       if (!targetCompact) return;
 
@@ -203,6 +294,13 @@ const CustomCursor = () => {
       if (!media.matches) return;
 
       if (targetDirty) measureTarget();
+
+      if (autoScrollTarget) {
+        setSnapped(null);
+        setMode("autoscroll");
+        cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
+        return;
+      }
 
       if (scrolling) {
         setSnapped(null);
@@ -308,6 +406,7 @@ const CustomCursor = () => {
     const onPointerMove = (event: PointerEvent) => {
       pointerX = event.clientX;
       pointerY = event.clientY;
+      updateAutoScrollVelocity();
       scheduleDraw();
     };
 
@@ -369,7 +468,8 @@ const CustomCursor = () => {
       scheduleDraw();
     };
 
-    const onPointerDown = () => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button === 1 || autoScrollTarget) return;
       setPressed(true);
     };
     const onPointerUp = () => {
@@ -401,6 +501,59 @@ const CustomCursor = () => {
       }
       setCursorLoading("route", true);
     };
+    const onMouseDown = (event: MouseEvent) => {
+      if (event.button === 0 && autoScrollTarget) {
+        event.preventDefault();
+        suppressNextClick = true;
+        stopAutoScroll();
+        return;
+      }
+      if (event.button !== 1) return;
+
+      if (autoScrollTarget) {
+        event.preventDefault();
+        suppressNextAuxClick = true;
+        stopAutoScroll();
+        return;
+      }
+
+      const element = event.target instanceof Element ? event.target : null;
+      if (!media.matches || element?.closest(AUTO_SCROLL_EXCLUDED_SELECTOR)) return;
+
+      const scroller = findVerticalScroller(event.target);
+      if (!scroller) return;
+
+      event.preventDefault();
+      suppressNextAuxClick = true;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      autoScrollAnchorY = event.clientY;
+      autoScrollTarget = scroller;
+      autoScrollVelocityY = 0;
+      autoScrollPreviousTime = 0;
+      setAccent(element);
+      setSnapped(null);
+      setVisible(true);
+      setPressed(false);
+      autoScrollAnchor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
+      autoScrollAnchor.dataset.visible = "true";
+      cursor.dataset.scrollDirection = "idle";
+      scheduleDraw();
+    };
+    const onAuxClick = (event: MouseEvent) => {
+      if (event.button !== 1 || !suppressNextAuxClick) return;
+      suppressNextAuxClick = false;
+      event.preventDefault();
+    };
+    const onClickCapture = (event: MouseEvent) => {
+      if (!suppressNextClick) return;
+      suppressNextClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") stopAutoScroll();
+    };
     const onLoadingChange = (event: Event) => {
       const { id, active } = (event as CustomEvent<CursorLoadingDetail>).detail;
       if (active) loadingIds.add(id);
@@ -431,7 +584,8 @@ const CustomCursor = () => {
       }, 150);
     };
     const onWheel = (event: WheelEvent) => {
-      if (event.deltaY === 0 || !canScrollVertically(event.target)) {
+      if (autoScrollTarget) stopAutoScroll();
+      if (event.deltaY === 0 || !findVerticalScroller(event.target)) {
         window.clearTimeout(scrollEndTimer);
         if (scrolling) {
           scrolling = false;
@@ -453,6 +607,10 @@ const CustomCursor = () => {
     const onPointerLeave = () => {
       setVisible(false);
     };
+    const onWindowBlur = () => {
+      stopAutoScroll();
+      onPointerLeave();
+    };
     const onMapTargetHover = (event: Event) => {
       mapTargetHovered = (event as CustomEvent<boolean>).detail;
       scheduleDraw();
@@ -461,6 +619,7 @@ const CustomCursor = () => {
       if (media.matches) {
         root.setAttribute("data-custom-cursor", "");
       } else {
+        stopAutoScroll();
         root.removeAttribute("data-custom-cursor");
         setSnapped(null);
         setVisible(false);
@@ -472,9 +631,13 @@ const CustomCursor = () => {
     window.addEventListener("pointerover", onPointerOver, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("pointerup", onPointerUp, { passive: true });
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("auxclick", onAuxClick);
+    window.addEventListener("click", onClickCapture, true);
     window.addEventListener("click", onClick);
+    window.addEventListener("keydown", onKeyDown);
     window.addEventListener("wheel", onWheel, { passive: true });
-    window.addEventListener("blur", onPointerLeave);
+    window.addEventListener("blur", onWindowBlur);
     window.addEventListener(CUSTOM_CURSOR_LOADING_EVENT, onLoadingChange);
     window.addEventListener(CUSTOM_CURSOR_MAP_HOVER_EVENT, onMapTargetHover);
     document.documentElement.addEventListener("mouseleave", onPointerLeave);
@@ -494,9 +657,13 @@ const CustomCursor = () => {
       window.removeEventListener("pointerover", onPointerOver);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("auxclick", onAuxClick);
+      window.removeEventListener("click", onClickCapture, true);
       window.removeEventListener("click", onClick);
+      window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("blur", onPointerLeave);
+      window.removeEventListener("blur", onWindowBlur);
       window.removeEventListener(CUSTOM_CURSOR_LOADING_EVENT, onLoadingChange);
       window.removeEventListener(CUSTOM_CURSOR_MAP_HOVER_EVENT, onMapTargetHover);
       document.documentElement.removeEventListener("mouseleave", onPointerLeave);
@@ -508,40 +675,55 @@ const CustomCursor = () => {
       window.clearTimeout(scrollEndTimer);
       window.clearTimeout(frameExitTimer);
       if (frame) window.cancelAnimationFrame(frame);
+      if (autoScrollFrame) window.cancelAnimationFrame(autoScrollFrame);
     };
   }, []);
 
   return (
-    <div
-      ref={cursorRef}
-      className={styles.cursor}
-      data-custom-cursor-ui
-      data-visible="false"
-      aria-hidden="true"
-    >
-      <span className={styles.shape} />
-      <span className={styles.markerDot} />
-      <span className={styles.markerArrow}>
-        <svg viewBox="0 0 14 14">
-          <path d="M2 2h8v8" />
-        </svg>
-      </span>
-      <span className={styles.rangeIndicator}>
-        <svg viewBox="0 0 34 18">
-          <path d="M7 5 3 9l4 4M27 5l4 4-4 4" />
-          <circle cx="17" cy="9" r="2.25" />
-        </svg>
-      </span>
-      <span className={styles.loadingOrbit}>
-        <svg viewBox="0 0 28 28">
-          <circle cx="14" cy="14" r="10.5" />
-        </svg>
-      </span>
-      <span className={`${styles.corner} ${styles.cornerTopLeft}`} />
-      <span className={`${styles.corner} ${styles.cornerTopRight}`} />
-      <span className={`${styles.corner} ${styles.cornerBottomLeft}`} />
-      <span className={`${styles.corner} ${styles.cornerBottomRight}`} />
-    </div>
+    <>
+      <div
+        ref={cursorRef}
+        className={styles.cursor}
+        data-custom-cursor-ui
+        data-visible="false"
+        aria-hidden="true"
+      >
+        <span className={styles.shape} />
+        <span className={styles.markerDot} />
+        <span className={styles.markerArrow}>
+          <svg viewBox="0 0 14 14">
+            <path d="M2 2h8v8" />
+          </svg>
+        </span>
+        <span className={styles.rangeIndicator}>
+          <svg viewBox="0 0 34 18">
+            <path d="M7 5 3 9l4 4M27 5l4 4-4 4" />
+            <circle cx="17" cy="9" r="2.25" />
+          </svg>
+        </span>
+        <span className={styles.autoScrollDirection}>
+          <svg viewBox="0 0 16 16">
+            <path d="m4 10 4-4 4 4" />
+          </svg>
+        </span>
+        <span className={styles.loadingOrbit}>
+          <svg viewBox="0 0 28 28">
+            <circle cx="14" cy="14" r="10.5" />
+          </svg>
+        </span>
+        <span className={`${styles.corner} ${styles.cornerTopLeft}`} />
+        <span className={`${styles.corner} ${styles.cornerTopRight}`} />
+        <span className={`${styles.corner} ${styles.cornerBottomLeft}`} />
+        <span className={`${styles.corner} ${styles.cornerBottomRight}`} />
+      </div>
+      <div
+        ref={autoScrollAnchorRef}
+        className={styles.autoScrollAnchor}
+        data-autoscroll-anchor
+        data-visible="false"
+        aria-hidden="true"
+      />
+    </>
   );
 };
 

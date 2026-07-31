@@ -58,6 +58,7 @@
 .markerDot,
 .markerArrow,
 .rangeIndicator,
+.autoScrollDirection,
 .loadingOrbit,
 .corner {
   position: absolute;
@@ -119,6 +120,58 @@
 
 .rangeIndicator circle {
   fill: currentColor;
+}
+
+.autoScrollDirection {
+  top: -8px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  color: var(--cursor-accent);
+  transition: transform 0.16s var(--ease);
+}
+
+.autoScrollDirection svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.autoScrollDirection path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.autoScrollAnchor {
+  --cursor-accent: var(--accent);
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  color: var(--cursor-accent);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 0.1s var(--ease);
+}
+
+.autoScrollAnchor::after {
+  position: absolute;
+  top: 5.5px;
+  left: 7px;
+  width: 4px;
+  height: 6.5px;
+  border-radius: 999px;
+  background: var(--cursor-accent);
+  content: "";
+}
+
+.autoScrollAnchor[data-visible="true"] {
+  opacity: 1;
 }
 
 .loadingOrbit {
@@ -310,9 +363,30 @@
   transform: scaleX(0.8);
 }
 
-.cursor[data-mode="scroll"] .shape {
+.cursor[data-mode="scroll"] .shape,
+.autoScrollAnchor {
+  width: 18px;
+  height: 28px;
+  border-radius: 9px;
   background-color: color-mix(in srgb, var(--cursor-accent) 7%, transparent);
   box-shadow: inset 0 0 0 1.5px var(--cursor-accent);
+}
+
+.cursor[data-mode="autoscroll"] .shape {
+  background: transparent;
+  box-shadow: none;
+}
+
+.cursor[data-mode="autoscroll"] .autoScrollDirection {
+  opacity: 1;
+}
+
+.cursor[data-mode="autoscroll"][data-scroll-direction="idle"] .autoScrollDirection {
+  opacity: 0;
+}
+
+.cursor[data-mode="autoscroll"][data-scroll-direction="down"] .autoScrollDirection {
+  transform: rotate(180deg);
 }
 
 .cursor[data-mode="scroll"] .shape::after {
@@ -396,5 +470,9 @@
 
   .cursor[data-mode="loading"] .loadingOrbit {
     animation: none;
+  }
+
+  .autoScrollAnchor {
+    display: none;
   }
 }
