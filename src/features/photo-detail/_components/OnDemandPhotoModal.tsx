@@ -198,7 +198,12 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
                     )}
                   </div>
                 </div>
-                <aside className={styles.panel} aria-hidden="true">
+                <aside
+                  id="photo-pending-scroll-container"
+                  className={styles.panel}
+                  data-custom-scroll-container
+                  aria-hidden="true"
+                >
                   <span className={styles.handle} />
                   <ExifPanelSkeleton tagCount={3} />
                 </aside>

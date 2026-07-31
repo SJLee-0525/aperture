@@ -361,8 +361,10 @@ const PhotoModal = ({
               </AnimatePresence>
             </div>
             <aside
+              id="photo-modal-scroll-container"
               ref={panelRef}
               className={`${styles.panel} ${expanded ? styles.expanded : ""}`}
+              data-custom-scroll-container
               onScroll={onPanelScroll}
               onTouchStart={(event) => {
                 const startY = event.touches[0]?.clientY ?? null;

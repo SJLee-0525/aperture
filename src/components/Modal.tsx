@@ -51,7 +51,11 @@ const Modal = ({
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={mobileFull ? `${styles.overlay} ${styles.overlayFull}` : styles.overlay}>
+    <div
+      id="modal-scroll-container"
+      className={mobileFull ? `${styles.overlay} ${styles.overlayFull}` : styles.overlay}
+      data-custom-scroll-container
+    >
       <button type="button" className={styles.scrim} aria-label={closeLabel} onClick={onClose} />
       <div
         ref={panelRef}

@@ -118,6 +118,16 @@
   padding: var(--s-6);
   overflow-y: auto;
 }
+
+:global(html[data-custom-scrollbar]) .panel {
+  scrollbar-width: none;
+}
+
+:global(html[data-custom-scrollbar]) .panel::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .handle {
   display: none;
 }
