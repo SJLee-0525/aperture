@@ -77,6 +77,11 @@ const publishedOrderedQuery = (collectionId: string) => ({
   orderBy: [{ field: { fieldPath: "order" }, direction: "ASCENDING" }],
 });
 
+const projectedPublishedOrderedQuery = (collectionId: string, fieldPaths: string[]) => ({
+  ...publishedOrderedQuery(collectionId),
+  select: { fields: fieldPaths.map((fieldPath) => ({ fieldPath })) },
+});
+
 /** :runQuery — 결과가 없으면 document 없는 row 만 오므로 필터한다. */
 const runQuery = async (
   structuredQuery: Record<string, unknown>,
@@ -289,6 +294,156 @@ const fetchPublishedDevProjects = async (): Promise<DevProject[]> => {
   return rows.map((row) => restToDevProject(row.id, row.data));
 };
 
+const fetchChatPhotos = async (): Promise<
+  Array<Pick<Photo, "id" | "title" | "place" | "tags" | "image" | "order" | "published">>
+> => {
+  const rows = await runQuery(
+    projectedPublishedOrderedQuery(COLLECTIONS.PHOTOS, [
+      "title",
+      "place",
+      "tags",
+      "image",
+      "order",
+      "published",
+    ]),
+  );
+  return rows.map(({ id, data: d }) => ({
+    id,
+    title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+    place: (d.place as LocalizedText) ?? EMPTY_LOCALIZED,
+    tags: (d.tags as string[]) ?? [],
+    image: (d.image as ImageMeta) ?? EMPTY_IMAGE,
+    order: (d.order as number) ?? 0,
+    published: (d.published as boolean) ?? false,
+  }));
+};
+
+const fetchChatAlbums = async (): Promise<
+  Array<Pick<Album, "id" | "title" | "subtitle" | "cover" | "order" | "published">>
+> => {
+  const rows = await runQuery(
+    projectedPublishedOrderedQuery(COLLECTIONS.ALBUMS, [
+      "title",
+      "subtitle",
+      "cover",
+      "order",
+      "published",
+    ]),
+  );
+  return rows.map(({ id, data: d }) => ({
+    id,
+    title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+    subtitle: (d.subtitle as LocalizedText) ?? EMPTY_LOCALIZED,
+    cover: (d.cover as ImageMeta | null) ?? null,
+    order: (d.order as number) ?? 0,
+    published: (d.published as boolean) ?? false,
+  }));
+};
+
+const fetchChatDevProjects = async (): Promise<
+  Array<
+    Pick<
+      DevProject,
+      "id" | "title" | "summary" | "position" | "techTags" | "cover" | "order" | "published"
+    >
+  >
+> => {
+  const rows = await runQuery(
+    projectedPublishedOrderedQuery(COLLECTIONS.DEV_PROJECTS, [
+      "title",
+      "summary",
+      "position",
+      "techTags",
+      "cover",
+      "order",
+      "published",
+    ]),
+  );
+  return rows.map(({ id, data: d }) => ({
+    id,
+    title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+    summary: (d.summary as LocalizedText) ?? EMPTY_LOCALIZED,
+    position: (d.position as LocalizedText) ?? EMPTY_LOCALIZED,
+    techTags: (d.techTags as string[]) ?? [],
+    cover: (d.cover as ImageMeta | null) ?? null,
+    order: (d.order as number) ?? 0,
+    published: (d.published as boolean) ?? false,
+  }));
+};
+
+const fetchChatMusicWorks = async (): Promise<
+  Array<
+    Pick<
+      MusicWork,
+      "id" | "title" | "performedAt" | "venue" | "program" | "poster" | "order" | "published"
+    >
+  >
+> => {
+  const rows = await runQuery(
+    projectedPublishedOrderedQuery(COLLECTIONS.MUSIC_WORKS, [
+      "title",
+      "performedAt",
+      "venue",
+      "program",
+      "poster",
+      "order",
+      "published",
+    ]),
+  );
+  return rows.map(({ id, data: d }) => ({
+    id,
+    title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+    performedAt: toDate(d.performedAt),
+    venue: (d.venue as LocalizedText) ?? EMPTY_LOCALIZED,
+    program: (d.program as string[]) ?? [],
+    poster: (d.poster as ImageMeta) ?? EMPTY_IMAGE,
+    order: (d.order as number) ?? 0,
+    published: (d.published as boolean) ?? false,
+  }));
+};
+
+const fetchChatMusicAwards = async (): Promise<
+  Array<Pick<MusicAward, "id" | "year" | "name" | "place" | "order" | "published">>
+> => {
+  const rows = await runQuery(
+    projectedPublishedOrderedQuery(COLLECTIONS.MUSIC_AWARDS, [
+      "year",
+      "name",
+      "place",
+      "order",
+      "published",
+    ]),
+  );
+  return rows.map(({ id, data: d }) => ({
+    id,
+    year: (d.year as number) ?? 0,
+    name: (d.name as LocalizedText) ?? EMPTY_LOCALIZED,
+    place: (d.place as string) ?? "",
+    order: (d.order as number) ?? 0,
+    published: (d.published as boolean) ?? false,
+  }));
+};
+
+const fetchChatMusicMedia = async (): Promise<
+  Array<Pick<MusicMedia, "id" | "title" | "source" | "order" | "published">>
+> => {
+  const rows = await runQuery(
+    projectedPublishedOrderedQuery(COLLECTIONS.MUSIC_MEDIA, [
+      "title",
+      "source",
+      "order",
+      "published",
+    ]),
+  );
+  return rows.map(({ id, data: d }) => ({
+    id,
+    title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+    source: (d.source as LocalizedText) ?? EMPTY_LOCALIZED,
+    order: (d.order as number) ?? 0,
+    published: (d.published as boolean) ?? false,
+  }));
+};
+
 /** site/dev 설정 문서(read: if true). 문서가 없으면 null → 호출부가 mock 폴백. */
 const fetchDevConfig = async (): Promise<DevConfig | null> => {
   const res = await fetch(`${documentsUrl()}/${COLLECTIONS.SITE}/${SITE_DEV_DOC}?key=${API_KEY}`, {
@@ -302,6 +457,12 @@ const fetchDevConfig = async (): Promise<DevConfig | null> => {
 };
 
 export {
+  fetchChatAlbums,
+  fetchChatDevProjects,
+  fetchChatMusicAwards,
+  fetchChatMusicMedia,
+  fetchChatMusicWorks,
+  fetchChatPhotos,
   fetchDevConfig,
   fetchMusicConfig,
   fetchPublishedAlbums,

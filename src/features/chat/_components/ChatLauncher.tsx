@@ -11,24 +11,30 @@ import styles from "./ChatLauncher.module.css";
 const ChatPanel = dynamic(() => import("./ChatPanel").then((module) => module.ChatPanel));
 
 const LABEL = {
-  ko: "AI 안내 챗봇 열기",
-  en: "Open AI guide",
+  ko: "챗봇 열기",
+  en: "Open chat",
 } as const;
 
 const ChatLauncher = () => {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const openChat = () => {
+    setHasOpened(true);
+    setOpen(true);
+  };
 
   return (
     <>
-      {open ? <ChatPanel onClose={() => setOpen(false)} /> : null}
+      {hasOpened ? <ChatPanel open={open} onClose={() => setOpen(false)} /> : null}
       <button
         type="button"
         className={styles.launcher}
         aria-label={LABEL[lang]}
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen(true)}
+        onClick={openChat}
       >
         <Icon name="chat" size={22} />
       </button>

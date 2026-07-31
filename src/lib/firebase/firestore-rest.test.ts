@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { fetchPublishedPhotos, fetchSiteConfig } from "@/lib/firebase/firestore-rest";
+import {
+  fetchChatDevProjects,
+  fetchChatPhotos,
+  fetchPublishedPhotos,
+  fetchSiteConfig,
+} from "@/lib/firebase/firestore-rest";
 
 type RestValue = Record<string, unknown>;
 
@@ -22,6 +27,36 @@ afterEach(() => {
 });
 
 describe("Firestore REST decoding", () => {
+  it("챗봇 조회는 카드 대표 이미지 외의 무거운 필드를 projection에서 제외한다", async () => {
+    const fetchMock = vi.fn().mockImplementation(async () => jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchChatPhotos();
+    await fetchChatDevProjects();
+
+    const photoQuery = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string).structuredQuery;
+    const projectQuery = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string).structuredQuery;
+    const photoFields = photoQuery.select.fields.map(
+      ({ fieldPath }: { fieldPath: string }) => fieldPath,
+    );
+    const projectFields = projectQuery.select.fields.map(
+      ({ fieldPath }: { fieldPath: string }) => fieldPath,
+    );
+
+    expect(photoFields).toEqual(["title", "place", "tags", "image", "order", "published"]);
+    expect(photoFields).not.toContain("exif");
+    expect(projectFields).toEqual([
+      "title",
+      "summary",
+      "position",
+      "techTags",
+      "cover",
+      "order",
+      "published",
+    ]);
+    expect(projectFields).not.toContain("images");
+  });
+
   it("사진의 중첩 값과 timestamp를 디코딩하고 누락 EXIF는 기본값으로 채운다", async () => {
     vi.stubGlobal(
       "fetch",

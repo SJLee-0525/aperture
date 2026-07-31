@@ -1,26 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
-import { useMockChat } from "@/features/chat/_hooks/use-mock-chat";
+import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
+import { useChat } from "@/features/chat/_hooks/use-chat";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import styles from "./ChatPanel.module.css";
 
 const COPY = {
   ko: {
-    title: "Sungjoon Lee.",
+    title: "ChatBot.",
     close: "챗봇 닫기",
     input: "메시지",
     placeholder: "궁금한 내용을 입력하세요…",
     send: "메시지 보내기",
     thinking: "답변을 준비하고 있어요…",
+    privacy: "민감한 개인정보는 입력하지 마세요.",
     suggestions: [
       "개발 프로젝트를 소개해 줘",
       "사진 작업은 어디서 볼 수 있어?",
@@ -28,12 +31,13 @@ const COPY = {
     ],
   },
   en: {
-    title: "Sungjoon Lee.",
+    title: "ChatBot.",
     close: "Close chat",
     input: "Message",
     placeholder: "Ask about the portfolio…",
     send: "Send message",
     thinking: "Preparing a response…",
+    privacy: "Please don’t share sensitive personal information.",
     suggestions: [
       "Show me the development projects",
       "Where can I see the photos?",
@@ -42,39 +46,50 @@ const COPY = {
   },
 } as const;
 
-type Props = { onClose: () => void };
+type Props = { open: boolean; onClose: () => void };
 
-const ChatPanel = ({ onClose }: Props) => {
+const MESSAGE_TRANSITION = { duration: 0.22, ease: [0.22, 1, 0.36, 1] } as const;
+const PRESENCE_TRANSITION = { duration: 0.16, ease: "easeOut" } as const;
+
+const ChatPanel = ({ open, onClose }: Props) => {
   const { lang } = useLang();
   const copy = COPY[lang];
-  const { messages, isReplying, send } = useMockChat(lang);
+  const { messages, isReplying, send } = useChat(lang);
   const titleId = useId();
-  const panelRef = useFocusTrap(true);
+  useDialogIsolation(open, "[data-chat-overlay]");
+  const panelRef = useFocusTrap(open);
   const listRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
-  useScrollLock(true);
+  useScrollLock(open);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (open && event.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  }, [onClose, open]);
 
   useEffect(() => {
+    if (!open) return;
     listRef.current?.scrollTo({
       top: listRef.current.scrollHeight,
       behavior: reduceMotion ? "auto" : "smooth",
     });
-  }, [messages, isReplying, reduceMotion]);
+  }, [messages, isReplying, open, reduceMotion]);
 
-  if (typeof document === "undefined") return null;
+  if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay}>
-      <button className={styles.scrim} type="button" aria-label={copy.close} onClick={onClose} />
+    <div className={styles.overlay} data-chat-overlay>
+      <button
+        className={styles.scrim}
+        type="button"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={onClose}
+      />
       <section
         ref={panelRef}
         className={styles.panel}
@@ -83,7 +98,7 @@ const ChatPanel = ({ onClose }: Props) => {
         aria-labelledby={titleId}
         tabIndex={-1}
       >
-        <header className={styles.header}>
+        <div className={styles.header}>
           <h2 id={titleId} className={styles.title}>
             {copy.title}
           </h2>
@@ -99,43 +114,106 @@ const ChatPanel = ({ onClose }: Props) => {
               </span>
             </button>
           </div>
-        </header>
-
-        <div ref={listRef} className={styles.messages} data-accent-scrollbar aria-live="polite">
-          {messages.map((message) => (
-            <article key={message.id} className={styles.message} data-role={message.role}>
-              <div className={styles.bubble}>
-                <p>{message.content}</p>
-                {message.link ? (
-                  <Link className={styles.link} href={message.link.href} onClick={onClose}>
-                    {message.link.label} <span aria-hidden="true">↗</span>
-                  </Link>
-                ) : null}
-              </div>
-            </article>
-          ))}
-          {messages.length === 1 ? (
-            <div
-              className={styles.suggestions}
-              aria-label={lang === "ko" ? "추천 질문" : "Suggested questions"}
-            >
-              {copy.suggestions.map((suggestion) => (
-                <button key={suggestion} type="button" onClick={() => send(suggestion)}>
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {isReplying ? <p className={styles.thinking}>{copy.thinking}</p> : null}
         </div>
 
-        <ChatComposer
-          inputLabel={copy.input}
-          placeholder={copy.placeholder}
-          sendLabel={copy.send}
-          isReplying={isReplying}
-          onSend={send}
-        />
+        <div
+          ref={listRef}
+          className={styles.messages}
+          data-accent-scrollbar
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+        >
+          <AnimatePresence initial={false}>
+            {messages.map((message) => (
+              <m.article
+                key={message.id}
+                className={styles.message}
+                data-role={message.role}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reduceMotion ? { duration: 0 } : MESSAGE_TRANSITION}
+                layout={reduceMotion ? false : "position"}
+              >
+                <div className={styles.bubble}>
+                  <p>{message.content}</p>
+                  {message.link ? (
+                    <Link className={styles.link} href={message.link.href} onClick={onClose}>
+                      {message.link.label} <span aria-hidden="true">↗</span>
+                    </Link>
+                  ) : null}
+                  {message.links?.map((link) => (
+                    <Link
+                      key={`${link.href}:${link.label}`}
+                      className={styles.link}
+                      href={link.href}
+                      onClick={onClose}
+                    >
+                      {link.label} <span aria-hidden="true">↗</span>
+                    </Link>
+                  ))}
+                  {message.references?.length ? (
+                    <div className={styles.references}>
+                      {message.references.map((reference) => (
+                        <ChatReferenceCard
+                          key={`${reference.type}:${reference.id}`}
+                          reference={reference}
+                          onNavigate={onClose}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </m.article>
+            ))}
+            {messages.length === 1 ? (
+              <m.div
+                key="suggestions"
+                className={styles.suggestions}
+                aria-label={lang === "ko" ? "추천 질문" : "Suggested questions"}
+                exit={
+                  reduceMotion ? undefined : { opacity: 0, y: -4, transition: PRESENCE_TRANSITION }
+                }
+                transition={reduceMotion ? { duration: 0 } : PRESENCE_TRANSITION}
+              >
+                {copy.suggestions.map((suggestion) => (
+                  <button key={suggestion} type="button" onClick={() => send(suggestion)}>
+                    {suggestion}
+                  </button>
+                ))}
+              </m.div>
+            ) : null}
+            {isReplying ? (
+              <m.p
+                key="thinking"
+                className={styles.thinking}
+                initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+                animate={reduceMotion ? { opacity: 1 } : { opacity: [0.55, 1, 0.55], y: 0 }}
+                exit={
+                  reduceMotion ? undefined : { opacity: 0, y: -4, transition: PRESENCE_TRANSITION }
+                }
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { opacity: { duration: 1.4, repeat: Infinity }, y: PRESENCE_TRANSITION }
+                }
+              >
+                {copy.thinking}
+              </m.p>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        <div className={styles.composerArea}>
+          <ChatComposer
+            inputLabel={copy.input}
+            placeholder={copy.placeholder}
+            sendLabel={copy.send}
+            isReplying={isReplying}
+            onSend={send}
+          />
+          <p className={styles.privacyNotice}>{copy.privacy}</p>
+        </div>
       </section>
     </div>,
     document.body,

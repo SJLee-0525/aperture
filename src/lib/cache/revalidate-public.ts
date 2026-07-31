@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
+import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
 
 /**
@@ -20,6 +21,7 @@ const revalidatePublicPages = async (idToken: string): Promise<void> => {
     throw new Error("Unauthorized cache revalidation");
   }
   revalidatePath("/", "layout");
+  revalidateTag(CHAT_PROFILE_CACHE_TAG, "max");
 };
 
 export { revalidatePublicPages };
