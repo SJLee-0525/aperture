@@ -1,6 +1,6 @@
 "use client";
 
-import { m } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { type CSSProperties, useMemo } from "react";
 
@@ -46,6 +46,7 @@ const MotionLink = m.create(Link);
  */
 const LandingView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
+  const reducedMotion = useReducedMotion();
   const started = useIntroReady();
   // useTyping 이 매 렌더 setText → 재렌더하므로, roles 배열 참조를 안정화(useMemo)해야 effect 가 재시작되지 않는다.
   const roles = useMemo(
@@ -70,7 +71,11 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           className={styles.type}
           initial={{ opacity: 0, y: 14 }}
           animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-          transition={{ duration: 0.5, ease: LANDING_EASE, delay: ROLE_DELAY }}
+          transition={
+            reducedMotion
+              ? { duration: 0 }
+              : { duration: 0.5, ease: LANDING_EASE, delay: ROLE_DELAY }
+          }
         >
           <span className={styles.typed}>{typed}</span>
           <span className={styles.cursor} aria-hidden="true" />
@@ -80,7 +85,11 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           className={styles.lead}
           initial={{ opacity: 0, y: 16 }}
           animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.5, ease: LANDING_EASE, delay: LANDING_REVEAL_DELAY }}
+          transition={
+            reducedMotion
+              ? { duration: 0 }
+              : { duration: 0.5, ease: LANDING_EASE, delay: LANDING_REVEAL_DELAY }
+          }
         >
           {pickText(site.landingLead, lang)}
         </m.p>
@@ -94,11 +103,15 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
               data-section={section.key}
               initial={{ opacity: 0, y: 16 }}
               animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              transition={{
-                duration: 0.5,
-                ease: LANDING_EASE,
-                delay: LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER,
-              }}
+              transition={
+                reducedMotion
+                  ? { duration: 0 }
+                  : {
+                      duration: 0.5,
+                      ease: LANDING_EASE,
+                      delay: LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER,
+                    }
+              }
             >
               <span className={styles.rowTitle}>{dict[section.labelKey]}</span>
               <span className={styles.rowCta} aria-hidden="true">
