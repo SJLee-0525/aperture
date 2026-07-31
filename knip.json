@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["test/**/*.test.mjs"],
+  "entry": ["test/**/*.test.mjs", "lighthouserc.cjs"],
   "ignore": ["design/**", "e2e/fixtures/google-font-responses.cjs"],
   "playwright": {
     "config": ["playwright.config.ts"],

@@ -13,6 +13,7 @@ export default defineConfig({
   // Next dev의 동시 on-demand compile이 client navigation을 재로드할 수 있어 직렬 실행한다.
   workers: 1,
   reporter: [["list"], ["html", { open: "never" }]],
+  snapshotPathTemplate: "{testDir}/{testFilePath}-snapshots/{arg}{ext}",
   use: {
     baseURL,
     locale: "ko-KR",
@@ -23,6 +24,12 @@ export default defineConfig({
   },
   expect: {
     timeout: 10_000,
+    toHaveScreenshot: {
+      animations: "disabled",
+      caret: "hide",
+      maxDiffPixelRatio: 0.01,
+      stylePath: path.resolve("e2e/visual/screenshot.css"),
+    },
   },
   projects: [
     {

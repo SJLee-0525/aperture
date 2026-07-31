@@ -17,6 +17,12 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "node e2e/run.cjs",
     "test:e2e:headed": "node e2e/run.cjs --headed",
+    "test:visual": "node e2e/run.cjs e2e/visual",
+    "test:visual:update": "node e2e/run.cjs e2e/visual --update-snapshots",
+    "test:a11y": "node e2e/run.cjs e2e/accessibility.e2e.ts",
+    "test:lighthouse": "lhci autorun",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "test:rules": "firebase emulators:exec --project demo-aperture --only firestore,storage \"node --test test/security-rules.test.mjs\""
   },
   "dependencies": {
@@ -28,13 +34,17 @@
     "firebase": "^12.15.0",
     "maplibre-gl": "^5.24.0",
     "motion": "^12.40.0",
-    "next": "16.2.9",
+    "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@firebase/rules-unit-testing": "^5.0.1",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.62.0",
+    "@storybook/addon-a11y": "^10.5.5",
+    "@storybook/nextjs-vite": "^10.5.5",
     "@testing-library/react": "^16.3.2",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^22",
@@ -42,13 +52,14 @@
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "16.2.12",
     "eslint-plugin-boundaries": "^7.1.0",
     "firebase-tools": "^15.24.0",
     "jscpd": "^5.0.14",
     "jsdom": "^29.1.1",
     "knip": "^6.29.0",
     "prettier": "^3.8.4",
+    "storybook": "^10.5.5",
     "typescript": "^5",
     "vitest": "^4.1.10"
   }

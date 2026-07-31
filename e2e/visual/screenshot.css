@@ -1,0 +1,14 @@
+/* 스크린샷 기준 이미지에서 시간·포인터 위치에 따른 변동을 제거한다. */
+*,
+*::before,
+*::after {
+  animation-delay: 0s !important;
+  animation-duration: 0s !important;
+  transition-delay: 0s !important;
+  transition-duration: 0s !important;
+}
+
+[data-custom-cursor],
+[data-cursor-trail] {
+  display: none !important;
+}
