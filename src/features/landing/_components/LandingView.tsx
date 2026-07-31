@@ -2,8 +2,9 @@
 
 import { m, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { type CSSProperties, useMemo } from "react";
+import { type CSSProperties, memo, type RefObject, useEffect, useMemo, useRef } from "react";
 
+import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
@@ -36,7 +37,65 @@ const NO_ROLES: string[] = [];
 const ROLE_DELAY = 0.55;
 const ROW_STAGGER = 0.09;
 
-const MotionLink = m.create(Link);
+/** 타이핑 상태와 역할 색상 갱신을 랜딩의 정적 콘텐츠에서 격리한다. */
+const LandingTyping = ({
+  accentRef,
+  reducedMotion,
+  roles,
+  started,
+}: {
+  accentRef: RefObject<HTMLDivElement | null>;
+  reducedMotion: boolean | null;
+  roles: string[];
+  started: boolean;
+}) => {
+  const { text: typed, index } = useTyping(started ? roles : NO_ROLES);
+  const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
+
+  useEffect(() => {
+    accentRef.current?.style.setProperty("--role-accent", roleAccent);
+  }, [accentRef, roleAccent]);
+
+  return (
+    <m.div
+      className={styles.type}
+      initial={{ opacity: 0, y: 14 }}
+      animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+      transition={
+        reducedMotion ? { duration: 0 } : { duration: 0.5, ease: LANDING_EASE, delay: ROLE_DELAY }
+      }
+    >
+      <span className={styles.typed}>{typed}</span>
+      <span className={styles.cursor} aria-hidden="true" />
+    </m.div>
+  );
+};
+
+/** 타이핑 프레임과 무관한 정적 탐색 영역. started가 바뀔 때 한 번만 갱신한다. */
+const LandingNav = memo(({ dict, started }: { dict: UIDict; started: boolean }) => (
+  <nav className={styles.rows} aria-label={dict.sectionsLabel}>
+    {SECTIONS.map((section, i) => (
+      <Link
+        key={section.key}
+        href={section.href}
+        className={`${styles.row} ${started ? styles.rowVisible : ""}`}
+        data-section={section.key}
+        style={
+          {
+            "--row-delay": `${LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER}s`,
+          } as CSSProperties
+        }
+      >
+        <span className={styles.rowTitle}>{dict[section.labelKey]}</span>
+        <span className={styles.rowCta} aria-hidden="true">
+          ↗
+        </span>
+      </Link>
+    ))}
+  </nav>
+));
+
+LandingNav.displayName = "LandingNav";
 
 /**
  * 랜딩 허브(/) — 이름(언어 무관 항상 "Sungjoon Lee") + 역할 타이핑(Photographer/Pianist/Developer)
@@ -48,6 +107,7 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
   const reducedMotion = useReducedMotion();
   const started = useIntroReady();
+  const accentRef = useRef<HTMLDivElement>(null);
   // useTyping 이 매 렌더 setText → 재렌더하므로, roles 배열 참조를 안정화(useMemo)해야 effect 가 재시작되지 않는다.
   const roles = useMemo(
     () =>
@@ -57,29 +117,25 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
         .filter(Boolean),
     [site.tagline, lang],
   );
-  // 진입 시작 전엔 타이핑을 멈춰 스플래시에 가린 채 진행되지 않게 → 등장과 동시에 처음부터 타이핑.
-  const { text: typed, index } = useTyping(started ? roles : NO_ROLES);
-  // 현재 타이핑 중인 역할의 색을 --role-accent 로 흘려보내면 이름의 '.'·타이핑·커서가 함께(스무스) 바뀐다.
-  const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
+  const initialRoleAccent = ROLE_ACCENT[roles[0]] ?? "var(--accent)";
 
   return (
-    <main className={styles.hero} style={{ "--role-accent": roleAccent } as CSSProperties}>
+    <main className={styles.hero}>
       <div className={styles.inner}>
-        <AnimatedWordmark started={started} />
-
-        <m.div
-          className={styles.type}
-          initial={{ opacity: 0, y: 14 }}
-          animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-          transition={
-            reducedMotion
-              ? { duration: 0 }
-              : { duration: 0.5, ease: LANDING_EASE, delay: ROLE_DELAY }
-          }
+        <div
+          ref={accentRef}
+          className={styles.identity}
+          style={{ "--role-accent": initialRoleAccent } as CSSProperties}
         >
-          <span className={styles.typed}>{typed}</span>
-          <span className={styles.cursor} aria-hidden="true" />
-        </m.div>
+          <AnimatedWordmark started={started} />
+
+          <LandingTyping
+            accentRef={accentRef}
+            reducedMotion={reducedMotion}
+            roles={roles}
+            started={started}
+          />
+        </div>
 
         <m.p
           className={styles.lead}
@@ -94,35 +150,10 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           {pickText(site.landingLead, lang)}
         </m.p>
 
-        <nav className={styles.rows} aria-label={dict.sectionsLabel}>
-          {SECTIONS.map((section, i) => (
-            <MotionLink
-              key={section.key}
-              href={section.href}
-              className={styles.row}
-              data-section={section.key}
-              initial={{ opacity: 0, y: 16 }}
-              animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              transition={
-                reducedMotion
-                  ? { duration: 0 }
-                  : {
-                      duration: 0.5,
-                      ease: LANDING_EASE,
-                      delay: LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER,
-                    }
-              }
-            >
-              <span className={styles.rowTitle}>{dict[section.labelKey]}</span>
-              <span className={styles.rowCta} aria-hidden="true">
-                ↗
-              </span>
-            </MotionLink>
-          ))}
-        </nav>
+        <LandingNav dict={dict} started={started} />
       </div>
     </main>
   );
 };
 
-export { LandingView };
+export { LandingNav, LandingView };

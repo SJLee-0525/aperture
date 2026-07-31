@@ -18,6 +18,9 @@
   flex-direction: column;
   justify-content: center;
 }
+.identity {
+  display: contents;
+}
 
 .type {
   display: flex;
@@ -125,10 +128,21 @@
   border: 1px solid var(--line-strong);
   color: var(--text);
   font-family: var(--font-sans);
+  opacity: 0;
+  transform: translateY(16px);
   transition:
     border-color 0.2s,
     background 0.2s,
     color 0.2s;
+}
+.rowVisible {
+  animation: rowReveal 0.5s var(--ease) var(--row-delay, 0s) both;
+}
+@keyframes rowReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .row[data-section="photo"] {
   --accent: var(--accent-photo);
@@ -163,6 +177,12 @@
    CSS 는 글자 색 플래시(charFlash)만 담당. reduced-motion 은 MotionConfig(reducedMotion="user")가
    transform 을 끄고, 색 플래시도 아래에서 비활성 → 정적 최종 상태로 안착. */
 @media (prefers-reduced-motion: reduce) {
+  .row,
+  .rowVisible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
   .char {
     color: var(--text);
   }
