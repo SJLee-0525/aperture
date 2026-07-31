@@ -3,7 +3,7 @@
   align-items: center;
   gap: 8px;
   min-width: 240px;
-  padding: 9px 11px;
+  padding: 9px 9px 9px 10px;
   background: var(--surface-2);
   border: 1px solid var(--line);
   color: var(--text-3);
@@ -35,7 +35,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5px;
+  padding: 2px;
   background: none;
   border: 0;
   color: var(--text-3);

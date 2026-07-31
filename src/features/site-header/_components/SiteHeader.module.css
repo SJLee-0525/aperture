@@ -35,11 +35,12 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
   color: var(--text);
-  padding: 4px 8px;
+  transform: translateY(2px);
 }
 @media (min-width: 768px) {
   .brand {
     font-size: 1.35rem;
+    padding: 4px 8px;
   }
 }
 .dot {
