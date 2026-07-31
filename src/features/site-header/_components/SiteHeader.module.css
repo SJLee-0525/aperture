@@ -178,8 +178,8 @@
     opacity: 0;
     visibility: hidden;
   }
-  :global(html[data-mobile-navigation-hidden]) [data-mobile-menu-trigger],
-  :global(html[data-mobile-navigation-hidden]) [data-mobile-menu-layer] {
+  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-trigger],
+  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-layer] {
     pointer-events: auto;
   }
 }
