@@ -366,6 +366,10 @@ const MOCK_DEV_PROJECTS: DevProject[] = [
     order: 3,
     published: true,
   },
+];
+
+/** 수상 모달 딥링크에서만 조회하며 공개 프로젝트 목록에는 노출하지 않는 fixture. */
+const MOCK_DEV_PROJECT_DETAILS: DevProject[] = [
   awardProject({
     id: "aidap",
     title: { ko: "아이답 (AIDAP)", en: "AIDAP" },
@@ -612,4 +616,4 @@ const MOCK_DEV_CONFIG: DevConfig = {
   ],
 };
 
-export { MOCK_DEV_PROJECTS, MOCK_DEV_CONFIG };
+export { MOCK_DEV_PROJECTS, MOCK_DEV_PROJECT_DETAILS, MOCK_DEV_CONFIG };

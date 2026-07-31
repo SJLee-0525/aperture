@@ -10,6 +10,8 @@ const VISUAL_ROUTES = [
 ] as const;
 
 test.describe("핵심 공개 화면 시각 회귀", () => {
+  test.skip(process.platform !== "win32", "시각 기준선은 GitHub Actions Windows 환경에서 관리");
+
   for (const route of VISUAL_ROUTES) {
     test(`${route.name} 레이아웃`, async ({ page }, testInfo) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
