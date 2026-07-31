@@ -68,7 +68,14 @@ const Select = ({ value, options, onChange, ariaLabel }: Props) => {
       </button>
 
       {open ? (
-        <ul className={styles.list} role="listbox">
+        <ul
+          id="filter-select-scroll-container"
+          className={styles.list}
+          role="listbox"
+          data-accent-scrollbar
+          data-custom-scroll-container
+          data-custom-scroll-scope="local"
+        >
           {options.map((option) => (
             <li key={option.value}>
               <button

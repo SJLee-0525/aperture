@@ -28,6 +28,7 @@ const TEXT_SELECTOR = [
   '[contenteditable="true"]',
 ].join(", ");
 const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
+const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
 const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select';
 const AUTO_SCROLL_EXCLUDED_SELECTOR = [
   "a",
@@ -111,6 +112,7 @@ const CustomCursor = () => {
     let mapTargetHovered = false;
     let textTargetHovered = false;
     let rangeTargetHovered = false;
+    let scrollbarTargetHovered = false;
     let scrolling = false;
     let loading = false;
     const loadingIds = new Set<string>();
@@ -157,6 +159,7 @@ const CustomCursor = () => {
         | "snap"
         | "text"
         | "range"
+        | "scrollbar"
         | "frame"
         | "link"
         | "loading",
@@ -199,6 +202,10 @@ const CustomCursor = () => {
       } else if (next === "range") {
         cursor.style.setProperty("--cursor-width", "34px");
         cursor.style.setProperty("--cursor-height", "18px");
+        cursor.style.setProperty("--cursor-radius", "999px");
+      } else if (next === "scrollbar") {
+        cursor.style.setProperty("--cursor-width", "20px");
+        cursor.style.setProperty("--cursor-height", "28px");
         cursor.style.setProperty("--cursor-radius", "999px");
       } else if (next === "link") {
         cursor.style.setProperty("--cursor-width", "30px");
@@ -330,6 +337,13 @@ const CustomCursor = () => {
         return;
       }
 
+      if (scrollbarTargetHovered) {
+        setSnapped(null);
+        setMode("scrollbar");
+        cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
+        return;
+      }
+
       if (target && targetRect) {
         if (targetCompact) {
           const expansion = 5.5;
@@ -414,8 +428,22 @@ const CustomCursor = () => {
       const element = event.target instanceof Element ? event.target : null;
       const textElement = element?.closest(TEXT_SELECTOR) ?? null;
       const rangeElement = element?.closest(RANGE_CONTROL_SELECTOR) ?? null;
+      const scrollbarElement = element?.closest(CUSTOM_SCROLLBAR_SELECTOR) ?? null;
       textTargetHovered = Boolean(textElement);
       rangeTargetHovered = Boolean(rangeElement);
+      scrollbarTargetHovered = Boolean(scrollbarElement);
+
+      if (scrollbarElement) {
+        target = null;
+        targetRect = null;
+        targetCompact = false;
+        targetCircular = false;
+        targetPill = false;
+        setAccent(scrollbarElement);
+        setVisible(true);
+        scheduleDraw();
+        return;
+      }
 
       if (textElement) {
         target = null;
@@ -699,6 +727,11 @@ const CustomCursor = () => {
           <svg viewBox="0 0 34 18">
             <path d="M7 5 3 9l4 4M27 5l4 4-4 4" />
             <circle cx="17" cy="9" r="2.25" />
+          </svg>
+        </span>
+        <span className={styles.scrollbarIndicator}>
+          <svg viewBox="0 0 20 28">
+            <path d="m6.5 9 3.5-3.5L13.5 9M6.5 19l3.5 3.5 3.5-3.5" />
           </svg>
         </span>
         <span className={styles.autoScrollDirection}>

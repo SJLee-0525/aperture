@@ -53,7 +53,14 @@ const LocationList = ({ locations }: Props) => {
   }, [locations]);
 
   return (
-    <aside ref={listRef} className={styles.list}>
+    <aside
+      id="map-location-scroll-container"
+      ref={listRef}
+      className={styles.list}
+      data-accent-scrollbar
+      data-custom-scroll-container
+      data-custom-scroll-scope="local"
+    >
       <div className={styles.head}>
         <span className="u-label">{dict.locationsLabel}</span>
         <span className={styles.count}>{locations.length} spots</span>

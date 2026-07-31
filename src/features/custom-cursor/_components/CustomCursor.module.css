@@ -58,6 +58,7 @@
 .markerDot,
 .markerArrow,
 .rangeIndicator,
+.scrollbarIndicator,
 .autoScrollDirection,
 .loadingOrbit,
 .corner {
@@ -120,6 +121,28 @@
 
 .rangeIndicator circle {
   fill: currentColor;
+}
+
+.scrollbarIndicator {
+  top: -14px;
+  left: -10px;
+  width: 20px;
+  height: 28px;
+  color: var(--cursor-accent);
+}
+
+.scrollbarIndicator svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scrollbarIndicator path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .autoScrollDirection {
@@ -359,6 +382,15 @@
   opacity: 1;
 }
 
+.cursor[data-mode="scrollbar"] .shape {
+  background: color-mix(in srgb, var(--cursor-accent) 7%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 32%, transparent);
+}
+
+.cursor[data-mode="scrollbar"] .scrollbarIndicator {
+  opacity: 1;
+}
+
 .cursor[data-mode="range"][data-pressed="true"] .rangeIndicator {
   transform: scaleX(0.8);
 }
@@ -443,19 +475,6 @@
 @keyframes loadingOrbit {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  :global(html[data-custom-cursor]),
-  :global(html[data-custom-cursor] body),
-  :global(html[data-custom-cursor] body *) {
-    cursor: none !important;
-  }
-  :global(html[data-custom-cursor] input[type="checkbox"]),
-  :global(html[data-custom-cursor] input[type="radio"]),
-  :global(html[data-custom-cursor] select) {
-    cursor: auto !important;
   }
 }
 

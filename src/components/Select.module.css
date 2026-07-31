@@ -47,9 +47,8 @@
   list-style: none;
   /* ul 기본 margin(≈1em) 제거 — 안 하면 top 오프셋에 더해져 리스트가 아래로 뜬다 */
   margin: 0;
-  padding: 7px;
+  padding: 7px 21px 7px 7px;
   background: var(--bg);
-  scrollbar-width: thin;
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-pop);
   animation: dropIn 0.16s var(--ease);

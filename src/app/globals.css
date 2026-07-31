@@ -200,6 +200,32 @@ body {
     background 0.35s,
     color 0.35s;
 }
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-custom-cursor],
+  html[data-custom-cursor] body,
+  html[data-custom-cursor] body * {
+    cursor: none !important;
+  }
+
+  html[data-custom-cursor] input[type="checkbox"],
+  html[data-custom-cursor] input[type="radio"],
+  html[data-custom-cursor] select {
+    cursor: auto !important;
+  }
+
+  html:has([data-custom-scrollbar-ui]),
+  html:has([data-custom-scrollbar-ui]) body {
+    scrollbar-width: none;
+  }
+
+  html:has([data-custom-scrollbar-ui])::-webkit-scrollbar,
+  html:has([data-custom-scrollbar-ui]) body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -219,6 +245,55 @@ img {
 [data-protected-image] img {
   -webkit-user-drag: none;
 }
+
+/* 작은 내부 스크롤 영역 — 페이지 오버레이와 같은 액센트 어휘를 네이티브 관성 스크롤에 적용. */
+[data-accent-scrollbar] {
+  scrollbar-color: color-mix(in srgb, var(--accent) 82%, var(--text-3)) transparent;
+  scrollbar-width: thin;
+}
+
+html[data-custom-scrollbar] [data-accent-scrollbar] {
+  scrollbar-width: none;
+}
+
+html[data-custom-scrollbar] [data-accent-scrollbar]::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+[data-accent-scrollbar]::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+[data-accent-scrollbar]::-webkit-scrollbar-track {
+  background: linear-gradient(
+    to right,
+    transparent calc(50% - 0.5px),
+    color-mix(in srgb, var(--text) 10%, transparent) calc(50% - 0.5px),
+    color-mix(in srgb, var(--text) 10%, transparent) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+[data-accent-scrollbar]::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--accent);
+  background-clip: padding-box;
+}
+
+[data-accent-scrollbar]::-webkit-scrollbar-thumb:hover,
+[data-accent-scrollbar]::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+}
+
+[data-accent-scrollbar]::-webkit-scrollbar-button,
+[data-accent-scrollbar]::-webkit-scrollbar-corner {
+  display: none;
+}
+
 /* 제목 여백은 각 .title/.name 클래스가 margin-bottom 으로 제어 → UA 기본 heading 여백 제거
    (안 하면 h1 위에 ~0.67em 유령 여백이 남아 로딩 스켈레톤과 높이가 어긋난다). */
 h1,
