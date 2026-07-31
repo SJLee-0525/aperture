@@ -45,20 +45,30 @@ test.describe("Custom cursor", () => {
 
     await page.evaluate(() => window.scrollTo(0, 400));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-    const initialScrollTop = await page.evaluate(() => window.scrollY);
+    await expect
+      .poll(async () => {
+        const [scrollTop, ariaValue] = await Promise.all([
+          page.evaluate(() => window.scrollY),
+          track.getAttribute("aria-valuenow"),
+        ]);
+        return Math.abs(scrollTop - Number(ariaValue));
+      })
+      .toBeLessThan(2);
     const thumbBox = await thumb.boundingBox();
     expect(thumbBox).not.toBeNull();
     if (!thumbBox) return;
 
-    await page.mouse.move(thumbBox.x + thumbBox.width / 2, thumbBox.y + 8);
+    const grabY = Math.min(8, thumbBox.height / 2);
+    await thumb.hover({ position: { x: thumbBox.width / 2, y: grabY } });
     await expect(page.locator("[data-custom-cursor-ui]")).toHaveAttribute("data-mode", "scrollbar");
+    const initialScrollTop = await page.evaluate(() => window.scrollY);
 
     await page.mouse.down();
     await expect(track).toHaveAttribute("data-dragging", "true");
     await expect
       .poll(() => page.evaluate((top) => Math.abs(window.scrollY - top), initialScrollTop))
       .toBeLessThan(3);
-    await page.mouse.move(thumbBox.x + thumbBox.width / 2, thumbBox.y + 188, { steps: 5 });
+    await page.mouse.move(thumbBox.x + thumbBox.width / 2, thumbBox.y + grabY + 180, { steps: 5 });
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollTop);
     await page.mouse.up();
     await expect(track).toHaveAttribute("data-dragging", "false");
