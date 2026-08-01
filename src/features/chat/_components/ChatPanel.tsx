@@ -98,9 +98,11 @@ const ChatPanel = ({ open, onClose }: Props) => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const height = viewport?.height ?? window.innerHeight;
-        // Safari의 포커스 자동 팬은 offsetTop과 scroll 이벤트를 여러 번 흔든다.
-        // 키보드가 실제로 줄인 visual viewport 높이만 반영해 패널 상단을 고정한다.
+        const offsetTop = viewport?.offsetTop ?? 0;
+        // 모바일 브라우저의 포커스 자동 팬이 만드는 scroll 중간값은 무시하고,
+        // resize 시 확정된 visual viewport 영역만 패널에 반영한다.
         overlay.style.setProperty("--chat-viewport-height", `${height}px`);
+        overlay.style.setProperty("--chat-viewport-top", `${offsetTop}px`);
       });
     };
 

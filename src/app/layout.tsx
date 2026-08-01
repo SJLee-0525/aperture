@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Newsreader, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
 import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
@@ -70,6 +70,12 @@ export const metadata: Metadata = {
         : {}),
     },
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({
