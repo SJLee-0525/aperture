@@ -28,6 +28,14 @@ const CASES = [
     referenceType: "photo",
   },
   {
+    id: "photo-equipment-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "소니 35mm GM 렌즈로 찍은 사진 보여줘" }],
+    expectsLookup: true,
+    referenceType: "photo",
+    extended: true,
+  },
+  {
     id: "private-location-ko",
     lang: "ko",
     messages: [{ role: "user", content: "이성준이 사는 곳의 시간은 지금 몇 시야?" }],
@@ -114,7 +122,9 @@ const evaluateCase = async (fixture) => {
 };
 
 const selectedCase = process.env.CHAT_EVAL_CASE;
-const fixtures = selectedCase ? CASES.filter(({ id }) => id === selectedCase) : CASES;
+const fixtures = selectedCase
+  ? CASES.filter(({ id }) => id === selectedCase)
+  : CASES.filter(({ extended }) => !extended);
 if (selectedCase && fixtures.length === 0)
   throw new Error(`Unknown CHAT_EVAL_CASE: ${selectedCase}`);
 
