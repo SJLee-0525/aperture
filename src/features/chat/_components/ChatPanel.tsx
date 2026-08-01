@@ -102,6 +102,10 @@ const ChatPanel = ({ open, onClose }: Props) => {
     let frame = 0;
 
     const syncHeight = () => {
+      const messageList = listRef.current;
+      const stickToBottom =
+        messageList == null ||
+        messageList.scrollHeight - messageList.clientHeight - messageList.scrollTop <= 2;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const height = `${viewport.height}px`;
@@ -111,6 +115,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
         root.scrollTop = 0;
         body.scrollTop = 0;
         window.scrollTo(0, 0);
+        if (messageList && stickToBottom) messageList.scrollTop = messageList.scrollHeight;
       });
     };
 

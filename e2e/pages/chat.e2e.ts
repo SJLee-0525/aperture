@@ -62,6 +62,21 @@ test.describe("Chat", () => {
     await page.mouse.wheel(0, 600);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 
+    await chatMessages(page).evaluate((element) => {
+      const filler = document.createElement("div");
+      filler.style.height = "600px";
+      filler.style.flex = "none";
+      element.append(filler);
+      element.scrollTop = element.scrollHeight;
+    });
+    await expect
+      .poll(() =>
+        chatMessages(page).evaluate(
+          (element) => element.scrollHeight - element.clientHeight - element.scrollTop,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
+
     await page.evaluate(() => {
       const viewport = window.visualViewport as VisualViewport & { height: number };
       viewport.height = 480;
@@ -80,6 +95,13 @@ test.describe("Chat", () => {
         })),
       )
       .toEqual({ root: "480px", body: "480px", scrollY: 0 });
+    await expect
+      .poll(() =>
+        chatMessages(page).evaluate(
+          (element) => element.scrollHeight - element.clientHeight - element.scrollTop,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
     const inlineViewportOverrides = await overlay.evaluate((element) => {
       const style = (element as HTMLElement).style;
       return {
@@ -95,6 +117,7 @@ test.describe("Chat", () => {
     const panelBox = await panel.boundingBox();
     expect(panelBox?.height).toBeCloseTo(480, -1);
     expect(panelBox?.y).toBeCloseTo(0, -1);
+    await expect(panel).toHaveCSS("box-shadow", "none");
 
     await panel.getByRole("button", { name: "챗봇 닫기" }).click();
     await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");
