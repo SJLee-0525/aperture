@@ -1,4 +1,7 @@
 .overlay {
+  --chat-user-bubble-bg: var(--accent);
+  --chat-user-bubble-fg: var(--accent-contrast);
+
   position: fixed;
   top: var(--chat-viewport-top, 0px);
   right: 0;
@@ -54,6 +57,18 @@
   font-size: var(--t-label);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
+}
+
+.identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.identityIcon {
+  flex: none;
+  color: var(--accent);
 }
 
 .title {
@@ -118,8 +133,18 @@
 }
 
 .message[data-role="user"] .bubble {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--chat-user-bubble-bg);
+  color: var(--chat-user-bubble-fg);
+}
+
+:global(html[data-section="home"]) .overlay {
+  --chat-user-bubble-bg: #18181b;
+  --chat-user-bubble-fg: #ffffff;
+}
+
+:global(html[data-theme="dark"][data-section="home"]) .overlay {
+  --chat-user-bubble-bg: #fafafa;
+  --chat-user-bubble-fg: #18181b;
 }
 
 .bubble {

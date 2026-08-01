@@ -8,9 +8,9 @@
   width: 48px;
   height: 48px;
   padding: 0;
-  border: 1px solid var(--line-strong);
-  background: var(--surface-2);
-  color: var(--text-2);
+  border: 1px solid transparent;
+  background: var(--chat-launcher-bg, var(--accent));
+  color: var(--chat-launcher-fg, var(--accent-contrast));
   box-shadow: var(--shadow-card);
   cursor: pointer;
   touch-action: manipulation;
@@ -21,8 +21,9 @@
 }
 
 .launcher:hover {
-  background: var(--surface-3);
-  color: var(--accent);
+  background: var(--chat-launcher-hover, var(--accent-press));
+  color: var(--chat-launcher-fg, var(--accent-contrast));
+  transform: translateY(-2px);
 }
 
 .launcher:active {
@@ -32,6 +33,18 @@
 .launcher:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+}
+
+:global(html[data-section="home"]) .launcher {
+  --chat-launcher-bg: #18181b;
+  --chat-launcher-fg: #ffffff;
+  --chat-launcher-hover: #303036;
+}
+
+:global(html[data-theme="dark"][data-section="home"]) .launcher {
+  --chat-launcher-bg: #fafafa;
+  --chat-launcher-fg: #18181b;
+  --chat-launcher-hover: #dedee3;
 }
 
 @media (max-width: 767px) {

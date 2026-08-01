@@ -36,7 +36,7 @@ const ChatLauncher = () => {
         aria-expanded={open}
         onClick={openChat}
       >
-        <Icon name="chat" size={22} />
+        <Icon name="sparkle" size={22} />
       </button>
     </>
   );

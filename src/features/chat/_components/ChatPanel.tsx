@@ -5,6 +5,7 @@ import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { Icon } from "@/components/Icon";
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
 import { useChat } from "@/features/chat/_hooks/use-chat";
@@ -17,7 +18,7 @@ import styles from "./ChatPanel.module.css";
 
 const COPY = {
   ko: {
-    title: "ChatBot.",
+    title: "Ask Sungjoon.",
     close: "챗봇 닫기",
     input: "메시지",
     placeholder: "궁금한 내용을 입력하세요…",
@@ -31,7 +32,7 @@ const COPY = {
     ],
   },
   en: {
-    title: "ChatBot.",
+    title: "Ask Sungjoon.",
     close: "Close chat",
     input: "Message",
     placeholder: "Ask about the portfolio…",
@@ -130,9 +131,12 @@ const ChatPanel = ({ open, onClose }: Props) => {
         tabIndex={-1}
       >
         <div className={styles.header}>
-          <h2 id={titleId} className={styles.title}>
-            {copy.title}
-          </h2>
+          <div className={styles.identity}>
+            <Icon name="sparkle" size={18} className={styles.identityIcon} />
+            <h2 id={titleId} className={styles.title}>
+              {copy.title}
+            </h2>
+          </div>
           <div className={styles.actions}>
             <button
               type="button"
