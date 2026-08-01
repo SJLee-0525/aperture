@@ -140,6 +140,7 @@ test.describe("Custom cursor", () => {
 
     await page.goto("/contact");
     await page.waitForFunction(() => document.documentElement.hasAttribute("data-custom-cursor"));
+    await expect(page.locator("[data-intro-splash]")).toBeHidden();
 
     const textarea = page.getByRole("textbox", { name: "메시지" });
     await expect(textarea).toHaveCSS("resize", "none");
@@ -157,7 +158,9 @@ test.describe("Custom cursor", () => {
     await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2);
     await expect(page.locator("[data-custom-cursor-ui]")).toHaveAttribute("data-mode", "dot");
     await page.mouse.down();
-    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height + 48);
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height + 48, {
+      steps: 5,
+    });
     await page.mouse.up();
     await expect
       .poll(() => textarea.evaluate((element) => (element as HTMLTextAreaElement).offsetHeight))
@@ -166,8 +169,7 @@ test.describe("Custom cursor", () => {
     const draggedHeight = await textarea.evaluate(
       (element) => (element as HTMLTextAreaElement).offsetHeight,
     );
-    await handle.focus();
-    await page.keyboard.press("ArrowDown");
+    await handle.press("ArrowDown");
     await expect
       .poll(() => textarea.evaluate((element) => (element as HTMLTextAreaElement).offsetHeight))
       .toBeGreaterThan(draggedHeight);

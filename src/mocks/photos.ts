@@ -3,7 +3,7 @@ import type { Photo } from "@/types/photo";
 /**
  * P1 mock 사진 — design/claude_design/portfolio.js 의 PHOTOS 이식.
  * ko는 디자인 원본, en은 번역. 태그는 사전 id 참조(mocks/site.ts TAGS).
- * shotAt은 촬영일시, dimensions는 원본 촬영 해상도(EXIF "크기"), image는 저장 webp(여기선 샘플 png).
+ * shotAt은 촬영일시, dimensions는 원본 촬영 해상도(EXIF "크기"), image는 운영과 같은 경량 WebP 샘플.
  */
 const DIMS = [
   { w: 6000, h: 4000 },
@@ -38,7 +38,7 @@ type Raw = {
 const RAW: Raw[] = [
   {
     id: "p01",
-    img: "tone01.png",
+    img: "tone01.webp",
     ar: 0.8,
     ko: "새벽의 항구",
     en: "Harbor at Dawn",
@@ -60,7 +60,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p02",
-    img: "tone02.png",
+    img: "tone02.webp",
     ar: 1.2,
     ko: "골목, 5시",
     en: "Alley, 5 AM",
@@ -82,7 +82,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p03",
-    img: "tone03.png",
+    img: "tone03.webp",
     ar: 0.74,
     ko: "안개 능선",
     en: "Misty Ridge",
@@ -104,7 +104,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p04",
-    img: "tone04.png",
+    img: "tone04.webp",
     ar: 1.05,
     ko: "부두",
     en: "Pier",
@@ -126,7 +126,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p05",
-    img: "tone05.png",
+    img: "tone05.webp",
     ar: 0.82,
     ko: "심야",
     en: "Late Night",
@@ -148,7 +148,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p06",
-    img: "tone06.png",
+    img: "tone06.webp",
     ar: 1.3,
     ko: "설원",
     en: "Snowfield",
@@ -170,7 +170,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p07",
-    img: "tone07.png",
+    img: "tone07.webp",
     ar: 0.72,
     ko: "파도",
     en: "Waves",
@@ -192,7 +192,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p08",
-    img: "tone08.png",
+    img: "tone08.webp",
     ar: 1.1,
     ko: "다리",
     en: "Bridge",
@@ -214,7 +214,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p09",
-    img: "tone09.png",
+    img: "tone09.webp",
     ar: 0.86,
     ko: "노을",
     en: "Afterglow",
@@ -236,7 +236,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p10",
-    img: "tone10.png",
+    img: "tone10.webp",
     ar: 1.0,
     ko: "빗속",
     en: "In the Rain",
@@ -258,7 +258,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p11",
-    img: "tone11.png",
+    img: "tone11.webp",
     ar: 0.78,
     ko: "정적",
     en: "Stillness",
@@ -280,7 +280,7 @@ const RAW: Raw[] = [
   },
   {
     id: "p12",
-    img: "tone12.png",
+    img: "tone12.webp",
     ar: 1.24,
     ko: "수평선",
     en: "Horizon",

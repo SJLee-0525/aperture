@@ -53,4 +53,3 @@ const resolveCursorTarget = (eventTarget: EventTarget | null): CursorTarget => {
 };
 
 export { resolveCursorTarget };
-export type { CursorTarget, CursorTargetKind };
