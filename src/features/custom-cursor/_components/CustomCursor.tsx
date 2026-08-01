@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { autoScrollDirection, autoScrollVelocity } from "@/features/custom-cursor/_lib/auto-scroll";
+import { applyCursorGeometry, type CursorMode } from "@/features/custom-cursor/_lib/cursor-mode";
+import { resolveCursorTarget } from "@/features/custom-cursor/_lib/cursor-target";
 import {
   CUSTOM_CURSOR_LOADING_EVENT,
   CUSTOM_CURSOR_MAP_HOVER_EVENT,
@@ -15,22 +17,6 @@ import styles from "./CustomCursor.module.css";
 
 const ENABLE_QUERY =
   "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
-const INTERACTIVE_SELECTOR = 'a, button, [role="button"], summary, [data-cursor-target]';
-const TEXT_SELECTOR = [
-  "input:not([type])",
-  'input[type="text"]',
-  'input[type="search"]',
-  'input[type="email"]',
-  'input[type="url"]',
-  'input[type="tel"]',
-  'input[type="password"]',
-  "textarea",
-  '[contenteditable="true"]',
-].join(", ");
-const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
-const PASSIVE_CURSOR_SELECTOR = "[data-cursor-passive]";
-const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
-const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select';
 const AUTO_SCROLL_EXCLUDED_SELECTOR = [
   "a",
   "button",
@@ -152,20 +138,7 @@ const CustomCursor = () => {
       if (snapped) snapped.dataset.cursorSnapped = "true";
     };
 
-    const setMode = (
-      next:
-        | "dot"
-        | "ring"
-        | "scroll"
-        | "autoscroll"
-        | "snap"
-        | "text"
-        | "range"
-        | "scrollbar"
-        | "frame"
-        | "link"
-        | "loading",
-    ) => {
+    const setMode = (next: CursorMode) => {
       if (next === currentMode) return;
 
       window.clearTimeout(frameExitTimer);
@@ -181,43 +154,7 @@ const CustomCursor = () => {
       currentMode = next;
       cursor.dataset.mode = next;
 
-      if (next === "dot") {
-        cursor.style.setProperty("--cursor-width", "12px");
-        cursor.style.setProperty("--cursor-height", "12px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "ring") {
-        cursor.style.setProperty("--cursor-width", "34px");
-        cursor.style.setProperty("--cursor-height", "34px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "scroll") {
-        cursor.style.setProperty("--cursor-width", "18px");
-        cursor.style.setProperty("--cursor-height", "28px");
-        cursor.style.setProperty("--cursor-radius", "9px");
-      } else if (next === "autoscroll") {
-        cursor.style.setProperty("--cursor-width", "24px");
-        cursor.style.setProperty("--cursor-height", "24px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "text") {
-        cursor.style.setProperty("--cursor-width", "4px");
-        cursor.style.setProperty("--cursor-height", "24px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "range") {
-        cursor.style.setProperty("--cursor-width", "34px");
-        cursor.style.setProperty("--cursor-height", "18px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "scrollbar") {
-        cursor.style.setProperty("--cursor-width", "20px");
-        cursor.style.setProperty("--cursor-height", "28px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "link") {
-        cursor.style.setProperty("--cursor-width", "30px");
-        cursor.style.setProperty("--cursor-height", "30px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      } else if (next === "loading") {
-        cursor.style.setProperty("--cursor-width", "22px");
-        cursor.style.setProperty("--cursor-height", "22px");
-        cursor.style.setProperty("--cursor-radius", "999px");
-      }
+      applyCursorGeometry(cursor, next);
     };
 
     const setAccent = (element: Element | null) => {
@@ -431,64 +368,24 @@ const CustomCursor = () => {
     };
 
     const onPointerOver = (event: PointerEvent) => {
-      const element = event.target instanceof Element ? event.target : null;
-      const textElement = element?.closest(TEXT_SELECTOR) ?? null;
-      const rangeElement = element?.closest(RANGE_CONTROL_SELECTOR) ?? null;
-      const scrollbarElement = element?.closest(CUSTOM_SCROLLBAR_SELECTOR) ?? null;
-      const passiveElement = element?.closest(PASSIVE_CURSOR_SELECTOR) ?? null;
-      textTargetHovered = Boolean(textElement);
-      rangeTargetHovered = Boolean(rangeElement);
-      scrollbarTargetHovered = Boolean(scrollbarElement);
+      const resolved = resolveCursorTarget(event.target);
+      textTargetHovered = resolved.kind === "text";
+      rangeTargetHovered = resolved.kind === "range";
+      scrollbarTargetHovered = resolved.kind === "scrollbar";
 
-      if (scrollbarElement) {
+      if (["scrollbar", "text", "range", "passive"].includes(resolved.kind)) {
         target = null;
         targetRect = null;
         targetCompact = false;
         targetCircular = false;
         targetPill = false;
-        setAccent(scrollbarElement);
+        setAccent(resolved.element);
         setVisible(true);
         scheduleDraw();
         return;
       }
 
-      if (textElement) {
-        target = null;
-        targetRect = null;
-        targetCompact = false;
-        targetCircular = false;
-        targetPill = false;
-        setAccent(textElement);
-        setVisible(true);
-        scheduleDraw();
-        return;
-      }
-
-      if (rangeElement) {
-        target = null;
-        targetRect = null;
-        targetCompact = false;
-        targetCircular = false;
-        targetPill = false;
-        setAccent(rangeElement);
-        setVisible(true);
-        scheduleDraw();
-        return;
-      }
-
-      if (passiveElement) {
-        target = null;
-        targetRect = null;
-        targetCompact = false;
-        targetCircular = false;
-        targetPill = false;
-        setAccent(passiveElement);
-        setVisible(true);
-        scheduleDraw();
-        return;
-      }
-
-      if (element?.closest(NATIVE_CONTROL_SELECTOR)) {
+      if (resolved.kind === "native") {
         target = null;
         targetRect = null;
         targetCompact = false;
@@ -498,7 +395,7 @@ const CustomCursor = () => {
         return;
       }
 
-      const nextTarget = element?.closest<HTMLElement>(INTERACTIVE_SELECTOR) ?? null;
+      const nextTarget = resolved.snapTarget;
       const targetChanged = nextTarget !== target;
       if (targetChanged) {
         target = nextTarget;
@@ -508,7 +405,7 @@ const CustomCursor = () => {
         targetPill = false;
         targetDirty = Boolean(target);
       }
-      setAccent(target ?? element);
+      setAccent(target ?? resolved.element);
       const becameVisible = !visible;
       setVisible(true);
       if (!targetChanged && !becameVisible) return;

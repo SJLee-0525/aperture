@@ -59,6 +59,7 @@
   --accent-music: #b4232d;
   --accent-dev: #087a32;
   --accent-contact: #a84d00;
+  --cursor-landing-accent: color-mix(in srgb, var(--text) 60%, transparent);
 
   /* --- Motion --- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
