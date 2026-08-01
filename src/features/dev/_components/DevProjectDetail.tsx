@@ -1,4 +1,5 @@
 import { ImageCarousel } from "@/components/ImageCarousel";
+import { useMemo } from "react";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { hasText } from "@/lib/i18n/has-text";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -13,7 +14,10 @@ type Props = {
 /** 선택된 프로젝트의 전체 설명과 외부 링크를 표시한다. 모달 프레임은 상위가 소유한다. */
 const DevProjectDetailContent = ({ project }: Props) => {
   const { dict, lang } = useLang();
-  const media = project.images.length > 0 ? project.images : project.cover ? [project.cover] : [];
+  const media = useMemo(
+    () => (project.images.length > 0 ? project.images : project.cover ? [project.cover] : []),
+    [project.cover, project.images],
+  );
 
   return (
     <div className={styles.detail}>

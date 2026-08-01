@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 
@@ -16,13 +16,18 @@ const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const openedHere = useRef(false);
+  const searchParamsRef = useRef(searchParams);
+
+  useEffect(() => {
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
 
   const activeId = searchParams.get(param);
   const active = activeId ? (items.find((item) => item.id === activeId) ?? null) : null;
 
   const select = useCallback(
     (id: string | null) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParamsRef.current.toString());
       if (id) {
         params.set(param, id);
         openedHere.current = true;
@@ -34,7 +39,7 @@ const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
       if (id) router.push(href, { scroll: false });
       else replaceCurrentUrl(href);
     },
-    [router, pathname, searchParams, param],
+    [router, pathname, param],
   );
 
   const close = useCallback(() => {

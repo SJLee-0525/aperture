@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { memo } from "react";
 
 import { pickText } from "@/lib/i18n/pick-text";
 import type { DevProjectCardData } from "@/types/dev";
@@ -15,7 +16,7 @@ type Props = {
 };
 
 /** 목록에서 사용하는 프로젝트 요약 카드. */
-const DevProjectCard = ({ project, lang, onSelect, onPreload }: Props) => {
+const DevProjectCard = memo(function DevProjectCard({ project, lang, onSelect, onPreload }: Props) {
   const coverUrl = imagePreviewUrl(project.cover);
   const hasCover = Boolean(coverUrl);
 
@@ -47,6 +48,6 @@ const DevProjectCard = ({ project, lang, onSelect, onPreload }: Props) => {
       </div>
     </button>
   );
-};
+});
 
 export { DevProjectCard };

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, type SyntheticEvent } from "react";
 
 import type { ImageMeta } from "@/types/image";
 
@@ -12,6 +12,12 @@ const loadImageLightbox = () => import("@/components/ImageLightbox");
 const ImageLightbox = dynamic(() => loadImageLightbox().then((module) => module.ImageLightbox), {
   ssr: false,
 });
+
+const hideImageLoader = (event: SyntheticEvent<HTMLImageElement>) => {
+  event.currentTarget.parentElement
+    ?.querySelector<HTMLElement>("[data-image-loader]")
+    ?.setAttribute("hidden", "");
+};
 
 const chevLeft = (
   <svg
@@ -49,25 +55,58 @@ type Props = {
   sizes?: string;
 };
 
+type LightboxSessionProps = Pick<
+  Props,
+  "images" | "alt" | "closeLabel" | "previousLabel" | "nextLabel"
+> & {
+  initialIndex: number;
+  onExit: (index: number) => void;
+};
+
+/** 확대 탐색 인덱스를 원본 캐러셀 상태와 격리한다. */
+const LightboxSession = ({
+  images,
+  initialIndex,
+  alt,
+  closeLabel,
+  previousLabel,
+  nextLabel,
+  onExit,
+}: LightboxSessionProps) => {
+  const [index, setIndex] = useState(initialIndex);
+
+  return (
+    <ImageLightbox
+      images={images}
+      index={index}
+      alt={alt}
+      closeLabel={closeLabel}
+      previousLabel={previousLabel}
+      nextLabel={nextLabel}
+      onClose={() => onExit(index)}
+      onNavigate={setIndex}
+    />
+  );
+};
+
 /**
  * 이미지 캐러셀 — scroll-snap 트랙(터치 스와이프 네이티브) + 양옆 오버레이 내비.
  * 슬라이드 클릭 시 ImageLightbox 로 확대. 순수 UI: 이미지 목록과 alt 만 받는다.
  * 1장이면 내비를 숨기고 정지 이미지로 동작.
  */
-const ImageCarousel = ({
+const ImageCarousel = memo(function ImageCarousel({
   images,
   alt,
   closeLabel,
   previousLabel,
   nextLabel,
   sizes = "(max-width: 760px) 100vw, 680px",
-}: Props) => {
+}: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const reportedIndexRef = useRef(0);
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(() => new Set());
   const count = images.length;
 
   useEffect(() => {
@@ -84,15 +123,6 @@ const ImageCarousel = ({
       node.removeEventListener("selectstart", prevent, true);
     };
   }, []);
-
-  const markLoaded = (key: string) => {
-    setLoadedImages((current) => {
-      if (current.has(key)) return current;
-      const next = new Set(current);
-      next.add(key);
-      return next;
-    });
-  };
 
   const onScroll = () => {
     const track = trackRef.current;
@@ -123,7 +153,6 @@ const ImageCarousel = ({
         <div className={styles.track} ref={trackRef} onScroll={onScroll}>
           {images.map((img, i) => {
             const imageKey = img.path || img.url;
-            const loaded = loadedImages.has(imageKey);
 
             return (
               <button
@@ -145,14 +174,12 @@ const ImageCarousel = ({
                   draggable={false}
                   onContextMenu={(event) => event.preventDefault()}
                   onDragStart={(event) => event.preventDefault()}
-                  onLoad={() => markLoaded(imageKey)}
-                  onError={() => markLoaded(imageKey)}
+                  onLoad={hideImageLoader}
+                  onError={hideImageLoader}
                 />
-                {loaded ? null : (
-                  <span className={styles.imgLoader} aria-hidden="true">
-                    <span className={styles.spinner} />
-                  </span>
-                )}
+                <span className={styles.imgLoader} data-image-loader aria-hidden="true">
+                  <span className={styles.spinner} />
+                </span>
               </button>
             );
           })}
@@ -183,22 +210,21 @@ const ImageCarousel = ({
       </div>
 
       {lightbox != null ? (
-        <ImageLightbox
+        <LightboxSession
           images={images}
-          index={lightbox}
+          initialIndex={lightbox}
           alt={alt}
           closeLabel={closeLabel}
           previousLabel={previousLabel}
           nextLabel={nextLabel}
-          onClose={() => setLightbox(null)}
-          onNavigate={(next) => {
-            setLightbox(next);
-            goTo(next); // 닫았을 때 캐러셀이 마지막으로 본 이미지를 보여주도록 동기화
+          onExit={(lastIndex) => {
+            setLightbox(null);
+            goTo(lastIndex); // 닫을 때만 원본 캐러셀을 마지막으로 본 이미지와 동기화
           }}
         />
       ) : null}
     </figure>
   );
-};
+});
 
 export { ImageCarousel };

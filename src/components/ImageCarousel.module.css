@@ -44,6 +44,9 @@
   place-items: center;
   pointer-events: none;
 }
+.imgLoader[hidden] {
+  display: none;
+}
 .spinner {
   width: 34px;
   height: 34px;
