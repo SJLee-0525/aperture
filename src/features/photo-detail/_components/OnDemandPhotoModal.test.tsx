@@ -10,6 +10,7 @@ const photoModalRender = vi.hoisted(() => vi.fn());
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ back: vi.fn() }),
+  usePathname: () => "/photo",
   useSearchParams: () => new URLSearchParams("photo=p1"),
 }));
 vi.mock("next/dynamic", () => ({

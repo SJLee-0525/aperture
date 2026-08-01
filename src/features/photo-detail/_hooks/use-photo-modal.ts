@@ -1,9 +1,8 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { usePhotoDetailSession } from "@/features/photo-detail/_hooks/use-photo-detail-session";
 import type { Photo } from "@/types/photo";
 
 /**
@@ -17,54 +16,22 @@ const usePhotoModal = (
   photoIds?: string[],
   onClose?: () => void,
 ) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { activeId, close: closeSession, goto } = usePhotoDetailSession();
   const navigationIds = useMemo(
     () => photoIds ?? photos.map((photo) => photo.id),
     [photoIds, photos],
   );
 
-  const activeId = searchParams.get("photo");
   const index = activeId ? navigationIds.indexOf(activeId) : -1;
   const photo = activeId ? (photos.find((item) => item.id === activeId) ?? null) : null;
   const open = photo != null;
-  const wasOpen = useRef(open);
-  const openedHere = useRef(false);
-
-  useEffect(() => {
-    if (!wasOpen.current && open) openedHere.current = true;
-    if (!open) openedHere.current = false;
-    wasOpen.current = open;
-  }, [open]);
-
-  const goto = useCallback(
-    (id: string | null) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (id) {
-        params.set("photo", id);
-      } else {
-        params.delete("photo");
-      }
-      const qs = params.toString();
-      const href = qs ? `${pathname}?${qs}` : pathname;
-      replaceCurrentUrl(href);
-    },
-    [pathname, searchParams],
-  );
-
   const close = useCallback(() => {
     if (onClose) {
       onClose();
       return;
     }
-    if (openedHere.current) {
-      openedHere.current = false;
-      router.back();
-      return;
-    }
-    goto(null);
-  }, [onClose, router, goto]);
+    closeSession();
+  }, [closeSession, onClose]);
 
   const step = useCallback(
     (delta: number) => {
