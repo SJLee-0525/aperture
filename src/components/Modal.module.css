@@ -72,6 +72,12 @@
 }
 /* mobileFull — 모바일에서 화면 꽉 채움 (프로젝트·연주 상세) */
 @media (max-width: 640px) {
+  .panelFull .head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg);
+  }
   .overlayFull {
     padding: 0;
     /* 오버레이 자체 스크롤바가 우측 거터를 만들지 않게 숨김 — 터치/휠 스크롤은 유지 */

@@ -12,6 +12,7 @@ import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanel
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
+import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Photo } from "@/types/photo";
@@ -31,7 +32,7 @@ type Props = {
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const MOBILE_QUERY = "(max-width: 900px)";
-const CLOSE_TOUCH_THRESHOLD = 56;
+const COLLAPSE_TOUCH_THRESHOLD = 56;
 const CLOSE_WHEEL_THRESHOLD = 80;
 const CHROME_TRANSITION = { duration: 0.2, ease: EASE } as const;
 
@@ -116,6 +117,7 @@ const PhotoModal = ({
   const touchStartY = useRef<number | null>(null);
   const collapsePullStartY = useRef<number | null>(null);
   const wheelTravel = useRef(0);
+  const dismissSurfaceRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
   // 사진이 바뀌면(prev/next·열기) 로더/스켈레톤을 다시 표시 — effect 없이 render-time reseed.
@@ -128,6 +130,22 @@ const PhotoModal = ({
   const trapRef = useFocusTrap(open && revealed);
   const mounted = useMounted();
   useScrollLock(open);
+  const {
+    onTouchStart: onDismissTouchStart,
+    onTouchMove: onDismissTouchMove,
+    onTouchEnd: onDismissTouchEnd,
+    onTouchCancel: onDismissTouchCancel,
+  } = usePullDownDismiss({
+    enabled: mobile && open && revealed && !expanded,
+    onDismiss: close,
+    surfaceRef: dismissSurfaceRef,
+    canStart: (target) => {
+      const element = target instanceof Element ? target : null;
+      if (element?.closest("button")) return false;
+      const panel = element?.closest("aside");
+      return !panel || panel.scrollTop <= 1;
+    },
+  });
 
   useEffect(() => {
     const node = photoRef.current;
@@ -204,7 +222,7 @@ const PhotoModal = ({
       return;
     }
 
-    // 내부 콘텐츠를 모두 올린 뒤, 최상단에서 추가로 당긴 거리만 축소 임계치에 포함한다.
+    // 펼친 상태에서는 최상단에서 아래로 당겨도 모달이 아닌 EXIF 패널만 축소한다.
     if (panel.scrollTop > 1) {
       collapsePullStartY.current = null;
       return;
@@ -213,7 +231,7 @@ const PhotoModal = ({
       collapsePullStartY.current = nextY;
       return;
     }
-    if (nextY - collapsePullStartY.current > CLOSE_TOUCH_THRESHOLD) collapsePanel(panel);
+    if (nextY - collapsePullStartY.current > COLLAPSE_TOUCH_THRESHOLD) collapsePanel(panel);
   };
 
   if (!mounted) return null;
@@ -235,6 +253,10 @@ const PhotoModal = ({
           animate={{ opacity: revealed ? 1 : 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
+          onTouchStart={onDismissTouchStart}
+          onTouchMove={onDismissTouchMove}
+          onTouchEnd={onDismissTouchEnd}
+          onTouchCancel={onDismissTouchCancel}
         >
           <button
             type="button"
@@ -243,6 +265,7 @@ const PhotoModal = ({
             onClick={close}
           />
           <m.div
+            ref={dismissSurfaceRef}
             className={styles.inner}
             initial={animateOnOpen ? { opacity: 0, scale: 0.985 } : false}
             animate={

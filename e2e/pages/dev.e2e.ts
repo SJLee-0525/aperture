@@ -66,7 +66,9 @@ test.describe("Dev", () => {
     const lightbox = page.locator("[data-image-lightbox]");
     const image = lightbox.locator("img").first();
     const close = lightbox.locator("[data-image-lightbox-close]");
+    const customScrollbar = page.locator("[data-custom-scrollbar-ui]");
     await expect(close).toBeVisible();
+    await expect(customScrollbar).toHaveCSS("opacity", "0");
     await expect(lightbox.getByText("1 / 3")).toBeVisible();
     await expect(lightbox.locator("img")).toHaveCount(2);
 

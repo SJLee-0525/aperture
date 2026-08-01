@@ -2,11 +2,12 @@
 
 import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
 import type { ImageMeta } from "@/types/image";
 
 import styles from "./ImageLightbox.module.css";
@@ -65,6 +66,71 @@ type Props = {
   onNavigate: (index: number) => void;
 };
 
+type SlideProps = {
+  item: ImageMeta;
+  itemIndex: number;
+  alt: string;
+  loaded: boolean;
+  rendered: boolean;
+  onClose: () => void;
+  onLoaded: (key: string) => void;
+  onToggleChrome: () => void;
+};
+
+const LightboxSlide = memo(function LightboxSlide({
+  item,
+  itemIndex,
+  alt,
+  loaded,
+  rendered,
+  onClose,
+  onLoaded,
+  onToggleChrome,
+}: SlideProps) {
+  const itemKey = item.path || item.url;
+  const itemRatio = item.w / item.h;
+
+  return (
+    <div
+      className={styles.slide}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        className={styles.stage}
+        style={{
+          width: `min(94vw, 1400px, ${88 * itemRatio}vh)`,
+          aspectRatio: `${item.w} / ${item.h}`,
+        }}
+        onContextMenu={(event) => event.preventDefault()}
+        onDragStart={(event) => event.preventDefault()}
+        onClick={onToggleChrome}
+      >
+        {rendered ? (
+          <Image
+            src={item.url}
+            alt={`${alt} — ${itemIndex + 1}`}
+            fill
+            sizes="100vw"
+            className={styles.img}
+            draggable={false}
+            onContextMenu={(event) => event.preventDefault()}
+            onDragStart={(event) => event.preventDefault()}
+            onLoad={() => onLoaded(itemKey)}
+            onError={() => onLoaded(itemKey)}
+          />
+        ) : null}
+        {!rendered || loaded ? null : (
+          <div className={styles.imgLoader} aria-hidden="true">
+            <span className={styles.spinner} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
 /**
  * 범용 이미지 라이트박스 — 캐러셀/갤러리 이미지 클릭 확대 뷰. 순수 UI(이미지 목록·인덱스만).
  * PhotoModal(사진 섹션 전용 라이트박스)과 동일한 오버레이 어휘(스크림·사각 내비)를 따르되
@@ -91,6 +157,17 @@ const ImageLightbox = ({
   const imageKey = image ? image.path || image.url : "";
   const loaded = imageKey ? loadedImages.has(imageKey) : false;
   useScrollLock(true);
+  const {
+    onTouchStart: onDismissTouchStart,
+    onTouchMove: onDismissTouchMove,
+    onTouchEnd: onDismissTouchEnd,
+    onTouchCancel: onDismissTouchCancel,
+  } = usePullDownDismiss({
+    enabled: true,
+    onDismiss: onClose,
+    surfaceRef: containerRef,
+    canStart: (target) => !(target instanceof Element && target.closest("button")),
+  });
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -139,6 +216,16 @@ const ImageLightbox = ({
     reportedIndexRef.current = index;
   }, [index]);
 
+  const markLoaded = useCallback((key: string) => {
+    setLoadedImages((current) => {
+      if (current.has(key)) return current;
+      const next = new Set(current);
+      next.add(key);
+      return next;
+    });
+  }, []);
+  const toggleChrome = useCallback(() => setChromeVisible((visible) => !visible), []);
+
   if (typeof document === "undefined") return null;
   if (!image) return null;
 
@@ -147,15 +234,6 @@ const ImageLightbox = ({
     if (!loaded || next < 0 || next >= count) return;
     setChromeVisible(true);
     track?.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
-  };
-
-  const markLoaded = (key: string) => {
-    setLoadedImages((current) => {
-      if (current.has(key)) return current;
-      const next = new Set(current);
-      next.add(key);
-      return next;
-    });
   };
 
   return createPortal(
@@ -169,6 +247,10 @@ const ImageLightbox = ({
       data-image-lightbox
       onContextMenu={(event) => event.preventDefault()}
       onDragStart={(event) => event.preventDefault()}
+      onTouchStart={onDismissTouchStart}
+      onTouchMove={onDismissTouchMove}
+      onTouchEnd={onDismissTouchEnd}
+      onTouchCancel={onDismissTouchCancel}
     >
       <button type="button" className={styles.scrim} aria-label={closeLabel} onClick={onClose} />
       <div
@@ -190,49 +272,18 @@ const ImageLightbox = ({
       >
         {images.map((item, itemIndex) => {
           const itemKey = item.path || item.url;
-          const itemLoaded = loadedImages.has(itemKey);
-          const itemRatio = item.w / item.h;
-          const shouldRenderImage = Math.abs(itemIndex - index) <= 1;
-
           return (
-            <div
+            <LightboxSlide
               key={itemKey}
-              className={styles.slide}
-              onClick={(event) => {
-                if (event.target === event.currentTarget) onClose();
-              }}
-            >
-              <div
-                className={styles.stage}
-                style={{
-                  width: `min(94vw, 1400px, ${88 * itemRatio}vh)`,
-                  aspectRatio: `${item.w} / ${item.h}`,
-                }}
-                onContextMenu={(event) => event.preventDefault()}
-                onDragStart={(event) => event.preventDefault()}
-                onClick={() => setChromeVisible((visible) => !visible)}
-              >
-                {shouldRenderImage ? (
-                  <Image
-                    src={item.url}
-                    alt={`${alt} — ${itemIndex + 1}`}
-                    fill
-                    sizes="100vw"
-                    className={styles.img}
-                    draggable={false}
-                    onContextMenu={(event) => event.preventDefault()}
-                    onDragStart={(event) => event.preventDefault()}
-                    onLoad={() => markLoaded(itemKey)}
-                    onError={() => markLoaded(itemKey)}
-                  />
-                ) : null}
-                {!shouldRenderImage || itemLoaded ? null : (
-                  <div className={styles.imgLoader} aria-hidden="true">
-                    <span className={styles.spinner} />
-                  </div>
-                )}
-              </div>
-            </div>
+              item={item}
+              itemIndex={itemIndex}
+              alt={alt}
+              loaded={loadedImages.has(itemKey)}
+              rendered={Math.abs(itemIndex - index) <= 1}
+              onClose={onClose}
+              onLoaded={markLoaded}
+              onToggleChrome={toggleChrome}
+            />
           );
         })}
       </div>

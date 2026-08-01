@@ -7,6 +7,7 @@
   outline: none;
   -webkit-touch-callout: none;
   user-select: none;
+  overscroll-behavior: contain;
 }
 
 .scrim {
@@ -15,7 +16,6 @@
   border: 0;
   padding: 0;
   background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(4px);
   cursor: zoom-out;
   animation: lbfade 0.25s linear;
 }

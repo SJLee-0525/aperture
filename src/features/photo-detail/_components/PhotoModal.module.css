@@ -142,6 +142,7 @@
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.28);
     max-height: 30vh;
     transition: max-height 0.3s var(--ease);
+    overscroll-behavior-y: contain;
   }
   .expanded {
     max-height: 82vh;
