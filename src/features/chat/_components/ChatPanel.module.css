@@ -270,7 +270,7 @@
 
 .privacyNotice {
   margin: var(--s-2) var(--s-1) 0;
-  color: var(--text-3);
+  color: var(--text-2);
   font-size: var(--t-label);
   line-height: 1.4;
 }
