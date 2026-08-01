@@ -49,7 +49,8 @@ const CustomScrollbar = () => {
         if (
           candidate &&
           candidate.getClientRects().length > 0 &&
-          candidate.scrollHeight > candidate.clientHeight + 1
+          (candidate.hasAttribute("data-custom-scroll-priority") ||
+            candidate.scrollHeight > candidate.clientHeight + 1)
         ) {
           localScroller = candidate;
           break;

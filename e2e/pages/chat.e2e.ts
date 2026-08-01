@@ -13,6 +13,42 @@ const submit = async (page: Page, message: string, inputName: string | RegExp = 
 };
 
 test.describe("Chat", () => {
+  test("모바일 키보드가 열리면 visual viewport 높이에 맞춰 패널을 줄인다", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "모바일 visual viewport에서만 검증");
+    await page.addInitScript(() => {
+      const viewport = new EventTarget();
+      Object.defineProperties(viewport, {
+        height: { configurable: true, value: 844, writable: true },
+        offsetTop: { configurable: true, value: 0, writable: true },
+      });
+      Object.defineProperty(window, "visualViewport", {
+        configurable: true,
+        value: viewport,
+      });
+    });
+    await page.goto("/");
+    await openChat(page);
+
+    await page.evaluate(() => {
+      const viewport = window.visualViewport as VisualViewport & {
+        height: number;
+        offsetTop: number;
+      };
+      viewport.height = 480;
+      viewport.offsetTop = 12;
+      viewport.dispatchEvent(new Event("resize"));
+    });
+
+    const overlay = page.locator("[data-chat-overlay]");
+    await expect(overlay).toHaveCSS("height", "480px");
+    await expect(overlay).toHaveCSS("top", "12px");
+    const panelBox = await page.getByRole("dialog", { name: "ChatBot." }).boundingBox();
+    expect(panelBox?.height).toBeCloseTo(480, -1);
+    expect(panelBox?.y).toBeCloseTo(12, -1);
+  });
+
   test("패널을 닫았다 열어도 새로고침 전까지 대화를 유지한다", async ({ page }) => {
     let requests = 0;
     await page.route("**/api/chat", async (route) => {
@@ -96,6 +132,10 @@ test.describe("Chat", () => {
     await page.goto("/");
 
     await openChat(page, "Open chat");
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+    const customScrollbar = page.locator("[data-custom-scrollbar-ui]");
+    await expect(customScrollbar).toHaveAttribute("aria-controls", "chat-message-scroll-container");
+    await expect(customScrollbar).toHaveAttribute("data-visible", "false");
     await expect(
       page.getByText("Please don’t share sensitive personal information."),
     ).toBeVisible();

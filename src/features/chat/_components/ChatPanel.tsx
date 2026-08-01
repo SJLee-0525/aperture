@@ -58,6 +58,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
@@ -79,10 +80,40 @@ const ChatPanel = ({ open, onClose }: Props) => {
     });
   }, [messages, isReplying, open, reduceMotion]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const viewport = window.visualViewport;
+    let frame = 0;
+
+    const syncViewport = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const height = viewport?.height ?? window.innerHeight;
+        const offsetTop = viewport?.offsetTop ?? 0;
+        overlay.style.setProperty("--chat-viewport-height", `${height}px`);
+        overlay.style.setProperty("--chat-viewport-top", `${offsetTop}px`);
+      });
+    };
+
+    syncViewport();
+    viewport?.addEventListener("resize", syncViewport);
+    viewport?.addEventListener("scroll", syncViewport);
+    window.addEventListener("resize", syncViewport);
+    return () => {
+      cancelAnimationFrame(frame);
+      viewport?.removeEventListener("resize", syncViewport);
+      viewport?.removeEventListener("scroll", syncViewport);
+      window.removeEventListener("resize", syncViewport);
+    };
+  }, [open]);
+
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay} data-chat-overlay>
+    <div ref={overlayRef} className={styles.overlay} data-chat-overlay>
       <button
         className={styles.scrim}
         type="button"
@@ -117,9 +148,13 @@ const ChatPanel = ({ open, onClose }: Props) => {
         </div>
 
         <div
+          id="chat-message-scroll-container"
           ref={listRef}
           className={styles.messages}
           data-accent-scrollbar
+          data-custom-scroll-container
+          data-custom-scroll-priority
+          data-custom-scroll-scope="local"
           role="log"
           aria-live="polite"
           aria-relevant="additions text"
