@@ -5,6 +5,7 @@ import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
@@ -62,6 +63,10 @@ const ChatPanel = ({ open, onClose }: Props) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  const announcement =
+    messages.findLast(
+      (message) => message.id !== "welcome" && message.role === "assistant" && !message.pending,
+    )?.content ?? "";
 
   useScrollLock(open);
 
@@ -144,9 +149,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
               aria-label={copy.close}
               onClick={onClose}
             >
-              <span className={styles.closeIcon} aria-hidden="true">
-                ×
-              </span>
+              <CloseIcon />
             </button>
           </div>
         </div>
@@ -160,8 +163,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
           data-custom-scroll-priority
           data-custom-scroll-scope="local"
           role="log"
-          aria-live="polite"
-          aria-relevant="additions text"
+          aria-live="off"
         >
           <AnimatePresence initial={false}>
             {messages.map((message) => (
@@ -257,6 +259,9 @@ const ChatPanel = ({ open, onClose }: Props) => {
               </m.div>
             ) : null}
           </AnimatePresence>
+        </div>
+        <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
+          {announcement}
         </div>
 
         <div className={styles.composerArea}>

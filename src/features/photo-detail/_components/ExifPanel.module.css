@@ -10,9 +10,40 @@
   justify-content: space-between;
   gap: 6px;
 }
+.titleRow {
+  width: 100%;
+  display: flex;
+  align-items: start;
+  gap: var(--s-3);
+}
 .titleWrap {
   flex: 1;
   min-width: 0;
+}
+.shareButton {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+.shareButton:hover {
+  color: var(--text-1);
+  border-color: var(--text-3);
+  background: var(--surface-1);
+}
+.shareButton:focus-visible {
+  outline: 2px solid var(--text-1);
+  outline-offset: 2px;
 }
 .title {
   font-family: var(--font-display);

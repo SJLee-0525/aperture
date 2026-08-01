@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { PhotoGrid } from "@/components/PhotoGrid";
+import { ShareButton } from "@/components/ShareButton";
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
@@ -58,6 +59,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
         <Link href={ROUTES.PHOTO_ALBUMS} className={styles.back}>
           ← {dict.albumsNav}
         </Link>
+        <ShareButton title={title} label={dict.shareLabel} className={styles.share} />
         <m.div
           className={styles.heroText}
           initial={{ opacity: 0, y: 18 }}

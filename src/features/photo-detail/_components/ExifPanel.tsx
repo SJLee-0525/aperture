@@ -1,6 +1,7 @@
 "use client";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { ShareButton } from "@/components/ShareButton";
 import { DetailMiniMap } from "@/features/photo-detail/_components/DetailMiniMap";
 import { formatShotAt } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -18,6 +19,7 @@ type Props = {
 const ExifPanel = ({ photo, tagLabels }: Props) => {
   const { dict, lang } = useLang();
   const exif = photo.exif;
+  const title = pickText(photo.title, lang);
 
   const rows: Array<[string, string]> = [
     [dict.focalLabel, exif.focalLength],
@@ -33,8 +35,11 @@ const ExifPanel = ({ photo, tagLabels }: Props) => {
   return (
     <div className={styles.panel}>
       <div className={styles.head}>
-        <div className={styles.titleWrap}>
-          <div className={styles.title}>{pickText(photo.title, lang)}</div>
+        <div className={styles.titleRow}>
+          <div className={styles.titleWrap}>
+            <div className={styles.title}>{title}</div>
+          </div>
+          <ShareButton title={title} label={dict.sharePhotoLabel} className={styles.shareButton} />
         </div>
         <div className={styles.exifHead}>
           <span className={styles.cam}>{photo.camera}</span>

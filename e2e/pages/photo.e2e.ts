@@ -61,6 +61,26 @@ test.describe("Photo", () => {
     expect(states.slice(firstLocked)).toEqual(states.slice(firstLocked).map(() => "hidden"));
   });
 
+  test("로딩 프레임 전환 중 페이지 배경이 비치지 않는다", async ({ page }) => {
+    await page.route("**/_next/image?*", async (route) => {
+      const width = Number(new URL(route.request().url()).searchParams.get("w"));
+      if (width >= 640) await new Promise((resolve) => setTimeout(resolve, 300));
+      await route.continue();
+    });
+    await page.goto("/photo");
+    await page.locator("[data-photo-index='0'] a").click();
+
+    const pending = page.locator("[data-photo-pending-frame]");
+    await expect(pending).toBeVisible();
+    await expect(pending).toHaveCount(0);
+
+    const opacity = await page.locator("[data-photo-modal-root]").evaluate((root) => ({
+      root: getComputedStyle(root).opacity,
+      frame: getComputedStyle(root.querySelector("[data-photo-modal-frame]")!).opacity,
+    }));
+    expect(opacity).toEqual({ root: "1", frame: "1" });
+  });
+
   test("사진을 검색하고 상세 모달을 열고 닫는다", async ({ page }) => {
     await page.goto("/photo");
     await photoAssertions.filterPhotos(page);

@@ -73,6 +73,8 @@ type UIDict = {
   menuCloseLabel: string;
   homeLabel: string;
   closeLabel: string;
+  shareLabel: string;
+  sharePhotoLabel: string;
   previousImageLabel: string;
   nextImageLabel: string;
   expandPhotoInfoLabel: string;
@@ -193,6 +195,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     menuCloseLabel: "메뉴 닫기",
     homeLabel: "이성준 홈",
     closeLabel: "닫기",
+    shareLabel: "공유하기",
+    sharePhotoLabel: "사진 공유하기",
     previousImageLabel: "이전 이미지",
     nextImageLabel: "다음 이미지",
     expandPhotoInfoLabel: "사진 정보 펼치기",
@@ -308,6 +312,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     menuCloseLabel: "Close menu",
     homeLabel: "Sungjoon Lee home",
     closeLabel: "Close",
+    shareLabel: "Share",
+    sharePhotoLabel: "Share photo",
     previousImageLabel: "Previous image",
     nextImageLabel: "Next image",
     expandPhotoInfoLabel: "Expand photo information",

@@ -69,6 +69,8 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
         mobileFull
         crumb={selected ? pickText(selected.category, lang) : ""}
         label={selected ? pickText(selected.title, lang) : ""}
+        shareTitle={selected ? pickText(selected.title, lang) : undefined}
+        shareLabel={dict.shareLabel}
       >
         {selected ? (
           <div className={styles.rec}>

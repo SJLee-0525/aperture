@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
+import { CloseIcon } from "@/components/CloseIcon";
 import { ExifStrip } from "@/components/ExifStrip";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { ExifPanel } from "@/features/photo-detail/_components/ExifPanel";
@@ -44,19 +45,6 @@ const subscribeMobile = (onChange: () => void) => {
 const readMobile = () => window.matchMedia(MOBILE_QUERY).matches;
 const readServerMobile = () => false;
 
-const closeIcon = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M5 5l14 14M19 5L5 19" />
-  </svg>
-);
 const chevLeft = (
   <svg
     viewBox="0 0 24 24"
@@ -244,13 +232,16 @@ const PhotoModal = ({
           ref={trapRef}
           tabIndex={-1}
           className={styles.modal}
+          data-photo-modal-root
           role={revealed ? "dialog" : undefined}
           aria-modal={revealed ? "true" : undefined}
           aria-label={revealed ? alt : undefined}
           aria-hidden={revealed ? undefined : true}
           inert={!revealed}
           initial={animateOnOpen ? { opacity: 0 } : false}
-          animate={{ opacity: revealed ? 1 : 0 }}
+          // 온디맨드 경로는 별도 pending 프레임이 로딩 전환을 소유한다.
+          // 그 아래 모달까지 투명하게 만들면 pending 제거 직후 페이지가 비친다.
+          animate={{ opacity: animateOnOpen ? (revealed ? 1 : 0) : 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
           onTouchStart={onDismissTouchStart}
@@ -267,11 +258,12 @@ const PhotoModal = ({
           <m.div
             ref={dismissSurfaceRef}
             className={styles.inner}
+            data-photo-modal-frame
             initial={animateOnOpen ? { opacity: 0, scale: 0.985 } : false}
             animate={
               animateOnOpen
                 ? { opacity: revealed ? 1 : 0, scale: revealed ? 1 : 0.985 }
-                : { opacity: revealed ? 1 : 0, y: revealed ? 0 : 14 }
+                : { opacity: 1, y: 0 }
             }
             exit={{ opacity: 0, scale: 0.985 }}
             transition={{ duration: 0.28, ease: EASE }}
@@ -354,7 +346,7 @@ const PhotoModal = ({
                 aria-label={dict.closeLabel}
                 onClick={close}
               >
-                {closeIcon}
+                <CloseIcon />
               </button>
               <AnimatePresence>
                 {showPhotoChrome ? (

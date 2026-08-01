@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
@@ -96,9 +97,13 @@ const MobileMenu = () => {
         aria-expanded={open}
         onClick={open ? close : openMenu}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          {open ? <path d="M5 5l14 14M19 5L5 19" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
-        </svg>
+        {open ? (
+          <CloseIcon />
+        ) : (
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        )}
       </button>
 
       {open && typeof document !== "undefined"

@@ -138,6 +138,8 @@ const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) =
       mobileFull
       crumb={crumb}
       label={label}
+      shareTitle={label}
+      shareLabel={dict.shareLabel}
     >
       {detail ? (
         <DevProjectDetailContent project={detail} />

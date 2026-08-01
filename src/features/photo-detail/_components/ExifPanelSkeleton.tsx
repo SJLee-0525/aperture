@@ -22,10 +22,13 @@ const ExifPanelSkeleton = ({ photo, tagCount }: Props) => {
   return (
     <div className={styles.panel} aria-hidden="true">
       <div className={styles.head}>
-        <div className={styles.titleWrap}>
-          <div className={styles.titleLine}>
-            <Skeleton width="72%" height={26} />
+        <div className={styles.titleRow}>
+          <div className={styles.titleWrap}>
+            <div className={styles.titleLine}>
+              <Skeleton width="72%" height={26} />
+            </div>
           </div>
+          <Skeleton width={32} height={32} />
         </div>
         <div className={styles.exifHead}>
           <Skeleton width={120} height={15} />

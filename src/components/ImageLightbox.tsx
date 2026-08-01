@@ -5,6 +5,7 @@ import Image from "next/image";
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { CloseIcon } from "@/components/CloseIcon";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
@@ -15,19 +16,6 @@ import styles from "./ImageLightbox.module.css";
 const EASE = [0.22, 1, 0.36, 1] as const;
 const CHROME_TRANSITION = { duration: 0.2, ease: EASE } as const;
 
-const closeIcon = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M5 5l14 14M19 5L5 19" />
-  </svg>
-);
 const chevLeft = (
   <svg
     viewBox="0 0 24 24"
@@ -302,7 +290,7 @@ const ImageLightbox = ({
             exit={{ opacity: 0 }}
             transition={CHROME_TRANSITION}
           >
-            {closeIcon}
+            <CloseIcon />
           </m.button>
         ) : null}
         {chromeVisible && count > 1 ? (

@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
+import { CloseIcon } from "@/components/CloseIcon";
+import { ShareButton } from "@/components/ShareButton";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
@@ -17,6 +19,8 @@ type Props = {
   maxWidth?: number; // 패널 최대 폭(px) — 연주 920 / 수상 600 등
   /** 모바일(≤640px)에서 패널을 화면 꽉 채움 — 콘텐츠 긴 상세 모달용(프로젝트·연주). */
   mobileFull?: boolean;
+  shareTitle?: string;
+  shareLabel?: string;
   children: React.ReactNode;
 };
 
@@ -33,6 +37,8 @@ const Modal = ({
   label,
   maxWidth,
   mobileFull,
+  shareTitle,
+  shareLabel,
   children,
 }: Props) => {
   useScrollLock(open);
@@ -68,9 +74,19 @@ const Modal = ({
       >
         <div className={styles.head}>
           <span className={styles.crumb}>{crumb}</span>
-          <button type="button" className={styles.close} aria-label={closeLabel} onClick={onClose}>
-            ×
-          </button>
+          <div className={styles.headActions}>
+            {shareTitle && shareLabel ? (
+              <ShareButton title={shareTitle} label={shareLabel} className={styles.share} />
+            ) : null}
+            <button
+              type="button"
+              className={styles.close}
+              aria-label={closeLabel}
+              onClick={onClose}
+            >
+              <CloseIcon />
+            </button>
+          </div>
         </div>
         <div className={styles.body}>{children}</div>
       </div>

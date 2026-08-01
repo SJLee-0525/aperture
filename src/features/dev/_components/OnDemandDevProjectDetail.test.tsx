@@ -14,6 +14,11 @@ vi.mock("next/dynamic", () => ({
       return <div>상세 콘텐츠 {project.id}</div>;
     },
 }));
+vi.mock("@/features/dev/_components/DevProjectDetail", () => ({
+  DevProjectDetailContent: ({ project }: { project: DevProject }) => (
+    <div>상세 콘텐츠 {project.id}</div>
+  ),
+}));
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({
   useLang: () => ({

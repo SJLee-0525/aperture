@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { CloseIcon } from "@/components/CloseIcon";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanelSkeleton";
 import { mergePhotoCache } from "@/features/photo-detail/_lib/photo-cache";
@@ -170,17 +171,7 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
                     aria-label={dict.closeLabel}
                     onClick={close}
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="17"
-                      height="17"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      aria-hidden="true"
-                    >
-                      <path d="M5 5l14 14M19 5L5 19" />
-                    </svg>
+                    <CloseIcon />
                   </button>
                   <div className={styles.state}>
                     {failedId === activeId || !knownActiveId ? (

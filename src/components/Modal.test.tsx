@@ -36,6 +36,35 @@ describe("Modal", () => {
     expect(screen.queryByText("상세 내용")).toBeNull();
   });
 
+  it("공유 정보가 있을 때만 닫기 버튼 왼쪽에 공유 버튼을 표시한다", () => {
+    const { rerender } = render(
+      <Modal
+        open
+        onClose={vi.fn()}
+        closeLabel="닫기"
+        label="프로젝트 상세"
+        shareTitle="프로젝트"
+        shareLabel="공유하기"
+      >
+        <p>상세 내용</p>
+      </Modal>,
+    );
+
+    const dialog = screen.getByRole("dialog");
+    const buttons = within(dialog).getAllByRole("button");
+    expect(buttons.map((button) => button.getAttribute("aria-label"))).toEqual([
+      "공유하기",
+      "닫기",
+    ]);
+
+    rerender(
+      <Modal open onClose={vi.fn()} closeLabel="닫기" label="수상 상세">
+        <p>수상 내용</p>
+      </Modal>,
+    );
+    expect(screen.queryByRole("button", { name: "공유하기" })).toBeNull();
+  });
+
   it("닫기 버튼과 스크림을 누르면 모달을 닫는다", () => {
     const onClose = vi.fn();
     render(

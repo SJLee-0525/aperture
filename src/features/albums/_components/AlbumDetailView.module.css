@@ -26,6 +26,8 @@
   z-index: 2;
   display: inline-flex;
   align-items: center;
+  height: 36px;
+  box-sizing: border-box;
   gap: 6px;
   padding: 8px 14px;
   background: rgba(0, 0, 0, 0.4);
@@ -37,6 +39,29 @@
 }
 .back:hover:not([data-cursor-snapped]) {
   background: rgba(0, 0, 0, 0.58);
+}
+.share {
+  position: absolute;
+  top: var(--s-5);
+  right: var(--s-6);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  color: var(--text-inverse);
+  cursor: pointer;
+}
+.share:hover:not([data-cursor-snapped]) {
+  background: rgba(0, 0, 0, 0.58);
+}
+.share:focus-visible {
+  outline: 2px solid var(--text-inverse);
+  outline-offset: 2px;
 }
 .heroText {
   position: relative;
