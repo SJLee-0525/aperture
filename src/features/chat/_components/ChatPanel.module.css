@@ -438,6 +438,7 @@
 @media (max-width: 640px) {
   .overlay {
     background: var(--bg);
+    transition: height 0.2s var(--ease);
   }
 
   .overlay::before {
@@ -467,6 +468,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition: none;
+  }
+
   .panel {
     animation: none;
   }

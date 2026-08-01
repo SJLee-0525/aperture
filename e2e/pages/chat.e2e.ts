@@ -75,14 +75,22 @@ test.describe("Chat", () => {
     });
 
     const overlay = page.locator("[data-chat-overlay]");
-    await expect(overlay).toHaveCSS("height", "492px");
+    await expect(overlay).toHaveCSS("height", "480px");
     await expect(overlay).toHaveCSS("top", "0px");
+    await page.evaluate(() => {
+      const viewport = window.visualViewport as VisualViewport & {
+        offsetTop: number;
+      };
+      viewport.offsetTop = 40;
+      viewport.dispatchEvent(new Event("scroll"));
+    });
+    await expect(overlay).toHaveCSS("height", "480px");
     const panel = page.getByRole("dialog", { name: "Ask Sungjoon." });
     await panel.evaluate((element) =>
       Promise.all(element.getAnimations().map((animation) => animation.finished)),
     );
     const panelBox = await panel.boundingBox();
-    expect(panelBox?.height).toBeCloseTo(492, -1);
+    expect(panelBox?.height).toBeCloseTo(480, -1);
     expect(panelBox?.y).toBeCloseTo(0, -1);
 
     await panel.getByRole("button", { name: "챗봇 닫기" }).click();

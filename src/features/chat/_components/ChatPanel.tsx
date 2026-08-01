@@ -98,21 +98,18 @@ const ChatPanel = ({ open, onClose }: Props) => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const height = viewport?.height ?? window.innerHeight;
-        const offsetTop = viewport?.offsetTop ?? 0;
-        // Safari는 키보드 전환 중 offsetTop을 여러 중간값으로 바꾼다. 상단을 따라
-        // 움직이지 않고 visual viewport의 하단만 추적해야 패널 전체가 왕복하지 않는다.
-        overlay.style.setProperty("--chat-viewport-height", `${height + offsetTop}px`);
+        // Safari의 포커스 자동 팬은 offsetTop과 scroll 이벤트를 여러 번 흔든다.
+        // 키보드가 실제로 줄인 visual viewport 높이만 반영해 패널 상단을 고정한다.
+        overlay.style.setProperty("--chat-viewport-height", `${height}px`);
       });
     };
 
     syncViewport();
     viewport?.addEventListener("resize", syncViewport);
-    viewport?.addEventListener("scroll", syncViewport);
     window.addEventListener("resize", syncViewport);
     return () => {
       cancelAnimationFrame(frame);
       viewport?.removeEventListener("resize", syncViewport);
-      viewport?.removeEventListener("scroll", syncViewport);
       window.removeEventListener("resize", syncViewport);
     };
   }, [open]);
