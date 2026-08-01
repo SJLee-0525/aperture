@@ -8,7 +8,6 @@
   background: transparent;
   color: var(--text-2);
   cursor: pointer;
-  border-radius: var(--r-pill);
   transition:
     background var(--dur),
     color var(--dur);
@@ -31,8 +30,8 @@
   color: var(--text);
 }
 .burger svg {
-  width: 18px;
-  height: 18px;
+  width: 19px;
+  height: 19px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.7;
@@ -88,7 +87,7 @@
   display: flex;
   flex-direction: column;
   background: transparent;
-  padding: 8px 16px 20px;
+  padding: 0px 16px;
   pointer-events: auto;
   /* clip-path는 iOS Safari에서 backdrop-filter 합성을 누락시켜 opacity로 전환한다. */
   animation: menuUnfold 0.42s var(--ease-spring) both;
