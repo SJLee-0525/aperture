@@ -62,6 +62,8 @@ const ChatPanel = ({ open, onClose }: Props) => {
   const panelRef = useFocusTrap(open);
   const overlayRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const messageListAtBottomRef = useRef(true);
+  const viewportTransitionRef = useRef(false);
   const reduceMotion = useReducedMotion();
   const announcement =
     messages.findLast(
@@ -101,13 +103,14 @@ const ChatPanel = ({ open, onClose }: Props) => {
     const bodyHeight = body.style.height;
     let fullViewportHeight = viewport.height;
     let frame = 0;
+    let settleFrame = 0;
 
     const syncHeight = () => {
       const messageList = listRef.current;
-      const stickToBottom =
-        messageList == null ||
-        messageList.scrollHeight - messageList.clientHeight - messageList.scrollTop <= 2;
+      const stickToBottom = messageListAtBottomRef.current;
+      viewportTransitionRef.current = true;
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(settleFrame);
       frame = requestAnimationFrame(() => {
         fullViewportHeight = Math.max(fullViewportHeight, viewport.height);
         const viewportHeight =
@@ -119,7 +122,16 @@ const ChatPanel = ({ open, onClose }: Props) => {
         root.scrollTop = 0;
         body.scrollTop = 0;
         window.scrollTo(0, 0);
-        if (messageList && stickToBottom) messageList.scrollTop = messageList.scrollHeight;
+        settleFrame = requestAnimationFrame(() => {
+          if (messageList && stickToBottom) {
+            const scrollBehavior = messageList.style.scrollBehavior;
+            messageList.style.scrollBehavior = "auto";
+            messageList.scrollTop = messageList.scrollHeight;
+            messageList.style.scrollBehavior = scrollBehavior;
+            messageListAtBottomRef.current = true;
+          }
+          viewportTransitionRef.current = false;
+        });
       });
     };
 
@@ -130,6 +142,8 @@ const ChatPanel = ({ open, onClose }: Props) => {
     window.addEventListener("resize", syncHeight);
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(settleFrame);
+      viewportTransitionRef.current = false;
       viewport.removeEventListener("resize", syncHeight);
       viewport.removeEventListener("scroll", syncHeight);
       viewport.removeEventListener("scrollend", syncHeight);
@@ -188,6 +202,12 @@ const ChatPanel = ({ open, onClose }: Props) => {
           data-custom-scroll-scope="local"
           role="log"
           aria-live="off"
+          onScroll={(event) => {
+            if (viewportTransitionRef.current) return;
+            const element = event.currentTarget;
+            messageListAtBottomRef.current =
+              element.scrollHeight - element.clientHeight - element.scrollTop <= 2;
+          }}
         >
           <AnimatePresence initial={false}>
             {messages.map((message) => (

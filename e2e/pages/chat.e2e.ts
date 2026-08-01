@@ -80,6 +80,11 @@ test.describe("Chat", () => {
     await page.evaluate(() => {
       const viewport = window.visualViewport as VisualViewport & { height: number };
       viewport.height = 480;
+      const overlay = document.querySelector<HTMLElement>("[data-chat-overlay]");
+      document.documentElement.style.height = "480px";
+      document.body.style.height = "480px";
+      overlay?.style.setProperty("--chat-viewport-height", "480px");
+      void document.documentElement.offsetHeight;
       viewport.dispatchEvent(new Event("resize"));
     });
 
