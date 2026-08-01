@@ -60,7 +60,6 @@ const ChatPanel = ({ open, onClose }: Props) => {
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
-  const overlayRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const announcement =
@@ -86,40 +85,10 @@ const ChatPanel = ({ open, onClose }: Props) => {
     });
   }, [messages, isReplying, open, reduceMotion]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-    const viewport = window.visualViewport;
-    let frame = 0;
-
-    const syncViewport = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const height = viewport?.height ?? window.innerHeight;
-        const offsetTop = viewport?.offsetTop ?? 0;
-        // 모바일 브라우저의 포커스 자동 팬이 만드는 scroll 중간값은 무시하고,
-        // resize 시 확정된 visual viewport 영역만 패널에 반영한다.
-        overlay.style.setProperty("--chat-viewport-height", `${height}px`);
-        overlay.style.setProperty("--chat-viewport-top", `${offsetTop}px`);
-      });
-    };
-
-    syncViewport();
-    viewport?.addEventListener("resize", syncViewport);
-    window.addEventListener("resize", syncViewport);
-    return () => {
-      cancelAnimationFrame(frame);
-      viewport?.removeEventListener("resize", syncViewport);
-      window.removeEventListener("resize", syncViewport);
-    };
-  }, [open]);
-
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div ref={overlayRef} className={styles.overlay} data-chat-overlay>
+    <div className={styles.overlay} data-chat-overlay>
       <button
         className={styles.scrim}
         type="button"

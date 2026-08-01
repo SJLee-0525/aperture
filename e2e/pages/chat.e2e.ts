@@ -15,21 +15,10 @@ const submit = async (page: Page, message: string, inputName: string | RegExp = 
 const chatMessages = (page: Page) => page.locator("#chat-message-scroll-container");
 
 test.describe("Chat", () => {
-  test("모바일 키보드가 열리면 visual viewport 높이에 맞춰 패널을 줄인다", async ({
+  test("모바일 챗봇은 표준 viewport 크기를 사용하고 JS 위치 보정을 하지 않는다", async ({
     page,
   }, testInfo) => {
-    test.skip(testInfo.project.name !== "mobile", "모바일 visual viewport에서만 검증");
-    await page.addInitScript(() => {
-      const viewport = new EventTarget();
-      Object.defineProperties(viewport, {
-        height: { configurable: true, value: 844, writable: true },
-        offsetTop: { configurable: true, value: 0, writable: true },
-      });
-      Object.defineProperty(window, "visualViewport", {
-        configurable: true,
-        value: viewport,
-      });
-    });
+    test.skip(testInfo.project.name !== "mobile", "모바일 viewport에서만 검증");
     await page.goto("/");
     await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
       "content",
@@ -68,35 +57,23 @@ test.describe("Chat", () => {
       .poll(() => page.evaluate(() => document.body.style.top))
       .toBe(`${-initialScrollY}px`);
 
-    await page.evaluate(() => {
-      const viewport = window.visualViewport as VisualViewport & {
-        height: number;
-        offsetTop: number;
-      };
-      viewport.height = 480;
-      viewport.offsetTop = 12;
-      viewport.dispatchEvent(new Event("resize"));
-    });
-
     const overlay = page.locator("[data-chat-overlay]");
-    await expect(overlay).toHaveCSS("height", "480px");
-    await expect(overlay).toHaveCSS("top", "12px");
-    await page.evaluate(() => {
-      const viewport = window.visualViewport as VisualViewport & {
-        offsetTop: number;
+    await expect(overlay).toHaveCSS("height", `${await page.evaluate(() => innerHeight)}px`);
+    const inlineViewportOverrides = await overlay.evaluate((element) => {
+      const style = (element as HTMLElement).style;
+      return {
+        top: style.getPropertyValue("--chat-viewport-top"),
+        height: style.getPropertyValue("--chat-viewport-height"),
       };
-      viewport.offsetTop = 40;
-      viewport.dispatchEvent(new Event("scroll"));
     });
-    await expect(overlay).toHaveCSS("height", "480px");
-    await expect(overlay).toHaveCSS("top", "12px");
+    expect(inlineViewportOverrides).toEqual({ top: "", height: "" });
     const panel = page.getByRole("dialog", { name: "Ask Sungjoon." });
     await panel.evaluate((element) =>
       Promise.all(element.getAnimations().map((animation) => animation.finished)),
     );
     const panelBox = await panel.boundingBox();
-    expect(panelBox?.height).toBeCloseTo(480, -1);
-    expect(panelBox?.y).toBeCloseTo(12, -1);
+    expect(panelBox?.height).toBeCloseTo(await page.evaluate(() => innerHeight), -1);
+    expect(panelBox?.y).toBeCloseTo(0, -1);
 
     await panel.getByRole("button", { name: "챗봇 닫기" }).click();
     await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");

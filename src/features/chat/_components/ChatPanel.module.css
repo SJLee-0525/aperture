@@ -3,10 +3,10 @@
   --chat-user-bubble-fg: var(--accent-contrast);
 
   position: fixed;
-  top: var(--chat-viewport-top, 0px);
+  top: 0;
   right: 0;
   left: 0;
-  height: var(--chat-viewport-height, 100dvh);
+  height: 100dvh;
   z-index: 90;
   pointer-events: none;
 }
@@ -438,9 +438,6 @@
 @media (max-width: 640px) {
   .overlay {
     background: var(--bg);
-    transition:
-      top 0.2s var(--ease),
-      height 0.2s var(--ease);
   }
 
   .overlay::before {
@@ -470,10 +467,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .overlay {
-    transition: none;
-  }
-
   .panel {
     animation: none;
   }
