@@ -437,6 +437,7 @@
 
 @media (max-width: 640px) {
   .overlay {
+    position: absolute;
     background: var(--bg);
   }
 

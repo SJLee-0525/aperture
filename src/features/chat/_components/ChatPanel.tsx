@@ -91,13 +91,26 @@ const ChatPanel = ({ open, onClose }: Props) => {
 
     const overlay = overlayRef.current;
     const viewport = window.visualViewport;
-    if (!overlay || !viewport) return;
+    const mobile = window.matchMedia("(max-width: 640px)").matches;
+    if (!overlay || !viewport || !mobile) return;
+    const root = document.documentElement;
+    const { body } = document;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const rootHeight = root.style.height;
+    const bodyHeight = body.style.height;
     let frame = 0;
 
     const syncHeight = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        overlay.style.setProperty("--chat-viewport-height", `${viewport.height}px`);
+        const height = `${viewport.height}px`;
+        root.style.height = height;
+        body.style.height = height;
+        overlay.style.setProperty("--chat-viewport-height", height);
+        root.scrollTop = 0;
+        body.scrollTop = 0;
+        window.scrollTo(0, 0);
       });
     };
 
@@ -106,6 +119,9 @@ const ChatPanel = ({ open, onClose }: Props) => {
     return () => {
       cancelAnimationFrame(frame);
       viewport.removeEventListener("resize", syncHeight);
+      root.style.height = rootHeight;
+      body.style.height = bodyHeight;
+      window.scrollTo(scrollX, scrollY);
     };
   }, [open]);
 
