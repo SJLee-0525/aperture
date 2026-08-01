@@ -3,10 +3,14 @@
 import { useCallback, useState } from "react";
 
 import { extractExif, type ExtractedExif } from "@/lib/exif/extract";
-import { uploadPhotoImage, uploadPhotoThumbnail } from "@/lib/firebase/storage";
+import { uploadPhotoImage, uploadPhotoPreview, uploadPhotoThumbnail } from "@/lib/firebase/storage";
 import type { ImageMeta } from "@/types/image";
 
-import { compressThumbnailToWebp, compressToWebp } from "@/features/image-upload/_lib/compress";
+import {
+  compressPreviewToWebp,
+  compressThumbnailToWebp,
+  compressToWebp,
+} from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
 /** 업로드 파이프라인 산출물 — 관리자 폼 자동 채움에 필요한 값 일체. */
@@ -34,21 +38,26 @@ const useImageUpload = (photoId: string) => {
           extractExif(file), // ① 압축 前 EXIF·GPS
           readDimensions(file), // ② 원본 크기
         ]);
-        const [compressed, thumbnail] = await Promise.all([
+        const [compressed, preview, thumbnail] = await Promise.all([
           compressToWebp(file),
+          compressPreviewToWebp(file),
           compressThumbnailToWebp(file),
-        ]); // ③ 메인·목록용 webp 병렬 압축
-        const [stored, thumbnailSize, mainUpload, thumbnailUpload] = await Promise.all([
-          readDimensions(compressed),
-          readDimensions(thumbnail),
-          uploadPhotoImage(photoId, compressed),
-          uploadPhotoThumbnail(photoId, thumbnail),
-        ]); // ④ 크기 확인과 메인·썸네일 업로드 병렬 실행
+        ]); // ③ 메인·카드용 프리뷰·작은 썸네일 webp 병렬 압축
+        const [stored, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
+          await Promise.all([
+            readDimensions(compressed),
+            readDimensions(preview),
+            readDimensions(thumbnail),
+            uploadPhotoImage(photoId, compressed),
+            uploadPhotoPreview(photoId, preview),
+            uploadPhotoThumbnail(photoId, thumbnail),
+          ]); // ④ 크기 확인과 세 이미지 업로드 병렬 실행
         return {
           image: {
             ...mainUpload,
             w: stored.w,
             h: stored.h,
+            preview: { ...previewUpload, w: previewSize.w, h: previewSize.h },
             thumbnail: { ...thumbnailUpload, w: thumbnailSize.w, h: thumbnailSize.h },
           },
           dimensions,

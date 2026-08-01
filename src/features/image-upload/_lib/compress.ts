@@ -14,5 +14,6 @@ const compressToWebp = async (file: File, maxWidthOrHeight = 2048): Promise<Blob
 };
 
 const compressThumbnailToWebp = (file: File): Promise<Blob> => compressToWebp(file, 320);
+const compressPreviewToWebp = (file: File): Promise<Blob> => compressToWebp(file, 960);
 
-export { compressThumbnailToWebp, compressToWebp };
+export { compressPreviewToWebp, compressThumbnailToWebp, compressToWebp };

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { useImageUpload, type UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
-import type { ImageMeta } from "@/types/image";
+import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import styles from "./PhotoUploadField.module.css";
 
@@ -24,6 +24,7 @@ type Props = {
 const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props) => {
   const { process, pending, error } = useImageUpload(photoId);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previewUrl = imageThumbnailUrl(image);
 
   useEffect(() => {
     onPendingChange(pending);
@@ -41,9 +42,9 @@ const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props
   return (
     <div className={styles.field}>
       <div className={styles.preview}>
-        {image?.url ? (
+        {previewUrl ? (
           <Image
-            src={image.url}
+            src={previewUrl}
             alt="업로드한 사진 미리보기"
             fill
             sizes="320px"

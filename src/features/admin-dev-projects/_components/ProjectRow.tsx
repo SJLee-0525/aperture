@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { adminDevProjectRoute } from "@/constants/routes";
 import type { AdminDevProjectListItem } from "@/types/admin";
-import { imagePreviewUrl } from "@/types/image";
+import { imageThumbnailUrl } from "@/types/image";
 
 import styles from "./ProjectRow.module.css";
 
@@ -19,7 +19,7 @@ type Props = {
 
 /** 정렬 가능한 프로젝트 행 — 드래그 핸들·대표 썸네일·제목·연도·공개 토글·수정/삭제. */
 const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
-  const previewUrl = imagePreviewUrl(project.cover);
+  const previewUrl = imageThumbnailUrl(project.cover);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: project.id,
   });

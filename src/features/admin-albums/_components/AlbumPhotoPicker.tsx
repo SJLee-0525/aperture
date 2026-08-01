@@ -13,7 +13,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import type { AdminPhotoListItem } from "@/types/admin";
-import { imagePreviewUrl } from "@/types/image";
+import { imageThumbnailUrl } from "@/types/image";
 
 import styles from "./AlbumPhotoPicker.module.css";
 import { SelectedPhotoChip } from "./SelectedPhotoChip";
@@ -142,7 +142,7 @@ const AlbumPhotoPicker = ({
             <ul className={styles.grid}>
               {visiblePhotos.map((photo) => {
                 const on = selectedSet.has(photo.id);
-                const previewUrl = imagePreviewUrl(photo.image);
+                const previewUrl = imageThumbnailUrl(photo.image);
                 return (
                   <li key={photo.id} className={styles.gridItem}>
                     <button

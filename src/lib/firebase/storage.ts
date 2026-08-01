@@ -42,18 +42,24 @@ const deleteImages = async (paths: Iterable<string>): Promise<void> => {
 
 /** 사진: photos/{photoId}/{uuid}.webp (EXIF 는 업로드 前 use-image-upload 에서 추출). */
 const uploadPhotoImage = (photoId: string, blob: Blob) => uploadWebp(`photos/${photoId}`, blob);
+const uploadPhotoPreview = (photoId: string, blob: Blob) =>
+  uploadWebp(`photos/${photoId}/previews`, blob);
 const uploadPhotoThumbnail = (photoId: string, blob: Blob) =>
   uploadWebp(`photos/${photoId}/thumbnails`, blob);
 const deletePhotoImages = (photoId: string) => deleteFolder(`photos/${photoId}`);
 
 /** 음악 포스터: music/{workId}/{uuid}.webp (EXIF 추출 없음 — 포스터는 좌표·촬영정보 불필요). */
 const uploadMusicPoster = (workId: string, blob: Blob) => uploadWebp(`music/${workId}`, blob);
+const uploadMusicPosterPreview = (workId: string, blob: Blob) =>
+  uploadWebp(`music/${workId}/previews`, blob);
 const uploadMusicPosterThumbnail = (workId: string, blob: Blob) =>
   uploadWebp(`music/${workId}/thumbnails`, blob);
 const deleteMusicWorkImages = (workId: string) => deleteFolder(`music/${workId}`);
 
 /** 개발 프로젝트 이미지(대표·갤러리): dev/{projectId}/{uuid}.webp (EXIF 추출 없음). */
 const uploadDevImage = (projectId: string, blob: Blob) => uploadWebp(`dev/${projectId}`, blob);
+const uploadDevPreview = (projectId: string, blob: Blob) =>
+  uploadWebp(`dev/${projectId}/previews`, blob);
 const uploadDevThumbnail = (projectId: string, blob: Blob) =>
   uploadWebp(`dev/${projectId}/thumbnails`, blob);
 const deleteDevProjectImages = (projectId: string) => deleteFolder(`dev/${projectId}`);
@@ -64,9 +70,12 @@ export {
   deleteMusicWorkImages,
   deletePhotoImages,
   uploadDevImage,
+  uploadDevPreview,
   uploadDevThumbnail,
   uploadMusicPoster,
+  uploadMusicPosterPreview,
   uploadMusicPosterThumbnail,
   uploadPhotoImage,
+  uploadPhotoPreview,
   uploadPhotoThumbnail,
 };

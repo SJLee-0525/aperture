@@ -17,7 +17,7 @@ const ImageMigrationPanel = () => {
   const [error, setError] = useState<string | null>(null);
 
   const run = async (dryRun: boolean) => {
-    if (!dryRun && !window.confirm("기존 문서와 Storage에 썸네일을 생성할까요?")) return;
+    if (!dryRun && !window.confirm("기존 문서와 Storage에 프리뷰·썸네일을 생성할까요?")) return;
     setPending(true);
     setError(null);
     setResult(null);
@@ -34,8 +34,8 @@ const ImageMigrationPanel = () => {
     <section className={styles.panel}>
       <h1 className={styles.title}>이미지 데이터 마이그레이션</h1>
       <p className={styles.description}>
-        썸네일이 없는 사진·음악 포스터·개발 이미지를 320px WebP로 생성하고, 앨범 커버 스냅샷을
-        보강합니다. 이미 완료된 항목은 건너뛰므로 다시 실행해도 안전합니다.
+        사진·음악 포스터·개발 이미지에 누락된 960px 프리뷰와 320px 썸네일 WebP를 생성하고, 앨범 커버
+        스냅샷을 보강합니다. 이미 완료된 파생본은 건너뛰므로 다시 실행해도 안전합니다.
       </p>
       <div className={styles.actions}>
         <button type="button" disabled={pending} onClick={() => run(true)}>

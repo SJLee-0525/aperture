@@ -6,6 +6,7 @@ import { Modal } from "@/components/Modal";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
+import { imagePreviewUrl } from "@/types/image";
 import type { MusicWork } from "@/types/music";
 
 import styles from "./MusicWorksView.module.css";
@@ -34,9 +35,9 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
               onClick={() => select(work.id)}
             >
               <div className={styles.poster} data-protected-image>
-                {work.poster.url ? (
+                {imagePreviewUrl(work.poster) ? (
                   <Image
-                    src={work.poster.url}
+                    src={imagePreviewUrl(work.poster)}
                     alt={pickText(work.title, lang)}
                     fill
                     sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"

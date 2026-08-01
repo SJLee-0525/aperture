@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   countVisibleAlbumPhotos,
   resolveAlbumCover,
+  resolveAlbumCoverPreview,
 } from "@/features/albums/_lib/resolve-album-cover";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
@@ -18,10 +19,31 @@ const album = (overrides: Partial<Album> = {}): Album => ({
   ...overrides,
 });
 
-const photo = (id: string): Photo =>
+const photo = (id: string, withDerivedImages = false): Photo =>
   ({
     id,
-    image: { url: `/${id}.webp`, path: `${id}.webp`, w: 100, h: 100 },
+    image: {
+      url: `/${id}.webp`,
+      path: `${id}.webp`,
+      w: 100,
+      h: 100,
+      ...(withDerivedImages
+        ? {
+            preview: {
+              url: `/${id}-preview.webp`,
+              path: `${id}-preview.webp`,
+              w: 960,
+              h: 640,
+            },
+            thumbnail: {
+              url: `/${id}-thumbnail.webp`,
+              path: `${id}-thumbnail.webp`,
+              w: 32,
+              h: 32,
+            },
+          }
+        : {}),
+    },
   }) as Photo;
 
 describe("resolveAlbumCover", () => {
@@ -35,6 +57,13 @@ describe("resolveAlbumCover", () => {
 
   it("앨범 사진이 없을 때 무관한 전체 목록 사진을 사용하지 않는다", () => {
     expect(resolveAlbumCover(album(), [photo("other-photo")])).toBeNull();
+  });
+
+  it("화면용 커버는 썸네일을 우선하고 메타데이터용 커버는 원본을 유지한다", () => {
+    const photos = [photo("photo-1", true)];
+
+    expect(resolveAlbumCoverPreview(album(), photos)).toBe("/photo-1-preview.webp");
+    expect(resolveAlbumCover(album(), photos)).toBe("/photo-1.webp");
   });
 });
 

@@ -24,6 +24,12 @@ describe("imagePaths", () => {
           path: "dev/id/three.webp",
           w: 200,
           h: 100,
+          preview: {
+            url: "/three-preview.webp",
+            path: "dev/id/previews/three.webp",
+            w: 960,
+            h: 480,
+          },
           thumbnail: {
             url: "/three-thumb.webp",
             path: "dev/id/thumbnails/three.webp",
@@ -36,6 +42,7 @@ describe("imagePaths", () => {
       "dev/id/one.webp",
       "dev/id/two.webp",
       "dev/id/three.webp",
+      "dev/id/previews/three.webp",
       "dev/id/thumbnails/three.webp",
     ]);
   });

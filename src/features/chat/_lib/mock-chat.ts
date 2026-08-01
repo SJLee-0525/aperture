@@ -14,7 +14,7 @@ type MockReply = {
 };
 
 const preview = (image: ImageMeta | null) => {
-  const source = image?.thumbnail ?? image;
+  const source = image?.thumbnail ?? image?.preview ?? image;
   return source?.url ? { url: source.url, width: source.w, height: source.h } : null;
 };
 

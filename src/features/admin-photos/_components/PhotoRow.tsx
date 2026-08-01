@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { adminPhotoRoute } from "@/constants/routes";
 import type { AdminPhotoListItem } from "@/types/admin";
-import { imagePreviewUrl } from "@/types/image";
+import { imageThumbnailUrl } from "@/types/image";
 
 import styles from "./PhotoRow.module.css";
 
@@ -19,7 +19,7 @@ type Props = {
 
 /** 정렬 가능한 사진 행 — 드래그 핸들·썸네일·제목·공개 토글·수정/삭제. */
 const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
-  const previewUrl = imagePreviewUrl(photo.image);
+  const previewUrl = imageThumbnailUrl(photo.image);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
   });

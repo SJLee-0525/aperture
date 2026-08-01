@@ -36,7 +36,7 @@
 | 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                |
 | 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                             |
 | DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)               |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 압축** (사진·음악 포스터·개발 썸네일)                  |
+| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)     |
 | 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**  |
 | i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음). **전 섹션 이중언어**     |
 | 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter) |
@@ -59,7 +59,7 @@
    클라이언트 코드의 인증 가드는 UX 편의일 뿐, 보안이 아니다.
 2. **관리자 판별 = 단일 UID 비교.** Rules의 `isAdmin()` 함수에서 본인 UID 하드코딩.
 3. **이미지 흐름**: 브라우저에서 ① `exifr`로 EXIF·좌표 추출(**압축 前 ★**, 사진만) → ② 원본 dimension 추출 →
-   ③ `browser-image-compression`으로 webp(~2048px) 압축 → ④ Storage 직접 업로드 → ⑤ 다운로드 URL + 메타를 Firestore에 저장.
+   ③ `browser-image-compression`으로 webp(2048px 메인·960px 프리뷰·320px 썸네일) 압축 → ④ Storage 직접 업로드 → ⑤ 다운로드 URL + 메타를 Firestore에 저장.
    (음악 포스터·개발 썸네일은 EXIF 추출 없이 ②③④⑤만.)
 4. **방문자 read 규칙**: `published == true` 문서만. 초안은 관리자만 읽기 가능. **전 컬렉션 공통.**
 5. **firebase-admin SDK 사용 금지.** 서비스 계정 키가 필요해지는 순간 서버리스 원칙이 깨진다.
@@ -83,10 +83,10 @@
 
 ### 사진 섹션 (기존)
 
-| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                                                    |
-| -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h,thumbnail?{url,path,w,h}}, order, published |
-| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, cover?(관리자 목록용 이미지 스냅샷), photoIds[](**수동 순서**), order, published                                                                                                                            |
+| 컬렉션   | 역할             | 주요 필드                                                                                                                                                                                                                                               |
+| -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `photos` | 사진 (작업)      | title{ko,en}, shotAt(TS), camera, lens, exif{aperture,shutter,iso,focalLength,ev,wb,metering,flash}, dimensions{w,h}, aspectRatio, place{ko,en}, coords{lat,lng}\|null, tags[](태그 id 참조), image{url,path,w,h,preview?,thumbnail?}, order, published |
+| `albums` | 앨범 (사진 묶음) | title{ko,en}, subtitle{ko,en}, **coverPhotoId**, cover?(관리자 목록용 이미지 스냅샷), photoIds[](**수동 순서**), order, published                                                                                                                       |
 
 ### 음악 섹션 (신규)
 
@@ -206,12 +206,12 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 
 ## 무료 한도 가드
 
-| 리소스       | 무료 한도                          | 이 프로젝트 대응                                          |
-| ------------ | ---------------------------------- | --------------------------------------------------------- |
-| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 쓰기는 관리자만 허용  |
-| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 브라우저 압축 (webp, 긴 변 ~2048px). next/image |
-| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                         |
-| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드 |
+| 리소스       | 무료 한도                          | 이 프로젝트 대응                                                    |
+| ------------ | ---------------------------------- | ------------------------------------------------------------------- |
+| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 쓰기는 관리자만 허용            |
+| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 3단 WebP 압축. Vercel 최적화 없이 용도별 파생본 직접 전송 |
+| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                                   |
+| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드           |
 
 ## 개발 명령어
 

@@ -19,7 +19,7 @@ const section = (title: string, lines: Array<string | null>) =>
   [`## ${title}`, ...lines.filter((item): item is string => Boolean(item))].join("\n");
 
 const preview = (image: ImageMeta | null | undefined): ChatReference["image"] => {
-  const source = image?.thumbnail ?? image;
+  const source = image?.thumbnail ?? image?.preview ?? image;
   return source?.url ? { url: source.url, width: source.w, height: source.h } : null;
 };
 

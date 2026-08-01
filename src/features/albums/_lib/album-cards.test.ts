@@ -15,20 +15,35 @@ const album = (overrides: Partial<Album> = {}): Album => ({
   ...overrides,
 });
 
-const photo = (id: string): Photo =>
+const photo = (id: string, withPreview = false): Photo =>
   ({
     id,
-    image: { url: `/${id}.webp`, path: `${id}.webp`, w: 100, h: 100 },
+    image: {
+      url: `/${id}.webp`,
+      path: `${id}.webp`,
+      w: 100,
+      h: 100,
+      ...(withPreview
+        ? {
+            preview: {
+              url: `/${id}-preview.webp`,
+              path: `${id}-preview.webp`,
+              w: 960,
+              h: 640,
+            },
+          }
+        : {}),
+    },
   }) as Photo;
 
 describe("toAlbumCards", () => {
   it("커버 URL·공개 장수·표시 필드만 담은 카드로 투영한다", () => {
-    expect(toAlbumCards([album()], [photo("photo-1"), photo("photo-2")])).toEqual([
+    expect(toAlbumCards([album()], [photo("photo-1", true), photo("photo-2")])).toEqual([
       {
         id: "album-1",
         title: { ko: "앨범", en: "Album" },
         subtitle: { ko: "부제", en: "Subtitle" },
-        coverUrl: "/photo-1.webp",
+        coverUrl: "/photo-1-preview.webp",
         count: 2,
       },
     ]);

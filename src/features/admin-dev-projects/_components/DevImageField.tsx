@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
-import type { ImageMeta } from "@/types/image";
+import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import styles from "./DevImageField.module.css";
 
@@ -34,6 +34,7 @@ const DevImageField = ({
   const { process, processBatch, pending, pendingCount, error } = useDevImageUpload(projectId);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const coverPreviewUrl = imageThumbnailUrl(cover);
 
   useEffect(() => {
     onPendingChange(pending);
@@ -69,9 +70,9 @@ const DevImageField = ({
     <div className={styles.wrap}>
       <div className={styles.coverBlock}>
         <div className={styles.preview}>
-          {cover?.url ? (
+          {coverPreviewUrl ? (
             <Image
-              src={cover.url}
+              src={coverPreviewUrl}
               alt="대표 이미지 미리보기"
               fill
               sizes="240px"
@@ -132,7 +133,7 @@ const DevImageField = ({
               <li key={image.path || index} className={styles.thumbItem}>
                 <span className={styles.thumb}>
                   <Image
-                    src={image.url}
+                    src={imageThumbnailUrl(image)}
                     alt={`갤러리 이미지 ${index + 1}`}
                     fill
                     sizes="120px"

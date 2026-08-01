@@ -6,6 +6,7 @@ import { migrateImageThumbnails } from "@/features/admin-maintenance/_lib/migrat
 import type { ImageMeta } from "@/types/image";
 
 const mocks = vi.hoisted(() => ({
+  compressPreviewToWebp: vi.fn(),
   compressThumbnailToWebp: vi.fn(),
   currentUser: null as { getIdToken: ReturnType<typeof vi.fn> } | null,
   devList: vi.fn(),
@@ -17,12 +18,16 @@ const mocks = vi.hoisted(() => ({
   readDimensions: vi.fn(),
   updateAlbum: vi.fn(),
   updatePhoto: vi.fn(),
+  uploadDevPreview: vi.fn(),
   uploadDevThumbnail: vi.fn(),
+  uploadMusicPosterPreview: vi.fn(),
   uploadMusicPosterThumbnail: vi.fn(),
+  uploadPhotoPreview: vi.fn(),
   uploadPhotoThumbnail: vi.fn(),
 }));
 
 vi.mock("@/features/image-upload/_lib/compress", () => ({
+  compressPreviewToWebp: mocks.compressPreviewToWebp,
   compressThumbnailToWebp: mocks.compressThumbnailToWebp,
 }));
 vi.mock("@/features/image-upload/_lib/read-dimensions", () => ({
@@ -50,17 +55,32 @@ vi.mock("@/lib/firebase/client", () => ({
   },
 }));
 vi.mock("@/lib/firebase/storage", () => ({
+  uploadDevPreview: mocks.uploadDevPreview,
   uploadDevThumbnail: mocks.uploadDevThumbnail,
+  uploadMusicPosterPreview: mocks.uploadMusicPosterPreview,
   uploadMusicPosterThumbnail: mocks.uploadMusicPosterThumbnail,
+  uploadPhotoPreview: mocks.uploadPhotoPreview,
   uploadPhotoThumbnail: mocks.uploadPhotoThumbnail,
 }));
 
-const image = (name: string, thumbnail?: ImageMeta["thumbnail"]): ImageMeta => ({
+const image = (
+  name: string,
+  thumbnail?: ImageMeta["thumbnail"],
+  preview?: ImageMeta["preview"],
+): ImageMeta => ({
   url: `https://images.example/${name}.webp`,
   path: `${name}.webp`,
   w: 1200,
   h: 800,
+  ...(preview ? { preview } : {}),
   ...(thumbnail ? { thumbnail } : {}),
+});
+
+const preview = (name: string) => ({
+  url: `https://previews.example/${name}.webp`,
+  path: `previews/${name}.webp`,
+  w: 960,
+  h: 640,
 });
 
 const thumbnail = (name: string) => ({
@@ -80,17 +100,30 @@ describe("migrateImageThumbnails", () => {
     mocks.listAlbumsAdmin.mockResolvedValue([]);
     mocks.musicList.mockResolvedValue([]);
     mocks.devList.mockResolvedValue([]);
+    mocks.compressPreviewToWebp.mockResolvedValue(new Blob(["preview"], { type: "image/webp" }));
     mocks.compressThumbnailToWebp.mockResolvedValue(
       new Blob(["thumbnail"], { type: "image/webp" }),
     );
     mocks.readDimensions.mockResolvedValue({ w: 320, h: 213 });
+    mocks.uploadPhotoPreview.mockResolvedValue({
+      url: "https://previews.example/photo.webp",
+      path: "previews/photo.webp",
+    });
     mocks.uploadPhotoThumbnail.mockResolvedValue({
       url: "https://thumbs.example/photo.webp",
       path: "thumbs/photo.webp",
     });
+    mocks.uploadMusicPosterPreview.mockResolvedValue({
+      url: "https://previews.example/music.webp",
+      path: "previews/music.webp",
+    });
     mocks.uploadMusicPosterThumbnail.mockResolvedValue({
       url: "https://thumbs.example/music.webp",
       path: "thumbs/music.webp",
+    });
+    mocks.uploadDevPreview.mockResolvedValue({
+      url: "https://previews.example/dev.webp",
+      path: "previews/dev.webp",
     });
     mocks.uploadDevThumbnail.mockResolvedValue({
       url: "https://thumbs.example/dev.webp",
@@ -107,14 +140,15 @@ describe("migrateImageThumbnails", () => {
 
   it("dry-run은 누락된 썸네일과 갱신될 앨범만 집계하고 외부 쓰기를 하지 않는다", async () => {
     const readyThumbnail = thumbnail("ready");
+    const readyPreview = preview("ready");
     mocks.listPhotosAdmin.mockResolvedValue([
       asFixture({ id: "photo-missing", image: image("photo-missing") }),
-      asFixture({ id: "photo-ready", image: image("photo-ready", readyThumbnail) }),
+      asFixture({ id: "photo-ready", image: image("photo-ready", readyThumbnail, readyPreview) }),
       asFixture({ id: "photo-empty", image: { ...image("photo-empty"), url: "" } }),
     ]);
     mocks.musicList.mockResolvedValue([
       asFixture({ id: "work-missing", poster: image("work-missing") }),
-      asFixture({ id: "work-ready", poster: image("work-ready", readyThumbnail) }),
+      asFixture({ id: "work-ready", poster: image("work-ready", readyThumbnail, readyPreview) }),
     ]);
     mocks.devList.mockResolvedValue([
       asFixture({
@@ -122,7 +156,7 @@ describe("migrateImageThumbnails", () => {
         cover: image("dev-cover"),
         images: [
           image("dev-missing"),
-          image("dev-ready", readyThumbnail),
+          image("dev-ready", readyThumbnail, readyPreview),
           { ...image("dev-empty"), url: "" },
         ],
       }),
@@ -132,7 +166,7 @@ describe("migrateImageThumbnails", () => {
       asFixture({
         id: "album-ready",
         coverPhotoId: "photo-ready",
-        cover: image("photo-ready", readyThumbnail),
+        cover: image("photo-ready", readyThumbnail, readyPreview),
       }),
       asFixture({ id: "album-orphan", coverPhotoId: "unknown", cover: null }),
     ]);
@@ -203,20 +237,54 @@ describe("migrateImageThumbnails", () => {
     expect(mocks.musicUpdate).toHaveBeenCalledWith(
       "work-1",
       expect.objectContaining({
-        poster: expect.objectContaining({ thumbnail: thumbnail("music") }),
+        poster: expect.objectContaining({
+          preview: expect.objectContaining({ url: "https://previews.example/music.webp" }),
+          thumbnail: thumbnail("music"),
+        }),
       }),
     );
     expect(mocks.devUpdate).toHaveBeenCalledWith(
       "project-1",
       expect.objectContaining({
-        cover: expect.objectContaining({ thumbnail: thumbnail("dev") }),
-        images: [expect.objectContaining({ thumbnail: thumbnail("dev") })],
+        cover: expect.objectContaining({
+          preview: expect.objectContaining({ url: "https://previews.example/dev.webp" }),
+          thumbnail: thumbnail("dev"),
+        }),
+        images: [
+          expect.objectContaining({
+            preview: expect.objectContaining({ url: "https://previews.example/dev.webp" }),
+            thumbnail: thumbnail("dev"),
+          }),
+        ],
       }),
     );
     expect(mocks.updateAlbum).toHaveBeenCalledWith(
       "album-1",
       expect.objectContaining({
-        cover: expect.objectContaining({ thumbnail: thumbnail("photo") }),
+        cover: expect.objectContaining({
+          preview: expect.objectContaining({ url: "https://previews.example/photo.webp" }),
+          thumbnail: thumbnail("photo"),
+        }),
+      }),
+    );
+  });
+
+  it("기존 썸네일은 유지하고 누락된 960px 프리뷰만 생성한다", async () => {
+    const existingThumbnail = thumbnail("existing");
+    mocks.listPhotosAdmin.mockResolvedValue([
+      asFixture({ id: "photo-1", image: image("photo", existingThumbnail) }),
+    ]);
+
+    await migrateImageThumbnails(false);
+
+    expect(mocks.compressPreviewToWebp).toHaveBeenCalledOnce();
+    expect(mocks.uploadPhotoPreview).toHaveBeenCalledOnce();
+    expect(mocks.compressThumbnailToWebp).not.toHaveBeenCalled();
+    expect(mocks.uploadPhotoThumbnail).not.toHaveBeenCalled();
+    expect(mocks.updatePhoto).toHaveBeenCalledWith(
+      "photo-1",
+      expect.objectContaining({
+        image: expect.objectContaining({ thumbnail: existingThumbnail }),
       }),
     );
   });

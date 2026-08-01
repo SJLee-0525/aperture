@@ -4,6 +4,7 @@ import Link from "next/link";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
 import type { GalleryPhoto } from "@/types/gallery-photo";
+import { imagePreviewUrl } from "@/types/image";
 import type { Lang } from "@/types/lang";
 
 import styles from "./PhotoTile.module.css";
@@ -54,7 +55,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }:
       }}
     >
       <Image
-        src={photo.image.url}
+        src={imagePreviewUrl(photo.image)}
         alt={title}
         fill
         priority={priority}

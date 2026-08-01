@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { adminMusicWorkRoute } from "@/constants/routes";
 import type { AdminMusicWorkListItem } from "@/types/admin";
-import { imagePreviewUrl } from "@/types/image";
+import { imageThumbnailUrl } from "@/types/image";
 
 import styles from "./WorkRow.module.css";
 
@@ -27,7 +27,7 @@ const formatDate = (date: Date): string => {
 
 /** 정렬 가능한 연주 행 — 드래그 핸들·포스터 썸네일·제목·날짜·공개 토글·수정/삭제. */
 const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
-  const previewUrl = imagePreviewUrl(work.poster);
+  const previewUrl = imageThumbnailUrl(work.poster);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: work.id,
   });

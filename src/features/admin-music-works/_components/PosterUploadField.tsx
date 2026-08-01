@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { usePosterUpload } from "@/features/image-upload/_hooks/use-poster-upload";
-import type { ImageMeta } from "@/types/image";
+import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import styles from "./PosterUploadField.module.css";
 
@@ -23,6 +23,7 @@ type Props = {
 const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props) => {
   const { process, pending, error } = usePosterUpload(workId);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previewUrl = imageThumbnailUrl(poster);
 
   useEffect(() => {
     onPendingChange(pending);
@@ -40,9 +41,9 @@ const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props)
   return (
     <div className={styles.field}>
       <div className={styles.preview}>
-        {poster?.url ? (
+        {previewUrl ? (
           <Image
-            src={poster.url}
+            src={previewUrl}
             alt="업로드한 포스터 미리보기"
             fill
             sizes="180px"

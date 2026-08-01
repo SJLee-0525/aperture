@@ -1,7 +1,7 @@
 import { ROUTES } from "@/constants/routes";
 import type { Album } from "@/types/album";
 import type { DevProject } from "@/types/dev";
-import { imagePreviewUrl } from "@/types/image";
+import { imageThumbnailUrl } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicMedia, MusicWork } from "@/types/music";
 import type { Photo } from "@/types/photo";
@@ -46,7 +46,7 @@ const createSearchDocuments = ({
   const albumImageUrl = (album: Album): string => {
     for (const photoId of [album.coverPhotoId, ...album.photoIds]) {
       if (!album.photoIds.includes(photoId)) continue;
-      const imageUrl = imagePreviewUrl(photoById.get(photoId)?.image);
+      const imageUrl = imageThumbnailUrl(photoById.get(photoId)?.image);
       if (imageUrl) return imageUrl;
     }
     return "";
@@ -59,7 +59,7 @@ const createSearchDocuments = ({
       title: photo.title,
       text: joinSearchText([photo.title, photo.place], [photo.camera, photo.lens]),
       meta: photo.place,
-      imageUrl: imagePreviewUrl(photo.image),
+      imageUrl: imageThumbnailUrl(photo.image),
       href: `${ROUTES.PHOTO}?photo=${photo.id}`,
     })),
     ...albums.map((album) => ({
@@ -77,7 +77,7 @@ const createSearchDocuments = ({
       title: work.title,
       text: joinSearchText([work.title, work.subtitle, work.venue, work.category], work.program),
       meta: work.subtitle,
-      imageUrl: imagePreviewUrl(work.poster),
+      imageUrl: imageThumbnailUrl(work.poster),
       href: `${ROUTES.MUSIC}?work=${work.id}`,
     })),
     ...awards.map((award) => ({
@@ -103,7 +103,7 @@ const createSearchDocuments = ({
       title: project.title,
       text: joinSearchText([project.title, project.category, project.summary], project.techTags),
       meta: project.category,
-      imageUrl: imagePreviewUrl(project.cover),
+      imageUrl: imageThumbnailUrl(project.cover),
       href: `${ROUTES.DEV_PROJECTS}?project=${project.id}`,
     })),
   ];

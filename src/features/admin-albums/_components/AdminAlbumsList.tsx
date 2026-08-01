@@ -14,7 +14,7 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { AlbumRow } from "@/features/admin-albums/_components/AlbumRow";
 import { useAlbumsAdmin } from "@/features/admin-albums/_hooks/use-albums-admin";
-import { imagePreviewUrl } from "@/types/image";
+import { imageThumbnailUrl } from "@/types/image";
 
 import styles from "./AdminAlbumsList.module.css";
 
@@ -67,7 +67,7 @@ const AdminAlbumsPage = () => {
                 <AlbumRow
                   key={album.id}
                   album={album}
-                  coverUrl={imagePreviewUrl(album.cover)}
+                  coverUrl={imageThumbnailUrl(album.cover)}
                   onTogglePublished={togglePublished}
                   onDelete={remove}
                 />

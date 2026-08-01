@@ -1,4 +1,5 @@
 import type { Album } from "@/types/album";
+import { imagePreviewUrl } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { Photo } from "@/types/photo";
 
@@ -24,7 +25,7 @@ const toAlbumCards = (albums: Album[], photos: Photo[]): AlbumCard[] => {
     let coverUrl: string | null = null;
     for (const photoId of [album.coverPhotoId, ...album.photoIds]) {
       if (!memberIds.has(photoId)) continue;
-      const url = photoById.get(photoId)?.image.url;
+      const url = imagePreviewUrl(photoById.get(photoId)?.image);
       if (url) {
         coverUrl = url;
         break;

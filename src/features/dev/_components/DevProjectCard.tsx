@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { pickText } from "@/lib/i18n/pick-text";
 import type { DevProjectCardData } from "@/types/dev";
+import { imagePreviewUrl } from "@/types/image";
 import type { Lang } from "@/types/lang";
 
 import styles from "./DevProjectsView.module.css";
@@ -15,7 +16,7 @@ type Props = {
 
 /** 목록에서 사용하는 프로젝트 요약 카드. */
 const DevProjectCard = ({ project, lang, onSelect, onPreload }: Props) => {
-  const coverUrl = project.cover?.url;
+  const coverUrl = imagePreviewUrl(project.cover);
   const hasCover = Boolean(coverUrl);
 
   return (

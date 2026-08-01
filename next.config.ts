@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Playwright는 실행 중인 로컬 dev 서버와 충돌하지 않도록 전용 distDir를 주입한다.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   images: {
+    // 업로드 단계에서 메인(2048px)·썸네일(320px) WebP를 직접 생성한다.
+    // Vercel Image Optimization 한도에 의존하지 않고 Storage 파일을 그대로 전달한다.
+    unoptimized: true,
     // Firebase Storage 다운로드 URL (P2부터). getDownloadURL은 firebasestorage.googleapis.com 반환.
     remotePatterns: [
       {

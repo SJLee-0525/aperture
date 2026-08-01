@@ -2,10 +2,14 @@
 
 import { useCallback, useState } from "react";
 
-import { uploadDevImage, uploadDevThumbnail } from "@/lib/firebase/storage";
+import { uploadDevImage, uploadDevPreview, uploadDevThumbnail } from "@/lib/firebase/storage";
 import type { ImageMeta } from "@/types/image";
 
-import { compressThumbnailToWebp, compressToWebp } from "@/features/image-upload/_lib/compress";
+import {
+  compressPreviewToWebp,
+  compressThumbnailToWebp,
+  compressToWebp,
+} from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 import { runLimited } from "@/features/image-upload/_lib/run-limited";
 
@@ -22,19 +26,24 @@ const useDevImageUpload = (projectId: string) => {
 
   const upload = useCallback(
     async (file: File): Promise<ImageMeta> => {
-      const [compressed, thumbnail] = await Promise.all([
+      const [compressed, preview, thumbnail] = await Promise.all([
         compressToWebp(file),
+        compressPreviewToWebp(file),
         compressThumbnailToWebp(file),
       ]);
-      const [size, thumbnailSize, mainUpload, thumbnailUpload] = await Promise.all([
-        readDimensions(compressed),
-        readDimensions(thumbnail),
-        uploadDevImage(projectId, compressed),
-        uploadDevThumbnail(projectId, thumbnail),
-      ]);
+      const [size, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
+        await Promise.all([
+          readDimensions(compressed),
+          readDimensions(preview),
+          readDimensions(thumbnail),
+          uploadDevImage(projectId, compressed),
+          uploadDevPreview(projectId, preview),
+          uploadDevThumbnail(projectId, thumbnail),
+        ]);
       return {
         ...mainUpload,
         ...size,
+        preview: { ...previewUpload, ...previewSize },
         thumbnail: { ...thumbnailUpload, ...thumbnailSize },
       };
     },

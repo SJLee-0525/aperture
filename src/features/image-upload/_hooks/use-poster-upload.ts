@@ -2,10 +2,18 @@
 
 import { useCallback, useState } from "react";
 
-import { uploadMusicPoster, uploadMusicPosterThumbnail } from "@/lib/firebase/storage";
+import {
+  uploadMusicPoster,
+  uploadMusicPosterPreview,
+  uploadMusicPosterThumbnail,
+} from "@/lib/firebase/storage";
 import type { ImageMeta } from "@/types/image";
 
-import { compressThumbnailToWebp, compressToWebp } from "@/features/image-upload/_lib/compress";
+import {
+  compressPreviewToWebp,
+  compressThumbnailToWebp,
+  compressToWebp,
+} from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
 /**
@@ -22,19 +30,24 @@ const usePosterUpload = (workId: string) => {
       setPending(true);
       setError(null);
       try {
-        const [compressed, thumbnail] = await Promise.all([
+        const [compressed, preview, thumbnail] = await Promise.all([
           compressToWebp(file),
+          compressPreviewToWebp(file),
           compressThumbnailToWebp(file),
         ]);
-        const [size, thumbnailSize, mainUpload, thumbnailUpload] = await Promise.all([
-          readDimensions(compressed),
-          readDimensions(thumbnail),
-          uploadMusicPoster(workId, compressed),
-          uploadMusicPosterThumbnail(workId, thumbnail),
-        ]);
+        const [size, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
+          await Promise.all([
+            readDimensions(compressed),
+            readDimensions(preview),
+            readDimensions(thumbnail),
+            uploadMusicPoster(workId, compressed),
+            uploadMusicPosterPreview(workId, preview),
+            uploadMusicPosterThumbnail(workId, thumbnail),
+          ]);
         return {
           ...mainUpload,
           ...size,
+          preview: { ...previewUpload, ...previewSize },
           thumbnail: { ...thumbnailUpload, ...thumbnailSize },
         };
       } catch (caught) {
