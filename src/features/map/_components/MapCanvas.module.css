@@ -132,7 +132,8 @@
 @media (max-width: 760px) {
   .canvas :global(.maplibregl-ctrl-top-right) {
     top: 10px;
-    right: 10px;
+    right: auto;
+    left: 10px;
   }
   .canvas :global(.maplibregl-ctrl-bottom-right) {
     right: 10px;

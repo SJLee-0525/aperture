@@ -51,8 +51,15 @@
   border-radius: var(--r-sm);
   font-size: var(--t-small);
   font-weight: 600;
-  transition: transform var(--dur) var(--ease);
+  text-decoration: none;
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
 }
-.chip:hover {
+.chip:hover:not([data-cursor-snapped]) {
   transform: translateY(-1px);
+}
+.chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }

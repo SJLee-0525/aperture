@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+
+import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { DevConfig } from "@/types/dev";
 
@@ -21,13 +24,14 @@ const DevStackView = ({ config }: { config: DevConfig }) => {
               <div className="u-label">{group.category}</div>
               <div className={styles.chips}>
                 {group.items.map((item) => (
-                  <span
+                  <Link
                     key={item.name}
+                    href={`${ROUTES.SEARCH}?q=${encodeURIComponent(item.name)}`}
                     className={styles.chip}
                     style={{ background: item.bg, color: item.fg, borderColor: item.bg }}
                   >
                     {item.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </div>

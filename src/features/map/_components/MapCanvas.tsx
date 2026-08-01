@@ -37,7 +37,10 @@ const POINT_LAYER = "unclustered";
 type Props = {
   locations: MapLocation[];
   onSelect: (id: string) => void;
+  onVisibleLocationsChange: (ids: string[]) => void;
 };
+
+const VIEWPORT_UPDATE_DELAY = 250;
 
 /**
  * 실제 지도 (MapLibre GL + CARTO 무료 타일). 사진 좌표를 클러스터링해서 표시한다.
@@ -46,7 +49,7 @@ type Props = {
  * 테마 토글 시 Positron↔Dark Matter 로 스타일 교체(교체 후 소스·레이어 재생성).
  * next/dynamic(ssr:false)로만 로드 — maplibre-gl은 window에 의존.
  */
-const MapCanvas = ({ locations, onSelect }: Props) => {
+const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -88,6 +91,19 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
       ...fit,
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+
+    let viewportUpdateTimer: ReturnType<typeof setTimeout> | undefined;
+    const updateVisibleLocations = () => {
+      clearTimeout(viewportUpdateTimer);
+      viewportUpdateTimer = setTimeout(() => {
+        const bounds = map.getBounds();
+        onVisibleLocationsChange(
+          locations
+            .filter((location) => bounds.contains([location.coords.lng, location.coords.lat]))
+            .map((location) => location.id),
+        );
+      }, VIEWPORT_UPDATE_DELAY);
+    };
 
     // 소스·레이어 추가(멱등) — 최초 로드 + 테마 교체(setStyle)마다 재생성한다.
     const render = () => {
@@ -150,6 +166,8 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
     };
 
     map.on("load", render);
+    map.on("load", updateVisibleLocations);
+    map.on("moveend", updateVisibleLocations);
     // setStyle 직후 styledata는 아직 isStyleLoaded=false일 수 있다.
     // 완성된 새 스타일을 보장하는 style.load에서 사용자 소스·레이어를 다시 붙인다.
     map.on("style.load", render);
@@ -193,11 +211,12 @@ const MapCanvas = ({ locations, onSelect }: Props) => {
     });
 
     return () => {
+      clearTimeout(viewportUpdateTimer);
       observer.disconnect();
       setMapCursorHover(false);
       map.remove();
     };
-  }, [locations, onSelect]);
+  }, [locations, onSelect, onVisibleLocationsChange]);
 
   return <div ref={containerRef} className={styles.canvas} />;
 };

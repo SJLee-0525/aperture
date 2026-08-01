@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { LocationList } from "@/features/map/_components/LocationList";
@@ -24,18 +24,39 @@ type Props = {
 /** 지도 — 위치 리스트 + 실제 지도(MapLibre+CARTO). 핀·리스트 클릭 → ?photo= 상세 모달. */
 const MapView = ({ locations }: Props) => {
   const router = useRouter();
+  const [visibleLocationIds, setVisibleLocationIds] = useState<string[] | null>(null);
   const photoIds = useMemo(() => locations.map((location) => location.id), [locations]);
+  const visibleLocations = useMemo(() => {
+    if (visibleLocationIds === null) return locations;
+    const visibleIds = new Set(visibleLocationIds);
+    return locations.filter((location) => visibleIds.has(location.id));
+  }, [locations, visibleLocationIds]);
   const onSelect = useCallback(
     (id: string) => router.push(`${ROUTES.PHOTO_MAP}?photo=${id}`, { scroll: false }),
     [router],
   );
+  const onVisibleLocationsChange = useCallback((ids: string[]) => {
+    setVisibleLocationIds((current) => {
+      if (
+        current?.length === ids.length &&
+        current.every((currentId, index) => currentId === ids[index])
+      ) {
+        return current;
+      }
+      return ids;
+    });
+  }, []);
 
   return (
     <>
       <div className={styles.view}>
-        <LocationList locations={locations} />
+        <LocationList locations={visibleLocations} />
         <div className={styles.stage}>
-          <MapCanvas locations={locations} onSelect={onSelect} />
+          <MapCanvas
+            locations={locations}
+            onSelect={onSelect}
+            onVisibleLocationsChange={onVisibleLocationsChange}
+          />
         </div>
       </div>
       <MapPhotoModal photoIds={photoIds} />
