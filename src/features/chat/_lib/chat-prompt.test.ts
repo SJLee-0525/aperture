@@ -8,6 +8,10 @@ describe("buildChatInstructions", () => {
 
     expect(prompt).toContain("자연스러운 한국어");
     expect(prompt).toContain("공개 정보만 근거");
+    expect(prompt).toContain("의도가 불명확한 입력");
+    expect(prompt).toContain("포트폴리오 밖의 가벼운 대화");
+    expect(prompt).toContain("가능한 다음 단계");
+    expect(prompt).toContain("알 수 없다는 이유만으로 /contact 페이지를 안내하지 않는다");
     expect(prompt).toContain("PROFILE_CONTEXT의 내부 경로만");
     expect(prompt).toContain("연락·문의·협업 방법을 묻지 않았다면 /contact 링크를 추가하지 않는다");
     expect(prompt).toContain(

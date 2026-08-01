@@ -50,6 +50,19 @@ const REFERENCES = { ko: mockReferences("ko"), en: mockReferences("en") } as con
 const REPLIES: Record<Lang, { test: RegExp; reply: MockReply }[]> = {
   ko: [
     {
+      test: /^(안녕|안녕하세요|반가워|하이|hello)[!?.\s]*$/i,
+      reply: {
+        content: "안녕하세요! 이성준의 사진, 음악, 개발 작업에 관해 궁금한 점을 물어보세요.",
+      },
+    },
+    {
+      test: /(?:사는 곳|거주|활동 지역).*(?:시간|몇 시)|(?:시간|몇 시).*(?:사는 곳|거주|활동 지역)/i,
+      reply: {
+        content:
+          "공개된 포트폴리오에는 현재 거주 지역이 나와 있지 않아 정확한 현지 시간은 알 수 없어요. 궁금한 도시를 알려주시면 그 지역을 기준으로 안내해 드릴게요.",
+      },
+    },
+    {
       test: /개발|프로젝트|react|프론트|코드/i,
       reply: {
         content:
@@ -85,6 +98,19 @@ const REPLIES: Record<Lang, { test: RegExp; reply: MockReply }[]> = {
     },
   ],
   en: [
+    {
+      test: /^(hello|hi|hey|good (?:morning|afternoon|evening))[!?.\s]*$/i,
+      reply: {
+        content: "Hello! Ask me anything about Sungjoon’s photography, music, or development work.",
+      },
+    },
+    {
+      test: /(?:live|residen|location).*(?:time|clock)|(?:time|clock).*(?:live|residen|location)/i,
+      reply: {
+        content:
+          "The public portfolio does not include a current place of residence, so I can’t determine the local time accurately. Tell me a city and I can help with that location instead.",
+      },
+    },
     {
       test: /develop|project|react|front.?end|code/i,
       reply: {
@@ -125,11 +151,11 @@ const REPLIES: Record<Lang, { test: RegExp; reply: MockReply }[]> = {
 const FALLBACK: Record<Lang, MockReply> = {
   ko: {
     content:
-      "현재는 목데이터로 답변하고 있어 정확한 내용을 찾지 못했어요. 사진, 음악, 개발 프로젝트 또는 연락 방법을 물어보세요.",
+      "무엇을 찾고 계신지 조금만 더 알려주실래요? 사진, 음악, 개발 작업에 관한 질문이라면 함께 찾아볼게요.",
   },
   en: {
     content:
-      "This prototype currently uses mock responses. Try asking about photography, music, development projects, or contact details.",
+      "Could you tell me a little more about what you’re looking for? I can help you explore the photography, music, or development work.",
   },
 };
 

@@ -21,4 +21,12 @@ describe("getMockReply", () => {
     expect(reference?.title).toBe("Harbor at Dawn");
     expect(reference?.subtitle).toBe("Minato, Tokyo");
   });
+
+  it.each([
+    ["안녕하세요", "안녕하세요!"],
+    ["4242", "조금만 더 알려주실래요"],
+    ["이성준이 사는 곳의 시간은 지금 몇 시야?", "현재 거주 지역"],
+  ])("%s 입력에 대화를 이어가는 응답을 제공한다", (question, expected) => {
+    expect(getMockReply(question, "ko").content).toContain(expected);
+  });
 });

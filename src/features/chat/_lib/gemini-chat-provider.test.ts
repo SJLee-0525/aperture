@@ -16,6 +16,38 @@ const response = (body: unknown, status = 200) =>
 afterEach(() => vi.unstubAllGlobals());
 
 describe("Gemini chat provider", () => {
+  it("구조화 응답의 content를 생성되는 순서대로 전달한다", async () => {
+    const event = (text: string) =>
+      `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] })}\n\n`;
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            event('{"content":"사진을 ') + event('확인해 보세요.","links":[],"references":[]}'),
+            { headers: { "Content-Type": "text/event-stream" } },
+          ),
+        ),
+    );
+    const deltas: string[] = [];
+
+    const result = await createGeminiChatProvider(
+      "secret",
+      "gemini-test",
+    )({
+      instructions: "context",
+      messages: [{ role: "user", content: "사진" }],
+      lang: "ko",
+      signal: new AbortController().signal,
+      onContentDelta: (delta) => deltas.push(delta),
+    });
+
+    expect(deltas).toEqual(["사진을 ", "확인해 보세요."]);
+    expect(result.content).toBe("사진을 확인해 보세요.");
+    expect(vi.mocked(fetch).mock.calls[0]?.[0]).toContain("streamGenerateContent?alt=sse");
+  });
+
   it("대화 역할과 구조화 응답 스키마를 Gemini 요청으로 변환한다", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       response({
@@ -70,7 +102,36 @@ describe("Gemini chat provider", () => {
     ]);
     expect(body.generationConfig.responseMimeType).toBe("application/json");
     expect(body.generationConfig.responseJsonSchema).toMatchObject({ type: "object" });
-    expect(body.generationConfig.maxOutputTokens).toBe(512);
+    expect(body.generationConfig.maxOutputTokens).toBe(1024);
+  });
+
+  it("MAX_TOKENS 종료를 일반 JSON 파싱 오류와 구분한다", async () => {
+    const event = `data: ${JSON.stringify({
+      candidates: [
+        { finishReason: "MAX_TOKENS", content: { parts: [{ text: '{"content":"잘린 답변' }] } },
+      ],
+    })}\n\n`;
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(event, { headers: { "Content-Type": "text/event-stream" } }),
+        ),
+    );
+
+    await expect(
+      createGeminiChatProvider(
+        "secret",
+        "gemini-test",
+      )({
+        instructions: "context",
+        messages: [{ role: "user", content: "question" }],
+        lang: "ko",
+        signal: new AbortController().signal,
+        onContentDelta: vi.fn(),
+      }),
+    ).rejects.toThrow("maximum output token limit");
   });
 
   it("무료 티어 제한과 안전 차단을 구분한다", async () => {

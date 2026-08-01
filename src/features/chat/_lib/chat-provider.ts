@@ -9,6 +9,7 @@ type ChatProviderInput = {
   messages: ChatRequestMessage[];
   lang: Lang;
   signal: AbortSignal;
+  onContentDelta?: (delta: string) => void;
 };
 
 type ChatProviderResult = {

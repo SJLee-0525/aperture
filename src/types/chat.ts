@@ -23,6 +23,9 @@ type ChatMessage = {
   id: string;
   role: ChatRole;
   content: string;
+  pending?: boolean;
+  pendingStatus?: "portfolio-search";
+  error?: { retryable: boolean; question: string };
   link?: ChatLink;
   links?: ChatLink[];
   references?: ChatReference[];

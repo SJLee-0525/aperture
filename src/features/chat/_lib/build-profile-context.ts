@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
+import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
 import { getChatProfileData } from "@/lib/content/get-chat-profile-data";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { ChatProfileData } from "@/lib/content/get-chat-profile-data";
@@ -95,12 +96,39 @@ const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
         (album) =>
           `Album: ${pickText(album.title, lang)} — ${pickText(album.subtitle, lang)} | url: ${albumRoute(album.id)}`,
       ),
-      ...publicPhotos.map(
-        (photo) =>
-          `Photo: ${pickText(photo.title, lang)} | place: ${pickText(photo.place, lang)} | tags: ${photo.tags.map((id) => tagById.get(id) ?? id).join(", ")} | url: ${ROUTES.PHOTO}?photo=${encodeURIComponent(photo.id)}`,
+      ...publicPhotos.map((photo) =>
+        [
+          `Photo: ${pickText(photo.title, lang)}`,
+          photo.camera ? `camera: ${photo.camera}` : null,
+          photo.lens ? `lens: ${photo.lens}` : null,
+          `place: ${pickText(photo.place, lang)}`,
+          `tags: ${photo.tags.map((id) => tagById.get(id) ?? id).join(", ")}`,
+          `url: ${ROUTES.PHOTO}?photo=${encodeURIComponent(photo.id)}`,
+        ]
+          .filter(Boolean)
+          .join(" | "),
       ),
     ]),
   ].join("\n\n");
+};
+
+const PROFILE_SECTION_TITLES: Record<ProfileSection, string> = {
+  profile: "Profile",
+  development: "Development",
+  music: "Music",
+  photography: "Photography",
+};
+
+const selectFormattedProfileContext = (context: string, sections: ProfileSection[]): string => {
+  const headings = new Set(
+    sections.map((sectionName) => `## ${PROFILE_SECTION_TITLES[sectionName]}`),
+  );
+  return context
+    .split("\n\n")
+    .filter(
+      (block) => block.startsWith("# PROFILE_CONTEXT") || headings.has(block.split("\n")[0] ?? ""),
+    )
+    .join("\n\n");
 };
 
 const formatProfileReferences = (data: ChatProfileData, lang: Lang): ChatReference[] => [
@@ -142,8 +170,10 @@ const buildProfileSnapshot = unstable_cache(
   { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
-const buildProfileContext = async (lang: Lang): Promise<string> =>
-  (await buildProfileSnapshot(lang)).context;
+const buildProfileContext = async (lang: Lang, sections?: ProfileSection[]): Promise<string> => {
+  const context = (await buildProfileSnapshot(lang)).context;
+  return sections?.length ? selectFormattedProfileContext(context, sections) : context;
+};
 
 const resolveProfileReferences = async (
   requested: ChatReferenceRequest[],
@@ -171,4 +201,5 @@ export {
   formatProfileContext,
   formatProfileReferences,
   resolveProfileReferences,
+  selectFormattedProfileContext,
 };

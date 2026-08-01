@@ -43,7 +43,16 @@ describe("Firestore REST decoding", () => {
       ({ fieldPath }: { fieldPath: string }) => fieldPath,
     );
 
-    expect(photoFields).toEqual(["title", "place", "tags", "image", "order", "published"]);
+    expect(photoFields).toEqual([
+      "title",
+      "camera",
+      "lens",
+      "place",
+      "tags",
+      "image",
+      "order",
+      "published",
+    ]);
     expect(photoFields).not.toContain("exif");
     expect(projectFields).toEqual([
       "title",

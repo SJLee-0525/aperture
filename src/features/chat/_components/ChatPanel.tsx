@@ -23,7 +23,7 @@ const COPY = {
     input: "메시지",
     placeholder: "궁금한 내용을 입력하세요…",
     send: "메시지 보내기",
-    thinking: "답변을 준비하고 있어요…",
+    retry: "다시 시도",
     privacy: "민감한 개인정보는 입력하지 마세요.",
     suggestions: [
       "개발 프로젝트를 소개해 줘",
@@ -37,7 +37,7 @@ const COPY = {
     input: "Message",
     placeholder: "Ask about the portfolio…",
     send: "Send message",
-    thinking: "Preparing a response…",
+    retry: "Try again",
     privacy: "Please don’t share sensitive personal information.",
     suggestions: [
       "Show me the development projects",
@@ -55,7 +55,7 @@ const PRESENCE_TRANSITION = { duration: 0.16, ease: "easeOut" } as const;
 const ChatPanel = ({ open, onClose }: Props) => {
   const { lang } = useLang();
   const copy = COPY[lang];
-  const { messages, isReplying, send } = useChat(lang);
+  const { messages, isReplying, retry, send } = useChat(lang);
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
@@ -169,13 +169,47 @@ const ChatPanel = ({ open, onClose }: Props) => {
                 key={message.id}
                 className={styles.message}
                 data-role={message.role}
+                data-pending={message.pending || undefined}
                 initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={reduceMotion ? { duration: 0 } : MESSAGE_TRANSITION}
                 layout={reduceMotion ? false : "position"}
               >
                 <div className={styles.bubble}>
-                  <p>{message.content}</p>
+                  {message.pending && !message.content ? (
+                    <span className={styles.waitingState}>
+                      <span className={styles.waitingDots} aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      <span className={message.pendingStatus ? undefined : styles.srOnly}>
+                        {message.pendingStatus === "portfolio-search"
+                          ? lang === "ko"
+                            ? "포트폴리오를 살펴보는 중…"
+                            : "Looking through the portfolio…"
+                          : lang === "ko"
+                            ? "답변 준비 중"
+                            : "Preparing a response"}
+                      </span>
+                    </span>
+                  ) : (
+                    <p>
+                      {message.content}
+                      {message.pending ? (
+                        <span className={styles.streamingCursor} aria-hidden="true" />
+                      ) : null}
+                    </p>
+                  )}
+                  {message.error?.retryable ? (
+                    <button
+                      type="button"
+                      className={styles.retryButton}
+                      onClick={() => retry(message.id)}
+                    >
+                      {copy.retry}
+                    </button>
+                  ) : null}
                   {message.link ? (
                     <Link className={styles.link} href={message.link.href} onClick={onClose}>
                       {message.link.label} <span aria-hidden="true">↗</span>
@@ -221,24 +255,6 @@ const ChatPanel = ({ open, onClose }: Props) => {
                   </button>
                 ))}
               </m.div>
-            ) : null}
-            {isReplying ? (
-              <m.p
-                key="thinking"
-                className={styles.thinking}
-                initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-                animate={reduceMotion ? { opacity: 1 } : { opacity: [0.55, 1, 0.55], y: 0 }}
-                exit={
-                  reduceMotion ? undefined : { opacity: 0, y: -4, transition: PRESENCE_TRANSITION }
-                }
-                transition={
-                  reduceMotion
-                    ? { duration: 0 }
-                    : { opacity: { duration: 1.4, repeat: Infinity }, y: PRESENCE_TRANSITION }
-                }
-              >
-                {copy.thinking}
-              </m.p>
             ) : null}
           </AnimatePresence>
         </div>

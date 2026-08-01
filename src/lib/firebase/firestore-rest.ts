@@ -295,11 +295,18 @@ const fetchPublishedDevProjects = async (): Promise<DevProject[]> => {
 };
 
 const fetchChatPhotos = async (): Promise<
-  Array<Pick<Photo, "id" | "title" | "place" | "tags" | "image" | "order" | "published">>
+  Array<
+    Pick<
+      Photo,
+      "id" | "title" | "camera" | "lens" | "place" | "tags" | "image" | "order" | "published"
+    >
+  >
 > => {
   const rows = await runQuery(
     projectedPublishedOrderedQuery(COLLECTIONS.PHOTOS, [
       "title",
+      "camera",
+      "lens",
       "place",
       "tags",
       "image",
@@ -310,6 +317,8 @@ const fetchChatPhotos = async (): Promise<
   return rows.map(({ id, data: d }) => ({
     id,
     title: (d.title as LocalizedText) ?? EMPTY_LOCALIZED,
+    camera: (d.camera as string) ?? "",
+    lens: (d.lens as string) ?? "",
     place: (d.place as LocalizedText) ?? EMPTY_LOCALIZED,
     tags: (d.tags as string[]) ?? [],
     image: (d.image as ImageMeta) ?? EMPTY_IMAGE,

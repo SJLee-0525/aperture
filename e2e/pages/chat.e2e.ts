@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const openChat = async (page: Page, label: string | RegExp = /챗봇 열기/) => {
   await page.getByRole("button", { name: label }).click();
-  await expect(page.getByRole("dialog", { name: "ChatBot." })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Ask Sungjoon." })).toBeVisible();
 };
 
 const submit = async (page: Page, message: string, inputName: string | RegExp = "메시지") => {
@@ -44,7 +44,7 @@ test.describe("Chat", () => {
     const overlay = page.locator("[data-chat-overlay]");
     await expect(overlay).toHaveCSS("height", "480px");
     await expect(overlay).toHaveCSS("top", "12px");
-    const panelBox = await page.getByRole("dialog", { name: "ChatBot." }).boundingBox();
+    const panelBox = await page.getByRole("dialog", { name: "Ask Sungjoon." }).boundingBox();
     expect(panelBox?.height).toBeCloseTo(480, -1);
     expect(panelBox?.y).toBeCloseTo(12, -1);
   });
@@ -68,7 +68,7 @@ test.describe("Chat", () => {
     await expect(page.getByText("민감한 개인정보는 입력하지 마세요.")).toBeVisible();
     await submit(page, "대화를 기억해 줘");
     await expect(page.getByText("이 답변은 패널을 닫아도 유지됩니다.")).toBeVisible();
-    const dialog = page.getByRole("dialog", { name: "ChatBot." });
+    const dialog = page.getByRole("dialog", { name: "Ask Sungjoon." });
     await dialog.getByRole("button", { name: "챗봇 닫기" }).click();
     await expect(dialog).toBeHidden();
 

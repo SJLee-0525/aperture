@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatProfileContext,
   formatProfileReferences,
+  selectFormattedProfileContext,
 } from "@/features/chat/_lib/build-profile-context";
 import { MOCK_ALBUMS } from "@/mocks/albums";
 import { MOCK_DEV_CONFIG, MOCK_DEV_PROJECTS } from "@/mocks/dev";
@@ -37,6 +38,8 @@ describe("formatProfileContext", () => {
     expect(first).toContain("Name: 이성준");
     expect(first).toContain("url: /dev/projects?project=");
     expect(first).toContain("url: /photo?photo=");
+    expect(first).toContain("camera: Sony α7 IV");
+    expect(first).toContain("lens: FE 35mm F1.4 GM");
     expect(first).not.toContain("image.url");
     expect(first).not.toContain("fileName");
     expect(first).not.toContain("coords");
@@ -63,6 +66,18 @@ describe("formatProfileContext", () => {
 
     expect(context).toContain("Name: Sungjoon Lee");
     expect(context).toContain("Photography bio: Quiet light in the city.");
+  });
+
+  it("선택한 프로필 섹션만 모델 문맥에 남긴다", () => {
+    const context = selectFormattedProfileContext(formatProfileContext(data, "ko"), [
+      "profile",
+      "photography",
+    ]);
+
+    expect(context).toContain("## Profile");
+    expect(context).toContain("## Photography");
+    expect(context).not.toContain("## Development");
+    expect(context).not.toContain("## Music");
   });
 
   it("사진·연주·프로젝트를 기존 모달 딥링크 카드로 투영한다", () => {

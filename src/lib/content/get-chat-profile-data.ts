@@ -16,7 +16,10 @@ import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/mus
 import type { Photo } from "@/types/photo";
 import type { SiteConfig } from "@/types/site";
 
-type ChatPhoto = Pick<Photo, "id" | "title" | "place" | "tags" | "image" | "order" | "published">;
+type ChatPhoto = Pick<
+  Photo,
+  "id" | "title" | "camera" | "lens" | "place" | "tags" | "image" | "order" | "published"
+>;
 type ChatAlbum = Pick<Album, "id" | "title" | "subtitle" | "cover" | "order" | "published">;
 type ChatDevProject = Pick<
   DevProject,

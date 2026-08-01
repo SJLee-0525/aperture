@@ -5,12 +5,14 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { getChatErrorMessage, type ChatErrorCode } from "@/features/chat/_lib/chat-errors";
 import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
+import { selectProfileSections, type ProfileSection } from "@/features/chat/_lib/chat-intent";
 import {
   ChatRateLimitConfigurationError,
   type ChatRateLimiter,
 } from "@/features/chat/_lib/chat-rate-limit";
 import {
   GeminiBlockedError,
+  GeminiMaxTokensError,
   GeminiRateLimitError,
   GeminiServiceUnavailableError,
 } from "@/features/chat/_lib/gemini-chat-provider";
@@ -25,6 +27,7 @@ import type { ChatLink } from "@/types/chat";
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 const MAX_BODY_BYTES = 20_000;
+const STREAM_MEDIA_TYPE = "application/x-ndjson";
 const ALLOWED_ACTION_ROUTES = new Set<string>([
   ROUTES.CONTACT,
   ROUTES.DEV,
@@ -43,7 +46,7 @@ const ALLOWED_ACTION_ROUTES = new Set<string>([
 
 type ChatHandlerDependencies = {
   provider: ChatProvider;
-  buildContext?: (lang: Lang) => Promise<string>;
+  buildContext?: (lang: Lang, sections?: ProfileSection[]) => Promise<string>;
   resolveReferences?: (references: ChatReferenceRequest[], lang: Lang) => Promise<ChatReference[]>;
   rateLimiter?: ChatRateLimiter;
   timeoutMs?: number;
@@ -81,6 +84,24 @@ const sanitizeLinks = (
     )
     .slice(0, 2);
   return safe?.length ? safe : undefined;
+};
+
+const publicErrorFor = (
+  error: unknown,
+  lang: Lang,
+  timedOut: boolean,
+): { status: number; code: ChatErrorCode } => {
+  if (timedOut) return { status: 504, code: "TIMEOUT" };
+  if (error instanceof ChatProviderUnavailableError) {
+    return { status: 503, code: "PROVIDER_UNAVAILABLE" };
+  }
+  if (error instanceof GeminiRateLimitError) return { status: 429, code: "RATE_LIMIT" };
+  if (error instanceof GeminiBlockedError) return { status: 422, code: "CONTENT_BLOCKED" };
+  if (error instanceof GeminiMaxTokensError) return { status: 502, code: "UPSTREAM_ERROR" };
+  if (error instanceof GeminiServiceUnavailableError) {
+    return { status: 503, code: "UPSTREAM_ERROR" };
+  }
+  return { status: 502, code: "UPSTREAM_ERROR" };
 };
 
 const handleChatRequest = async (
@@ -124,6 +145,8 @@ const handleChatRequest = async (
     if (error instanceof ChatRequestError) return jsonError(400, error.code, responseLang);
     return jsonError(400, "INVALID_BODY", responseLang);
   }
+  const profileSections = selectProfileSections(chatRequest.messages);
+  const shouldLoadProfile = profileSections.length > 0;
 
   if (rateLimiter) {
     let rateLimit;
@@ -158,51 +181,87 @@ const handleChatRequest = async (
     }, timeoutMs);
   });
 
-  try {
-    const message = await Promise.race([
-      (async () => {
-        const profileContext = await buildContext(chatRequest.lang);
-        const result = await provider({
-          instructions: buildChatInstructions(chatRequest.lang, profileContext),
-          messages: chatRequest.messages,
-          lang: chatRequest.lang,
-          signal: controller.signal,
-        });
-        const content = result.content.trim();
-        if (!content) throw new Error("Provider returned an empty response");
-        const references = result.references?.length
-          ? await resolveReferences(result.references, chatRequest.lang)
-          : undefined;
+  const cleanup = () => {
+    if (timeout) clearTimeout(timeout);
+    request.signal.removeEventListener("abort", abortFromRequest);
+  };
 
-        return {
-          role: "assistant" as const,
-          content,
-          links: sanitizeLinks(result.links, references),
-          references: references?.length ? references : undefined,
-        };
-      })(),
-      timeoutPromise,
-    ]);
+  const generateMessage = async (onContentDelta?: (delta: string) => void) => {
+    const profileContext = shouldLoadProfile
+      ? await buildContext(chatRequest.lang, profileSections)
+      : "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.";
+    const result = await provider({
+      instructions: buildChatInstructions(chatRequest.lang, profileContext),
+      messages: chatRequest.messages,
+      lang: chatRequest.lang,
+      signal: controller.signal,
+      onContentDelta,
+    });
+    const content = result.content.trim();
+    if (!content) throw new Error("Provider returned an empty response");
+    const references = result.references?.length
+      ? await resolveReferences(result.references, chatRequest.lang)
+      : undefined;
+
+    return {
+      role: "assistant" as const,
+      content,
+      links: sanitizeLinks(result.links, references),
+      references: references?.length ? references : undefined,
+    };
+  };
+
+  const run = (onContentDelta?: (delta: string) => void) =>
+    Promise.race([generateMessage(onContentDelta), timeoutPromise]);
+
+  if (request.headers.get("accept")?.includes(STREAM_MEDIA_TYPE)) {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      start(streamController) {
+        const send = (event: object) =>
+          streamController.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+
+        if (shouldLoadProfile) send({ type: "status", status: "portfolio-search" });
+
+        void run((delta) => send({ type: "delta", content: delta }))
+          .then((message) => send({ type: "done", message }))
+          .catch((error: unknown) => {
+            const { status, code } = publicErrorFor(error, responseLang, timedOut);
+            send({
+              type: "error",
+              code,
+              message: getChatErrorMessage(code, responseLang),
+              retryable: status >= 500,
+            });
+          })
+          .finally(() => {
+            cleanup();
+            streamController.close();
+          });
+      },
+      cancel(reason) {
+        controller.abort(reason);
+        cleanup();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": `${STREAM_MEDIA_TYPE}; charset=utf-8`,
+        "Cache-Control": "no-cache, no-transform",
+      },
+    });
+  }
+
+  try {
+    const message = await run();
 
     return Response.json({ message });
   } catch (error) {
-    if (timedOut) return jsonError(504, "TIMEOUT", responseLang);
-    if (error instanceof ChatProviderUnavailableError) {
-      return jsonError(503, "PROVIDER_UNAVAILABLE", responseLang);
-    }
-    if (error instanceof GeminiRateLimitError) {
-      return jsonError(429, "RATE_LIMIT", responseLang);
-    }
-    if (error instanceof GeminiBlockedError) {
-      return jsonError(422, "CONTENT_BLOCKED", responseLang);
-    }
-    if (error instanceof GeminiServiceUnavailableError) {
-      return jsonError(503, "UPSTREAM_ERROR", responseLang);
-    }
-    return jsonError(502, "UPSTREAM_ERROR", responseLang);
+    const { status, code } = publicErrorFor(error, responseLang, timedOut);
+    return jsonError(status, code, responseLang);
   } finally {
-    if (timeout) clearTimeout(timeout);
-    request.signal.removeEventListener("abort", abortFromRequest);
+    cleanup();
   }
 };
 

@@ -20,6 +20,7 @@
     "test:visual": "node e2e/run.cjs e2e/visual",
     "test:visual:update": "npm run build && node e2e/run.cjs --production e2e/visual --update-snapshots",
     "test:a11y": "node e2e/run.cjs e2e/accessibility.e2e.ts",
+    "test:chat-eval": "node scripts/chat-eval.mjs",
     "test:lighthouse": "lhci autorun",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

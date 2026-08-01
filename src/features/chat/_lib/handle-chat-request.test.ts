@@ -16,6 +16,36 @@ const createRequest = (body: unknown, headers?: HeadersInit) =>
   });
 
 describe("handleChatRequest", () => {
+  it("답변 조각을 NDJSON으로 전송하고 완료 시 구조화 메시지를 확정한다", async () => {
+    const provider = vi.fn(async ({ onContentDelta }) => {
+      onContentDelta?.("사진을 ");
+      onContentDelta?.("확인해 보세요.");
+      return { content: "사진을 확인해 보세요." };
+    });
+    const response = await handleChatRequest(
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "사진" }] },
+        { accept: "application/x-ndjson" },
+      ),
+      { provider, buildContext: async () => "context" },
+    );
+
+    const events = (await response.text())
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    expect(response.headers.get("content-type")).toContain("application/x-ndjson");
+    expect(events).toEqual([
+      { type: "status", status: "portfolio-search" },
+      { type: "delta", content: "사진을 " },
+      { type: "delta", content: "확인해 보세요." },
+      {
+        type: "done",
+        message: { role: "assistant", content: "사진을 확인해 보세요." },
+      },
+    ]);
+  });
+
   it.each([
     ["ko", "한국어 답변"],
     ["en", "English answer"],
@@ -24,21 +54,41 @@ describe("handleChatRequest", () => {
     const buildContext = vi.fn().mockResolvedValue(`# PROFILE_CONTEXT\nlang=${lang}`);
 
     const response = await handleChatRequest(
-      createRequest({ lang, messages: [{ role: "user", content: "question" }] }),
+      createRequest({ lang, messages: [{ role: "user", content: "development project" }] }),
       { provider, buildContext },
     );
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ message: { role: "assistant", content: answer } });
-    expect(buildContext).toHaveBeenCalledWith(lang);
+    expect(buildContext).toHaveBeenCalledWith(lang, ["profile", "development"]);
     expect(provider).toHaveBeenCalledWith(
       expect.objectContaining({
         lang,
         instructions: expect.stringContaining(`lang=${lang}`),
-        messages: [{ role: "user", content: "question" }],
+        messages: [{ role: "user", content: "development project" }],
         signal: expect.any(AbortSignal),
       }),
     );
+  });
+
+  it("일반 대화는 포트폴리오 문맥을 불러오거나 조회 상태를 보내지 않는다", async () => {
+    const buildContext = vi.fn().mockResolvedValue("context");
+    const response = await handleChatRequest(
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "안녕하세요" }] },
+        { accept: "application/x-ndjson" },
+      ),
+      {
+        provider: async ({ onContentDelta }) => {
+          onContentDelta?.("안녕하세요!");
+          return { content: "안녕하세요!" };
+        },
+        buildContext,
+      },
+    );
+
+    expect(buildContext).not.toHaveBeenCalled();
+    expect(await response.text()).not.toContain("portfolio-search");
   });
 
   it("system 역할 주입은 provider 호출 전에 거부한다", async () => {
@@ -245,7 +295,7 @@ describe("handleChatRequest", () => {
 
   it("문맥 생성이 멈춰도 전체 요청 timeout을 보장한다", async () => {
     const response = await handleChatRequest(
-      createRequest({ lang: "ko", messages: [{ role: "user", content: "질문" }] }),
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "프로젝트 질문" }] }),
       {
         provider: vi.fn(),
         buildContext: () => new Promise<string>(() => undefined),
