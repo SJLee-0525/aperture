@@ -99,8 +99,9 @@ const ChatPanel = ({ open, onClose }: Props) => {
       frame = requestAnimationFrame(() => {
         const height = viewport?.height ?? window.innerHeight;
         const offsetTop = viewport?.offsetTop ?? 0;
-        overlay.style.setProperty("--chat-viewport-height", `${height}px`);
-        overlay.style.setProperty("--chat-viewport-top", `${offsetTop}px`);
+        // Safari는 키보드 전환 중 offsetTop을 여러 중간값으로 바꾼다. 상단을 따라
+        // 움직이지 않고 visual viewport의 하단만 추적해야 패널 전체가 왕복하지 않는다.
+        overlay.style.setProperty("--chat-viewport-height", `${height + offsetTop}px`);
       });
     };
 

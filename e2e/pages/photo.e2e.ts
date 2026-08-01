@@ -4,7 +4,8 @@ import { photoAssertions } from "../utils/assertions/photo.assertions";
 import { commonAssertions } from "../utils/assertions/common.assertions";
 
 test.describe("Photo", () => {
-  test("모바일 상세 모달의 스켈레톤과 실제 이미지 영역 높이가 같다", async ({ page }) => {
+  test("모바일 상세 모달의 스켈레톤과 실제 이미지 영역 높이가 같다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "모바일 브라우저 컨텍스트에서만 검증");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.route("**/api/photos/*", async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 300));

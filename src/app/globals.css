@@ -235,6 +235,18 @@ button {
   font: inherit;
 }
 
+/* iOS Safari는 16px 미만의 편집 컨트롤에 포커스할 때 페이지를 자동 확대한다.
+   Safari에만 적용해 다른 브라우저의 기존 폼 크기와 시각 기준선은 유지한다. */
+@supports (-webkit-touch-callout: none) {
+  @media (hover: none) and (pointer: coarse) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+}
+
 img {
   display: block;
   max-width: 100%;
