@@ -99,6 +99,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
     const scrollY = window.scrollY;
     const rootHeight = root.style.height;
     const bodyHeight = body.style.height;
+    let fullViewportHeight = viewport.height;
     let frame = 0;
 
     const syncHeight = () => {
@@ -108,7 +109,10 @@ const ChatPanel = ({ open, onClose }: Props) => {
         messageList.scrollHeight - messageList.clientHeight - messageList.scrollTop <= 2;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const height = `${viewport.height}px`;
+        fullViewportHeight = Math.max(fullViewportHeight, viewport.height);
+        const viewportHeight =
+          fullViewportHeight - viewport.height <= 48 ? fullViewportHeight : viewport.height;
+        const height = `${viewportHeight}px`;
         root.style.height = height;
         body.style.height = height;
         overlay.style.setProperty("--chat-viewport-height", height);

@@ -119,6 +119,28 @@ test.describe("Chat", () => {
     expect(panelBox?.y).toBeCloseTo(0, -1);
     await expect(panel).toHaveCSS("box-shadow", "none");
 
+    await page.evaluate(() => {
+      const viewport = window.visualViewport as VisualViewport & { height: number };
+      viewport.height = 820;
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(overlay).toHaveCSS("height", "844px");
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          root: document.documentElement.style.height,
+          body: document.body.style.height,
+        })),
+      )
+      .toEqual({ root: "844px", body: "844px" });
+    await expect
+      .poll(() =>
+        chatMessages(page).evaluate(
+          (element) => element.scrollHeight - element.clientHeight - element.scrollTop,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
+
     await panel.getByRole("button", { name: "챗봇 닫기" }).click();
     await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");
     await expect

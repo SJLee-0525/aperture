@@ -27,7 +27,9 @@
   margin-top: var(--s-5);
   max-width: 60ch;
   color: var(--text-2);
-  font-size: 1.05rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 5vw, 1.45rem);
+  font-weight: 500;
   line-height: 1.7;
 }
 .stats {
