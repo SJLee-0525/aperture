@@ -29,7 +29,7 @@ const MOCK_MUSIC_WORKS: MusicWork[] = [
       en: "Schubert's complete Winterreise — twenty-four songs in one long breath.",
     },
     poster: NO_POSTER,
-    ticketUrl: "#",
+    ticketUrl: "",
     order: 0,
     published: true,
   },

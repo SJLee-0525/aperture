@@ -95,16 +95,18 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                 {ymd(selected.performedAt)} · {selected.time}
               </div>
               <div className={styles.rv}>{pickText(selected.venue, lang)}</div>
-              <div className={styles.rbtns}>
-                <a
-                  className={styles.book}
-                  href={selected.ticketUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {dict.musicBook}
-                </a>
-              </div>
+              {selected.ticketUrl.trim() ? (
+                <div className={styles.rbtns}>
+                  <a
+                    className={styles.book}
+                    href={selected.ticketUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {dict.musicBook}
+                  </a>
+                </div>
+              ) : null}
               <div className={styles.prog}>
                 <div className={styles.ph}>{dict.musicProgram}</div>
                 {selected.program.map((piece, i) => (
