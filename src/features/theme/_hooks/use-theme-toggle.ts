@@ -1,6 +1,8 @@
 "use client";
 
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
+import { sectionFromPath } from "@/constants/sections";
+import { syncBrowserThemeColor } from "@/features/theme/_lib/browser-theme-color";
 
 /**
  * 테마 상태의 단일 원천은 React state가 아니라 html[data-theme] 속성.
@@ -17,6 +19,7 @@ const useThemeToggle = () => {
     } else {
       delete root.dataset.theme;
     }
+    syncBrowserThemeColor(sectionFromPath(window.location.pathname), nextTheme);
 
     try {
       localStorage.setItem(STORAGE_KEYS.THEME, nextTheme);

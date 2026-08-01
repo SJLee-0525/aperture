@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 import { sectionFromPath } from "@/constants/sections";
+import { syncBrowserThemeColor } from "@/features/theme/_lib/browser-theme-color";
 
 /**
  * 라우트 → `html[data-section]` 세팅. globals.css 의 `html[data-section]` 규칙이 `--accent` 를 오버라이드한다.
@@ -13,7 +14,9 @@ const SectionAccent = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    document.documentElement.dataset.section = sectionFromPath(pathname);
+    const section = sectionFromPath(pathname);
+    document.documentElement.dataset.section = section;
+    syncBrowserThemeColor(section);
   }, [pathname]);
 
   return null;
