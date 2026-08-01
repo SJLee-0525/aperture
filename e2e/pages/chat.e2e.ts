@@ -31,7 +31,38 @@ test.describe("Chat", () => {
       });
     });
     await page.goto("/");
+    const initialScrollY = await page.evaluate(() => {
+      window.scrollTo(0, Math.min(300, document.documentElement.scrollHeight - innerHeight));
+      return window.scrollY;
+    });
     await openChat(page);
+
+    const textarea = page.getByRole("textbox", { name: "메시지" });
+    await expect(textarea).toHaveCSS("font-size", "16px");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.style.overflow))
+      .toBe("hidden");
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
+    const backplate = await page.locator("[data-chat-overlay]").evaluate((element) => {
+      const style = getComputedStyle(element, "::before");
+      return {
+        content: style.content,
+        position: style.position,
+        background: style.backgroundColor,
+      };
+    });
+    expect(backplate.content).not.toBe("none");
+    expect(backplate.position).toBe("fixed");
+    expect(backplate.background).not.toBe("rgba(0, 0, 0, 0)");
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => document.body.style.top))
+      .toBe(`${-initialScrollY}px`);
+    await page.mouse.wheel(0, 600);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => document.body.style.top))
+      .toBe(`${-initialScrollY}px`);
 
     await page.evaluate(() => {
       const viewport = window.visualViewport as VisualViewport & {
@@ -53,6 +84,10 @@ test.describe("Chat", () => {
     const panelBox = await panel.boundingBox();
     expect(panelBox?.height).toBeCloseTo(480, -1);
     expect(panelBox?.y).toBeCloseTo(12, -1);
+
+    await panel.getByRole("button", { name: "챗봇 닫기" }).click();
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY);
   });
 
   test("패널을 닫았다 열어도 새로고침 전까지 대화를 유지한다", async ({ page }) => {
@@ -136,9 +171,19 @@ test.describe("Chat", () => {
       });
     });
     await page.goto("/");
+    await page.evaluate(() => window.scrollTo(0, 300));
 
     await openChat(page, "Open chat");
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");
+    const siteHeader = page.locator("[data-site-header]");
+    await expect(siteHeader).toBeVisible();
+    await expect(siteHeader).toHaveCSS("opacity", "1");
+    await expect.poll(async () => (await siteHeader.boundingBox())?.y).toBeCloseTo(0, 0);
+    const desktopBackplate = await page
+      .locator("[data-chat-overlay]")
+      .evaluate((element) => getComputedStyle(element, "::before").content);
+    expect(desktopBackplate).toBe("none");
     const customScrollbar = page.locator("[data-custom-scrollbar-ui]");
     await expect(customScrollbar).toHaveAttribute("aria-controls", "chat-message-scroll-container");
     await expect(customScrollbar).toHaveAttribute("data-visible", "false");

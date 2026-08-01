@@ -179,7 +179,6 @@ html[data-theme="dark"][data-section="contact"] {
 }
 html {
   -webkit-text-size-adjust: 100%;
-  background: var(--bg);
 }
 body {
   margin: 0;
@@ -236,21 +235,6 @@ button {
   font: inherit;
 }
 
-/* iOS Safari는 16px 미만의 편집 컨트롤에 포커스할 때 페이지를 확대한다. */
-@media (max-width: 640px) {
-  input:not([type]),
-  input[type="text"],
-  input[type="search"],
-  input[type="email"],
-  input[type="url"],
-  input[type="tel"],
-  input[type="password"],
-  input[type="number"],
-  textarea,
-  select {
-    font-size: 16px;
-  }
-}
 img {
   display: block;
   max-width: 100%;

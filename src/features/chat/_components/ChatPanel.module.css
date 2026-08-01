@@ -440,6 +440,14 @@
     background: var(--bg);
   }
 
+  .overlay::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    pointer-events: none;
+  }
+
   .scrim {
     background: var(--scrim);
   }
@@ -451,6 +459,10 @@
     border: 0;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .composer textarea {
+    font-size: 16px;
   }
 }
 

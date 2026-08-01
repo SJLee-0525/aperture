@@ -21,7 +21,7 @@ const SiteHeader = () => {
   const { dict } = useLang();
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-site-header>
       <div className={styles.inner}>
         <Link href={ROUTES.LANDING} className={styles.brand} aria-label={dict.homeLabel}>
           Sungjoon Lee<span className={styles.dot}>.</span>
