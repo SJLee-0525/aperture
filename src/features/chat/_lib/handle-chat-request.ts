@@ -216,10 +216,13 @@ const handleChatRequest = async (
 
   if (request.headers.get("accept")?.includes(STREAM_MEDIA_TYPE)) {
     const encoder = new TextEncoder();
+    let cancelled = false;
     const stream = new ReadableStream<Uint8Array>({
       start(streamController) {
-        const send = (event: object) =>
+        const send = (event: object) => {
+          if (cancelled) return;
           streamController.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+        };
 
         if (shouldLoadProfile) send({ type: "status", status: "portfolio-search" });
 
@@ -236,10 +239,11 @@ const handleChatRequest = async (
           })
           .finally(() => {
             cleanup();
-            streamController.close();
+            if (!cancelled) streamController.close();
           });
       },
       cancel(reason) {
+        cancelled = true;
         controller.abort(reason);
         cleanup();
       },

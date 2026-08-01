@@ -46,6 +46,29 @@ describe("handleChatRequest", () => {
     ]);
   });
 
+  it("클라이언트가 스트림을 취소하면 provider를 중단하고 추가 이벤트를 쓰지 않는다", async () => {
+    const provider = vi.fn(
+      ({ signal }) =>
+        new Promise<never>((_, reject) => {
+          signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+        }),
+    );
+    const response = await handleChatRequest(
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "사진" }] },
+        { accept: "application/x-ndjson" },
+      ),
+      { provider, buildContext: async () => "context" },
+    );
+    const reader = response.body!.getReader();
+
+    await reader.read();
+    await reader.cancel("dialog closed");
+    await Promise.resolve();
+
+    expect(provider.mock.calls[0]?.[0].signal.aborted).toBe(true);
+  });
+
   it.each([
     ["ko", "한국어 답변"],
     ["en", "English answer"],
