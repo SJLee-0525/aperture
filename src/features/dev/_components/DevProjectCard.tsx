@@ -30,15 +30,37 @@ const DevProjectCard = memo(function DevProjectCard({ project, lang, onSelect, o
       onMouseEnter={onPreload}
     >
       <div className={styles.cover} data-protected-image>
-        <Image
-          src={coverUrl || "/opengraph-image"}
-          alt={hasCover ? pickText(project.title, lang) : ""}
-          fill
-          sizes="(max-width: 720px) 100vw, 560px"
-          className={styles.coverImg}
-          draggable={false}
-          unoptimized={!hasCover}
-        />
+        {hasCover ? (
+          <Image
+            src={coverUrl}
+            alt={pickText(project.title, lang)}
+            fill
+            sizes="(max-width: 720px) 100vw, 560px"
+            className={styles.coverImg}
+            draggable={false}
+          />
+        ) : (
+          <>
+            <Image
+              src="/dev-project-image"
+              alt=""
+              fill
+              sizes="(max-width: 720px) 100vw, 560px"
+              className={`${styles.coverImg} ${styles.fallbackLight}`}
+              draggable={false}
+              unoptimized
+            />
+            <Image
+              src="/dev-project-image-dark"
+              alt=""
+              fill
+              sizes="(max-width: 720px) 100vw, 560px"
+              className={`${styles.coverImg} ${styles.fallbackDark}`}
+              draggable={false}
+              unoptimized
+            />
+          </>
+        )}
       </div>
       <div className={styles.cardBody}>
         <div className={styles.year}>{project.year}</div>

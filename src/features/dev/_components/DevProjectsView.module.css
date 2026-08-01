@@ -57,6 +57,15 @@
 .coverImg {
   object-fit: cover;
 }
+.fallbackDark {
+  display: none;
+}
+:global(html[data-theme="dark"]) .fallbackLight {
+  display: none;
+}
+:global(html[data-theme="dark"]) .fallbackDark {
+  display: block;
+}
 .cardBody {
   display: flex;
   flex-direction: column;
