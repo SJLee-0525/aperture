@@ -201,6 +201,7 @@
   font-size: 1.55rem;
   font-weight: 500;
   color: var(--text);
+  transform: translateY(var(--s-1));
 }
 .plus {
   font-size: 20px;

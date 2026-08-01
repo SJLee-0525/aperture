@@ -24,7 +24,7 @@
   max-width: 22ch;
 }
 .bio {
-  margin-top: var(--s-2);
+  margin: var(--s-2) 0 0;
   max-width: 60ch;
   color: var(--text-3);
   font-family: var(--font-display);
