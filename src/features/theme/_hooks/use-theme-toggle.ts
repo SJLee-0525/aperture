@@ -1,7 +1,6 @@
 "use client";
 
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
-import { sectionFromPath } from "@/constants/sections";
 import { syncBrowserThemeColor } from "@/features/theme/_lib/browser-theme-color";
 
 /**
@@ -19,7 +18,7 @@ const useThemeToggle = () => {
     } else {
       delete root.dataset.theme;
     }
-    syncBrowserThemeColor(sectionFromPath(window.location.pathname), nextTheme);
+    syncBrowserThemeColor(nextTheme);
 
     try {
       localStorage.setItem(STORAGE_KEYS.THEME, nextTheme);

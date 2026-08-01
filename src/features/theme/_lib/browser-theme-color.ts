@@ -1,29 +1,14 @@
-import type { SectionId } from "@/constants/sections";
-
 type SiteTheme = "light" | "dark";
 
-const BROWSER_THEME_COLORS: Record<SiteTheme, Record<SectionId, string>> = {
-  light: {
-    home: "#ffffff",
-    photo: "#0066cc",
-    music: "#b4232d",
-    dev: "#087a32",
-    contact: "#a84d00",
-  },
-  dark: {
-    home: "#000000",
-    photo: "#4da3ff",
-    music: "#ff5b60",
-    dev: "#2ecc71",
-    contact: "#fb923c",
-  },
+const BROWSER_THEME_COLORS: Record<SiteTheme, string> = {
+  light: "#ffffff",
+  dark: "#000000",
 };
 
-const browserThemeColor = (section: SectionId, theme: SiteTheme): string =>
-  BROWSER_THEME_COLORS[theme][section];
+const browserThemeColor = (theme: SiteTheme): string => BROWSER_THEME_COLORS[theme];
 
-/** 모바일 브라우저 주소창·탭 UI 색을 현재 섹션과 테마에 맞춘다. */
-const syncBrowserThemeColor = (section: SectionId, theme?: SiteTheme) => {
+/** 모바일 브라우저 주소창·탭 UI 색을 실제 페이지 배경색과 맞춘다. */
+const syncBrowserThemeColor = (theme?: SiteTheme) => {
   const currentTheme =
     theme ?? (document.documentElement.dataset.theme === "dark" ? "dark" : "light");
   let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -32,8 +17,7 @@ const syncBrowserThemeColor = (section: SectionId, theme?: SiteTheme) => {
     meta.name = "theme-color";
     document.head.append(meta);
   }
-  meta.content = browserThemeColor(section, currentTheme);
+  meta.content = browserThemeColor(currentTheme);
 };
 
 export { BROWSER_THEME_COLORS, browserThemeColor, syncBrowserThemeColor };
-export type { SiteTheme };

@@ -16,7 +16,7 @@ const SectionAccent = () => {
   useEffect(() => {
     const section = sectionFromPath(pathname);
     document.documentElement.dataset.section = section;
-    syncBrowserThemeColor(section);
+    syncBrowserThemeColor();
   }, [pathname]);
 
   return null;

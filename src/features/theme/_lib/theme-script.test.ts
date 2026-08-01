@@ -42,7 +42,7 @@ describe("THEME_INIT_SCRIPT", () => {
     expect(localStorage.getItem(STORAGE_KEYS.THEME)).toBe("light");
   });
 
-  it("현재 경로와 테마에 맞는 모바일 브라우저 색을 첫 페인트 전에 적용한다", () => {
+  it("현재 경로와 테마 배경에 맞는 모바일 브라우저 색을 첫 페인트 전에 적용한다", () => {
     localStorage.setItem(STORAGE_KEYS.THEME, "dark");
     window.history.replaceState(null, "", "/music");
 
@@ -50,11 +50,11 @@ describe("THEME_INIT_SCRIPT", () => {
 
     expect(document.documentElement.dataset.section).toBe("music");
     expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe(
-      "#ff5b60",
+      "#000000",
     );
   });
 
-  it("localStorage를 읽을 수 없어도 기본 테마의 섹션색을 적용한다", () => {
+  it("localStorage를 읽을 수 없어도 기본 테마의 배경색을 적용한다", () => {
     window.history.replaceState(null, "", "/dev/projects");
 
     runThemeScript({
@@ -65,7 +65,7 @@ describe("THEME_INIT_SCRIPT", () => {
 
     expect(document.documentElement.dataset.section).toBe("dev");
     expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe(
-      "#087a32",
+      "#ffffff",
     );
   });
 });
