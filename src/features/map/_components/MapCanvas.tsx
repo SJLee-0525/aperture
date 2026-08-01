@@ -168,6 +168,7 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
     map.on("load", render);
     map.on("load", updateVisibleLocations);
     map.on("moveend", updateVisibleLocations);
+    map.on("resize", updateVisibleLocations);
     // setStyle 직후 styledata는 아직 isStyleLoaded=false일 수 있다.
     // 완성된 새 스타일을 보장하는 style.load에서 사용자 소스·레이어를 다시 붙인다.
     map.on("style.load", render);
