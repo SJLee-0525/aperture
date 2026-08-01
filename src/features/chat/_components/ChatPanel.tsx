@@ -60,6 +60,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const announcement =
@@ -67,7 +68,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
       (message) => message.id !== "welcome" && message.role === "assistant" && !message.pending,
     )?.content ?? "";
 
-  useScrollLock(open);
+  useScrollLock(open, { fixBodyOnMobile: false });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -85,10 +86,33 @@ const ChatPanel = ({ open, onClose }: Props) => {
     });
   }, [messages, isReplying, open, reduceMotion]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const overlay = overlayRef.current;
+    const viewport = window.visualViewport;
+    if (!overlay || !viewport) return;
+    let frame = 0;
+
+    const syncHeight = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        overlay.style.setProperty("--chat-viewport-height", `${viewport.height}px`);
+      });
+    };
+
+    syncHeight();
+    viewport.addEventListener("resize", syncHeight);
+    return () => {
+      cancelAnimationFrame(frame);
+      viewport.removeEventListener("resize", syncHeight);
+    };
+  }, [open]);
+
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay} data-chat-overlay>
+    <div ref={overlayRef} className={styles.overlay} data-chat-overlay>
       <button
         className={styles.scrim}
         type="button"

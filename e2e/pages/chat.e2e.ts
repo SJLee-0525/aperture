@@ -15,10 +15,21 @@ const submit = async (page: Page, message: string, inputName: string | RegExp = 
 const chatMessages = (page: Page) => page.locator("#chat-message-scroll-container");
 
 test.describe("Chat", () => {
-  test("모바일 챗봇은 표준 viewport 크기를 사용하고 JS 위치 보정을 하지 않는다", async ({
+  test("모바일 키보드가 열리면 문서를 이동하지 않고 패널 높이만 줄인다", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "모바일 viewport에서만 검증");
+    await page.addInitScript(() => {
+      const viewport = new EventTarget();
+      Object.defineProperties(viewport, {
+        height: { configurable: true, value: 844, writable: true },
+        offsetTop: { configurable: true, value: 0, writable: true },
+      });
+      Object.defineProperty(window, "visualViewport", {
+        configurable: true,
+        value: viewport,
+      });
+    });
     await page.goto("/");
     await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
       "content",
@@ -35,7 +46,7 @@ test.describe("Chat", () => {
     await expect
       .poll(() => page.evaluate(() => document.documentElement.style.overflow))
       .toBe("hidden");
-    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");
     const backplate = await page.locator("[data-chat-overlay]").evaluate((element) => {
       const style = getComputedStyle(element, "::before");
       return {
@@ -47,18 +58,18 @@ test.describe("Chat", () => {
     expect(backplate.content).not.toBe("none");
     expect(backplate.position).toBe("fixed");
     expect(backplate.background).not.toBe("rgba(0, 0, 0, 0)");
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await expect
-      .poll(() => page.evaluate(() => document.body.style.top))
-      .toBe(`${-initialScrollY}px`);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY);
     await page.mouse.wheel(0, 600);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await expect
-      .poll(() => page.evaluate(() => document.body.style.top))
-      .toBe(`${-initialScrollY}px`);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY);
+
+    await page.evaluate(() => {
+      const viewport = window.visualViewport as VisualViewport & { height: number };
+      viewport.height = 480;
+      viewport.dispatchEvent(new Event("resize"));
+    });
 
     const overlay = page.locator("[data-chat-overlay]");
-    await expect(overlay).toHaveCSS("height", `${await page.evaluate(() => innerHeight)}px`);
+    await expect(overlay).toHaveCSS("height", "480px");
     const inlineViewportOverrides = await overlay.evaluate((element) => {
       const style = (element as HTMLElement).style;
       return {
@@ -66,13 +77,13 @@ test.describe("Chat", () => {
         height: style.getPropertyValue("--chat-viewport-height"),
       };
     });
-    expect(inlineViewportOverrides).toEqual({ top: "", height: "" });
+    expect(inlineViewportOverrides).toEqual({ top: "", height: "480px" });
     const panel = page.getByRole("dialog", { name: "Ask Sungjoon." });
     await panel.evaluate((element) =>
       Promise.all(element.getAnimations().map((animation) => animation.finished)),
     );
     const panelBox = await panel.boundingBox();
-    expect(panelBox?.height).toBeCloseTo(await page.evaluate(() => innerHeight), -1);
+    expect(panelBox?.height).toBeCloseTo(480, -1);
     expect(panelBox?.y).toBeCloseTo(0, -1);
 
     await panel.getByRole("button", { name: "챗봇 닫기" }).click();

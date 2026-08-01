@@ -18,14 +18,18 @@ let originalBodyStyles = {
   width: "",
 };
 
-const acquireScrollLock = () => {
+type ScrollLockOptions = {
+  fixBodyOnMobile?: boolean;
+};
+
+const acquireScrollLock = ({ fixBodyOnMobile = true }: ScrollLockOptions) => {
   const { body, documentElement } = document;
 
   if (lockCount === 0) {
     const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
     lockedScrollX = window.scrollX;
     lockedScrollY = window.scrollY;
-    bodyWasFixed = window.innerWidth <= 767;
+    bodyWasFixed = fixBodyOnMobile && window.innerWidth <= 767;
     originalRootOverflow = documentElement.style.overflow;
     originalBodyStyles = {
       overflow: body.style.overflow,
@@ -36,7 +40,7 @@ const acquireScrollLock = () => {
       width: body.style.width,
     };
 
-    if (bodyWasFixed) documentElement.style.overflow = "hidden";
+    if (window.innerWidth <= 767) documentElement.style.overflow = "hidden";
     Object.assign(body.style, {
       overflow: "hidden",
     });
@@ -75,13 +79,13 @@ const releaseScrollLock = () => {
  * → 사라지는 스크롤바 폭을 padding-right 로 보정해 모달 열림 시 가로 흔들림을 제거.
  * (오버레이 스크롤바 환경에선 폭이 0이라 보정 없음.)
  */
-const useScrollLock = (locked: boolean) => {
+const useScrollLock = (locked: boolean, options: ScrollLockOptions = {}) => {
   useBrowserLayoutEffect(() => {
     if (!locked) return;
 
-    acquireScrollLock();
+    acquireScrollLock(options);
     return releaseScrollLock;
-  }, [locked]);
+  }, [locked, options.fixBodyOnMobile]);
 };
 
 export { useScrollLock };

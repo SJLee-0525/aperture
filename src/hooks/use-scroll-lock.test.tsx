@@ -39,4 +39,25 @@ describe("useScrollLock", () => {
     expect(document.body.style.position).toBe("");
     expect(scrollTo).toHaveBeenCalledWith(7, 123);
   });
+
+  it("키보드 대응 오버레이는 body 위치를 바꾸지 않고 스크롤만 잠근다", () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
+
+    const { rerender } = renderHook(
+      ({ locked }) => useScrollLock(locked, { fixBodyOnMobile: false }),
+      {
+        initialProps: { locked: true },
+      },
+    );
+
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.body.style.position).toBe("");
+    expect(document.body.style.top).toBe("");
+
+    rerender({ locked: false });
+
+    expect(document.documentElement.style.overflow).toBe("");
+    expect(document.body.style.overflow).toBe("");
+  });
 });
