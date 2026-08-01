@@ -50,6 +50,7 @@ const SECTION_ACCENTS: Record<string, string> = {
   dev: "var(--accent-dev)",
   contact: "var(--accent-contact)",
 };
+const LANDING_CURSOR_ACCENT = "var(--cursor-landing-accent)";
 const SCROLLABLE_OVERFLOW = new Set(["auto", "scroll", "overlay"]);
 
 const findVerticalScroller = (eventTarget: EventTarget | null): HTMLElement | null => {
@@ -221,7 +222,11 @@ const CustomCursor = () => {
 
     const setAccent = (element: Element | null) => {
       const section = element?.closest<HTMLElement>("[data-section]")?.dataset.section;
-      const accent = SECTION_ACCENTS[section ?? ""] ?? "var(--accent)";
+      // 랜딩의 빈 영역은 중립색으로 두되, 섹션 진입 행에서는 각 섹션의 accent를 미리 보여준다.
+      // --text를 사용해 라이트에서는 차콜, 다크에서는 밝은 무채색으로 대비를 유지한다.
+      const accent =
+        SECTION_ACCENTS[section ?? ""] ??
+        (pathname === "/" ? LANDING_CURSOR_ACCENT : "var(--accent)");
       if (accent === currentAccent) return;
       currentAccent = accent;
       cursor.style.setProperty("--cursor-accent", accent);
@@ -719,7 +724,7 @@ const CustomCursor = () => {
       if (frame) window.cancelAnimationFrame(frame);
       if (autoScrollFrame) window.cancelAnimationFrame(autoScrollFrame);
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <>

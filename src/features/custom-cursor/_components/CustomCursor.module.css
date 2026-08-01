@@ -5,6 +5,9 @@
   --cursor-radius: 999px;
   --cursor-hint-x: 50%;
   --cursor-hint-y: 50%;
+  --cursor-landing-accent: color-mix(in srgb, var(--text) 60%, transparent);
+  --cursor-contrast-light: rgb(255 255 255 / 72%);
+  --cursor-contrast-dark: rgb(0 0 0 / 32%);
 
   position: fixed;
   top: 0;
@@ -26,7 +29,9 @@
   height: var(--cursor-height);
   border-radius: var(--cursor-radius);
   background-color: var(--cursor-accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 30%, transparent);
+  box-shadow:
+    0 0 0 1px var(--cursor-contrast-light),
+    0 1px 3px var(--cursor-contrast-dark);
   transform: translate(-50%, -50%);
   transition:
     width 0.36s cubic-bezier(0.2, 1.25, 0.4, 1),
@@ -65,6 +70,16 @@
   position: absolute;
   pointer-events: none;
   opacity: 0;
+}
+
+.markerDot,
+.markerArrow,
+.rangeIndicator,
+.scrollbarIndicator,
+.autoScrollDirection,
+.loadingOrbit,
+.corner {
+  filter: drop-shadow(0 0 0.6px rgb(255 255 255 / 85%)) drop-shadow(0 1px 1px rgb(0 0 0 / 45%));
 }
 
 .markerDot {
@@ -170,6 +185,7 @@
 
 .autoScrollAnchor {
   --cursor-accent: var(--accent);
+  --cursor-landing-accent: color-mix(in srgb, var(--text) 60%, transparent);
 
   position: fixed;
   top: 0;
@@ -292,7 +308,10 @@
   --cursor-height: 34px;
   --cursor-radius: 999px;
   background-color: color-mix(in srgb, var(--cursor-accent) 10%, transparent);
-  box-shadow: inset 0 0 0 1.5px var(--cursor-accent);
+  box-shadow:
+    inset 0 0 0 1.5px var(--cursor-accent),
+    0 0 0 1px var(--cursor-contrast-light),
+    0 1px 3px var(--cursor-contrast-dark);
 }
 
 .cursor[data-mode="frame"] .shape,
@@ -384,7 +403,10 @@
 
 .cursor[data-mode="scrollbar"] .shape {
   background: color-mix(in srgb, var(--cursor-accent) 7%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 32%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--cursor-accent) 32%, transparent),
+    0 0 0 1px var(--cursor-contrast-light),
+    0 1px 3px var(--cursor-contrast-dark);
 }
 
 .cursor[data-mode="scrollbar"] .scrollbarIndicator {
@@ -401,7 +423,10 @@
   height: 28px;
   border-radius: 9px;
   background-color: color-mix(in srgb, var(--cursor-accent) 7%, transparent);
-  box-shadow: inset 0 0 0 1.5px var(--cursor-accent);
+  box-shadow:
+    inset 0 0 0 1.5px var(--cursor-accent),
+    0 0 0 1px rgb(255 255 255 / 72%),
+    0 1px 3px rgb(0 0 0 / 32%);
 }
 
 .cursor[data-mode="autoscroll"] .shape {
@@ -433,7 +458,9 @@
 
 .cursor[data-mode="text"] .shape {
   background-color: var(--cursor-accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg) 45%, transparent);
+  box-shadow:
+    0 0 0 1px var(--cursor-contrast-light),
+    0 1px 3px var(--cursor-contrast-dark);
 }
 
 .cursor[data-pressed="true"] .shape {
