@@ -23,7 +23,7 @@
 .launcher:hover {
   background: var(--chat-launcher-hover, var(--accent-press));
   color: var(--chat-launcher-fg, var(--accent-contrast));
-  transform: translateY(-2px);
+  transform: scale(1.04);
 }
 
 .launcher:active {
