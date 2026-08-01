@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { MusicWorksView } from "@/features/music/_components/MusicWorksView";
-import { getMusicWorks } from "@/lib/content/get-music-works";
+import { getMusicWorks } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getDevProject } from "@/lib/content/get-dev-project";
+import { getDevProject } from "@/lib/content/dev";
 
 export const revalidate = 3600;
 

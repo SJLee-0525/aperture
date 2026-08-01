@@ -1,7 +1,6 @@
 import { AlbumsView } from "@/features/albums/_components/AlbumsView";
 import { toAlbumCards } from "@/features/albums/_lib/album-cards";
-import { getAlbums } from "@/lib/content/get-albums";
-import { getPhotos } from "@/lib/content/get-photos";
+import { getAlbums, getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

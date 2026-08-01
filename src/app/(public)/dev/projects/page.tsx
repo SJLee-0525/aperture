@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
-import { getDevProjects } from "@/lib/content/get-dev-projects";
+import { getDevProjects } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

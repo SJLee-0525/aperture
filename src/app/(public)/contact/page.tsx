@@ -1,5 +1,5 @@
 import { ContactView } from "@/features/contact/_components/ContactView";
-import { getSite } from "@/lib/content/get-site";
+import { getSite } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

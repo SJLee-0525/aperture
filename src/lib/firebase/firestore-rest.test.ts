@@ -1,11 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  fetchChatDevProjects,
-  fetchChatPhotos,
-  fetchPublishedPhotos,
-  fetchSiteConfig,
-} from "@/lib/firebase/firestore-rest";
+import { fetchChatDevProjects } from "@/lib/firebase/public/dev";
+import { fetchChatPhotos, fetchPublishedPhotos } from "@/lib/firebase/public/photo";
+import { fetchSiteConfig } from "@/lib/firebase/public/site";
 
 type RestValue = Record<string, unknown>;
 

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { ROUTES, albumRoute } from "@/constants/routes";
-import { getAlbums } from "@/lib/content/get-albums";
+import { getAlbums } from "@/lib/content/photo";
 import { absoluteUrl } from "@/lib/seo/site-url";
 
 const PUBLIC_ROUTES = [

@@ -1,15 +1,14 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
-import { getDevConfig } from "@/lib/content/get-dev-config";
-import { getMusicConfig } from "@/lib/content/get-music-config";
-import { getSite } from "@/lib/content/get-site";
+import { getDevConfig } from "@/lib/content/dev";
+import { getMusicConfig } from "@/lib/content/music";
+import { getSite } from "@/lib/content/site";
+import { fetchChatDevProjects } from "@/lib/firebase/public/dev";
 import {
-  fetchChatAlbums,
-  fetchChatDevProjects,
   fetchChatMusicAwards,
   fetchChatMusicMedia,
   fetchChatMusicWorks,
-  fetchChatPhotos,
-} from "@/lib/firebase/firestore-rest";
+} from "@/lib/firebase/public/music";
+import { fetchChatAlbums, fetchChatPhotos } from "@/lib/firebase/public/photo";
 import type { Album } from "@/types/album";
 import type { DevConfig, DevProject } from "@/types/dev";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";

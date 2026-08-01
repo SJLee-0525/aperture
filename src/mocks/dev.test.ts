@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getDevProject } from "@/lib/content/get-dev-project";
-import { getDevProjects } from "@/lib/content/get-dev-projects";
+import { getDevProject, getDevProjects } from "@/lib/content/dev";
 import { MOCK_DEV_CONFIG, MOCK_DEV_PROJECT_DETAILS, MOCK_DEV_PROJECTS } from "@/mocks/dev";
 
 describe("개발 mock 연결", () => {

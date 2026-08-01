@@ -1,8 +1,5 @@
 import { MusicAboutView } from "@/features/music/_components/MusicAboutView";
-import { getMusicAwards } from "@/lib/content/get-music-awards";
-import { getMusicConfig } from "@/lib/content/get-music-config";
-import { getMusicMedia } from "@/lib/content/get-music-media";
-import { getMusicWorks } from "@/lib/content/get-music-works";
+import { getMusicAwards, getMusicConfig, getMusicMedia, getMusicWorks } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

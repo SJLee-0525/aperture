@@ -1,7 +1,6 @@
 import { AboutView } from "@/features/about/_components/AboutView";
-import { getAlbums } from "@/lib/content/get-albums";
-import { getPhotos } from "@/lib/content/get-photos";
-import { getSite } from "@/lib/content/get-site";
+import { getAlbums, getPhotos } from "@/lib/content/photo";
+import { getSite } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

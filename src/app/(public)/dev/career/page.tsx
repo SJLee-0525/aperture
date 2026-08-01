@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { DevCareerView } from "@/features/dev/_components/DevCareerView";
-import { getDevConfig } from "@/lib/content/get-dev-config";
+import { getDevConfig } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

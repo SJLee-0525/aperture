@@ -1,5 +1,5 @@
 import { DevStackView } from "@/features/dev/_components/DevStackView";
-import { getDevConfig } from "@/lib/content/get-dev-config";
+import { getDevConfig } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

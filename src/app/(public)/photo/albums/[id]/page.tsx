@@ -7,10 +7,7 @@ import {
   resolveAlbumCover,
   resolveAlbumCoverPreview,
 } from "@/features/albums/_lib/resolve-album-cover";
-import { getAlbum } from "@/lib/content/get-album";
-import { getAlbums } from "@/lib/content/get-albums";
-import { getPhotos } from "@/lib/content/get-photos";
-import { getTags } from "@/lib/content/get-tags";
+import { getAlbum, getAlbums, getPhotos, getTags } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 import type { Photo } from "@/types/photo";
 

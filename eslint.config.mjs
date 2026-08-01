@@ -12,6 +12,7 @@ const config = [
       "coverage/**",
       "playwright-report/**",
       "test-results/**",
+      "storybook-static/**",
       "dist/**",
       "public/**",
       ".example/",

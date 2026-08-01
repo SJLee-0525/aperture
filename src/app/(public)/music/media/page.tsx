@@ -1,5 +1,5 @@
 import { MusicMediaView } from "@/features/music/_components/MusicMediaView";
-import { getMusicMedia } from "@/lib/content/get-music-media";
+import { getMusicMedia } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

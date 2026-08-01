@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 
 import { GalleryView } from "@/features/gallery/_components/GalleryView";
-import { getPhotos } from "@/lib/content/get-photos";
-import { getTags } from "@/lib/content/get-tags";
+import { getPhotos, getTags } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { toGalleryPhotos } from "@/types/gallery-photo";
 

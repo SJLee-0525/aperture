@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 
 import { MusicCareerView } from "@/features/music/_components/MusicCareerView";
-import { getMusicAwards } from "@/lib/content/get-music-awards";
-import { getMusicConfig } from "@/lib/content/get-music-config";
+import { getMusicAwards, getMusicConfig } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({

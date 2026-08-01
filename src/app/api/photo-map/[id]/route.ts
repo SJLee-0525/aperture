@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { adjacentPhotos, serializePhoto } from "@/features/photo-detail/_lib/photo-detail-payload";
-import { getPhotos } from "@/lib/content/get-photos";
-import { getTags } from "@/lib/content/get-tags";
+import { getPhotos, getTags } from "@/lib/content/photo";
 
 export const revalidate = 3600;
 

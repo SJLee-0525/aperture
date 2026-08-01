@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { MapView } from "@/features/map/_components/MapView";
 import { toMapLocations } from "@/features/map/_types/map-location";
-import { getPhotos } from "@/lib/content/get-photos";
+import { getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
