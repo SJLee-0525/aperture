@@ -122,7 +122,7 @@ test.describe("Chat", () => {
     await page.evaluate(() => {
       const viewport = window.visualViewport as VisualViewport & { height: number };
       viewport.height = 820;
-      viewport.dispatchEvent(new Event("resize"));
+      viewport.dispatchEvent(new Event("scroll"));
     });
     await expect(overlay).toHaveCSS("height", "844px");
     await expect

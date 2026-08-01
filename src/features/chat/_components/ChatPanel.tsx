@@ -125,9 +125,15 @@ const ChatPanel = ({ open, onClose }: Props) => {
 
     syncHeight();
     viewport.addEventListener("resize", syncHeight);
+    viewport.addEventListener("scroll", syncHeight);
+    viewport.addEventListener("scrollend", syncHeight);
+    window.addEventListener("resize", syncHeight);
     return () => {
       cancelAnimationFrame(frame);
       viewport.removeEventListener("resize", syncHeight);
+      viewport.removeEventListener("scroll", syncHeight);
+      viewport.removeEventListener("scrollend", syncHeight);
+      window.removeEventListener("resize", syncHeight);
       root.style.height = rootHeight;
       body.style.height = bodyHeight;
       window.scrollTo(scrollX, scrollY);

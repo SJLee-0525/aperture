@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
+import { Newsreader, Noto_Serif_KR, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
 import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
 import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomScrollbar";
@@ -17,6 +17,15 @@ const newsreader = Newsreader({
   axes: ["opsz"],
   variable: "--font-newsreader",
   display: "swap",
+});
+
+/* Noto Serif KR — Newsreader에 없는 한글 글리프용 editorial fallback */
+const notoSerifKr = Noto_Serif_KR({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--font-noto-serif-kr",
+  display: "swap",
+  preload: false,
 });
 
 /* Schibsted Grotesk — UI·본문·라벨용 sans */
@@ -86,7 +95,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${newsreader.variable} ${schibstedGrotesk.variable} ${splineMono.variable}`}
+      className={`${newsreader.variable} ${notoSerifKr.variable} ${schibstedGrotesk.variable} ${splineMono.variable}`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
