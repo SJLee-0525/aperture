@@ -33,6 +33,7 @@ describe("useQueryModal", () => {
     navigation.pathname = "/dev/projects";
     navigation.searchParams = new URLSearchParams();
     vi.spyOn(window.history, "replaceState");
+    vi.spyOn(window.history, "pushState");
   });
 
   afterEach(() => {
@@ -64,9 +65,12 @@ describe("useQueryModal", () => {
 
     act(() => result.current.select("project-1"));
 
-    expect(navigation.push).toHaveBeenCalledWith("/dev/projects?lang=en&page=2&project=project-1", {
-      scroll: false,
-    });
+    expect(window.history.pushState).toHaveBeenCalledWith(
+      window.history.state,
+      "",
+      "/dev/projects?lang=en&page=2&project=project-1",
+    );
+    expect(navigation.push).not.toHaveBeenCalled();
   });
 
   it("직접 진입한 모달을 닫으면 해당 id만 제거하고 나머지 쿼리를 유지한다", () => {
@@ -90,5 +94,25 @@ describe("useQueryModal", () => {
 
     expect(navigation.back).toHaveBeenCalledOnce();
     expect(window.history.replaceState).not.toHaveBeenCalled();
+  });
+
+  it("딥링크 모달을 닫은 뒤 다른 항목을 열면 새 id로 history를 추가한다", () => {
+    navigation.searchParams = new URLSearchParams("project=project-1");
+    const { result } = renderHook(() => useQueryModal("project", projects));
+
+    act(() => result.current.close());
+    act(() => result.current.select("project-2"));
+
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      window.history.state,
+      "",
+      "/dev/projects",
+    );
+    expect(window.history.pushState).toHaveBeenLastCalledWith(
+      window.history.state,
+      "",
+      "/dev/projects?project=project-2",
+    );
+    expect(navigation.push).not.toHaveBeenCalled();
   });
 });

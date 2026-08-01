@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
-import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 
 /**
  * URL 쿼리(?param=id)로 열리는 상세 모달 상태 — 딥링크·검색 결과에서 항목을 바로 열 수 있게 한다.
@@ -36,10 +36,10 @@ const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
       }
       const qs = params.toString();
       const href = qs ? `${pathname}?${qs}` : pathname;
-      if (id) router.push(href, { scroll: false });
+      if (id) pushCurrentUrl(href);
       else replaceCurrentUrl(href);
     },
-    [router, pathname, param],
+    [pathname, param],
   );
 
   const close = useCallback(() => {
