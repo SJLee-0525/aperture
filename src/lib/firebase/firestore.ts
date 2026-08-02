@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 
 import { COLLECTIONS } from "@/constants/collections";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
@@ -93,6 +94,7 @@ const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
     throw new Error("사진 저장에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("photo", id);
 };
 
 /** 수정 — createdAt은 건드리지 않는다. */
@@ -103,6 +105,7 @@ const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
     throw new Error("사진 수정에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("photo", id);
 };
 
 const deletePhoto = async (id: string): Promise<void> => {
@@ -131,6 +134,7 @@ const deletePhoto = async (id: string): Promise<void> => {
     throw new Error("사진 삭제에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("photo", id);
 };
 
 /** 순서만 갱신 (dnd 정렬) — 전체 입력 없이 order 필드만. */
@@ -151,6 +155,7 @@ const setPhotoPublished = async (id: string, published: boolean): Promise<void> 
     throw new Error("공개 상태 변경에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("photo", id);
 };
 
 export {

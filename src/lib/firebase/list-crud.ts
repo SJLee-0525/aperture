@@ -12,8 +12,10 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
+import type { RagSyncSourceType } from "@/types/rag";
 
 type WithId = { id: string };
 
@@ -26,6 +28,7 @@ const listCrud = <T extends WithId>(
   name: string,
   toEntity: (id: string, d: DocumentData) => T,
   label: string,
+  ragSourceType?: RagSyncSourceType,
 ) => {
   type Input = Omit<T, "id">;
   const col = () => collection(db, name);
@@ -60,6 +63,7 @@ const listCrud = <T extends WithId>(
         throw new Error(`${label} 저장에 실패했습니다.`);
       }
       requestPublicRevalidate();
+      if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
     update: async (id: string, input: Input): Promise<void> => {
       try {
@@ -68,6 +72,7 @@ const listCrud = <T extends WithId>(
         throw new Error(`${label} 수정에 실패했습니다.`);
       }
       requestPublicRevalidate();
+      if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
     /** 순서만 갱신 (dnd 정렬). */
     updateOrder: async (id: string, order: number): Promise<void> => {
@@ -85,6 +90,7 @@ const listCrud = <T extends WithId>(
         throw new Error("공개 상태 변경에 실패했습니다.");
       }
       requestPublicRevalidate();
+      if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
     remove: async (id: string): Promise<void> => {
       try {
@@ -93,6 +99,7 @@ const listCrud = <T extends WithId>(
         throw new Error(`${label} 삭제에 실패했습니다.`);
       }
       requestPublicRevalidate();
+      if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
   };
 };

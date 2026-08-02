@@ -2,6 +2,7 @@ import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from "firebas
 
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
@@ -34,7 +35,12 @@ const toDevProject = (id: string, d: DocumentData): DevProject => ({
   published: d.published ?? false,
 });
 
-const devProjectsCrud = listCrud<DevProject>(COLLECTIONS.DEV_PROJECTS, toDevProject, "프로젝트");
+const devProjectsCrud = listCrud<DevProject>(
+  COLLECTIONS.DEV_PROJECTS,
+  toDevProject,
+  "프로젝트",
+  "project",
+);
 const devProjects = {
   ...devProjectsCrud,
   remove: async (id: string): Promise<void> => {
@@ -75,6 +81,7 @@ const updateDevConfig = async (config: DevConfig): Promise<void> => {
     throw new Error("개발 설정 저장에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("devConfig", SITE_DEV_DOC);
 };
 
 type DevProjectInput = Omit<DevProject, "id">;

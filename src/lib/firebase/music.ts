@@ -9,6 +9,7 @@ import {
 
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
@@ -55,7 +56,12 @@ const toMusicMedia = (id: string, d: DocumentData): MusicMedia => ({
   published: d.published ?? false,
 });
 
-const musicWorksCrud = listCrud<MusicWork>(COLLECTIONS.MUSIC_WORKS, toMusicWork, "연주");
+const musicWorksCrud = listCrud<MusicWork>(
+  COLLECTIONS.MUSIC_WORKS,
+  toMusicWork,
+  "연주",
+  "musicWork",
+);
 const musicWorks = {
   ...musicWorksCrud,
   remove: async (id: string): Promise<void> => {
@@ -63,8 +69,18 @@ const musicWorks = {
     await deleteMusicWorkImages(id).catch(() => undefined);
   },
 };
-const musicAwards = listCrud<MusicAward>(COLLECTIONS.MUSIC_AWARDS, toMusicAward, "수상");
-const musicMedia = listCrud<MusicMedia>(COLLECTIONS.MUSIC_MEDIA, toMusicMedia, "영상");
+const musicAwards = listCrud<MusicAward>(
+  COLLECTIONS.MUSIC_AWARDS,
+  toMusicAward,
+  "수상",
+  "musicAward",
+);
+const musicMedia = listCrud<MusicMedia>(
+  COLLECTIONS.MUSIC_MEDIA,
+  toMusicMedia,
+  "영상",
+  "musicMedia",
+);
 
 /**
  * site/music 설정(소개 intro + 경력·학력 타임라인) 읽기/저장 — 단일 문서.
@@ -91,6 +107,7 @@ const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
     throw new Error("음악 설정 저장에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("musicConfig", SITE_MUSIC_DOC);
 };
 
 type MusicWorkInput = Omit<MusicWork, "id">;

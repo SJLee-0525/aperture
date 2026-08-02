@@ -1,6 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
@@ -49,6 +50,8 @@ const updateSiteConfigFields = async (fields: Partial<SiteConfig>): Promise<void
     throw new Error("사이트 설정 저장에 실패했습니다.");
   }
   requestPublicRevalidate();
+  await requestRagSync("siteConfig", SITE_DOC);
+  if (fields.tags) await requestRagSync("photoTags", SITE_DOC);
 };
 
 export { getSiteConfig, updateSiteConfigFields };
