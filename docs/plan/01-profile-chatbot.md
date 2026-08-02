@@ -15,19 +15,22 @@ Next.js Route Handler
     └─ 텍스트·내부 링크·콘텐츠 참조 반환
 ```
 
-- 제공자는 환경변수로 교체할 수 있으며 현재 로컬 기본값은 Gemini다.
+- 기본 제공자는 OpenAI GPT-5.6 Luna이며 응답 시작 전 장애에는 Gemini로 폴백한다.
 - API 키와 모델 호출은 서버에서만 처리한다.
 - Firebase Admin SDK나 별도 상시 서버를 추가하지 않는다.
 - 대화는 브라우저 메모리에만 유지되어 패널을 닫아도 남고 새로고침하면 초기화된다.
-- Gemini 응답은 NDJSON으로 스트리밍하며 첫 토큰 전에는 대기 말풍선을 표시한다.
+- 제공자 응답은 NDJSON으로 스트리밍하며 첫 토큰 전에는 대기 말풍선을 표시한다.
 - 질문과 후속 대화를 분류해 필요한 프로필·개발·음악·사진 문맥만 모델에 전달한다.
 
 ## 2. 환경변수
 
 ```dotenv
-CHAT_PROVIDER=gemini
-CHAT_PROVIDER_MODEL=gemini-3.5-flash-lite
+CHAT_PROVIDER=openai
+CHAT_PROVIDER_MODEL=gpt-5.6-luna
 CHAT_PROVIDER_API_KEY=
+CHAT_FALLBACK_PROVIDER=gemini
+CHAT_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite
+CHAT_FALLBACK_PROVIDER_API_KEY=
 EMBEDDING_PROVIDER=openai
 EMBEDDING_PROVIDER_MODEL=text-embedding-3-small
 EMBEDDING_PROVIDER_API_KEY=
@@ -38,7 +41,7 @@ KV_REST_API_URL=
 KV_REST_API_TOKEN=
 ```
 
-로컬 값은 `.env.local`, 운영 값은 Vercel의 server-only 환경변수에 넣는다. 비밀값에 `NEXT_PUBLIC_` 접두사를 붙이거나 저장소에 실제 키를 커밋하지 않는다. 외부 호출 없는 개발·테스트에는 `CHAT_PROVIDER=mock`을 사용할 수 있다. Upstash의 `UPSTASH_REDIS_REST_*` 또는 Vercel Marketplace의 `KV_REST_API_*` 쌍이 설정되면 공유 limiter를 사용하고, 없으면 인스턴스 메모리 limiter를 사용한다. `REDIS_URL`, `KV_URL`, `KV_REST_API_READ_ONLY_TOKEN`은 이 기능에서 사용하지 않는다.
+로컬 값은 `.env.local`, 운영 값은 Vercel의 server-only 환경변수에 넣는다. 비밀값에 `NEXT_PUBLIC_` 접두사를 붙이거나 저장소에 실제 키를 커밋하지 않는다. 외부 호출 없는 개발·테스트에는 `CHAT_PROVIDER=mock`을 사용할 수 있다. Luna는 Responses API의 스트리밍, 엄격한 Structured Outputs, 낮은 verbosity와 `reasoning: none`을 사용한다. OpenAI가 아직 본문을 보내지 않은 상태에서 실패할 때만 Gemini로 폴백해 서로 다른 제공자의 문장이 섞이지 않게 한다. Upstash의 `UPSTASH_REDIS_REST_*` 또는 Vercel Marketplace의 `KV_REST_API_*` 쌍이 설정되면 공유 limiter를 사용하고, 없으면 인스턴스 메모리 limiter를 사용한다. `REDIS_URL`, `KV_URL`, `KV_REST_API_READ_ONLY_TOKEN`은 이 기능에서 사용하지 않는다.
 
 채팅 생성과 임베딩 생성은 키·모델·할당량을 완전히 분리한다. `EMBEDDING_PROVIDER_API_KEY`가 없을 때 `CHAT_PROVIDER_API_KEY`로 폴백하지 않는다. 관리자는 `/admin/maintenance`에서 공개 프로필·개발·음악·사진 콘텐츠를 의미 단위 RAG 청크로 일괄 생성한다. 서버는 Firebase 관리자 ID token을 검증하고 OpenAI 배치 임베딩을 생성한 뒤 Firestore 요청 크기에 맞춰 `ragDocuments`를 분할 교체한다. 런타임은 분류된 섹션의 청크를 1시간 캐시하고 Route Handler에서 코사인 유사도를 계산한다.
 
