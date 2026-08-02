@@ -177,6 +177,10 @@ describe("migrateImageThumbnails", () => {
       devImages: 2,
       musicPosters: 1,
       photos: 1,
+      completed: 4,
+      pending: 5,
+      percent: 44,
+      total: 9,
     });
 
     expect(mocks.updatePhoto).not.toHaveBeenCalled();
@@ -217,6 +221,10 @@ describe("migrateImageThumbnails", () => {
       devImages: 2,
       musicPosters: 1,
       photos: 1,
+      completed: 5,
+      pending: 0,
+      percent: 100,
+      total: 5,
     });
 
     expect(fetch).toHaveBeenCalledTimes(4);

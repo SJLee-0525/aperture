@@ -20,6 +20,37 @@
   line-height: 1.65;
 }
 
+.summary {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.summaryLine {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  color: var(--text-2);
+}
+
+.summaryLine span {
+  color: var(--text-3);
+}
+
+.meter {
+  height: 8px;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: 999px;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 180ms ease;
+}
+
 .actions {
   display: flex;
   gap: var(--s-3);

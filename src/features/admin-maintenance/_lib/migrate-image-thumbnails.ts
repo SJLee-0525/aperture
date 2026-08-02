@@ -31,6 +31,10 @@ type MigrationResult = {
   devImages: number;
   musicPosters: number;
   photos: number;
+  completed: number;
+  pending: number;
+  percent: number;
+  total: number;
 };
 
 type ProgressListener = (progress: MigrationProgress) => void;
@@ -101,8 +105,26 @@ const migrateImageThumbnails = async (
     musicWorks.list(),
     devProjects.list(),
   ]);
-  const result: MigrationResult = { albums: 0, devImages: 0, musicPosters: 0, photos: 0 };
+  const result: MigrationResult = {
+    albums: 0,
+    devImages: 0,
+    musicPosters: 0,
+    photos: 0,
+    completed: 0,
+    pending: 0,
+    percent: 100,
+    total: 0,
+  };
   const photoImages = new Map(photos.map((photo) => [photo.id, photo.image]));
+  result.total =
+    photos.filter((photo) => Boolean(photo.image.url)).length +
+    works.filter((work) => Boolean(work.poster.url)).length +
+    projects.reduce(
+      (count, project) =>
+        count + [project.cover, ...project.images].filter((image) => Boolean(image?.url)).length,
+      0,
+    ) +
+    albums.filter((album) => photoImages.has(album.coverPhotoId)).length;
 
   for (const [index, photo] of photos.entries()) {
     onProgress({ stage: "사진 파생 이미지", completed: index, total: photos.length });
@@ -176,6 +198,11 @@ const migrateImageThumbnails = async (
     await updateAlbum(id, { ...input, cover });
   }
 
+  result.pending = dryRun
+    ? result.photos + result.musicPosters + result.devImages + result.albums
+    : 0;
+  result.completed = Math.max(0, result.total - result.pending);
+  result.percent = result.total === 0 ? 100 : Math.round((result.completed / result.total) * 100);
   onProgress({ stage: "완료", completed: 1, total: 1 });
   return result;
 };

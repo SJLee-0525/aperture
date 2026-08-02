@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   migrateImageThumbnails,
@@ -15,6 +15,20 @@ const ImageMigrationPanel = () => {
   const [progress, setProgress] = useState<MigrationProgress | null>(null);
   const [result, setResult] = useState<MigrationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    migrateImageThumbnails(true)
+      .then((value) => {
+        if (active) setResult(value);
+      })
+      .catch((caught: Error) => {
+        if (active) setError(caught.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const run = async (dryRun: boolean) => {
     if (!dryRun && !window.confirm("기존 문서와 Storage에 프리뷰·썸네일을 생성할까요?")) return;
@@ -51,10 +65,21 @@ const ImageMigrationPanel = () => {
         </p>
       ) : null}
       {result ? (
-        <p className={styles.result}>
-          사진 {result.photos} · 음악 포스터 {result.musicPosters} · 개발 이미지 {result.devImages}{" "}
-          · 앨범 {result.albums}
-        </p>
+        <div className={styles.summary} aria-live="polite">
+          <div className={styles.summaryLine}>
+            <strong>{result.percent}% 완료</strong>
+            <span>
+              {result.completed}/{result.total} · 변경 필요 {result.pending}
+            </span>
+          </div>
+          <div className={styles.meter} aria-hidden="true">
+            <span style={{ width: `${result.percent}%` }} />
+          </div>
+          <p className={styles.result}>
+            대상: 사진 {result.photos} · 음악 포스터 {result.musicPosters} · 개발 이미지{" "}
+            {result.devImages} · 앨범 {result.albums}
+          </p>
+        </div>
       ) : null}
       {error ? (
         <p className={styles.error} role="alert">
