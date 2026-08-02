@@ -41,8 +41,11 @@ describe("needsProfileContext", () => {
   it.each([
     ["사진 작업 보여줘", ["profile", "photography"]],
     ["캐논으로 찍은 것 보여줘", ["profile", "photography"]],
+    ["lake에서 찍은 작업", ["profile", "photography"]],
     ["React 프로젝트가 궁금해", ["profile", "development"]],
+    ["리액트로 만든 작업", ["profile", "development"]],
     ["피아노 연주와 수상 경력 알려줘", ["profile", "music"]],
+    ["piano 작업을 알려줘", ["profile", "music"]],
     ["수상 경력을 알려줘", ["profile", "development", "music"]],
     ["연락 방법을 알려줘", ["profile"]],
     ["포트폴리오를 소개해 줘", ["profile", "development", "music", "photography"]],

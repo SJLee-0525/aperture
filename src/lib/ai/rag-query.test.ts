@@ -17,4 +17,12 @@ describe("RAG 검색어 보강", () => {
   it("자연어 조사와 검색 요청 표현을 제거하고 장비명을 찾는다", () => {
     expect(keywordSimilarity("캐논으로 찍은 사진 보여줘", "Canon EOS R6")).toBe(1);
   });
+
+  it.each([
+    ["lake", "제목: 고요한 저녁 | 장소: 광교호수공원"],
+    ["리액트", "React TypeScript 프로젝트"],
+    ["piano", "피아노 독주회"],
+  ])("도메인 이중언어 별칭을 연결한다: %s", (query, document) => {
+    expect(keywordSimilarity(query, document)).toBe(1);
+  });
 });

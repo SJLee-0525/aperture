@@ -17,6 +17,18 @@ const SEARCH_ALIASES: Array<{ pattern: RegExp; expansion: string }> = [
   },
   { pattern: /시그마|\bsigma\b/i, expansion: "Sigma camera lens 카메라 렌즈 사진 photography" },
   { pattern: /탐론|\btamron\b/i, expansion: "Tamron lens 렌즈 사진 photography" },
+  {
+    pattern: /호수공원|호수|\blake(?: park)?\b/i,
+    expansion: "Lake 호수 호수공원 photo photography 사진",
+  },
+  {
+    pattern: /리액트|\breact(?:\.?js)?\b/i,
+    expansion: "React 리액트 developer development project 개발 프로젝트",
+  },
+  {
+    pattern: /피아노|\bpiano\b/i,
+    expansion: "Piano 피아노 music performance 음악 연주",
+  },
 ];
 
 const STOP_WORDS = new Set([

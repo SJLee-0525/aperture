@@ -54,6 +54,21 @@ const documents: SearchDocument[] = [
     meta: { ko: "웹", en: "Web" },
     href: "/dev/projects?project=1",
   },
+  {
+    key: "photo-lake",
+    section: "photo",
+    title: { ko: "고요한 저녁", en: "" },
+    text: { ko: "고요한 저녁 광교호수공원", en: "" },
+    meta: { ko: "광교호수공원", en: "" },
+    href: "/photo?photo=lake",
+  },
+  {
+    key: "work-piano",
+    section: "music",
+    title: { ko: "겨울 독주회", en: "" },
+    text: { ko: "피아노 독주회", en: "" },
+    href: "/music?work=piano",
+  },
 ];
 
 describe("SearchResults", () => {
@@ -113,6 +128,20 @@ describe("SearchResults", () => {
 
     expect(screen.getByText("겨울 바다").closest("a")?.getAttribute("href")).toBe("/photo?photo=2");
     expect(screen.queryByText("부산의 새벽")).toBeNull();
+  });
+
+  it.each([
+    ["lake", "고요한 저녁", "/photo?photo=lake"],
+    ["리액트", "포트폴리오", "/dev/projects?project=1"],
+    ["piano", "겨울 독주회", "/music?work=piano"],
+  ])("분야별 이중언어 검색어를 결과에 연결한다: %s", (query, title, href) => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams({ q: query }) as ReturnType<typeof useSearchParams>,
+    );
+
+    render(<SearchResults documents={documents} />);
+
+    expect(screen.getByText(title).closest("a")?.getAttribute("href")).toBe(href);
   });
 
   it("일치하는 문서가 없으면 빈 결과 안내와 0건을 보여준다", () => {
