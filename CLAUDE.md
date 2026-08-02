@@ -70,8 +70,9 @@
    published 문서·`site`는 Rules가 무인증 read를 허용 → 웹 API 키만으로 충분. **쓰기·관리자 읽기만 클라 SDK**(`firestore.ts`).
 7. **★ 무인증 쓰기 전면 금지.** 방문자는 모든 컬렉션을 읽기만 하며, Firestore·Storage 쓰기는 관리자만 허용한다.
    공개 server action도 Firebase ID token을 검증하고 관리자 UID와 일치할 때만 실행한다.
-8. **★ AI(Phase 3 태그 추천) = 브라우저 내 추론(`transformers.js`)만.** 클라우드 비전/LLM API 금지 —
-   진짜 시크릿 키를 클라에 둘 수 없고, 프록시할 서버가 없다(원칙 #1·#5와 충돌).
+8. **★ AI = 서버리스 Route Handler만.** 채팅과 OpenAI 임베딩 키는 Vercel 서버 환경변수로 분리하고
+   브라우저 번들에 노출하지 않는다. 관리자 쓰기는 Firebase ID token과 고정 관리자 UID를 검증한다.
+   별도 상시 서버와 `firebase-admin`은 두지 않는다. 자세한 결정은 `docs/adr/0001-serverless-rag.md`를 따른다.
 9. **★ 섹션 액센트 = `html[data-section]`.** 라우트에 따라 `photo`(블루)/`music`(레드)/`dev`(그린)/`home`(블루)를 설정,
    `globals.css`가 `--accent` 계열을 오버라이드. 컴포넌트는 항상 `--accent` 변수만 참조(섹션별 색 하드코딩 금지).
 
@@ -202,7 +203,7 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 
 > 지도(MapLibre+CARTO)는 **키가 없다** — CARTO 무료 타일 사용.
 > Firebase 웹 키(`AIza…`)는 공개돼도 보안 위험이 아니다 — 보안은 Rules가 담당.
-> LLM/비전 API 키 같은 **진짜 시크릿은 이 프로젝트에 없다**(아키텍처 원칙 #8). 코드 하드코딩 시 secret_scan hook이 경고.
+> LLM·임베딩 키는 Vercel 서버 환경변수에만 둔다. `NEXT_PUBLIC_` 접두사를 사용하거나 코드에 하드코딩하지 않는다.
 
 ## 무료 한도 가드
 

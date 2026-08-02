@@ -28,6 +28,9 @@ Next.js Route Handler
 CHAT_PROVIDER=gemini
 CHAT_PROVIDER_MODEL=gemini-3.5-flash-lite
 CHAT_PROVIDER_API_KEY=
+EMBEDDING_PROVIDER=openai
+EMBEDDING_PROVIDER_MODEL=text-embedding-3-small
+EMBEDDING_PROVIDER_API_KEY=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 # 또는 Vercel Marketplace가 자동 주입하는 아래 두 변수
@@ -36,6 +39,8 @@ KV_REST_API_TOKEN=
 ```
 
 로컬 값은 `.env.local`, 운영 값은 Vercel의 server-only 환경변수에 넣는다. 비밀값에 `NEXT_PUBLIC_` 접두사를 붙이거나 저장소에 실제 키를 커밋하지 않는다. 외부 호출 없는 개발·테스트에는 `CHAT_PROVIDER=mock`을 사용할 수 있다. Upstash의 `UPSTASH_REDIS_REST_*` 또는 Vercel Marketplace의 `KV_REST_API_*` 쌍이 설정되면 공유 limiter를 사용하고, 없으면 인스턴스 메모리 limiter를 사용한다. `REDIS_URL`, `KV_URL`, `KV_REST_API_READ_ONLY_TOKEN`은 이 기능에서 사용하지 않는다.
+
+채팅 생성과 임베딩 생성은 키·모델·할당량을 완전히 분리한다. `EMBEDDING_PROVIDER_API_KEY`가 없을 때 `CHAT_PROVIDER_API_KEY`로 폴백하지 않는다. 관리자는 `/admin/maintenance`에서 공개 프로필·개발·음악·사진 콘텐츠를 의미 단위 RAG 청크로 일괄 생성한다. 서버는 Firebase 관리자 ID token을 검증하고 OpenAI 배치 임베딩을 생성한 뒤 Firestore 요청 크기에 맞춰 `ragDocuments`를 분할 교체한다. 런타임은 분류된 섹션의 청크를 1시간 캐시하고 Route Handler에서 코사인 유사도를 계산한다.
 
 ## 3. 공개 문맥과 데이터 절약
 
