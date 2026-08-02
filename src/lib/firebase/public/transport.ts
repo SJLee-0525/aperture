@@ -1,3 +1,5 @@
+import { firestoreCollectionCacheTag, firestoreDocumentCacheTag } from "@/constants/cache";
+
 type RestValue = Record<string, unknown>;
 type RestDocument = { name: string; fields?: Record<string, RestValue> };
 
@@ -54,10 +56,19 @@ const projectedPublishedOrderedQuery = (collectionId: string, fieldPaths: string
 const runQuery = async (
   structuredQuery: Record<string, unknown>,
 ): Promise<Array<{ id: string; data: Record<string, unknown> }>> => {
+  const collectionIds = (
+    (structuredQuery.from as Array<{ collectionId?: string }> | undefined) ?? []
+  )
+    .map(({ collectionId }) => collectionId)
+    .filter((collectionId): collectionId is string => Boolean(collectionId));
   const response = await fetch(`${documentsUrl()}:runQuery?key=${API_KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ structuredQuery }),
+    next: {
+      revalidate: REVALIDATE_SECONDS,
+      tags: collectionIds.map(firestoreCollectionCacheTag),
+    },
   });
   if (!response.ok) throw new Error(`Firestore runQuery 실패 (${response.status})`);
 
@@ -76,7 +87,10 @@ const fetchDocument = async (
   label: string,
 ): Promise<Record<string, unknown> | null> => {
   const response = await fetch(`${documentsUrl()}/${collectionId}/${documentId}?key=${API_KEY}`, {
-    next: { revalidate: REVALIDATE_SECONDS },
+    next: {
+      revalidate: REVALIDATE_SECONDS,
+      tags: [firestoreDocumentCacheTag(collectionId, documentId)],
+    },
   });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Firestore ${label} 읽기 실패 (${response.status})`);

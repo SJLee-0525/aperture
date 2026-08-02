@@ -79,7 +79,7 @@ const SearchResults = ({ documents }: Props) => {
             <ul className={styles.list}>
               {group.hits.map((hitItem) => (
                 <li key={hitItem.key}>
-                  <Link href={hitItem.href} className={styles.hit}>
+                  <Link href={hitItem.href} prefetch={false} className={styles.hit}>
                     {hitItem.imageUrl ? (
                       <span className={styles.thumbnail} data-protected-image>
                         <Image

@@ -111,7 +111,9 @@ const AboutSection = ({
                 <ul id={`${colsId}-${index}`} className={styles.list}>
                   {visibleItems.map((item) => (
                     <li key={item}>
-                      <Link href={{ pathname: ROUTES.SEARCH, query: { q: item } }}>{item}</Link>
+                      <Link prefetch={false} href={{ pathname: ROUTES.SEARCH, query: { q: item } }}>
+                        {item}
+                      </Link>
                     </li>
                   ))}
                 </ul>

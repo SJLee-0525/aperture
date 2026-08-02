@@ -258,7 +258,12 @@ const ChatPanel = ({ open, onClose }: Props) => {
                     </button>
                   ) : null}
                   {message.link ? (
-                    <Link className={styles.link} href={message.link.href} onClick={onClose}>
+                    <Link
+                      className={styles.link}
+                      href={message.link.href}
+                      prefetch={false}
+                      onClick={onClose}
+                    >
                       {message.link.label} <span aria-hidden="true">↗</span>
                     </Link>
                   ) : null}
@@ -267,6 +272,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
                       key={`${link.href}:${link.label}`}
                       className={styles.link}
                       href={link.href}
+                      prefetch={false}
                       onClick={onClose}
                     >
                       {link.label} <span aria-hidden="true">↗</span>

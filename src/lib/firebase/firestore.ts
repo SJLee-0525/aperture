@@ -14,12 +14,16 @@ import {
 } from "firebase/firestore";
 
 import { COLLECTIONS } from "@/constants/collections";
+import { firestoreCollectionCacheTag } from "@/constants/cache";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
+
+const PHOTOS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.PHOTOS);
+const ALBUMS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.ALBUMS);
 
 /** 사진 쓰기 입력 — 문서 id는 저장 필드에서 제외한다. */
 type PhotoInput = Omit<Photo, "id">;
@@ -93,7 +97,7 @@ const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
   } catch {
     throw new Error("사진 저장에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(PHOTOS_CACHE_TAG);
   await requestRagSync("photo", id);
 };
 
@@ -104,7 +108,7 @@ const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
   } catch {
     throw new Error("사진 수정에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(PHOTOS_CACHE_TAG);
   await requestRagSync("photo", id);
 };
 
@@ -133,7 +137,7 @@ const deletePhoto = async (id: string): Promise<void> => {
   } catch {
     throw new Error("사진 삭제에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(PHOTOS_CACHE_TAG, ALBUMS_CACHE_TAG);
   await requestRagSync("photo", id);
 };
 
@@ -144,7 +148,7 @@ const updatePhotoOrder = async (id: string, order: number): Promise<void> => {
   } catch {
     throw new Error("순서 저장에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(PHOTOS_CACHE_TAG);
 };
 
 /** 공개 여부만 토글. */
@@ -154,7 +158,7 @@ const setPhotoPublished = async (id: string, published: boolean): Promise<void> 
   } catch {
     throw new Error("공개 상태 변경에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(PHOTOS_CACHE_TAG);
   await requestRagSync("photo", id);
 };
 

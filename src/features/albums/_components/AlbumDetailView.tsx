@@ -56,7 +56,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
           ) : null}
         </m.div>
         <div className={styles.scrim} />
-        <Link href={ROUTES.PHOTO_ALBUMS} className={styles.back}>
+        <Link href={ROUTES.PHOTO_ALBUMS} prefetch={false} className={styles.back}>
           ← {dict.albumsNav}
         </Link>
         <ShareButton title={title} label={dict.shareLabel} className={styles.share} />

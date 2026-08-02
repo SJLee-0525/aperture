@@ -27,6 +27,7 @@ const DevStackView = ({ config }: { config: DevConfig }) => {
                   <Link
                     key={item.name}
                     href={`${ROUTES.SEARCH}?q=${encodeURIComponent(item.name)}`}
+                    prefetch={false}
                     className={styles.chip}
                     style={{ background: item.bg, color: item.fg, borderColor: item.bg }}
                   >

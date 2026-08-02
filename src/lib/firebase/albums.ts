@@ -13,10 +13,13 @@ import {
 } from "firebase/firestore";
 
 import { COLLECTIONS } from "@/constants/collections";
+import { firestoreCollectionCacheTag } from "@/constants/cache";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import type { Album } from "@/types/album";
+
+const ALBUMS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.ALBUMS);
 
 /** 앨범 쓰기 입력 — id 제외(선발급). */
 type AlbumInput = Omit<Album, "id">;
@@ -64,7 +67,7 @@ const createAlbum = async (id: string, input: AlbumInput): Promise<void> => {
   } catch {
     throw new Error("앨범 저장에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(ALBUMS_CACHE_TAG);
   await requestRagSync("album", id);
 };
 
@@ -74,7 +77,7 @@ const updateAlbum = async (id: string, input: AlbumInput): Promise<void> => {
   } catch {
     throw new Error("앨범 수정에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(ALBUMS_CACHE_TAG);
   await requestRagSync("album", id);
 };
 
@@ -85,7 +88,7 @@ const updateAlbumOrder = async (id: string, order: number): Promise<void> => {
   } catch {
     throw new Error("순서 저장에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(ALBUMS_CACHE_TAG);
 };
 
 const setAlbumPublished = async (id: string, published: boolean): Promise<void> => {
@@ -94,7 +97,7 @@ const setAlbumPublished = async (id: string, published: boolean): Promise<void> 
   } catch {
     throw new Error("공개 상태 변경에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(ALBUMS_CACHE_TAG);
   await requestRagSync("album", id);
 };
 
@@ -105,7 +108,7 @@ const deleteAlbum = async (id: string): Promise<void> => {
   } catch {
     throw new Error("앨범 삭제에 실패했습니다.");
   }
-  requestPublicRevalidate();
+  requestPublicRevalidate(ALBUMS_CACHE_TAG);
   await requestRagSync("album", id);
 };
 

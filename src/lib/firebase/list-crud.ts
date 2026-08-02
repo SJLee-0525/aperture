@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
+import { firestoreCollectionCacheTag } from "@/constants/cache";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import type { RagSyncSourceType } from "@/types/rag";
@@ -32,6 +33,7 @@ const listCrud = <T extends WithId>(
 ) => {
   type Input = Omit<T, "id">;
   const col = () => collection(db, name);
+  const cacheTag = firestoreCollectionCacheTag(name);
   return {
     /** 새 문서 ID 선발급 (Storage 경로 확정용). */
     newId: (): string => doc(col()).id,
@@ -62,7 +64,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error(`${label} 저장에 실패했습니다.`);
       }
-      requestPublicRevalidate();
+      requestPublicRevalidate(cacheTag);
       if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
     update: async (id: string, input: Input): Promise<void> => {
@@ -71,7 +73,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error(`${label} 수정에 실패했습니다.`);
       }
-      requestPublicRevalidate();
+      requestPublicRevalidate(cacheTag);
       if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
     /** 순서만 갱신 (dnd 정렬). */
@@ -81,7 +83,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error("순서 저장에 실패했습니다.");
       }
-      requestPublicRevalidate();
+      requestPublicRevalidate(cacheTag);
     },
     setPublished: async (id: string, published: boolean): Promise<void> => {
       try {
@@ -89,7 +91,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error("공개 상태 변경에 실패했습니다.");
       }
-      requestPublicRevalidate();
+      requestPublicRevalidate(cacheTag);
       if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
     remove: async (id: string): Promise<void> => {
@@ -98,7 +100,7 @@ const listCrud = <T extends WithId>(
       } catch {
         throw new Error(`${label} 삭제에 실패했습니다.`);
       }
-      requestPublicRevalidate();
+      requestPublicRevalidate(cacheTag);
       if (ragSourceType) await requestRagSync(ragSourceType, id);
     },
   };

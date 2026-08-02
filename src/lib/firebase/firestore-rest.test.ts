@@ -63,6 +63,23 @@ describe("Firestore REST decoding", () => {
     expect(projectFields).not.toContain("images");
   });
 
+  it("공개 목록 조회를 컬렉션 태그로 1시간 공유 캐시한다", async () => {
+    const fetchMock = vi.fn().mockImplementation(async () => jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchPublishedPhotos();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining(":runQuery"),
+      expect.objectContaining({
+        next: {
+          revalidate: 3_600,
+          tags: ["firestore:photos"],
+        },
+      }),
+    );
+  });
+
   it("사진의 중첩 값과 timestamp를 디코딩하고 누락 EXIF는 기본값으로 채운다", async () => {
     vi.stubGlobal(
       "fetch",
@@ -153,6 +170,12 @@ describe("Firestore REST decoding", () => {
       name: { ko: "이성준", en: "Sungjoon Lee" },
       links: [{ label: "GitHub", href: "https://github.com/example" }],
       tags: [{ id: "street", ko: "거리", en: "Street" }],
+    });
+    expect(vi.mocked(fetch).mock.calls[0]?.[1]).toMatchObject({
+      next: {
+        revalidate: 3_600,
+        tags: ["firestore:site:config"],
+      },
     });
   });
 

@@ -85,7 +85,11 @@ const DevCareerView = ({ config }: { config: DevConfig }) => {
             <div className={styles.modalPlace}>{pickText(selectedAward.place, lang)}</div>
             <p className={styles.modalDescription}>{pickText(selectedAward.description, lang)}</p>
             {selectedAward.projectId ? (
-              <Link className={styles.projectLink} href={devProjectRoute(selectedAward.projectId)}>
+              <Link
+                className={styles.projectLink}
+                href={devProjectRoute(selectedAward.projectId)}
+                prefetch={false}
+              >
                 {dict.devAwardProjectLink} <span aria-hidden="true">↗</span>
               </Link>
             ) : null}

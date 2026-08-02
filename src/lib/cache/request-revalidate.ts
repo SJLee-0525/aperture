@@ -5,12 +5,13 @@ import { auth } from "@/lib/firebase/client";
 const DEBOUNCE_MS = 300;
 
 let timer: ReturnType<typeof setTimeout> | null = null;
+const pendingTags = new Set<string>();
 
-const revalidateAsCurrentAdmin = async (): Promise<void> => {
+const revalidateAsCurrentAdmin = async (tags: string[]): Promise<void> => {
   const user = auth.currentUser;
   if (!user) throw new Error("관리자 인증이 필요합니다.");
   const idToken = await user.getIdToken();
-  await revalidatePublicPages(idToken);
+  await revalidatePublicPages(idToken, tags);
 };
 
 /**
@@ -18,11 +19,14 @@ const revalidateAsCurrentAdmin = async (): Promise<void> => {
  * 저장은 이미 Firestore 에 반영된 뒤라, 재검증 실패는 "최대 revalidate 주기만큼 늦게 보임"일 뿐
  * 데이터 유실이 아니다 → 저장 UX 를 막지 않고 실패는 경고 로그만 남긴다.
  */
-const requestPublicRevalidate = (): void => {
+const requestPublicRevalidate = (...tags: string[]): void => {
+  tags.forEach((tag) => pendingTags.add(tag));
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
     timer = null;
-    revalidateAsCurrentAdmin().catch((error) => {
+    const tagsToRevalidate = [...pendingTags];
+    pendingTags.clear();
+    revalidateAsCurrentAdmin(tagsToRevalidate).catch((error) => {
       console.warn("[cache] 공개 페이지 재검증 실패 — ISR 주기 후 자동 갱신", error);
     });
   }, DEBOUNCE_MS);
