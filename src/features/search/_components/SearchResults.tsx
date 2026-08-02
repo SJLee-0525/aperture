@@ -7,6 +7,7 @@ import { useMemo } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { SearchDocument, SearchSection } from "@/features/search/_lib/search-documents";
+import { matchesSearchText } from "@/lib/ai/rag-query";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import styles from "./SearchResults.module.css";
@@ -23,14 +24,14 @@ type Group = { section: SearchSection; label: string; hits: Hit[] };
 const SearchResults = ({ documents }: Props) => {
   const { dict, lang } = useLang();
   const q = (useSearchParams().get("q") ?? "").trim();
-  const ql = q.toLowerCase();
 
   const groups = useMemo<Group[]>(() => {
-    if (!ql) return [];
+    if (!q) return [];
     const hits: Record<SearchSection, Hit[]> = { photo: [], music: [], dev: [] };
 
     for (const document of documents) {
-      if (!pickText(document.text, lang).toLowerCase().includes(ql)) continue;
+      const searchableText = `${document.text.ko} ${document.text.en}`;
+      if (!matchesSearchText(q, searchableText)) continue;
       hits[document.section].push({
         key: document.key,
         title: pickText(document.title, lang),
@@ -50,7 +51,7 @@ const SearchResults = ({ documents }: Props) => {
       { section: "music", label: dict.sectionMusic, hits: hits.music },
       { section: "dev", label: dict.sectionDev, hits: hits.dev },
     ].filter((group) => group.hits.length > 0) as Group[];
-  }, [ql, lang, dict, documents]);
+  }, [q, lang, dict, documents]);
 
   const total = groups.reduce((n, g) => n + g.hits.length, 0);
 

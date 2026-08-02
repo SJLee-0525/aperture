@@ -39,6 +39,14 @@ const documents: SearchDocument[] = [
     href: "/photo/albums/city",
   },
   {
+    key: "photo-2",
+    section: "photo",
+    title: { ko: "겨울 바다", en: "Winter Sea" },
+    text: { ko: "강릉 Canon EOS R6 RF 24-70mm", en: "Gangneung Canon EOS R6 RF 24-70mm" },
+    meta: { ko: "강릉", en: "Gangneung" },
+    href: "/photo?photo=2",
+  },
+  {
     key: "project-1",
     section: "dev",
     title: { ko: "포트폴리오", en: "Portfolio" },
@@ -94,6 +102,17 @@ describe("SearchResults", () => {
 
     expect(screen.getByText("도시의 밤").closest("a")).toBeTruthy();
     expect(screen.getByText(DICTIONARY.ko.albumsNav)).toBeTruthy();
+  });
+
+  it("한글 장비 브랜드 검색으로 영문 카메라 모델이 포함된 사진을 찾는다", () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("q=%EC%BA%90%EB%85%BC") as ReturnType<typeof useSearchParams>,
+    );
+
+    render(<SearchResults documents={documents} />);
+
+    expect(screen.getByText("겨울 바다").closest("a")?.getAttribute("href")).toBe("/photo?photo=2");
+    expect(screen.queryByText("부산의 새벽")).toBeNull();
   });
 
   it("일치하는 문서가 없으면 빈 결과 안내와 0건을 보여준다", () => {
