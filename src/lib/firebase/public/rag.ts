@@ -4,28 +4,31 @@ import type { RagSection, StoredRagChunk } from "@/types/rag";
 
 const fetchRagChunks = async (): Promise<StoredRagChunk[]> =>
   (
-    await runQuery({
-      from: [{ collectionId: COLLECTIONS.RAG_DOCUMENTS }],
-      where: {
-        fieldFilter: {
-          field: { fieldPath: "published" },
-          op: "EQUAL",
-          value: { booleanValue: true },
+    await runQuery(
+      {
+        from: [{ collectionId: COLLECTIONS.RAG_DOCUMENTS }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "published" },
+            op: "EQUAL",
+            value: { booleanValue: true },
+          },
+        },
+        select: {
+          fields: [
+            "section",
+            "sourceType",
+            "sourceId",
+            "chunkKey",
+            "text",
+            "embedding",
+            "embeddingModel",
+            "published",
+          ].map((fieldPath) => ({ fieldPath })),
         },
       },
-      select: {
-        fields: [
-          "section",
-          "sourceType",
-          "sourceId",
-          "chunkKey",
-          "text",
-          "embedding",
-          "embeddingModel",
-          "published",
-        ].map((fieldPath) => ({ fieldPath })),
-      },
-    })
+      { fresh: true },
+    )
   ).flatMap(({ id, data }) => {
     if (
       typeof data.section !== "string" ||

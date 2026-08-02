@@ -28,7 +28,9 @@ flowchart LR
     E --> R[(Firestore ragDocuments)]
 
     C --> API[POST /api/chat]
-    API --> I[규칙 기반 분야 분류]
+    API --> N[GPT-5 Nano 문맥 분류]
+    N -. none·오류·timeout .-> I[정규식 분야 분류]
+    N --> Q[질문 임베딩 + RAG 검색]
     I --> Q[질문 임베딩 + RAG 검색]
     R --> Q
     Q --> L[GPT-5.6 Luna]
@@ -40,13 +42,14 @@ flowchart LR
 
 ## 3. 사용 모델과 호출 위치
 
-| 용도           | 제공자·모델                     | 호출 위치                                           | 호출 시점                                           |
-| -------------- | ------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
-| 챗봇 기본 응답 | OpenAI `gpt-5.6-luna`           | `src/features/chat/_lib/openai-chat-provider.ts`    | 방문자가 챗봇 메시지를 전송할 때                    |
-| 챗봇 폴백      | Google `gemini-3.5-flash-lite`  | `src/features/chat/_lib/gemini-chat-provider.ts`    | Luna가 본문을 보내기 전에 실패했을 때               |
-| 콘텐츠 임베딩  | OpenAI `text-embedding-3-small` | `src/lib/ai/embedding.ts`                           | 최초 일괄 생성 또는 콘텐츠 변경 후 증분 동기화할 때 |
-| 질문 임베딩    | OpenAI `text-embedding-3-small` | `src/lib/ai/rag-search.ts`                          | 포트폴리오 문맥이 필요한 챗봇 질문마다              |
-| 일반 통합검색  | 외부 모델 없음                  | `src/features/search/_components/SearchResults.tsx` | `/search?q=...`를 열거나 검색어가 바뀔 때           |
+| 용도           | 제공자·모델                     | 호출 위치                                            | 호출 시점                                           |
+| -------------- | ------------------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| 챗봇 기본 응답 | OpenAI `gpt-5.6-luna`           | `src/features/chat/_lib/openai-chat-provider.ts`     | 방문자가 챗봇 메시지를 전송할 때                    |
+| 챗봇 폴백      | Google `gemini-3.5-flash-lite`  | `src/features/chat/_lib/gemini-chat-provider.ts`     | Luna가 본문을 보내기 전에 실패했을 때               |
+| 의도 분류      | OpenAI `gpt-5-nano`             | `src/features/chat/_lib/openai-intent-classifier.ts` | 포트폴리오 분야를 판단할 때                         |
+| 콘텐츠 임베딩  | OpenAI `text-embedding-3-small` | `src/lib/ai/embedding.ts`                            | 최초 일괄 생성 또는 콘텐츠 변경 후 증분 동기화할 때 |
+| 질문 임베딩    | OpenAI `text-embedding-3-small` | `src/lib/ai/rag-search.ts`                           | live 포트폴리오 문맥이 필요한 챗봇 질문마다         |
+| 일반 통합검색  | 외부 모델 없음                  | `src/features/search/_components/SearchResults.tsx`  | `/search?q=...`를 열거나 검색어가 바뀔 때           |
 
 채팅과 임베딩은 API 키, 모델, 할당량을 분리한다. 임베딩 키가 없을 때 채팅 키를 대신 사용하지 않는다.
 
@@ -59,10 +62,16 @@ CHAT_FALLBACK_PROVIDER=gemini
 CHAT_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite
 CHAT_FALLBACK_PROVIDER_API_KEY=
 
+CHAT_INTENT_MODEL=gpt-5-nano
+CHAT_INTENT_PROVIDER_API_KEY=
+CHAT_INTENT_TIMEOUT_MS=3000
+
 EMBEDDING_PROVIDER=openai
 EMBEDDING_PROVIDER_MODEL=text-embedding-3-small
 EMBEDDING_PROVIDER_API_KEY=
 ```
+
+의도 분류 키를 비워 두면 기본 제공자가 OpenAI일 때 채팅 키를 공유한다. 사용할 OpenAI 키가 없으면 LLM 분류를 건너뛰고 정규식 분류만 사용한다.
 
 모든 키는 `.env.local` 또는 Vercel의 server-only 환경변수에 저장하며 `NEXT_PUBLIC_` 접두사를 사용하지 않는다.
 
@@ -72,6 +81,7 @@ EMBEDDING_PROVIDER_API_KEY=
 sequenceDiagram
     participant UI as Chat UI
     participant API as /api/chat
+    participant N as GPT-5 Nano 분류기
     participant RAG as RAG 검색
     participant FS as Firestore
     participant EMB as OpenAI Embeddings
@@ -79,8 +89,13 @@ sequenceDiagram
     participant G as Gemini fallback
 
     UI->>API: 메시지 + 언어, NDJSON 요청
-    API->>API: 본문 검증, rate limit, 분야 분류
-    alt 포트폴리오 문맥 필요
+    API->>API: 본문 검증, rate limit
+    API->>N: 최근 메시지 6개
+    N-->>API: 필요한 분야 또는 none
+    alt none·오류·분류 timeout
+        API->>API: 정규식 분류로 폴백
+    end
+    alt live 포트폴리오 문맥 필요
         par 질문 벡터 생성
             API->>EMB: 확장된 질문
             EMB-->>API: 1536차원 벡터
@@ -90,8 +105,8 @@ sequenceDiagram
         end
         API->>RAG: 코사인 유사도 + 키워드 점수
         RAG-->>API: 관련 청크 최대 8개
-    else 일반 대화
-        API->>API: 포트폴리오 조회 생략
+    else mock 또는 일반 대화
+        API->>API: 선택 분야의 mock 문맥 또는 조회 생략
     end
     API->>L: 지침 + 대화 + 관련 문맥
     L-->>UI: 구조화 content 스트리밍
@@ -114,7 +129,9 @@ sequenceDiagram
 - 15초 timeout
 - IP 기준 요청 제한
 
-`chat-intent.ts`의 규칙 기반 분류기가 질문을 `profile`, `development`, `music`, `photography`로 나눈다. 이 분류기는 모델 호출 전에 실행되므로 빠르고 비용이 들지 않는다. “그거”, “더 보여줘” 같은 후속 질문은 최근 사용자 메시지에서 분야를 이어받는다.
+`openai-intent-classifier.ts`가 현재 질문을 포함한 최근 메시지 6개를 `gpt-5-nano`에 전달해 `profile`, `development`, `music`, `photography`, `none`으로 분류한다. 최근 user/assistant 메시지를 함께 보기 때문에 “울릉도 갔나 보네, 그럼 독도도 있어?”처럼 현재 문장에 `사진`이라는 단어가 없는 후속 질문도 Photo 문맥으로 이어갈 수 있다. 응답은 엄격한 JSON Schema의 섹션 배열만 허용하며 `reasoning.effort: minimal`, 최대 출력 80토큰을 사용한다.
+
+분류 결과가 `none` 또는 빈 배열이거나 API 키 미설정, 잘못된 응답, 429·5xx·네트워크 오류, `CHAT_INTENT_TIMEOUT_MS` 초과가 발생하면 `chat-intent.ts`의 기존 정규식 분류를 한 번 더 실행한다. 기본 분류 timeout은 3초이며 전체 채팅 15초 timeout 안에서 동작한다. 요청 제한을 통과한 뒤 분류하므로 차단된 요청이 모델 할당량을 소비하지 않는다. 정규식은 직접 분야 키워드와 “그거”, “더 보여줘” 같은 단순 후속 질문을 처리하는 무비용 복구 경로다.
 
 분류기를 유지하는 이유는 모든 데이터를 매번 모델에 보내지 않고 필요한 분야만 검색하기 위해서다. 이는 입력 토큰, Firestore 처리량, 응답 시간을 줄이고 서로 무관한 콘텐츠가 답변에 섞이는 문제도 완화한다.
 
@@ -132,7 +149,7 @@ sequenceDiagram
 - **키워드 유사도**는 모델명, 기술명, 고유명사처럼 정확한 문자열이 중요한 검색을 보강한다.
 - 벡터 점수 0.3 이상 또는 키워드 점수 0.5 이상인 후보 중 상위 8개만 모델 문맥에 넣는다.
 
-Firestore의 네이티브 벡터 검색 기능은 사용하지 않는다. 공개 `ragDocuments`를 1시간 캐시한 뒤 Vercel Route Handler 메모리에서 코사인 유사도를 계산한다. 현재 데이터 규모에서는 별도 벡터 DB, 상시 서버, 추가 인덱스 비용 없이 충분하고 구조도 단순하다.
+Firestore의 네이티브 벡터 검색 기능은 사용하지 않는다. Route Handler가 공개 `ragDocuments`를 읽고 코사인 유사도를 계산한다. 임베딩 배열을 포함한 응답은 현재 약 7MB로 Next.js Data Cache의 항목당 2MB 제한을 넘기므로 raw RAG 벡터 응답은 캐시하지 않는다. 현재 데이터 규모에서는 별도 벡터 DB나 상시 서버 없이 동작하지만, 데이터 증가 시 서버 측 전체 벡터 읽기가 우선적인 이전 검토 대상이다.
 
 RAG 검색에 문제가 생기면 챗봇 전체를 중단하지 않고 해당 분야의 기존 포맷 문맥으로 폴백한다.
 
@@ -180,7 +197,20 @@ type ChatProviderResult = {
 - 참조 ID는 현재 공개된 사진·연주·프로젝트 목록과 다시 대조한다.
 - 존재하지 않거나 비공개인 ID는 제거한다.
 - 검증된 참조만 제목, 부제, 썸네일, 딥 링크가 있는 카드로 변환한다.
+- 모델이 선택한 공개 참조 ID가 1시간 Portfolio 스냅샷에 아직 없으면 live 모드에서 공개 projection을 `no-store`로 한 번 다시 읽어 신규 카드의 캐시 시차를 복구한다.
 - API 원문 오류와 stack trace는 사용자에게 노출하지 않는다.
+
+### 4.6 mock과 live 데이터 격리
+
+`NEXT_PUBLIC_USE_MOCK`은 챗봇 문맥, 참조 카드와 RAG 검색에 동일하게 적용한다.
+
+- `1`: mock 프로필·Photo·Music·Dev 데이터만 사용하고 live Firestore RAG를 호출하지 않는다.
+- `0`: live Firestore 공개 데이터와 live RAG를 사용한다.
+- 미설정: 개발 환경은 mock 우선, 프로덕션은 Firebase 설정이 있어야 live를 사용한다.
+
+Portfolio 스냅샷 캐시 함수는 언어뿐 아니라 `mock | live` 콘텐츠 소스를 인자로 받아 캐시 키를 분리한다. mock reference가 없을 때 live 데이터로 재조회하지 않으며, live에서만 stale reference 복구를 허용한다. 따라서 모드를 전환해도 반대쪽 문맥이나 카드가 캐시에서 섞이지 않는다.
+
+`NEXT_PUBLIC_*` 환경변수는 Next.js 빌드·서버 시작 시점 값이므로 `.env.local`을 변경한 뒤 개발 서버를 재시작한다. 기존 채팅창에는 전환 전 assistant 메시지가 브라우저 메모리에 남을 수 있으므로 모드 비교 시 채팅창도 새로 연다.
 
 ## 5. 임베딩 데이터 생성과 저장
 
@@ -283,10 +313,11 @@ flowchart LR
 ## 7. 캐시, 서버리스와 비용
 
 - Next.js Route Handler를 사용하며 별도 상시 서버를 운영하지 않는다.
-- 공개 프로필 projection과 `ragDocuments`는 1시간 Data Cache를 사용한다.
+- 공개 프로필 projection은 1시간 Data Cache를 사용하며 `ko/en`과 `mock/live`별로 분리한다.
+- 2MB 제한을 넘는 raw `ragDocuments` 벡터 응답은 캐시하지 않는다.
 - 관리자 콘텐츠 저장과 임베딩 완료 후 같은 캐시 태그를 무효화한다.
 - 일반 통합검색은 모델 호출 비용이 없다.
-- 챗봇의 포트폴리오 질문에는 질문 임베딩 1회와 채팅 모델 호출 1회가 발생한다.
+- live 포트폴리오 질문에는 의도 분류 1회, 질문 임베딩 1회와 채팅 모델 호출 1회가 발생한다. mock 질문은 RAG와 질문 임베딩을 생략한다.
 - 전체 임베딩 비용은 최초 구축, 모델 변경, 전체 복구 시에 발생한다.
 - 일반적인 콘텐츠 수정은 변경된 항목의 청크만 다시 임베딩한다.
 - Firestore 벡터는 문서의 float 배열로 저장하며 현재는 서버에서 유사도를 계산한다.
@@ -301,9 +332,9 @@ flowchart LR
 
 다단계 도구 호출, 재검색·평가 루프, 여러 벡터 DB 교체, LangSmith 추적이 실제 요구사항이 될 때 다시 검토한다.
 
-### 분류기를 모델로 바꾸지 않은 이유
+### LLM 분류기와 정규식 폴백을 함께 쓰는 이유
 
-규칙 기반 분류기는 무료이고 결정적이며 빠르다. 현재 도메인은 프로필·개발·음악·사진 네 분야로 좁아 규칙과 최근 대화 상속만으로 충분하다. 분류 실패 사례가 누적될 때 별칭과 평가 케이스를 먼저 보강한다.
+정규식만으로는 현재 문장에 분야 단어가 없는 자연스러운 후속 질문을 안정적으로 분류하기 어렵다. 저비용 `gpt-5-nano`가 최근 대화의 암시된 대상을 해석하고, `none`과 모든 실패 경로에서는 무료이고 결정적인 기존 정규식으로 다시 시도한다. LLM의 recall과 정규식의 가용성을 결합하면서 분류 장애가 본 답변 장애로 번지지 않게 한다.
 
 ### 번역본을 별도 생성하지 않는 이유
 
@@ -316,6 +347,8 @@ flowchart LR
 ## 9. 운영 점검표
 
 - [ ] Vercel Production·Preview에 채팅, 폴백, 임베딩 환경변수를 각각 설정한다.
+- [ ] `CHAT_INTENT_MODEL`, 선택적 분류 전용 키와 `CHAT_INTENT_TIMEOUT_MS`를 설정한다.
+- [ ] `NEXT_PUBLIC_USE_MOCK` 변경 후 빌드 또는 개발 서버를 재시작하고 새 채팅에서 데이터 소스를 확인한다.
 - [ ] OpenAI 채팅 키는 Responses Write 중심의 제한 권한을 사용한다.
 - [ ] OpenAI 임베딩 키는 Embeddings Write 중심의 제한 권한을 사용한다.
 - [ ] Firebase Rules와 indexes를 배포한다.
@@ -327,21 +360,23 @@ flowchart LR
 
 ## 10. 주요 구현 파일
 
-| 영역                    | 파일                                                |
-| ----------------------- | --------------------------------------------------- |
-| 챗봇 API                | `src/app/api/chat/route.ts`                         |
-| 요청 처리·검증·스트림   | `src/features/chat/_lib/handle-chat-request.ts`     |
-| 분야 분류               | `src/features/chat/_lib/chat-intent.ts`             |
-| 제공자 선택·폴백        | `src/features/chat/_lib/chat-provider.ts`           |
-| OpenAI Luna             | `src/features/chat/_lib/openai-chat-provider.ts`    |
-| Gemini                  | `src/features/chat/_lib/gemini-chat-provider.ts`    |
-| 프로필 문맥·참조 검증   | `src/features/chat/_lib/build-profile-context.ts`   |
-| RAG 검색                | `src/lib/ai/rag-search.ts`                          |
-| 검색어 별칭·키워드 점수 | `src/lib/ai/rag-query.ts`                           |
-| 청크 생성               | `src/lib/ai/rag-chunks.ts`                          |
-| 임베딩 API              | `src/lib/ai/embedding.ts`                           |
-| 임베딩 관리 API         | `src/app/api/admin/portfolio-embeddings/route.ts`   |
-| 증분 동기화             | `src/lib/ai/request-rag-sync.ts`                    |
-| Firestore RAG 읽기      | `src/lib/firebase/public/rag.ts`                    |
-| 통합검색 문서           | `src/features/search/_lib/search-documents.ts`      |
-| 통합검색 UI             | `src/features/search/_components/SearchResults.tsx` |
+| 영역                    | 파일                                                 |
+| ----------------------- | ---------------------------------------------------- |
+| 챗봇 API                | `src/app/api/chat/route.ts`                          |
+| 요청 처리·검증·스트림   | `src/features/chat/_lib/handle-chat-request.ts`      |
+| 분야 분류               | `src/features/chat/_lib/chat-intent.ts`              |
+| OpenAI 의도 분류        | `src/features/chat/_lib/openai-intent-classifier.ts` |
+| mock/live 소스 선택     | `src/lib/content/content-source.ts`                  |
+| 제공자 선택·폴백        | `src/features/chat/_lib/chat-provider.ts`            |
+| OpenAI Luna             | `src/features/chat/_lib/openai-chat-provider.ts`     |
+| Gemini                  | `src/features/chat/_lib/gemini-chat-provider.ts`     |
+| 프로필 문맥·참조 검증   | `src/features/chat/_lib/build-profile-context.ts`    |
+| RAG 검색                | `src/lib/ai/rag-search.ts`                           |
+| 검색어 별칭·키워드 점수 | `src/lib/ai/rag-query.ts`                            |
+| 청크 생성               | `src/lib/ai/rag-chunks.ts`                           |
+| 임베딩 API              | `src/lib/ai/embedding.ts`                            |
+| 임베딩 관리 API         | `src/app/api/admin/portfolio-embeddings/route.ts`    |
+| 증분 동기화             | `src/lib/ai/request-rag-sync.ts`                     |
+| Firestore RAG 읽기      | `src/lib/firebase/public/rag.ts`                     |
+| 통합검색 문서           | `src/features/search/_lib/search-documents.ts`       |
+| 통합검색 UI             | `src/features/search/_components/SearchResults.tsx`  |

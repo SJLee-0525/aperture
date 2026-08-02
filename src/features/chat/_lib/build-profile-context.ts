@@ -5,6 +5,7 @@ import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
 import { searchRagChunks } from "@/lib/ai/rag-search";
 import { getChatProfileData } from "@/lib/content/chat";
+import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { ChatProfileData } from "@/lib/content/chat";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
@@ -160,15 +161,15 @@ const formatProfileReferences = (data: ChatProfileData, lang: Lang): ChatReferen
 ];
 
 const buildProfileSnapshot = unstable_cache(
-  async (lang: Lang) => {
-    const data = await getChatProfileData();
+  async (lang: Lang, source: ContentSource) => {
+    const data = await getChatProfileData({ source });
     return {
       context: formatProfileContext(data, lang),
       references: formatProfileReferences(data, lang),
     };
   },
   // 공개 문맥 projection이 바뀌면 배포 간 Data Cache가 이전 직렬화를 재사용하지 않도록 버전을 올린다.
-  ["chat-profile-context-v3-equipment"],
+  ["chat-profile-context-v4-content-source"],
   { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
@@ -178,10 +179,11 @@ const buildProfileContext = async (
   queryText?: string,
   signal?: AbortSignal,
 ): Promise<string> => {
-  const context = (await buildProfileSnapshot(lang)).context;
+  const source = getContentSource();
+  const context = (await buildProfileSnapshot(lang, source)).context;
   let formatted = sections?.length ? selectFormattedProfileContext(context, sections) : context;
 
-  if (sections?.length && queryText) {
+  if (source === "live" && sections?.length && queryText) {
     try {
       const relevant = await searchRagChunks(queryText, sections, signal);
       if (relevant.length > 0) {
@@ -199,16 +201,23 @@ const buildProfileContext = async (
   return formatted;
 };
 
-const resolveProfileReferences = async (
+const resolveReferencesWithRefresh = async (
   requested: ChatReferenceRequest[],
-  lang: Lang,
+  cachedReferences: ChatReference[],
+  loadFreshReferences?: () => Promise<ChatReference[]>,
 ): Promise<ChatReference[]> => {
-  const available = new Map(
-    (await buildProfileSnapshot(lang)).references.map((reference) => [
-      `${reference.type}:${reference.id}`,
-      reference,
-    ]),
+  const requestedKeys = requested.map(({ type, id }) => `${type}:${id}`);
+  let available = new Map(
+    cachedReferences.map((reference) => [`${reference.type}:${reference.id}`, reference]),
   );
+  if (loadFreshReferences && requestedKeys.some((key) => !available.has(key))) {
+    available = new Map(
+      (await loadFreshReferences()).map((reference) => [
+        `${reference.type}:${reference.id}`,
+        reference,
+      ]),
+    );
+  }
   const seen = new Set<string>();
 
   return requested.slice(0, 3).flatMap((reference) => {
@@ -220,10 +229,30 @@ const resolveProfileReferences = async (
   });
 };
 
+const resolveProfileReferences = async (
+  requested: ChatReferenceRequest[],
+  lang: Lang,
+): Promise<ChatReference[]> => {
+  const source = getContentSource();
+  const { references } = await buildProfileSnapshot(lang, source);
+  return resolveReferencesWithRefresh(
+    requested,
+    references,
+    source === "live"
+      ? async () =>
+          formatProfileReferences(
+            await getChatProfileData({ freshPublicFields: true, source }),
+            lang,
+          )
+      : undefined,
+  );
+};
+
 export {
   buildProfileContext,
   formatProfileContext,
   formatProfileReferences,
+  resolveReferencesWithRefresh,
   resolveProfileReferences,
   selectFormattedProfileContext,
 };

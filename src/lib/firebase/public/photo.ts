@@ -69,7 +69,7 @@ const fetchPublishedAlbums = async (): Promise<Album[]> =>
     toAlbum(id, data),
   );
 
-const fetchChatPhotos = async (): Promise<ChatPhoto[]> =>
+const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto[]> =>
   (
     await runQuery(
       projectedPublishedOrderedQuery(COLLECTIONS.PHOTOS, [
@@ -82,6 +82,7 @@ const fetchChatPhotos = async (): Promise<ChatPhoto[]> =>
         "order",
         "published",
       ]),
+      options,
     )
   ).map(({ id, data }) => {
     const photo = toPhoto(id, data);
@@ -98,7 +99,7 @@ const fetchChatPhotos = async (): Promise<ChatPhoto[]> =>
     };
   });
 
-const fetchChatAlbums = async (): Promise<ChatAlbum[]> =>
+const fetchChatAlbums = async (options?: { fresh?: boolean }): Promise<ChatAlbum[]> =>
   (
     await runQuery(
       projectedPublishedOrderedQuery(COLLECTIONS.ALBUMS, [
@@ -108,6 +109,7 @@ const fetchChatAlbums = async (): Promise<ChatAlbum[]> =>
         "order",
         "published",
       ]),
+      options,
     )
   ).map(({ id, data }) => {
     const album = toAlbum(id, data);

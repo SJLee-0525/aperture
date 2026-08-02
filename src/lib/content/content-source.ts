@@ -1,5 +1,7 @@
 import { isFirebaseConfigured } from "@/lib/firebase/config";
 
+type ContentSource = "mock" | "live";
+
 /**
  * 콘텐츠 소스 스위치. getter 들이 실 Firestore 대신 mock 을 쓸지 결정한다.
  *
@@ -32,4 +34,7 @@ const shouldUseMockContent = (): boolean => {
   return true;
 };
 
-export { shouldUseMockContent };
+const getContentSource = (): ContentSource => (shouldUseMockContent() ? "mock" : "live");
+
+export { getContentSource, shouldUseMockContent };
+export type { ContentSource };

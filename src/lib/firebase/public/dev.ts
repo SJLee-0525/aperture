@@ -58,7 +58,7 @@ const fetchDevConfig = async (): Promise<DevConfig | null> => {
   };
 };
 
-const fetchChatDevProjects = async (): Promise<ChatDevProject[]> =>
+const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<ChatDevProject[]> =>
   (
     await runQuery(
       projectedPublishedOrderedQuery(COLLECTIONS.DEV_PROJECTS, [
@@ -70,6 +70,7 @@ const fetchChatDevProjects = async (): Promise<ChatDevProject[]> =>
         "order",
         "published",
       ]),
+      options,
     )
   ).map(({ id, data }) => {
     const project = toDevProject(id, data);

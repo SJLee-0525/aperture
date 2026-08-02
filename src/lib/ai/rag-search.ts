@@ -1,15 +1,7 @@
-import { unstable_cache } from "next/cache";
-
-import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { DEFAULT_EMBEDDING_MODEL, generateEmbedding } from "@/lib/ai/embedding";
 import { expandRagQuery, keywordSimilarity } from "@/lib/ai/rag-query";
 import { fetchRagChunks } from "@/lib/firebase/public/rag";
 import type { RagSection, StoredRagChunk } from "@/types/rag";
-
-const cachedRagChunks = unstable_cache(fetchRagChunks, ["portfolio-rag-chunks-v1"], {
-  revalidate: 3_600,
-  tags: [CHAT_PROFILE_CACHE_TAG],
-});
 
 const cosineSimilarity = (a: number[], b: number[]) => {
   if (a.length !== b.length || a.length === 0) return 0;
@@ -35,7 +27,7 @@ const searchRagChunks = async (
   const expandedQuery = expandRagQuery(query);
   const [queryVector, chunks] = await Promise.all([
     generateEmbedding(expandedQuery, { model, signal }),
-    cachedRagChunks(),
+    fetchRagChunks(),
   ]);
   const allowed = new Set(sections);
   return chunks

@@ -55,6 +55,7 @@ const projectedPublishedOrderedQuery = (collectionId: string, fieldPaths: string
 
 const runQuery = async (
   structuredQuery: Record<string, unknown>,
+  options?: { fresh?: boolean },
 ): Promise<Array<{ id: string; data: Record<string, unknown> }>> => {
   const collectionIds = (
     (structuredQuery.from as Array<{ collectionId?: string }> | undefined) ?? []
@@ -65,10 +66,14 @@ const runQuery = async (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ structuredQuery }),
-    next: {
-      revalidate: REVALIDATE_SECONDS,
-      tags: collectionIds.map(firestoreCollectionCacheTag),
-    },
+    ...(options?.fresh
+      ? { cache: "no-store" as const }
+      : {
+          next: {
+            revalidate: REVALIDATE_SECONDS,
+            tags: collectionIds.map(firestoreCollectionCacheTag),
+          },
+        }),
   });
   if (!response.ok) throw new Error(`Firestore runQuery 실패 (${response.status})`);
 

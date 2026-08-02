@@ -23,6 +23,14 @@ const ALL_SECTION_TERMS = /포트폴리오|portfolio|모든 작업|전체 작업
 const SHARED_HISTORY_TERMS = /경력|학력|수상|career|education|award/i;
 const FOLLOW_UP_TERMS =
   /^(?:(?:그|그거|그건|그게|그중|이거|이건|언제|어디|어떤|왜|어떻게|더|또|보여|알려)|(?:한|두|세|네|몇)\s*개|which|that|it|when|where|what|why|how|more|show|tell)(?:\s|[?!.]|$)/i;
+const DEFAULT_INTENT_CLASSIFIER_TIMEOUT_MS = 3_000;
+
+const getIntentClassifierTimeoutMs = (): number => {
+  const configured = Number(process.env.CHAT_INTENT_TIMEOUT_MS);
+  return Number.isFinite(configured) && configured > 0
+    ? configured
+    : DEFAULT_INTENT_CLASSIFIER_TIMEOUT_MS;
+};
 
 const sectionsForText = (text: string): ProfileSection[] => {
   const searchableText = expandRagQuery(text);
@@ -61,5 +69,27 @@ const selectProfileSections = (messages: ChatRequestMessage[]): ProfileSection[]
 const needsProfileContext = (messages: ChatRequestMessage[]): boolean =>
   selectProfileSections(messages).length > 0;
 
-export { needsProfileContext, selectProfileSections };
+const selectProfileSectionsWithClassifier = async (
+  messages: ChatRequestMessage[],
+  signal: AbortSignal,
+  classifier?: (messages: ChatRequestMessage[], signal: AbortSignal) => Promise<ProfileSection[]>,
+): Promise<ProfileSection[]> => {
+  const regexSections = selectProfileSections(messages);
+  if (!classifier) return regexSections;
+
+  try {
+    const classifierSignal = AbortSignal.any([
+      signal,
+      AbortSignal.timeout(getIntentClassifierTimeoutMs()),
+    ]);
+    const classified = await classifier(messages, classifierSignal);
+    return classified.length ? classified : regexSections;
+  } catch (error) {
+    if (signal.aborted) throw error;
+    console.warn("Chat intent classification failed; using regex fallback:", error);
+    return regexSections;
+  }
+};
+
+export { needsProfileContext, selectProfileSections, selectProfileSectionsWithClassifier };
 export type { ProfileSection };

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { shouldUseMockContent } from "@/lib/content/content-source";
+import { getContentSource, shouldUseMockContent } from "@/lib/content/content-source";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -39,5 +39,15 @@ describe("shouldUseMockContent", () => {
     vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
 
     expect(shouldUseMockContent()).toBe(false);
+  });
+
+  it("환경변수 전환을 캐시 키에 사용할 명시적 콘텐츠 소스로 변환한다", () => {
+    vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "1");
+    expect(getContentSource()).toBe("mock");
+
+    vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
+    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
+    vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+    expect(getContentSource()).toBe("live");
   });
 });

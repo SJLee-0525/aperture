@@ -79,20 +79,16 @@ const fetchMusicConfig = async (): Promise<MusicConfig | null> => {
   };
 };
 
-const chatQuery = (collection: string, fields: string[]) =>
-  runQuery(projectedPublishedOrderedQuery(collection, fields));
+const chatQuery = (collection: string, fields: string[], options?: { fresh?: boolean }) =>
+  runQuery(projectedPublishedOrderedQuery(collection, fields), options);
 
-const fetchChatMusicWorks = async (): Promise<ChatMusicWork[]> =>
+const fetchChatMusicWorks = async (options?: { fresh?: boolean }): Promise<ChatMusicWork[]> =>
   (
-    await chatQuery(COLLECTIONS.MUSIC_WORKS, [
-      "title",
-      "performedAt",
-      "venue",
-      "program",
-      "poster",
-      "order",
-      "published",
-    ])
+    await chatQuery(
+      COLLECTIONS.MUSIC_WORKS,
+      ["title", "performedAt", "venue", "program", "poster", "order", "published"],
+      options,
+    )
   ).map(({ id, data }) => {
     const work = toMusicWork(id, data);
     return {
@@ -106,33 +102,37 @@ const fetchChatMusicWorks = async (): Promise<ChatMusicWork[]> =>
       published: work.published,
     };
   });
-const fetchChatMusicAwards = async (): Promise<ChatMusicAward[]> =>
-  (await chatQuery(COLLECTIONS.MUSIC_AWARDS, ["year", "name", "place", "order", "published"])).map(
-    ({ id, data }) => {
-      const award = toMusicAward(id, data);
-      return {
-        id: award.id,
-        year: award.year,
-        name: award.name,
-        place: award.place,
-        order: award.order,
-        published: award.published,
-      };
-    },
-  );
-const fetchChatMusicMedia = async (): Promise<ChatMusicMedia[]> =>
-  (await chatQuery(COLLECTIONS.MUSIC_MEDIA, ["title", "source", "order", "published"])).map(
-    ({ id, data }) => {
-      const media = toMusicMedia(id, data);
-      return {
-        id: media.id,
-        title: media.title,
-        source: media.source,
-        order: media.order,
-        published: media.published,
-      };
-    },
-  );
+const fetchChatMusicAwards = async (options?: { fresh?: boolean }): Promise<ChatMusicAward[]> =>
+  (
+    await chatQuery(
+      COLLECTIONS.MUSIC_AWARDS,
+      ["year", "name", "place", "order", "published"],
+      options,
+    )
+  ).map(({ id, data }) => {
+    const award = toMusicAward(id, data);
+    return {
+      id: award.id,
+      year: award.year,
+      name: award.name,
+      place: award.place,
+      order: award.order,
+      published: award.published,
+    };
+  });
+const fetchChatMusicMedia = async (options?: { fresh?: boolean }): Promise<ChatMusicMedia[]> =>
+  (
+    await chatQuery(COLLECTIONS.MUSIC_MEDIA, ["title", "source", "order", "published"], options)
+  ).map(({ id, data }) => {
+    const media = toMusicMedia(id, data);
+    return {
+      id: media.id,
+      title: media.title,
+      source: media.source,
+      order: media.order,
+      published: media.published,
+    };
+  });
 
 export {
   fetchChatMusicAwards,

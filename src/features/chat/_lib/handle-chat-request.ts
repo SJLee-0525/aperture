@@ -5,7 +5,11 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { getChatErrorMessage, type ChatErrorCode } from "@/features/chat/_lib/chat-errors";
 import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
-import { selectProfileSections, type ProfileSection } from "@/features/chat/_lib/chat-intent";
+import {
+  selectProfileSectionsWithClassifier,
+  type ProfileSection,
+} from "@/features/chat/_lib/chat-intent";
+import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
 import {
   ChatRateLimitConfigurationError,
   type ChatRateLimiter,
@@ -58,6 +62,7 @@ type ChatHandlerDependencies = {
   ) => Promise<string>;
   resolveReferences?: (references: ChatReferenceRequest[], lang: Lang) => Promise<ChatReference[]>;
   rateLimiter?: ChatRateLimiter;
+  intentClassifier?: ChatIntentClassifier;
   timeoutMs?: number;
 };
 
@@ -124,6 +129,7 @@ const handleChatRequest = async (
     buildContext = buildProfileContext,
     resolveReferences = resolveProfileReferences,
     rateLimiter,
+    intentClassifier,
     timeoutMs = DEFAULT_TIMEOUT_MS,
   }: ChatHandlerDependencies,
 ): Promise<Response> => {
@@ -158,9 +164,6 @@ const handleChatRequest = async (
     if (error instanceof ChatRequestError) return jsonError(400, error.code, responseLang);
     return jsonError(400, "INVALID_BODY", responseLang);
   }
-  const profileSections = selectProfileSections(chatRequest.messages);
-  const shouldLoadProfile = profileSections.length > 0;
-
   if (rateLimiter) {
     let rateLimit;
     try {
@@ -198,6 +201,23 @@ const handleChatRequest = async (
     if (timeout) clearTimeout(timeout);
     request.signal.removeEventListener("abort", abortFromRequest);
   };
+
+  let profileSections: ProfileSection[];
+  try {
+    profileSections = await Promise.race([
+      selectProfileSectionsWithClassifier(
+        chatRequest.messages,
+        controller.signal,
+        intentClassifier,
+      ),
+      timeoutPromise,
+    ]);
+  } catch (error) {
+    cleanup();
+    const { status, code } = publicErrorFor(error, responseLang, timedOut);
+    return jsonError(status, code, responseLang);
+  }
+  const shouldLoadProfile = profileSections.length > 0;
 
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
     const profileContext = shouldLoadProfile

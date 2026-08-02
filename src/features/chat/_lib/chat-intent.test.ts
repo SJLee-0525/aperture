@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { needsProfileContext, selectProfileSections } from "@/features/chat/_lib/chat-intent";
+import {
+  needsProfileContext,
+  selectProfileSections,
+  selectProfileSectionsWithClassifier,
+} from "@/features/chat/_lib/chat-intent";
 
 describe("needsProfileContext", () => {
   it.each([
@@ -87,5 +91,34 @@ describe("needsProfileContext", () => {
         { role: "user", content: "그건 말고 다른 거 보여줘" },
       ]),
     ).toEqual([]);
+  });
+});
+
+describe("selectProfileSectionsWithClassifier", () => {
+  const messages = [
+    { role: "user" as const, content: "오 시원한 바다 사진 어때?" },
+    { role: "assistant" as const, content: "울릉군에서 촬영한 바다 풍경 사진들이 있어요." },
+    { role: "user" as const, content: "오 울릉도 갔나보네, 그럼 독도도 있어?" },
+  ];
+
+  it("최근 대화의 암시된 사진 의도를 LLM 분류 결과로 이어간다", async () => {
+    const classifier = vi.fn().mockResolvedValue(["profile", "photography"]);
+
+    await expect(
+      selectProfileSectionsWithClassifier(messages, new AbortController().signal, classifier),
+    ).resolves.toEqual(["profile", "photography"]);
+    expect(classifier).toHaveBeenCalledWith(messages, expect.any(AbortSignal));
+  });
+
+  it.each(["none", "failure"])("LLM %s 시 기존 정규식 결과로 폴백한다", async (mode) => {
+    const directMessages = [{ role: "user" as const, content: "독도 사진 없어 정말?" }];
+    const classifier =
+      mode === "none"
+        ? vi.fn().mockResolvedValue([])
+        : vi.fn().mockRejectedValue(new Error("classifier unavailable"));
+
+    await expect(
+      selectProfileSectionsWithClassifier(directMessages, new AbortController().signal, classifier),
+    ).resolves.toEqual(["profile", "photography"]);
   });
 });

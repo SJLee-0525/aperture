@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   formatProfileContext,
   formatProfileReferences,
+  resolveReferencesWithRefresh,
   selectFormattedProfileContext,
 } from "@/features/chat/_lib/build-profile-context";
 import { MOCK_ALBUMS } from "@/mocks/albums";
@@ -93,5 +94,51 @@ describe("formatProfileContext", () => {
     expect(references.find(({ type }) => type === "project")).toMatchObject({
       href: expect.stringContaining("/dev/projects?project="),
     });
+  });
+});
+
+describe("resolveReferencesWithRefresh", () => {
+  it("요청한 항목이 캐시에서 누락되면 최신 공개 reference로 복구한다", async () => {
+    const freshPhoto = {
+      type: "photo" as const,
+      id: "dokdo-photo",
+      title: "LSJ_3112",
+      subtitle: "독도",
+      href: "/photo?photo=dokdo-photo",
+      image: null,
+    };
+    const loadFreshReferences = vi.fn().mockResolvedValue([freshPhoto]);
+
+    await expect(
+      resolveReferencesWithRefresh([{ type: "photo", id: "dokdo-photo" }], [], loadFreshReferences),
+    ).resolves.toEqual([freshPhoto]);
+    expect(loadFreshReferences).toHaveBeenCalledOnce();
+  });
+
+  it("캐시가 요청한 항목을 포함하면 최신 데이터를 다시 읽지 않는다", async () => {
+    const cachedProject = {
+      type: "project" as const,
+      id: "project-1",
+      title: "Project",
+      subtitle: "Summary",
+      href: "/dev/projects?project=project-1",
+      image: null,
+    };
+    const loadFreshReferences = vi.fn();
+
+    await expect(
+      resolveReferencesWithRefresh(
+        [{ type: "project", id: "project-1" }],
+        [cachedProject],
+        loadFreshReferences,
+      ),
+    ).resolves.toEqual([cachedProject]);
+    expect(loadFreshReferences).not.toHaveBeenCalled();
+  });
+
+  it("mock reference가 없을 때 live refresh 함수 없이 빈 결과를 유지한다", async () => {
+    await expect(
+      resolveReferencesWithRefresh([{ type: "photo", id: "live-only-photo" }], []),
+    ).resolves.toEqual([]);
   });
 });

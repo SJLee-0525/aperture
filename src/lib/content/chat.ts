@@ -1,4 +1,4 @@
-import { shouldUseMockContent } from "@/lib/content/content-source";
+import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import { getDevConfig } from "@/lib/content/dev";
 import { getMusicConfig } from "@/lib/content/music";
 import { getSite } from "@/lib/content/site";
@@ -66,20 +66,25 @@ const pickPublicFields = async (): Promise<
   };
 };
 
-const getChatProfileData = async (): Promise<ChatProfileData> => {
+const getChatProfileData = async (options?: {
+  freshPublicFields?: boolean;
+  source?: ContentSource;
+}): Promise<ChatProfileData> => {
+  const queryOptions = options?.freshPublicFields ? { fresh: true } : undefined;
+  const source = options?.source ?? getContentSource();
   const [site, devConfig, musicConfig, publicFields] = await Promise.all([
     getSite(),
     getDevConfig(),
     getMusicConfig(),
-    shouldUseMockContent()
+    source === "mock"
       ? pickPublicFields()
       : Promise.all([
-          fetchChatDevProjects(),
-          fetchChatMusicWorks(),
-          fetchChatMusicAwards(),
-          fetchChatMusicMedia(),
-          fetchChatPhotos(),
-          fetchChatAlbums(),
+          fetchChatDevProjects(queryOptions),
+          fetchChatMusicWorks(queryOptions),
+          fetchChatMusicAwards(queryOptions),
+          fetchChatMusicMedia(queryOptions),
+          fetchChatPhotos(queryOptions),
+          fetchChatAlbums(queryOptions),
         ]).then(([devProjects, musicWorks, musicAwards, musicMedia, photos, albums]) => ({
           devProjects,
           musicWorks,
