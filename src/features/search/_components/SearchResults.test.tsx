@@ -152,6 +152,7 @@ describe("SearchResults", () => {
     render(<SearchResults documents={documents} />);
 
     expect(screen.getByText(DICTIONARY.ko.searchEmpty)).toBeTruthy();
+    expect(screen.getByText(DICTIONARY.ko.searchEmptyChatHint)).toBeTruthy();
     expect(screen.getByText("0")).toBeTruthy();
   });
 

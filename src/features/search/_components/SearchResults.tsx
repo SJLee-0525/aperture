@@ -65,7 +65,10 @@ const SearchResults = ({ documents }: Props) => {
       {!q ? (
         <p className={styles.empty}>{dict.searchPrompt}</p>
       ) : total === 0 ? (
-        <p className={styles.empty}>{dict.searchEmpty}</p>
+        <div className={styles.empty}>
+          <p className={styles.emptyTitle}>{dict.searchEmpty}</p>
+          <p className={styles.emptyHint}>{dict.searchEmptyChatHint}</p>
+        </div>
       ) : (
         groups.map((group) => (
           <section key={group.section} className={styles.group} data-section={group.section}>

@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
+import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
 import { useChat } from "@/features/chat/_hooks/use-chat";
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -230,13 +231,13 @@ const ChatPanel = ({ open, onClose }: Props) => {
                         <i />
                       </span>
                       <span className={message.pendingStatus ? undefined : styles.srOnly}>
-                        {message.pendingStatus === "portfolio-search"
-                          ? lang === "ko"
-                            ? "포트폴리오를 살펴보는 중…"
-                            : "Looking through the portfolio…"
-                          : lang === "ko"
-                            ? "답변 준비 중"
-                            : "Preparing a response"}
+                        {message.pendingStatus === "portfolio-search" ? (
+                          <PortfolioSearchStatus key={lang} lang={lang} />
+                        ) : lang === "ko" ? (
+                          "답변 준비 중"
+                        ) : (
+                          "Preparing a response"
+                        )}
                       </span>
                     </span>
                   ) : (

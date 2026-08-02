@@ -89,6 +89,7 @@ type UIDict = {
   searchPlaceholder: string;
   searchPrompt: string;
   searchEmpty: string;
+  searchEmptyChatHint: string;
   allTag: string;
   filterLabel: string;
   cameraLabel: string;
@@ -211,6 +212,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     searchPrompt: "검색어를 입력하세요.",
     searchEmpty: "검색 결과가 없습니다.",
+    searchEmptyChatHint: "원하는 결과를 찾지 못했다면 챗봇에게 물어보세요.",
     allTag: "전체",
     filterLabel: "필터",
     cameraLabel: "카메라",
@@ -328,6 +330,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     searchPlaceholder: "Search · tag / gear / place",
     searchPrompt: "Type to search.",
     searchEmpty: "No results found.",
+    searchEmptyChatHint: "If you couldn’t find what you need, try asking the chatbot.",
     allTag: "All",
     filterLabel: "Filter",
     cameraLabel: "Camera",
