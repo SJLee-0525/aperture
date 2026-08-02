@@ -83,7 +83,12 @@ describe("handleChatRequest", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ message: { role: "assistant", content: answer } });
-    expect(buildContext).toHaveBeenCalledWith(lang, ["profile", "development"]);
+    expect(buildContext).toHaveBeenCalledWith(
+      lang,
+      ["profile", "development"],
+      "development project",
+      expect.anything(),
+    );
     expect(provider).toHaveBeenCalledWith(
       expect.objectContaining({
         lang,

@@ -42,6 +42,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /ragDocuments/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
     match /site/{id} {
       allow read:  if true;      // name·bio·links·태그 사전은 공개
       allow write: if isAdmin();

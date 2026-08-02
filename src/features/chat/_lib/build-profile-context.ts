@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
+import { searchRagChunks } from "@/lib/ai/rag-search";
 import { getChatProfileData } from "@/lib/content/chat";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { ChatProfileData } from "@/lib/content/chat";
@@ -171,9 +172,31 @@ const buildProfileSnapshot = unstable_cache(
   { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
-const buildProfileContext = async (lang: Lang, sections?: ProfileSection[]): Promise<string> => {
+const buildProfileContext = async (
+  lang: Lang,
+  sections?: ProfileSection[],
+  queryText?: string,
+  signal?: AbortSignal,
+): Promise<string> => {
   const context = (await buildProfileSnapshot(lang)).context;
-  return sections?.length ? selectFormattedProfileContext(context, sections) : context;
+  let formatted = sections?.length ? selectFormattedProfileContext(context, sections) : context;
+
+  if (sections?.length && queryText) {
+    try {
+      const relevant = await searchRagChunks(queryText, sections, signal);
+      if (relevant.length > 0) {
+        const profileOnly = selectFormattedProfileContext(context, ["profile"]);
+        formatted = `${profileOnly}\n\n${section(
+          "Highly Relevant Portfolio Context (Vector Search)",
+          relevant.map((item) => `[${item.sourceType}:${item.sourceId}] ${item.text}`),
+        )}`;
+      }
+    } catch (error) {
+      console.warn("RAG vector search failed during context build:", error);
+    }
+  }
+
+  return formatted;
 };
 
 const resolveProfileReferences = async (

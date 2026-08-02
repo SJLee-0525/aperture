@@ -14,7 +14,13 @@ import { deleteObject, getBytes, listAll, ref, uploadBytes } from "firebase/stor
 
 const ADMIN_UID = "KBBvgyMIssPngwx9n0OXaL2THwy1";
 const OTHER_UID = "not-the-admin-uid";
-const PUBLIC_COLLECTIONS = ["musicWorks", "musicAwards", "musicMedia", "devProjects"];
+const PUBLIC_COLLECTIONS = [
+  "musicWorks",
+  "musicAwards",
+  "musicMedia",
+  "devProjects",
+  "ragDocuments",
+];
 
 let testEnv;
 
@@ -75,7 +81,7 @@ describe("Firestore 방문자 읽기", () => {
     await assertFails(getDoc(doc(db, "albums", "draft")));
   });
 
-  it("Music·Dev의 published 문서만 읽을 수 있다", async () => {
+  it("Music·Dev·RAG의 published 문서만 읽을 수 있다", async () => {
     const db = testEnv.unauthenticatedContext().firestore();
     for (const collection of PUBLIC_COLLECTIONS) {
       await assertSucceeds(getDoc(doc(db, collection, "pub")));

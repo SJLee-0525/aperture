@@ -49,5 +49,11 @@
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "ragDocuments",
+      "fieldPath": "embedding",
+      "indexes": []
+    }
+  ]
 }

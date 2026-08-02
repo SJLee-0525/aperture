@@ -36,6 +36,13 @@ const CASES = [
     extended: true,
   },
   {
+    id: "photography-implicit-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "이성준이 찍은 바다 몇 개 추천해줘" }],
+    expectsLookup: true,
+    referenceType: "photo",
+  },
+  {
     id: "private-location-ko",
     lang: "ko",
     messages: [{ role: "user", content: "이성준이 사는 곳의 시간은 지금 몇 시야?" }],

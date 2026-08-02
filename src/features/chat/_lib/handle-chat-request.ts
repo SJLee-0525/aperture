@@ -46,7 +46,12 @@ const ALLOWED_ACTION_ROUTES = new Set<string>([
 
 type ChatHandlerDependencies = {
   provider: ChatProvider;
-  buildContext?: (lang: Lang, sections?: ProfileSection[]) => Promise<string>;
+  buildContext?: (
+    lang: Lang,
+    sections?: ProfileSection[],
+    queryText?: string,
+    signal?: AbortSignal,
+  ) => Promise<string>;
   resolveReferences?: (references: ChatReferenceRequest[], lang: Lang) => Promise<ChatReference[]>;
   rateLimiter?: ChatRateLimiter;
   timeoutMs?: number;
@@ -188,7 +193,12 @@ const handleChatRequest = async (
 
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
     const profileContext = shouldLoadProfile
-      ? await buildContext(chatRequest.lang, profileSections)
+      ? await buildContext(
+          chatRequest.lang,
+          profileSections,
+          chatRequest.messages.at(-1)?.content,
+          controller.signal,
+        )
       : "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.";
     const result = await provider({
       instructions: buildChatInstructions(chatRequest.lang, profileContext),
