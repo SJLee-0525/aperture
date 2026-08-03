@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { ROUTES } from "@/constants/routes";
+import { RagStaleBanner } from "@/features/admin-maintenance/_components/RagStaleBanner";
 import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
 
@@ -20,7 +21,10 @@ const AdminLayoutClient = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthGuard>
-      <AdminChrome>{children}</AdminChrome>
+      <AdminChrome>
+        <RagStaleBanner />
+        {children}
+      </AdminChrome>
     </AuthGuard>
   );
 };
