@@ -20,9 +20,13 @@ let originalBodyStyles = {
 
 type ScrollLockOptions = {
   fixBodyOnMobile?: boolean;
+  lockRootOnMobile?: boolean;
 };
 
-const acquireScrollLock = ({ fixBodyOnMobile = true }: ScrollLockOptions) => {
+const acquireScrollLock = ({
+  fixBodyOnMobile = true,
+  lockRootOnMobile = true,
+}: ScrollLockOptions) => {
   const { body, documentElement } = document;
 
   if (lockCount === 0) {
@@ -40,7 +44,12 @@ const acquireScrollLock = ({ fixBodyOnMobile = true }: ScrollLockOptions) => {
       width: body.style.width,
     };
 
-    if (window.innerWidth <= 767) documentElement.style.overflow = "hidden";
+    /* root(html) overflow 를 잠그면 body overflow 의 viewport 승격이 끊겨 body 가
+       자체 스크롤 컨테이너가 되고, sticky 헤더의 기준이 viewport → body(scrollTop 0)로 바뀌어
+       헤더가 문서 최상단(-scrollY)으로 밀려난다. 헤더가 시트 위에 계속 보여야 하는
+       오버레이(모바일 메뉴)는 lockRootOnMobile:false 로 body overflow 승격만 사용하고,
+       화면 전체를 덮는 오버레이(모달·모바일 챗 — 키보드 대응이 root 잠금에 의존)는 기본값 유지. */
+    if (window.innerWidth <= 767 && lockRootOnMobile) documentElement.style.overflow = "hidden";
     Object.assign(body.style, {
       overflow: "hidden",
     });
@@ -57,6 +66,9 @@ const acquireScrollLock = ({ fixBodyOnMobile = true }: ScrollLockOptions) => {
 
   lockCount += 1;
 };
+
+/** body가 fixed로 잠겨 window.scrollY가 실제 위치와 무관해진 상태인지 — 스크롤 관찰자가 잠금 중 점프를 무시할 때 사용. */
+const isScrollLockFixingBody = () => lockCount > 0 && bodyWasFixed;
 
 const releaseScrollLock = () => {
   lockCount = Math.max(0, lockCount - 1);
@@ -85,7 +97,7 @@ const useScrollLock = (locked: boolean, options: ScrollLockOptions = {}) => {
 
     acquireScrollLock(options);
     return releaseScrollLock;
-  }, [locked, options.fixBodyOnMobile]);
+  }, [locked, options.fixBodyOnMobile, options.lockRootOnMobile]);
 };
 
-export { useScrollLock };
+export { isScrollLockFixingBody, useScrollLock };

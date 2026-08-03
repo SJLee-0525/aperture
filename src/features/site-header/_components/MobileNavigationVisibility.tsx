@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
+import { isScrollLockFixingBody } from "@/hooks/use-scroll-lock";
+
 const MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE = "data-mobile-navigation-hidden";
 const MOBILE_MENU_OPEN_ATTRIBUTE = "data-mobile-menu-open";
 const MOBILE_QUERY = "(max-width: 767px)";
@@ -41,6 +43,10 @@ const MobileNavigationVisibility = () => {
         show();
         return;
       }
+
+      // 모달 스크롤 잠금이 body를 fixed로 바꾸면 scrollY가 0으로 점프한다(해제 시 복원 점프).
+      // 사용자 스크롤이 아니므로 lastY를 유지한 채 무시 — 해제 복원 후 delta가 0이 되어 chrome이 숨지 않는다.
+      if (isScrollLockFixingBody()) return;
 
       const currentY = Math.max(window.scrollY, 0);
       const delta = currentY - lastY;

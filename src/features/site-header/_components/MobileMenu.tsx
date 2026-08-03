@@ -24,6 +24,9 @@ import styles from "./MobileMenu.module.css";
  * 모바일 버거 메뉴 — 헤더 우측 버거 + 위에서 내려오는 시트(사진/음악/개발 아코디언 + 검색).
  * 데스크톱은 CSS로 버거 숨김(mega-menu 사용). 버거 + 오버레이를 한 컴포넌트로 캡슐화.
  */
+/** CSS 브레이크포인트(767px)와 동기 — 버거·시트가 표시되는 폭. */
+const MOBILE_QUERY = "(max-width: 767px)";
+
 const MobileMenu = () => {
   const { dict } = useLang();
   const pathname = usePathname();
@@ -36,7 +39,9 @@ const MobileMenu = () => {
   const restoreHiddenChromeRef = useRef(false);
   const panelRef = useFocusTrap(open);
 
-  useScrollLock(open);
+  // body fixed·root overflow 잠금은 둘 다 sticky 헤더를 문서 최상단(-scrollY)으로 밀어낸다.
+  // 메뉴는 헤더(로고·토글)가 시트 위에 계속 보여야 하므로 body overflow 승격 잠금만 사용한다.
+  useScrollLock(open, { fixBodyOnMobile: false, lockRootOnMobile: false });
 
   const openMenu = () => {
     // 그룹(아코디언)이 있는 섹션만 펼친 채로 연다 — home·contact 는 그룹 없음.
@@ -60,6 +65,19 @@ const MobileMenu = () => {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  // 데스크톱 폭으로 전환되면 자동으로 닫는다 — 데스크톱은 mega-menu 가 담당하고
+  // 버거가 CSS 로 숨겨져 시트를 닫을 수단이 없어진다(스크롤 잠금도 걸린 채 남는다).
+  useEffect(() => {
+    if (!open) return;
+    const media = window.matchMedia(MOBILE_QUERY);
+    const onChange = () => {
+      if (!media.matches) setOpen(false);
+    };
+    onChange();
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
   }, [open]);
 
   useEffect(() => () => document.documentElement.removeAttribute(MOBILE_MENU_OPEN_ATTRIBUTE), []);
@@ -132,7 +150,7 @@ const MobileMenu = () => {
                       className={styles.searchBtn}
                       aria-label={dict.searchPlaceholder}
                     >
-                      <Icon name="search" size={15} />
+                      <Icon name="search" size={17} />
                     </button>
                   </form>
 
