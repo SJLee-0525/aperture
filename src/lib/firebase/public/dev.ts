@@ -1,4 +1,5 @@
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
+
 import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import {
@@ -7,6 +8,8 @@ import {
   publishedOrderedQuery,
   runQuery,
 } from "@/lib/firebase/public/transport";
+import { asText } from "@/lib/i18n/as-text";
+
 import type { DevConfig, DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
@@ -17,17 +20,15 @@ type ChatDevProject = Pick<
   "id" | "title" | "summary" | "position" | "techTags" | "cover" | "order" | "published"
 >;
 
-const EMPTY_LOCALIZED: LocalizedText = { ko: "", en: "" };
-
 const toDevProject = (id: string, data: Record<string, unknown>): DevProject => ({
   id,
-  title: (data.title as LocalizedText) ?? EMPTY_LOCALIZED,
-  category: (data.category as LocalizedText) ?? EMPTY_LOCALIZED,
+  title: asText(data.title),
+  category: asText(data.category),
   year: (data.year as string) ?? "",
-  period: (data.period as LocalizedText) ?? EMPTY_LOCALIZED,
-  position: (data.position as LocalizedText) ?? EMPTY_LOCALIZED,
-  summary: (data.summary as LocalizedText) ?? EMPTY_LOCALIZED,
-  overview: (data.overview as LocalizedText) ?? EMPTY_LOCALIZED,
+  period: asText(data.period),
+  position: asText(data.position),
+  summary: asText(data.summary),
+  overview: asText(data.overview),
   features: (data.features as LocalizedText[]) ?? [],
   roles: (data.roles as LocalizedText[]) ?? [],
   troubleshooting: normalizeTroubleshooting(data.troubleshooting),
@@ -49,7 +50,7 @@ const fetchDevConfig = async (): Promise<DevConfig | null> => {
   const data = await fetchDocument(COLLECTIONS.SITE, SITE_DEV_DOC, "dev config");
   if (!data) return null;
   return {
-    heroLead: (data.heroLead as LocalizedText) ?? EMPTY_LOCALIZED,
+    heroLead: asText(data.heroLead),
     interview: (data.interview as DevConfig["interview"]) ?? [],
     stack: (data.stack as DevConfig["stack"]) ?? [],
     education: (data.education as DevConfig["education"]) ?? [],

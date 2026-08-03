@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
-import { musicAwards, type MusicAwardInput } from "@/lib/firebase/music";
 import type { MusicAward } from "@/types/music";
 
+import { musicAwards, type MusicAwardInput } from "@/lib/firebase/music";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import styles from "./AwardForm.module.css";
 
 type Props = {
@@ -18,9 +19,9 @@ type Props = {
 /** 빈 수상 초기 상태. */
 const emptyInput = (): MusicAwardInput => ({
   year: new Date().getFullYear(),
-  name: { ko: "", en: "" },
+  name: EMPTY_TEXT,
   place: "",
-  description: { ko: "", en: "" },
+  description: EMPTY_TEXT,
   // 새 수상은 order 0 — 목록 상단에 오며, dnd 정렬로 조정한다.
   order: 0,
   published: false,

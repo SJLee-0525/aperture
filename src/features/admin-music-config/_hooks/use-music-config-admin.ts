@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getMusicConfigAdmin, updateMusicConfig } from "@/lib/firebase/music";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicConfig } from "@/types/music";
 import type { TimelineEntry } from "@/types/timeline";
+
+import { getMusicConfigAdmin, updateMusicConfig } from "@/lib/firebase/music";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type Status = "loading" | "ready" | "error";
 /** career/education 두 타임라인 배열을 같은 로직으로 편집하기 위한 키. */
@@ -17,7 +19,7 @@ type TimelineKey = "career" | "education";
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
  */
 const useMusicConfigAdmin = () => {
-  const [intro, setIntro] = useState<LocalizedText>({ ko: "", en: "" });
+  const [intro, setIntro] = useState<LocalizedText>(EMPTY_TEXT);
   const [career, setCareer] = useState<TimelineEntry[]>([]);
   const [education, setEducation] = useState<TimelineEntry[]>([]);
   const [status, setStatus] = useState<Status>("loading");
@@ -55,7 +57,7 @@ const useMusicConfigAdmin = () => {
   }, []);
 
   const addEntry = useCallback((key: TimelineKey) => {
-    setterFor(key)((prev) => [...prev, { period: "", title: { ko: "", en: "" } }]);
+    setterFor(key)((prev) => [...prev, { period: "", title: EMPTY_TEXT }]);
     markDirty();
   }, []);
 

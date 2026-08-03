@@ -6,13 +6,16 @@ import {
   editDevConfig,
   type DevConfigEdit,
 } from "@/features/admin-dev-config/_lib/edit-dev-config";
+
 import { getDevConfigAdmin, updateDevConfig } from "@/lib/firebase/dev";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { DevConfig } from "@/types/dev";
 
 type Status = "loading" | "ready" | "error";
 
 const EMPTY: DevConfig = {
-  heroLead: { ko: "", en: "" },
+  heroLead: EMPTY_TEXT,
   interview: [],
   stack: [],
   education: [],

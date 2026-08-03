@@ -91,6 +91,25 @@ type UIDict = {
   searchPrompt: string;
   searchEmpty: string;
   searchEmptyChatHint: string;
+  // 챗봇 (Ask Sungjoon)
+  chatOpenLabel: string;
+  chatTitle: string;
+  chatCloseLabel: string;
+  chatInputLabel: string;
+  chatPlaceholder: string;
+  chatSendLabel: string;
+  chatRetryLabel: string;
+  chatPrivacyNote: string;
+  chatSuggestionsLabel: string;
+  chatSuggestions: string[];
+  chatPreparingLabel: string;
+  chatSearchStatuses: string[];
+  chatWelcome: string;
+  chatErrorFallback: string;
+  // 커스텀 스크롤바 aria
+  scrollPageLabel: string;
+  scrollModalLabel: string;
+  scrollListLabel: string;
   allTag: string;
   filterLabel: string;
   cameraLabel: string;
@@ -215,6 +234,33 @@ const DICTIONARY: Record<Lang, UIDict> = {
     searchPrompt: "검색어를 입력하세요.",
     searchEmpty: "검색 결과가 없습니다.",
     searchEmptyChatHint: "원하는 결과를 찾지 못했다면 챗봇에게 물어보세요.",
+    chatOpenLabel: "챗봇 열기",
+    chatTitle: "Ask Sungjoon.",
+    chatCloseLabel: "챗봇 닫기",
+    chatInputLabel: "메시지",
+    chatPlaceholder: "궁금한 내용을 입력하세요…",
+    chatSendLabel: "메시지 보내기",
+    chatRetryLabel: "다시 시도",
+    chatPrivacyNote: "민감한 개인정보는 입력하지 마세요.",
+    chatSuggestionsLabel: "추천 질문",
+    chatSuggestions: [
+      "개발 프로젝트를 소개해 줘",
+      "사진 작업은 어디서 볼 수 있어?",
+      "연락 방법을 알려줘",
+    ],
+    chatPreparingLabel: "답변 준비 중",
+    chatSearchStatuses: [
+      "포트폴리오를 펼쳐보는 중…",
+      "관련 작업을 찾는 중…",
+      "기록 사이를 탐색하는 중…",
+      "질문과 가까운 작업을 고르는 중…",
+      "답변에 담을 내용을 정리하는 중…",
+    ],
+    chatWelcome: "안녕하세요. 사진, 음악, 개발 작업에 관해 무엇이든 물어보세요.",
+    chatErrorFallback: "답변을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    scrollPageLabel: "페이지 스크롤",
+    scrollModalLabel: "모달 스크롤",
+    scrollListLabel: "내부 목록 스크롤",
     allTag: "전체",
     filterLabel: "필터",
     cameraLabel: "카메라",
@@ -334,6 +380,33 @@ const DICTIONARY: Record<Lang, UIDict> = {
     searchPrompt: "Type to search.",
     searchEmpty: "No results found.",
     searchEmptyChatHint: "If you couldn’t find what you need, try asking the chatbot.",
+    chatOpenLabel: "Open chat",
+    chatTitle: "Ask Sungjoon.",
+    chatCloseLabel: "Close chat",
+    chatInputLabel: "Message",
+    chatPlaceholder: "Ask about the portfolio…",
+    chatSendLabel: "Send message",
+    chatRetryLabel: "Try again",
+    chatPrivacyNote: "Please don’t share sensitive personal information.",
+    chatSuggestionsLabel: "Suggested questions",
+    chatSuggestions: [
+      "Show me the development projects",
+      "Where can I see the photos?",
+      "How can I get in touch?",
+    ],
+    chatPreparingLabel: "Preparing a response",
+    chatSearchStatuses: [
+      "Opening up the portfolio…",
+      "Looking for relevant work…",
+      "Exploring the archive…",
+      "Picking work that matches your question…",
+      "Gathering details for the answer…",
+    ],
+    chatWelcome: "Hello. Ask me anything about the photography, music, or development work.",
+    chatErrorFallback: "The response could not be loaded. Please try again shortly.",
+    scrollPageLabel: "Page scroll",
+    scrollModalLabel: "Modal scroll",
+    scrollListLabel: "List scroll",
     allTag: "All",
     filterLabel: "Filter",
     cameraLabel: "Camera",

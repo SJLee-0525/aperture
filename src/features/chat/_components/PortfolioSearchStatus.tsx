@@ -2,30 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-import type { Lang } from "@/types/lang";
+import { DICTIONARY } from "@/constants/dictionary";
 
-const SEARCH_MESSAGES = {
-  ko: [
-    "포트폴리오를 펼쳐보는 중…",
-    "관련 작업을 찾는 중…",
-    "기록 사이를 탐색하는 중…",
-    "질문과 가까운 작업을 고르는 중…",
-    "답변에 담을 내용을 정리하는 중…",
-  ],
-  en: [
-    "Opening up the portfolio…",
-    "Looking for relevant work…",
-    "Exploring the archive…",
-    "Picking work that matches your question…",
-    "Gathering details for the answer…",
-  ],
-} as const;
+import type { Lang } from "@/types/lang";
 
 const MESSAGE_INTERVAL_MS = 1_800;
 
+/** 포트폴리오 검색 대기 상태 문구 롤링 — 문구는 DICTIONARY.chatSearchStatuses 단일 출처. */
 const PortfolioSearchStatus = ({ lang }: { lang: Lang }) => {
   const [messageIndex, setMessageIndex] = useState(0);
-  const messages = SEARCH_MESSAGES[lang];
+  const messages = DICTIONARY[lang].chatSearchStatuses;
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -37,4 +23,4 @@ const PortfolioSearchStatus = ({ lang }: { lang: Lang }) => {
   return <span>{messages[messageIndex]}</span>;
 };
 
-export { MESSAGE_INTERVAL_MS, PortfolioSearchStatus, SEARCH_MESSAGES };
+export { MESSAGE_INTERVAL_MS, PortfolioSearchStatus };

@@ -3,8 +3,10 @@
 import { createContext, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { DICTIONARY, type UIDict } from "@/constants/dictionary";
+import { DEFAULT_LANG, LANGS } from "@/constants/langs";
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
-import { DEFAULT_LANG, LANGS, type Lang } from "@/types/lang";
+
+import type { Lang } from "@/types/lang";
 
 type LangContextValue = {
   lang: Lang;

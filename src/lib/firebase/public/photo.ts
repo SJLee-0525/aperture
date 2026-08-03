@@ -1,14 +1,16 @@
 import { COLLECTIONS } from "@/constants/collections";
+
 import {
   projectedPublishedOrderedQuery,
   publishedOrderedQuery,
   runQuery,
   toDate,
 } from "@/lib/firebase/public/transport";
+import { asText } from "@/lib/i18n/as-text";
+
 import type { Album } from "@/types/album";
 import type { Coords } from "@/types/coords";
 import type { ImageMeta } from "@/types/image";
-import type { LocalizedText } from "@/types/localized";
 import type { Photo } from "@/types/photo";
 
 type ChatPhoto = Pick<
@@ -17,7 +19,6 @@ type ChatPhoto = Pick<
 >;
 type ChatAlbum = Pick<Album, "id" | "title" | "subtitle" | "cover" | "order" | "published">;
 
-const EMPTY_LOCALIZED: LocalizedText = { ko: "", en: "" };
 const EMPTY_IMAGE: ImageMeta = { url: "", path: "", w: 0, h: 0 };
 const EMPTY_EXIF: Photo["exif"] = {
   aperture: "",
@@ -32,7 +33,7 @@ const EMPTY_EXIF: Photo["exif"] = {
 
 const toPhoto = (id: string, data: Record<string, unknown>): Photo => ({
   id,
-  title: (data.title as LocalizedText) ?? EMPTY_LOCALIZED,
+  title: asText(data.title),
   shotAt: toDate(data.shotAt),
   camera: (data.camera as string) ?? "",
   lens: (data.lens as string) ?? "",
@@ -40,7 +41,7 @@ const toPhoto = (id: string, data: Record<string, unknown>): Photo => ({
   fileName: (data.fileName as string) ?? undefined,
   dimensions: (data.dimensions as { w: number; h: number }) ?? { w: 0, h: 0 },
   aspectRatio: (data.aspectRatio as number) ?? 1,
-  place: (data.place as LocalizedText) ?? EMPTY_LOCALIZED,
+  place: asText(data.place),
   coords: (data.coords as Coords | null) ?? null,
   tags: (data.tags as string[]) ?? [],
   image: (data.image as ImageMeta) ?? EMPTY_IMAGE,
@@ -50,8 +51,8 @@ const toPhoto = (id: string, data: Record<string, unknown>): Photo => ({
 
 const toAlbum = (id: string, data: Record<string, unknown>): Album => ({
   id,
-  title: (data.title as LocalizedText) ?? EMPTY_LOCALIZED,
-  subtitle: (data.subtitle as LocalizedText) ?? EMPTY_LOCALIZED,
+  title: asText(data.title),
+  subtitle: asText(data.subtitle),
   coverPhotoId: (data.coverPhotoId as string) ?? "",
   cover: (data.cover as ImageMeta | null) ?? null,
   photoIds: (data.photoIds as string[]) ?? [],

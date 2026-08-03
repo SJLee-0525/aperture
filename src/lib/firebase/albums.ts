@@ -14,9 +14,12 @@ import {
 
 import { COLLECTIONS } from "@/constants/collections";
 import { firestoreCollectionCacheTag } from "@/constants/cache";
+
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { Album } from "@/types/album";
 
 const ALBUMS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.ALBUMS);
@@ -26,8 +29,8 @@ type AlbumInput = Omit<Album, "id">;
 
 const toAlbum = (id: string, data: DocumentData): Album => ({
   id,
-  title: data.title ?? { ko: "", en: "" },
-  subtitle: data.subtitle ?? { ko: "", en: "" },
+  title: data.title ?? EMPTY_TEXT,
+  subtitle: data.subtitle ?? EMPTY_TEXT,
   coverPhotoId: data.coverPhotoId ?? "",
   cover: data.cover ?? null,
   photoIds: data.photoIds ?? [],

@@ -1,16 +1,18 @@
-import { hasText } from "@/lib/i18n/has-text";
 import type { DevProject, DevTroubleshooting } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
+
+import { hasText } from "@/lib/i18n/has-text";
 import type { DevProjectInput } from "@/lib/firebase/dev";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 const emptyProjectInput = (): DevProjectInput => ({
-  title: { ko: "", en: "" },
-  category: { ko: "", en: "" },
+  title: EMPTY_TEXT,
+  category: EMPTY_TEXT,
   year: "",
-  period: { ko: "", en: "" },
-  position: { ko: "", en: "" },
-  summary: { ko: "", en: "" },
-  overview: { ko: "", en: "" },
+  period: EMPTY_TEXT,
+  position: EMPTY_TEXT,
+  summary: EMPTY_TEXT,
+  overview: EMPTY_TEXT,
   features: [],
   roles: [],
   troubleshooting: [],

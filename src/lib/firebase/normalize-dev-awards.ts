@@ -1,7 +1,6 @@
-import type { DevAward } from "@/types/dev";
-import type { LocalizedText } from "@/types/localized";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
-const EMPTY_TEXT: LocalizedText = { ko: "", en: "" };
+import type { DevAward } from "@/types/dev";
 
 /** 구형 site/dev 문서의 수상에도 안정적인 ID와 새 필드 기본값을 채운다. */
 const normalizeDevAwards = (value: unknown): DevAward[] => {

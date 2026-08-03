@@ -2,12 +2,15 @@ import { unstable_cache } from "next/cache";
 
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
+
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
+
 import { searchRagChunks } from "@/lib/ai/rag-search";
 import { getChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { ChatProfileData } from "@/lib/content/chat";
+
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";
@@ -27,7 +30,7 @@ const preview = (image: ImageMeta | null | undefined): ChatReference["image"] =>
 };
 
 const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
-  const tagById = new Map(data.site.tags.map((tag) => [tag.id, lang === "ko" ? tag.ko : tag.en]));
+  const tagById = new Map(data.site.tags.map((tag) => [tag.id, pickText(tag, lang)]));
   const publicProjects = byOrder(data.devProjects);
   const publicWorks = byOrder(data.musicWorks);
   const publicAwards = byOrder(data.musicAwards);

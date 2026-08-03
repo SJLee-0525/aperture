@@ -1,6 +1,8 @@
 "use client";
 
 import { auth } from "@/lib/firebase/client";
+import { asText } from "@/lib/i18n/as-text";
+
 import type {
   AdminAlbumListItem,
   AdminDevProjectListItem,
@@ -8,7 +10,6 @@ import type {
   AdminPhotoListItem,
 } from "@/types/admin";
 import type { ImageMeta } from "@/types/image";
-import type { LocalizedText } from "@/types/localized";
 
 type RestValue = Record<string, unknown>;
 type RestDocument = { name: string; fields?: Record<string, RestValue> };
@@ -74,14 +75,13 @@ const listProjected = async (
   );
 };
 
-const text = (value: unknown): LocalizedText => (value as LocalizedText) ?? { ko: "", en: "" };
 const image = (value: unknown): ImageMeta =>
   (value as ImageMeta) ?? { url: "", path: "", w: 0, h: 0 };
 
 const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
   (await listProjected("photos", ["title", "image", "order", "published"])).map(({ id, data }) => ({
     id,
-    title: text(data.title),
+    title: asText(data.title),
     image: image(data.image),
     order: (data.order as number) ?? 0,
     published: (data.published as boolean) ?? false,
@@ -99,7 +99,7 @@ const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
     ])
   ).map(({ id, data }) => ({
     id,
-    title: text(data.title),
+    title: asText(data.title),
     coverPhotoId: (data.coverPhotoId as string) ?? "",
     cover: (data.cover as ImageMeta | null) ?? null,
     photoIds: (data.photoIds as string[]) ?? [],
@@ -111,7 +111,7 @@ const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
   (await listProjected("devProjects", ["title", "year", "cover", "order", "published"])).map(
     ({ id, data }) => ({
       id,
-      title: text(data.title),
+      title: asText(data.title),
       year: (data.year as string) ?? "",
       cover: (data.cover as ImageMeta | null) ?? null,
       order: (data.order as number) ?? 0,
@@ -123,7 +123,7 @@ const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
   (await listProjected("musicWorks", ["title", "performedAt", "poster", "order", "published"])).map(
     ({ id, data }) => ({
       id,
-      title: text(data.title),
+      title: asText(data.title),
       performedAt: new Date((data.performedAt as string) ?? 0),
       poster: image(data.poster),
       order: (data.order as number) ?? 0,

@@ -15,10 +15,13 @@ import {
 
 import { COLLECTIONS } from "@/constants/collections";
 import { firestoreCollectionCacheTag } from "@/constants/cache";
+
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 
@@ -42,7 +45,7 @@ const EMPTY_EXIF: Photo["exif"] = {
 /** Firestore 문서 → Photo (Timestamp → Date). 누락 필드는 안전 기본값으로 채운다. */
 const toPhoto = (id: string, data: DocumentData): Photo => ({
   id,
-  title: data.title ?? { ko: "", en: "" },
+  title: data.title ?? EMPTY_TEXT,
   shotAt: data.shotAt instanceof Timestamp ? data.shotAt.toDate() : new Date(data.shotAt ?? 0),
   camera: data.camera ?? "",
   lens: data.lens ?? "",
@@ -50,7 +53,7 @@ const toPhoto = (id: string, data: DocumentData): Photo => ({
   fileName: data.fileName ?? undefined,
   dimensions: data.dimensions ?? { w: 0, h: 0 },
   aspectRatio: data.aspectRatio ?? 1,
-  place: data.place ?? { ko: "", en: "" },
+  place: data.place ?? EMPTY_TEXT,
   coords: data.coords ?? null,
   tags: data.tags ?? [],
   image: data.image,

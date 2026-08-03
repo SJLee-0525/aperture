@@ -1,4 +1,5 @@
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
+
 import {
   fetchDocument,
   projectedPublishedOrderedQuery,
@@ -6,8 +7,9 @@ import {
   runQuery,
   toDate,
 } from "@/lib/firebase/public/transport";
+import { asText } from "@/lib/i18n/as-text";
+
 import type { ImageMeta } from "@/types/image";
-import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 import type { TimelineEntry } from "@/types/timeline";
 
@@ -18,19 +20,18 @@ type ChatMusicWork = Pick<
 type ChatMusicAward = Pick<MusicAward, "id" | "year" | "name" | "place" | "order" | "published">;
 type ChatMusicMedia = Pick<MusicMedia, "id" | "title" | "source" | "order" | "published">;
 
-const EMPTY_LOCALIZED: LocalizedText = { ko: "", en: "" };
 const EMPTY_IMAGE: ImageMeta = { url: "", path: "", w: 0, h: 0 };
 
 const toMusicWork = (id: string, data: Record<string, unknown>): MusicWork => ({
   id,
-  title: (data.title as LocalizedText) ?? EMPTY_LOCALIZED,
-  subtitle: (data.subtitle as LocalizedText) ?? EMPTY_LOCALIZED,
+  title: asText(data.title),
+  subtitle: asText(data.subtitle),
   performedAt: toDate(data.performedAt),
   time: (data.time as string) ?? "",
-  venue: (data.venue as LocalizedText) ?? EMPTY_LOCALIZED,
-  category: (data.category as LocalizedText) ?? EMPTY_LOCALIZED,
+  venue: asText(data.venue),
+  category: asText(data.category),
   program: (data.program as string[]) ?? [],
-  description: (data.description as LocalizedText) ?? EMPTY_LOCALIZED,
+  description: asText(data.description),
   poster: (data.poster as ImageMeta) ?? EMPTY_IMAGE,
   ticketUrl: (data.ticketUrl as string) ?? "",
   order: (data.order as number) ?? 0,
@@ -40,17 +41,17 @@ const toMusicWork = (id: string, data: Record<string, unknown>): MusicWork => ({
 const toMusicAward = (id: string, data: Record<string, unknown>): MusicAward => ({
   id,
   year: (data.year as number) ?? 0,
-  name: (data.name as LocalizedText) ?? EMPTY_LOCALIZED,
+  name: asText(data.name),
   place: (data.place as string) ?? "",
-  description: (data.description as LocalizedText) ?? EMPTY_LOCALIZED,
+  description: asText(data.description),
   order: (data.order as number) ?? 0,
   published: (data.published as boolean) ?? false,
 });
 
 const toMusicMedia = (id: string, data: Record<string, unknown>): MusicMedia => ({
   id,
-  title: (data.title as LocalizedText) ?? EMPTY_LOCALIZED,
-  source: (data.source as LocalizedText) ?? EMPTY_LOCALIZED,
+  title: asText(data.title),
+  source: asText(data.source),
   youtubeId: (data.youtubeId as string) ?? "",
   order: (data.order as number) ?? 0,
   published: (data.published as boolean) ?? false,
@@ -73,7 +74,7 @@ const fetchMusicConfig = async (): Promise<MusicConfig | null> => {
   const data = await fetchDocument(COLLECTIONS.SITE, SITE_MUSIC_DOC, "music config");
   if (!data) return null;
   return {
-    intro: (data.intro as LocalizedText) ?? EMPTY_LOCALIZED,
+    intro: asText(data.intro),
     career: (data.career as TimelineEntry[]) ?? [],
     education: (data.education as TimelineEntry[]) ?? [],
   };

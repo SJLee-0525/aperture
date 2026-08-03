@@ -1,3 +1,5 @@
+import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
+
 import { fetchPublishedDevProjects, fetchDevConfig } from "@/lib/firebase/public/dev";
 import {
   fetchMusicConfig,
@@ -7,6 +9,7 @@ import {
 } from "@/lib/firebase/public/music";
 import { fetchPublishedAlbums, fetchPublishedPhotos } from "@/lib/firebase/public/photo";
 import { fetchSiteConfig } from "@/lib/firebase/public/site";
+
 import type { RagSyncTarget } from "@/types/rag";
 
 type RestValue = Record<string, unknown>;
@@ -90,26 +93,6 @@ const getRagSourceData = async () => {
   };
 };
 
-const emptyText = { ko: "", en: "" };
-const emptySite = {
-  name: emptyText,
-  tagline: emptyText,
-  landingLead: emptyText,
-  contactLead: emptyText,
-  bio: emptyText,
-  links: [],
-  tags: [],
-};
-const emptyDev = {
-  heroLead: emptyText,
-  stack: [],
-  timeline: [],
-  education: [],
-  awards: [],
-  interview: [],
-};
-const emptyMusic = { intro: emptyText, career: [], education: [] };
-
 const getRagSourceDataForTarget = async (
   target: RagSyncTarget,
   idToken: string,
@@ -117,9 +100,9 @@ const getRagSourceDataForTarget = async (
   if (target.sourceType === "photoTags") {
     const [site, photos] = await Promise.all([fetchSiteConfig(), fetchPublishedPhotos()]);
     return {
-      site: site ?? emptySite,
-      devConfig: emptyDev,
-      musicConfig: emptyMusic,
+      site: site ?? EMPTY_SITE_CONFIG,
+      devConfig: EMPTY_DEV_CONFIG,
+      musicConfig: EMPTY_MUSIC_CONFIG,
       devProjects: [],
       musicWorks: [],
       musicAwards: [],
@@ -138,9 +121,9 @@ const getRagSourceDataForTarget = async (
     item.performedAt = new Date(item.performedAt);
   }
   return {
-    site: target.sourceType === "siteConfig" && raw ? raw : (site ?? emptySite),
-    devConfig: target.sourceType === "devConfig" && raw ? raw : emptyDev,
-    musicConfig: target.sourceType === "musicConfig" && raw ? raw : emptyMusic,
+    site: target.sourceType === "siteConfig" && raw ? raw : (site ?? EMPTY_SITE_CONFIG),
+    devConfig: target.sourceType === "devConfig" && raw ? raw : EMPTY_DEV_CONFIG,
+    musicConfig: target.sourceType === "musicConfig" && raw ? raw : EMPTY_MUSIC_CONFIG,
     devProjects: target.sourceType === "project" && published && item ? [item] : [],
     musicWorks: target.sourceType === "musicWork" && published && item ? [item] : [],
     musicAwards: target.sourceType === "musicAward" && published && item ? [item] : [],

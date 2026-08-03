@@ -1,12 +1,7 @@
+import { asText } from "@/lib/i18n/as-text";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { DevTroubleshooting } from "@/types/dev";
-import type { LocalizedText } from "@/types/localized";
-
-const EMPTY: LocalizedText = { ko: "", en: "" };
-
-const asLocalized = (v: unknown): LocalizedText => {
-  const r = (v ?? {}) as Record<string, unknown>;
-  return { ko: typeof r.ko === "string" ? r.ko : "", en: typeof r.en === "string" ? r.en : "" };
-};
 
 /** 구형 평문 "문제 → 해결" 을 첫 화살표 기준으로 분리. 화살표 없으면 전부 problem. */
 const splitAtArrow = (text: string): [string, string] => {
@@ -23,22 +18,22 @@ const normalizeTroubleshooting = (value: unknown): DevTroubleshooting[] => {
   if (!Array.isArray(value)) return [];
   return value.map((entry): DevTroubleshooting => {
     if (entry == null || typeof entry !== "object") {
-      return { title: EMPTY, problem: EMPTY, solution: EMPTY };
+      return { title: EMPTY_TEXT, problem: EMPTY_TEXT, solution: EMPTY_TEXT };
     }
     const record = entry as Record<string, unknown>;
     if ("problem" in record || "title" in record || "solution" in record) {
       return {
-        title: asLocalized(record.title),
-        problem: asLocalized(record.problem),
-        solution: asLocalized(record.solution),
-        ...(record.result != null ? { result: asLocalized(record.result) } : {}),
+        title: asText(record.title),
+        problem: asText(record.problem),
+        solution: asText(record.solution),
+        ...(record.result != null ? { result: asText(record.result) } : {}),
       };
     }
-    const legacy = asLocalized(record);
+    const legacy = asText(record);
     const [koProblem, koSolution] = splitAtArrow(legacy.ko);
     const [enProblem, enSolution] = splitAtArrow(legacy.en);
     return {
-      title: EMPTY,
+      title: EMPTY_TEXT,
       problem: { ko: koProblem, en: enProblem },
       solution: { ko: koSolution, en: enSolution },
     };

@@ -1,10 +1,13 @@
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
-import type { PhotoInput } from "@/lib/firebase/firestore";
+
 import type { Coords } from "@/types/coords";
 import type { Photo } from "@/types/photo";
 
+import type { PhotoInput } from "@/lib/firebase/firestore";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 const createEmptyPhotoInput = (): PhotoInput => ({
-  title: { ko: "", en: "" },
+  title: EMPTY_TEXT,
   shotAt: new Date(),
   camera: "",
   lens: "",
@@ -21,7 +24,7 @@ const createEmptyPhotoInput = (): PhotoInput => ({
   fileName: undefined,
   dimensions: { w: 0, h: 0 },
   aspectRatio: 1,
-  place: { ko: "", en: "" },
+  place: EMPTY_TEXT,
   coords: null,
   tags: [],
   image: { url: "", path: "", w: 0, h: 0 },

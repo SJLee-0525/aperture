@@ -10,13 +10,8 @@ import styles from "./ChatLauncher.module.css";
 
 const ChatPanel = dynamic(() => import("./ChatPanel").then((module) => module.ChatPanel));
 
-const LABEL = {
-  ko: "챗봇 열기",
-  en: "Open chat",
-} as const;
-
 const ChatLauncher = () => {
-  const { lang } = useLang();
+  const { dict } = useLang();
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
 
@@ -31,7 +26,7 @@ const ChatLauncher = () => {
       <button
         type="button"
         className={styles.launcher}
-        aria-label={LABEL[lang]}
+        aria-label={dict.chatOpenLabel}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={openChat}

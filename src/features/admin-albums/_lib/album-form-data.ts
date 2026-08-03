@@ -1,9 +1,11 @@
-import type { AlbumInput } from "@/lib/firebase/albums";
 import type { Album } from "@/types/album";
 
+import type { AlbumInput } from "@/lib/firebase/albums";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 const emptyAlbumInput = (): AlbumInput => ({
-  title: { ko: "", en: "" },
-  subtitle: { ko: "", en: "" },
+  title: EMPTY_TEXT,
+  subtitle: EMPTY_TEXT,
   coverPhotoId: "",
   cover: null,
   photoIds: [],

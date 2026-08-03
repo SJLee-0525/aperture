@@ -2,10 +2,13 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
 import { firestoreDocumentCacheTag } from "@/constants/cache";
-import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
+
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { SiteConfig } from "@/types/site";
 
 /**
@@ -23,7 +26,7 @@ const getSiteConfig = async (): Promise<SiteConfig> => {
       tagline: data.tagline ?? EMPTY_SITE_CONFIG.tagline,
       landingLead: data.landingLead ?? EMPTY_SITE_CONFIG.landingLead,
       contactLead: data.contactLead ?? EMPTY_SITE_CONFIG.contactLead,
-      bio: data.bio ?? { ko: "", en: "" },
+      bio: data.bio ?? EMPTY_TEXT,
       links: data.links ?? [],
       tags: data.tags ?? [],
     };

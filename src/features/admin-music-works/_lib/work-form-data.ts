@@ -1,4 +1,6 @@
 import type { MusicWorkInput } from "@/lib/firebase/music";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { MusicWork } from "@/types/music";
 
 const toDateValue = (date: Date): string => {
@@ -14,14 +16,14 @@ const fromDateValue = (value: string): Date => {
 };
 
 const emptyWorkInput = (): MusicWorkInput => ({
-  title: { ko: "", en: "" },
-  subtitle: { ko: "", en: "" },
+  title: EMPTY_TEXT,
+  subtitle: EMPTY_TEXT,
   performedAt: new Date(),
   time: "",
-  venue: { ko: "", en: "" },
-  category: { ko: "", en: "" },
+  venue: EMPTY_TEXT,
+  category: EMPTY_TEXT,
   program: [],
-  description: { ko: "", en: "" },
+  description: EMPTY_TEXT,
   poster: { url: "", path: "", w: 0, h: 0 },
   ticketUrl: "",
   order: 0,

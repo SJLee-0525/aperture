@@ -18,45 +18,13 @@ import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import styles from "./ChatPanel.module.css";
 
-const COPY = {
-  ko: {
-    title: "Ask Sungjoon.",
-    close: "챗봇 닫기",
-    input: "메시지",
-    placeholder: "궁금한 내용을 입력하세요…",
-    send: "메시지 보내기",
-    retry: "다시 시도",
-    privacy: "민감한 개인정보는 입력하지 마세요.",
-    suggestions: [
-      "개발 프로젝트를 소개해 줘",
-      "사진 작업은 어디서 볼 수 있어?",
-      "연락 방법을 알려줘",
-    ],
-  },
-  en: {
-    title: "Ask Sungjoon.",
-    close: "Close chat",
-    input: "Message",
-    placeholder: "Ask about the portfolio…",
-    send: "Send message",
-    retry: "Try again",
-    privacy: "Please don’t share sensitive personal information.",
-    suggestions: [
-      "Show me the development projects",
-      "Where can I see the photos?",
-      "How can I get in touch?",
-    ],
-  },
-} as const;
-
 type Props = { open: boolean; onClose: () => void };
 
 const MESSAGE_TRANSITION = { duration: 0.22, ease: [0.22, 1, 0.36, 1] } as const;
 const PRESENCE_TRANSITION = { duration: 0.16, ease: "easeOut" } as const;
 
 const ChatPanel = ({ open, onClose }: Props) => {
-  const { lang } = useLang();
-  const copy = COPY[lang];
+  const { lang, dict } = useLang();
   const { messages, isReplying, retry, send } = useChat(lang);
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
@@ -178,14 +146,14 @@ const ChatPanel = ({ open, onClose }: Props) => {
           <div className={styles.identity}>
             <Icon name="sparkle" size={18} className={styles.identityIcon} />
             <h2 id={titleId} className={styles.title}>
-              {copy.title}
+              {dict.chatTitle}
             </h2>
           </div>
           <div className={styles.actions}>
             <button
               type="button"
               className={styles.iconButton}
-              aria-label={copy.close}
+              aria-label={dict.chatCloseLabel}
               onClick={onClose}
             >
               <CloseIcon />
@@ -233,10 +201,8 @@ const ChatPanel = ({ open, onClose }: Props) => {
                       <span className={message.pendingStatus ? undefined : styles.srOnly}>
                         {message.pendingStatus === "portfolio-search" ? (
                           <PortfolioSearchStatus key={lang} lang={lang} />
-                        ) : lang === "ko" ? (
-                          "답변 준비 중"
                         ) : (
-                          "Preparing a response"
+                          dict.chatPreparingLabel
                         )}
                       </span>
                     </span>
@@ -254,7 +220,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
                       className={styles.retryButton}
                       onClick={() => retry(message.id)}
                     >
-                      {copy.retry}
+                      {dict.chatRetryLabel}
                     </button>
                   ) : null}
                   {message.link ? (
@@ -296,13 +262,13 @@ const ChatPanel = ({ open, onClose }: Props) => {
               <m.div
                 key="suggestions"
                 className={styles.suggestions}
-                aria-label={lang === "ko" ? "추천 질문" : "Suggested questions"}
+                aria-label={dict.chatSuggestionsLabel}
                 exit={
                   reduceMotion ? undefined : { opacity: 0, y: -4, transition: PRESENCE_TRANSITION }
                 }
                 transition={reduceMotion ? { duration: 0 } : PRESENCE_TRANSITION}
               >
-                {copy.suggestions.map((suggestion) => (
+                {dict.chatSuggestions.map((suggestion) => (
                   <button key={suggestion} type="button" onClick={() => send(suggestion)}>
                     {suggestion}
                   </button>
@@ -317,13 +283,13 @@ const ChatPanel = ({ open, onClose }: Props) => {
 
         <div className={styles.composerArea}>
           <ChatComposer
-            inputLabel={copy.input}
-            placeholder={copy.placeholder}
-            sendLabel={copy.send}
+            inputLabel={dict.chatInputLabel}
+            placeholder={dict.chatPlaceholder}
+            sendLabel={dict.chatSendLabel}
             isReplying={isReplying}
             onSend={send}
           />
-          <p className={styles.privacyNotice}>{copy.privacy}</p>
+          <p className={styles.privacyNotice}>{dict.chatPrivacyNote}</p>
         </div>
       </section>
     </div>,

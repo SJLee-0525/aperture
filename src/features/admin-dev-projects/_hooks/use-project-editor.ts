@@ -4,16 +4,20 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
+
 import {
   emptyProjectInput,
   prepareProjectInput,
   projectToInput,
 } from "@/features/admin-dev-projects/_lib/project-form-data";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
-import { devProjects, type DevProjectInput } from "@/lib/firebase/dev";
+
 import type { DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { SiteLink } from "@/types/site";
+
+import { devProjects, type DevProjectInput } from "@/lib/firebase/dev";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type LocalizedArrayKey = "features" | "roles" | "achievements";
 
@@ -35,7 +39,7 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   const addLocalized = (key: LocalizedArrayKey) =>
     setForm((previous) => ({
       ...previous,
-      [key]: [...previous[key], { ko: "", en: "" }],
+      [key]: [...previous[key], EMPTY_TEXT],
     }));
   const editLocalized = (
     key: LocalizedArrayKey,

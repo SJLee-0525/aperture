@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { LocalizedText } from "@/types/localized";
 
 type Status = "loading" | "ready" | "error";
@@ -14,7 +16,7 @@ type Status = "loading" | "ready" | "error";
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
  */
 const useSiteAdmin = () => {
-  const [bio, setBio] = useState<LocalizedText>({ ko: "", en: "" });
+  const [bio, setBio] = useState<LocalizedText>(EMPTY_TEXT);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);

@@ -6,6 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminMusicWorkRoute } from "@/constants/routes";
+
+import { formatYMD } from "@/lib/format/format-date";
+
 import type { AdminMusicWorkListItem } from "@/types/admin";
 import { imageThumbnailUrl } from "@/types/image";
 
@@ -15,14 +18,6 @@ type Props = {
   work: AdminMusicWorkListItem;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
-};
-
-/** 공연일자를 YYYY.MM.DD 로 표기. */
-const formatDate = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}.${m}.${d}`;
 };
 
 /** 정렬 가능한 연주 행 — 드래그 핸들·포스터 썸네일·제목·날짜·공개 토글·수정/삭제. */
@@ -70,7 +65,7 @@ const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
 
       <span className={styles.title}>{work.title.ko || "제목 없음"}</span>
 
-      <span className={styles.date}>{formatDate(work.performedAt)}</span>
+      <span className={styles.date}>{formatYMD(work.performedAt)}</span>
 
       <button
         type="button"

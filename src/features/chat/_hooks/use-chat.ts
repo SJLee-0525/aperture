@@ -2,14 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { DICTIONARY } from "@/constants/dictionary";
+
 import { createInitialMessage } from "@/features/chat/_lib/chat-welcome";
+
 import type { ChatMessage } from "@/types/chat";
 import type { Lang } from "@/types/lang";
-
-const FALLBACK_ERROR: Record<Lang, string> = {
-  ko: "답변을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-  en: "The response could not be loaded. Please try again shortly.",
-};
 
 type ChatSuccessResponse = { message: Omit<ChatMessage, "id"> };
 type ChatErrorResponse = { error?: { code?: string; message?: string } };
@@ -162,13 +160,14 @@ const useChat = (lang: Lang) => {
             const body = await readResponseBody(response);
             const serverError = getServerError(body);
             throw new ChatPublicError(
-              serverError?.message ?? FALLBACK_ERROR[lang],
+              serverError?.message ?? DICTIONARY[lang].chatErrorFallback,
               response.status >= 500,
             );
           }
           if (!response.headers.get("content-type")?.includes("application/x-ndjson")) {
             const body = await readResponseBody(response);
-            if (!isSuccessResponse(body)) throw new ChatPublicError(FALLBACK_ERROR[lang]);
+            if (!isSuccessResponse(body))
+              throw new ChatPublicError(DICTIONARY[lang].chatErrorFallback);
             messagesRef.current = messagesRef.current.map((message) =>
               message.id === assistantId ? { ...body.message, id: assistantId } : message,
             );
@@ -199,7 +198,8 @@ const useChat = (lang: Lang) => {
         })
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === "AbortError") return;
-          const content = error instanceof ChatPublicError ? error.message : FALLBACK_ERROR[lang];
+          const content =
+            error instanceof ChatPublicError ? error.message : DICTIONARY[lang].chatErrorFallback;
           const retryable = error instanceof ChatPublicError ? error.retryable : true;
           messagesRef.current = messagesRef.current.map((message) =>
             message.id === assistantId

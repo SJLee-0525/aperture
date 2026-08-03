@@ -1,5 +1,6 @@
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { DevConfig } from "@/types/dev";
-import type { LocalizedText } from "@/types/localized";
 import type { MusicConfig } from "@/types/music";
 import type { SiteConfig } from "@/types/site";
 
@@ -9,8 +10,6 @@ import type { SiteConfig } from "@/types/site";
  * 관리자 편집기도 같은 값으로 부트스트랩한다(mock 시드가 저장으로 영속되는 사고 방지).
  * mock 은 오직 개발 모드·env 미설정에서만 쓴다 — lib/content/content-source.ts 참조.
  */
-const EMPTY_TEXT: LocalizedText = { ko: "", en: "" };
-
 const EMPTY_SITE_CONFIG: SiteConfig = {
   name: EMPTY_TEXT,
   tagline: EMPTY_TEXT,

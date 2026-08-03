@@ -4,7 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
+
 import { musicMedia, type MusicMediaInput } from "@/lib/firebase/music";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { MusicMedia } from "@/types/music";
 
 import styles from "./MediaForm.module.css";
@@ -17,8 +20,8 @@ type Props = {
 
 /** 빈 영상 초기 상태. */
 const emptyInput = (): MusicMediaInput => ({
-  title: { ko: "", en: "" },
-  source: { ko: "", en: "" },
+  title: EMPTY_TEXT,
+  source: EMPTY_TEXT,
   youtubeId: "",
   // 새 영상은 order 0 — 목록 상단에 오며, dnd 정렬로 조정한다.
   order: 0,

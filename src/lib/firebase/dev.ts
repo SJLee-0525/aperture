@@ -3,6 +3,7 @@ import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from "firebas
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
 import { firestoreDocumentCacheTag } from "@/constants/cache";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
+
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
@@ -10,10 +11,9 @@ import { listCrud } from "@/lib/firebase/list-crud";
 import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import { deleteDevProjectImages } from "@/lib/firebase/storage";
-import type { DevConfig, DevProject } from "@/types/dev";
-import type { LocalizedText } from "@/types/localized";
+import { asText } from "@/lib/i18n/as-text";
 
-const asText = (v: unknown): LocalizedText => (v as LocalizedText) ?? { ko: "", en: "" };
+import type { DevConfig, DevProject } from "@/types/dev";
 
 const toDevProject = (id: string, d: DocumentData): DevProject => ({
   id,

@@ -10,17 +10,18 @@ import {
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
 import { firestoreDocumentCacheTag } from "@/constants/cache";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
+
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { db } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
 import { deleteMusicWorkImages } from "@/lib/firebase/storage";
-import type { LocalizedText } from "@/types/localized";
+import { asText } from "@/lib/i18n/as-text";
+
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
 const asDate = (v: unknown): Date =>
   v instanceof Timestamp ? v.toDate() : v instanceof Date ? v : new Date();
-const asText = (v: unknown): LocalizedText => (v as LocalizedText) ?? { ko: "", en: "" };
 
 const toMusicWork = (id: string, d: DocumentData): MusicWork => ({
   id,

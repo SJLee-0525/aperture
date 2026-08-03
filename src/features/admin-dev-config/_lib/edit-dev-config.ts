@@ -1,6 +1,8 @@
 import type { DevConfig, DevStackItem } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
 
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 type Lang = keyof LocalizedText;
 type MoveOffset = -1 | 1;
 type InterviewField = "q" | "a";
@@ -75,7 +77,7 @@ const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
     case "interview.add":
       return {
         ...config,
-        interview: [...config.interview, { q: { ko: "", en: "" }, a: { ko: "", en: "" } }],
+        interview: [...config.interview, { q: EMPTY_TEXT, a: EMPTY_TEXT }],
       };
     case "interview.edit":
       return {
@@ -166,9 +168,9 @@ const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
           ...config.timeline,
           {
             period: "",
-            title: { ko: "", en: "" },
-            role: { ko: "", en: "" },
-            desc: { ko: "", en: "" },
+            title: EMPTY_TEXT,
+            role: EMPTY_TEXT,
+            desc: EMPTY_TEXT,
           },
         ],
       };
@@ -207,7 +209,7 @@ const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
     case "education.add":
       return {
         ...config,
-        education: [...config.education, { period: "", title: { ko: "", en: "" } }],
+        education: [...config.education, { period: "", title: EMPTY_TEXT }],
       };
     case "education.period.edit":
       return {
@@ -241,9 +243,9 @@ const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
             id: edit.id,
             year: "",
             projectId: "",
-            name: { ko: "", en: "" },
-            place: { ko: "", en: "" },
-            description: { ko: "", en: "" },
+            name: EMPTY_TEXT,
+            place: EMPTY_TEXT,
+            description: EMPTY_TEXT,
           },
         ],
       };

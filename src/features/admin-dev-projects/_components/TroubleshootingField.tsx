@@ -1,7 +1,8 @@
 "use client";
 
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { DevTroubleshooting } from "@/types/dev";
-import type { LocalizedText } from "@/types/localized";
 
 import styles from "./TroubleshootingField.module.css";
 
@@ -12,14 +13,12 @@ type Props = {
 
 type TextFieldKey = "title" | "problem" | "solution" | "result";
 
-const EMPTY: LocalizedText = { ko: "", en: "" };
-
 /** 새 항목 — 폼 상태에서는 result 를 항상 채워 undefined 분기를 없앤다(저장 시 빈 값이면 키 생략). */
 const emptyEntry = (): DevTroubleshooting => ({
-  title: { ...EMPTY },
-  problem: { ...EMPTY },
-  solution: { ...EMPTY },
-  result: { ...EMPTY },
+  title: { ...EMPTY_TEXT },
+  problem: { ...EMPTY_TEXT },
+  solution: { ...EMPTY_TEXT },
+  result: { ...EMPTY_TEXT },
 });
 
 /** 항목별 제목/문제/해결/결과(ko·en) 필드 정의 — 렌더 순서 그대로. */
@@ -39,7 +38,7 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
     onChange(
       entries.map((entry, i) =>
         i === index
-          ? { ...entry, [field]: { ...(entry[field] ?? EMPTY), [langKey]: value } }
+          ? { ...entry, [field]: { ...(entry[field] ?? EMPTY_TEXT), [langKey]: value } }
           : entry,
       ),
     );

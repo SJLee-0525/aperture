@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
 import type { LocalizedText } from "@/types/localized";
 import type { SiteLink } from "@/types/site";
+
+import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type Status = "loading" | "ready" | "error";
 
@@ -16,9 +18,9 @@ const EMPTY_LINK: SiteLink = { label: "", href: "" };
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
  */
 const useGlobalAdmin = () => {
-  const [tagline, setTagline] = useState<LocalizedText>({ ko: "", en: "" });
-  const [landingLead, setLandingLead] = useState<LocalizedText>({ ko: "", en: "" });
-  const [contactLead, setContactLead] = useState<LocalizedText>({ ko: "", en: "" });
+  const [tagline, setTagline] = useState<LocalizedText>(EMPTY_TEXT);
+  const [landingLead, setLandingLead] = useState<LocalizedText>(EMPTY_TEXT);
+  const [contactLead, setContactLead] = useState<LocalizedText>(EMPTY_TEXT);
   const [links, setLinks] = useState<SiteLink[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);

@@ -2,6 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import type { UIDict } from "@/constants/dictionary";
+
 import styles from "./CustomScrollbar.module.css";
 
 const ENABLE_QUERY =
@@ -11,8 +15,15 @@ const MIN_THUMB_HEIGHT = 44;
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const CustomScrollbar = () => {
+  const { dict } = useLang();
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
+  // 라벨은 rAF 갱신 루프(이펙트 1회 설치)에서 읽으므로 ref 로 최신 사전을 전달한다.
+  const dictRef = useRef<UIDict>(dict);
+
+  useEffect(() => {
+    dictRef.current = dict;
+  }, [dict]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -145,10 +156,10 @@ const CustomScrollbar = () => {
       track.setAttribute(
         "aria-label",
         scrollScope === "modal"
-          ? "모달 스크롤"
+          ? dictRef.current.scrollModalLabel
           : scrollScope === "local"
-            ? "내부 목록 스크롤"
-            : "페이지 스크롤",
+            ? dictRef.current.scrollListLabel
+            : dictRef.current.scrollPageLabel,
       );
       track.setAttribute("aria-valuemax", String(Math.round(maxScroll)));
       track.setAttribute("aria-valuenow", String(Math.round(scrollTop)));
@@ -257,7 +268,7 @@ const CustomScrollbar = () => {
       aria-hidden="true"
       role="scrollbar"
       aria-controls="page-content"
-      aria-label="페이지 스크롤"
+      aria-label={dict.scrollPageLabel}
       aria-orientation="vertical"
       aria-valuemin={0}
       aria-valuemax={0}

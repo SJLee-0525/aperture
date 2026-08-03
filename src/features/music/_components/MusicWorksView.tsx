@@ -3,16 +3,21 @@
 import Image from "next/image";
 
 import { Modal } from "@/components/Modal";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { useQueryModal } from "@/hooks/use-query-modal";
+
+import { formatYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import { imagePreviewUrl } from "@/types/image";
 import type { MusicWork } from "@/types/music";
 
 import styles from "./MusicWorksView.module.css";
 
+/** 프로그램 곡 순번 2자리 표기 (01, 02, …) */
 const pad = (n: number) => String(n).padStart(2, "0");
-const ymd = (d: Date) => `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
 
 /** 연주 목록 (/music) — 포스터 그리드. 클릭 시 프로그램·예매 모달. */
 const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
@@ -53,7 +58,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                 <div className={styles.wt}>{pickText(work.title, lang)}</div>
                 <div className={styles.ws}>{pickText(work.subtitle, lang)}</div>
                 <div className={styles.wm}>
-                  {ymd(work.performedAt)} · {pickText(work.venue, lang)}
+                  {formatYMD(work.performedAt)} · {pickText(work.venue, lang)}
                 </div>
               </div>
             </button>
@@ -92,7 +97,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
               <div className={styles.rt}>{pickText(selected.title, lang)}</div>
               <div className={styles.rsub}>{pickText(selected.subtitle, lang)}</div>
               <div className={styles.rmeta}>
-                {ymd(selected.performedAt)} · {selected.time}
+                {formatYMD(selected.performedAt)} · {selected.time}
               </div>
               <div className={styles.rv}>{pickText(selected.venue, lang)}</div>
               {selected.ticketUrl.trim() ? (
