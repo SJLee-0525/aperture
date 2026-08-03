@@ -93,7 +93,15 @@ describe("buildRagChunks", () => {
 
   it("개발 수상 청크는 site/dev 문서 단위(sourceId=dev)로 실리고 항목은 chunkKey로 구분한다", () => {
     const data = {
-      site: { name: { ko: "", en: "" }, tagline: { ko: "", en: "" }, landingLead: { ko: "", en: "" }, contactLead: { ko: "", en: "" }, bio: { ko: "", en: "" }, links: [], tags: [] },
+      site: {
+        name: { ko: "", en: "" },
+        tagline: { ko: "", en: "" },
+        landingLead: { ko: "", en: "" },
+        contactLead: { ko: "", en: "" },
+        bio: { ko: "", en: "" },
+        links: [],
+        tags: [],
+      },
       devConfig: {
         heroLead: { ko: "", en: "" },
         stack: [],

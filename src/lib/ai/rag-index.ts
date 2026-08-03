@@ -83,7 +83,7 @@ const loadPackedRagIndex = unstable_cache(
   { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
-const getRagIndex = async (): Promise<RagIndexEntry[]> => unpackRagIndex(await loadPackedRagIndex());
+const getRagIndex = async (): Promise<RagIndexEntry[]> =>
+  unpackRagIndex(await loadPackedRagIndex());
 
 export { getRagIndex, packRagIndex, unpackRagIndex };
-export type { PackedRagIndex, RagIndexEntry };

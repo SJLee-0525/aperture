@@ -46,8 +46,14 @@ describe("packRagIndex / unpackRagIndex", () => {
     const query = pseudoVector(9, 64);
     const chunks = [
       chunk("far", pseudoVector(3, 64)),
-      chunk("near", query.map((value) => value * 0.9)),
-      chunk("mid", query.map((value, index) => value + pseudoVector(4, 64)[index]! * 2)),
+      chunk(
+        "near",
+        query.map((value) => value * 0.9),
+      ),
+      chunk(
+        "mid",
+        query.map((value, index) => value + pseudoVector(4, 64)[index]! * 2),
+      ),
     ];
 
     const ranked = unpackRagIndex(packRagIndex(chunks))
@@ -65,7 +71,11 @@ describe("packRagIndex / unpackRagIndex", () => {
   });
 
   it("차원이 어긋나거나 비어 있는 벡터는 스냅샷에서 제외한다", () => {
-    const chunks = [chunk("ok", pseudoVector(5, 64)), chunk("broken", [0.1, 0.2]), chunk("empty", [])];
+    const chunks = [
+      chunk("ok", pseudoVector(5, 64)),
+      chunk("broken", [0.1, 0.2]),
+      chunk("empty", []),
+    ];
 
     const unpacked = unpackRagIndex(packRagIndex(chunks));
 

@@ -108,10 +108,4 @@ const generateEmbeddings = async (
   return vectors as number[][];
 };
 
-export {
-  DEFAULT_EMBEDDING_MODEL,
-  embeddingModelKey,
-  generateEmbedding,
-  generateEmbeddings,
-  EmbeddingError,
-};
+export { embeddingModelKey, generateEmbedding, generateEmbeddings, EmbeddingError };

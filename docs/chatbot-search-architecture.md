@@ -234,16 +234,16 @@ Portfolio 스냅샷 캐시 함수는 언어뿐 아니라 `mock | live` 콘텐츠
 
 Firestore `ragDocuments`의 각 문서는 다음 정보를 가진다.
 
-| 필드             | 설명                                                  |
-| ---------------- | ----------------------------------------------------- |
-| `section`        | profile, development, music, photography              |
-| `sourceType`     | photo, album, project, musicWork 등 원본 종류         |
-| `sourceId`       | 원본 Firestore 문서 ID                                |
-| `chunkKey`       | overview, work, troubleshooting-0 같은 의미 단위      |
-| `text`           | 한국어·영어와 검색 메타데이터를 합친 임베딩 원문      |
-| `embedding`      | `text-embedding-3-small`이 생성한 기본 512차원 float 배열 |
+| 필드             | 설명                                                                 |
+| ---------------- | -------------------------------------------------------------------- |
+| `section`        | profile, development, music, photography                             |
+| `sourceType`     | photo, album, project, musicWork 등 원본 종류                        |
+| `sourceId`       | 원본 Firestore 문서 ID                                               |
+| `chunkKey`       | overview, work, troubleshooting-0 같은 의미 단위                     |
+| `text`           | 한국어·영어와 검색 메타데이터를 합친 임베딩 원문                     |
+| `embedding`      | `text-embedding-3-small`이 생성한 기본 512차원 float 배열            |
 | `embeddingModel` | 벡터 공간 호환성 키 `모델명@차원` (예: `text-embedding-3-small@512`) |
-| `published`      | 런타임 공개 조회 여부                                 |
+| `published`      | 런타임 공개 조회 여부                                                |
 
 ### 5.3 최초 일괄 생성
 

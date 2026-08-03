@@ -88,4 +88,10 @@ const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<Chat
     };
   });
 
-export { fetchChatDevProjects, fetchDevConfig, fetchPublishedDevProjects, toDevConfig, toDevProject };
+export {
+  fetchChatDevProjects,
+  fetchDevConfig,
+  fetchPublishedDevProjects,
+  toDevConfig,
+  toDevProject,
+};
