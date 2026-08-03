@@ -5,8 +5,8 @@ import { getDevConfig } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "개발 경력",
-  description: "개발자 이성준의 학력, 경력과 수상 이력을 살펴보세요.",
+  title: "Development Career",
+  description: "개발자 이성준의 학력, 경력과 수상 이력을 소개합니다.",
   pathname: "/dev/career",
 });
 

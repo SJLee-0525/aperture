@@ -42,13 +42,17 @@ const splineMono = Spline_Sans_Mono({
   display: "swap",
 });
 
+/* 사이트 대표 제목·설명 — 기본·OG·트위터 메타 공용 단일 출처 */
+const SITE_TITLE = "Sungjoon Lee — Photographer, Pianist, Developer";
+const SITE_DESCRIPTION = "사진, 음악, 개발 작업을 소개하는 이성준(Sungjoon Lee)의 포트폴리오.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Sungjoon Lee — Photographer, Pianist, Developer",
+    default: SITE_TITLE,
     template: "%s | Sungjoon Lee",
   },
-  description: "사진, 음악, 개발 작업을 소개하는 이성준(Sungjoon Lee)의 포트폴리오.",
+  description: SITE_DESCRIPTION,
   applicationName: "Sungjoon Lee",
   authors: [{ name: "Sungjoon Lee", url: "/" }],
   creator: "Sungjoon Lee",
@@ -58,15 +62,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Sungjoon Lee",
-    title: "Sungjoon Lee — Photographer, Pianist, Developer",
-    description: "사진, 음악, 개발 작업을 소개하는 이성준의 포트폴리오.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     url: "/",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sungjoon Lee — Photographer, Pianist, Developer",
-    description: "사진, 음악, 개발 작업을 소개하는 이성준의 포트폴리오.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,

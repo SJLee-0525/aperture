@@ -4,8 +4,8 @@ import { getSite } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "사진작가 소개",
-  description: "이성준의 사진 작업 기록을 살펴보세요.",
+  title: "About the Photographer",
+  description: "사진작가 이성준의 사진 작업 기록을 소개합니다.",
   pathname: "/photo/about",
 });
 

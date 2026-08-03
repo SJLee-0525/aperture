@@ -7,8 +7,13 @@ import {
   resolveAlbumCover,
   resolveAlbumCoverPreview,
 } from "@/features/albums/_lib/resolve-album-cover";
+
+import { DEFAULT_LANG } from "@/constants/langs";
+
 import { getAlbum, getAlbums, getPhotos, getTags } from "@/lib/content/photo";
+import { pickText } from "@/lib/i18n/pick-text";
 import { pageMetadata } from "@/lib/seo/metadata";
+
 import type { Photo } from "@/types/photo";
 
 export const revalidate = 3600;
@@ -32,16 +37,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!album) {
     return {
-      title: "앨범을 찾을 수 없습니다",
+      title: "Album Not Found",
       robots: { index: false, follow: false },
     };
   }
 
-  const title = album.title.ko || album.title.en;
-  const subtitle = album.subtitle.ko || album.subtitle.en;
-  const description = subtitle
-    ? `${title} — ${subtitle}. 사진작가 이성준의 사진 앨범.`
-    : `${title} — 사진작가 이성준의 사진 앨범.`;
+  // 탭 제목은 영어 고정 정책(lib/seo/metadata.ts 참조) — en 비면 ko 폴백. 설명은 ko 기준.
+  const title = pickText(album.title, "en");
+  const koTitle = pickText(album.title, DEFAULT_LANG);
+  const koSubtitle = pickText(album.subtitle, DEFAULT_LANG);
+  const description = koSubtitle
+    ? `${koTitle} — ${koSubtitle}. 사진작가 이성준의 사진 앨범.`
+    : `${koTitle} — 사진작가 이성준의 사진 앨범.`;
   const coverUrl = resolveAlbumCover(album, photos);
   const pathname = `/photo/albums/${id}`;
   const base = pageMetadata({ title, description, pathname });

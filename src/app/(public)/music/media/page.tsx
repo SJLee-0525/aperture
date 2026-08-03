@@ -3,8 +3,8 @@ import { getMusicMedia } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "연주 영상",
-  description: "이성준의 공연과 연주 영상을 감상하세요.",
+  title: "Performance Videos",
+  description: "피아니스트 이성준의 공연과 연주 영상을 소개합니다.",
   pathname: "/music/media",
 });
 

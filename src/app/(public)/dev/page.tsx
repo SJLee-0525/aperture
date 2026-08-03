@@ -3,7 +3,7 @@ import { getDevConfig } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "기술 스택",
+  title: "Tech Stack",
   description: "개발자 이성준이 사용하는 기술과 도구를 소개합니다.",
   pathname: "/dev",
 });

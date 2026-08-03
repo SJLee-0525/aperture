@@ -5,8 +5,8 @@ import { getMusicAwards, getMusicConfig } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "음악 경력",
-  description: "이성준의 음악 활동과 수상 경력을 소개합니다.",
+  title: "Music Career",
+  description: "피아니스트 이성준의 학력, 경력과 수상 이력을 소개합니다.",
   pathname: "/music/career",
 });
 

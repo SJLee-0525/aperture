@@ -3,8 +3,8 @@ import { getMusicAwards, getMusicConfig, getMusicMedia, getMusicWorks } from "@/
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "피아니스트 소개",
-  description: "이성준의 음악 활동과 레퍼토리를 소개합니다.",
+  title: "About the Pianist",
+  description: "피아니스트 이성준의 음악 활동과 레퍼토리를 소개합니다.",
   pathname: "/music/about",
 });
 

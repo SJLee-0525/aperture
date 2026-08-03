@@ -6,8 +6,8 @@ import { pageMetadata } from "@/lib/seo/metadata";
 import { toGalleryPhotos } from "@/types/gallery-photo";
 
 export const metadata = pageMetadata({
-  title: "사진 작업",
-  description: "이성준의 사진 작업을 주제와 촬영 정보별로 살펴보세요.",
+  title: "Photography",
+  description: "사진작가 이성준의 사진 작업을 주제와 촬영 정보별로 소개합니다.",
   pathname: "/photo",
 });
 

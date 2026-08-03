@@ -4,8 +4,8 @@ import { getAlbums, getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "사진 앨범",
-  description: "이성준의 사진 작업을 주제와 장소별 앨범으로 살펴보세요.",
+  title: "Photo Albums",
+  description: "사진작가 이성준의 사진 작업을 주제와 장소별 앨범으로 소개합니다.",
   pathname: "/photo/albums",
 });
 

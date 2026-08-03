@@ -3,8 +3,8 @@ import { getSite } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "문의",
-  description: "사진, 음악, 개발 작업과 협업에 관해 이성준에게 문의하세요.",
+  title: "Contact",
+  description: "이성준에게 사진, 음악, 개발 작업과 협업 문의를 보낼 수 있습니다.",
   pathname: "/contact",
 });
 

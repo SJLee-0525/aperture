@@ -6,8 +6,8 @@ import { getDevProjects } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "개발 프로젝트",
-  description: "이성준이 설계하고 개발한 웹·소프트웨어 프로젝트를 소개합니다.",
+  title: "Development Projects",
+  description: "개발자 이성준이 설계하고 개발한 웹·소프트웨어 프로젝트를 소개합니다.",
   pathname: "/dev/projects",
 });
 

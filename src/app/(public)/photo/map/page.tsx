@@ -6,8 +6,8 @@ import { getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "사진 지도",
-  description: "이성준의 사진을 촬영 장소와 지도에서 탐색해 보세요.",
+  title: "Photo Map",
+  description: "사진작가 이성준의 사진을 촬영 장소와 함께 지도로 소개합니다.",
   pathname: "/photo/map",
 });
 

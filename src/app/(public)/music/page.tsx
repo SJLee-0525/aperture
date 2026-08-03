@@ -5,8 +5,8 @@ import { getMusicWorks } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "연주",
-  description: "이성준의 공연과 연주 프로그램을 소개합니다.",
+  title: "Performances",
+  description: "피아니스트 이성준의 공연과 연주 프로그램을 소개합니다.",
   pathname: "/music",
 });
 
