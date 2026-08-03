@@ -18,6 +18,7 @@
 .hero {
   position: relative;
   isolation: isolate;
+  overflow: clip; /* 글로우의 translate/scale이 문서 scroll 영역을 확장하지 않게 hero 경계에서 자른다. */
   min-height: calc(100svh - 58px);
   display: flex;
   flex-direction: column;
@@ -75,7 +76,6 @@
   );
   opacity: var(--glow-opacity);
   /* 위치(--glow-x/y)와 별개인 transform 이라 이동 중에도 부유가 끊기지 않는다. */
-  animation: glowDrift 16s ease-in-out infinite alternate;
   transition: opacity var(--glow-travel);
   will-change: transform;
 }
@@ -85,7 +85,7 @@
     transform: translate3d(-2.5%, 2%, 0) scale(1);
   }
   to {
-    transform: translate3d(2.5%, -2.5%, 0) scale(1.07);
+    transform: translate3d(2.5%, -2.5%, 0) scale(1);
   }
 }
 

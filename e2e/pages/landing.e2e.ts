@@ -16,4 +16,8 @@ test.describe("Landing", () => {
   test("Dev 진입점을 클릭해 프로젝트로 이동한다", async ({ page }) => {
     await landingAssertions.enterDev(page);
   });
+
+  test("배경 글로우가 가로 overflow를 만들지 않는다", async ({ page }) => {
+    await landingAssertions.glowDoesNotCreateHorizontalOverflow(page);
+  });
 });

@@ -17,6 +17,19 @@ const landingAssertions = {
     await expect(page).toHaveURL(/\/dev\/projects$/);
     await expect(page.getByRole("heading", { name: "프로젝트" })).toBeVisible();
   },
+
+  async glowDoesNotCreateHorizontalOverflow(page: Page) {
+    await page.locator("main > [aria-hidden='true']").evaluate((glow) => {
+      (glow as HTMLElement).style.animationDelay = "-8s";
+    });
+    await page.waitForTimeout(100);
+
+    const widths = await page.evaluate(() => ({
+      client: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    expect(widths.scroll).toBe(widths.client);
+  },
 };
 
 export { landingAssertions };
