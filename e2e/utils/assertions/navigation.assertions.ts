@@ -12,10 +12,12 @@ const navigationAssertions = {
 
   async mobileMenu(page: Page) {
     await page.getByRole("button", { name: "메뉴 열기" }).click();
-    const dev = page.getByRole("button", { name: "개발" });
+    // 푸터 사이트맵에도 동명 링크가 있어 메뉴 시트(dialog)로 스코프
+    const menu = page.getByRole("dialog");
+    const dev = menu.getByRole("button", { name: "개발" });
     await dev.click();
     await expect(dev).toHaveAttribute("aria-expanded", "true");
-    await page.getByRole("link", { name: "프로젝트" }).click();
+    await menu.getByRole("link", { name: "프로젝트" }).click();
     await expect(page).toHaveURL(/\/dev\/projects$/);
   },
 
