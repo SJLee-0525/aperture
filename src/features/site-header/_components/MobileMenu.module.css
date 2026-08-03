@@ -84,6 +84,7 @@
   width: 100%;
   max-height: calc(100dvh - 58px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   background: transparent;
@@ -145,24 +146,31 @@
 .search {
   display: flex;
   align-items: center;
-  gap: 9px;
-  height: 44px;
-  padding: 0 13px;
+  gap: var(--s-2);
+  padding: 9px 9px 9px 11px;
   border: 1px solid var(--line);
   background: var(--surface-2);
-  margin-bottom: 10px;
   color: var(--text-3);
+  transition: border-color var(--dur);
+  margin-bottom: 10px;
 }
 .search input {
-  border: 0;
-  background: none;
-  outline: none;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  color: var(--text);
   width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+}
+/* 챗 composer 와 동일 — 입력 활성화 시 현재 섹션 액센트로 강조 */
+.search:focus-within {
+  border-color: var(--accent);
 }
 .search input::placeholder {
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
   color: var(--text-3);
 }
 /* 우측 아이콘 버튼 — 클릭으로 검색 제출. */
@@ -171,11 +179,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  background: none;
+  padding: 3px;
   border: 0;
+  background: none;
   color: var(--text-3);
   cursor: pointer;
+  touch-action: manipulation;
   transition: color var(--dur) var(--ease);
 }
 .searchBtn:hover {
@@ -269,6 +278,14 @@
 }
 .flatLink:hover {
   color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  /* iOS Safari 포커스 자동 확대 방지 — 전역 Safari 전용 규칙(@supports)과 달리
+     브라우저 무관 보장이라 Chromium 기반 E2E(mobile)에서도 계약이 검증된다. */
+  .search input {
+    font-size: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

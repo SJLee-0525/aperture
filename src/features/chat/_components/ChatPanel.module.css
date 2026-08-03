@@ -126,7 +126,11 @@
   color: var(--chat-user-bubble-fg);
 }
 
+/* 랜딩(중립 구역)은 커서·스크롤바와 동일한 반투명 무채색(--cursor-landing-accent) —
+   --accent 자체를 덮어 패널 내 모든 액센트 참조(아이콘·포커스 보더·제안 hover·링크·아웃라인)에
+   한 번에 적용. --text 기반이라 다크 테마도 자동 전환. 버블은 기존 솔리드 무채색 유지. */
 :global(html[data-section="home"]) .overlay {
+  --accent: var(--cursor-landing-accent);
   --chat-user-bubble-bg: #18181b;
   --chat-user-bubble-fg: #ffffff;
 }
@@ -193,9 +197,10 @@
 }
 
 .waitingDots i {
+  border-radius: 999px;
   width: 4px;
   height: 4px;
-  background: currentColor;
+  background: var(--accent);
   animation: waiting-dot 1.2s ease-in-out infinite;
 }
 
@@ -371,6 +376,8 @@
 }
 
 .composer textarea::placeholder {
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
   color: var(--text-3);
 }
 
@@ -463,6 +470,8 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* iOS Safari 포커스 자동 확대 방지 — 전역 Safari 전용 규칙(@supports)과 달리
+     브라우저 무관 보장이라 Chromium 기반 E2E(mobile)에서도 계약이 검증된다. */
   .composer textarea {
     font-size: 16px;
   }

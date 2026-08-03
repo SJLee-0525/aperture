@@ -34,7 +34,7 @@ const SearchBox = () => {
         className={styles.input}
       />
       <button type="submit" className={styles.btn} aria-label={dict.searchPlaceholder}>
-        <Icon name="search" size={15} />
+        <Icon name="search" size={17} />
       </button>
     </form>
   );

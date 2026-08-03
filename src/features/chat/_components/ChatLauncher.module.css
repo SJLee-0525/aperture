@@ -36,6 +36,7 @@
 }
 
 :global(html[data-section="home"]) .launcher {
+  --accent: var(--cursor-landing-accent);
   --chat-launcher-bg: #18181b;
   --chat-launcher-fg: #ffffff;
   --chat-launcher-hover: #303036;
