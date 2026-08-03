@@ -91,7 +91,7 @@ describe("OpenAI chat provider", () => {
       model: "gpt-5.6-luna",
       instructions: "system context",
       reasoning: { effort: "none" },
-      max_output_tokens: 1024,
+      max_output_tokens: 2048,
       store: false,
       stream: false,
       text: {
@@ -123,5 +123,59 @@ describe("OpenAI chat provider", () => {
 
     expect(() => parseOpenAIResult('{"content":""}')).toThrow();
     expect(() => parseOpenAIResult("not-json")).toThrow();
+  });
+
+  it("max_output_tokens 잘림(response.incomplete)이면 스트리밍된 본문만 회수한다", async () => {
+    const event = (type: string, body: object) =>
+      `event: ${type}\ndata: ${JSON.stringify({ type, ...body })}\n\n`;
+    const truncated = '{"content":"긴 답변이 여기서 잘렸습니다';
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          event("response.output_text.delta", { delta: truncated }) +
+            event("response.incomplete", {
+              response: {
+                output: [{ type: "message", content: [{ type: "output_text", text: truncated }] }],
+              },
+            }),
+          { headers: { "Content-Type": "text/event-stream" } },
+        ),
+      ),
+    );
+    const deltas: string[] = [];
+
+    const result = await createOpenAIChatProvider(
+      "secret",
+      "gpt-5.6-luna",
+    )({
+      instructions: "context",
+      messages: [{ role: "user", content: "자세히 설명해줘" }],
+      lang: "ko",
+      signal: new AbortController().signal,
+      onContentDelta: (delta) => deltas.push(delta),
+    });
+
+    expect(result).toEqual({ content: "긴 답변이 여기서 잘렸습니다" });
+    expect(deltas.join("")).toBe("긴 답변이 여기서 잘렸습니다");
+  });
+
+  it("비스트림 응답의 미완성 JSON도 본문만 회수하고 links는 버린다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(outputResponse('{"content":"부분 답변입니다.","links":[{"la')),
+    );
+
+    const result = await createOpenAIChatProvider(
+      "secret",
+      "gpt-5.6-luna",
+    )({
+      instructions: "context",
+      messages: [{ role: "user", content: "질문" }],
+      lang: "ko",
+      signal: new AbortController().signal,
+    });
+
+    expect(result).toEqual({ content: "부분 답변입니다." });
   });
 });

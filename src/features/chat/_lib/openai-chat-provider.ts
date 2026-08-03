@@ -120,6 +120,21 @@ const parseOpenAIResult = (text: string): ChatProviderResult => {
   };
 };
 
+/**
+ * max_output_tokens 잘림(response.incomplete) 등으로 구조화 JSON 이 미완성일 때 본문만 회수한다.
+ * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 동일하므로
+ * "본문 확정 + links/references 포기"가 "다 보여주고 오류"보다 항상 낫다.
+ */
+const parseOrSalvageOpenAIResult = (text: string): ChatProviderResult => {
+  try {
+    return parseOpenAIResult(text);
+  } catch (error) {
+    const content = contentFromPartialJson(text).slice(0, MAX_RESPONSE_CHARS).trim();
+    if (!content) throw error;
+    return { content };
+  }
+};
+
 const contentFromPartialJson = (serialized: string): string => {
   const match = /"content"\s*:\s*"/.exec(serialized);
   if (!match) return "";
@@ -197,7 +212,7 @@ const createOpenAIChatProvider =
         instructions,
         input: messages.map(({ role, content }) => ({ role, content })),
         reasoning: { effort: "none" },
-        max_output_tokens: 1_024,
+        max_output_tokens: 2_048,
         store: false,
         stream: Boolean(onContentDelta),
         text: {
@@ -229,7 +244,7 @@ const createOpenAIChatProvider =
             onContentDelta(content.slice(emitted.length));
             emitted = content;
           }
-        } else if (event.type === "response.completed") {
+        } else if (event.type === "response.completed" || event.type === "response.incomplete") {
           completedResponse = event.response;
         } else if (event.type === "response.failed" || event.type === "error") {
           throw new Error(
@@ -238,13 +253,13 @@ const createOpenAIChatProvider =
         }
       });
       const finalText = responseOutputText(completedResponse ?? {}) || serialized;
-      return parseOpenAIResult(finalText.trim());
+      return parseOrSalvageOpenAIResult(finalText.trim());
     }
 
     const data = (await response.json()) as OpenAIResponse;
     const text = responseOutputText(data).trim();
     if (!text) throw new Error(data.error?.message ?? "OpenAI returned no content");
-    return parseOpenAIResult(text);
+    return parseOrSalvageOpenAIResult(text);
   };
 
 export {
