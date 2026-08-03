@@ -90,12 +90,17 @@ const fetchDocument = async (
   collectionId: string,
   documentId: string,
   label: string,
+  options?: { fresh?: boolean },
 ): Promise<Record<string, unknown> | null> => {
   const response = await fetch(`${documentsUrl()}/${collectionId}/${documentId}?key=${API_KEY}`, {
-    next: {
-      revalidate: REVALIDATE_SECONDS,
-      tags: [firestoreDocumentCacheTag(collectionId, documentId)],
-    },
+    ...(options?.fresh
+      ? { cache: "no-store" as const }
+      : {
+          next: {
+            revalidate: REVALIDATE_SECONDS,
+            tags: [firestoreDocumentCacheTag(collectionId, documentId)],
+          },
+        }),
   });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Firestore ${label} 읽기 실패 (${response.status})`);
@@ -104,4 +109,11 @@ const fetchDocument = async (
   return decodeFields(document.fields ?? {});
 };
 
-export { fetchDocument, projectedPublishedOrderedQuery, publishedOrderedQuery, runQuery, toDate };
+export {
+  decodeFields,
+  fetchDocument,
+  projectedPublishedOrderedQuery,
+  publishedOrderedQuery,
+  runQuery,
+  toDate,
+};

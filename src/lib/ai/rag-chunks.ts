@@ -85,9 +85,11 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
       ]),
     ),
   );
+  // 개발 수상은 site/dev 문서의 배열 필드 — 저장 단위가 site/dev 이므로 sourceId 도 "dev" 로
+  // 두어야 devConfig 증분 동기화(sourceId == "dev" 필터·조회)에 함께 실린다. 항목 식별은 chunkKey 가 맡는다.
   data.devConfig.awards.forEach((item) =>
     chunks.push(
-      chunk("development", "devAward", item.id, "award", [
+      chunk("development", "devAward", "dev", `award-${item.id}`, [
         item.year,
         localized(item.name),
         localized(item.place),

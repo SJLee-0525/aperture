@@ -41,22 +41,23 @@ const toDevProject = (id: string, data: Record<string, unknown>): DevProject => 
   published: (data.published as boolean) ?? false,
 });
 
-const fetchPublishedDevProjects = async (): Promise<DevProject[]> =>
-  (await runQuery(publishedOrderedQuery(COLLECTIONS.DEV_PROJECTS))).map(({ id, data }) =>
+const toDevConfig = (data: Record<string, unknown>): DevConfig => ({
+  heroLead: asText(data.heroLead),
+  interview: (data.interview as DevConfig["interview"]) ?? [],
+  stack: (data.stack as DevConfig["stack"]) ?? [],
+  education: (data.education as DevConfig["education"]) ?? [],
+  timeline: (data.timeline as DevConfig["timeline"]) ?? [],
+  awards: normalizeDevAwards(data.awards),
+});
+
+const fetchPublishedDevProjects = async (options?: { fresh?: boolean }): Promise<DevProject[]> =>
+  (await runQuery(publishedOrderedQuery(COLLECTIONS.DEV_PROJECTS), options)).map(({ id, data }) =>
     toDevProject(id, data),
   );
 
-const fetchDevConfig = async (): Promise<DevConfig | null> => {
-  const data = await fetchDocument(COLLECTIONS.SITE, SITE_DEV_DOC, "dev config");
-  if (!data) return null;
-  return {
-    heroLead: asText(data.heroLead),
-    interview: (data.interview as DevConfig["interview"]) ?? [],
-    stack: (data.stack as DevConfig["stack"]) ?? [],
-    education: (data.education as DevConfig["education"]) ?? [],
-    timeline: (data.timeline as DevConfig["timeline"]) ?? [],
-    awards: normalizeDevAwards(data.awards),
-  };
+const fetchDevConfig = async (options?: { fresh?: boolean }): Promise<DevConfig | null> => {
+  const data = await fetchDocument(COLLECTIONS.SITE, SITE_DEV_DOC, "dev config", options);
+  return data ? toDevConfig(data) : null;
 };
 
 const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<ChatDevProject[]> =>
@@ -87,4 +88,4 @@ const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<Chat
     };
   });
 
-export { fetchChatDevProjects, fetchDevConfig, fetchPublishedDevProjects };
+export { fetchChatDevProjects, fetchDevConfig, fetchPublishedDevProjects, toDevConfig, toDevProject };

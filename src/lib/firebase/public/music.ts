@@ -57,27 +57,28 @@ const toMusicMedia = (id: string, data: Record<string, unknown>): MusicMedia => 
   published: (data.published as boolean) ?? false,
 });
 
-const fetchPublishedMusicWorks = async (): Promise<MusicWork[]> =>
-  (await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_WORKS))).map(({ id, data }) =>
+const toMusicConfig = (data: Record<string, unknown>): MusicConfig => ({
+  intro: asText(data.intro),
+  career: (data.career as TimelineEntry[]) ?? [],
+  education: (data.education as TimelineEntry[]) ?? [],
+});
+
+const fetchPublishedMusicWorks = async (options?: { fresh?: boolean }): Promise<MusicWork[]> =>
+  (await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_WORKS), options)).map(({ id, data }) =>
     toMusicWork(id, data),
   );
-const fetchPublishedMusicAwards = async (): Promise<MusicAward[]> =>
-  (await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_AWARDS))).map(({ id, data }) =>
+const fetchPublishedMusicAwards = async (options?: { fresh?: boolean }): Promise<MusicAward[]> =>
+  (await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_AWARDS), options)).map(({ id, data }) =>
     toMusicAward(id, data),
   );
-const fetchPublishedMusicMedia = async (): Promise<MusicMedia[]> =>
-  (await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_MEDIA))).map(({ id, data }) =>
+const fetchPublishedMusicMedia = async (options?: { fresh?: boolean }): Promise<MusicMedia[]> =>
+  (await runQuery(publishedOrderedQuery(COLLECTIONS.MUSIC_MEDIA), options)).map(({ id, data }) =>
     toMusicMedia(id, data),
   );
 
-const fetchMusicConfig = async (): Promise<MusicConfig | null> => {
-  const data = await fetchDocument(COLLECTIONS.SITE, SITE_MUSIC_DOC, "music config");
-  if (!data) return null;
-  return {
-    intro: asText(data.intro),
-    career: (data.career as TimelineEntry[]) ?? [],
-    education: (data.education as TimelineEntry[]) ?? [],
-  };
+const fetchMusicConfig = async (options?: { fresh?: boolean }): Promise<MusicConfig | null> => {
+  const data = await fetchDocument(COLLECTIONS.SITE, SITE_MUSIC_DOC, "music config", options);
+  return data ? toMusicConfig(data) : null;
 };
 
 const chatQuery = (collection: string, fields: string[], options?: { fresh?: boolean }) =>
@@ -143,4 +144,8 @@ export {
   fetchPublishedMusicAwards,
   fetchPublishedMusicMedia,
   fetchPublishedMusicWorks,
+  toMusicAward,
+  toMusicConfig,
+  toMusicMedia,
+  toMusicWork,
 };

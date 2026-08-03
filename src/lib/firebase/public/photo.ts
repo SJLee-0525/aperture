@@ -60,13 +60,13 @@ const toAlbum = (id: string, data: Record<string, unknown>): Album => ({
   published: (data.published as boolean) ?? false,
 });
 
-const fetchPublishedPhotos = async (): Promise<Photo[]> =>
-  (await runQuery(publishedOrderedQuery(COLLECTIONS.PHOTOS))).map(({ id, data }) =>
+const fetchPublishedPhotos = async (options?: { fresh?: boolean }): Promise<Photo[]> =>
+  (await runQuery(publishedOrderedQuery(COLLECTIONS.PHOTOS), options)).map(({ id, data }) =>
     toPhoto(id, data),
   );
 
-const fetchPublishedAlbums = async (): Promise<Album[]> =>
-  (await runQuery(publishedOrderedQuery(COLLECTIONS.ALBUMS))).map(({ id, data }) =>
+const fetchPublishedAlbums = async (options?: { fresh?: boolean }): Promise<Album[]> =>
+  (await runQuery(publishedOrderedQuery(COLLECTIONS.ALBUMS), options)).map(({ id, data }) =>
     toAlbum(id, data),
   );
 
@@ -124,4 +124,4 @@ const fetchChatAlbums = async (options?: { fresh?: boolean }): Promise<ChatAlbum
     };
   });
 
-export { fetchChatAlbums, fetchChatPhotos, fetchPublishedAlbums, fetchPublishedPhotos };
+export { fetchChatAlbums, fetchChatPhotos, fetchPublishedAlbums, fetchPublishedPhotos, toAlbum, toPhoto };
