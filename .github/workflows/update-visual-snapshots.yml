@@ -1,0 +1,75 @@
+name: Update visual snapshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: visual-snapshots-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Regenerate Windows baselines
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_USE_MOCK: "1"
+      NEXT_PUBLIC_FIREBASE_API_KEY: ci-mock-api-key
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-mock.firebaseapp.com
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-mock
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ci-mock.appspot.com
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+      NEXT_PUBLIC_FIREBASE_APP_ID: "1:000000000000:web:0000000000000000000000"
+
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      - name: Regenerate visual snapshots
+        run: npm run test:visual:update
+
+      - name: Upload snapshots for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-visual-snapshots-${{ github.run_id }}
+          path: e2e/visual/public-pages.visual.e2e.ts-snapshots
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Commit updated snapshots
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -- e2e/visual/public-pages.visual.e2e.ts-snapshots
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            "No visual snapshot changes were generated." >> $env:GITHUB_STEP_SUMMARY
+            exit 0
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "[TEST] Windows 시각 기준선 갱신"
+          git push origin "HEAD:$env:GITHUB_REF_NAME"
+          gh workflow run ci.yml --ref "$env:GITHUB_REF_NAME"
+          "Updated Windows visual snapshots on ``$env:GITHUB_REF_NAME``." >> $env:GITHUB_STEP_SUMMARY
