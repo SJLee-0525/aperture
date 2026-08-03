@@ -1,16 +1,18 @@
 import { IntroSplash } from "@/components/IntroSplash";
 import { PublicImageProtection } from "@/components/PublicImageProtection";
-import { SiteFooter } from "@/components/SiteFooter";
 import { ChatLauncher } from "@/features/chat/_components/ChatLauncher";
+import { SiteFooter } from "@/features/site-footer/_components/SiteFooter";
 import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
 import { MobileNavigationVisibility } from "@/features/site-header/_components/MobileNavigationVisibility";
 import { SectionAccent } from "@/features/site-header/_components/SectionAccent";
 import { SiteHeader } from "@/features/site-header/_components/SiteHeader";
+import { getSite } from "@/lib/content/site";
 
 import styles from "./layout.module.css";
 
-/** 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. */
-const PublicLayout = ({ children }: { children: React.ReactNode }) => {
+/** 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config. */
+const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
+  const site = await getSite();
   return (
     <>
       <PublicImageProtection />
@@ -21,7 +23,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
       <div id="page-content" className={styles.content}>
         {children}
       </div>
-      <SiteFooter />
+      <SiteFooter tagline={site.tagline} links={site.links} />
       <MobileTabBar />
       <ChatLauncher />
     </>
