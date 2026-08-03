@@ -35,17 +35,12 @@
   outline-offset: 3px;
 }
 
+/* 랜딩(중립 구역)은 솔리드 무채색(--neutral-solid, 테마 반전 내장). */
 :global(html[data-section="home"]) .launcher {
   --accent: var(--cursor-landing-accent);
-  --chat-launcher-bg: #18181b;
-  --chat-launcher-fg: #ffffff;
-  --chat-launcher-hover: #303036;
-}
-
-:global(html[data-theme="dark"][data-section="home"]) .launcher {
-  --chat-launcher-bg: #fafafa;
-  --chat-launcher-fg: #18181b;
-  --chat-launcher-hover: #dedee3;
+  --chat-launcher-bg: var(--neutral-solid);
+  --chat-launcher-fg: var(--neutral-solid-contrast);
+  --chat-launcher-hover: var(--neutral-solid-hover);
 }
 
 @media (max-width: 767px) {

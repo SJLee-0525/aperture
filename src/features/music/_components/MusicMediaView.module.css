@@ -31,7 +31,7 @@
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #0a0a0c;
+  background: var(--stage-bg);
 }
 .trigger {
   position: absolute;

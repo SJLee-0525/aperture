@@ -66,6 +66,8 @@ const AboutView = ({ bio, photoFacts, albumCount }: Props) => {
         { label: dict.cameraLabel, items: cameras },
         { label: dict.lensLabel, items: lenses },
       ]}
+      showMoreLabel={dict.aboutShowMore}
+      showLessLabel={dict.aboutShowLess}
     />
   );
 };

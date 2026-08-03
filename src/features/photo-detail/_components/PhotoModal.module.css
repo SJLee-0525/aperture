@@ -29,7 +29,7 @@
 
 .photo {
   position: relative;
-  background: #0a0a0c;
+  background: var(--stage-bg);
   overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;

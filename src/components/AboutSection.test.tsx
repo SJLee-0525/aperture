@@ -14,11 +14,7 @@ vi.mock("motion/react", () => ({
   useReducedMotion: () => true,
 }));
 
-vi.mock("@/features/lang/_hooks/use-lang", () => ({
-  useLang: () => ({
-    dict: { aboutShowMore: "더보기", aboutShowLess: "접기" },
-  }),
-}));
+const TOGGLE_LABELS = { showMoreLabel: "더보기", showLessLabel: "접기" };
 
 describe("AboutSection", () => {
   afterEach(cleanup);
@@ -31,6 +27,7 @@ describe("AboutSection", () => {
         body=""
         stats={[]}
         cols={[{ label: "사용 기술", items: ["React", "Next.js"] }]}
+        {...TOGGLE_LABELS}
       />,
     );
 
@@ -50,6 +47,7 @@ describe("AboutSection", () => {
         body=""
         stats={[]}
         cols={[{ label: "카메라", items: ["Sony α7 IV"] }]}
+        {...TOGGLE_LABELS}
       />,
     );
 
@@ -69,6 +67,7 @@ describe("AboutSection", () => {
           { label: "사용 기술", items: ["React", "Next.js", "TypeScript"] },
           { label: "분야", items: ["Frontend", "Backend", "Design"] },
         ]}
+        {...TOGGLE_LABELS}
       />,
     );
 

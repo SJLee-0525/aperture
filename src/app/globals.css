@@ -61,6 +61,9 @@
   --accent-contact: #a84d00;
   --cursor-landing-accent: color-mix(in srgb, var(--text) 60%, transparent);
 
+  /* --- 스테이지 (사진 라이트박스·영상 프레임) — 테마 무관 항상 어둡게 (다크 --surface-inset 동일값) --- */
+  --stage-bg: #0a0a0c;
+
   /* --- Motion --- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
@@ -85,6 +88,10 @@
   --text-4: #a1a1aa;
 
   --photo-bg: #ececef;
+  /* 무채색 솔리드 (챗 랜딩 구역 버블·런처) — 테마 반전: 라이트=잉크 위 흰 글자 */
+  --neutral-solid: #18181b;
+  --neutral-solid-contrast: #ffffff;
+  --neutral-solid-hover: #303036;
   --scrim: rgba(0, 0, 0, 0.55);
   --map-land: #eceef0;
   --map-road: #ffffff;
@@ -111,6 +118,9 @@
   --text-4: #5a5a62;
 
   --photo-bg: #161618;
+  --neutral-solid: #fafafa;
+  --neutral-solid-contrast: #18181b;
+  --neutral-solid-hover: #dedee3;
   --scrim: rgba(0, 0, 0, 0.7);
   --map-land: #161618;
   --map-road: #2a2a30;

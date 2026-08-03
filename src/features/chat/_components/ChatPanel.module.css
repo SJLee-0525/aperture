@@ -128,16 +128,11 @@
 
 /* 랜딩(중립 구역)은 커서·스크롤바와 동일한 반투명 무채색(--cursor-landing-accent) —
    --accent 자체를 덮어 패널 내 모든 액센트 참조(아이콘·포커스 보더·제안 hover·링크·아웃라인)에
-   한 번에 적용. --text 기반이라 다크 테마도 자동 전환. 버블은 기존 솔리드 무채색 유지. */
+   한 번에 적용. --text 기반이라 다크 테마도 자동 전환. 버블은 솔리드 무채색(--neutral-solid, 테마 반전 내장). */
 :global(html[data-section="home"]) .overlay {
   --accent: var(--cursor-landing-accent);
-  --chat-user-bubble-bg: #18181b;
-  --chat-user-bubble-fg: #ffffff;
-}
-
-:global(html[data-theme="dark"][data-section="home"]) .overlay {
-  --chat-user-bubble-bg: #fafafa;
-  --chat-user-bubble-fg: #18181b;
+  --chat-user-bubble-bg: var(--neutral-solid);
+  --chat-user-bubble-fg: var(--neutral-solid-contrast);
 }
 
 .bubble {

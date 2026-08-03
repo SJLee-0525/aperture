@@ -64,6 +64,8 @@ const MusicAboutView = ({ intro, workFacts, awardCount, mediaCount }: Props) => 
         { label: dict.musicRepertoireLabel, items: composers },
         { label: dict.musicVenuesLabel, items: venues },
       ]}
+      showMoreLabel={dict.aboutShowMore}
+      showLessLabel={dict.aboutShowLess}
     />
   );
 };

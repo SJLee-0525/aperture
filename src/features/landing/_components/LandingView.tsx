@@ -13,7 +13,7 @@ import { useSectionGlow } from "@/features/landing/_hooks/use-section-glow";
 import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
 import { useTyping } from "@/hooks/use-typing";
 import { pickText } from "@/lib/i18n/pick-text";
-import type { SiteConfig } from "@/types/site";
+import type { LocalizedText } from "@/types/localized";
 
 import { AnimatedWordmark } from "./AnimatedWordmark";
 import styles from "./LandingView.module.css";
@@ -124,7 +124,14 @@ LandingNav.displayName = "LandingNav";
  * 배경 글로우는 평소 우상단에서 역할 색으로 느리게 부유하다가, 섹션 행에 포인터·포커스가 닿으면
  * 그 행 한가운데로 옮겨가며 섹션 액센트로 물든다(위치는 실측, 색·세기는 CSS `:has()`).
  */
-const LandingView = ({ site }: { site: SiteConfig }) => {
+const LandingView = ({
+  tagline,
+  landingLead,
+}: {
+  /** site/config 중 랜딩이 소비하는 두 필드만 — 전체 SiteConfig(태그 사전·bio·links)를 직렬화하지 않는다. */
+  tagline: LocalizedText;
+  landingLead: LocalizedText;
+}) => {
   const { dict, lang } = useLang();
   const reducedMotion = useReducedMotion();
   const started = useIntroReady();
@@ -134,11 +141,11 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
   // useTyping 이 매 렌더 setText → 재렌더하므로, roles 배열 참조를 안정화(useMemo)해야 effect 가 재시작되지 않는다.
   const roles = useMemo(
     () =>
-      pickText(site.tagline, lang)
+      pickText(tagline, lang)
         .split("·")
         .map((role) => role.trim())
         .filter(Boolean),
-    [site.tagline, lang],
+    [tagline, lang],
   );
   const initialRoleAccent = ROLE_ACCENT[roles[0]] ?? "var(--accent)";
 
@@ -164,7 +171,7 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
           className={styles.lead}
           delay={leadDelay}
           started={started}
-          text={pickText(site.landingLead, lang)}
+          text={pickText(landingLead, lang)}
         />
 
         <LandingNav dict={dict} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started={started} />

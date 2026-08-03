@@ -6,7 +6,6 @@ import { type ReactNode, useId, useState } from "react";
 
 import { CountUp } from "@/components/CountUp";
 import { ROUTES } from "@/constants/routes";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import styles from "./AboutSection.module.css";
 
@@ -38,6 +37,9 @@ type Props = {
   cols: Col[];
   /** 각 목록을 접었을 때 노출할 항목 수. */
   collapsedItemCount?: number;
+  /** 목록 펼침 토글 라벨 — ko/en 사전은 각 섹션 뷰(features)가 소비하고 여기는 props only. */
+  showMoreLabel: string;
+  showLessLabel: string;
   /** 섹션 하단 추가 콘텐츠 (예: 개발 소개의 인터뷰 Q&A). */
   children?: ReactNode;
 };
@@ -53,9 +55,10 @@ const AboutSection = ({
   stats,
   cols,
   collapsedItemCount = DEFAULT_COLLAPSED_ITEM_COUNT,
+  showMoreLabel,
+  showLessLabel,
   children,
 }: Props) => {
-  const { dict } = useLang();
   const colsId = useId();
   const [expanded, setExpanded] = useState(false);
   const expandable = cols.some((col) => col.items.length > collapsedItemCount);
@@ -129,7 +132,7 @@ const AboutSection = ({
                 aria-controls={controlledListIds}
                 onClick={() => setExpanded((current) => !current)}
               >
-                <span>{expanded ? dict.aboutShowLess : dict.aboutShowMore}</span>
+                <span>{expanded ? showLessLabel : showMoreLabel}</span>
                 <svg className={styles.chevron} viewBox="0 0 16 16" aria-hidden="true">
                   <g className={styles.chevronGlyph}>
                     <path d="m4 6 4 4 4-4" />

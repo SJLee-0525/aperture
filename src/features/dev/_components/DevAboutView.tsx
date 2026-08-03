@@ -54,6 +54,8 @@ const DevAboutView = ({ heroLead, stack, interview, timelineCount, projectTechTa
         { label: dict.devTechLabel, items: techTags },
         { label: dict.devStackLabel, items: stack.map((group) => group.category) },
       ]}
+      showMoreLabel={dict.aboutShowMore}
+      showLessLabel={dict.aboutShowLess}
     >
       <div className={styles.qa}>
         {interview.map((item, index) => (
