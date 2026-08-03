@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { spawn } = require("node:child_process");
+const { spawn, spawnSync } = require("node:child_process");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
@@ -7,13 +7,33 @@ const port = 3100;
 const baseURL = `http://127.0.0.1:${port}`;
 const cliArgs = process.argv.slice(2);
 const production = process.env.E2E_PRODUCTION === "1" || cliArgs.includes("--production");
-const playwrightArgs = cliArgs.filter((argument) => argument !== "--production");
+const build = cliArgs.includes("--build");
+const playwrightArgs = cliArgs.filter(
+  (argument) => argument !== "--production" && argument !== "--build",
+);
 const serverEnv = {
   ...process.env,
   NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? ".next-playwright-v7",
   NEXT_FONT_GOOGLE_MOCKED_RESPONSES: path.resolve(__dirname, "fixtures/google-font-responses.cjs"),
   NEXT_PUBLIC_USE_MOCK: "1",
 };
+
+if (build) {
+  // 서버가 서빙할 distDir로 직접 빌드한다 — npm run build(.next)와 어긋나지 않게.
+  // CI 프로덕션 빌드와 동일하게 폰트 mock 없이(실제 웹폰트 셀프호스팅) 빌드한다.
+  const buildEnv = {
+    ...process.env,
+    NEXT_DIST_DIR: serverEnv.NEXT_DIST_DIR,
+    NEXT_PUBLIC_USE_MOCK: "1",
+  };
+  delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
+  const buildResult = spawnSync(
+    process.execPath,
+    ["node_modules/next/dist/bin/next", "build"],
+    { cwd: root, env: buildEnv, stdio: "inherit" },
+  );
+  if (buildResult.status !== 0) process.exit(buildResult.status ?? 1);
+}
 
 const serverArgs = [
   "node_modules/next/dist/bin/next",

@@ -18,7 +18,7 @@
     "test:e2e": "node e2e/run.cjs",
     "test:e2e:headed": "node e2e/run.cjs --headed",
     "test:visual": "node e2e/run.cjs e2e/visual",
-    "test:visual:update": "npm run build && node e2e/run.cjs --production e2e/visual --update-snapshots",
+    "test:visual:update": "node e2e/run.cjs --production --build e2e/visual --update-snapshots",
     "test:a11y": "node e2e/run.cjs e2e/accessibility.e2e.ts",
     "test:chat-eval": "node scripts/chat-eval.mjs",
     "test:lighthouse": "lhci autorun",
