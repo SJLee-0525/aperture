@@ -18,6 +18,16 @@ const useTyping = (words: string[]): { text: string; index: number } => {
     let wordIndex = 0;
     let charIndex = 0;
     let deleting = false;
+
+    // 모션 최소화 설정에서는 순환 없이 첫 단어를 정적으로 표시한다(시각 회귀 기준선도 결정적이 된다).
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const staticTimer = setTimeout(() => {
+        setText(words[0]);
+        setIndex(0);
+      }, 0);
+      return () => clearTimeout(staticTimer);
+    }
+
     let timer = setTimeout(tick, 400);
 
     function tick() {

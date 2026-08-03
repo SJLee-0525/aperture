@@ -12,3 +12,8 @@
 [data-cursor-trail] {
   display: none !important;
 }
+
+/* Next dev 서버의 devtools 배지(N) — 기준 이미지에서 제외 */
+nextjs-portal {
+  display: none !important;
+}
