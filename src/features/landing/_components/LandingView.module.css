@@ -28,20 +28,20 @@
   --glow-y: 34%;
   /* 평상시는 옅게, 행에 닿으면 또렷하게 — 세기 차이는 opacity 가 전담한다(색은 전 섹션 동일 기준). */
   --glow-opacity: 0.35;
-  --glow-base: 13%;
+  --glow-base: 15%;
   /* 느긋하게 시작해 느긋하게 멈춘다(ease-in-out). 이 값은 '제자리로 돌아갈 때' —
      행에 올라탈 때는 아래 :has() 규칙이 더 짧은 시간으로 덮어쓴다. */
-  --glow-travel: 2s cubic-bezier(0.65, 0, 0.35, 1);
+  --glow-travel: 2.5s cubic-bezier(0.65, 0, 0.35, 1);
   transition:
     --glow-accent var(--glow-travel),
     --glow-x var(--glow-travel),
     --glow-y var(--glow-travel);
 }
 :global(html[data-theme="dark"]) .hero {
-  --glow-base: 18.5%;
+  --glow-base: 27.5%;
 }
 .hero:has(.row:is(:hover, :focus-visible)) {
-  --glow-travel: 1.3s cubic-bezier(0.65, 0, 0.35, 1);
+  --glow-travel: 1.5s cubic-bezier(0.65, 0, 0.35, 1);
 }
 @media (min-width: 768px) {
   .hero {
