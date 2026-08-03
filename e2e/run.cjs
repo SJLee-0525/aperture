@@ -27,11 +27,11 @@ if (build) {
     NEXT_PUBLIC_USE_MOCK: "1",
   };
   delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
-  const buildResult = spawnSync(
-    process.execPath,
-    ["node_modules/next/dist/bin/next", "build"],
-    { cwd: root, env: buildEnv, stdio: "inherit" },
-  );
+  const buildResult = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {
+    cwd: root,
+    env: buildEnv,
+    stdio: "inherit",
+  });
   if (buildResult.status !== 0) process.exit(buildResult.status ?? 1);
 }
 
