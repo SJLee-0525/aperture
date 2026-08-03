@@ -12,8 +12,10 @@ Accepted
 
 - 채팅과 임베딩은 Vercel Route Handler에서 실행한다.
 - 채팅 키와 임베딩 키·모델·할당량은 환경변수로 분리한다.
-- 임베딩 모델은 `text-embedding-3-small`을 사용한다.
+- 임베딩 모델은 `text-embedding-3-small`, 차원은 MRL 잘라내기 기본 512를 사용한다
+  (`EMBEDDING_PROVIDER_DIMENSIONS`). 호환성은 `모델명@차원` 키로 저장·검색 양쪽에서 검증한다.
 - 벡터는 Firestore `ragDocuments`에 저장하고 공개 문서만 런타임 검색에 사용한다.
+  런타임은 int8 양자화 스냅샷을 Data Cache(태그 무효화)로 캐시해 질문당 Firestore 읽기를 없앤다.
 - 관리자 쓰기는 Firebase ID token과 고정 관리자 UID를 검증한다.
 - 최초에는 전체 생성하고 이후에는 변경된 원본 범위만 동기화한다.
 - `firebase-admin`과 서비스 계정 키는 사용하지 않는다.

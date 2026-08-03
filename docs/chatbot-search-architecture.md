@@ -68,6 +68,7 @@ CHAT_INTENT_TIMEOUT_MS=3000
 
 EMBEDDING_PROVIDER=openai
 EMBEDDING_PROVIDER_MODEL=text-embedding-3-small
+EMBEDDING_PROVIDER_DIMENSIONS=512
 EMBEDDING_PROVIDER_API_KEY=
 ```
 
@@ -98,7 +99,7 @@ sequenceDiagram
     alt live 포트폴리오 문맥 필요
         par 질문 벡터 생성
             API->>EMB: 확장된 질문
-            EMB-->>API: 1536차원 벡터
+            EMB-->>API: 512차원 질문 벡터
         and 저장된 청크 조회
             API->>FS: 공개 ragDocuments
             FS-->>API: 청크 + 벡터
@@ -149,7 +150,7 @@ sequenceDiagram
 - **키워드 유사도**는 모델명, 기술명, 고유명사처럼 정확한 문자열이 중요한 검색을 보강한다.
 - 벡터 점수 0.3 이상 또는 키워드 점수 0.5 이상인 후보 중 상위 8개만 모델 문맥에 넣는다.
 
-Firestore의 네이티브 벡터 검색 기능은 사용하지 않는다. Route Handler가 공개 `ragDocuments`를 읽고 코사인 유사도를 계산한다. 임베딩 배열을 포함한 응답은 현재 약 7MB로 Next.js Data Cache의 항목당 2MB 제한을 넘기므로 raw RAG 벡터 응답은 캐시하지 않는다. 현재 데이터 규모에서는 별도 벡터 DB나 상시 서버 없이 동작하지만, 데이터 증가 시 서버 측 전체 벡터 읽기가 우선적인 이전 검토 대상이다.
+Firestore의 네이티브 벡터 검색 기능은 사용하지 않는다. Route Handler가 공개 `ragDocuments`를 읽고 코사인 유사도를 계산한다. raw 벡터 응답은 Data Cache의 항목당 2MB 제한을 넘기므로 그대로 캐시하지 않고, `rag-index.ts`가 벡터를 int8로 양자화해 base64로 압축한 스냅샷을 1시간 Data Cache에 담는다. 스냅샷은 임베딩 동기화가 무효화하는 같은 캐시 태그를 공유하므로 콘텐츠 변경이 다음 질문에 반영되고, 방문자 질문의 Firestore 읽기와 egress는 캐시 fill 시점에만 발생한다. 임베딩은 MRL 잘라내기로 기본 512차원을 사용한다(`EMBEDDING_PROVIDER_DIMENSIONS`). 벡터 공간 호환성은 `모델명@차원` 키로 관리하며, 모델이나 차원을 바꾸면 키가 어긋난 기존 청크가 자동 배제되고 전체 재생성이 이행 경로다. 코퍼스가 커져 스냅샷이 한도에 근접하면 Firestore `findNearest` 이전을 검토한다.
 
 RAG 검색에 문제가 생기면 챗봇 전체를 중단하지 않고 해당 분야의 기존 포맷 문맥으로 폴백한다.
 
@@ -240,8 +241,8 @@ Firestore `ragDocuments`의 각 문서는 다음 정보를 가진다.
 | `sourceId`       | 원본 Firestore 문서 ID                                |
 | `chunkKey`       | overview, work, troubleshooting-0 같은 의미 단위      |
 | `text`           | 한국어·영어와 검색 메타데이터를 합친 임베딩 원문      |
-| `embedding`      | `text-embedding-3-small`이 생성한 1536차원 float 배열 |
-| `embeddingModel` | 벡터를 생성한 모델명                                  |
+| `embedding`      | `text-embedding-3-small`이 생성한 기본 512차원 float 배열 |
+| `embeddingModel` | 벡터 공간 호환성 키 `모델명@차원` (예: `text-embedding-3-small@512`) |
 | `published`      | 런타임 공개 조회 여부                                 |
 
 ### 5.3 최초 일괄 생성
@@ -274,6 +275,8 @@ flowchart LR
 ```
 
 전체 242개와 같은 모든 청크를 매번 다시 만들지 않으므로 결과 품질은 일괄 생성과 같고, 호출량과 쓰기 비용만 줄어든다. 증분 갱신은 서버 오류일 때 한 번 재시도한다. 원본 콘텐츠 저장과 RAG 동기화는 분리되어 있어 임베딩 실패가 원본 저장을 되돌리지는 않는다. 실패 시 관리자 일괄 생성이 복구 경로다.
+
+동기화가 읽는 원본은 항상 ISR 캐시를 우회한다(fresh). 관리자 저장 직후의 공개 페이지 재검증은 디바운스된 fire-and-forget이라, 캐시 경유 읽기는 방금 저장한 값 대신 최대 1시간 전 값을 임베딩할 수 있기 때문이다. 증분 타깃 원본은 공개 fetcher와 같은 디코더(`toPhoto`·`toDevProject` 등)로 정규화해 구형 문서(평문 troubleshooting, id 없는 수상)에서도 전체 생성과 같은 청크가 나온다. 개발 수상은 `site/dev` 문서의 배열 필드이므로 청크 `sourceId`도 `dev`로 저장해 devConfig 증분 동기화에 함께 실린다.
 
 ## 6. 일반 통합검색
 
@@ -314,7 +317,7 @@ flowchart LR
 
 - Next.js Route Handler를 사용하며 별도 상시 서버를 운영하지 않는다.
 - 공개 프로필 projection은 1시간 Data Cache를 사용하며 `ko/en`과 `mock/live`별로 분리한다.
-- 2MB 제한을 넘는 raw `ragDocuments` 벡터 응답은 캐시하지 않는다.
+- raw `ragDocuments` 벡터 응답은 2MB 제한을 넘으므로 int8 양자화 스냅샷으로 압축해 캐시한다. 방문자 질문의 Firestore 읽기·egress는 캐시 fill(콘텐츠 변경 또는 1시간 주기) 시점에만 발생한다.
 - 관리자 콘텐츠 저장과 임베딩 완료 후 같은 캐시 태그를 무효화한다.
 - 일반 통합검색은 모델 호출 비용이 없다.
 - live 포트폴리오 질문에는 의도 분류 1회, 질문 임베딩 1회와 채팅 모델 호출 1회가 발생한다. mock 질문은 RAG와 질문 임베딩을 생략한다.
