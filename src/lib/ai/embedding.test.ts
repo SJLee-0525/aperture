@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { generateEmbedding, EmbeddingError } from "@/lib/ai/embedding";
+import { embeddingModelKey, generateEmbedding, EmbeddingError } from "@/lib/ai/embedding";
 
 describe("generateEmbedding", () => {
   afterEach(() => {
@@ -22,8 +22,8 @@ describe("generateEmbedding", () => {
     );
   });
 
-  it("OpenAI API 호출 성공 시 1536 차원의 임베딩 배열을 반환한다", async () => {
-    const mockValues = new Array(1536).fill(0.1);
+  it("OpenAI API 호출 성공 시 기본 512 차원 요청으로 임베딩 배열을 반환한다", async () => {
+    const mockValues = new Array(512).fill(0.1);
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -33,7 +33,7 @@ describe("generateEmbedding", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await generateEmbedding("바다 사진 추천해줘", { apiKey: "test-api-key" });
-    expect(result).toHaveLength(1536);
+    expect(result).toHaveLength(512);
     expect(result[0]).toBe(0.1);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.openai.com/v1/embeddings",
@@ -43,9 +43,45 @@ describe("generateEmbedding", () => {
           model: "text-embedding-3-small",
           input: ["바다 사진 추천해줘"],
           encoding_format: "float",
+          dimensions: 512,
         }),
       }),
     );
+  });
+
+  it("빈 문자열 모델·차원 환경변수는 기본값으로 폴백한다", async () => {
+    vi.stubEnv("EMBEDDING_PROVIDER_MODEL", "");
+    vi.stubEnv("EMBEDDING_PROVIDER_DIMENSIONS", "");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: [{ embedding: [0.1, 0.2] }] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await generateEmbedding("테스트", { apiKey: "test-api-key" });
+
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string) as {
+      model: string;
+      dimensions: number;
+    };
+    expect(body.model).toBe("text-embedding-3-small");
+    expect(body.dimensions).toBe(512);
+  });
+
+  it("환경변수로 차원을 재정의할 수 있다", async () => {
+    vi.stubEnv("EMBEDDING_PROVIDER_DIMENSIONS", "1536");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: [{ embedding: [0.1, 0.2] }] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await generateEmbedding("테스트", { apiKey: "test-api-key" });
+
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string) as {
+      dimensions: number;
+    };
+    expect(body.dimensions).toBe(1536);
   });
 
   it("OpenAI API 실패 시 HTTP 상태 코드를 포함한 EmbeddingError를 던진다", async () => {
@@ -60,5 +96,23 @@ describe("generateEmbedding", () => {
     await expect(
       generateEmbedding("바다 사진 추천해줘", { apiKey: "test-api-key" }),
     ).rejects.toThrow(EmbeddingError);
+  });
+});
+
+describe("embeddingModelKey", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("모델과 차원을 합친 벡터 공간 호환성 키를 만든다", () => {
+    expect(embeddingModelKey()).toBe("text-embedding-3-small@512");
+  });
+
+  it("환경변수 모델·차원을 반영하고 빈 문자열은 기본값으로 폴백한다", () => {
+    vi.stubEnv("EMBEDDING_PROVIDER_MODEL", "text-embedding-3-large");
+    vi.stubEnv("EMBEDDING_PROVIDER_DIMENSIONS", "1024");
+    expect(embeddingModelKey()).toBe("text-embedding-3-large@1024");
+
+    vi.stubEnv("EMBEDDING_PROVIDER_MODEL", "");
+    vi.stubEnv("EMBEDDING_PROVIDER_DIMENSIONS", "");
+    expect(embeddingModelKey()).toBe("text-embedding-3-small@512");
   });
 });

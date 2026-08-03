@@ -28,4 +28,14 @@ type StoredRagChunk = RagChunk & {
   published: boolean;
 };
 
-export type { RagChunk, RagSection, RagSyncSourceType, RagSyncTarget, StoredRagChunk };
+/** 벡터 본체를 제외한 저장 청크 — 스냅샷 인덱스가 벡터를 별도 압축 보관할 때 사용. */
+type StoredRagChunkMeta = Omit<StoredRagChunk, "embedding">;
+
+export type {
+  RagChunk,
+  RagSection,
+  RagSyncSourceType,
+  RagSyncTarget,
+  StoredRagChunk,
+  StoredRagChunkMeta,
+};

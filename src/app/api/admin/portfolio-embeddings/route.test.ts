@@ -19,7 +19,7 @@ vi.mock("@/lib/content/rag-source", () => ({
 }));
 vi.mock("@/lib/ai/rag-chunks", () => ({ buildRagChunks: mocks.buildRagChunks }));
 vi.mock("@/lib/ai/embedding", () => ({
-  DEFAULT_EMBEDDING_MODEL: "text-embedding-3-small",
+  embeddingModelKey: () => "text-embedding-3-small@512",
   generateEmbeddings: mocks.generateEmbeddings,
 }));
 
@@ -36,7 +36,6 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = "test-project";
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY = "firebase-key";
-    process.env.EMBEDDING_PROVIDER_MODEL = "text-embedding-3-small";
   });
 
   it("관리자가 아니면 임베딩을 생성하지 않는다", async () => {
@@ -97,11 +96,10 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     expect(result).toMatchObject({
       count: 2,
       dimensions: 2,
-      model: "text-embedding-3-small",
+      model: "text-embedding-3-small@512",
       sections: { profile: 1, development: 1, music: 0, photography: 0 },
     });
     expect(mocks.generateEmbeddings).toHaveBeenCalledWith(["프로필 소개", "프로젝트 소개"], {
-      model: "text-embedding-3-small",
       signal: expect.any(AbortSignal),
     });
     const commitBody = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string) as {
@@ -207,7 +205,7 @@ describe("POST /api/admin/portfolio-embeddings", () => {
             documents: [
               {
                 name: "projects/test-project/databases/(default)/documents/ragDocuments/ready",
-                fields: { embeddingModel: { stringValue: "text-embedding-3-small" } },
+                fields: { embeddingModel: { stringValue: "text-embedding-3-small@512" } },
               },
             ],
             nextPageToken: "next-page",
@@ -220,7 +218,7 @@ describe("POST /api/admin/portfolio-embeddings", () => {
             documents: [
               {
                 name: "projects/test-project/databases/(default)/documents/ragDocuments/missing",
-                fields: { embeddingModel: { stringValue: "text-embedding-3-small" } },
+                fields: { embeddingModel: { stringValue: "text-embedding-3-small@512" } },
               },
             ],
           }),

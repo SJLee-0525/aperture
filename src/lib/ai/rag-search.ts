@@ -1,9 +1,9 @@
-import { DEFAULT_EMBEDDING_MODEL, generateEmbedding } from "@/lib/ai/embedding";
+import { embeddingModelKey, generateEmbedding } from "@/lib/ai/embedding";
+import { getRagIndex } from "@/lib/ai/rag-index";
 import { expandRagQuery, keywordSimilarity } from "@/lib/ai/rag-query";
-import { fetchRagChunks } from "@/lib/firebase/public/rag";
-import type { RagSection, StoredRagChunk } from "@/types/rag";
+import type { RagSection, StoredRagChunkMeta } from "@/types/rag";
 
-const cosineSimilarity = (a: number[], b: number[]) => {
+const cosineSimilarity = (a: ArrayLike<number>, b: ArrayLike<number>) => {
   if (a.length !== b.length || a.length === 0) return 0;
   let dot = 0;
   let normA = 0;
@@ -22,18 +22,18 @@ const searchRagChunks = async (
   query: string,
   sections: RagSection[],
   signal?: AbortSignal,
-): Promise<StoredRagChunk[]> => {
-  const model = process.env.EMBEDDING_PROVIDER_MODEL?.trim() ?? DEFAULT_EMBEDDING_MODEL;
+): Promise<StoredRagChunkMeta[]> => {
+  const modelKey = embeddingModelKey();
   const expandedQuery = expandRagQuery(query);
-  const [queryVector, chunks] = await Promise.all([
-    generateEmbedding(expandedQuery, { model, signal }),
-    fetchRagChunks(),
+  const [queryVector, index] = await Promise.all([
+    generateEmbedding(expandedQuery, { signal }),
+    getRagIndex(),
   ]);
   const allowed = new Set(sections);
-  return chunks
-    .flatMap((chunk) => {
-      if (!allowed.has(chunk.section) || chunk.embeddingModel !== model) return [];
-      const vectorScore = cosineSimilarity(queryVector, chunk.embedding);
+  return index
+    .flatMap(({ chunk, vector }) => {
+      if (!allowed.has(chunk.section) || chunk.embeddingModel !== modelKey) return [];
+      const vectorScore = cosineSimilarity(queryVector, vector);
       const keywordScore = keywordSimilarity(query, chunk.text);
       return [{ chunk, score: vectorScore + keywordScore * 0.35, vectorScore, keywordScore }];
     })

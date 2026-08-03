@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { COLLECTIONS } from "@/constants/collections";
-import { DEFAULT_EMBEDDING_MODEL, generateEmbeddings } from "@/lib/ai/embedding";
+import { embeddingModelKey, generateEmbeddings } from "@/lib/ai/embedding";
 import { buildRagChunks } from "@/lib/ai/rag-chunks";
 import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
 import { getRagSourceData, getRagSourceDataForTarget } from "@/lib/content/rag-source";
@@ -246,13 +246,10 @@ export async function POST(request: Request) {
           return chunk.sourceType === target.sourceType && chunk.sourceId === target.sourceId;
         })
       : allChunks;
-    const model = process.env.EMBEDDING_PROVIDER_MODEL?.trim() ?? DEFAULT_EMBEDDING_MODEL;
+    const model = embeddingModelKey();
     const vectors = await generateEmbeddings(
       chunks.map(({ text }) => text),
-      {
-        model,
-        signal: request.signal,
-      },
+      { signal: request.signal },
     );
     await replaceRagDocuments(idToken, chunks, vectors, model, target);
     revalidateTag(CHAT_PROFILE_CACHE_TAG, "max");
@@ -286,7 +283,7 @@ export async function GET(request: Request) {
     const chunks = buildRagChunks(await getRagSourceData());
     const existing = await listExistingDocuments(idToken);
     const { database } = firebaseConfig();
-    const model = process.env.EMBEDDING_PROVIDER_MODEL?.trim() ?? DEFAULT_EMBEDDING_MODEL;
+    const model = embeddingModelKey();
     const expectedNames = new Set(
       chunks.map(({ id }) => `${database}/documents/${COLLECTIONS.RAG_DOCUMENTS}/${id}`),
     );
