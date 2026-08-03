@@ -11,6 +11,11 @@ const VISUAL_ROUTES = [
 
 test.describe("핵심 공개 화면 시각 회귀", () => {
   test.skip(process.platform !== "win32", "시각 기준선은 GitHub Actions Windows 환경에서 관리");
+  // dev 서버는 next/font mock(연결 불가 URL)으로 폴백 폰트가 렌더돼 프로덕션 기준선과 어긋난다.
+  test.skip(
+    process.env.E2E_PRODUCTION !== "1",
+    "시각 기준선은 프로덕션 렌더링(next start) 기준 — E2E_PRODUCTION=1 또는 --production 으로 실행",
+  );
 
   for (const route of VISUAL_ROUTES) {
     test(`${route.name} 레이아웃`, async ({ page }, testInfo) => {

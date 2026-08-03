@@ -67,7 +67,12 @@ async function run() {
       ["node_modules/@playwright/test/cli.js", "test", ...playwrightArgs],
       {
         cwd: root,
-        env: { ...process.env, PLAYWRIGHT_BASE_URL: baseURL },
+        env: {
+          ...process.env,
+          PLAYWRIGHT_BASE_URL: baseURL,
+          // --production 플래그로 실행해도 스펙(시각 회귀의 프로덕션 전용 skip)이 모드를 알 수 있게 전달.
+          ...(production ? { E2E_PRODUCTION: "1" } : {}),
+        },
         stdio: "inherit",
       },
     );
