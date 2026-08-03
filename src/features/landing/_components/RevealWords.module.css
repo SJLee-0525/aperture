@@ -1,0 +1,38 @@
+/* 마스크는 인라인 블록 — 단어 사이 공백 텍스트 노드가 그대로 어절 줄바꿈 지점이 된다. */
+.mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* 디센더(g·j·y)가 마스크 하단에 잘리지 않도록 여백을 주고 레이아웃에서는 되돌린다. */
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+.word {
+  display: inline-block;
+  opacity: 0;
+  /* 마스크 아래로 완전히 숨는 값 — 위 padding(0.16em)보다 큰 여유(0.2 × 행높이)를 확보한다. */
+  transform: translateY(120%);
+  will-change: transform;
+}
+.wordVisible {
+  animation: wordReveal 0.55s var(--ease-spring) var(--word-delay, 0s) both;
+}
+@keyframes wordReveal {
+  from {
+    opacity: 0;
+    transform: translateY(120%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word,
+  .wordVisible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}

@@ -18,11 +18,17 @@ vi.mock("next/link", () => ({
 
 describe("LandingNav", () => {
   it("동일한 props에서는 하단 섹션 링크를 다시 렌더하지 않는다", () => {
-    const { rerender } = render(<LandingNav dict={DICTIONARY.ko} started />);
+    const onRowEnter = vi.fn();
+    const onRowLeave = vi.fn();
+    const { rerender } = render(
+      <LandingNav dict={DICTIONARY.ko} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started />,
+    );
 
     expect(linkRender).toHaveBeenCalledTimes(3);
 
-    rerender(<LandingNav dict={DICTIONARY.ko} started />);
+    rerender(
+      <LandingNav dict={DICTIONARY.ko} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started />,
+    );
 
     expect(linkRender).toHaveBeenCalledTimes(3);
   });

@@ -7,7 +7,9 @@ import { type CSSProperties, memo, type RefObject, useEffect, useMemo, useRef } 
 import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useIntroDelay } from "@/features/landing/_hooks/use-intro-delay";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
+import { useSectionGlow } from "@/features/landing/_hooks/use-section-glow";
 import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
 import { useTyping } from "@/hooks/use-typing";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -15,6 +17,7 @@ import type { SiteConfig } from "@/types/site";
 
 import { AnimatedWordmark } from "./AnimatedWordmark";
 import styles from "./LandingView.module.css";
+import { RevealWords } from "./RevealWords";
 
 /** 랜딩 진입 행 — 각 섹션의 액센트를 미리 보여준다(hover 채움). */
 const SECTIONS = [
@@ -44,7 +47,7 @@ const LandingTyping = ({
   roles,
   started,
 }: {
-  accentRef: RefObject<HTMLDivElement | null>;
+  accentRef: RefObject<HTMLElement | null>;
   reducedMotion: boolean | null;
   roles: string[];
   started: boolean;
@@ -72,28 +75,44 @@ const LandingTyping = ({
 };
 
 /** 타이핑 프레임과 무관한 정적 탐색 영역. started가 바뀔 때 한 번만 갱신한다. */
-const LandingNav = memo(({ dict, started }: { dict: UIDict; started: boolean }) => (
-  <nav className={styles.rows} aria-label={dict.sectionsLabel}>
-    {SECTIONS.map((section, i) => (
-      <Link
-        key={section.key}
-        href={section.href}
-        className={`${styles.row} ${started ? styles.rowVisible : ""}`}
-        data-section={section.key}
-        style={
-          {
-            "--row-delay": `${LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER}s`,
-          } as CSSProperties
-        }
-      >
-        <span className={styles.rowTitle}>{dict[section.labelKey]}</span>
-        <span className={styles.rowCta} aria-hidden="true">
-          ↗
-        </span>
-      </Link>
-    ))}
-  </nav>
-));
+const LandingNav = memo(
+  ({
+    dict,
+    onRowEnter,
+    onRowLeave,
+    started,
+  }: {
+    dict: UIDict;
+    onRowEnter: (event: { currentTarget: HTMLElement }) => void;
+    onRowLeave: () => void;
+    started: boolean;
+  }) => (
+    <nav className={styles.rows} aria-label={dict.sectionsLabel}>
+      {SECTIONS.map((section, i) => (
+        <Link
+          key={section.key}
+          href={section.href}
+          className={`${styles.row} ${started ? styles.rowVisible : ""}`}
+          data-section={section.key}
+          onPointerEnter={onRowEnter}
+          onPointerLeave={onRowLeave}
+          onFocus={onRowEnter}
+          onBlur={onRowLeave}
+          style={
+            {
+              "--row-delay": `${LANDING_REVEAL_DELAY + 0.1 + i * ROW_STAGGER}s`,
+            } as CSSProperties
+          }
+        >
+          <span className={styles.rowTitle}>{dict[section.labelKey]}</span>
+          <span className={styles.rowCta} aria-hidden="true">
+            ↗
+          </span>
+        </Link>
+      ))}
+    </nav>
+  ),
+);
 
 LandingNav.displayName = "LandingNav";
 
@@ -101,13 +120,17 @@ LandingNav.displayName = "LandingNav";
  * 랜딩 허브(/) — 이름(언어 무관 항상 "Sungjoon Lee") + 역할 타이핑(Photographer/Pianist/Developer)
  * + 소개 + 사진/음악/개발 진입. 타이핑 단어는 tagline 을 '·' 로 분해해 파생.
  * 진입 애니메이션은 스플래시가 걷힌 뒤 시작: 글자가 블러에서 선명해지며 액센트색으로 떠올랐다 본문색으로 안착 →
- * 마침표가 공처럼 튀어들어와(역할 색을 따라 변색) → 역할·소개·섹션 행이 순차로 등장.
+ * 마침표가 공처럼 튀어들어와(역할 색을 따라 변색) → 역할·소개(어절 리빌)·섹션 행이 순차로 등장.
+ * 배경 글로우는 평소 우상단에서 역할 색으로 느리게 부유하다가, 섹션 행에 포인터·포커스가 닿으면
+ * 그 행 한가운데로 옮겨가며 섹션 액센트로 물든다(위치는 실측, 색·세기는 CSS `:has()`).
  */
 const LandingView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
   const reducedMotion = useReducedMotion();
   const started = useIntroReady();
-  const accentRef = useRef<HTMLDivElement>(null);
+  const leadDelay = useIntroDelay(started, LANDING_REVEAL_DELAY);
+  const accentRef = useRef<HTMLElement>(null);
+  const { onRowEnter, onRowLeave } = useSectionGlow(accentRef);
   // useTyping 이 매 렌더 setText → 재렌더하므로, roles 배열 참조를 안정화(useMemo)해야 effect 가 재시작되지 않는다.
   const roles = useMemo(
     () =>
@@ -120,37 +143,31 @@ const LandingView = ({ site }: { site: SiteConfig }) => {
   const initialRoleAccent = ROLE_ACCENT[roles[0]] ?? "var(--accent)";
 
   return (
-    <main className={styles.hero}>
+    <main
+      ref={accentRef}
+      className={styles.hero}
+      style={{ "--role-accent": initialRoleAccent } as CSSProperties}
+    >
+      <div className={styles.glow} aria-hidden="true" />
+
       <div className={styles.inner}>
-        <div
-          ref={accentRef}
-          className={styles.identity}
-          style={{ "--role-accent": initialRoleAccent } as CSSProperties}
-        >
-          <AnimatedWordmark started={started} />
+        <AnimatedWordmark started={started} />
 
-          <LandingTyping
-            accentRef={accentRef}
-            reducedMotion={reducedMotion}
-            roles={roles}
-            started={started}
-          />
-        </div>
+        <LandingTyping
+          accentRef={accentRef}
+          reducedMotion={reducedMotion}
+          roles={roles}
+          started={started}
+        />
 
-        <m.p
+        <RevealWords
           className={styles.lead}
-          initial={{ opacity: 0, y: 16 }}
-          animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={
-            reducedMotion
-              ? { duration: 0 }
-              : { duration: 0.5, ease: LANDING_EASE, delay: LANDING_REVEAL_DELAY }
-          }
-        >
-          {pickText(site.landingLead, lang)}
-        </m.p>
+          delay={leadDelay}
+          started={started}
+          text={pickText(site.landingLead, lang)}
+        />
 
-        <LandingNav dict={dict} started={started} />
+        <LandingNav dict={dict} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started={started} />
       </div>
     </main>
   );
