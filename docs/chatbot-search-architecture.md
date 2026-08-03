@@ -100,9 +100,9 @@ sequenceDiagram
         par 질문 벡터 생성
             API->>EMB: 확장된 질문
             EMB-->>API: 512차원 질문 벡터
-        and 저장된 청크 조회
-            API->>FS: 공개 ragDocuments
-            FS-->>API: 청크 + 벡터
+        and 스냅샷 인덱스 로드
+            API->>FS: 캐시 미스 시에만 공개 ragDocuments
+            FS-->>API: int8 양자화 스냅샷 (1시간 Data Cache·태그 무효화)
         end
         API->>RAG: 코사인 유사도 + 키워드 점수
         RAG-->>API: 관련 청크 최대 8개
@@ -375,6 +375,7 @@ flowchart LR
 | Gemini                  | `src/features/chat/_lib/gemini-chat-provider.ts`     |
 | 프로필 문맥·참조 검증   | `src/features/chat/_lib/build-profile-context.ts`    |
 | RAG 검색                | `src/lib/ai/rag-search.ts`                           |
+| RAG 스냅샷 인덱스       | `src/lib/ai/rag-index.ts`                            |
 | 검색어 별칭·키워드 점수 | `src/lib/ai/rag-query.ts`                            |
 | 청크 생성               | `src/lib/ai/rag-chunks.ts`                           |
 | 임베딩 API              | `src/lib/ai/embedding.ts`                            |
