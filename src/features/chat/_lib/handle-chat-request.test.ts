@@ -255,6 +255,32 @@ describe("handleChatRequest", () => {
     expect(resolveReferences).toHaveBeenCalledWith([{ type: "photo", id: "p01" }], "ko");
   });
 
+  it("references 조회가 실패해도 완성된 답변을 references 없이 반환한다", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const resolveReferences = vi.fn().mockRejectedValue(new Error("firestore down"));
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여줘" }] }),
+      {
+        provider: async () => ({
+          content: "이 사진부터 확인해 보세요.",
+          references: [{ type: "photo", id: "p01" }],
+        }),
+        buildContext: async () => "context",
+        resolveReferences,
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      message: { role: "assistant", content: "이 사진부터 확인해 보세요." },
+    });
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[chat] reference resolution failed; sending answer without references:",
+      expect.objectContaining({ message: "firestore down" }),
+    );
+    warnSpy.mockRestore();
+  });
+
   it("본문 크기 제한을 적용한다", async () => {
     const response = await handleChatRequest(
       new Request("http://localhost/api/chat", {

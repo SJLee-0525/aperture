@@ -27,9 +27,11 @@ import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
 import type { RagQuery } from "@/types/rag";
 
-// route.ts의 maxDuration(30초)보다 5초 여유를 둔다 — Vercel이 함수를 먼저 끊으면
+// route.ts의 maxDuration(45초)보다 5초 여유를 둔다 — Vercel이 함수를 먼저 끊으면
 // TIMEOUT 에러 이벤트 대신 연결이 그냥 끊긴다.
-const DEFAULT_TIMEOUT_MS = 25_000;
+// 예산 배분: 인텐트 분류(CHAT_INTENT_TIMEOUT_MS) + primary 무응답 상한
+// (chat-provider.ts) + 폴백 나머지 — 세 값은 이 총량 안에서 함께 조정한다.
+const DEFAULT_TIMEOUT_MS = 40_000;
 const MAX_BODY_BYTES = 20_000;
 const STREAM_MEDIA_TYPE = "application/x-ndjson";
 const ALLOWED_ACTION_ROUTES = new Set<string>([
@@ -224,8 +226,16 @@ const handleChatRequest = async (
     });
     const content = result.content.trim();
     if (!content) throw new Error("Provider returned an empty response");
+    // 참조 카드는 부가 정보다 — 조회 실패가 이미 완성된(스트리밍이면 이미 보여준)
+    // 답변을 폐기하게 두지 않고 카드만 포기한다.
     const references = result.references?.length
-      ? await resolveReferences(result.references, chatRequest.lang)
+      ? await resolveReferences(result.references, chatRequest.lang).catch((error: unknown) => {
+          console.warn(
+            "[chat] reference resolution failed; sending answer without references:",
+            error,
+          );
+          return undefined;
+        })
       : undefined;
 
     return {
