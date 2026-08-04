@@ -1,26 +1,64 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
+import { useId, useState } from "react";
 
 import { Icon } from "@/components/Icon";
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import type { SearchSuggestion } from "@/lib/search/suggest-documents";
+import { useSearchSuggestions } from "@/features/site-header/_hooks/use-search-suggestions";
 
+import { SearchSuggestions, optionId } from "./SearchSuggestions";
 import styles from "./SearchBox.module.css";
 
 /**
  * 데스크톱 헤더 검색 (모바일은 CSS로 숨김 — 모바일 검색은 버거 메뉴 안). 제출 시 통합 검색
- * 페이지(/search?q=)로 이동 — 사진·음악·개발 전 섹션을 검색한다. 우측 아이콘 버튼 클릭으로도 제출.
+ * 페이지(/search?q=)로 이동. 입력 중에는 검색 인덱스(포커스 시 lazy load) 상위 매치를
+ * 자동완성으로 제안 — 방향키로 고르고 Enter/클릭 시 해당 콘텐츠 딥링크로 바로 이동.
  */
 const SearchBox = () => {
   const router = useRouter();
   const { dict } = useLang();
+  const listboxId = useId();
+
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const { suggestions, loadIndex } = useSearchSuggestions(query);
+
+  const showList = open && suggestions.length > 0;
+  const active = showList && activeIndex < suggestions.length ? activeIndex : -1;
+
+  const pick = (suggestion: SearchSuggestion) => {
+    setOpen(false);
+    router.push(suggestion.href);
+  };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const query = String(new FormData(event.currentTarget).get("q") ?? "").trim();
-    router.push(query ? `${ROUTES.SEARCH}?q=${encodeURIComponent(query)}` : ROUTES.SEARCH);
+    const trimmed = query.trim();
+    setOpen(false);
+    router.push(trimmed ? `${ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}` : ROUTES.SEARCH);
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      setOpen(false);
+      return;
+    }
+    if (!showList) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((index) => (index + 1) % suggestions.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((index) => (index <= 0 ? suggestions.length - 1 : index - 1));
+    } else if (event.key === "Enter" && active >= 0) {
+      event.preventDefault();
+      pick(suggestions[active]!);
+    }
   };
 
   return (
@@ -29,13 +67,39 @@ const SearchBox = () => {
         type="text"
         name="q"
         autoComplete="off"
+        role="combobox"
+        aria-expanded={showList}
+        aria-controls={listboxId}
+        aria-autocomplete="list"
+        aria-activedescendant={active >= 0 ? optionId(listboxId, active) : undefined}
         placeholder={dict.searchPlaceholder}
         aria-label={dict.searchPlaceholder}
         className={styles.input}
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setActiveIndex(-1);
+          setOpen(true);
+        }}
+        onFocus={() => {
+          loadIndex();
+          setOpen(true);
+        }}
+        onBlur={() => setOpen(false)}
+        onKeyDown={onKeyDown}
       />
       <button type="submit" className={styles.btn} aria-label={dict.searchPlaceholder}>
         <Icon name="search" size={17} />
       </button>
+
+      {showList ? (
+        <SearchSuggestions
+          id={listboxId}
+          suggestions={suggestions}
+          activeIndex={active}
+          onPick={pick}
+        />
+      ) : null}
     </form>
   );
 };

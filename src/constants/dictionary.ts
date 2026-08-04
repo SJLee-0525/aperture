@@ -88,6 +88,7 @@ type UIDict = {
   mobileNavigationLabel: string;
   sectionsLabel: string;
   searchPlaceholder: string;
+  searchSuggestionsLabel: string;
   searchPrompt: string;
   searchEmpty: string;
   searchEmptyChatHint: string;
@@ -231,6 +232,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     mobileNavigationLabel: "모바일 내비게이션",
     sectionsLabel: "섹션",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
+    searchSuggestionsLabel: "추천 결과",
     searchPrompt: "검색어를 입력하세요.",
     searchEmpty: "검색 결과가 없습니다.",
     searchEmptyChatHint: "원하는 결과를 찾지 못했다면 챗봇에게 물어보세요.",
@@ -377,6 +379,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     mobileNavigationLabel: "Mobile navigation",
     sectionsLabel: "Sections",
     searchPlaceholder: "Search · tag / gear / place",
+    searchSuggestionsLabel: "Suggestions",
     searchPrompt: "Type to search.",
     searchEmpty: "No results found.",
     searchEmptyChatHint: "If you couldn’t find what you need, try asking the chatbot.",

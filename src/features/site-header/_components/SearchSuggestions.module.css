@@ -1,0 +1,90 @@
+/* 검색창 자동완성 드롭다운 — Select 드롭다운(components/Select.module.css)과 같은 패널 문법.
+   부모(form)가 position: relative 여야 검색창 폭에 맞춰 바로 아래에 붙는다. */
+.list {
+  position: absolute;
+  /* 검색창 1px 보더와 라인 맞춤 */
+  left: -1px;
+  right: -1px;
+  top: calc(100% + 4px);
+  z-index: 5;
+  list-style: none;
+  margin: 0;
+  padding: 7px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-pop);
+  animation: dropIn 0.16s var(--ease);
+}
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.row,
+.rowActive {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.row:hover:not([data-cursor-snapped]),
+.rowActive {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.section {
+  flex: none;
+  color: var(--text-3);
+}
+
+/* 매치 구간 표시 — SearchResults 의 .mark 와 같은 섹션 액센트 밑줄 문법. */
+.mark {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+.row[data-section="photo"] .mark,
+.rowActive[data-section="photo"] .mark {
+  text-decoration-color: var(--accent-photo);
+}
+.row[data-section="music"] .mark,
+.rowActive[data-section="music"] .mark {
+  text-decoration-color: var(--accent-music);
+}
+.row[data-section="dev"] .mark,
+.rowActive[data-section="dev"] .mark {
+  text-decoration-color: var(--accent-dev);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list {
+    animation: none;
+  }
+}

@@ -1,4 +1,6 @@
 .box {
+  /* 자동완성 드롭다운(SearchSuggestions)의 absolute 기준점 */
+  position: relative;
   display: none;
   align-items: center;
   gap: var(--s-2);

@@ -1,10 +1,7 @@
 import { Suspense } from "react";
 
 import { SearchResults } from "@/features/search/_components/SearchResults";
-import { createSearchDocuments } from "@/features/search/_lib/search-documents";
-import { getDevProjects } from "@/lib/content/dev";
-import { getMusicAwards, getMusicMedia, getMusicWorks } from "@/lib/content/music";
-import { getAlbums, getPhotos } from "@/lib/content/photo";
+import { fetchSearchDocuments } from "@/features/search/_lib/fetch-search-documents";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = {
@@ -26,15 +23,7 @@ export const revalidate = 3600;
  * (ISR 캐시, q 무관) SearchResults 가 ?q 로 클라 필터. 검색어는 useSearchParams → Suspense 필요.
  */
 export default async function SearchPage() {
-  const [photos, albums, works, awards, media, projects] = await Promise.all([
-    getPhotos(),
-    getAlbums(),
-    getMusicWorks(),
-    getMusicAwards(),
-    getMusicMedia(),
-    getDevProjects(),
-  ]);
-  const documents = createSearchDocuments({ photos, albums, works, awards, media, projects });
+  const documents = await fetchSearchDocuments();
 
   return (
     <Suspense>

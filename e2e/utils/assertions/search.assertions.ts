@@ -7,8 +7,9 @@ const searchAssertions = {
     }
 
     const search = page.getByRole("search");
-    await search.getByRole("textbox").fill("포트폴리오");
-    await search.getByRole("button").click();
+    // 검색 input은 자동완성 콤보박스(role="combobox") — 암시적 textbox 롤이 대체된다.
+    await search.getByRole("combobox").fill("포트폴리오");
+    await search.getByRole("button", { name: /검색/ }).click();
 
     await expect(page).toHaveURL(/\/search\?q=%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4$/);
     await expect(page.getByRole("heading", { name: "“포트폴리오”" })).toBeVisible();
