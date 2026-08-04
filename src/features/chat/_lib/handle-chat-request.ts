@@ -6,7 +6,9 @@ import { ROUTES } from "@/constants/routes";
 import { getChatErrorMessage, type ChatErrorCode } from "@/features/chat/_lib/chat-errors";
 import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
 import {
-  selectProfileSectionsWithClassifier,
+  buildRagQueryText,
+  selectChatIntentWithClassifier,
+  type ChatIntent,
   type ProfileSection,
 } from "@/features/chat/_lib/chat-intent";
 import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
@@ -23,6 +25,7 @@ import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-sc
 import type { Lang } from "@/types/lang";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
+import type { RagQuery } from "@/types/rag";
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 const MAX_BODY_BYTES = 20_000;
@@ -48,7 +51,7 @@ type ChatHandlerDependencies = {
   buildContext?: (
     lang: Lang,
     sections?: ProfileSection[],
-    queryText?: string,
+    query?: RagQuery,
     signal?: AbortSignal,
   ) => Promise<string>;
   resolveReferences?: (references: ChatReferenceRequest[], lang: Lang) => Promise<ChatReference[]>;
@@ -188,14 +191,10 @@ const handleChatRequest = async (
     request.signal.removeEventListener("abort", abortFromRequest);
   };
 
-  let profileSections: ProfileSection[];
+  let chatIntent: ChatIntent;
   try {
-    profileSections = await Promise.race([
-      selectProfileSectionsWithClassifier(
-        chatRequest.messages,
-        controller.signal,
-        intentClassifier,
-      ),
+    chatIntent = await Promise.race([
+      selectChatIntentWithClassifier(chatRequest.messages, controller.signal, intentClassifier),
       timeoutPromise,
     ]);
   } catch (error) {
@@ -203,16 +202,17 @@ const handleChatRequest = async (
     const { status, code } = publicErrorFor(error, responseLang, timedOut);
     return jsonError(status, code, responseLang);
   }
+  const profileSections = chatIntent.sections;
   const shouldLoadProfile = profileSections.length > 0;
+  // 분류기가 만든 독립 검색어·키워드를 우선 사용하고, 없으면 후속 질문 맥락을 복원한 휴리스틱 쿼리.
+  const ragQuery: RagQuery = {
+    text: chatIntent.searchQuery ?? buildRagQueryText(chatRequest.messages),
+    keywords: chatIntent.searchKeywords,
+  };
 
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
     const profileContext = shouldLoadProfile
-      ? await buildContext(
-          chatRequest.lang,
-          profileSections,
-          chatRequest.messages.at(-1)?.content,
-          controller.signal,
-        )
+      ? await buildContext(chatRequest.lang, profileSections, ragQuery, controller.signal)
       : "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.";
     const result = await provider({
       instructions: buildChatInstructions(chatRequest.lang, profileContext),

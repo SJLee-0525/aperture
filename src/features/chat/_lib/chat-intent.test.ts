@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  buildRagQueryText,
   needsProfileContext,
+  selectChatIntentWithClassifier,
   selectProfileSections,
-  selectProfileSectionsWithClassifier,
 } from "@/features/chat/_lib/chat-intent";
 
 describe("needsProfileContext", () => {
@@ -94,19 +95,27 @@ describe("needsProfileContext", () => {
   });
 });
 
-describe("selectProfileSectionsWithClassifier", () => {
+describe("selectChatIntentWithClassifier", () => {
   const messages = [
     { role: "user" as const, content: "오 시원한 바다 사진 어때?" },
     { role: "assistant" as const, content: "울릉군에서 촬영한 바다 풍경 사진들이 있어요." },
     { role: "user" as const, content: "오 울릉도 갔나보네, 그럼 독도도 있어?" },
   ];
 
-  it("최근 대화의 암시된 사진 의도를 LLM 분류 결과로 이어간다", async () => {
-    const classifier = vi.fn().mockResolvedValue(["profile", "photography"]);
+  it("최근 대화의 암시된 사진 의도와 검색어를 LLM 분류 결과로 이어간다", async () => {
+    const classifier = vi.fn().mockResolvedValue({
+      sections: ["profile", "photography"],
+      searchQuery: "독도 사진",
+      searchKeywords: ["독도", "Dokdo"],
+    });
 
     await expect(
-      selectProfileSectionsWithClassifier(messages, new AbortController().signal, classifier),
-    ).resolves.toEqual(["profile", "photography"]);
+      selectChatIntentWithClassifier(messages, new AbortController().signal, classifier),
+    ).resolves.toEqual({
+      sections: ["profile", "photography"],
+      searchQuery: "독도 사진",
+      searchKeywords: ["독도", "Dokdo"],
+    });
     expect(classifier).toHaveBeenCalledWith(messages, expect.any(AbortSignal));
   });
 
@@ -114,11 +123,29 @@ describe("selectProfileSectionsWithClassifier", () => {
     const directMessages = [{ role: "user" as const, content: "독도 사진 없어 정말?" }];
     const classifier =
       mode === "none"
-        ? vi.fn().mockResolvedValue([])
+        ? vi.fn().mockResolvedValue({ sections: [] })
         : vi.fn().mockRejectedValue(new Error("classifier unavailable"));
 
     await expect(
-      selectProfileSectionsWithClassifier(directMessages, new AbortController().signal, classifier),
-    ).resolves.toEqual(["profile", "photography"]);
+      selectChatIntentWithClassifier(directMessages, new AbortController().signal, classifier),
+    ).resolves.toEqual({ sections: ["profile", "photography"] });
+  });
+});
+
+describe("buildRagQueryText", () => {
+  it("독립적인 질문은 그대로 검색어로 사용한다", () => {
+    expect(buildRagQueryText([{ role: "user", content: "수상 경력을 알려줘" }])).toBe(
+      "수상 경력을 알려줘",
+    );
+  });
+
+  it("후속 질문은 직전 사용자 메시지를 이어붙여 맥락을 복원한다", () => {
+    expect(
+      buildRagQueryText([
+        { role: "user", content: "개발 프로젝트를 알려줘" },
+        { role: "assistant", content: "대표 프로젝트를 소개할게요." },
+        { role: "user", content: "그건 언제 했어?" },
+      ]),
+    ).toBe("개발 프로젝트를 알려줘\n그건 언제 했어?");
   });
 });

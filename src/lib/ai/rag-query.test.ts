@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { expandRagQuery, keywordSimilarity } from "@/lib/ai/rag-query";
+import { createKeywordScorer, expandRagQuery, keywordSimilarity } from "@/lib/ai/rag-query";
 
 describe("RAG 검색어 보강", () => {
   it("한글 카메라 브랜드를 영문 브랜드와 사진 문맥으로 확장한다", () => {
@@ -48,5 +48,33 @@ describe("RAG 검색어 보강", () => {
 
   it("짧은 토큰은 부분 일치를 허용하지 않아 오탐을 막는다", () => {
     expect(keywordSimilarity("니콘", "Camera: Canon EOS R6")).toBe(0);
+  });
+});
+
+describe("createKeywordScorer", () => {
+  it("분류기 키워드와 로컬 토큰화 채점 중 높은 점수를 쓴다", () => {
+    const score = createKeywordScorer("그건 언제 받았어?", ["우수상", "award"]);
+    expect(score("2025 우수상(2위) SSAFY 12기")).toBe(0.5);
+  });
+
+  it("키워드가 없으면 로컬 토큰화만으로 채점한다", () => {
+    const score = createKeywordScorer("울릉도");
+    expect(score("울릉도 사진 Ulleungdo")).toBe(1);
+  });
+
+  it("일반어 키워드는 로컬과 같은 불용어 규칙으로 걸러 점수 인플레이션을 막는다", () => {
+    const score = createKeywordScorer("의미없는입력값", ["사진"]);
+    expect(score("도쿄 사진")).toBe(0);
+  });
+
+  it("두 단어 키워드는 단어별로 나눠 대조하고 한 글자 키워드는 버린다", () => {
+    const score = createKeywordScorer("질문", ["수상 내역"]);
+    expect(score("우수상 수상 내역 목록")).toBe(1);
+    expect(createKeywordScorer("질문", ["상"])("우수상")).toBe(0);
+  });
+
+  it("한글 브랜드 키워드는 별칭 사전으로 영문 장비명과 만난다", () => {
+    const score = createKeywordScorer("의미없는입력값", ["캐논"]);
+    expect(score("Camera: Canon EOS R6 | Lens: RF 24-70mm")).toBe(1);
   });
 });

@@ -55,7 +55,7 @@ describe("searchRagChunks", () => {
       entry({ id: "low-score", vector: [0, 1] }),
     ]);
 
-    const result = await searchRagChunks("바다 사진", ["photography"]);
+    const result = await searchRagChunks({ text: "바다 사진" }, ["photography"]);
 
     expect(result.map(({ id }) => id)).toEqual(["match"]);
   });
@@ -66,7 +66,34 @@ describe("searchRagChunks", () => {
       entry({ id: "keyword-hit", vector: [0, 1], text: "울릉도 사진 Ulleungdo" }),
     ]);
 
-    const result = await searchRagChunks("울릉도", ["photography"]);
+    const result = await searchRagChunks({ text: "울릉도" }, ["photography"]);
+
+    expect(result.map(({ id }) => id)).toEqual(["keyword-hit"]);
+  });
+
+  it("질문 원문이 빗나가도 분류기 키워드로 청크를 찾는다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    mocks.getRagIndex.mockResolvedValue([
+      entry({ id: "award", vector: [0, 1], text: "2025 우수상(2위) SSAFY 12기", section: "music" }),
+    ]);
+
+    const result = await searchRagChunks(
+      { text: "그건 언제 받았어?", keywords: ["우수상", "수상"] },
+      ["music"],
+    );
+
+    expect(result.map(({ id }) => id)).toEqual(["award"]);
+  });
+
+  it("분류기 키워드가 빗나가도 로컬 토큰화 점수가 폴백으로 남는다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    mocks.getRagIndex.mockResolvedValue([
+      entry({ id: "keyword-hit", vector: [0, 1], text: "울릉도 사진 Ulleungdo" }),
+    ]);
+
+    const result = await searchRagChunks({ text: "울릉도", keywords: ["엉뚱한말"] }, [
+      "photography",
+    ]);
 
     expect(result.map(({ id }) => id)).toEqual(["keyword-hit"]);
   });

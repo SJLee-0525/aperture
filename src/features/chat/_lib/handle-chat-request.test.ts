@@ -83,7 +83,7 @@ describe("handleChatRequest", () => {
     expect(buildContext).toHaveBeenCalledWith(
       lang,
       ["profile", "development"],
-      "development project",
+      { text: "development project" },
       expect.anything(),
     );
     expect(provider).toHaveBeenCalledWith(
@@ -93,6 +93,61 @@ describe("handleChatRequest", () => {
         messages: [{ role: "user", content: "development project" }],
         signal: expect.any(AbortSignal),
       }),
+    );
+  });
+
+  it("분류기가 만든 독립 검색어를 문맥 조회 쿼리로 사용한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "답변" });
+    const buildContext = vi.fn().mockResolvedValue("# PROFILE_CONTEXT\ncontext");
+    const intentClassifier = vi.fn().mockResolvedValue({
+      sections: ["profile", "development"],
+      searchQuery: "개발 수상 내역",
+      searchKeywords: ["수상", "우수상"],
+    });
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [
+          { role: "user", content: "개발 프로젝트를 알려줘" },
+          { role: "assistant", content: "소개할게요." },
+          { role: "user", content: "그건 수상도 했어?" },
+        ],
+      }),
+      { provider, buildContext, intentClassifier },
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildContext).toHaveBeenCalledWith(
+      "ko",
+      ["profile", "development"],
+      { text: "개발 수상 내역", keywords: ["수상", "우수상"] },
+      expect.anything(),
+    );
+  });
+
+  it("분류기 검색어가 없는 후속 질문은 직전 사용자 메시지로 맥락을 복원한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "답변" });
+    const buildContext = vi.fn().mockResolvedValue("# PROFILE_CONTEXT\ncontext");
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [
+          { role: "user", content: "개발 프로젝트를 알려줘" },
+          { role: "assistant", content: "소개할게요." },
+          { role: "user", content: "그건 언제 했어?" },
+        ],
+      }),
+      { provider, buildContext },
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildContext).toHaveBeenCalledWith(
+      "ko",
+      ["profile", "development"],
+      { text: "개발 프로젝트를 알려줘\n그건 언제 했어?" },
+      expect.anything(),
     );
   });
 

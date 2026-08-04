@@ -4,6 +4,13 @@ import type { RagSection } from "@/types/rag";
 
 type ProfileSection = RagSection;
 
+/** 섹션 선택 + (LLM 분류기가 만든) 대명사 해소된 독립 검색어·검색 키워드. */
+type ChatIntent = {
+  sections: ProfileSection[];
+  searchQuery?: string;
+  searchKeywords?: string[];
+};
+
 const SECTION_TERMS: Record<Exclude<ProfileSection, "profile">, RegExp[]> = {
   development: [
     /개발|프로젝트|기술|스택|코드|프론트|앱|웹|이력서/i,
@@ -69,13 +76,29 @@ const selectProfileSections = (messages: ChatRequestMessage[]): ProfileSection[]
 const needsProfileContext = (messages: ChatRequestMessage[]): boolean =>
   selectProfileSections(messages).length > 0;
 
-const selectProfileSectionsWithClassifier = async (
+/**
+ * RAG 검색어 휴리스틱 폴백 — 분류기가 searchQuery를 못 만들었을 때 사용한다.
+ * 후속 질문("그건 언제였어?")은 단독으로 임베딩하면 무의미하므로
+ * 직전 사용자 메시지들을 이어붙여 맥락을 복원한다.
+ */
+const buildRagQueryText = (messages: ChatRequestMessage[]): string => {
+  const current = messages.at(-1)?.content.trim() ?? "";
+  if (!FOLLOW_UP_TERMS.test(current)) return current;
+  const previous = messages
+    .slice(0, -1)
+    .filter((message) => message.role === "user")
+    .slice(-2)
+    .map((message) => message.content.trim());
+  return [...previous, current].join("\n");
+};
+
+const selectChatIntentWithClassifier = async (
   messages: ChatRequestMessage[],
   signal: AbortSignal,
-  classifier?: (messages: ChatRequestMessage[], signal: AbortSignal) => Promise<ProfileSection[]>,
-): Promise<ProfileSection[]> => {
-  const regexSections = selectProfileSections(messages);
-  if (!classifier) return regexSections;
+  classifier?: (messages: ChatRequestMessage[], signal: AbortSignal) => Promise<ChatIntent>,
+): Promise<ChatIntent> => {
+  const regexIntent: ChatIntent = { sections: selectProfileSections(messages) };
+  if (!classifier) return regexIntent;
 
   try {
     const classifierSignal = AbortSignal.any([
@@ -83,13 +106,18 @@ const selectProfileSectionsWithClassifier = async (
       AbortSignal.timeout(getIntentClassifierTimeoutMs()),
     ]);
     const classified = await classifier(messages, classifierSignal);
-    return classified.length ? classified : regexSections;
+    return classified.sections.length ? classified : regexIntent;
   } catch (error) {
     if (signal.aborted) throw error;
     console.warn("Chat intent classification failed; using regex fallback:", error);
-    return regexSections;
+    return regexIntent;
   }
 };
 
-export { needsProfileContext, selectProfileSections, selectProfileSectionsWithClassifier };
-export type { ProfileSection };
+export {
+  buildRagQueryText,
+  needsProfileContext,
+  selectChatIntentWithClassifier,
+  selectProfileSections,
+};
+export type { ChatIntent, ProfileSection };

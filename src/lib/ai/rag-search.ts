@@ -1,7 +1,7 @@
 import { embeddingModelKey, generateEmbedding } from "@/lib/ai/embedding";
 import { getRagIndex } from "@/lib/ai/rag-index";
-import { expandRagQuery, keywordSimilarity } from "@/lib/ai/rag-query";
-import type { RagSection, StoredRagChunkMeta } from "@/types/rag";
+import { createKeywordScorer, expandRagQuery } from "@/lib/ai/rag-query";
+import type { RagQuery, RagSection, StoredRagChunkMeta } from "@/types/rag";
 
 const cosineSimilarity = (a: ArrayLike<number>, b: ArrayLike<number>) => {
   if (a.length !== b.length || a.length === 0) return 0;
@@ -19,12 +19,13 @@ const cosineSimilarity = (a: ArrayLike<number>, b: ArrayLike<number>) => {
 };
 
 const searchRagChunks = async (
-  query: string,
+  query: RagQuery,
   sections: RagSection[],
   signal?: AbortSignal,
 ): Promise<StoredRagChunkMeta[]> => {
   const modelKey = embeddingModelKey();
-  const expandedQuery = expandRagQuery(query);
+  const expandedQuery = expandRagQuery(query.text);
+  const scoreKeywords = createKeywordScorer(query.text, query.keywords);
   const [queryVector, index] = await Promise.all([
     generateEmbedding(expandedQuery, { signal }),
     getRagIndex(),
@@ -34,7 +35,7 @@ const searchRagChunks = async (
     .flatMap(({ chunk, vector }) => {
       if (!allowed.has(chunk.section) || chunk.embeddingModel !== modelKey) return [];
       const vectorScore = cosineSimilarity(queryVector, vector);
-      const keywordScore = keywordSimilarity(query, chunk.text);
+      const keywordScore = scoreKeywords(chunk.text);
       return [{ chunk, score: vectorScore + keywordScore * 0.35, vectorScore, keywordScore }];
     })
     .filter(({ vectorScore, keywordScore }) => vectorScore >= 0.3 || keywordScore >= 0.5)

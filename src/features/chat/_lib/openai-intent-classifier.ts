@@ -1,5 +1,5 @@
 import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
-import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
+import type { ChatIntent, ProfileSection } from "@/features/chat/_lib/chat-intent";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const CLASSIFIER_HISTORY_LIMIT = 6;
@@ -15,8 +15,10 @@ const INTENT_SCHEMA = {
         enum: ["none", "profile", "development", "music", "photography"],
       },
     },
+    searchQuery: { type: "string" },
+    searchKeywords: { type: "array", items: { type: "string" } },
   },
-  required: ["sections"],
+  required: ["sections", "searchQuery", "searchKeywords"],
 } as const;
 
 type OpenAIResponse = {
@@ -26,7 +28,7 @@ type OpenAIResponse = {
 type ChatIntentClassifier = (
   messages: ChatRequestMessage[],
   signal: AbortSignal,
-) => Promise<ProfileSection[]>;
+) => Promise<ChatIntent>;
 
 const responseOutputText = (response: OpenAIResponse): string =>
   response.output
@@ -35,11 +37,17 @@ const responseOutputText = (response: OpenAIResponse): string =>
     .map((item) => item.text ?? "")
     .join("") ?? "";
 
-const parseIntentSections = (text: string): ProfileSection[] => {
+const parseChatIntent = (text: string): ChatIntent => {
   const parsed: unknown = JSON.parse(text);
-  if (typeof parsed !== "object" || parsed === null || !("sections" in parsed)) return [];
-  const sections = (parsed as { sections?: unknown }).sections;
-  if (!Array.isArray(sections) || sections.includes("none")) return [];
+  if (typeof parsed !== "object" || parsed === null || !("sections" in parsed)) {
+    return { sections: [] };
+  }
+  const { sections, searchQuery, searchKeywords } = parsed as {
+    sections?: unknown;
+    searchQuery?: unknown;
+    searchKeywords?: unknown;
+  };
+  if (!Array.isArray(sections) || sections.includes("none")) return { sections: [] };
 
   const valid = sections.filter(
     (section): section is ProfileSection =>
@@ -48,8 +56,23 @@ const parseIntentSections = (text: string): ProfileSection[] => {
       section === "music" ||
       section === "photography",
   );
-  if (!valid.length) return [];
-  return [...new Set<ProfileSection>(["profile", ...valid])];
+  if (!valid.length) return { sections: [] };
+  const query = typeof searchQuery === "string" ? searchQuery.trim() : "";
+  const keywords = Array.isArray(searchKeywords)
+    ? [
+        ...new Set(
+          searchKeywords
+            .filter((keyword): keyword is string => typeof keyword === "string")
+            .map((keyword) => keyword.trim())
+            .filter(Boolean),
+        ),
+      ].slice(0, 8)
+    : [];
+  return {
+    sections: [...new Set<ProfileSection>(["profile", ...valid])],
+    searchQuery: query || undefined,
+    searchKeywords: keywords.length ? keywords : undefined,
+  };
 };
 
 const createOpenAIIntentClassifier =
@@ -72,12 +95,16 @@ const createOpenAIIntentClassifier =
           "music covers performances, repertoire, music career, education, and music awards.",
           "photography covers photos, albums, cameras, places, scenery, and whether a pictured subject or location exists.",
           "profile covers identity, introduction, contact, and collaboration.",
+          "Also produce searchQuery: a short standalone search query, in the user's language, stating what the latest message asks about with pronouns and follow-ups resolved from the conversation (e.g. '그건 언제였어?' after discussing awards becomes '수상 내역 연도'). Use an empty string when sections is none.",
+          "Also produce searchKeywords: 3-8 short retrieval keywords for the same request — key nouns, proper nouns with spelling variants in both Korean and English (e.g. 아이답 and AIDAP, 캐논 and Canon), and close synonyms. Single words or two-word phrases. Use an empty array when sections is none.",
         ].join("\n"),
         input: messages
           .slice(-CLASSIFIER_HISTORY_LIMIT)
           .map(({ role, content }) => ({ role, content })),
         reasoning: { effort: "minimal" },
-        max_output_tokens: 80,
+        // Responses API는 reasoning 토큰도 이 한도에 포함한다 — 한글 검색어 + 한영
+        // 키워드 8개가 잘리면 JSON 파싱 실패로 조용히 정규식 폴백에 떨어지므로 여유를 둔다.
+        max_output_tokens: 240,
         store: false,
         text: {
           verbosity: "low",
@@ -94,7 +121,7 @@ const createOpenAIIntentClassifier =
 
     if (!response.ok) throw new Error(`OpenAI intent classification failed (${response.status})`);
     const data = (await response.json()) as OpenAIResponse;
-    return parseIntentSections(responseOutputText(data));
+    return parseChatIntent(responseOutputText(data));
   };
 
 /**
@@ -108,5 +135,5 @@ const getChatIntentClassifier = (): ChatIntentClassifier | undefined => {
   return apiKey ? createOpenAIIntentClassifier(apiKey, model) : undefined;
 };
 
-export { createOpenAIIntentClassifier, getChatIntentClassifier, parseIntentSections };
+export { createOpenAIIntentClassifier, getChatIntentClassifier, parseChatIntent };
 export type { ChatIntentClassifier };
