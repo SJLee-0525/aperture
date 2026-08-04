@@ -7,6 +7,8 @@ describe("buildChatInstructions", () => {
     const prompt = buildChatInstructions("ko", "# PROFILE_CONTEXT\nName: 이성준");
 
     expect(prompt).toContain("자연스러운 한국어");
+    expect(prompt).toContain("따뜻하고 살가운 말투");
+    expect(prompt).toContain("호들갑스러운 감탄이나 아부하는 표현은 피한다");
     expect(prompt).toContain("공개 정보만 근거");
     expect(prompt).toContain("의도가 불명확한 입력");
     expect(prompt).toContain("포트폴리오 밖의 가벼운 대화");
