@@ -98,7 +98,6 @@ const sanitizeLinks = (
 
 const publicErrorFor = (
   error: unknown,
-  lang: Lang,
   timedOut: boolean,
 ): { status: number; code: ChatErrorCode } => {
   if (timedOut) return { status: 504, code: "TIMEOUT" };
@@ -201,7 +200,7 @@ const handleChatRequest = async (
     ]);
   } catch (error) {
     cleanup();
-    const { status, code } = publicErrorFor(error, responseLang, timedOut);
+    const { status, code } = publicErrorFor(error, timedOut);
     return jsonError(status, code, responseLang);
   }
   const profileSections = chatIntent.sections;
@@ -255,7 +254,7 @@ const handleChatRequest = async (
         void run((delta) => send({ type: "delta", content: delta }))
           .then((message) => send({ type: "done", message }))
           .catch((error: unknown) => {
-            const { status, code } = publicErrorFor(error, responseLang, timedOut);
+            const { status, code } = publicErrorFor(error, timedOut);
             send({
               type: "error",
               code,
@@ -288,7 +287,7 @@ const handleChatRequest = async (
 
     return Response.json({ message });
   } catch (error) {
-    const { status, code } = publicErrorFor(error, responseLang, timedOut);
+    const { status, code } = publicErrorFor(error, timedOut);
     return jsonError(status, code, responseLang);
   } finally {
     cleanup();
