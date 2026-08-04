@@ -25,9 +25,8 @@ const fetchMock = vi.fn();
 /** 모듈 캐시(searchIndexPromise)가 테스트 간 새어들지 않게 매번 새 모듈로 훅을 얻는다. */
 const freshHook = async () => {
   vi.resetModules();
-  const { useSearchSuggestions } = await import(
-    "@/features/site-header/_hooks/use-search-suggestions"
-  );
+  const { useSearchSuggestions } =
+    await import("@/features/site-header/_hooks/use-search-suggestions");
   return useSearchSuggestions;
 };
 

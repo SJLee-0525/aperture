@@ -6,12 +6,7 @@ import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
 
 /** 서버(search-documents)와 같은 정규화 경로로 픽스처 문서를 만든다. */
-const doc = (
-  key: string,
-  section: SearchSection,
-  titleKo: string,
-  body = "",
-): SearchDocument => ({
+const doc = (key: string, section: SearchSection, titleKo: string, body = ""): SearchDocument => ({
   key,
   section,
   title: { ko: titleKo, en: "" },
