@@ -6,7 +6,7 @@ import { DICTIONARY } from "@/constants/dictionary";
 
 import type { Lang } from "@/types/lang";
 
-const MESSAGE_INTERVAL_MS = 1_800;
+const MESSAGE_INTERVAL_MS = 2_500;
 
 /** 포트폴리오 검색 대기 상태 문구 롤링 — 문구는 DICTIONARY.chatSearchStatuses 단일 출처. */
 const PortfolioSearchStatus = ({ lang }: { lang: Lang }) => {
