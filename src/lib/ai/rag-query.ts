@@ -45,6 +45,35 @@ const STOP_WORDS = new Set([
   "찾아",
   "검색",
   "해줘",
+  "어떻게",
+  "어떤",
+  "어때",
+  "무엇",
+  "뭐야",
+  "뭔가",
+  "언제",
+  "어디",
+  "어디서",
+  "누구",
+  "누가",
+  "혹시",
+  "궁금",
+  "궁금해",
+  "궁금한",
+  "알려",
+  "알려줘",
+  "주세요",
+  "있어",
+  "있는지",
+  "있나요",
+  "있을까",
+  "없어",
+  "없나요",
+  "대해",
+  "대한",
+  "관해",
+  "관한",
+  "관련",
   "photo",
   "photos",
   "picture",
@@ -56,6 +85,60 @@ const STOP_WORDS = new Set([
   "camera",
 ]);
 
+// 긴 조사부터 검사한다 — "에서는"을 "는"보다 먼저 떼야 남은 어간이 온전하다.
+const KOREAN_PARTICLES = [
+  "에서는",
+  "에서도",
+  "으로는",
+  "으로도",
+  "께서",
+  "에서",
+  "에게",
+  "한테",
+  "으로",
+  "이라",
+  "이나",
+  "부터",
+  "까지",
+  "처럼",
+  "보다",
+  "마다",
+  "조차",
+  "마저",
+  "은",
+  "는",
+  "이",
+  "가",
+  "을",
+  "를",
+  "과",
+  "와",
+  "의",
+  "도",
+  "만",
+  "에",
+  "로",
+  "나",
+  "요",
+];
+
+const stripParticles = (token: string): string => {
+  let stem = token;
+  let stripped = true;
+  while (stripped) {
+    stripped = false;
+    for (const particle of KOREAN_PARTICLES) {
+      // 어간이 2자 미만으로 줄어드는 스트립은 하지 않는다 — "놀이"→"놀" 같은 훼손 방지.
+      if (stem.endsWith(particle) && stem.length - particle.length >= 2) {
+        stem = stem.slice(0, stem.length - particle.length);
+        stripped = true;
+        break;
+      }
+    }
+  }
+  return stem;
+};
+
 const tokensFor = (text: string) => {
   const normalized = text.normalize("NFKC").toLocaleLowerCase("ko-KR");
   const aliases = SEARCH_ALIASES.flatMap(({ pattern, expansion }) =>
@@ -64,6 +147,7 @@ const tokensFor = (text: string) => {
   const words = normalized
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .split(" ")
+    .map(stripParticles)
     .filter((token) => token.length >= 2)
     .filter((token) => !STOP_WORDS.has(token))
     .filter((token) => !SEARCH_ALIASES.some(({ pattern }) => pattern.test(token)));
@@ -77,14 +161,35 @@ const expandRagQuery = (query: string) => {
   return additions.length ? `${query} ${[...new Set(additions)].join(" ")}` : query;
 };
 
-const keywordSimilarity = (query: string, document: string) => {
-  const queryTokens = tokensFor(query);
+// 한국어 합성어 대응 — "수상내역"이 문서의 "우수상"과 만나려면 접두/접미 부분 문자열
+// 일치가 필요하다. 3자 이상 조각은 강한 신호(1점), 2자 조각은 "프로"⊂"프로필" 같은
+// 공통 접두 오탐이 흔해 0.5점만 준다. 짧은 토큰(3자 이하)은 완전 포함만 허용하고,
+// 라틴 토큰은 2자 조각("on"⊂"canon")의 오탐이 커서 한글 토큰에만 적용한다.
+const partialTokenCredit = (token: string, documentText: string): number => {
+  if (token.length < 4 || !/^\p{Script=Hangul}+$/u.test(token)) return 0;
+  for (let size = token.length - 1; size >= 2; size -= 1) {
+    if (
+      documentText.includes(token.slice(0, size)) ||
+      documentText.includes(token.slice(token.length - size))
+    ) {
+      return size >= 3 ? 1 : 0.5;
+    }
+  }
+  return 0;
+};
+
+const documentTextFor = (document: string) => [...tokensFor(document)].join(" ");
+
+const matchedTokenRatio = (queryTokens: Set<string>, documentText: string) => {
   if (queryTokens.size === 0) return 0;
-  const documentTokens = tokensFor(document);
-  const documentText = [...documentTokens].join(" ");
-  const matched = [...queryTokens].filter((token) => documentText.includes(token)).length;
+  const matched = [...queryTokens]
+    .map((token) => (documentText.includes(token) ? 1 : partialTokenCredit(token, documentText)))
+    .reduce((sum, credit) => sum + credit, 0);
   return matched / queryTokens.size;
 };
+
+const keywordSimilarity = (query: string, document: string) =>
+  matchedTokenRatio(tokensFor(query), documentTextFor(document));
 
 const matchesSearchText = (query: string, document: string) =>
   keywordSimilarity(query, document) >= 0.5;
