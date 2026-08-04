@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DICTIONARY } from "@/constants/dictionary";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { SearchResults } from "@/features/search/_components/SearchResults";
-import type { SearchDocument } from "@/features/search/_lib/search-documents";
+import type { SearchDocument } from "@/types/search";
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
 import { useSearchParams } from "next/navigation";

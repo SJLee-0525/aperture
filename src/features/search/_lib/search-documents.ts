@@ -7,21 +7,7 @@ import { imageThumbnailUrl } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicMedia, MusicWork } from "@/types/music";
 import type { Photo } from "@/types/photo";
-
-import type { SearchIndex } from "./score-documents";
-
-type SearchSection = "photo" | "music" | "dev";
-
-type SearchDocument = {
-  key: string;
-  section: SearchSection;
-  title: LocalizedText;
-  index: SearchIndex;
-  meta?: LocalizedText;
-  metaLabel?: "albums";
-  imageUrl?: string;
-  href: string;
-};
+import type { SearchDocument, SearchIndex } from "@/types/search";
 
 type SearchSources = {
   photos: Photo[];
@@ -125,4 +111,3 @@ const createSearchDocuments = ({
 };
 
 export { createSearchDocuments };
-export type { SearchDocument, SearchSection };

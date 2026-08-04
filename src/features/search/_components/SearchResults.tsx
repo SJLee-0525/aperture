@@ -6,10 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { Fragment, useMemo } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { TitleSegment } from "@/features/search/_lib/highlight-title";
-import { highlightTokensFor, splitTitleByMatches } from "@/features/search/_lib/highlight-title";
-import { createDocumentScorer } from "@/features/search/_lib/score-documents";
-import type { SearchDocument, SearchSection } from "@/features/search/_lib/search-documents";
+import type { TitleSegment } from "@/lib/search/highlight-title";
+import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
+import { createDocumentScorer } from "@/lib/search/score-documents";
+import type { SearchDocument, SearchSection } from "@/types/search";
 import { pickText } from "@/lib/i18n/pick-text";
 import { tokensFor } from "@/lib/text/korean-tokenize";
 

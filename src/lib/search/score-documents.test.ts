@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocumentScorer } from "@/features/search/_lib/score-documents";
+import { createDocumentScorer } from "@/lib/search/score-documents";
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
 

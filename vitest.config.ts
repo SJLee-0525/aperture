@@ -9,6 +9,7 @@ export default defineConfig({
       reporter: ["text", "html"],
       include: [
         "src/features/**/_lib/*.ts",
+        "src/lib/search/*.ts",
         "src/lib/i18n/*.ts",
         "src/lib/format/*.ts",
         "src/lib/exif/*.ts",

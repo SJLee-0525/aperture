@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { highlightTokensFor, splitTitleByMatches } from "@/features/search/_lib/highlight-title";
+import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
 
 describe("splitTitleByMatches", () => {
   it("질의 토큰이 포함된 구간을 hit 세그먼트로 분리한다", () => {
