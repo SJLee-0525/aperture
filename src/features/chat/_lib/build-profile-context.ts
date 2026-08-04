@@ -200,6 +200,10 @@ const buildProfileContext = async (
   if (source === "live" && sections?.length && query?.text) {
     try {
       const relevant = await searchRagChunks(query, sections, signal);
+      // Vercel 함수 로그(Hobby 1시간 보관)에서 검색 빗나감을 추적하는 용도 — chunks=0이 경고 신호.
+      console.info(
+        `[chat-rag] sections=${sections.join(",")} query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])} chunks=${relevant.length}`,
+      );
       return appendRagChunks(formatted, relevant);
     } catch (error) {
       console.warn("RAG vector search failed during context build:", error);
