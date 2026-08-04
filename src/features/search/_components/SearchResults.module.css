@@ -115,6 +115,23 @@
   color: var(--text);
   overflow-wrap: anywhere;
 }
+/* 매치 구간 = 랭킹 근거 표시. 배경 하이라이트 대신 섹션 액센트 밑줄 — 다크모드 무관. */
+.mark {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+.group[data-section="photo"] .mark {
+  text-decoration-color: var(--accent-photo);
+}
+.group[data-section="music"] .mark {
+  text-decoration-color: var(--accent-music);
+}
+.group[data-section="dev"] .mark {
+  text-decoration-color: var(--accent-dev);
+}
 .hitMeta {
   flex: 0 1 auto;
   min-width: 0;

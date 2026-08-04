@@ -3,12 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import type { TitleSegment } from "@/features/search/_lib/highlight-title";
+import { highlightTokensFor, splitTitleByMatches } from "@/features/search/_lib/highlight-title";
+import { createDocumentScorer } from "@/features/search/_lib/score-documents";
 import type { SearchDocument, SearchSection } from "@/features/search/_lib/search-documents";
-import { matchesSearchText } from "@/lib/ai/rag-query";
 import { pickText } from "@/lib/i18n/pick-text";
+import { tokensFor } from "@/lib/text/korean-tokenize";
 
 import styles from "./SearchResults.module.css";
 
@@ -16,25 +19,37 @@ type Props = {
   documents: SearchDocument[];
 };
 
-type Hit = { key: string; title: string; meta: string; href: string; imageUrl?: string };
+type Hit = {
+  key: string;
+  titleSegments: TitleSegment[];
+  meta: string;
+  href: string;
+  imageUrl?: string;
+  score: number;
+};
 type Group = { section: SearchSection; label: string; hits: Hit[] };
 
-/** 통합 검색 결과 (/search?q=) — 서버가 투영한 최소 검색 문서를 q(useSearchParams)로 클라 필터.
- *  데이터는 ISR 캐시(q 무관), 필터만 클라라 타이핑/언어 전환에 즉시 반응. */
+/** 통합 검색 결과 (/search?q=) — 서버가 정규화까지 마친 검색 인덱스를 q(useSearchParams)로 클라 대조.
+ *  데이터는 ISR 캐시(q 무관), 대조만 클라라 타이핑/언어 전환에 즉시 반응.
+ *  그룹 순서는 사진→음악→개발 고정, 그룹 안은 점수순(제목 매치 가중) + 매치 구간 하이라이트.
+ *  자모만 친 질의("ㅂㅅ")는 서버가 만든 초성 인덱스와 대조하는 초성 검색으로 동작. */
 const SearchResults = ({ documents }: Props) => {
   const { dict, lang } = useLang();
   const q = (useSearchParams().get("q") ?? "").trim();
 
   const groups = useMemo<Group[]>(() => {
     if (!q) return [];
+    const queryTokens = tokensFor(q); // 채점·하이라이트가 공유 — 질의 토큰화는 한 번만
+    const highlightTokens = highlightTokensFor(q, queryTokens);
+    const scoreDocument = createDocumentScorer(q, queryTokens);
     const hits: Record<SearchSection, Hit[]> = { photo: [], music: [], dev: [] };
 
     for (const document of documents) {
-      const searchableText = `${document.text.ko} ${document.text.en}`;
-      if (!matchesSearchText(q, searchableText)) continue;
+      const score = scoreDocument(document.index);
+      if (score <= 0) continue;
       hits[document.section].push({
         key: document.key,
-        title: pickText(document.title, lang),
+        titleSegments: splitTitleByMatches(pickText(document.title, lang), highlightTokens),
         meta:
           document.metaLabel === "albums"
             ? dict.albumsNav
@@ -43,7 +58,12 @@ const SearchResults = ({ documents }: Props) => {
               : "",
         href: document.href,
         imageUrl: document.imageUrl,
+        score,
       });
+    }
+    // 그룹 내부만 점수순 — sort는 안정 정렬이라 동점은 문서 배열 순서(관리자 큐레이션) 유지.
+    for (const section of Object.keys(hits) as SearchSection[]) {
+      hits[section].sort((a, b) => b.score - a.score);
     }
 
     return [
@@ -92,7 +112,17 @@ const SearchResults = ({ documents }: Props) => {
                       </span>
                     ) : null}
                     <span className={styles.hitText}>
-                      <span className={styles.hitTitle}>{hitItem.title}</span>
+                      <span className={styles.hitTitle}>
+                        {hitItem.titleSegments.map((segment, segmentIndex) =>
+                          segment.hit ? (
+                            <mark key={segmentIndex} className={styles.mark}>
+                              {segment.text}
+                            </mark>
+                          ) : (
+                            <Fragment key={segmentIndex}>{segment.text}</Fragment>
+                          ),
+                        )}
+                      </span>
                       {hitItem.meta ? <span className={styles.hitMeta}>{hitItem.meta}</span> : null}
                     </span>
                   </Link>
