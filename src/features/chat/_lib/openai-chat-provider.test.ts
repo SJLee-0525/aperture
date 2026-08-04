@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  createOpenAIChatProvider,
-  OpenAIRateLimitError,
-  parseOpenAIResult,
-} from "@/features/chat/_lib/openai-chat-provider";
+import { createOpenAIChatProvider } from "@/features/chat/_lib/openai-chat-provider";
 
 const outputResponse = (text: string, status = 200) =>
   new Response(
@@ -91,7 +87,7 @@ describe("OpenAI chat provider", () => {
       model: "gpt-5.6-luna",
       instructions: "system context",
       reasoning: { effort: "none" },
-      max_output_tokens: 2048,
+      max_output_tokens: 2_048,
       store: false,
       stream: false,
       text: {
@@ -107,8 +103,9 @@ describe("OpenAI chat provider", () => {
     expect(body.input.map(({ role }: { role: string }) => role)).toEqual(["user", "assistant"]);
   });
 
-  it("rate limit과 잘못된 구조화 출력을 구분한다", async () => {
+  it("rate limit을 공통 오류 kind로 정규화한다", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 429 })));
+
     await expect(
       createOpenAIChatProvider(
         "secret",
@@ -119,10 +116,7 @@ describe("OpenAI chat provider", () => {
         lang: "en",
         signal: new AbortController().signal,
       }),
-    ).rejects.toBeInstanceOf(OpenAIRateLimitError);
-
-    expect(() => parseOpenAIResult('{"content":""}')).toThrow();
-    expect(() => parseOpenAIResult("not-json")).toThrow();
+    ).rejects.toMatchObject({ kind: "rate-limit" });
   });
 
   it("max_output_tokens 잘림(response.incomplete)이면 스트리밍된 본문만 회수한다", async () => {

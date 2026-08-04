@@ -2,10 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ChatProviderUnavailableError } from "@/features/chat/_lib/chat-provider";
 import { ChatRateLimitConfigurationError } from "@/features/chat/_lib/chat-rate-limit";
-import {
-  GeminiBlockedError,
-  GeminiRateLimitError,
-} from "@/features/chat/_lib/gemini-chat-provider";
+import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import { handleChatRequest, MAX_BODY_BYTES } from "@/features/chat/_lib/handle-chat-request";
 
 const createRequest = (body: unknown, headers?: HeadersInit) =>
@@ -286,9 +283,11 @@ describe("handleChatRequest", () => {
   });
 
   it.each([
-    [new GeminiRateLimitError(), 429, "RATE_LIMIT"],
-    [new GeminiBlockedError(), 422, "CONTENT_BLOCKED"],
-  ] as const)("Gemini 오류를 언어별 공개 오류로 변환한다", async (error, status, code) => {
+    [new ChatUpstreamError("rate-limit", "rate limited"), 429, "RATE_LIMIT"],
+    [new ChatUpstreamError("blocked", "blocked"), 422, "CONTENT_BLOCKED"],
+    [new ChatUpstreamError("unavailable", "unavailable"), 503, "UPSTREAM_ERROR"],
+    [new ChatUpstreamError("invalid", "invalid"), 502, "UPSTREAM_ERROR"],
+  ] as const)("제공자 오류 kind를 공개 오류로 변환한다", async (error, status, code) => {
     const response = await handleChatRequest(
       createRequest({ lang: "en", messages: [{ role: "user", content: "question" }] }),
       {

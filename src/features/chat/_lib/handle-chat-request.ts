@@ -15,19 +15,10 @@ import {
   type ChatRateLimiter,
 } from "@/features/chat/_lib/chat-rate-limit";
 import {
-  GeminiBlockedError,
-  GeminiMaxTokensError,
-  GeminiRateLimitError,
-  GeminiServiceUnavailableError,
-} from "@/features/chat/_lib/gemini-chat-provider";
-import {
   ChatProviderUnavailableError,
   type ChatProvider,
 } from "@/features/chat/_lib/chat-provider";
-import {
-  OpenAIRateLimitError,
-  OpenAIServiceUnavailableError,
-} from "@/features/chat/_lib/openai-chat-provider";
+import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
 import type { Lang } from "@/types/lang";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
@@ -109,15 +100,10 @@ const publicErrorFor = (
   if (error instanceof ChatProviderUnavailableError) {
     return { status: 503, code: "PROVIDER_UNAVAILABLE" };
   }
-  if (error instanceof GeminiRateLimitError) return { status: 429, code: "RATE_LIMIT" };
-  if (error instanceof OpenAIRateLimitError) return { status: 429, code: "RATE_LIMIT" };
-  if (error instanceof GeminiBlockedError) return { status: 422, code: "CONTENT_BLOCKED" };
-  if (error instanceof GeminiMaxTokensError) return { status: 502, code: "UPSTREAM_ERROR" };
-  if (error instanceof GeminiServiceUnavailableError) {
-    return { status: 503, code: "UPSTREAM_ERROR" };
-  }
-  if (error instanceof OpenAIServiceUnavailableError) {
-    return { status: 503, code: "UPSTREAM_ERROR" };
+  if (error instanceof ChatUpstreamError) {
+    if (error.kind === "rate-limit") return { status: 429, code: "RATE_LIMIT" };
+    if (error.kind === "blocked") return { status: 422, code: "CONTENT_BLOCKED" };
+    if (error.kind === "unavailable") return { status: 503, code: "UPSTREAM_ERROR" };
   }
   return { status: 502, code: "UPSTREAM_ERROR" };
 };

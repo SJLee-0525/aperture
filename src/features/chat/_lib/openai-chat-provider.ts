@@ -1,51 +1,26 @@
-import type { ChatProvider, ChatProviderResult } from "@/features/chat/_lib/chat-provider";
-import type { ChatLink, ChatReferenceRequest } from "@/types/chat";
+import {
+  buildChatResponseSchema,
+  createStreamingContentCollector,
+  parseOrSalvageChatResult,
+} from "@/features/chat/_lib/chat-response-contract";
+import { MAX_OUTPUT_TOKENS } from "@/features/chat/_lib/chat-tuning";
+import {
+  assertUpstreamResponseOk,
+  ChatUpstreamError,
+} from "@/features/chat/_lib/chat-upstream-error";
+import { readSseStream } from "@/features/chat/_lib/sse-stream";
+import type { ChatProvider } from "@/features/chat/_lib/chat-provider";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const MAX_RESPONSE_CHARS = 1_200;
+const PROVIDER_LABEL = "OpenAI";
+/**
+ * 추론 토큰도 max_output_tokens 를 소모하므로 본문 예산을 지키려고 끈다.
+ * Gemini 쪽은 모델 세대마다 필드가 달라 같은 조치를 하지 않으며(해당 파일 주석 참고),
+ * 대신 양쪽 모두 넉넉한 MAX_OUTPUT_TOKENS 를 공유해 잘림을 예방한다.
+ */
+const REASONING_EFFORT = "none";
 
-const RESPONSE_SCHEMA = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    content: {
-      type: "string",
-      description:
-        "A concise plain-text answer in the requested language. Do not include Markdown or URLs.",
-    },
-    links: {
-      type: "array",
-      description:
-        "Up to two directly relevant internal navigation actions. Usually empty. Do not add contact unless requested or the answer is unknown.",
-      maxItems: 2,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          label: { type: "string" },
-          href: { type: "string" },
-        },
-        required: ["label", "href"],
-      },
-    },
-    references: {
-      type: "array",
-      description:
-        "Up to three concrete portfolio items directly relevant to the answer. Empty for general profile or contact questions.",
-      maxItems: 3,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          type: { type: "string", enum: ["photo", "music", "project"] },
-          id: { type: "string" },
-        },
-        required: ["type", "id"],
-      },
-    },
-  },
-  required: ["content", "links", "references"],
-} as const;
+const RESPONSE_SCHEMA = buildChatResponseSchema({ strict: true });
 
 type OpenAIResponse = {
   output?: Array<{
@@ -62,141 +37,12 @@ type OpenAIStreamEvent = {
   error?: { message?: string };
 };
 
-class OpenAIRateLimitError extends Error {
-  constructor() {
-    super("OpenAI rate limit exceeded");
-    this.name = "OpenAIRateLimitError";
-  }
-}
-
-class OpenAIServiceUnavailableError extends Error {
-  constructor() {
-    super("OpenAI service unavailable");
-    this.name = "OpenAIServiceUnavailableError";
-  }
-}
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const parseLinks = (value: unknown): ChatLink[] | undefined => {
-  if (!Array.isArray(value)) return undefined;
-  const links = value.slice(0, 2).flatMap((item) => {
-    if (!isRecord(item) || typeof item.label !== "string" || typeof item.href !== "string") {
-      return [];
-    }
-    return [{ label: item.label.trim(), href: item.href.trim() }];
-  });
-  return links.length ? links : undefined;
-};
-
-const parseReferences = (value: unknown): ChatReferenceRequest[] | undefined => {
-  if (!Array.isArray(value)) return undefined;
-  const references = value.slice(0, 3).flatMap((item) => {
-    if (
-      !isRecord(item) ||
-      (item.type !== "photo" && item.type !== "music" && item.type !== "project") ||
-      typeof item.id !== "string" ||
-      !item.id.trim()
-    ) {
-      return [];
-    }
-    return [{ type: item.type, id: item.id.trim() } satisfies ChatReferenceRequest];
-  });
-  return references.length ? references : undefined;
-};
-
-const parseOpenAIResult = (text: string): ChatProviderResult => {
-  const parsed: unknown = JSON.parse(text);
-  if (!isRecord(parsed) || typeof parsed.content !== "string") {
-    throw new Error("OpenAI returned an invalid structured response");
-  }
-  const content = parsed.content.trim().slice(0, MAX_RESPONSE_CHARS);
-  if (!content) throw new Error("OpenAI returned an empty response");
-  return {
-    content,
-    links: parseLinks(parsed.links),
-    references: parseReferences(parsed.references),
-  };
-};
-
-/**
- * max_output_tokens 잘림(response.incomplete) 등으로 구조화 JSON 이 미완성일 때 본문만 회수한다.
- * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 동일하므로
- * "본문 확정 + links/references 포기"가 "다 보여주고 오류"보다 항상 낫다.
- */
-const parseOrSalvageOpenAIResult = (text: string): ChatProviderResult => {
-  try {
-    return parseOpenAIResult(text);
-  } catch (error) {
-    const content = contentFromPartialJson(text).slice(0, MAX_RESPONSE_CHARS).trim();
-    if (!content) throw error;
-    return { content };
-  }
-};
-
-const contentFromPartialJson = (serialized: string): string => {
-  const match = /"content"\s*:\s*"/.exec(serialized);
-  if (!match) return "";
-  const start = match.index + match[0].length;
-  let raw = "";
-  let escaped = false;
-
-  for (let index = start; index < serialized.length; index += 1) {
-    const character = serialized[index] ?? "";
-    if (!escaped && character === '"') break;
-    raw += character;
-    if (escaped) escaped = false;
-    else if (character === "\\") escaped = true;
-  }
-  if (escaped) raw = raw.slice(0, -1);
-
-  try {
-    return JSON.parse(`"${raw}"`) as string;
-  } catch {
-    return "";
-  }
-};
-
 const responseOutputText = (response: OpenAIResponse): string =>
   response.output
     ?.flatMap((item) => item.content ?? [])
     .filter((item) => item.type === "output_text")
     .map((item) => item.text ?? "")
     .join("") ?? "";
-
-const readOpenAIEventStream = async (
-  response: Response,
-  signal: AbortSignal,
-  onEvent: (event: OpenAIStreamEvent) => void,
-) => {
-  if (!response.body) throw new Error("OpenAI returned no stream");
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  const consume = (eventBlock: string) => {
-    const payload = eventBlock
-      .split("\n")
-      .filter((line) => line.startsWith("data:"))
-      .map((line) => line.slice(5).trimStart())
-      .join("\n");
-    if (payload && payload !== "[DONE]") onEvent(JSON.parse(payload) as OpenAIStreamEvent);
-  };
-
-  while (!signal.aborted) {
-    const { done, value } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done }).replaceAll("\r\n", "\n");
-    let boundary = buffer.indexOf("\n\n");
-    while (boundary >= 0) {
-      consume(buffer.slice(0, boundary));
-      buffer = buffer.slice(boundary + 2);
-      boundary = buffer.indexOf("\n\n");
-    }
-    if (done) break;
-  }
-  if (buffer.trim()) consume(buffer);
-};
 
 const createOpenAIChatProvider =
   (apiKey: string, model: string): ChatProvider =>
@@ -211,8 +57,8 @@ const createOpenAIChatProvider =
         model,
         instructions,
         input: messages.map(({ role, content }) => ({ role, content })),
-        reasoning: { effort: "none" },
-        max_output_tokens: 2_048,
+        reasoning: { effort: REASONING_EFFORT },
+        max_output_tokens: MAX_OUTPUT_TOKENS,
         store: false,
         stream: Boolean(onContentDelta),
         text: {
@@ -228,22 +74,16 @@ const createOpenAIChatProvider =
       signal,
     });
 
-    if (response.status === 429) throw new OpenAIRateLimitError();
-    if (response.status >= 500) throw new OpenAIServiceUnavailableError();
-    if (!response.ok) throw new Error(`OpenAI request failed (${response.status})`);
+    assertUpstreamResponseOk(PROVIDER_LABEL, response);
 
     if (onContentDelta) {
-      let serialized = "";
-      let emitted = "";
+      const collector = createStreamingContentCollector(onContentDelta);
       let completedResponse: OpenAIResponse | undefined;
-      await readOpenAIEventStream(response, signal, (event) => {
+
+      await readSseStream(response, signal, (payload) => {
+        const event = JSON.parse(payload) as OpenAIStreamEvent;
         if (event.type === "response.output_text.delta") {
-          serialized += event.delta ?? "";
-          const content = contentFromPartialJson(serialized).slice(0, MAX_RESPONSE_CHARS);
-          if (content.length > emitted.length) {
-            onContentDelta(content.slice(emitted.length));
-            emitted = content;
-          }
+          collector.push(event.delta ?? "");
         } else if (event.type === "response.completed" || event.type === "response.incomplete") {
           completedResponse = event.response;
         } else if (event.type === "response.failed" || event.type === "error") {
@@ -252,19 +92,17 @@ const createOpenAIChatProvider =
           );
         }
       });
-      const finalText = responseOutputText(completedResponse ?? {}) || serialized;
-      return parseOrSalvageOpenAIResult(finalText.trim());
+
+      const finalText = responseOutputText(completedResponse ?? {}) || collector.serialized;
+      return parseOrSalvageChatResult(finalText.trim());
     }
 
     const data = (await response.json()) as OpenAIResponse;
     const text = responseOutputText(data).trim();
-    if (!text) throw new Error(data.error?.message ?? "OpenAI returned no content");
-    return parseOrSalvageOpenAIResult(text);
+    if (!text) {
+      throw new ChatUpstreamError("invalid", data.error?.message ?? "OpenAI returned no content");
+    }
+    return parseOrSalvageChatResult(text);
   };
 
-export {
-  createOpenAIChatProvider,
-  OpenAIRateLimitError,
-  OpenAIServiceUnavailableError,
-  parseOpenAIResult,
-};
+export { createOpenAIChatProvider };

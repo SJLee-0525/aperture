@@ -1,11 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  createGeminiChatProvider,
-  GeminiBlockedError,
-  GeminiRateLimitError,
-  parseGeminiResult,
-} from "@/features/chat/_lib/gemini-chat-provider";
+import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
+import { createGeminiChatProvider } from "@/features/chat/_lib/gemini-chat-provider";
 
 const response = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -102,10 +98,49 @@ describe("Gemini chat provider", () => {
     ]);
     expect(body.generationConfig.responseMimeType).toBe("application/json");
     expect(body.generationConfig.responseJsonSchema).toMatchObject({ type: "object" });
-    expect(body.generationConfig.maxOutputTokens).toBe(1024);
+    expect(body.generationConfig.maxOutputTokens).toBe(2_048);
   });
 
-  it("MAX_TOKENS 종료를 일반 JSON 파싱 오류와 구분한다", async () => {
+  /**
+   * 사고 제어 필드는 모델 세대마다 이름이 다르다(2.5=thinkingBudget, 3.x=thinkingLevel).
+   * 어느 쪽을 하드코딩해도 다른 세대 모델에서 400 이 나므로 아예 보내지 않는다 —
+   * env 로 모델만 바꿔 끼우는 운용을 지키기 위한 의도적 선택이다.
+   */
+  it("모델 세대에 종속되는 사고 설정을 보내지 않는다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      response({
+        candidates: [
+          {
+            content: {
+              parts: [
+                { text: JSON.stringify({ content: "안녕하세요.", links: [], references: [] }) },
+              ],
+            },
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await createGeminiChatProvider(
+      "secret",
+      "gemini-test",
+    )({
+      instructions: "context",
+      messages: [{ role: "user", content: "소개해줘" }],
+      lang: "ko",
+      signal: new AbortController().signal,
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string).generationConfig).not.toHaveProperty("thinkingConfig");
+  });
+
+  /**
+   * 예전에는 MAX_TOKENS 를 오류로 올려 502 로 끝냈다. 스트리밍으로 이미 다 보여준 본문을
+   * 버리는 셈이라 OpenAI 와 동작이 어긋났고, 지금은 양쪽 모두 본문만 회수한다.
+   */
+  it("MAX_TOKENS로 잘린 응답도 본문만 회수한다", async () => {
     const event = `data: ${JSON.stringify({
       candidates: [
         { finishReason: "MAX_TOKENS", content: { parts: [{ text: '{"content":"잘린 답변' }] } },
@@ -119,19 +154,21 @@ describe("Gemini chat provider", () => {
           new Response(event, { headers: { "Content-Type": "text/event-stream" } }),
         ),
     );
+    const deltas: string[] = [];
 
-    await expect(
-      createGeminiChatProvider(
-        "secret",
-        "gemini-test",
-      )({
-        instructions: "context",
-        messages: [{ role: "user", content: "question" }],
-        lang: "ko",
-        signal: new AbortController().signal,
-        onContentDelta: vi.fn(),
-      }),
-    ).rejects.toThrow("maximum output token limit");
+    const result = await createGeminiChatProvider(
+      "secret",
+      "gemini-test",
+    )({
+      instructions: "context",
+      messages: [{ role: "user", content: "question" }],
+      lang: "ko",
+      signal: new AbortController().signal,
+      onContentDelta: (delta) => deltas.push(delta),
+    });
+
+    expect(result).toEqual({ content: "잘린 답변" });
+    expect(deltas.join("")).toBe("잘린 답변");
   });
 
   it("무료 티어 제한과 안전 차단을 구분한다", async () => {
@@ -145,41 +182,20 @@ describe("Gemini chat provider", () => {
         lang: "en",
         signal: new AbortController().signal,
       }),
-    ).rejects.toBeInstanceOf(GeminiRateLimitError);
+    ).rejects.toMatchObject({ kind: "rate-limit" });
 
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValueOnce(response({ promptFeedback: { blockReason: "SAFETY" } })),
     );
-    await expect(
-      provider({
-        instructions: "context",
-        messages: [{ role: "user", content: "question" }],
-        lang: "en",
-        signal: new AbortController().signal,
-      }),
-    ).rejects.toBeInstanceOf(GeminiBlockedError);
-  });
+    const blocked = provider({
+      instructions: "context",
+      messages: [{ role: "user", content: "question" }],
+      lang: "en",
+      signal: new AbortController().signal,
+    });
 
-  it("구조가 잘못된 모델 출력을 거부한다", () => {
-    expect(() => parseGeminiResult('{"content":""}')).toThrow();
-    expect(() => parseGeminiResult("not-json")).toThrow();
-  });
-
-  it("지나치게 긴 답변은 패널에 맞는 길이로 제한한다", () => {
-    const result = parseGeminiResult(
-      JSON.stringify({
-        content: "가".repeat(2_000),
-        links: [
-          { label: "사진", href: "/photo" },
-          { label: "음악", href: "/music" },
-          { label: "개발", href: "/dev" },
-        ],
-        references: [],
-      }),
-    );
-
-    expect(result.content).toHaveLength(1_200);
-    expect(result.links).toHaveLength(2);
+    await expect(blocked).rejects.toBeInstanceOf(ChatUpstreamError);
+    await expect(blocked).rejects.toMatchObject({ kind: "blocked" });
   });
 });

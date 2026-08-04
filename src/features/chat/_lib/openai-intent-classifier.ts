@@ -97,11 +97,13 @@ const createOpenAIIntentClassifier =
     return parseIntentSections(responseOutputText(data));
   };
 
+/**
+ * 채팅 제공자 키를 공유하지 않는다 — 공유하면 CHAT_PROVIDER 를 Gemini 로 바꾸는 순간
+ * 분류기가 조용히 꺼져 정규식 폴백으로 내려간다. 전용 키만 보게 해서 챗봇 제공자 교체와
+ * 완전히 분리한다. 키가 없으면 chat-intent.ts 의 정규식 분류기가 그대로 동작한다.
+ */
 const getChatIntentClassifier = (): ChatIntentClassifier | undefined => {
-  const explicitKey = process.env.CHAT_INTENT_PROVIDER_API_KEY?.trim();
-  const sharedOpenAIKey =
-    process.env.CHAT_PROVIDER === "openai" ? process.env.CHAT_PROVIDER_API_KEY?.trim() : undefined;
-  const apiKey = explicitKey || sharedOpenAIKey;
+  const apiKey = process.env.CHAT_INTENT_PROVIDER_API_KEY?.trim();
   const model = process.env.CHAT_INTENT_MODEL?.trim() || "gpt-5-nano";
   return apiKey ? createOpenAIIntentClassifier(apiKey, model) : undefined;
 };
