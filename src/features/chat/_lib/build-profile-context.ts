@@ -12,6 +12,7 @@ import { pickText } from "@/lib/i18n/pick-text";
 import type { ChatProfileData } from "@/lib/content/chat";
 
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
+import type { StoredRagChunkMeta } from "@/types/rag";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";
 
@@ -176,6 +177,14 @@ const buildProfileSnapshot = unstable_cache(
   { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
+const appendRagChunks = (baseContext: string, chunks: StoredRagChunkMeta[]): string => {
+  if (chunks.length === 0) return baseContext;
+  return `${baseContext}\n\n${section(
+    "Highly Relevant Portfolio Context (Vector Search)",
+    chunks.map((item) => `[${item.sourceType}:${item.sourceId}] ${item.text}`),
+  )}`;
+};
+
 const buildProfileContext = async (
   lang: Lang,
   sections?: ProfileSection[],
@@ -184,18 +193,14 @@ const buildProfileContext = async (
 ): Promise<string> => {
   const source = getContentSource();
   const context = (await buildProfileSnapshot(lang, source)).context;
-  let formatted = sections?.length ? selectFormattedProfileContext(context, sections) : context;
+  // 벡터 검색은 섹션 요약을 대체하지 않고 보강한다 — 검색이 관련 청크를 놓쳐도
+  // 요약(수상·경력 라인 등)이 남아 있어야 "있는데 없다" 오답을 막는다.
+  const formatted = sections?.length ? selectFormattedProfileContext(context, sections) : context;
 
   if (source === "live" && sections?.length && queryText) {
     try {
       const relevant = await searchRagChunks(queryText, sections, signal);
-      if (relevant.length > 0) {
-        const profileOnly = selectFormattedProfileContext(context, ["profile"]);
-        formatted = `${profileOnly}\n\n${section(
-          "Highly Relevant Portfolio Context (Vector Search)",
-          relevant.map((item) => `[${item.sourceType}:${item.sourceId}] ${item.text}`),
-        )}`;
-      }
+      return appendRagChunks(formatted, relevant);
     } catch (error) {
       console.warn("RAG vector search failed during context build:", error);
     }
@@ -252,6 +257,7 @@ const resolveProfileReferences = async (
 };
 
 export {
+  appendRagChunks,
   buildProfileContext,
   formatProfileContext,
   formatProfileReferences,

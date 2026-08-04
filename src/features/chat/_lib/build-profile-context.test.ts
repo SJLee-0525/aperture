@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  appendRagChunks,
   formatProfileContext,
   formatProfileReferences,
   resolveReferencesWithRefresh,
@@ -94,6 +95,38 @@ describe("formatProfileContext", () => {
     expect(references.find(({ type }) => type === "project")).toMatchObject({
       href: expect.stringContaining("/dev/projects?project="),
     });
+  });
+});
+
+describe("appendRagChunks", () => {
+  const chunk = {
+    id: "musicAward:award-1:0",
+    section: "music" as const,
+    sourceType: "musicAward",
+    sourceId: "award-1",
+    chunkKey: "0",
+    text: "2024 우수상 수상",
+    embeddingModel: "text-embedding-3-small@512",
+    published: true,
+  };
+
+  it("벡터 검색 청크를 섹션 요약 아래에 덧붙이고 요약은 유지한다", () => {
+    const base = selectFormattedProfileContext(formatProfileContext(data, "ko"), [
+      "profile",
+      "development",
+      "music",
+    ]);
+    const merged = appendRagChunks(base, [chunk]);
+
+    expect(merged).toContain("## Development");
+    expect(merged).toContain("## Music");
+    expect(merged).toContain("## Highly Relevant Portfolio Context (Vector Search)");
+    expect(merged).toContain("[musicAward:award-1] 2024 우수상 수상");
+    expect(merged.indexOf("## Music")).toBeLessThan(merged.indexOf("Vector Search"));
+  });
+
+  it("검색 청크가 없으면 기존 문맥을 그대로 반환한다", () => {
+    expect(appendRagChunks("# PROFILE_CONTEXT", [])).toBe("# PROFILE_CONTEXT");
   });
 });
 
