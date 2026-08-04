@@ -204,7 +204,7 @@ describe("chat provider routing", () => {
       lang: "ko",
       signal: new AbortController().signal,
     });
-    await vi.advanceTimersByTimeAsync(15_000);
+    await vi.advanceTimersByTimeAsync(25_000);
     const result = await resultPromise;
 
     expect(result.content).toBe("OpenAI fallback");

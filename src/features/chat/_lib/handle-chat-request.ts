@@ -27,11 +27,11 @@ import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
 import type { RagQuery } from "@/types/rag";
 
-// route.ts의 maxDuration(45초)보다 5초 여유를 둔다 — Vercel이 함수를 먼저 끊으면
-// TIMEOUT 에러 이벤트 대신 연결이 그냥 끊긴다.
+// route.ts의 maxDuration(60초 — Fluid Compute 미활성 Hobby 한도 안)보다 5초 여유를
+// 둔다 — Vercel이 함수를 먼저 끊으면 TIMEOUT 에러 이벤트 대신 연결이 그냥 끊긴다.
 // 예산 배분: 인텐트 분류(CHAT_INTENT_TIMEOUT_MS) + primary 무응답 상한
 // (chat-provider.ts) + 폴백 나머지 — 세 값은 이 총량 안에서 함께 조정한다.
-const DEFAULT_TIMEOUT_MS = 40_000;
+const DEFAULT_TIMEOUT_MS = 55_000;
 const MAX_BODY_BYTES = 20_000;
 const STREAM_MEDIA_TYPE = "application/x-ndjson";
 const ALLOWED_ACTION_ROUTES = new Set<string>([

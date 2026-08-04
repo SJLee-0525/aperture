@@ -44,13 +44,14 @@ const mockChatProvider: ChatProvider = async ({ messages, lang, signal }) => {
 };
 
 /**
- * primary가 무응답으로 매달리면 요청 전체 타임아웃(40초)을 혼자 소진해 폴백이
+ * primary가 무응답으로 매달리면 요청 전체 타임아웃(55초)을 혼자 소진해 폴백이
  * 시도조차 못 된다. 첫 본문 출력 전까지만 적용하는 상한 — 본문이 나가기 시작하면
  * 폴백하지 않으므로(emitted 가드) 건강한 스트림을 중간에 죽이지 않는다.
  * 비스트리밍 호출은 끝까지 이 상한을 받지만, 걸려도 폴백이 이어받으므로 응답은 나간다.
  * 최악 케이스 배분: 인텐트 분류 + 이 상한 + 폴백 나머지 — 전체 예산은 handle-chat-request.ts.
+ * Gemini 실측(2026-08): 정상 TTFB ~1초, 간헐적으로 응답 시작 전 14~24초 큐잉 스파이크.
  */
-const PRIMARY_NO_OUTPUT_TIMEOUT_MS = 15_000;
+const PRIMARY_NO_OUTPUT_TIMEOUT_MS = 25_000;
 
 const withFallback =
   (primary: ChatProvider, fallback: ChatProvider): ChatProvider =>
