@@ -228,7 +228,7 @@ const CustomCursor = () => {
       }
 
       targetRect = target.getBoundingClientRect();
-      targetCompact = targetRect.width <= 450 && targetRect.height <= 72;
+      targetCompact = targetRect.width <= 450 && targetRect.height <= 128;
       targetLargeMode = target.dataset.cursorLarge === "frame" ? "frame" : "link";
       if (!targetCompact) return;
 
