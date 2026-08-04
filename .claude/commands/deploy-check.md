@@ -14,6 +14,9 @@ npm run build     # 실패 시 여기서 중단
 npm run lint
 ```
 
+- [ ] `package-lock.json` 이 변경됐다면 **npm 10 으로 재생성됐는가** (CI 는 Node 22/npm 10 `npm ci` — 로컬 npm 11 churn 시 전 잡 실패. `npx npm@10 install --package-lock-only` 후 `npx npm@10 ci --dry-run` 검증, [CLAUDE.md 개발 명령어](../../CLAUDE.md) 참조)
+- [ ] `package.json` 변경 시 `package-lock.json` 도 같은 커밋에 staged 되어 있는가
+
 ### Step 2 — Security Rules 점검 ★ (서버 없는 구조라 이게 보안의 전부)
 
 - `firestore.rules` / `storage.rules` Read 후 확인:

@@ -224,6 +224,20 @@ firebase emulators:start   # Rules 로컬 테스트 (Auth/Firestore/Storage)
 firebase deploy --only firestore:rules,storage   # Rules만 배포
 ```
 
+### ⚠️ 의존성 추가 시 lockfile은 npm 10으로 재생성 (CI 필수)
+
+CI(ci.yml)는 전 잡이 **Node 22(npm 10.9.x)** 에서 `npm ci`로 설치한다. 로컬 npm 11로 `npm install` 하면
+lockfile이 churn된다(peer 플래그 뒤집기 + `@emnapi/*` 엔트리 삭제) → CI `npm ci`가 "Missing from lock file"로 전 잡 실패.
+**의존성 추가/변경 후 커밋 전에 반드시:**
+
+```bash
+git checkout -- package-lock.json          # npm 11이 쓴 churn 롤백
+npx npm@10 install --package-lock-only     # CI와 같은 npm 10으로 재생성
+npx npm@10 ci --dry-run                    # 검증 (에러 없으면 OK)
+```
+
+diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `package-lock.json`은 **반드시 같은 커밋**에.
+
 ## 컨벤션
 
 - 커밋: `[TYPE] 한글 제목` — [git-commit-convention](.claude/skills/git-commit-convention/SKILL.md)
