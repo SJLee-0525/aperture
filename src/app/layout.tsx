@@ -6,6 +6,7 @@ import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomS
 import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { MotionProvider } from "@/features/motion/_components/MotionProvider";
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/seo/site-meta";
 import { SITE_URL } from "@/lib/seo/site-url";
 
 import "./globals.css";
@@ -42,35 +43,29 @@ const splineMono = Spline_Sans_Mono({
   display: "swap",
 });
 
-/* 사이트 대표 제목·설명 — 기본·OG·트위터 메타 공용 단일 출처 */
-const SITE_TITLE = "Sungjoon Lee — Photographer, Pianist, Developer";
-const SITE_DESCRIPTION = "사진, 음악, 개발 작업을 소개하는 이성준(Sungjoon Lee)의 포트폴리오.";
-
+/* 기본 메타는 ko 기준(SSR 기본 언어) — 공개 페이지는 [lang] 세그먼트의 generateMetadata가 언어별로 덮어쓴다 */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_TITLE,
     template: "%s | Sungjoon Lee",
   },
-  description: SITE_DESCRIPTION,
-  applicationName: "Sungjoon Lee",
-  authors: [{ name: "Sungjoon Lee", url: "/" }],
-  creator: "Sungjoon Lee",
-  alternates: {
-    canonical: "/",
-  },
+  description: SITE_DESCRIPTION.ko,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME, url: "/" }],
+  creator: SITE_NAME,
   openGraph: {
     type: "website",
-    siteName: "Sungjoon Lee",
+    siteName: SITE_NAME,
     title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
+    description: SITE_DESCRIPTION.ko,
     url: "/",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
+    description: SITE_DESCRIPTION.ko,
   },
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,

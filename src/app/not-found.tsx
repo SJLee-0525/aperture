@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
 import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import styles from "./status.module.css";
@@ -25,9 +24,9 @@ export default function NotFound() {
           {dict.notFoundBody2}
         </p>
         <div className={styles.actions}>
-          <Link href={ROUTES.LANDING} className={styles.home}>
+          <LocalizedLink href={ROUTES.LANDING} className={styles.home}>
             {dict.backHome}
-          </Link>
+          </LocalizedLink>
         </div>
       </div>
     </main>

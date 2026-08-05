@@ -21,14 +21,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // 사진 섹션이 /photo/* 로 이동(A1) — 기존 URL 보존. `/` 는 (public)/page.tsx 가 처리.
-  // 이전 사진 URL은 308로 새 경로에 검색 신호와 북마크를 영구 이전한다.
+  // 경로 기반 i18n(/ko·/en) — 무-로케일 URL은 기본 언어(ko)로 308 직행.
+  // Accept-Language 분기 없는 결정적 이전 (구글 권장: 언어 기반 자동 리다이렉트 금지).
+  // v1 사진 URL(/albums 등)도 체인 리다이렉트(308 두 번)를 피해 /ko/photo/* 로 직행한다.
   async redirects() {
     return [
-      { source: "/albums", destination: "/photo/albums", permanent: true },
-      { source: "/albums/:id", destination: "/photo/albums/:id", permanent: true },
-      { source: "/map", destination: "/photo/map", permanent: true },
-      { source: "/about", destination: "/photo/about", permanent: true },
+      { source: "/", destination: "/ko", permanent: true },
+      { source: "/photo/:path*", destination: "/ko/photo/:path*", permanent: true },
+      { source: "/music/:path*", destination: "/ko/music/:path*", permanent: true },
+      { source: "/dev/:path*", destination: "/ko/dev/:path*", permanent: true },
+      { source: "/contact", destination: "/ko/contact", permanent: true },
+      { source: "/search", destination: "/ko/search", permanent: true },
+      { source: "/albums", destination: "/ko/photo/albums", permanent: true },
+      { source: "/albums/:id", destination: "/ko/photo/albums/:id", permanent: true },
+      { source: "/map", destination: "/ko/photo/map", permanent: true },
+      { source: "/about", destination: "/ko/photo/about", permanent: true },
     ];
   },
 };

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 
 import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import styles from "./status.module.css";
@@ -39,9 +39,9 @@ export default function Error({ error, reset }: Props) {
           <button type="button" onClick={reset} className={styles.retry}>
             {dict.errorRetry}
           </button>
-          <Link href={ROUTES.LANDING} className={styles.home}>
+          <LocalizedLink href={ROUTES.LANDING} className={styles.home}>
             {dict.backHome}
-          </Link>
+          </LocalizedLink>
         </div>
         {error.digest ? (
           <p className={styles.digest}>

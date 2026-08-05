@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+
+import { AboutView } from "@/features/about/_components/AboutView";
+import { getAlbums, getPhotos } from "@/lib/content/photo";
+import { getSite } from "@/lib/content/site";
+import { pageMetadata } from "@/lib/seo/metadata";
+
+import type { Lang } from "@/types/lang";
+
+type Props = { params: Promise<{ lang: Lang }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { lang } = await params;
+  return pageMetadata({
+    lang,
+    title: { ko: "사진가 소개", en: "About the Photographer" },
+    description: {
+      ko: "사진작가 이성준의 사진 작업 기록을 소개합니다.",
+      en: "About photographer Sungjoon Lee and a record of his photographic work.",
+    },
+    pathname: "/photo/about",
+  });
+}
+
+export const revalidate = 3600;
+
+/** 소개 — 통계는 사진·앨범에서 자동 집계. 파생에 쓰는 필드만 투영해 직렬화. */
+export default async function AboutPage() {
+  const [site, photos, albums] = await Promise.all([getSite(), getPhotos(), getAlbums()]);
+  const photoFacts = photos.map(({ camera, lens, place }) => ({ camera, lens, place }));
+  return <AboutView bio={site.bio} photoFacts={photoFacts} albumCount={albums.length} />;
+}
