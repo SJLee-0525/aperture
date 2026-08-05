@@ -150,11 +150,17 @@ const splitWrites = (writes: FirestoreWrite[]): FirestoreWrite[][] => {
   return batches;
 };
 
-const firestoreError = async (response: Response) => {
+/**
+ * 업스트림 원문은 서버 로그에만 남긴다 — 응답 본문에 실으면 내부 경로·필드명이 그대로 나간다.
+ * 관리자 전용 라우트지만 진단 정보를 응답으로 흘릴 이유는 없다.
+ */
+const logFirestoreError = async (response: Response) => {
   const payload = (await response.json().catch(() => null)) as {
     error?: { message?: string };
   } | null;
-  return payload?.error?.message ? `: ${payload.error.message}` : "";
+  if (payload?.error?.message) {
+    console.error(`[portfolio-embeddings] Firestore ${response.status}: ${payload.error.message}`);
+  }
 };
 
 const replaceRagDocuments = async (
@@ -207,9 +213,8 @@ const replaceRagDocuments = async (
       },
     );
     if (!response.ok) {
-      throw new Error(
-        `Firestore 임베딩 저장 실패 (${response.status})${await firestoreError(response)}`,
-      );
+      await logFirestoreError(response);
+      throw new Error(`Firestore 임베딩 저장 실패 (${response.status})`);
     }
   }
 };
