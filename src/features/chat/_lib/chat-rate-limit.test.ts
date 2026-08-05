@@ -34,11 +34,24 @@ describe("chat rate limiter", () => {
     expect(limit(request("203.0.113.1"), 1_001).allowed).toBe(false);
   });
 
+  it("위조 가능한 x-forwarded-for 보다 플랫폼이 채우는 헤더를 우선한다", () => {
+    const limit = createChatRateLimiter({ limit: 1 });
+    const spoofed = (forged: string) =>
+      new Request("http://localhost/api/chat", {
+        headers: { "x-vercel-forwarded-for": "203.0.113.9", "x-forwarded-for": forged },
+      });
+
+    expect(limit(spoofed("198.51.100.1"), 1_000).allowed).toBe(true);
+    // 공격자가 x-forwarded-for 를 매번 바꿔도 같은 버킷에 묶여야 한다.
+    expect(limit(spoofed("198.51.100.2"), 1_001).allowed).toBe(false);
+    expect(limit(spoofed("198.51.100.3"), 1_002).allowed).toBe(false);
+  });
+
   it("Upstash에서 공유 카운터와 Retry-After를 계산하고 IP 원문은 전송하지 않는다", async () => {
     const fetcher = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(Response.json({ result: [1, 10_000] }))
-      .mockResolvedValueOnce(Response.json({ result: [3, 8_000] }));
+      .mockResolvedValueOnce(Response.json({ result: [1, 10_000, 1] }))
+      .mockResolvedValueOnce(Response.json({ result: [3, 8_000, -1] }));
     const limit = createUpstashChatRateLimiter({
       url: "https://example.upstash.io",
       token: "secret",
@@ -53,6 +66,7 @@ describe("chat rate limiter", () => {
     await expect(limit(request("203.0.113.1"))).resolves.toEqual({
       allowed: false,
       retryAfterSeconds: 8,
+      scope: "client",
     });
 
     const [url, init] = fetcher.mock.calls[0] ?? [];
@@ -62,10 +76,70 @@ describe("chat rate limiter", () => {
     expect(JSON.parse(String(init?.body))).toEqual([
       "EVAL",
       expect.any(String),
-      1,
+      2,
       expect.stringMatching(/^chat:rate:v1:[a-f0-9]{64}$/),
+      expect.stringMatching(/^chat:daily:v1:\d{4}-\d{2}-\d{2}$/),
       60_000,
+      172_800_000,
+      2,
     ]);
+  });
+
+  it("전역 일일 상한을 넘기면 UTC 자정까지의 Retry-After로 막는다", async () => {
+    const noon = Date.UTC(2026, 7, 5, 12, 0, 0);
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ result: [1, 60_000, 501] }));
+    const limit = createUpstashChatRateLimiter({
+      url: "https://example.upstash.io",
+      token: "secret",
+      limit: 6,
+      dailyLimit: 500,
+      fetcher,
+      now: () => noon,
+    });
+
+    // IP 윈도우에는 여유가 있어도(count=1) 전역 예산이 소진되면 막힌다.
+    await expect(limit(request("203.0.113.1"))).resolves.toEqual({
+      allowed: false,
+      retryAfterSeconds: 12 * 60 * 60,
+      scope: "daily",
+    });
+  });
+
+  it("일일 상한 안에서는 IP가 달라도 통과시킨다", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ result: [1, 60_000, 499] }));
+    const limit = createUpstashChatRateLimiter({
+      url: "https://example.upstash.io",
+      token: "secret",
+      dailyLimit: 500,
+      fetcher,
+    });
+
+    await expect(limit(request("203.0.113.7"))).resolves.toEqual({
+      allowed: true,
+      retryAfterSeconds: 0,
+    });
+  });
+
+  it("같은 UTC 날짜의 요청은 IP가 달라도 같은 일일 키를 공유한다", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ result: [1, 60_000, 1] }));
+    const limit = createUpstashChatRateLimiter({
+      url: "https://example.upstash.io",
+      token: "secret",
+      fetcher,
+      now: () => Date.UTC(2026, 7, 5, 3, 0, 0),
+    });
+
+    await limit(request("203.0.113.1"));
+    await limit(request("198.51.100.2"));
+
+    const dailyKeys = fetcher.mock.calls.map((call) => JSON.parse(String(call[1]?.body))[4]);
+    expect(dailyKeys).toEqual(["chat:daily:v1:2026-08-05", "chat:daily:v1:2026-08-05"]);
   });
 
   it("Upstash 장애 시 인스턴스 limiter로 폴백한다", async () => {
@@ -104,6 +178,18 @@ describe("chat rate limiter", () => {
     const local = createConfiguredChatRateLimiter({});
 
     expect(local(request("203.0.113.1"))).not.toBeInstanceOf(Promise);
+  });
+
+  it("배포 환경에서 공유 limiter 자격증명이 없으면 인스턴스 limiter로 강등하지 않는다", () => {
+    // 서버리스 인스턴스별 카운터는 동시 요청만으로 우회되므로 조용히 통과시키면 안 된다.
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL", "1");
+
+    const limit = createConfiguredChatRateLimiter({});
+
+    expect(() => limit(request("203.0.113.1"))).toThrow(ChatRateLimitConfigurationError);
+
+    vi.unstubAllEnvs();
   });
 
   it("Vercel Marketplace의 KV 환경변수 이름도 공유 limiter에 사용한다", async () => {

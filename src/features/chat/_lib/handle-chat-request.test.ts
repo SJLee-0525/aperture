@@ -315,6 +315,28 @@ describe("handleChatRequest", () => {
     expect(provider).not.toHaveBeenCalled();
   });
 
+  it("전역 일일 상한 소진은 IP 제한과 다른 안내 문구로 답한다", async () => {
+    const provider = vi.fn();
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "질문" }] }),
+      {
+        provider,
+        rateLimiter: () => ({ allowed: false, retryAfterSeconds: 43_200, scope: "daily" }),
+      },
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBe("43200");
+    // "잠시 후 다시"는 리셋이 UTC 자정인 일일 상한에서는 거짓말이 된다.
+    expect(await response.json()).toEqual({
+      error: {
+        code: "DAILY_LIMIT",
+        message: "오늘의 대화 한도를 모두 사용했습니다. 내일 다시 찾아와 주세요.",
+      },
+    });
+    expect(provider).not.toHaveBeenCalled();
+  });
+
   it("공유 요청 제한 설정 오류는 provider를 호출하지 않고 503으로 닫는다", async () => {
     const provider = vi.fn();
     const response = await handleChatRequest(

@@ -167,7 +167,9 @@ const handleChatRequest = async (
       return jsonError(503, "RATE_LIMIT_UNAVAILABLE", responseLang);
     }
     if (!rateLimit.allowed) {
-      return jsonError(429, "TOO_MANY_REQUESTS", responseLang, {
+      // 전역 일일 상한은 "잠시 후 다시"가 거짓말이 된다 — 리셋은 UTC 자정이다.
+      const code = rateLimit.scope === "daily" ? "DAILY_LIMIT" : "TOO_MANY_REQUESTS";
+      return jsonError(429, code, responseLang, {
         "Retry-After": String(rateLimit.retryAfterSeconds),
       });
     }

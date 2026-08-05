@@ -18,6 +18,7 @@ const CHAT_ERROR_MESSAGES = {
     PROVIDER_UNAVAILABLE: "챗봇이 아직 준비되지 않았습니다.",
     RATE_LIMIT: "사용량이 잠시 제한되었습니다. 잠시 후 다시 시도해 주세요.",
     TOO_MANY_REQUESTS: "요청이 너무 빠릅니다. 잠시 후 다시 시도해 주세요.",
+    DAILY_LIMIT: "오늘의 대화 한도를 모두 사용했습니다. 내일 다시 찾아와 주세요.",
     RATE_LIMIT_UNAVAILABLE: "요청 보호 서비스를 확인하고 있습니다. 잠시 후 다시 시도해 주세요.",
     CONTENT_BLOCKED: "이 요청에는 답변할 수 없습니다. 다른 방식으로 질문해 주세요.",
     UPSTREAM_ERROR: "답변을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
@@ -40,6 +41,7 @@ const CHAT_ERROR_MESSAGES = {
     PROVIDER_UNAVAILABLE: "The chatbot is not available yet.",
     RATE_LIMIT: "Usage is temporarily limited. Please try again shortly.",
     TOO_MANY_REQUESTS: "Too many requests. Please try again shortly.",
+    DAILY_LIMIT: "Today's conversation limit has been reached. Please come back tomorrow.",
     RATE_LIMIT_UNAVAILABLE:
       "The request protection service is being checked. Please try again shortly.",
     CONTENT_BLOCKED: "This request cannot be answered. Please try asking another way.",
