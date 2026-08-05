@@ -22,6 +22,9 @@ test.describe("핵심 공개 화면 시각 회귀", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(route.path);
       await page.locator("main").waitFor({ state: "visible" });
+      // 웹폰트는 display:swap — 스왑 전에 찍으면 폴백 폰트 상태가 기준선으로 굳는다.
+      // 폰트 캐시가 비어 있는 첫 라우트에서만 터져서 재현이 들쭉날쭉하다.
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
       await page.locator("img").evaluateAll((images) =>
         Promise.all(
           images
