@@ -16,11 +16,14 @@ const FIREBASE_HOSTS = [
   "https://www.googleapis.com",
 ] as const;
 
-/** MapLibre 스타일(style.json)과 타일·sprite·glyphs — 키 없는 CARTO 무료 타일. */
-const CARTO_HOSTS = [
-  "https://basemaps.cartocdn.com",
-  "https://tiles.basemaps.cartocdn.com",
-] as const;
+/**
+ * MapLibre 스타일(style.json)과 타일·sprite·glyphs — 키 없는 CARTO 무료 타일.
+ * style.json 은 `basemaps.cartocdn.com`, 실제 벡터 타일(.mvt)은 샤딩된
+ * `tiles-a`~`tiles-d.basemaps.cartocdn.com` 에서 온다 — 와일드카드는 bare 도메인을
+ * 포함하지 않으므로 둘 다 필요하다. 서브도메인이 빠지면 스타일·글리프만 로드돼
+ * 클러스터 핀은 뜨는데 베이스맵이 백지가 된다.
+ */
+const CARTO_HOSTS = ["https://basemaps.cartocdn.com", "https://*.basemaps.cartocdn.com"] as const;
 
 const IMAGE_HOSTS = [
   "https://firebasestorage.googleapis.com",

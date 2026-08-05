@@ -30,6 +30,10 @@ describe("Content-Security-Policy", () => {
 
     // MapLibre 는 워커를 blob: 으로 만든다 — 빠지면 지도가 통째로 죽는다.
     expect(directive(policy, "worker-src")).toContain("blob:");
+    // CARTO 벡터 타일은 샤딩된 tiles-a~d 서브도메인에서 온다 — 빠지면 베이스맵만 백지가 된다.
+    expect(directive(policy, "connect-src")).toContain("https://*.basemaps.cartocdn.com");
+    // style.json 은 bare 도메인 — 와일드카드가 커버하지 않으므로 별도로 있어야 한다.
+    expect(directive(policy, "connect-src")).toContain("https://basemaps.cartocdn.com");
     // hCaptcha 는 스크립트·프레임을 자기 호스트에서 가져온다 — 빠지면 연락 폼이 제출 불가가 된다.
     expect(directive(policy, "script-src")).toContain("https://*.hcaptcha.com");
     expect(directive(policy, "frame-src")).toContain("https://*.hcaptcha.com");
