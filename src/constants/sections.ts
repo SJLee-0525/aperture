@@ -1,3 +1,5 @@
+import { stripLangPrefix } from "@/lib/i18n/locale-path";
+
 /**
  * 사이트 섹션 식별자 — `html[data-section]` 액센트 및 네비 그룹의 단일 출처.
  * 액센트 "색"은 globals.css 의 `html[data-section]` 규칙(디자인 site.css 이식)이 담당한다 — 여기엔 색을 두지 않는다.
@@ -15,10 +17,17 @@ const SECTION_BY_PREFIX: { prefix: string; section: SectionId }[] = [
 /** 랜딩(`/`) 및 매칭 실패 시 기본 섹션 */
 const DEFAULT_SECTION: SectionId = "home";
 
-/** 현재 경로가 속한 섹션 판별 — SectionAccent(A2)·모바일 탭 세트 선택에 사용. */
-const sectionFromPath = (pathname: string): SectionId =>
-  SECTION_BY_PREFIX.find(({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`))
-    ?.section ?? DEFAULT_SECTION;
+/**
+ * 현재 경로가 속한 섹션 판별 — SectionAccent(A2)·모바일 탭 세트 선택에 사용.
+ * 공개 경로는 `/ko`·`/en` 로케일 프리픽스를 달고 오므로 벗겨낸 뒤 매칭한다.
+ */
+const sectionFromPath = (pathname: string): SectionId => {
+  const bare = stripLangPrefix(pathname);
+  return (
+    SECTION_BY_PREFIX.find(({ prefix }) => bare === prefix || bare.startsWith(`${prefix}/`))
+      ?.section ?? DEFAULT_SECTION
+  );
+};
 
 export { DEFAULT_SECTION, SECTION_BY_PREFIX, sectionFromPath };
 export type { SectionId };

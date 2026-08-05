@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useMemo, useSyncExternalStore } from "react";
+import { createContext, useMemo, useSyncExternalStore } from "react";
 
 import { DICTIONARY, type UIDict } from "@/constants/dictionary";
 import { DEFAULT_LANG, LANGS } from "@/constants/langs";
@@ -62,17 +62,22 @@ const writeLang = (next: Lang) => {
   langListeners.forEach((listener) => listener());
 };
 
-/**
- * SSR은 항상 ko 스냅샷으로 렌더 → hydration mismatch 없음.
- * 저장값이 en이면 hydration 직후 useSyncExternalStore가 클라이언트 스냅샷으로
- * 한 번 재렌더 (수용한 트레이드오프 — 쿠키 SSR 분기는 ISR을 깨므로 기각).
- */
-const LangProvider = ({ children }: { children: React.ReactNode }) => {
-  const lang = useSyncExternalStore(subscribeLang, readLangSnapshot, readServerLangSnapshot);
+type LangProviderProps = {
+  /** 경로 모드 — 공개 `/[lang]/*` 트리에서 URL 세그먼트를 그대로 주입. 생략 시 스토어 모드. */
+  lang?: Lang;
+  children: React.ReactNode;
+};
 
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
+/**
+ * 두 가지 모드:
+ * - 경로 모드(lang prop, 공개 `/[lang]/*` 트리): URL 세그먼트가 언어의 단일 출처 —
+ *   SSR부터 해당 언어로 렌더된다. 다른 언어로의 "이동"은 LangMenu가 담당한다
+ *   (setLang은 어느 모드든 스토어 기록 — 관리자 화면과 선호를 공유).
+ * - 스토어 모드(prop 없음, 관리자·에러 페이지): 기존 localStorage + 모듈 스토어 동작 유지.
+ */
+const LangProvider = ({ lang: routeLang, children }: LangProviderProps) => {
+  const storeLang = useSyncExternalStore(subscribeLang, readLangSnapshot, readServerLangSnapshot);
+  const lang = routeLang ?? storeLang;
 
   // 값 객체 정체성 고정 — lang이 그대로면 useLang 소비자(헤더·메뉴·모달 등) 재렌더를 만들지 않는다.
   const value = useMemo(() => ({ lang, dict: DICTIONARY[lang], setLang: writeLang }), [lang]);
