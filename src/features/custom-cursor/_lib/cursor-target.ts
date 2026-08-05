@@ -13,7 +13,13 @@ const TEXT_SELECTOR = [
 const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
 const PASSIVE_CURSOR_SELECTOR = "[data-cursor-passive]";
 const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
-const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select';
+/**
+ * 브라우저가 커서를 직접 그리는 영역 — 커스텀 커서를 숨기고 기본 커서에 넘긴다.
+ * iframe 이 여기 포함되는 이유: 교차 출처 문서라 부모의 `cursor: none` 이 안으로 닿지 않고,
+ * pointermove 도 경계를 넘지 못한다. 넘기지 않으면 커스텀 커서가 iframe 경계에 굳은 채
+ * 안에서는 기본 화살표가 따로 움직여 커서가 둘로 보인다. (hCaptcha·YouTube 임베드 공통)
+ */
+const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select, iframe';
 
 type CursorTargetKind =
   "interactive" | "native" | "passive" | "range" | "scrollbar" | "text" | "none";

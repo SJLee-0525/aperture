@@ -37,4 +37,12 @@ describe("resolveCursorTarget", () => {
 
     expect(resolveCursorTarget(checkbox).kind).toBe("native");
   });
+
+  it("iframe도 native로 분류해 기본 커서에 넘긴다", () => {
+    // 교차 출처 문서에는 부모의 cursor:none 이 닿지 않는다 — 넘기지 않으면 커스텀 커서가
+    // 경계에 굳은 채 안에서 기본 화살표가 따로 움직여 커서가 둘로 보인다. (hCaptcha·YouTube)
+    const iframe = document.createElement("iframe");
+
+    expect(resolveCursorTarget(iframe).kind).toBe("native");
+  });
 });
