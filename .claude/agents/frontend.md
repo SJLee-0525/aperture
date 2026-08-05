@@ -213,7 +213,7 @@ setSelected((s) => [...s, id]); // ✅ functional setState
 ### 8. 페이지는 껍데기 — app/ 에는 라우팅·조립만
 
 ```tsx
-// app/(public)/photo/page.tsx — fetch + feature 진입 컴포넌트 조립까지만
+// app/[lang]/(public)/photo/page.tsx — fetch + feature 진입 컴포넌트 조립까지만
 export const revalidate = 3600;
 export default async function WorkPage() {
   const photos = await getPhotos();

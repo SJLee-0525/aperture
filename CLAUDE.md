@@ -30,19 +30,19 @@
 
 ## 확정 스택 & 결정 기록
 
-| 레이어     | 선택                       | 왜 (결정 사유)                                                                          |
-| ---------- | -------------------------- | --------------------------------------------------------------------------------------- |
-| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                           |
-| 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                |
-| 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                             |
-| DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)               |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)     |
-| 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**  |
-| i18n       | 자체 구현 (라이브러리 X)   | `useSyncExternalStore` + `pickText` 폴백. **ko/en** (de 없음). **전 섹션 이중언어**     |
-| 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter) |
-| EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)         |
-| 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                        |
-| 애니메이션 | CSS + `motion`             | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피            |
+| 레이어     | 선택                       | 왜 (결정 사유)                                                                                                                         |
+| ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                                                                          |
+| 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                                                               |
+| 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                                                                            |
+| DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)                                                              |
+| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
+| 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**                                                 |
+| i18n       | 자체 구현 (라이브러리 X)   | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
+| 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
+| EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)                                                        |
+| 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                                                                       |
+| 애니메이션 | CSS + `motion`             | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
 
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
 > **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **결제 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
@@ -129,7 +129,7 @@
 ```
 src/
 ├── app/                        # ★ 라우팅 껍데기만 (fetch + features 조립)
-│   ├── (public)/               # 방문자 — Server Component + revalidate
+│   ├── [lang]/(public)/        # 방문자 — /ko·/en 프리픽스, Server Component + revalidate ([lang]/layout.tsx가 lang 검증·경로 모드 LangProvider)
 │   │   ├── page.tsx            # ★ 랜딩 허브 (/ — 이름·태그라인 + 3섹션 진입 행)
 │   │   ├── photo/              # 사진 섹션 (서브브랜드 Aperture.)
 │   │   │   ├── page.tsx        # 작업 — 사진 그리드 + 필터 (?photo= 모달)
@@ -178,12 +178,13 @@ src/
 import는 **같은 하위폴더면 `./`**(예: `_components/` 안의 컴포넌트↔짝 CSS↔형제 컴포넌트), **다른 하위폴더면 `@/features/<폴더>/<하위>/…` alias**(`../` 금지 — hook 경고). 예: `@/features/gallery/_components/GalleryView`, `@/features/gallery/_hooks/use-photo-filter`, `@/features/gallery/_lib/filter-photos`.
 (단 `components/`·`lib/` 등 features 밖은 이 규칙 대상 아님 — 기존대로 평면 + CSS 동거.)
 
-### 라우팅 & URL 마이그레이션
+### 라우팅 & URL 마이그레이션 (경로 기반 i18n — [ADR-0002](docs/adr/0002-path-based-i18n.md))
 
-- `/` = **랜딩**(신규). 사진 작업 그리드는 `/photo` 로 이동. 랜딩의 개발 행은 대표 콘텐츠인 `/dev/projects`로 바로 진입한다.
-- 기존 사진 URL은 **`next.config` redirects** 로 보존: `/albums → /photo/albums`, `/map → /photo/map`, `/about → /photo/about`.
+- **공개 URL은 전부 `/ko/*`·`/en/*` 로케일 프리픽스**(`app/[lang]/(public)/*`). URL 세그먼트가 언어의 단일 출처 — `LangProvider` 경로 모드가 SSR부터 해당 언어로 렌더한다. `/ko/` = 랜딩(ko), 랜딩의 개발 행은 대표 콘텐츠인 `/dev/projects`로 바로 진입한다.
+- **무-로케일·구 URL은 `next.config` redirects로 `/ko/*`에 308 직행**(체인 금지): `/ → /ko`, `/photo/* → /ko/photo/*`(음악·개발·연락·검색 동일), v1 URL `/albums → /ko/photo/albums`, `/map → /ko/photo/map`, `/about → /ko/photo/about`. **Accept-Language 자동 분기 금지**(구글 정책) — 언어 전환은 헤더 토글(같은 페이지의 다른 언어 경로로 이동)만.
+- 공개 내부 링크는 `LocalizedLink`(현재 언어 프리픽스 자동 부착), 경로 유틸은 `lib/i18n/locale-path.ts` 단일 출처. pathname 소비 코드는 `stripLangPrefix` 경유(섹션 판별·활성 링크). hreflang은 ko·en 상호 참조 + x-default(ko)를 `pageMetadata`·sitemap이 공유한다.
 - 음악·개발은 **개별 페이지**로 구성한다. 개발은 `/dev`=기술 스택, `/dev/projects`=프로젝트, `/dev/career`=경력이며 프로젝트 상세는 `?project=` 딥링크 모달이다.
-- `/admin/*` 는 세 섹션 CMS를 모두 포함(사진·음악·개발).
+- `/admin/*` 는 **로케일 밖**(프리픽스 없음) — 세 섹션 CMS를 모두 포함(사진·음악·개발). 관리자 UI 언어는 기존 localStorage 스토어 모드 유지.
 
 ## 환경변수 (`.env.local` — hook이 자동 수정 차단, 직접 편집)
 
