@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
@@ -11,13 +11,10 @@ import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation"
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { SearchSuggestion } from "@/lib/search/suggest-documents";
 import {
   MOBILE_MENU_OPEN_ATTRIBUTE,
   MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE,
 } from "@/features/site-header/_components/MobileNavigationVisibility";
-import { SearchSuggestions } from "@/features/site-header/_components/SearchSuggestions";
-import { useSearchSuggestions } from "@/features/site-header/_hooks/use-search-suggestions";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
@@ -26,6 +23,7 @@ import styles from "./MobileMenu.module.css";
 /**
  * 모바일 버거 메뉴 — 헤더 우측 버거 + 위에서 내려오는 시트(사진/음악/개발 아코디언 + 검색).
  * 데스크톱은 CSS로 버거 숨김(mega-menu 사용). 버거 + 오버레이를 한 컴포넌트로 캡슐화.
+ * 검색은 제출로 /search 만 연다 — 자동완성 드롭다운은 데스크톱(SearchBox) 전용.
  */
 /** CSS 브레이크포인트(767px)와 동기 — 버거·시트가 표시되는 폭. */
 const MOBILE_QUERY = "(max-width: 767px)";
@@ -39,8 +37,6 @@ const MobileMenu = () => {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<NavSection | null>(null);
   const [query, setQuery] = useState("");
-  const [suggestOpen, setSuggestOpen] = useState(false);
-  const { suggestions, loadIndex } = useSearchSuggestions(query);
   const restoreHiddenChromeRef = useRef(false);
   const panelRef = useFocusTrap(open);
 
@@ -62,20 +58,15 @@ const MobileMenu = () => {
   };
   const close = () => setOpen(false);
 
-  // Escape 로 닫기 — 추천 드롭다운이 열려 있으면 그것만 먼저 닫는다(표준 콤보박스 동작).
+  // Escape 로 닫기
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (suggestOpen && suggestions.length > 0) {
-        setSuggestOpen(false);
-        return;
-      }
-      close();
+      if (event.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, suggestOpen, suggestions.length]);
+  }, [open]);
 
   // 데스크톱 폭으로 전환되면 자동으로 닫는다 — 데스크톱은 mega-menu 가 담당하고
   // 버거가 CSS 로 숨겨져 시트를 닫을 수단이 없어진다(스크롤 잠금도 걸린 채 남는다).
@@ -115,13 +106,6 @@ const MobileMenu = () => {
     close();
   };
 
-  const suggestListId = useId();
-  const showSuggestions = suggestOpen && suggestions.length > 0;
-  const pickSuggestion = (suggestion: SearchSuggestion) => {
-    router.push(suggestion.href);
-    close();
-  };
-
   return (
     <>
       <button
@@ -158,19 +142,7 @@ const MobileMenu = () => {
                     <input
                       type="text"
                       value={query}
-                      role="combobox"
-                      aria-expanded={showSuggestions}
-                      aria-controls={suggestListId}
-                      aria-autocomplete="list"
-                      onChange={(event) => {
-                        setQuery(event.target.value);
-                        setSuggestOpen(true);
-                      }}
-                      onFocus={() => {
-                        loadIndex();
-                        setSuggestOpen(true);
-                      }}
-                      onBlur={() => setSuggestOpen(false)}
+                      onChange={(event) => setQuery(event.target.value)}
                       placeholder={dict.searchPlaceholder}
                       aria-label={dict.searchPlaceholder}
                     />
@@ -181,14 +153,6 @@ const MobileMenu = () => {
                     >
                       <Icon name="search" size={17} />
                     </button>
-                    {showSuggestions ? (
-                      <SearchSuggestions
-                        id={suggestListId}
-                        suggestions={suggestions}
-                        activeIndex={-1}
-                        onPick={pickSuggestion}
-                      />
-                    ) : null}
                   </form>
 
                   {MEGA_MENU.map((group) => {

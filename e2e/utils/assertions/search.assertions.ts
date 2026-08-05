@@ -7,8 +7,9 @@ const searchAssertions = {
     }
 
     const search = page.getByRole("search");
-    // 검색 input은 자동완성 콤보박스(role="combobox") — 암시적 textbox 롤이 대체된다.
-    await search.getByRole("combobox").fill("포트폴리오");
+    // 데스크톱 검색창은 자동완성 콤보박스(role="combobox"), 암시적 textbox 롤 대체.
+    // 모바일 버거 메뉴 검색은 자동완성이 없어 평범한 textbox 다.
+    await search.getByRole(mobile ? "textbox" : "combobox").fill("포트폴리오");
     await search.getByRole("button", { name: /검색/ }).click();
 
     await expect(page).toHaveURL(/\/search\?q=%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4$/);

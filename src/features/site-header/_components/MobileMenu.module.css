@@ -144,11 +144,6 @@
 }
 
 .search {
-  /* 자동완성 드롭다운(SearchSuggestions)의 absolute 기준점.
-     z-index — 형제 항목들이 entry 애니메이션(fill both)으로 스태킹 컨텍스트를 유지해
-     뒤 형제(아코디언)가 DOM 순서로 드롭다운 위에 그려지는 것을 막는다. */
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   gap: var(--s-2);
