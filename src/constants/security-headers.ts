@@ -46,6 +46,20 @@ const CAPTCHA_HOSTS = [
 ] as const;
 
 /**
+ * GA4(gtag.js) — 로더는 googletagmanager, 수집 비콘은 google-analytics 로 나간다.
+ * 지역 엔드포인트(`region1.google-analytics.com`)와 서버 사이드 리디렉션 대상
+ * (`*.analytics.google.com`)까지 열지 않으면 이벤트가 조용히 유실된다.
+ */
+const ANALYTICS_SCRIPT_HOSTS = ["https://www.googletagmanager.com"] as const;
+
+const ANALYTICS_CONNECT_HOSTS = [
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
+  "https://*.google-analytics.com",
+  "https://*.analytics.google.com",
+] as const;
+
+/**
  * ⚠️ script-src 'unsafe-inline' 은 테마·lang no-flash 인라인 스크립트와 Next 부트스트랩 때문이다.
  * nonce 로 좁히려면 middleware 에서 요청마다 nonce 를 발급해 두 스크립트에 주입해야 한다.
  * style-src 'unsafe-inline' 은 React inline style prop(24곳)과 MapLibre 런타임 스타일 때문.
@@ -64,13 +78,14 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) =>
     "object-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    `script-src ${["'self'", "'unsafe-inline'", ...(isDevelopment ? ["'unsafe-eval'"] : []), ...CAPTCHA_HOSTS].join(" ")}`,
+    `script-src ${["'self'", "'unsafe-inline'", ...(isDevelopment ? ["'unsafe-eval'"] : []), ...CAPTCHA_HOSTS, ...ANALYTICS_SCRIPT_HOSTS].join(" ")}`,
     `style-src 'self' 'unsafe-inline' ${CAPTCHA_HOSTS.join(" ")}`,
     "font-src 'self' data:",
-    `img-src 'self' data: blob: ${IMAGE_HOSTS.join(" ")}`,
+    // GA 는 fetch/beacon 이 막히면 1x1 픽셀로 폴백하므로 img-src 에도 같은 호스트가 필요하다.
+    `img-src 'self' data: blob: ${[...IMAGE_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
     // blob: 은 업로드 전 압축본(browser-image-compression)·내보내기 canvas 결과를 다시 읽는 경로.
     // data: 는 어느 경로도 fetch 하지 않아 넣지 않는다.
-    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...CARTO_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS].join(" ")}`,
+    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...CARTO_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
     `frame-src ${[...YOUTUBE_FRAME_HOSTS, ...CAPTCHA_HOSTS].join(" ")}`,
     // MapLibre 는 워커를 blob: URL 로 생성한다 — 빠지면 지도가 통째로 죽는다.
     "worker-src 'self' blob:",

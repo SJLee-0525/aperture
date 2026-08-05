@@ -196,6 +196,7 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비교(Rules 하드코딩 UID와 동기화)
+# NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX      # (선택) GA4 측정 ID. 미설정 시 gtag 미삽입. 실값은 Vercel에만
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션에 '1' 금지
 ```
 

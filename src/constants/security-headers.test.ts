@@ -37,6 +37,18 @@ describe("Content-Security-Policy", () => {
     expect(directive(policy, "img-src")).toContain("https://firebasestorage.googleapis.com");
   });
 
+  it("GA4 로더와 수집 비콘 경로를 함께 연다", () => {
+    const policy = buildContentSecurityPolicy(false);
+
+    // 로더(gtag.js)만 열고 수집 호스트를 빠뜨리면 스크립트는 뜨는데 이벤트가 전부 유실된다.
+    expect(directive(policy, "script-src")).toContain("https://www.googletagmanager.com");
+    expect(directive(policy, "connect-src")).toContain("https://www.google-analytics.com");
+    // 지역 엔드포인트(region1.google-analytics.com)로 나가는 비콘.
+    expect(directive(policy, "connect-src")).toContain("https://*.google-analytics.com");
+    // fetch 가 막힌 환경의 1x1 픽셀 폴백.
+    expect(directive(policy, "img-src")).toContain("https://www.google-analytics.com");
+  });
+
   it("클릭재킹과 폼 하이재킹 방어를 유지한다", () => {
     const policy = buildContentSecurityPolicy(false);
 

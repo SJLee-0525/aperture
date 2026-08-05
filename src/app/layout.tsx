@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Noto_Serif_KR, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
+import { GoogleAnalytics } from "@/features/analytics/_components/GoogleAnalytics";
 import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
 import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomScrollbar";
 import { LangProvider } from "@/features/lang/_components/LangProvider";
@@ -109,6 +110,8 @@ export default function RootLayout({
             {children}
           </MotionProvider>
         </LangProvider>
+        {/* GA4 — NEXT_PUBLIC_GA_ID 가 없으면 렌더되지 않는다(개발·프리뷰 무해). */}
+        <GoogleAnalytics />
       </body>
     </html>
   );
