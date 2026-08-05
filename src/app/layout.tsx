@@ -74,9 +74,6 @@ export const metadata: Metadata = {
       ...(process.env.NAVER_SITE_VERIFICATION
         ? { "naver-site-verification": process.env.NAVER_SITE_VERIFICATION }
         : {}),
-      ...(process.env.BING_SITE_VERIFICATION
-        ? { msvalidate01: process.env.BING_SITE_VERIFICATION }
-        : {}),
     },
   },
 };
