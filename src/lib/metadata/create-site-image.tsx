@@ -49,7 +49,7 @@ const createSiteImage = async ({ dark = false, accent = "#d45d3f" }: Options = {
             letterSpacing: "1px",
           }}
         >
-          Photographer · Pianist · Developer
+          Developer, Photographer, Pianist
         </div>
       </div>
     </div>,
