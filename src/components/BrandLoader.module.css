@@ -1,7 +1,9 @@
+/* 폭을 워드마크에 맡긴다 — fit-content 로 컨테이너가 글자 폭이 되고, 바는 stretch 로 그 폭을 따라간다. */
 .loader {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  width: fit-content;
   gap: 26px;
 }
 .brand {
@@ -10,6 +12,8 @@
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--text);
+  /* 줄바꿈되면 fit-content 가 글자 폭을 잃는다 */
+  white-space: nowrap;
 }
 .dot {
   color: var(--accent);
@@ -17,7 +21,6 @@
 .bar {
   position: relative;
   display: block;
-  width: 160px;
   height: 2px;
   overflow: hidden;
   background: var(--line);
