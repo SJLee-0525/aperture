@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import {
   type KeyboardEvent,
   memo,
@@ -10,6 +11,7 @@ import {
 } from "react";
 
 import { SocialGlyph } from "@/components/SocialGlyph";
+import { useCaptchaState } from "@/features/contact/_hooks/use-captcha-state";
 import { useContactForm } from "@/features/contact/_hooks/use-contact-form";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -20,6 +22,9 @@ import styles from "./ContactView.module.css";
 /** Web3Forms 키 미설정 시 mailto 폴백 대상 — site.links 에 mailto 가 없을 때의 최후 폴백. */
 const FALLBACK_EMAIL = "hello@example.com";
 const MIN_TEXTAREA_HEIGHT = 132;
+const CAPTCHA_HINT_ID = "contact-captcha-hint";
+/** 키가 있어야 Web3Forms 로 실제 발송한다 — 없으면 mailto 폴백이라 캡차도 필요 없다. */
+const WEB3FORMS_ENABLED = Boolean(process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY);
 
 const TextareaResizeHandle = memo(
   ({
@@ -101,13 +106,33 @@ const ContactForm = ({ to }: { to: string }) => {
   const { dict } = useLang();
   const { status, submit, resetStatus } = useContactForm(to);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const captcha = useCaptchaState(formRef);
+  // 위젯이 렌더되지 않은 동안(스크립트 로드 전·차단됨)에는 잠그지 않는다 —
+  // 잠그면 캡차가 끝내 안 뜨는 환경에서 폼이 영영 죽은 버튼이 된다.
+  // 그 경우는 제출 시 use-contact-form 이 "captcha-required" 안내로 막는다.
+  const blockedByCaptcha = captcha.rendered && !captcha.solved;
 
   return (
     <form
+      ref={formRef}
       className={styles.form}
       onSubmit={submit}
       onInput={status === "idle" ? undefined : resetStatus}
     >
+      {/*
+        Web3Forms 허니팟 — 봇은 보이지 않는 필드까지 채우므로 값이 있으면 Web3Forms 가 조용히 버린다.
+        access key 는 번들에 노출되는 공개 키라(설계상 정상) 엔드포인트로 직접 쏘는 스팸은
+        이 필드로 막히지 않는다. 그건 Web3Forms 대시보드의 캡차가 담당한다.
+      */}
+      <input
+        type="checkbox"
+        name="botcheck"
+        className={styles.botcheck}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+      />
       <div className={styles.grid}>
         <label className={styles.field}>
           <span className={styles.label}>{dict.contactName}</span>
@@ -134,17 +159,44 @@ const ContactForm = ({ to }: { to: string }) => {
           <TextareaResizeHandle textareaRef={textareaRef} label={dict.contactResizeMessage} />
         </div>
       </div>
-      <button type="submit" className={styles.send} disabled={status === "sending"}>
+      {/*
+        Web3Forms 클라이언트 스크립트가 data-captcha 를 보고 hCaptcha 를 렌더한다.
+        hCaptcha 가 폼 안에 <textarea name="h-captcha-response"> 를 심으므로,
+        제출 훅은 FormData 에서 그 토큰을 그대로 읽는다 (use-contact-form.ts).
+
+        캡차는 Web3Forms 제출 전용이다 — 키가 없으면 폼이 mailto 폴백으로 동작하므로
+        위젯을 띄우지 않는다. 띄우면 메일 앱을 여는 데까지 캡차를 풀어야 한다(로컬 dev).
+      */}
+      {WEB3FORMS_ENABLED ? (
+        <>
+          <div className={styles.captcha}>
+            <div className="h-captcha" data-captcha="true" />
+          </div>
+          <Script src="https://web3forms.com/client/script.js" strategy="lazyOnload" />
+        </>
+      ) : null}
+      <button
+        type="submit"
+        className={styles.send}
+        disabled={status === "sending" || blockedByCaptcha}
+        // 버튼이 왜 잠겼는지 스크린리더에도 전달한다.
+        aria-describedby={blockedByCaptcha ? CAPTCHA_HINT_ID : undefined}
+      >
         {status === "sending" ? dict.contactSending : dict.contactSend}
       </button>
+      {blockedByCaptcha ? (
+        <p id={CAPTCHA_HINT_ID} className={styles.hint}>
+          {dict.contactCaptchaRequired}
+        </p>
+      ) : null}
       {status === "sent" ? (
         <p className={styles.status} role="status">
           {dict.contactSent}
         </p>
       ) : null}
-      {status === "error" ? (
+      {status === "error" || status === "captcha-required" ? (
         <p className={`${styles.status} ${styles.statusError}`} role="alert">
-          {dict.contactSendError}
+          {status === "captcha-required" ? dict.contactCaptchaRequired : dict.contactSendError}
         </p>
       ) : null}
     </form>

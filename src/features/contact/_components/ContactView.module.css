@@ -140,6 +140,11 @@
 .statusError {
   color: var(--danger);
 }
+/* 캡차 안내 — 아직 오류가 아니라 남은 절차 안내라 액센트·경고색을 쓰지 않는다. */
+.hint {
+  font-size: 14px;
+  color: var(--text-2);
+}
 
 /* ===== 직접 연락 (폼 위, 라벨 없음) — 헤더와의 보더 제거, 보더는 폼 위(아래)에만 ===== */
 .socials {
@@ -166,6 +171,16 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+/* Web3Forms 허니팟 — 사람 눈·스크린리더·탭 순서에서 모두 빠지되 폼 제출에는 포함된다. */
+.botcheck {
+  display: none !important;
+}
+
+/* hCaptcha 위젯 — 스크립트 로드 전에는 비어 있으므로 자리를 미리 잡지 않는다(레이아웃 시프트 회피). */
+.captcha:not(:empty) {
+  margin-top: 4px;
+}
+
 @media (max-width: 560px) {
   .grid {
     grid-template-columns: 1fr;

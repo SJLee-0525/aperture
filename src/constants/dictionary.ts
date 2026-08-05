@@ -30,6 +30,7 @@ type UIDict = {
   contactSending: string;
   contactSent: string;
   contactSendError: string;
+  contactCaptchaRequired: string;
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
@@ -176,6 +177,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactSending: "보내는 중…",
     contactSent: "메일이 전송되었습니다. 확인 후 회신드릴게요.",
     contactSendError: "전송에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    contactCaptchaRequired: "스팸 방지 확인을 완료해 주세요.",
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
@@ -323,6 +325,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactSending: "Sending…",
     contactSent: "Your message has been sent. I'll get back to you soon.",
     contactSendError: "Failed to send. Please try again in a moment.",
+    contactCaptchaRequired: "Please complete the spam check.",
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
