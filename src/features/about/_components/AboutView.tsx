@@ -53,6 +53,7 @@ const AboutView = ({ bio, photoFacts, albumCount }: Props) => {
 
   return (
     <AboutSection
+      lang={lang}
       eyebrow="Aperture."
       summary={summary}
       body={body}

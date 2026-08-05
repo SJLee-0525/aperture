@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
 import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { DevConfig } from "@/types/dev";
 
@@ -24,7 +23,7 @@ const DevStackView = ({ config }: { config: DevConfig }) => {
               <div className="u-label">{group.category}</div>
               <div className={styles.chips}>
                 {group.items.map((item) => (
-                  <Link
+                  <LocalizedLink
                     key={item.name}
                     href={`${ROUTES.SEARCH}?q=${encodeURIComponent(item.name)}`}
                     prefetch={false}
@@ -32,7 +31,7 @@ const DevStackView = ({ config }: { config: DevConfig }) => {
                     style={{ background: item.bg, color: item.fg, borderColor: item.bg }}
                   >
                     {item.name}
-                  </Link>
+                  </LocalizedLink>
                 ))}
               </div>
             </div>

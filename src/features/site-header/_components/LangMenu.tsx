@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { langFromPath, switchLangPath } from "@/lib/i18n/locale-path";
 import type { Lang } from "@/types/lang";
 
 import styles from "./LangMenu.module.css";
@@ -18,11 +20,17 @@ const OPTIONS: { code: Lang; label: string }[] = [
  */
 const LangMenu = () => {
   const { dict, lang, setLang } = useLang();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   const pick = (next: Lang) => {
-    setLang(next);
+    setLang(next); // 선호 저장 — 로케일 밖(관리자)에선 이것만으로 전환 완료
     setOpen(false);
+    // 공개 트리(/ko·/en)에선 같은 페이지의 다른 언어 경로로 이동한다 (구글 권장 — 언어별 별도 URL).
+    const { pathname, search, hash } = window.location;
+    if (langFromPath(pathname)) {
+      router.push(switchLangPath(next, `${pathname}${search}${hash}`), { scroll: false });
+    }
   };
 
   return (

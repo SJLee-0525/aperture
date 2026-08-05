@@ -119,7 +119,7 @@ describe("SearchResults", () => {
 
     expect(screen.getByRole("heading", { name: "“부산”" })).toBeTruthy();
     expect(screen.getByRole("link", { name: /부산의 새벽/ }).getAttribute("href")).toBe(
-      "/photo?photo=1",
+      "/ko/photo?photo=1",
     );
     expect(screen.getByText(DICTIONARY.ko.sectionPhoto)).toBeTruthy();
     expect(document.querySelector("img")?.getAttribute("src")).toContain("photo-thumb.webp");
@@ -171,15 +171,15 @@ describe("SearchResults", () => {
     render(<SearchResults documents={documents} />);
 
     expect(screen.getByRole("link", { name: /겨울 바다/ }).getAttribute("href")).toBe(
-      "/photo?photo=2",
+      "/ko/photo?photo=2",
     );
     expect(screen.queryByRole("link", { name: /부산의 새벽/ })).toBeNull();
   });
 
   it.each([
-    ["lake", "고요한 저녁", "/photo?photo=lake"],
-    ["리액트", "포트폴리오", "/dev/projects?project=1"],
-    ["piano", "겨울 독주회", "/music?work=piano"],
+    ["lake", "고요한 저녁", "/ko/photo?photo=lake"],
+    ["리액트", "포트폴리오", "/ko/dev/projects?project=1"],
+    ["piano", "겨울 독주회", "/ko/music?work=piano"],
   ])("분야별 이중언어 검색어를 결과에 연결한다: %s", (query, title, href) => {
     useSearchParamsMock.mockReturnValue(
       new URLSearchParams({ q: query }) as ReturnType<typeof useSearchParams>,
@@ -229,7 +229,7 @@ describe("SearchResults", () => {
     render(<SearchResults documents={documents} />);
 
     expect(screen.getByRole("link", { name: /Portfolio/ }).getAttribute("href")).toBe(
-      "/dev/projects?project=1",
+      "/en/dev/projects?project=1",
     );
     expect(screen.getByText(DICTIONARY.en.sectionDev)).toBeTruthy();
   });

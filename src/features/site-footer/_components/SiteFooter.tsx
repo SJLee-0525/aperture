@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
 import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { SocialGlyph } from "@/components/SocialGlyph";
 import { CONTACT_NAV, MEGA_MENU } from "@/constants/navigation";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { LocalizedText } from "@/types/localized";
@@ -50,24 +49,24 @@ const SiteFooter = ({ tagline, links }: { tagline: LocalizedText; links: SiteLin
         <nav className={styles.sitemap} aria-label={dict.footerSitemapLabel}>
           {MEGA_MENU.map((section) => (
             <div key={section.section} className={styles.col} data-section={section.section}>
-              <Link href={section.href} className={styles.colTitle}>
+              <LocalizedLink href={section.href} className={styles.colTitle}>
                 {dict[section.labelKey]}
-              </Link>
+              </LocalizedLink>
               <ul className={styles.colLinks}>
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className={styles.colLink}>
+                    <LocalizedLink href={link.href} className={styles.colLink}>
                       {dict[link.labelKey]}
-                    </Link>
+                    </LocalizedLink>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
           <div className={styles.col} data-section="contact">
-            <Link href={CONTACT_NAV.href} className={styles.colTitle}>
+            <LocalizedLink href={CONTACT_NAV.href} className={styles.colTitle}>
               {dict[CONTACT_NAV.labelKey]}
-            </Link>
+            </LocalizedLink>
           </div>
         </nav>
       </div>

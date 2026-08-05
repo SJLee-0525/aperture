@@ -6,6 +6,9 @@ import { type ReactNode, useId, useState } from "react";
 
 import { CountUp } from "@/components/CountUp";
 import { ROUTES } from "@/constants/routes";
+import { localizePath } from "@/lib/i18n/locale-path";
+
+import type { Lang } from "@/types/lang";
 
 import styles from "./AboutSection.module.css";
 
@@ -25,6 +28,8 @@ type Stat = { value: number; label: string };
 type Col = { label: string; items: string[] };
 
 type Props = {
+  /** 현재 언어 — 검색 링크 로케일 프리픽스용 (사전 소비는 없음 — props only 유지). */
+  lang: Lang;
   /** 액센트 eyebrow (섹션 역할 라벨 — "Aperture."·"Pianist"·"Developer"). */
   eyebrow: string;
   /** 요약 헤드라인 (bio/intro 첫 문장 파생). */
@@ -49,6 +54,7 @@ type Props = {
  * 데이터 파생(통계·목록 계산)은 각 섹션 뷰가 하고, 여기는 표시만(props only).
  */
 const AboutSection = ({
+  lang,
   eyebrow,
   summary,
   body,
@@ -114,7 +120,10 @@ const AboutSection = ({
                 <ul id={`${colsId}-${index}`} className={styles.list}>
                   {visibleItems.map((item) => (
                     <li key={item}>
-                      <Link prefetch={false} href={{ pathname: ROUTES.SEARCH, query: { q: item } }}>
+                      <Link
+                        prefetch={false}
+                        href={{ pathname: localizePath(lang, ROUTES.SEARCH), query: { q: item } }}
+                      >
                         {item}
                       </Link>
                     </li>

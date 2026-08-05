@@ -22,6 +22,7 @@ describe("AboutSection", () => {
   it("목록 항목을 통합 검색 링크로 표시한다", () => {
     render(
       <AboutSection
+        lang="ko"
         eyebrow="Developer"
         summary="소개"
         body=""
@@ -32,16 +33,17 @@ describe("AboutSection", () => {
     );
 
     expect(screen.getByRole("link", { name: "React" }).getAttribute("href")).toBe(
-      "/search?q=React",
+      "/ko/search?q=React",
     );
     expect(screen.getByRole("link", { name: "Next.js" }).getAttribute("href")).toBe(
-      "/search?q=Next.js",
+      "/ko/search?q=Next.js",
     );
   });
 
   it("공백과 비 ASCII 문자를 검색 쿼리로 인코딩한다", () => {
     render(
       <AboutSection
+        lang="ko"
         eyebrow="Aperture."
         summary="소개"
         body=""
@@ -58,6 +60,7 @@ describe("AboutSection", () => {
   it("긴 컬럼을 접어 표시하고 공용 버튼으로 함께 확장한다", () => {
     render(
       <AboutSection
+        lang="ko"
         eyebrow="Developer"
         summary="소개"
         body=""

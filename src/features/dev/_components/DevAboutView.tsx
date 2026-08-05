@@ -41,6 +41,7 @@ const DevAboutView = ({ heroLead, stack, interview, timelineCount, projectTechTa
 
   return (
     <AboutSection
+      lang={lang}
       eyebrow={EYEBROW}
       summary={summary}
       body={body}

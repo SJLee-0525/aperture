@@ -51,6 +51,7 @@ const MusicAboutView = ({ intro, workFacts, awardCount, mediaCount }: Props) => 
   );
   return (
     <AboutSection
+      lang={lang}
       eyebrow={EYEBROW}
       summary={summary}
       body={body}

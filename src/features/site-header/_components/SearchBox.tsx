@@ -7,6 +7,7 @@ import { useId, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { localizePath } from "@/lib/i18n/locale-path";
 import type { SearchSuggestion } from "@/lib/search/suggest-documents";
 import { useSearchSuggestions } from "@/features/site-header/_hooks/use-search-suggestions";
 
@@ -20,7 +21,7 @@ import styles from "./SearchBox.module.css";
  */
 const SearchBox = () => {
   const router = useRouter();
-  const { dict } = useLang();
+  const { dict, lang } = useLang();
   const listboxId = useId();
 
   const [query, setQuery] = useState("");
@@ -33,14 +34,19 @@ const SearchBox = () => {
 
   const pick = (suggestion: SearchSuggestion) => {
     setOpen(false);
-    router.push(suggestion.href);
+    router.push(localizePath(lang, suggestion.href));
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = query.trim();
     setOpen(false);
-    router.push(trimmed ? `${ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}` : ROUTES.SEARCH);
+    router.push(
+      localizePath(
+        lang,
+        trimmed ? `${ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}` : ROUTES.SEARCH,
+      ),
+    );
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {

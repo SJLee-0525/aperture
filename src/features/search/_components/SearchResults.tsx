@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Fragment, useMemo } from "react";
 
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { TitleSegment } from "@/lib/search/highlight-title";
 import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
@@ -99,7 +99,7 @@ const SearchResults = ({ documents }: Props) => {
             <ul className={styles.list}>
               {group.hits.map((hitItem) => (
                 <li key={hitItem.key}>
-                  <Link href={hitItem.href} prefetch={false} className={styles.hit}>
+                  <LocalizedLink href={hitItem.href} prefetch={false} className={styles.hit}>
                     {hitItem.imageUrl ? (
                       <span className={styles.thumbnail} data-protected-image>
                         <Image
@@ -125,7 +125,7 @@ const SearchResults = ({ documents }: Props) => {
                       </span>
                       {hitItem.meta ? <span className={styles.hitMeta}>{hitItem.meta}</span> : null}
                     </span>
-                  </Link>
+                  </LocalizedLink>
                 </li>
               ))}
             </ul>

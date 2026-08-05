@@ -1,11 +1,11 @@
 "use client";
 
 import { m, useReducedMotion } from "motion/react";
-import Link from "next/link";
 import { type CSSProperties, memo, type RefObject, useEffect, useMemo, useRef } from "react";
 
 import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useIntroDelay } from "@/features/landing/_hooks/use-intro-delay";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
@@ -89,7 +89,7 @@ const LandingNav = memo(
   }) => (
     <nav className={styles.rows} aria-label={dict.sectionsLabel}>
       {SECTIONS.map((section, i) => (
-        <Link
+        <LocalizedLink
           key={section.key}
           href={section.href}
           className={`${styles.row} ${started ? styles.rowVisible : ""}`}
@@ -108,7 +108,7 @@ const LandingNav = memo(
           <span className={styles.rowCta} aria-hidden="true">
             ↗
           </span>
-        </Link>
+        </LocalizedLink>
       ))}
     </nav>
   ),

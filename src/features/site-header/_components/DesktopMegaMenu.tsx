@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
@@ -8,7 +7,9 @@ import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation"
 import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { stripLangPrefix } from "@/lib/i18n/locale-path";
 
 import styles from "./SiteHeader.module.css";
 
@@ -59,9 +60,14 @@ const MegaMenuGroup = memo(
       </button>
       <div className={styles.megaPanel}>
         {group.links.map((link) => (
-          <Link key={link.href} href={link.href} className={styles.megaLink} onClick={onClose}>
+          <LocalizedLink
+            key={link.href}
+            href={link.href}
+            className={styles.megaLink}
+            onClick={onClose}
+          >
             {dict[link.labelKey]}
-          </Link>
+          </LocalizedLink>
         ))}
       </div>
     </div>
@@ -132,12 +138,12 @@ const DesktopMegaMenu = () => {
       <div
         data-section="contact"
         className={`${styles.megaItem} ${
-          pathname.startsWith(ROUTES.CONTACT) ? styles.current : ""
+          stripLangPrefix(pathname).startsWith(ROUTES.CONTACT) ? styles.current : ""
         }`}
       >
-        <Link href={CONTACT_NAV.href} className={styles.megaBtn} onClick={closeMenu}>
+        <LocalizedLink href={CONTACT_NAV.href} className={styles.megaBtn} onClick={closeMenu}>
           {dict[CONTACT_NAV.labelKey]}
-        </Link>
+        </LocalizedLink>
       </div>
     </nav>
   );

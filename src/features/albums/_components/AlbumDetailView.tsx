@@ -2,11 +2,11 @@
 
 import { m } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
 
 import { PhotoGrid } from "@/components/PhotoGrid";
 import { ShareButton } from "@/components/ShareButton";
 import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -56,9 +56,9 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
           ) : null}
         </m.div>
         <div className={styles.scrim} />
-        <Link href={ROUTES.PHOTO_ALBUMS} prefetch={false} className={styles.back}>
+        <LocalizedLink href={ROUTES.PHOTO_ALBUMS} prefetch={false} className={styles.back}>
           ← {dict.albumsNav}
-        </Link>
+        </LocalizedLink>
         <ShareButton title={title} label={dict.shareLabel} className={styles.share} />
         <m.div
           className={styles.heroText}

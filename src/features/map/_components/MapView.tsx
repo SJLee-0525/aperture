@@ -1,10 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
-import { ROUTES } from "@/constants/routes";
 import { LocationList } from "@/features/map/_components/LocationList";
 import { MapPhotoModal } from "@/features/map/_components/MapPhotoModal";
 import type { MapLocation } from "@/features/map/_types/map-location";
@@ -24,6 +23,7 @@ type Props = {
 /** 지도 — 위치 리스트 + 실제 지도(MapLibre+CARTO). 핀·리스트 클릭 → ?photo= 상세 모달. */
 const MapView = ({ locations }: Props) => {
   const router = useRouter();
+  const pathname = usePathname();
   const [visibleLocationIds, setVisibleLocationIds] = useState<string[] | null>(null);
   const photoIds = useMemo(() => locations.map((location) => location.id), [locations]);
   const visibleLocations = useMemo(() => {
@@ -31,9 +31,10 @@ const MapView = ({ locations }: Props) => {
     const visibleIds = new Set(visibleLocationIds);
     return locations.filter((location) => visibleIds.has(location.id));
   }, [locations, visibleLocationIds]);
+  // 현재 pathname 기반 — 로케일 프리픽스(/ko/photo/map)를 그대로 유지한 채 ?photo= 만 붙인다.
   const onSelect = useCallback(
-    (id: string) => router.push(`${ROUTES.PHOTO_MAP}?photo=${id}`, { scroll: false }),
-    [router],
+    (id: string) => router.push(`${pathname}?photo=${id}`, { scroll: false }),
+    [router, pathname],
   );
   const onVisibleLocationsChange = useCallback((ids: string[]) => {
     setVisibleLocationIds((current) => {

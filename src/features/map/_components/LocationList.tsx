@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { MapLocation } from "@/features/map/_types/map-location";
 import { preloadPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
@@ -66,7 +66,7 @@ const LocationList = ({ locations }: Props) => {
         <span className={styles.count}>{locations.length} spots</span>
       </div>
       {locations.map((location) => (
-        <Link
+        <LocalizedLink
           key={location.id}
           href={{ query: { photo: location.id } }}
           prefetch={false}
@@ -92,7 +92,7 @@ const LocationList = ({ locations }: Props) => {
             <span className={styles.place}>{pickText(location.place, lang)}</span>
             <span className={styles.co}>{formatCoords(location.coords)}</span>
           </span>
-        </Link>
+        </LocalizedLink>
       ))}
     </aside>
   );

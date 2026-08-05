@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { autoScrollDirection, autoScrollVelocity } from "@/features/custom-cursor/_lib/auto-scroll";
+import { stripLangPrefix } from "@/lib/i18n/locale-path";
 import { applyCursorGeometry, type CursorMode } from "@/features/custom-cursor/_lib/cursor-mode";
 import { resolveCursorTarget } from "@/features/custom-cursor/_lib/cursor-target";
 import {
@@ -163,7 +164,7 @@ const CustomCursor = () => {
       // --text를 사용해 라이트에서는 차콜, 다크에서는 밝은 무채색으로 대비를 유지한다.
       const accent =
         SECTION_ACCENTS[section ?? ""] ??
-        (pathname === "/" ? LANDING_CURSOR_ACCENT : "var(--accent)");
+        (stripLangPrefix(pathname) === "/" ? LANDING_CURSOR_ACCENT : "var(--accent)");
       if (accent === currentAccent) return;
       currentAccent = accent;
       cursor.style.setProperty("--cursor-accent", accent);

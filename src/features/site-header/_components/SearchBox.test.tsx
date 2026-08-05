@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({
   useLang: () => ({
+    lang: "ko",
     dict: {
       searchPlaceholder: "검색",
       searchSuggestionsLabel: "추천 결과",
@@ -64,7 +65,7 @@ describe("SearchBox", () => {
     fireEvent.change(input, { target: { value: " React 19 " } });
     fireEvent.submit(input.closest("form")!);
 
-    expect(push).toHaveBeenCalledWith("/search?q=React%2019");
+    expect(push).toHaveBeenCalledWith("/ko/search?q=React%2019");
   });
 
   it("포커스 시 인덱스를 lazy load 하고 추천 리스트를 연다", () => {
@@ -86,7 +87,7 @@ describe("SearchBox", () => {
 
     fireEvent.click(screen.getByRole("option", { name: /겨울 독주회/ }));
 
-    expect(push).toHaveBeenCalledWith("/music?work=piano");
+    expect(push).toHaveBeenCalledWith("/ko/music?work=piano");
     expect(screen.queryByRole("listbox")).toBeNull();
   });
 
@@ -102,7 +103,7 @@ describe("SearchBox", () => {
 
     fireEvent.keyDown(input, { key: "ArrowDown" });
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(push).toHaveBeenCalledWith("/music?work=piano");
+    expect(push).toHaveBeenCalledWith("/ko/music?work=piano");
   });
 
   it("Escape 로 추천 리스트를 닫는다", () => {

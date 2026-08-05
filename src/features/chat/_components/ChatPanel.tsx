@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -11,6 +10,7 @@ import { ChatComposer } from "@/features/chat/_components/ChatComposer";
 import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
 import { useChat } from "@/features/chat/_hooks/use-chat";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
@@ -224,17 +224,17 @@ const ChatPanel = ({ open, onClose }: Props) => {
                     </button>
                   ) : null}
                   {message.link ? (
-                    <Link
+                    <LocalizedLink
                       className={styles.link}
                       href={message.link.href}
                       prefetch={false}
                       onClick={onClose}
                     >
                       {message.link.label} <span aria-hidden="true">↗</span>
-                    </Link>
+                    </LocalizedLink>
                   ) : null}
                   {message.links?.map((link) => (
-                    <Link
+                    <LocalizedLink
                       key={`${link.href}:${link.label}`}
                       className={styles.link}
                       href={link.href}
@@ -242,7 +242,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
                       onClick={onClose}
                     >
                       {link.label} <span aria-hidden="true">↗</span>
-                    </Link>
+                    </LocalizedLink>
                   ))}
                   {message.references?.length ? (
                     <div className={styles.references}>

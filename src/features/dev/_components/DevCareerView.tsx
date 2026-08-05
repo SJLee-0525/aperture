@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
 import { devProjectRoute } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -85,13 +84,13 @@ const DevCareerView = ({ config }: { config: DevConfig }) => {
             <div className={styles.modalPlace}>{pickText(selectedAward.place, lang)}</div>
             <p className={styles.modalDescription}>{pickText(selectedAward.description, lang)}</p>
             {selectedAward.projectId ? (
-              <Link
+              <LocalizedLink
                 className={styles.projectLink}
                 href={devProjectRoute(selectedAward.projectId)}
                 prefetch={false}
               >
                 {dict.devAwardProjectLink} <span aria-hidden="true">↗</span>
-              </Link>
+              </LocalizedLink>
             ) : null}
           </div>
         ) : null}

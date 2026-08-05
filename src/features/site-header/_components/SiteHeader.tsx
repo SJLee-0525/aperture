@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
 import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { DesktopMegaMenu } from "@/features/site-header/_components/DesktopMegaMenu";
 import { LangMenu } from "@/features/site-header/_components/LangMenu";
@@ -23,9 +22,9 @@ const SiteHeader = () => {
   return (
     <header className={styles.header} data-site-header>
       <div className={styles.inner}>
-        <Link href={ROUTES.LANDING} className={styles.brand} aria-label={dict.homeLabel}>
+        <LocalizedLink href={ROUTES.LANDING} className={styles.brand} aria-label={dict.homeLabel}>
           Sungjoon Lee<span className={styles.dot}>.</span>
-        </Link>
+        </LocalizedLink>
 
         <DesktopMegaMenu />
 

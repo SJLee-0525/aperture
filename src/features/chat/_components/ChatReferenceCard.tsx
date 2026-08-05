@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import type { ChatReference } from "@/types/chat";
 
 import styles from "./ChatPanel.module.css";
@@ -8,7 +8,7 @@ import styles from "./ChatPanel.module.css";
 type Props = { reference: ChatReference; onNavigate: () => void };
 
 const ChatReferenceCard = ({ reference, onNavigate }: Props) => (
-  <Link
+  <LocalizedLink
     className={styles.reference}
     href={reference.href}
     scroll={false}
@@ -35,7 +35,7 @@ const ChatReferenceCard = ({ reference, onNavigate }: Props) => (
       <strong>{reference.title}</strong>
       <span>{reference.subtitle}</span>
     </span>
-  </Link>
+  </LocalizedLink>
 );
 
 export { ChatReferenceCard };

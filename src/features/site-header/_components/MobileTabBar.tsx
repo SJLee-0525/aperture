@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Icon } from "@/components/Icon";
 import { MOBILE_TABS } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { stripLangPrefix } from "@/lib/i18n/locale-path";
 
 import styles from "./MobileTabBar.module.css";
 
@@ -19,7 +20,8 @@ const isTabActive = (href: string, pathname: string): boolean =>
 /** 모바일 하단 탭바 — 현재 섹션(사진/음악/개발)의 탭 세트. 랜딩(home)에선 숨김. 데스크톱은 CSS로 숨김. */
 const MobileTabBar = () => {
   const { dict } = useLang();
-  const pathname = usePathname();
+  // 탭 href는 무-로케일 상수 — 활성 판정도 로케일을 벗긴 경로로 비교한다.
+  const pathname = stripLangPrefix(usePathname());
   const section = sectionFromPath(pathname);
 
   // home·contact 는 섹션 탭 세트가 없다(단일 페이지) → 탭바 숨김.
@@ -28,14 +30,14 @@ const MobileTabBar = () => {
   return (
     <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel}>
       {MOBILE_TABS[section].map((tab) => (
-        <Link
+        <LocalizedLink
           key={tab.href}
           href={tab.href}
           className={`${styles.tab} ${isTabActive(tab.href, pathname) ? styles.active : ""}`}
         >
           <Icon name={tab.icon} size={22} />
           <span>{dict[tab.labelKey]}</span>
-        </Link>
+        </LocalizedLink>
       ))}
     </nav>
   );

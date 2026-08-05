@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -11,10 +10,12 @@ import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation"
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import {
   MOBILE_MENU_OPEN_ATTRIBUTE,
   MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE,
 } from "@/features/site-header/_components/MobileNavigationVisibility";
+import { localizePath } from "@/lib/i18n/locale-path";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
@@ -29,7 +30,7 @@ import styles from "./MobileMenu.module.css";
 const MOBILE_QUERY = "(max-width: 767px)";
 
 const MobileMenu = () => {
-  const { dict } = useLang();
+  const { dict, lang } = useLang();
   const pathname = usePathname();
   const router = useRouter();
   const currentSection = sectionFromPath(pathname);
@@ -102,7 +103,9 @@ const MobileMenu = () => {
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
     const q = query.trim();
-    router.push(q ? `${ROUTES.SEARCH}?q=${encodeURIComponent(q)}` : ROUTES.SEARCH);
+    router.push(
+      localizePath(lang, q ? `${ROUTES.SEARCH}?q=${encodeURIComponent(q)}` : ROUTES.SEARCH),
+    );
     close();
   };
 
@@ -176,7 +179,7 @@ const MobileMenu = () => {
                         <div className={styles.subs} aria-hidden={!isOpen}>
                           <div className={styles.subsInner}>
                             {group.links.map((link) => (
-                              <Link
+                              <LocalizedLink
                                 key={link.href}
                                 href={link.href}
                                 className={styles.sub}
@@ -184,7 +187,7 @@ const MobileMenu = () => {
                                 tabIndex={isOpen ? undefined : -1}
                               >
                                 {dict[link.labelKey]}
-                              </Link>
+                              </LocalizedLink>
                             ))}
                           </div>
                         </div>
@@ -192,9 +195,13 @@ const MobileMenu = () => {
                     );
                   })}
 
-                  <Link href={CONTACT_NAV.href} className={styles.flatLink} onClick={close}>
+                  <LocalizedLink
+                    href={CONTACT_NAV.href}
+                    className={styles.flatLink}
+                    onClick={close}
+                  >
                     {dict[CONTACT_NAV.labelKey]}
-                  </Link>
+                  </LocalizedLink>
                 </div>
               </div>
               <button

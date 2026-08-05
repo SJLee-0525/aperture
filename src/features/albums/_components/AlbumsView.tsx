@@ -6,6 +6,7 @@ import { AlbumCard } from "@/components/AlbumCard";
 import { albumRoute } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { AlbumCard as AlbumCardData } from "@/features/albums/_lib/album-cards";
+import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import styles from "./AlbumsView.module.css";
@@ -44,7 +45,7 @@ const AlbumsView = ({ albums }: Props) => {
           return (
             <m.div key={album.id} variants={CARD}>
               <AlbumCard
-                href={albumRoute(album.id)}
+                href={localizePath(lang, albumRoute(album.id))}
                 coverUrl={album.coverUrl}
                 coverAlt={title}
                 count={album.count}

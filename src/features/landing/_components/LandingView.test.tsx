@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { LandingNav } from "@/features/landing/_components/LandingView";
+import { LangProvider } from "@/features/lang/_components/LangProvider";
 
 const linkRender = vi.fn();
 
@@ -21,13 +22,17 @@ describe("LandingNav", () => {
     const onRowEnter = vi.fn();
     const onRowLeave = vi.fn();
     const { rerender } = render(
-      <LandingNav dict={DICTIONARY.ko} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started />,
+      <LangProvider lang="ko">
+        <LandingNav dict={DICTIONARY.ko} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started />
+      </LangProvider>,
     );
 
     expect(linkRender).toHaveBeenCalledTimes(3);
 
     rerender(
-      <LandingNav dict={DICTIONARY.ko} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started />,
+      <LangProvider lang="ko">
+        <LandingNav dict={DICTIONARY.ko} onRowEnter={onRowEnter} onRowLeave={onRowLeave} started />
+      </LangProvider>,
     );
 
     expect(linkRender).toHaveBeenCalledTimes(3);
