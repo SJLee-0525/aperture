@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+import { SECURITY_HEADERS } from "./src/constants/security-headers";
+
 const nextConfig: NextConfig = {
   // Playwright는 실행 중인 로컬 dev 서버와 충돌하지 않도록 전용 distDir를 주입한다.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
@@ -37,6 +39,10 @@ const nextConfig: NextConfig = {
       { source: "/map", destination: "/ko/photo/map", permanent: true },
       { source: "/about", destination: "/ko/photo/about", permanent: true },
     ];
+  },
+  // 백엔드가 없어 브라우저 측 방어는 응답 헤더가 전부다 — 목록은 constants/security-headers.ts.
+  async headers() {
+    return [{ source: "/:path*", headers: [...SECURITY_HEADERS] }];
   },
 };
 
