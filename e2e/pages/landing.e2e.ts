@@ -5,11 +5,11 @@ import { landingAssertions } from "../utils/assertions/landing.assertions";
 
 test.describe("Landing", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/ko");
   });
 
   test("공개 허브와 세 섹션 진입점이 보인다", async ({ page }) => {
-    await commonAssertions.publicPageLoaded(page, "/");
+    await commonAssertions.publicPageLoaded(page, "/ko");
     await landingAssertions.loaded(page);
   });
 

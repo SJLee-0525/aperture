@@ -10,14 +10,14 @@ test.describe("Custom cursor", () => {
     );
 
     await page.setViewportSize({ width: 1440, height: 600 });
-    await page.goto("/photo/map");
+    await page.goto("/ko/photo/map");
     await expect(page.locator("aside[data-accent-scrollbar]")).toBeVisible();
     await expect(page.locator("[data-custom-scrollbar-ui]")).toHaveAttribute(
       "aria-controls",
       "map-location-scroll-container",
     );
 
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await page.getByRole("button", { name: "필터" }).click();
     await page.getByRole("button", { name: "카메라" }).click();
     const listbox = page.getByRole("listbox");
@@ -34,7 +34,7 @@ test.describe("Custom cursor", () => {
   test("커스텀 스크롤바와 커서가 연동되고 썸을 드래그할 수 있다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 스크롤바는 fine pointer에서만 활성화");
 
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await page.waitForFunction(() =>
       document.documentElement.hasAttribute("data-custom-scrollbar"),
     );
@@ -77,7 +77,7 @@ test.describe("Custom cursor", () => {
   test("모달이 열리면 페이지 트랙을 모달 스크롤로 전환한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 스크롤바는 fine pointer에서만 활성화");
 
-    await page.goto("/music");
+    await page.goto("/ko/music");
     await page.waitForFunction(() =>
       document.documentElement.hasAttribute("data-custom-scrollbar"),
     );
@@ -98,7 +98,7 @@ test.describe("Custom cursor", () => {
   test("사진 상세 모달도 정보 패널 스크롤로 전환한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 스크롤바는 fine pointer에서만 활성화");
 
-    await page.goto("/photo?photo=p01");
+    await page.goto("/ko/photo?photo=p01");
     await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
     await expect(page.locator('[data-photo-modal-image-area="ready"]')).toBeVisible();
     await expect(page.locator("#photo-pending-scroll-container")).toHaveCount(0);
@@ -111,7 +111,7 @@ test.describe("Custom cursor", () => {
   test("가운데 클릭 자동 스크롤을 시작하고 Esc로 종료한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 커서는 fine pointer에서만 활성화");
 
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await page.waitForFunction(() => document.documentElement.hasAttribute("data-custom-cursor"));
 
     const anchor = page.locator("[data-autoscroll-anchor]");
@@ -128,7 +128,7 @@ test.describe("Custom cursor", () => {
   test("링크의 가운데 클릭은 자동 스크롤로 가로채지 않는다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 커서는 fine pointer에서만 활성화");
 
-    await page.goto("/contact");
+    await page.goto("/ko/contact");
     await page.waitForFunction(() => document.documentElement.hasAttribute("data-custom-cursor"));
     await page.locator("a").first().dispatchEvent("mousedown", { button: 1 });
 
@@ -138,7 +138,7 @@ test.describe("Custom cursor", () => {
   test("문의 textarea 리사이즈 핸들에서도 커스텀 커서를 유지한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "커스텀 커서는 fine pointer에서만 활성화");
 
-    await page.goto("/contact");
+    await page.goto("/ko/contact");
     await page.waitForFunction(() => document.documentElement.hasAttribute("data-custom-cursor"));
     await expect(page.locator("[data-intro-splash]")).toBeHidden();
 

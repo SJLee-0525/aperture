@@ -30,7 +30,7 @@ test.describe("Chat", () => {
         value: viewport,
       });
     });
-    await page.goto("/");
+    await page.goto("/ko");
     await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
       "content",
       /interactive-widget=resizes-content/,
@@ -171,7 +171,7 @@ test.describe("Chat", () => {
         }),
       });
     });
-    await page.goto("/");
+    await page.goto("/ko");
 
     await openChat(page);
     await expect(page.getByRole("button", { name: "챗봇 닫기" })).toHaveCount(1);
@@ -215,20 +215,19 @@ test.describe("Chat", () => {
         }),
       }),
     );
-    await page.goto("/");
+    await page.goto("/ko");
 
     await openChat(page);
     await submit(page, "사진을 보여줘");
     await page.getByRole("link", { name: "새벽의 항구 — 도쿄 미나토구" }).click();
 
-    await expect(page).toHaveURL(/\/photo\?photo=p01$/);
+    await expect(page).toHaveURL(/\/ko\/photo\?photo=p01$/);
     await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
   });
 
   test("영어 설정을 API 요청과 오류 없는 접근성 트리에 반영한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "axe 스캔은 데스크톱 DOM에서 대표 실행");
     let requestedLang = "";
-    await page.addInitScript(() => localStorage.setItem("ap-lang:v1", "en"));
     await page.route("**/api/chat", async (route) => {
       requestedLang = route.request().postDataJSON().lang;
       await route.fulfill({
@@ -239,7 +238,8 @@ test.describe("Chat", () => {
         }),
       });
     });
-    await page.goto("/");
+    // 경로 기반 i18n — 영어는 /en 경로가 단일 출처 (localStorage 설정은 공개 트리에 영향 없음)
+    await page.goto("/en");
     await page.evaluate(() => window.scrollTo(0, 300));
 
     await openChat(page, "Open chat");

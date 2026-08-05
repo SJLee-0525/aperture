@@ -12,7 +12,7 @@ const photoAssertions = {
   },
 
   async filterPhotos(page: Page) {
-    await page.goto("/photo?q=설원");
+    await page.goto("/ko/photo?q=설원");
     await expect(page.getByRole("link", { name: "설원" })).toBeVisible();
     const square = page.getByRole("button", { name: "정사각" });
     await square.click();
@@ -21,9 +21,9 @@ const photoAssertions = {
 
   async openAlbum(page: Page) {
     const album = page.getByRole("link", { name: /도시의 밤/ });
-    await expect(album).toHaveAttribute("href", "/photo/albums/city-night");
+    await expect(album).toHaveAttribute("href", "/ko/photo/albums/city-night");
     await album.click();
-    await page.waitForURL(/\/photo\/albums\/city-night$/);
+    await page.waitForURL(/\/ko\/photo\/albums\/city-night$/);
     await expect(page.getByRole("heading", { name: "도시의 밤" })).toBeVisible();
   },
 

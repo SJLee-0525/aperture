@@ -7,7 +7,7 @@ const navigationAssertions = {
     const albums = primary.getByRole("link", { name: "앨범" });
     await expect(albums).toBeVisible();
     await albums.click();
-    await expect(page).toHaveURL(/\/photo\/albums$/);
+    await expect(page).toHaveURL(/\/ko\/photo\/albums$/);
   },
 
   async mobileMenu(page: Page) {
@@ -18,13 +18,13 @@ const navigationAssertions = {
     await dev.click();
     await expect(dev).toHaveAttribute("aria-expanded", "true");
     await menu.getByRole("link", { name: "프로젝트" }).click();
-    await expect(page).toHaveURL(/\/dev\/projects$/);
+    await expect(page).toHaveURL(/\/ko\/dev\/projects$/);
   },
 
   async mobileTab(page: Page) {
     const tabs = page.getByRole("navigation", { name: "모바일 내비게이션" });
     await tabs.getByRole("link", { name: "앨범" }).click();
-    await expect(page).toHaveURL(/\/photo\/albums$/);
+    await expect(page).toHaveURL(/\/ko\/photo\/albums$/);
   },
 };
 

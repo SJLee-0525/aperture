@@ -12,7 +12,7 @@ const contactAssertions = {
     );
     await form.getByRole("button", { name: "보내기" }).click();
 
-    await expect(page).toHaveURL(/\/contact$/);
+    await expect(page).toHaveURL(/\/ko\/contact$/);
   },
 };
 

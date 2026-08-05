@@ -2,12 +2,12 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 const ACCESSIBILITY_ROUTES = [
-  "/",
-  "/photo",
-  "/photo/albums",
-  "/music",
-  "/dev/projects",
-  "/contact",
+  "/ko",
+  "/ko/photo",
+  "/ko/photo/albums",
+  "/ko/music",
+  "/ko/dev/projects",
+  "/ko/contact",
 ] as const;
 
 const THEMES = ["light", "dark"] as const;

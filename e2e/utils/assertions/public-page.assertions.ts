@@ -16,7 +16,8 @@ const publicPageAssertions = {
   async themeCanBeChanged(page: Page) {
     const html = page.locator("html");
     const before = await html.getAttribute("data-theme");
-    await page.getByRole("button", { name: "테마 전환" }).click();
+    // 라벨은 페이지 언어(/ko·/en)를 따르므로 두 사전 값 모두 매치한다.
+    await page.getByRole("button", { name: /테마 전환|Toggle theme/ }).click();
     await expect(html).not.toHaveAttribute("data-theme", before ?? "");
   },
 };

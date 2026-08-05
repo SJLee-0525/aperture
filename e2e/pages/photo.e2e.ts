@@ -17,7 +17,7 @@ test.describe("Photo", () => {
       await route.continue();
     });
 
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await page.locator("[data-photo-index='0'] a").click();
 
     const pendingArea = page.locator('[data-photo-modal-image-area="pending"]');
@@ -40,7 +40,7 @@ test.describe("Photo", () => {
       await new Promise((resolve) => setTimeout(resolve, 300));
       await route.continue();
     });
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await page.evaluate(() => {
       const states: string[] = [];
       new MutationObserver(() => states.push(document.body.style.overflow)).observe(document.body, {
@@ -68,7 +68,7 @@ test.describe("Photo", () => {
       if (width >= 640) await new Promise((resolve) => setTimeout(resolve, 300));
       await route.continue();
     });
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await page.locator("[data-photo-index='0'] a").click();
 
     const pending = page.locator("[data-photo-pending-frame]");
@@ -83,28 +83,28 @@ test.describe("Photo", () => {
   });
 
   test("사진을 검색하고 상세 모달을 열고 닫는다", async ({ page }) => {
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await photoAssertions.filterPhotos(page);
-    await page.goto("/photo");
+    await page.goto("/ko/photo");
     await photoAssertions.openPhoto(page);
   });
 
   test("앨범 카드를 클릭해 상세로 이동한다", async ({ page }) => {
-    await page.goto("/photo/albums");
+    await page.goto("/ko/photo/albums");
     await photoAssertions.openAlbum(page);
   });
 
   test("지도 위치를 클릭해 사진 모달을 열고 닫는다", async ({ page }) => {
-    await page.goto("/photo/map");
+    await page.goto("/ko/photo/map");
     await photoAssertions.openMapPhoto(page);
   });
 
   test("직접 진입한 사진 모달을 닫아도 사진 페이지에 머문다", async ({ page }) => {
-    await page.goto("/photo?photo=p01");
+    await page.goto("/ko/photo?photo=p01");
     await commonAssertions.dialogOpened(page, "새벽의 항구");
 
     await commonAssertions.closeDialog(page);
 
-    await expect(page).toHaveURL(/\/photo$/);
+    await expect(page).toHaveURL(/\/ko\/photo$/);
   });
 });

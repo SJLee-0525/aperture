@@ -14,7 +14,7 @@ const landingAssertions = {
       .getByRole("navigation", { name: "섹션" })
       .getByRole("link", { name: "개발" })
       .click();
-    await expect(page).toHaveURL(/\/dev\/projects$/);
+    await expect(page).toHaveURL(/\/ko\/dev\/projects$/);
     await expect(page.getByRole("heading", { name: "프로젝트" })).toBeVisible();
   },
 
