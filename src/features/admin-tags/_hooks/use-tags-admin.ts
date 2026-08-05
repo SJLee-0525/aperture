@@ -38,7 +38,6 @@ const useTagsAdmin = () => {
     };
   }, []);
 
-  /** 편집이 일어나면 "저장됨" 표시를 해제. */
   const markDirty = () => setSaved(false);
 
   /** id 는 사진이 참조하는 키라 수정 불가 — ko/en 만 편집. */

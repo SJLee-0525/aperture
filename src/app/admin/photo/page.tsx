@@ -6,7 +6,6 @@ import { ROUTES } from "@/constants/routes";
 
 import styles from "./page.module.css";
 
-/** 사진 CMS 진입 카드 — 작업·앨범·태그·소개. */
 const SECTIONS: { key: string; label: string; desc: string; href: string }[] = [
   {
     key: "photos",
@@ -34,7 +33,6 @@ const SECTIONS: { key: string; label: string; desc: string; href: string }[] = [
   },
 ];
 
-/** 사진 관리자 허브 — 작업·앨범·태그·소개 4개 카드. */
 const AdminPhotoPage = () => (
   <div className={styles.page}>
     <header className={styles.head}>

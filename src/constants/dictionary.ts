@@ -13,7 +13,7 @@ type UIDict = {
   musicWorksNav: string;
   musicMediaNav: string;
   musicCareerNav: string; // 경력 탭 + 경력(experience) 타임라인 라벨
-  musicEducationLabel: string; // 학력
+  musicEducationLabel: string;
   musicAwardsNav: string; // 수상 (경력 페이지 안 섹션 라벨)
   musicRepertoireLabel: string; // 소개 페이지 컬럼 — 레퍼토리
   musicVenuesLabel: string; // 소개 페이지 컬럼 — 무대

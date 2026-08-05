@@ -207,7 +207,6 @@ const ContactForm = ({ to }: { to: string }) => {
 const ContactView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
 
-  /** mailto 폴백 대상 = site.links 중 mailto 링크, 없으면 폴백. */
   const to = useMemo(() => {
     const mail = site.links.find((link) => link.href.startsWith("mailto:"));
     return mail ? mail.href.replace(/^mailto:/, "") : FALLBACK_EMAIL;

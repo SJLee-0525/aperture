@@ -6,7 +6,6 @@ import { ROUTES } from "@/constants/routes";
 
 import styles from "./page.module.css";
 
-/** 개발 CMS 진입 카드. */
 const SECTIONS: { key: string; label: string; desc: string; href: string }[] = [
   {
     key: "projects",

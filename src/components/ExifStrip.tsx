@@ -8,7 +8,7 @@ type Props = {
   glass?: boolean;
 };
 
-/** 노출 3값 압축 스트립 (F · S · ISO). glass는 사진 위 오버레이용. */
+/** 노출 3값 압축 스트립 (F · S · ISO). */
 const ExifStrip = ({ aperture, shutter, iso, glass = false }: Props) => (
   <div className={`${styles.strip} ${glass ? styles.glass : ""}`}>
     <span className={styles.seg}>

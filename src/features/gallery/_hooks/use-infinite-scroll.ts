@@ -7,10 +7,6 @@ import { useCallback, useEffect, useState } from "react";
  * 서버가 ISR 로 전체를 한 번 받고(방문자당 read 0), 여기선 pageSize 만큼만 렌더 → 하단 sentinel 이
  * 뷰포트에 들어오면 count 를 늘린다. 진짜 Firestore 페이지네이션이 아니라 DOM 마운트만 점진화한 것 —
  * 클라 필터·검색(전체 배열 대상)의 즉각성과 무료 한도(읽기)를 그대로 지킨다.
- *
- * items 참조가 바뀌면(필터·검색·정렬) count 를 리셋해 새 결과의 처음부터 보여준다.
- * sentinel 은 콜백 ref 로 노드를 state 에 올려 effect 에서 관찰한다 — ref 객체를 반환하지 않아
- * 렌더 중 ref 접근(react-hooks/refs) 규칙에 걸리지 않는다. count 증가는 옵저버 콜백에서만.
  */
 const useInfiniteScroll = <T>(items: T[], pageSize = 24) => {
   const [count, setCount] = useState(pageSize);

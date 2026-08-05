@@ -20,8 +20,8 @@ type Props = {
 
 /**
  * 공개 트리 로케일 셸 — URL `[lang]` 세그먼트가 언어의 단일 출처 (구글 권장: 언어별 별도 URL).
- * 지원 외 세그먼트(/fr 등)는 404. 루트 LangProvider(스토어 모드) 안에 경로 모드 Provider를
- * 중첩해 공개 트리의 useLang 소비자들이 URL 언어로 SSR·hydration 되게 한다.
+ * 루트 LangProvider(스토어 모드) 안에 경로 모드 Provider를 중첩해 공개 트리의 useLang
+ * 소비자들이 URL 언어로 SSR·hydration 되게 한다.
  */
 export default async function LangLayout({ children, params }: Props) {
   const { lang } = await params;

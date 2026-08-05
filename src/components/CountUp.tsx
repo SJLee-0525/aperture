@@ -16,7 +16,7 @@ const CountUp = ({ value }: { value: number }) => {
 
   useEffect(() => {
     const node = nodeRef.current;
-    if (reduce || !node) return; // 감소 모션 사용자: 초기값(=value) 그대로.
+    if (reduce || !node) return;
     const controls = animate(0, value, {
       duration: 0.9,
       ease: EASE,
@@ -27,7 +27,6 @@ const CountUp = ({ value }: { value: number }) => {
     return () => controls.stop();
   }, [value, reduce]);
 
-  // 원본 동작 유지: 애니메이션 대상은 0에서 시작, 모션 감소 사용자는 최종값 즉시 표시.
   return <span ref={nodeRef}>{reduce ? value : 0}</span>;
 };
 

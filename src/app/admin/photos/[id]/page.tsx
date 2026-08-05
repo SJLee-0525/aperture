@@ -12,7 +12,6 @@ type Status = "loading" | "found" | "missing" | "error";
 
 type Props = { params: Promise<{ id: string }> };
 
-/** 사진 수정 — id 로 로드 후 PhotoForm 에 초기값 전달. 없으면 안내 문구. */
 const EditPhotoPage = ({ params }: Props) => {
   const { id } = use(params);
   const [photo, setPhoto] = useState<Photo | null>(null);
