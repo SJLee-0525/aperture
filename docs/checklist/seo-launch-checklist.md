@@ -2,6 +2,9 @@
 
 이 문서는 코드에 이미 구현된 SEO 기능과 배포 후 사이트 소유자가 직접 처리해야 하는 외부 작업을 구분한다.
 
+> Google·네이버에 **처음 등록하는 실행 순서**는 [`search-engine-registration.md`](search-engine-registration.md)를 따른다.
+> 이 문서는 구현 항목 목록과 운영 점검 주기를 다루는 레퍼런스다.
+
 ## 1. 코드에서 이미 처리되는 항목
 
 - 페이지별 `title`, `description`, canonical URL
@@ -16,7 +19,7 @@
   - 공개 앨범 상세 URL
 - `/admin/*`, `/search` 검색 결과 제외
 - 이전 사진 URL의 영구 리디렉션
-- Google, 네이버, Bing HTML 메타 태그 소유권 인증 환경변수
+- Google, 네이버 HTML 메타 태그 소유권 인증 환경변수
 
 관련 코드는 다음 위치에서 관리한다.
 
@@ -35,7 +38,6 @@ Vercel의 프로젝트 `Settings → Environment Variables`에서 설정한다.
 SITE_URL=https://실제-대표-도메인
 GOOGLE_SITE_VERIFICATION=
 NAVER_SITE_VERIFICATION=
-BING_SITE_VERIFICATION=
 ```
 
 ### `SITE_URL`
@@ -106,12 +108,13 @@ https://대표도메인/sitemap.xml
 ```
 
 6. URL 검사에서 다음 대표 페이지를 검사하고 색인 생성을 요청한다.
-   - `/`
-   - `/photo`
-   - `/photo/albums`
-   - `/music`
-   - `/dev/projects`
-   - `/contact`
+   무-로케일 URL(`/photo` 등)은 308 리디렉션이라 색인 대상이 아니므로 `/ko` 프리픽스를 붙인다.
+   - `/ko`
+   - `/ko/photo`
+   - `/ko/photo/albums`
+   - `/ko/music`
+   - `/ko/dev/projects`
+   - `/ko/contact`
 7. 며칠 후 `페이지 색인`, `HTTPS`, `Core Web Vitals` 보고서를 확인한다.
 
 도메인 속성은 모든 프로토콜과 하위 도메인을 함께 관리하며 DNS 인증이 필요하다. URL 접두어 속성은 입력한 프로토콜과 주소 범위만 포함한다. 자세한 내용은 [Google 속성 추가 안내](https://support.google.com/webmasters/answer/34592)와 [소유권 확인 안내](https://support.google.com/webmasters/answer/9008080)를 참고한다.
@@ -139,29 +142,7 @@ sitemap.xml
 
 네이버는 사이트맵에 수집 대상 URL을 포함하고 소유 확인된 사이트와 동일한 도메인을 사용할 것을 권장한다. [사이트맵 제출 안내](https://searchadvisor.naver.com/guide/request-feed)와 [robots.txt 안내](https://searchadvisor.naver.com/guide/seo-basic-robots)를 참고한다.
 
-## 6. Bing Webmaster Tools
-
-가장 간단한 방법은 Google Search Console에서 가져오는 것이다.
-
-1. [Bing Webmaster Tools](https://www.bing.com/webmasters/)에 접속한다.
-2. `Import from Google Search Console`을 선택한다.
-3. Google 계정 접근을 허용하고 등록한 사이트를 가져온다.
-4. 가져온 사이트와 사이트맵 상태를 확인한다.
-
-직접 등록하려면:
-
-1. 운영 사이트 URL을 추가한다.
-2. HTML 메타 태그의 `msvalidate.01` 값을 `BING_SITE_VERIFICATION`에 입력한다.
-3. Production 재배포 후 인증한다.
-4. `Sitemaps`에서 다음 주소를 제출한다.
-
-```text
-https://대표도메인/sitemap.xml
-```
-
-Bing은 Google Search Console에서 사이트와 사이트맵을 가져올 수 있다. [사이트 등록·인증 안내](https://www.bing.com/webmasters/help/add-and-verify-site-12184f8b)와 [사이트맵 안내](https://www.bing.com/webmasters/help/Sitemaps-3b5cf6ed)를 참고한다.
-
-## 7. 검색엔진 밖에서 해야 하는 작업
+## 6. 검색엔진 밖에서 해야 하는 작업
 
 기술 설정만으로 검색 순위가 보장되지는 않는다. 사이트의 신뢰도와 발견 가능성을 위해 다음 작업을 병행한다.
 
@@ -175,7 +156,7 @@ Bing은 Google Search Console에서 사이트와 사이트맵을 가져올 수 �
 
 인위적인 링크 구매, 무관한 사이트에 반복 링크 등록, 같은 키워드 반복 삽입은 하지 않는다.
 
-## 8. 운영 후 점검 주기
+## 7. 운영 후 점검 주기
 
 ### 배포 또는 콘텐츠 변경 직후
 
@@ -196,7 +177,7 @@ Bing은 Google Search Console에서 사이트와 사이트맵을 가져올 수 �
 - 색인되지 않은 공개 페이지의 robots, noindex, canonical 확인
 - Core Web Vitals와 모바일 사용성 확인
 
-## 9. 자주 발생하는 문제
+## 8. 자주 발생하는 문제
 
 ### 소유권 인증 실패
 
