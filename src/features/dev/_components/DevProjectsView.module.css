@@ -167,27 +167,27 @@
   flex-direction: column;
   gap: var(--s-4);
 }
+/* 라벨 열을 카드 단위로 공유해 ko/en 라벨 길이 차이와 무관하게 본문 시작점을 맞춘다. */
 .tsItem {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: start;
   gap: var(--s-3);
   padding: var(--s-5);
   background: var(--surface-1);
   border: 1px solid var(--line);
 }
 .tsTitle {
+  grid-column: 1 / -1;
   font-size: var(--t-body);
   font-weight: 600;
   line-height: 1.5;
   color: var(--text);
 }
 .tsRow {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-3);
+  display: contents;
 }
 .tsLabel {
-  flex: none;
   min-width: 44px;
   text-align: center;
   padding: 3px 10px;
@@ -199,6 +199,14 @@
   color: var(--text-2);
   transform: translateY(3px);
 }
+/* 문제=음악 섹션 레드, 결과=현재 섹션 액센트 — 대비되는 두 톤으로 흐름을 읽게 한다. */
+.tsProblemLabel {
+  background: color-mix(in srgb, var(--accent-music) 11%, transparent);
+  color: var(--accent-music);
+}
+:global(html[data-theme="dark"]) .tsProblemLabel {
+  background: color-mix(in srgb, var(--accent-music) 16%, transparent);
+}
 .tsResultLabel {
   background: var(--accent-soft);
   color: var(--accent);
@@ -209,6 +217,25 @@
   font-size: var(--t-body);
   line-height: 1.6;
   color: var(--text-2);
+}
+/* 좁은 화면에선 라벨을 본문 위로 쌓아 본문 폭을 확보한다. */
+@media (max-width: 640px) {
+  .tsItem {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+  .tsRow {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-2);
+  }
+  .tsLabel {
+    transform: none;
+  }
+  .tsText {
+    padding-top: 0;
+  }
 }
 .mtags {
   display: flex;

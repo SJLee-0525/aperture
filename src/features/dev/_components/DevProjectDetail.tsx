@@ -99,7 +99,9 @@ const DevProjectDetailContent = ({ project }: Props) => {
                 ) : null}
                 {hasText(item.problem) ? (
                   <div className={styles.tsRow}>
-                    <span className={styles.tsLabel}>{dict.devTroubleProblemLabel}</span>
+                    <span className={`${styles.tsLabel} ${styles.tsProblemLabel}`}>
+                      {dict.devTroubleProblemLabel}
+                    </span>
                     <p className={styles.tsText}>{pickText(item.problem, lang)}</p>
                   </div>
                 ) : null}
