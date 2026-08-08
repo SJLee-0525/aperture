@@ -28,13 +28,13 @@ flowchart LR
     E --> R[(Firestore ragDocuments)]
 
     C --> API[POST /api/chat]
-    API --> N[GPT-5 Nano 문맥 분류 + 검색어·키워드 생성]
+    API --> N[의도 분류 + 검색어·키워드 생성]
     N -. none·오류·timeout .-> I[정규식 분야 분류]
     N --> Q[질문 임베딩 + RAG 검색]
     I --> Q[질문 임베딩 + RAG 검색]
     R --> Q
-    Q --> P[Gemini 3.5 Flash-Lite]
-    P -. 본문 출력 전 실패·25초 무응답 .-> O[GPT-5.6 Luna]
+    Q --> P[기본 채팅 제공자]
+    P -. 본문 출력 전 실패·25초 무응답 .-> O[폴백 제공자]
     P --> V[링크·참조 검증]
     O --> V
     V --> C
@@ -42,29 +42,29 @@ flowchart LR
 
 ## 3. 사용 모델과 호출 위치
 
-| 용도           | 제공자·모델                     | 호출 위치                                            | 호출 시점                                           |
-| -------------- | ------------------------------- | ---------------------------------------------------- | --------------------------------------------------- |
-| 챗봇 기본 응답 | Google `gemini-3.5-flash-lite`  | `src/features/chat/_lib/gemini-chat-provider.ts`     | 방문자가 챗봇 메시지를 전송할 때                    |
-| 챗봇 폴백      | OpenAI `gpt-5.6-luna`           | `src/features/chat/_lib/openai-chat-provider.ts`     | 기본 제공자가 본문 출력 전 실패·25초 무응답일 때    |
-| 의도 분류      | OpenAI `gpt-5-nano`             | `src/features/chat/_lib/openai-intent-classifier.ts` | 포트폴리오 분야를 판단할 때                         |
-| 콘텐츠 임베딩  | OpenAI `text-embedding-3-small` | `src/lib/ai/embedding.ts`                            | 최초 일괄 생성 또는 콘텐츠 변경 후 증분 동기화할 때 |
-| 질문 임베딩    | OpenAI `text-embedding-3-small` | `src/lib/ai/rag-search.ts`                           | live 포트폴리오 문맥이 필요한 챗봇 질문마다         |
-| 일반 통합검색  | 외부 모델 없음                  | `src/features/search/_components/SearchResults.tsx`  | `/search?q=...`를 열거나 검색어가 바뀔 때           |
+| 용도           | 설정·모델                            | 호출 위치                                            | 호출 시점                                           |
+| -------------- | ------------------------------------ | ---------------------------------------------------- | --------------------------------------------------- |
+| 챗봇 기본 응답 | `CHAT_PROVIDER`와 해당 모델          | `src/features/chat/_lib/chat-provider.ts`            | 방문자가 챗봇 메시지를 전송할 때                    |
+| 챗봇 폴백      | `CHAT_FALLBACK_PROVIDER`와 해당 모델 | `src/features/chat/_lib/chat-provider.ts`            | 기본 제공자가 본문 출력 전 실패·25초 무응답일 때    |
+| 의도 분류      | OpenAI `gpt-5-nano`                  | `src/features/chat/_lib/openai-intent-classifier.ts` | 포트폴리오 분야를 판단할 때                         |
+| 콘텐츠 임베딩  | OpenAI `text-embedding-3-small`      | `src/lib/ai/embedding.ts`                            | 최초 일괄 생성 또는 콘텐츠 변경 후 증분 동기화할 때 |
+| 질문 임베딩    | OpenAI `text-embedding-3-small`      | `src/lib/ai/rag-search.ts`                           | live 포트폴리오 문맥이 필요한 챗봇 질문마다         |
+| 일반 통합검색  | 외부 모델 없음                       | `src/features/search/_components/SearchResults.tsx`  | `/search?q=...`를 열거나 검색어가 바뀔 때           |
 
-기본·폴백은 env 값만 서로 바꾸면 교체된다 — 코드 수정 없이 스왑되는 것을 대칭 테스트(`chat-provider.test.ts`, `chat-provider-symmetry.test.ts`)로 고정한다. 채팅과 임베딩은 API 키, 모델, 할당량을 분리한다. 임베딩 키가 없을 때 채팅 키를 대신 사용하지 않는다.
+기본·폴백 채팅 제공자는 OpenAI와 Gemini 중에서 선택한다. `.env.example`은 OpenAI를 기본, Gemini를 폴백으로 두지만 여섯 개의 채팅 환경변수를 서로 바꾸면 코드 수정 없이 순서를 교체할 수 있다. 이 동작은 `chat-provider.test.ts`와 `chat-provider-symmetry.test.ts`로 검증한다. 채팅과 임베딩은 API 키, 모델, 할당량을 분리하며 임베딩 키가 없을 때 채팅 키를 대신 사용하지 않는다.
 
 ```dotenv
-CHAT_PROVIDER=gemini
-CHAT_PROVIDER_MODEL=gemini-3.5-flash-lite
+CHAT_PROVIDER=openai
+CHAT_PROVIDER_MODEL=gpt-5.6-luna
 CHAT_PROVIDER_API_KEY=
 
-CHAT_FALLBACK_PROVIDER=openai
-CHAT_FALLBACK_PROVIDER_MODEL=gpt-5.6-luna
+CHAT_FALLBACK_PROVIDER=gemini
+CHAT_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite
 CHAT_FALLBACK_PROVIDER_API_KEY=
 
 CHAT_INTENT_MODEL=gpt-5-nano
 CHAT_INTENT_PROVIDER_API_KEY=
-CHAT_INTENT_TIMEOUT_MS=10000
+CHAT_INTENT_TIMEOUT_MS=3000
 
 EMBEDDING_PROVIDER=openai
 EMBEDDING_PROVIDER_MODEL=text-embedding-3-small
@@ -84,12 +84,12 @@ env 값 처리 규칙 두 가지: ① provider 이름은 trim·소문자 정규�
 sequenceDiagram
     participant UI as Chat UI
     participant API as /api/chat
-    participant N as GPT-5 Nano 분류기
+    participant N as 의도 분류기
     participant RAG as RAG 검색
     participant FS as Firestore
     participant EMB as OpenAI Embeddings
-    participant P as Gemini 3.5 Flash-Lite
-    participant O as GPT-5.6 Luna 폴백
+    participant P as 기본 채팅 제공자
+    participant O as 폴백 제공자
 
     UI->>API: 메시지 + 언어, NDJSON 요청
     API->>API: 본문 검증, rate limit
@@ -134,7 +134,7 @@ sequenceDiagram
 
 `openai-intent-classifier.ts`가 현재 질문을 포함한 최근 메시지 6개를 `gpt-5-nano`에 전달해 `profile`, `development`, `music`, `photography`, `none`으로 분류한다. 최근 user/assistant 메시지를 함께 보기 때문에 “울릉도 갔나 보네, 그럼 독도도 있어?”처럼 현재 문장에 `사진`이라는 단어가 없는 후속 질문도 Photo 문맥으로 이어갈 수 있다. 분류와 동시에 대명사·후속 맥락을 해소한 독립 검색어(`searchQuery`)와 한·영 표기 변형을 포함한 검색 키워드(`searchKeywords`, 최대 8개)를 함께 생성해 RAG 검색에 그대로 사용한다. 응답은 엄격한 JSON Schema만 허용하며 `reasoning.effort: minimal`, 최대 출력 240토큰(한·영 키워드가 잘리면 JSON 파싱 실패로 조용히 정규식 폴백에 떨어지므로 여유를 둠)을 사용한다.
 
-분류 결과가 `none` 또는 빈 배열이거나 API 키 미설정, 잘못된 응답, 429·5xx·네트워크 오류, `CHAT_INTENT_TIMEOUT_MS` 초과가 발생하면 `chat-intent.ts`의 기존 정규식 분류를 한 번 더 실행한다. 분류 timeout 기본값은 3초, 운영값은 10초이며 전체 채팅 55초 timeout 안에서 동작한다. 요청 제한을 통과한 뒤 분류하므로 차단된 요청이 모델 할당량을 소비하지 않는다. 정규식은 직접 분야 키워드와 “그거”, “더 보여줘” 같은 단순 후속 질문을 처리하는 무비용 복구 경로다.
+분류 결과가 `none` 또는 빈 배열이거나 API 키 미설정, 잘못된 응답, 429·5xx·네트워크 오류, `CHAT_INTENT_TIMEOUT_MS` 초과가 발생하면 `chat-intent.ts`의 기존 정규식 분류를 한 번 더 실행한다. 분류 timeout 기본값은 3초이며 환경변수로 조정할 수 있다. 요청 제한을 통과한 뒤 분류하므로 차단된 요청이 모델 할당량을 소비하지 않는다. 정규식은 직접 분야 키워드와 “그거”, “더 보여줘” 같은 단순 후속 질문을 처리하는 무비용 복구 경로다.
 
 분류기를 유지하는 이유는 모든 데이터를 매번 모델에 보내지 않고 필요한 분야만 검색하기 위해서다. 이는 입력 토큰, Firestore 처리량, 응답 시간을 줄이고 서로 무관한 콘텐츠가 답변에 섞이는 문제도 완화한다.
 
@@ -192,11 +192,11 @@ type ChatProviderResult = {
 
 시간 예산은 전체 55초다 (`maxDuration` 60초 — Fluid Compute 미활성 Hobby 한도 안. Vercel이 함수를 먼저 끊으면 TIMEOUT 이벤트 대신 연결이 그냥 끊기므로 5초 여유):
 
-| 구간               | 상한                            | 비고                                          |
-| ------------------ | ------------------------------- | --------------------------------------------- |
-| 인텐트 분류        | 10초 (`CHAT_INTENT_TIMEOUT_MS`) | 초과·실패 시 정규식 폴백, 요청은 계속         |
-| 기본 제공자 무응답 | 25초                            | 첫 본문 출력 전 한정                          |
-| 폴백 응답          | 나머지 약 20초 (−RAG 시간)      | 첫 델타 이후는 전체 timeout까지 스트리밍 지속 |
+| 구간               | 상한                                | 비고                                          |
+| ------------------ | ----------------------------------- | --------------------------------------------- |
+| 인텐트 분류        | 기본 3초 (`CHAT_INTENT_TIMEOUT_MS`) | 초과·실패 시 정규식 폴백, 요청은 계속         |
+| 기본 제공자 무응답 | 25초                                | 첫 본문 출력 전 한정                          |
+| 폴백 응답          | 나머지 약 20초 (−RAG 시간)          | 첫 델타 이후는 전체 timeout까지 스트리밍 지속 |
 
 의도적으로 폴백하지 않는 실패도 있다.
 
@@ -289,7 +289,7 @@ flowchart LR
     E --> F[캐시 무효화]
 ```
 
-전체 242개와 같은 모든 청크를 매번 다시 만들지 않으므로 결과 품질은 일괄 생성과 같고, 호출량과 쓰기 비용만 줄어든다. 증분 갱신은 서버 오류일 때 한 번 재시도한다. 원본 콘텐츠 저장과 RAG 동기화는 분리되어 있어 임베딩 실패가 원본 저장을 되돌리지는 않는다. 실패 시 관리자 일괄 생성이 복구 경로다.
+모든 청크를 매번 다시 만들지 않으므로 결과 품질은 일괄 생성과 같고, 호출량과 쓰기 비용만 줄어든다. 증분 갱신은 서버 오류일 때 한 번 재시도한다. 원본 콘텐츠 저장과 RAG 동기화는 분리되어 있어 임베딩 실패가 원본 저장을 되돌리지는 않는다. 실패 시 관리자 일괄 생성이 복구 경로다.
 
 동기화가 읽는 원본은 항상 ISR 캐시를 우회한다(fresh). 관리자 저장 직후의 공개 페이지 재검증은 디바운스된 fire-and-forget이라, 캐시 경유 읽기는 방금 저장한 값 대신 최대 1시간 전 값을 임베딩할 수 있기 때문이다. 증분 타깃 원본은 공개 fetcher와 같은 디코더(`toPhoto`·`toDevProject` 등)로 정규화해 구형 문서(평문 troubleshooting, id 없는 수상)에서도 전체 생성과 같은 청크가 나온다. 개발 수상은 `site/dev` 문서의 배열 필드이므로 청크 `sourceId`도 `dev`로 저장해 devConfig 증분 동기화에 함께 실린다.
 
@@ -360,7 +360,7 @@ flowchart LR
 
 ### 서로 다른 제공자 둘을 유지하는 이유
 
-메인·폴백을 서로 다른 제공자(Google·OpenAI)로 두면 한쪽의 일시적인 5xx, rate limit, 무응답 상황에서 가용성을 높일 수 있고, 같은 제공자의 장애가 두 경로를 동시에 무너뜨리는 상관 장애를 피한다. 메인·서브 교체는 env 값 스왑만으로 끝나며 코드 수정이 필요 없다는 것을 대칭 테스트로 고정한다. 현재 운영은 Gemini 3.5 Flash-Lite 기본, GPT-5.6 Luna 폴백이다. 키와 모델 설정은 분리해 어느 한 제공자의 권한이나 할당량이 다른 기능에 영향을 주지 않게 한다.
+메인·폴백을 서로 다른 제공자(Google·OpenAI)로 두면 한쪽의 일시적인 5xx, rate limit, 무응답 상황에서 가용성을 높일 수 있고, 같은 제공자의 장애가 두 경로를 동시에 무너뜨리는 상관 장애를 피한다. 메인·서브 교체는 env 값 스왑만으로 끝나며 코드 수정이 필요 없다는 것을 대칭 테스트로 고정한다. 저장소의 예시 설정은 GPT-5.6 Luna 기본, Gemini 3.5 Flash-Lite 폴백이다. 실제 운영 순서는 배포 환경변수가 결정한다. 키와 모델 설정은 분리해 어느 한 제공자의 권한이나 할당량이 다른 기능에 영향을 주지 않게 한다.
 
 ## 9. 운영 점검표
 
@@ -372,7 +372,8 @@ flowchart LR
 - [ ] Firebase Rules와 indexes를 배포한다.
 - [ ] `/admin/maintenance`에서 임베딩 완료율이 100%인지 확인한다.
 - [ ] 콘텐츠를 새로 저장한 뒤 해당 항목의 증분 임베딩 요청이 성공하는지 확인한다.
-- [ ] `npm run test:chat-eval`로 한국어·영어 사실성, 참조 카드, TTFT를 비교한다.
+- [ ] `npm run test:chat-eval`로 한국어·영어 mock 응답과 참조 카드를 검사한다.
+- [ ] `npm run test:chat-eval:live`로 실제 제공자의 사실성, TTFT와 전체 지연을 비교한다.
 - [ ] OpenAI와 Gemini 사용량 한도 및 결제 알림을 설정한다.
 - [ ] 운영 개인정보 안내에 각 제공자의 데이터 처리 범위를 반영한다.
 
@@ -386,7 +387,7 @@ flowchart LR
 | OpenAI 의도 분류        | `src/features/chat/_lib/openai-intent-classifier.ts` |
 | mock/live 소스 선택     | `src/lib/content/content-source.ts`                  |
 | 제공자 선택·폴백        | `src/features/chat/_lib/chat-provider.ts`            |
-| OpenAI Luna             | `src/features/chat/_lib/openai-chat-provider.ts`     |
+| OpenAI 채팅 제공자      | `src/features/chat/_lib/openai-chat-provider.ts`     |
 | Gemini                  | `src/features/chat/_lib/gemini-chat-provider.ts`     |
 | 프로필 문맥·참조 검증   | `src/features/chat/_lib/build-profile-context.ts`    |
 | RAG 검색                | `src/lib/ai/rag-search.ts`                           |

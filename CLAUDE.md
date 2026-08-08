@@ -285,3 +285,13 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
   공개 개별 페이지(스택·프로젝트·경력·소개, 프로젝트 모달, reveal·타이핑) + 관리자 CMS(`/admin/dev/*`).
 - **Phase D — 마감**: 전 섹션 ko/en 번역 채움, 반응형·다크·접근성 점검, SEO/OG(섹션별), `/design-check`·`/deploy-check` 통과, 배포.
 - **Phase 3(선택)**: AI 태그 추천(브라우저 `transformers.js`), 지도 고도화, `/api/revalidate` 즉시 반영.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

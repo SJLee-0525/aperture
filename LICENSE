@@ -1,0 +1,149 @@
+APERTURE 포트폴리오 라이선스
+APERTURE PORTFOLIO LICENSE
+모든 권리 보유 / All Rights Reserved
+
+Copyright (c) 2026 Sungjoon Lee (이성준)
+
+본 문서는 한국어본과 영문본으로 제공됩니다. 두 언어본 사이에 해석의
+차이나 상충이 있는 경우 한국어본이 우선합니다.
+
+This document is provided in Korean and English. If any interpretation differs
+or conflicts between the two versions, the Korean version shall prevail.
+
+한국어본
+========
+
+1. 적용 범위
+
+본 라이선스는 이 저장소에 포함된 독창적인 소스 코드, 사용자 인터페이스,
+디자인, 문서, 디자인 내보내기 산출물, 이미지, 시청각 자료 및 그 밖의 콘텐츠
+(이하 통칭하여 "프로젝트")에 적용됩니다. 단, 제3자 자료 또는 공동 소유
+자료로 명시된 항목은 제외합니다.
+
+2. 권리의 유보
+
+프로젝트는 포트폴리오 검토와 참고를 위한 공개 열람 목적으로만 제공됩니다.
+본 프로젝트는 오픈소스 소프트웨어가 아닙니다. 제3조의 제한적 허용이나
+관계 법령에 따라 인정되는 경우를 제외하고, 명시적·묵시적 또는 그 밖의
+어떠한 방식으로도 저작권 이용허락이나 기타 권한을 부여하지 않습니다.
+
+3. 제한적인 열람 허용
+
+저장소 호스팅 서비스와 정당하게 공개된 포트폴리오 배포본을 통해 프로젝트를
+열람할 수 있습니다. 해당 열람에 합리적으로 필요한 일시적 또는 기술적 복제만
+허용됩니다. 저장소 호스팅 서비스가 자체 이용약관에 따라 직접 제공하는 권리는
+그 이용약관을 따르며, 저작권자가 별도의 추가 이용허락을 부여한 것으로 보지
+않습니다.
+
+4. 금지되는 이용
+
+관련 권리자의 사전 서면 허락 없이 다음 행위를 할 수 없습니다.
+
+- 프로젝트를 사용, 복제, 복사, 수정, 각색, 번역하거나 프로젝트를 바탕으로
+  2차적저작물을 작성하는 행위
+- 프로젝트 또는 그 상당 부분을 게시, 배포, 전송, 재허락, 판매, 대여, 호스팅,
+  서비스에 배치하거나 그 밖의 방법으로 타인에게 제공하는 행위
+- 프로젝트 또는 프로젝트의 시각적 정체성을 다른 포트폴리오, 제품, 서비스,
+  템플릿, 디자인 시스템, 데이터셋 또는 상업적 발표 자료에 사용하는 행위
+- 저작권, 출처, 저자 또는 권리 고지를 제거하거나 감추거나 변경하는 행위
+- 관계 법령에서 명시적으로 허용하는 경우를 제외하고, 프로젝트를 스크래핑,
+  데이터 마이닝하거나 머신러닝 또는 생성형 AI 시스템의 학습, 미세 조정,
+  평가 또는 입력 자료로 사용하는 행위
+
+5. 제3자 및 공동 소유 자료
+
+본 라이선스는 폰트, 이름, 초상, 사진, 포스터, 프로젝트 스크린샷, 발표 영상,
+링크된 파일, 상표 또는 서비스표를 포함한 제3자 자료나 공동 소유 자료에 대한
+권리를 부여하지 않습니다. 해당 자료에는 각 권리자의 권리와 라이선스 조건이
+계속 적용됩니다. 자세한 사항은 NOTICE 파일을 확인하십시오.
+
+6. AI 보조 제작
+
+제작 과정에서 생성형 AI 도구를 보조 수단으로 활용했습니다. 사람이 창작한
+선택, 배열, 편집, 디자인, 코드, 문서 및 프로젝트의 그 밖의 부분에 저작권이나
+관련 권리가 인정되는 범위에서 모든 권리를 유보합니다. 관계 법령상 보호 대상이
+아닌 자료에 대해서는 권리를 주장하지 않습니다.
+
+7. 무보증
+
+프로젝트는 상품성, 특정 목적 적합성, 권원 및 비침해에 관한 보증을 포함하여
+명시적 또는 묵시적인 어떠한 보증도 없이 "있는 그대로" 제공됩니다. 관계
+법령이 허용하는 최대 범위에서 권리자는 프로젝트의 접근 또는 이용으로 인해
+발생하는 어떠한 청구, 손해 또는 기타 책임도 부담하지 않습니다.
+
+8. 이용허락 요청
+
+별도의 서면 라이선스나 기타 이용허락 요청은 저장소 소유자에게 전달해야
+합니다. 이용허락은 모든 관련 권리자가 서면으로 승인한 경우에만 유효합니다.
+
+English Version
+===============
+
+1. Scope
+
+This license applies to the original source code, user interface, design,
+documentation, design exports, images, audiovisual materials, and other
+content contained in this repository (collectively, the "Project"), except
+for material expressly identified as third-party or jointly owned material.
+
+2. Reservation of rights
+
+The Project is made publicly visible for portfolio review and reference only.
+It is not open-source software. Except for the limited permission in Section 3
+or as required by applicable law, no copyright license or other permission is
+granted, whether expressly, by implication, estoppel, or otherwise.
+
+3. Limited permission to view
+
+You may view the Project through the repository hosting service and through an
+authorized deployment of the portfolio. You may make only the transient or
+technical copies reasonably necessary for that viewing. Rights provided
+directly by a repository hosting service under its terms of service remain
+subject to those terms and do not create any additional license from the
+copyright holder.
+
+4. Prohibited uses
+
+Without prior written permission from the relevant rights holder, you may not:
+
+- use, reproduce, copy, modify, adapt, translate, or create derivative works
+  from the Project;
+- publish, distribute, transmit, sublicense, sell, rent, host, deploy, or
+  otherwise make the Project or a substantial part of it available to others;
+- use the Project or its visual identity in another portfolio, product,
+  service, template, design system, dataset, or commercial presentation;
+- remove, hide, or alter copyright, attribution, authorship, or rights notices;
+  or
+- scrape, mine, or use the Project to train, fine-tune, evaluate, or supply a
+  machine-learning or generative-AI system, except where such activity is
+  expressly permitted by applicable law.
+
+5. Third-party and jointly owned material
+
+This license does not grant rights in third-party or jointly owned material,
+including fonts, names, likenesses, photographs, posters, project screenshots,
+presentation recordings, linked files, trademarks, or service marks. Such
+material remains subject to the rights and license terms of its respective
+owner or owners. See the NOTICE file for additional information.
+
+6. AI-assisted production
+
+Generative-AI tools were used as production aids. To the extent that copyright
+or related rights subsist in the human-authored selection, arrangement,
+editing, design, code, documentation, and other portions of the Project, all
+such rights are reserved. No rights are claimed in material that is not
+eligible for protection under applicable law.
+
+7. No warranty
+
+THE PROJECT IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY LAW, THE RIGHTS HOLDERS SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES,
+OR OTHER LIABILITY ARISING FROM ACCESS TO OR USE OF THE PROJECT.
+
+8. Permission requests
+
+Requests for a separate written license or other permission must be directed
+to the repository owner. Permission is valid only when granted in writing by
+all relevant rights holders.

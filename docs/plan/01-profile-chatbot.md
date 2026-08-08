@@ -126,7 +126,7 @@ type ChatProviderResult = {
 ## 9. 다음 단계
 
 1. Vercel에 Upstash 환경변수와 제공자 비용 알림 설정
-2. `npm run test:chat-eval`로 사실성·언어·카드 선택과 TTFT·전체 지연 회귀 검사
+2. `npm run test:chat-eval`로 mock 사실성·언어·카드 선택을 검사하고, `npm run test:chat-eval:live`로 실제 제공자의 TTFT·전체 지연을 확인
 3. 운영 환경에서 provider별 데이터 처리·보관 정책을 개인정보 처리 안내에 반영
 4. 실제 평가 결과를 바탕으로 문맥 검색과 요청 중단 UX를 추가 개선
 5. 제공자 변경 시 `chat-provider` 경계 안에서 어댑터만 교체
