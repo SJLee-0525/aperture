@@ -1,0 +1,8 @@
+# 테스트 fixture의 식별자다. 실제 API 키나 자격 증명이 아니다.
+f8b590917cc34cf194e93f8d36f5f34bcb475e6c:src/lib/ai/rag-chunks.test.ts:generic-api-key:71
+8068da46e69adf00943cb8fdbfabccff0e235b22:src/lib/geo/geocode.test.ts:generic-api-key:43
+
+# Firebase Auth UID를 비교하는 보안 규칙이다. 비밀정보가 아닌 사용자 식별자다.
+24fc4b276549af1bb5b484dfe45d435bcec6eb69:storage.rules:generic-api-key:10
+413483cf7e811e32462dcce39cd611bd55a64de7:firestore.rules:generic-api-key:12
+413483cf7e811e32462dcce39cd611bd55a64de7:storage.rules:generic-api-key:11
