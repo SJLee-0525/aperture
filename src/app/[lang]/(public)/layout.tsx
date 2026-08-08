@@ -10,7 +10,13 @@ import { getSite } from "@/lib/content/site";
 
 import styles from "./layout.module.css";
 
-/** 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config. */
+/**
+ * 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config.
+ *
+ * @param {{ children: React.ReactNode }} props
+ * @param {ReactNode} props.children
+ * @returns {Promise<JSX.Element>}
+ */
 const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
   const site = await getSite();
   return (

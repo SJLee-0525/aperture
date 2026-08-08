@@ -17,7 +17,11 @@ import { usePhotosAdmin } from "@/features/admin-photos/_hooks/use-photos-admin"
 
 import styles from "./AdminPhotosList.module.css";
 
-/** 관리자 사진 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 usePhotosAdmin. */
+/**
+ * 관리자 사진 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 usePhotosAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminPhotosPage = () => {
   const { photos, status, error, reorder, togglePublished, remove } = usePhotosAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));

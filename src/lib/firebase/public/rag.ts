@@ -2,6 +2,11 @@ import { COLLECTIONS } from "@/constants/collections";
 import { runQuery } from "@/lib/firebase/public/transport";
 import type { RagSection, StoredRagChunk } from "@/types/rag";
 
+/**
+ * 공개된 RAG 청크를 캐시 없이 읽고 필수 필드가 유효한 문서만 반환한다.
+ *
+ * @returns {Promise<StoredRagChunk[]>} 검색에 사용할 수 있는 RAG 청크 목록.
+ */
 const fetchRagChunks = async (): Promise<StoredRagChunk[]> =>
   (
     await runQuery(

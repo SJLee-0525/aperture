@@ -11,7 +11,13 @@ type Props = {
   project: DevProject;
 };
 
-/** 선택된 프로젝트의 전체 설명과 외부 링크를 표시한다. 모달 프레임은 상위가 소유한다. */
+/**
+ * 선택된 프로젝트의 전체 설명과 외부 링크를 표시한다. 모달 프레임은 상위가 소유한다.
+ *
+ * @param {Props} props
+ * @param {DevProject} props.project
+ * @returns {JSX.Element}
+ */
 const DevProjectDetailContent = ({ project }: Props) => {
   const { dict, lang } = useLang();
   const media = useMemo(

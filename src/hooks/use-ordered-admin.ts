@@ -24,6 +24,9 @@ type OrderedAdminStatus = "loading" | "ready" | "error";
  * reorder는 한 번에 하나만 저장해 연속 drag의 stale snapshot 경쟁을 막고,
  * 일부 write가 실패하면 adapter에서 authoritative 목록을 다시 읽어 롤백한다.
  * 삭제의 도메인별 부작용은 adapter.remove 뒤에 숨긴다.
+ *
+ * @param {OrderedAdminAdapter<T>} adapter
+ * @returns {{ items: T[]; status: OrderedAdminStatus; error: string | null; reorder: (activeId: string, overId: string) => Promise<void>; togglePublished: (id: string, next: boolean) => Promise<void>; remove: (id: string) => Promise<void> }}
  */
 const useOrderedAdmin = <T extends OrderedAdminItem>(adapter: OrderedAdminAdapter<T>) => {
   const [items, setItems] = useState<T[]>([]);

@@ -76,7 +76,16 @@ type Props = {
   endpoint: string;
 };
 
-/** 프로젝트 상세 데이터와 무거운 모달 UI를 실제 선택 시에만 불러온다. */
+/**
+ * 프로젝트 상세 데이터와 무거운 모달 UI를 실제 선택 시에만 불러온다.
+ *
+ * @param {Props} props
+ * @param {DevProjectCardData | null} props.project
+ * @param {boolean} props.open
+ * @param {() => void} props.onClose
+ * @param {string} props.endpoint
+ * @returns {JSX.Element | null}
+ */
 const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) => {
   const { dict, lang } = useLang();
   const [projectsById, setProjectsById] = useState<Map<string, DevProject>>(() => new Map());

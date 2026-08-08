@@ -13,6 +13,8 @@ import { useDevConfigAdmin } from "@/features/admin-dev-config/_hooks/use-dev-co
 import styles from "./DevConfigEditor.module.css";
 
 /** 개발 설정 — 소개 리드·인터뷰·기술 스택·학력·경력·수상 편집. 조립만, 로직은 편집 Module과 hook.
+ *
+ * @returns {JSX.Element}
  *  (연락처·소셜은 /contact, 히어로 타이핑은 랜딩 소관 → 여기 없음.) */
 const DevConfigEditor = () => {
   const { config, status, error, saving, saved, edit, save } = useDevConfigAdmin();

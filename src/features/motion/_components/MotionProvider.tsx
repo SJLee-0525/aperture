@@ -6,7 +6,11 @@ type Props = {
   children: React.ReactNode;
 };
 
-/** domMax를 별도 청크로 — 초기 번들에는 ~6KB m 런타임만 남고 기능 세트는 hydration 후 로드. */
+/**
+ * domMax를 별도 청크로 — 초기 번들에는 ~6KB m 런타임만 남고 기능 세트는 hydration 후 로드.
+ *
+ * @returns {Promise<FeatureBundle>}
+ */
 const loadFeatures = () =>
   import("@/features/motion/_lib/motion-features").then((module) => module.default);
 

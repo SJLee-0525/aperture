@@ -16,7 +16,13 @@ const chunk = (id: string, embedding: number[]): StoredRagChunk => ({
   published: true,
 });
 
-/** 결정적 의사 난수 벡터 — 실제 임베딩처럼 소수 성분이 뒤섞인 모양을 흉내낸다. */
+/**
+ * 결정적 의사 난수 벡터 — 실제 임베딩처럼 소수 성분이 뒤섞인 모양을 흉내낸다.
+ *
+ * @param {number} seed
+ * @param {number} dims
+ * @returns {number[]}
+ */
 const pseudoVector = (seed: number, dims: number): number[] =>
   Array.from({ length: dims }, (_, index) => Math.sin(seed * 997 + index * 13.7) * 0.05);
 

@@ -20,7 +20,13 @@ type Props = {
   locations: MapLocation[];
 };
 
-/** 지도 — 위치 리스트 + 실제 지도(MapLibre+CARTO). 핀·리스트 클릭 → ?photo= 상세 모달. */
+/**
+ * 지도 — 위치 리스트 + 실제 지도(MapLibre+CARTO). 핀·리스트 클릭 → ?photo= 상세 모달.
+ *
+ * @param {Props} props
+ * @param {MapLocation[]} props.locations
+ * @returns {JSX.Element}
+ */
 const MapView = ({ locations }: Props) => {
   const router = useRouter();
   const pathname = usePathname();

@@ -10,7 +10,11 @@ import type { TimelineEntry } from "@/types/timeline";
 
 import styles from "./AdminMusicConfigEditor.module.css";
 
-/** 음악 설정 — 소개글 + 경력·학력 타임라인 편집. 조립만, 로직은 useMusicConfigAdmin. */
+/**
+ * 음악 설정 — 소개글 + 경력·학력 타임라인 편집. 조립만, 로직은 useMusicConfigAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminMusicConfigPage = () => {
   const {
     intro,
@@ -29,7 +33,14 @@ const AdminMusicConfigPage = () => {
     save,
   } = useMusicConfigAdmin();
 
-  /** career·education 두 타임라인 섹션을 같은 마크업으로 렌더. */
+  /**
+   * career·education 두 타임라인 섹션을 같은 마크업으로 렌더.
+   *
+   * @param {TimelineKey} groupKey
+   * @param {string} label
+   * @param {TimelineEntry[]} entries
+   * @returns {JSX.Element}
+   */
   const renderTimeline = (groupKey: TimelineKey, label: string, entries: TimelineEntry[]) => (
     <section className={styles.section}>
       <div className={styles.arrayHead}>

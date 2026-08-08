@@ -14,7 +14,11 @@ const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 /** hCaptcha 위젯이 폼에 심는 토큰 필드 — Web3Forms 가 대시보드에서 캡차를 켜면 필수로 요구한다. */
 const CAPTCHA_FIELD = "h-captcha-response";
 
-/** 스크립트 로드 전이거나 캡차를 끈 환경에서도 안전하게 무시된다. */
+/**
+ * 스크립트 로드 전이거나 캡차를 끈 환경에서도 안전하게 무시된다.
+ *
+ * @returns {void}
+ */
 const resetCaptchaWidget = () => {
   (window as { hcaptcha?: { reset: () => void } }).hcaptcha?.reset();
 };

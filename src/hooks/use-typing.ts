@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
  * setState 는 setTimeout 콜백 안에서만 호출(effect 직접 setState 금지 규칙 준수).
  * `index`(현재 단어 인덱스)를 함께 반환 → 호출부가 단어별 색상 등을 매길 수 있다.
  * ⚠️ words 는 안정 참조여야 함(매 렌더 새 배열이면 effect 재시작 → 첫 글자에서 멈춤). 호출부에서 useMemo.
+ *
+ * @param {string[]} words
+ * @returns {{ text: string; index: number }}
  */
 const useTyping = (words: string[]): { text: string; index: number } => {
   const [text, setText] = useState("");

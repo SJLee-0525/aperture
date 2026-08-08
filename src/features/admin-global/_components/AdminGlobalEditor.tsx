@@ -8,7 +8,11 @@ import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin"
 
 import styles from "./AdminGlobalEditor.module.css";
 
-/** 관리자 전역 — 메인(/) 랜딩(순환 타이핑·리드) + 연락(/contact) 리드·링크 편집. 조립만, 로직은 useGlobalAdmin. */
+/**
+ * 관리자 전역 — 메인(/) 랜딩(순환 타이핑·리드) + 연락(/contact) 리드·링크 편집. 조립만, 로직은 useGlobalAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminGlobalPage = () => {
   const {
     tagline,

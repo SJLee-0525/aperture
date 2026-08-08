@@ -10,6 +10,10 @@ import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-curr
  * id 매칭 항목을 돌려주고, select/close 는 쿼리만 갱신(스크롤 유지). ESC·스크림 닫기는 Modal 이 처리.
  * usePhotoModal(?photo=)의 단일 항목 버전 — 음악 연주(?work=)·수상(?award=)·개발 프로젝트(?project=) 공용.
  * 소비 컴포넌트는 useSearchParams 를 쓰므로 상위에 Suspense 경계가 필요하다.
+ *
+ * @param {string} param
+ * @param {T[]} items
+ * @returns {{ active: T | null; open: boolean; select: (id: string | null) => void; close: () => void }}
  */
 const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
   const router = useRouter();

@@ -18,7 +18,13 @@ const sources = {
   projects: [MOCK_DEV_PROJECTS[0]],
 };
 
-/** 원문 텍스트의 토큰이 인덱스 문자열에 전부 담겼는지 — 클라 대조와 같은 경로로 검증. */
+/**
+ * 원문 텍스트의 토큰이 인덱스 문자열에 전부 담겼는지 — 클라 대조와 같은 경로로 검증.
+ *
+ * @param {string} indexText
+ * @param {string} raw
+ * @returns {boolean}
+ */
 const containsAllTokensOf = (indexText: string, raw: string) =>
   matchedTokenRatio(tokensFor(raw), indexText) === 1;
 

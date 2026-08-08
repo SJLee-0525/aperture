@@ -23,6 +23,10 @@ type Props = { coords: Coords };
  * 상세 패널용 실지도 미니맵 (MapLibre GL + CARTO). 좌표 중심 + 단일 마커.
  * interactive:false — 미니맵이라 스크롤/드래그를 뺏지 않는다(패널 스크롤 보존).
  * next/dynamic(ssr:false)로만 로드 — maplibre-gl 은 window 의존.
+ *
+ * @param {Props} props
+ * @param {Coords} props.coords
+ * @returns {JSX.Element}
  */
 const MiniMapCanvas = ({ coords }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);

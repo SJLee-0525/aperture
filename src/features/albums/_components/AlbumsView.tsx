@@ -23,7 +23,13 @@ type Props = {
   albums: AlbumCardData[];
 };
 
-/** 앨범 그리드 — 커버·장수는 서버에서 투영된 카드 데이터를 그대로 표시. */
+/**
+ * 앨범 그리드 — 커버·장수는 서버에서 투영된 카드 데이터를 그대로 표시.
+ *
+ * @param {Props} props
+ * @param {AlbumCardData[]} props.albums
+ * @returns {JSX.Element}
+ */
 const AlbumsView = ({ albums }: Props) => {
   const { dict, lang } = useLang();
 

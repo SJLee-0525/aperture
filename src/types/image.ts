@@ -7,11 +7,21 @@ type ImageVariant = { url: string; path: string; w: number; h: number };
  */
 type ImageMeta = ImageVariant & { preview?: ImageVariant; thumbnail?: ImageVariant };
 
-/** 카드·그리드용 중간 프리뷰 → 작은 썸네일 → 메인 순으로 폴백한다. */
+/**
+ * 카드·그리드용 중간 프리뷰 → 작은 썸네일 → 메인 순으로 폴백한다.
+ *
+ * @param {ImageMeta | null | undefined} image
+ * @returns {string}
+ */
 const imagePreviewUrl = (image: ImageMeta | null | undefined): string =>
   image?.preview?.url || image?.thumbnail?.url || image?.url || "";
 
-/** 행·검색·지도·채팅용 작은 썸네일 → 중간 프리뷰 → 메인 순으로 폴백한다. */
+/**
+ * 행·검색·지도·채팅용 작은 썸네일 → 중간 프리뷰 → 메인 순으로 폴백한다.
+ *
+ * @param {ImageMeta | null | undefined} image
+ * @returns {string}
+ */
 const imageThumbnailUrl = (image: ImageMeta | null | undefined): string =>
   image?.thumbnail?.url || image?.preview?.url || image?.url || "";
 

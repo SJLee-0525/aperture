@@ -19,7 +19,17 @@ type Props = {
   onPreload?: () => void;
 };
 
-/** 사진 타일 — 클릭 시 ?photo= 딥링크(상세 모달). 호버 시 제목·노출값 오버레이. */
+/**
+ * 사진 타일 — 클릭 시 ?photo= 딥링크(상세 모달). 호버 시 제목·노출값 오버레이.
+ *
+ * @param {Props} props
+ * @param {GalleryPhoto} props.photo
+ * @param {Lang} props.lang
+ * @param {boolean | undefined} props.square
+ * @param {boolean | undefined} props.priority - LCP 보호 — 상단(첫 화면)에 오는 타일만 eager 로드
+ * @param {(() => void) | undefined} props.onPreload - hover/focus/터치 시작 시 상세 모달 리소스 프리로드
+ * @returns {JSX.Element}
+ */
 const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }: Props) => {
   const title = pickText(photo.title, lang);
   const meta = `${photo.exif.aperture} · ${photo.exif.shutter} · ISO${photo.exif.iso} · ${photo.exif.focalLength}`;

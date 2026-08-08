@@ -20,7 +20,15 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-/** 정렬 가능한 연주 행 — 드래그 핸들·포스터 썸네일·제목·날짜·공개 토글·수정/삭제. */
+/**
+ * 정렬 가능한 연주 행 — 드래그 핸들·포스터 썸네일·제목·날짜·공개 토글·수정/삭제.
+ *
+ * @param {Props} props
+ * @param {AdminMusicWorkListItem} props.work
+ * @param {(id: string, next: boolean) => void} props.onTogglePublished
+ * @param {(id: string) => void} props.onDelete
+ * @returns {JSX.Element}
+ */
 const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(work.poster);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({

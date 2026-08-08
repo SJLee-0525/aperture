@@ -12,7 +12,18 @@ type Props = {
   subtitle: string;
 };
 
-/** 앨범 카드 — 정사각 커버 + 장수 배지 + 제목·부제. */
+/**
+ * 앨범 카드 — 정사각 커버 + 장수 배지 + 제목·부제.
+ *
+ * @param {Props} props
+ * @param {string} props.href
+ * @param {string | null} props.coverUrl
+ * @param {string} props.coverAlt
+ * @param {number} props.count
+ * @param {string} props.title
+ * @param {string} props.subtitle
+ * @returns {JSX.Element}
+ */
 const AlbumCard = ({ href, coverUrl, coverAlt, count, title, subtitle }: Props) => (
   <Link href={href} prefetch={false} className={styles.card} data-cursor-large="frame">
     <div className={styles.cover} data-protected-image>

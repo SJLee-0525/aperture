@@ -8,7 +8,13 @@ import { DevProjectCard } from "./DevProjectCard";
 import { OnDemandDevProjectDetail, preloadDevProjectDetail } from "./OnDemandDevProjectDetail";
 import styles from "./DevProjectsView.module.css";
 
-/** 프로젝트 목록과 URL 기반 상세 선택을 조율한다. */
+/**
+ * 프로젝트 목록과 URL 기반 상세 선택을 조율한다.
+ *
+ * @param {{ projects: DevProjectCardData[] }} props
+ * @param {DevProjectCardData[]} props.projects
+ * @returns {JSX.Element}
+ */
 const DevProjectsView = ({ projects }: { projects: DevProjectCardData[] }) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("project", projects);

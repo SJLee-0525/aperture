@@ -12,7 +12,13 @@ type Status = "loading" | "found" | "missing" | "error";
 
 type Props = { params: Promise<{ id: string }> };
 
-/** 수상 수정 — id 로 로드 후 AwardForm 에 초기값 전달. 없으면 안내 문구. */
+/**
+ * 수상 수정 — id 로 로드 후 AwardForm 에 초기값 전달. 없으면 안내 문구.
+ *
+ * @param {Props} props
+ * @param {Promise<{ id: string }>} props.params
+ * @returns {JSX.Element | null}
+ */
 const EditMusicAwardPage = ({ params }: Props) => {
   const { id } = use(params);
   const [award, setAward] = useState<MusicAward | null>(null);

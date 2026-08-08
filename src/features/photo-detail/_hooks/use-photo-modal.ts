@@ -8,6 +8,13 @@ import type { Photo } from "@/types/photo";
 /**
  * 사진 상세 모달 상태 — URL(?photo=id)이 단일 출처(딥링크·공유).
  * prev/next는 photoIds(생략 시 photos)를 순환하므로 상세 사진을 일부만 캐시해도 전체 탐색 순서를 유지한다.
+ *
+ * @param {Photo[]} photos
+ * @param {boolean} [navigationEnabled]
+ * @param {(id: string) => void} [onNavigateStart]
+ * @param {string[]} [photoIds]
+ * @param {() => void} [onClose]
+ * @returns {{ photo: Photo | null; open: boolean; close: () => void; next: () => void; prev: () => void }}
  */
 const usePhotoModal = (
   photos: Photo[],

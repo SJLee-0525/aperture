@@ -22,7 +22,13 @@ vi.mock("next/navigation", () => ({
 const useLangMock = vi.mocked(useLang);
 const useSearchParamsMock = vi.mocked(useSearchParams);
 
-/** 서버(search-documents)와 같은 정규화 경로로 픽스처 인덱스를 만든다. */
+/**
+ * 서버(search-documents)와 같은 정규화 경로로 픽스처 인덱스를 만든다.
+ *
+ * @param {string} title
+ * @param {string} [body]
+ * @returns {{ title: string; body: string; choseong: string }}
+ */
 const indexFor = (title: string, body = "") => ({
   title: normalizeForSearch(title),
   body: normalizeForSearch(body),

@@ -1,6 +1,11 @@
 /**
  * 입력 순서를 유지하면서 독립 작업을 제한 병렬 실행한다.
  * 각 작업의 실패를 보존해 호출자가 부분 성공 정책을 결정할 수 있다.
+ *
+ * @param {Input[]} inputs
+ * @param {number} concurrency
+ * @param {(input: Input) => Promise<Output>} task
+ * @returns {Promise<PromiseSettledResult<Output>[]>}
  */
 const runLimited = async <Input, Output>(
   inputs: Input[],

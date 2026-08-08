@@ -19,7 +19,11 @@ const STYLE_URL = {
 const currentTheme = (): "light" | "dark" =>
   document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 
-/** 현재 테마의 색 토큰 읽기 — 지도 레이어는 CSS 변수를 못 받으므로 런타임에 실측값을 넣는다. */
+/**
+ * 현재 테마의 색 토큰 읽기 — 지도 레이어는 CSS 변수를 못 받으므로 런타임에 실측값을 넣는다.
+ *
+ * @returns {{ accent: string; bg: string }}
+ */
 const readColors = () => {
   const cs = getComputedStyle(document.documentElement);
   const value = (name: string, fallback: string) => cs.getPropertyValue(name).trim() || fallback;
@@ -48,6 +52,12 @@ const VIEWPORT_UPDATE_DELAY = 250;
  * - 클러스터 클릭 → 확장 줌으로 이동(스플릿), 단일 핀 클릭 → onSelect(id).
  * 테마 토글 시 Positron↔Dark Matter 로 스타일 교체(교체 후 소스·레이어 재생성).
  * next/dynamic(ssr:false)로만 로드 — maplibre-gl은 window에 의존.
+ *
+ * @param {Props} props
+ * @param {MapLocation[]} props.locations
+ * @param {(id: string) => void} props.onSelect
+ * @param {(ids: string[]) => void} props.onVisibleLocationsChange
+ * @returns {JSX.Element}
  */
 const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);

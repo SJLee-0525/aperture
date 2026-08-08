@@ -16,7 +16,16 @@ type Props = {
   onRemove: (id: string) => void;
 };
 
-/** 선택된 사진 한 장 — 드래그로 순서 이동, 커버 지정, 제외. 순서 = photoIds 배열 순서. */
+/**
+ * 선택된 사진 한 장 — 드래그로 순서 이동, 커버 지정, 제외. 순서 = photoIds 배열 순서.
+ *
+ * @param {Props} props
+ * @param {AdminPhotoListItem} props.photo
+ * @param {boolean} props.isCover
+ * @param {(id: string) => void} props.onSetCover
+ * @param {(id: string) => void} props.onRemove
+ * @returns {JSX.Element}
+ */
 const SelectedPhotoChip = ({ photo, isCover, onSetCover, onRemove }: Props) => {
   const previewUrl = imageThumbnailUrl(photo.image);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({

@@ -34,7 +34,18 @@ const searchIndexFor = (
   choseong: choseongOf([title.ko, ...body.map((text) => text.ko), ...common].join(" ")),
 });
 
-/** 공개 도메인 객체를 Client Module에 필요한 최소 검색 문서로 투영한다. */
+/**
+ * 공개 도메인 객체를 Client Module에 필요한 최소 검색 문서로 투영한다.
+ *
+ * @param {SearchSources} options
+ * @param {Photo[]} options.photos
+ * @param {Album[]} options.albums
+ * @param {MusicWork[]} options.works
+ * @param {MusicAward[]} options.awards
+ * @param {MusicMedia[]} options.media
+ * @param {DevProject[]} options.projects
+ * @returns {SearchDocument[]}
+ */
 const createSearchDocuments = ({
   photos,
   albums,

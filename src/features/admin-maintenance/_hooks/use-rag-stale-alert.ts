@@ -9,6 +9,8 @@ import { getPortfolioEmbeddingStatus } from "@/features/admin-maintenance/_lib/g
  * 관리자 진입 시 RAG 인덱스의 불필요(stale) 청크 잔류를 감지한다.
  * 비공개 전환·삭제 시의 자동 동기화(requestRagSync)는 브라우저 fire-and-forget 이라 실패할 수 있고,
  * 실패하면 챗봇이 비공개 콘텐츠를 계속 인용한다 — 그 잔류를 다음 관리자 방문에서 알리는 보완 장치.
+ *
+ * @returns {{ dismiss: () => void; error: string | null; staleCount: number; sync: () => Promise<void>; syncing: boolean; visible: boolean }}
  */
 const useRagStaleAlert = () => {
   const [staleCount, setStaleCount] = useState(0);

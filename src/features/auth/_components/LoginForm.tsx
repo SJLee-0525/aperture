@@ -8,7 +8,11 @@ import { signIn } from "@/lib/firebase/auth";
 
 import styles from "./LoginForm.module.css";
 
-/** 관리자 로그인 폼. 성공 시 /admin 으로 이동. (관리자 UI 는 소유자 전용 → 한국어 고정) */
+/**
+ * 관리자 로그인 폼. 성공 시 /admin 으로 이동. (관리자 UI 는 소유자 전용 → 한국어 고정)
+ *
+ * @returns {JSX.Element}
+ */
 const LoginForm = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");

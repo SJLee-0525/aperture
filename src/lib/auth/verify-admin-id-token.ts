@@ -7,6 +7,10 @@ type LookupResponse = {
 /**
  * Firebase Auth REST가 ID token의 서명·만료·프로젝트를 검증한 결과로 관리자 UID를 확인한다.
  * 웹 API 키와 관리자 UID는 비밀이 아니며, 권한 증명은 검증된 ID token이 담당한다.
+ *
+ * @param {string} idToken
+ * @param {Fetcher} [fetcher]
+ * @returns {Promise<boolean>}
  */
 const verifyAdminIdToken = async (idToken: string, fetcher: Fetcher = fetch): Promise<boolean> => {
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;

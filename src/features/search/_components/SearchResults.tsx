@@ -32,6 +32,10 @@ type Group = { section: SearchSection; label: string; hits: Hit[] };
 /** 통합 검색 결과 (/search?q=) — 서버가 정규화까지 마친 검색 인덱스를 q(useSearchParams)로 클라 대조.
  *  데이터는 ISR 캐시(q 무관), 대조만 클라라 타이핑/언어 전환에 즉시 반응.
  *  그룹 순서는 사진→음악→개발 고정, 그룹 안은 점수순(제목 매치 가중) + 매치 구간 하이라이트.
+ *
+ * @param {Props} props
+ * @param {SearchDocument[]} props.documents
+ * @returns {JSX.Element}
  *  자모만 친 질의("ㅂㅅ")는 서버가 만든 초성 인덱스와 대조하는 초성 검색으로 동작. */
 const SearchResults = ({ documents }: Props) => {
   const { dict, lang } = useLang();

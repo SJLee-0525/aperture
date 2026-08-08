@@ -13,6 +13,10 @@ const REFERENCES_DESCRIPTION =
  * 두 제공자가 같은 응답 계약을 쓰도록 한 곳에서 만든다.
  * OpenAI Structured Outputs(strict) 는 모든 object 에 additionalProperties:false 를 요구하고
  * Gemini responseJsonSchema 는 이 키를 받지 않으므로 strict 플래그로만 분기한다.
+ *
+ * @param {{ strict: boolean }} options
+ * @param {boolean} options.strict
+ * @returns {{ properties: Record<string, unknown>; required: string[]; additionalProperties?: boolean | undefined; type: string }}
  */
 const buildChatResponseSchema = ({ strict }: { strict: boolean }) => {
   const object = (properties: Record<string, unknown>, required: string[]) => ({
@@ -97,6 +101,9 @@ const parseChatResult = (text: string): ChatProviderResult => {
  * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 동일하므로
  * "본문 확정 + links/references 포기"가 "다 보여주고 오류"보다 항상 낫다.
  * 두 제공자 모두 이 경로를 쓰므로 메인·서브를 바꿔도 잘림 처리 방식이 달라지지 않는다.
+ *
+ * @param {string} text
+ * @returns {ChatProviderResult}
  */
 const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   try {
@@ -135,6 +142,9 @@ const contentFromPartialJson = (serialized: string): string => {
  * 스트리밍 조각을 누적하면서 아직 내보내지 않은 본문 증분만 전달한다.
  * 구조화 JSON 이 완성되기 전에도 content 값만 뽑아 보여주기 위한 공통 로직으로,
  * 두 제공자의 스트림 처리 차이를 이 한 곳으로 흡수한다.
+ *
+ * @param {(delta: string) => void} onContentDelta
+ * @returns {{ push(chunk: string): void; readonly serialized: string }}
  */
 const createStreamingContentCollector = (onContentDelta: (delta: string) => void) => {
   let serialized = "";

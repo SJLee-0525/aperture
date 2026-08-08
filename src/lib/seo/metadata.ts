@@ -14,6 +14,9 @@ const OG_LOCALE: Record<Lang, string> = { ko: "ko_KR", en: "en_US" };
 /**
  * hreflang 세트 — 전 언어 버전 상호 참조(자기 포함, 구글 양방향 요구) + x-default(기본 언어 ko).
  * 상대 경로는 루트 layout `metadataBase`가 절대 URL로 해석한다 (구글 요구: 완전 수식 URL).
+ *
+ * @param {string} pathname
+ * @returns {Record<string, string>}
  */
 const languageAlternates = (pathname: string): Record<string, string> => ({
   ...Object.fromEntries(LANGS.map((lang) => [lang, localizePath(lang, pathname)])),
@@ -33,6 +36,13 @@ type PageMetadataInput = {
  * - title·description은 URL 언어를 따른다. 언어별 별도 URL이므로 클라 전환과 <title>이
  *   경합하던 문제가 구조적으로 사라짐 (구 "영어 제목 고정" 정책 폐기).
  * - canonical = 현재 언어 URL, hreflang = languageAlternates 세트.
+ *
+ * @param {PageMetadataInput} options
+ * @param {Lang} options.lang
+ * @param {LocalizedText} options.title
+ * @param {LocalizedText} options.description
+ * @param {string} options.pathname - 무-로케일 공개 경로("/photo") — 언어 프리픽스는 여기서 부착한다
+ * @returns {Metadata}
  */
 const pageMetadata = ({ lang, title, description, pathname }: PageMetadataInput): Metadata => {
   const resolvedTitle = pickText(title, lang);

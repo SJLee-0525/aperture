@@ -17,7 +17,11 @@ import { useMusicAwardsAdmin } from "@/features/admin-music-awards/_hooks/use-mu
 
 import styles from "./AdminMusicAwardsList.module.css";
 
-/** 관리자 수상 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicAwardsAdmin. */
+/**
+ * 관리자 수상 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicAwardsAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminMusicAwardsPage = () => {
   const { awards, status, error, reorder, togglePublished, remove } = useMusicAwardsAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));

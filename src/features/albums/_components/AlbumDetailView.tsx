@@ -29,6 +29,13 @@ type Props = {
  * 앨범 상세 — 히어로(커버+제목) + 메이슨리 그리드 + 상세 모달(앨범 내 순환).
  * 진입 시: 커버가 살짝 줌아웃되며 자리잡고, 제목과 그리드가 순차로 떠오른다.
  * (모달은 body 로 포털되어 이 영역의 transform 영향을 받지 않는다.)
+ *
+ * @param {Props} props
+ * @param {Album} props.album
+ * @param {Photo[]} props.photos
+ * @param {string | null} props.coverUrl
+ * @param {Tag[]} props.tags
+ * @returns {JSX.Element}
  */
 const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
   const { dict, lang } = useLang();

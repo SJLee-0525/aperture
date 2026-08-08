@@ -13,6 +13,8 @@ type ContentSource = "mock" | "live";
  * ⚠️ Vercel 프로덕션 빌드 + `NEXT_PUBLIC_USE_MOCK=1` 은 즉시 throw — 실서비스에 mock 이 노출되는
  *    사고를 빌드(정적 생성) 단계에서 원천 차단한다. deploy-check 의 사람 확인에만 의존하지 않는다.
  *    로컬 `npm run build` 는 mock 빌드 점검 용도로 계속 허용한다(Vercel 이 아니므로 실서비스 아님).
+ *
+ * @returns {boolean}
  */
 const mockContentEnabled = (): boolean => {
   const flag = process.env.NEXT_PUBLIC_USE_MOCK;
@@ -31,6 +33,8 @@ const mockContentEnabled = (): boolean => {
 /**
  * 개발 환경은 Firebase 설정이 없으면 mock 으로 동작할 수 있지만, 운영 환경에서는
  * 설정 누락을 콘텐츠 없음으로 위장하지 않는다. 명시적 mock 빌드만 예외다.
+ *
+ * @returns {boolean}
  */
 const shouldUseMockContent = (): boolean => {
   if (mockContentEnabled()) return true;

@@ -83,7 +83,14 @@ const GalleryContent = memo(function GalleryContent({
   );
 });
 
-/** 작업(Work) 뷰 — 검색 쿼리와 상세 모달만 구독하고, 배경 갤러리는 memo 경계로 격리한다. */
+/**
+ * 작업(Work) 뷰 — 검색 쿼리와 상세 모달만 구독하고, 배경 갤러리는 memo 경계로 격리한다.
+ *
+ * @param {Props} props
+ * @param {GalleryPhoto[]} props.photos
+ * @param {Tag[]} props.tags
+ * @returns {JSX.Element}
+ */
 const GalleryView = ({ photos, tags }: Props) => {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";

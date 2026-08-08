@@ -23,7 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 3600;
 
-/** 개발 — 기술 스택 (/dev). */
+/**
+ * 개발 — 기술 스택 (/dev).
+ *
+ * @returns {Promise<JSX.Element>}
+ */
 export default async function DevPage() {
   const config = await getDevConfig();
   return <DevStackView config={config} />;

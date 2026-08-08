@@ -22,7 +22,17 @@ type Props = {
   projectTechTags: string[][];
 };
 
-/** 소개 (/dev/about) — 공통 AboutSection(리드·통계·목록) + 하단 인터뷰 Q&A(dev 전용). */
+/**
+ * 소개 (/dev/about) — 공통 AboutSection(리드·통계·목록) + 하단 인터뷰 Q&A(dev 전용).
+ *
+ * @param {Props} props
+ * @param {LocalizedText} props.heroLead
+ * @param {DevStackGroup[]} props.stack
+ * @param {DevInterview[]} props.interview
+ * @param {number} props.timelineCount
+ * @param {string[][]} props.projectTechTags
+ * @returns {JSX.Element}
+ */
 const DevAboutView = ({ heroLead, stack, interview, timelineCount, projectTechTags }: Props) => {
   const { dict, lang } = useLang();
 

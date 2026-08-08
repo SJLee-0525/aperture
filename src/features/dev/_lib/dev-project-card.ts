@@ -1,6 +1,11 @@
 import type { DevProject, DevProjectCardData } from "@/types/dev";
 
-/** 전체 프로젝트에서 목록 렌더에 필요한 필드만 남겨 RSC 직렬화 크기를 줄인다. */
+/**
+ * 전체 프로젝트에서 목록 렌더에 필요한 필드만 남겨 RSC 직렬화 크기를 줄인다.
+ *
+ * @param {DevProject} project
+ * @returns {DevProjectCardData}
+ */
 const toDevProjectCard = (project: DevProject): DevProjectCardData => ({
   id: project.id,
   title: project.title,

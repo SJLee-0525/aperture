@@ -14,7 +14,19 @@ type Props = {
   onRemove: (index: number) => void;
 };
 
-/** 연락처 링크 한 행 — label·href 입력 + 위/아래 이동 + 삭제. */
+/**
+ * 연락처 링크 한 행 — label·href 입력 + 위/아래 이동 + 삭제.
+ *
+ * @param {Props} props
+ * @param {SiteLink} props.link
+ * @param {number} props.index
+ * @param {boolean} props.isFirst
+ * @param {boolean} props.isLast
+ * @param {(index: number, field: keyof SiteLink, value: string) => void} props.onEdit
+ * @param {(index: number, offset: -1 | 1) => void} props.onMove
+ * @param {(index: number) => void} props.onRemove
+ * @returns {JSX.Element}
+ */
 const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Props) => (
   <li className={styles.row}>
     <label className={styles.field}>

@@ -15,7 +15,15 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-/** 정렬 가능한 영상 행 — 드래그 핸들·제목·YouTube ID·공개 토글·수정/삭제. */
+/**
+ * 정렬 가능한 영상 행 — 드래그 핸들·제목·YouTube ID·공개 토글·수정/삭제.
+ *
+ * @param {Props} props
+ * @param {MusicMedia} props.media
+ * @param {(id: string, next: boolean) => void} props.onTogglePublished
+ * @param {(id: string) => void} props.onDelete
+ * @returns {JSX.Element}
+ */
 const MediaRow = ({ media, onTogglePublished, onDelete }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: media.id,

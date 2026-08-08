@@ -18,7 +18,14 @@ type Props = {
   coords: Coords | null;
 };
 
-/** 상세 패널 미니맵 — 좌표가 있으면 실지도, 없으면 빈 지면 + 장소명 캡션. */
+/**
+ * 상세 패널 미니맵 — 좌표가 있으면 실지도, 없으면 빈 지면 + 장소명 캡션.
+ *
+ * @param {Props} props
+ * @param {string} props.place
+ * @param {Coords | null} props.coords
+ * @returns {JSX.Element}
+ */
 const DetailMiniMap = ({ place, coords }: Props) => (
   <div className={styles.map}>
     {coords ? <MiniMapCanvas coords={coords} /> : <div className={styles.empty} />}

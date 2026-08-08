@@ -14,7 +14,11 @@ type AuthState = {
   isAdmin: boolean;
 };
 
-/** 현재 인증 상태 구독. loading=최초 판별 전, isAdmin=로그인 + UID 일치. */
+/**
+ * 현재 인증 상태 구독. loading=최초 판별 전, isAdmin=로그인 + UID 일치.
+ *
+ * @returns {AuthState}
+ */
 const useAuth = (): AuthState => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

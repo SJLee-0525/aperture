@@ -17,6 +17,11 @@ const GITHUB_URL = "https://github.com/SJLee-0525";
 /**
  * 전역 푸터 — 상단: 브랜드 블록(워드마크 + 태그라인 + 연락 아이콘) + 사이트맵(mega-menu와 동일 출처),
  * 하단: © + 조용한 GitHub 크레딧. 공개 레이아웃 하단에만 마운트, links·tagline은 site/config에서 주입.
+ *
+ * @param {{ tagline: LocalizedText; links: SiteLink[] }} props
+ * @param {LocalizedText} props.tagline
+ * @param {SiteLink[]} props.links
+ * @returns {JSX.Element}
  */
 const SiteFooter = ({ tagline, links }: { tagline: LocalizedText; links: SiteLink[] }) => {
   const { dict, lang } = useLang();

@@ -124,6 +124,17 @@ const LightboxSlide = memo(function LightboxSlide({
  * PhotoModal(사진 섹션 전용 라이트박스)과 동일한 오버레이 어휘(스크림·사각 내비)를 따르되
  * EXIF 등 도메인 결합 없이 이미지 확대만 담당한다. ESC 는 capture 단계에서 소비해
  * 아래에 열려 있는 Modal(문서 bubble 리스너)이 함께 닫히지 않게 한다.
+ *
+ * @param {Props} props
+ * @param {ImageMeta[]} props.images
+ * @param {number} props.index
+ * @param {string} props.alt
+ * @param {string} props.closeLabel
+ * @param {string} props.previousLabel
+ * @param {string} props.nextLabel
+ * @param {() => void} props.onClose
+ * @param {(index: number) => void} props.onNavigate
+ * @returns {ReactPortal | null}
  */
 const ImageLightbox = ({
   images,

@@ -17,7 +17,11 @@ import { useDevProjectsAdmin } from "@/features/admin-dev-projects/_hooks/use-de
 
 import styles from "./AdminDevProjectsList.module.css";
 
-/** 관리자 프로젝트 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useDevProjectsAdmin. */
+/**
+ * 관리자 프로젝트 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useDevProjectsAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminDevProjectsPage = () => {
   const { projects, status, error, reorder, togglePublished, remove } = useDevProjectsAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));

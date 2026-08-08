@@ -18,7 +18,11 @@ type Props = {
   initial?: MusicMedia;
 };
 
-/** 빈 영상 초기 상태. */
+/**
+ * 빈 영상 초기 상태.
+ *
+ * @returns {MusicMediaInput}
+ */
 const emptyInput = (): MusicMediaInput => ({
   title: EMPTY_TEXT,
   source: EMPTY_TEXT,
@@ -34,7 +38,14 @@ const fromMedia = (media: MusicMedia): MusicMediaInput => {
   return rest;
 };
 
-/** 공유 영상 폼 — 이중언어 제목·출처 + YouTube ID + 저장. */
+/**
+ * 공유 영상 폼 — 이중언어 제목·출처 + YouTube ID + 저장.
+ *
+ * @param {Props} props
+ * @param {string} props.mediaId
+ * @param {MusicMedia | undefined} props.initial - 있으면 수정 모드.
+ * @returns {JSX.Element}
+ */
 const MediaForm = ({ mediaId, initial }: Props) => {
   const router = useRouter();
   const isEdit = initial != null;

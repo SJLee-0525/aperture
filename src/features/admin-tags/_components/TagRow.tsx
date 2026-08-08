@@ -13,7 +13,15 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-/** 정렬 가능한 태그 행 — 드래그 핸들·읽기전용 id·ko/en 입력·삭제. */
+/**
+ * 정렬 가능한 태그 행 — 드래그 핸들·읽기전용 id·ko/en 입력·삭제.
+ *
+ * @param {Props} props
+ * @param {Tag} props.tag
+ * @param {(id: string, field: 'ko' | 'en', value: string) => void} props.onEditLabel
+ * @param {(id: string) => void} props.onDelete
+ * @returns {JSX.Element}
+ */
 const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: tag.id,

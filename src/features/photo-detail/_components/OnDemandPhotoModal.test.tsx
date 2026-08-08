@@ -41,7 +41,11 @@ vi.mock("@/features/lang/_hooks/use-lang", () => ({
 const serialized = (id: string) =>
   ({ id, shotAt: new Date(0).toISOString() }) as unknown as Photo & { shotAt: string };
 
-/** 응답 이후 마이크로태스크·재렌더 사이클을 여러 번 비워 재요청 루프 여부를 드러낸다. */
+/**
+ * 응답 이후 마이크로태스크·재렌더 사이클을 여러 번 비워 재요청 루프 여부를 드러낸다.
+ *
+ * @returns {Promise<void>}
+ */
 const flushCycles = async () => {
   for (let i = 0; i < 5; i += 1) {
     await act(async () => {

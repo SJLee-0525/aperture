@@ -23,7 +23,11 @@ const PhotoModal = dynamic(() => loadPhotoModal().then((module) => module.PhotoM
   ssr: false,
 });
 
-/** 타일·위치 리스트가 hover/focus 시점에 모달 청크를 미리 받게 한다 — 첫 클릭 지연 제거. */
+/**
+ * 타일·위치 리스트가 hover/focus 시점에 모달 청크를 미리 받게 한다 — 첫 클릭 지연 제거.
+ *
+ * @returns {void}
+ */
 const preloadPhotoModal = () => {
   void loadPhotoModal();
 };

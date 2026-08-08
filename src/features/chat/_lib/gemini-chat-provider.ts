@@ -45,6 +45,9 @@ const responseText = (data: GeminiResponse): string =>
  * 안전 차단은 Gemini 만 신호를 준다 — OpenAI 에는 대응 신호가 없어 blocked 는 이 제공자 전용이다.
  * MAX_TOKENS 종료는 오류로 다루지 않는다. 잘린 JSON 은 공용 salvage 가 본문만 회수하므로
  * OpenAI 와 동일하게 "본문 확정 + links/references 포기"로 수렴한다.
+ *
+ * @param {GeminiResponse} data
+ * @returns {void}
  */
 const assertNotBlocked = (data: GeminiResponse) => {
   const candidate = data.candidates?.[0];

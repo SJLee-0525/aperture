@@ -13,6 +13,10 @@ type Props = { children: ReactNode };
 /**
  * 관리자 라우트 가드. 로그인 페이지(/admin/login)는 통과, 그 외는 관리자만.
  * ⚠️ UX 가드일 뿐 — 실제 보안 경계는 Firestore/Storage Rules 다 (아키텍처 원칙 #1).
+ *
+ * @param {Props} props
+ * @param {ReactNode} props.children
+ * @returns {JSX.Element}
  */
 const AuthGuard = ({ children }: Props) => {
   const pathname = usePathname();

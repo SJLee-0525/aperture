@@ -25,7 +25,15 @@ const shareIcon = (
   </svg>
 );
 
-/** 현재 딥링크를 네이티브 공유 시트로 전달하는 공용 아이콘 버튼. */
+/**
+ * 현재 딥링크를 네이티브 공유 시트로 전달하는 공용 아이콘 버튼.
+ *
+ * @param {Props} props
+ * @param {string} props.title
+ * @param {string} props.label
+ * @param {string | undefined} props.className
+ * @returns {JSX.Element}
+ */
 const ShareButton = ({ title, label, className }: Props) => {
   const share = async () => {
     const url = window.location.href;

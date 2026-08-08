@@ -26,7 +26,12 @@ type NominatimSearch = {
   lon: string;
 };
 
-/** 장소 검색(한국어 표기 기준). 좌표·osm 식별자 포함. */
+/**
+ * 장소 검색(한국어 표기 기준). 좌표·osm 식별자 포함.
+ *
+ * @param {string} query
+ * @returns {Promise<GeoResult[]>}
+ */
 const searchPlaces = async (query: string): Promise<GeoResult[]> => {
   const q = query.trim();
   if (!q) return [];
@@ -51,7 +56,13 @@ const searchPlaces = async (query: string): Promise<GeoResult[]> => {
     }));
 };
 
-/** 선택한 장소의 영어 표기 — 실패하면 빈 문자열(호출부가 ko 로 폴백). */
+/**
+ * 선택한 장소의 영어 표기 — 실패하면 빈 문자열(호출부가 ko 로 폴백).
+ *
+ * @param {string} osmType
+ * @param {number} osmId
+ * @returns {Promise<string>}
+ */
 const fetchPlaceEnglish = async (osmType: string, osmId: number): Promise<string> => {
   const prefix = PREFIX[osmType];
   if (!prefix) return "";

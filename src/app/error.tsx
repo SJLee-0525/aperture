@@ -13,10 +13,15 @@ type Props = {
   reset: () => void;
 };
 
-/*
+/**
  * 라우트 에러 바운더리 — 렌더 중 오류를 잡는다(루트 레이아웃은 유지).
  * 루트 레이아웃 하위(LangProvider 안)라 useLang으로 ko/en 대응. editorial 톤은 status.module.css 공유.
  * 외부 로깅 없음(서버리스·$0) — 콘솔에만 기록.
+ *
+ * @param {Props} props 오류 정보와 재시도 동작.
+ * @param {Error & { digest?: string }} props.error 렌더링 중 포착한 오류.
+ * @param {() => void} props.reset 오류 경계를 다시 렌더링하는 콜백.
+ * @returns {JSX.Element} 현재 언어의 오류 안내 화면.
  */
 export default function Error({ error, reset }: Props) {
   const { dict } = useLang();

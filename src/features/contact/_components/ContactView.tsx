@@ -203,7 +203,13 @@ const ContactForm = ({ to }: { to: string }) => {
   );
 };
 
-/** 연락처 (/contact) — Web3Forms 발송 폼(키 미설정 시 mailto 폴백) + 직접 연락 버튼. */
+/**
+ * 연락처 (/contact) — Web3Forms 발송 폼(키 미설정 시 mailto 폴백) + 직접 연락 버튼.
+ *
+ * @param {{ site: SiteConfig }} props
+ * @param {SiteConfig} props.site
+ * @returns {JSX.Element}
+ */
 const ContactView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
 

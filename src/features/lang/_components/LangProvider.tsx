@@ -74,6 +74,11 @@ type LangProviderProps = {
  *   SSR부터 해당 언어로 렌더된다. 다른 언어로의 "이동"은 LangMenu가 담당한다
  *   (setLang은 어느 모드든 스토어 기록 — 관리자 화면과 선호를 공유).
  * - 스토어 모드(prop 없음, 관리자·에러 페이지): 기존 localStorage + 모듈 스토어 동작 유지.
+ *
+ * @param {LangProviderProps} props
+ * @param {Lang | undefined} props.lang - 경로 모드 — 공개 `/[lang]/*` 트리에서 URL 세그먼트를 그대로 주입. 생략 시 스토어 모드.
+ * @param {ReactNode} props.children
+ * @returns {JSX.Element}
  */
 const LangProvider = ({ lang: routeLang, children }: LangProviderProps) => {
   const storeLang = useSyncExternalStore(subscribeLang, readLangSnapshot, readServerLangSnapshot);

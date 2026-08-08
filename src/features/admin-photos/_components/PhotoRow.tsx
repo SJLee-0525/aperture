@@ -17,7 +17,15 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-/** 정렬 가능한 사진 행 — 드래그 핸들·썸네일·제목·공개 토글·수정/삭제. */
+/**
+ * 정렬 가능한 사진 행 — 드래그 핸들·썸네일·제목·공개 토글·수정/삭제.
+ *
+ * @param {Props} props
+ * @param {AdminPhotoListItem} props.photo
+ * @param {(id: string, next: boolean) => void} props.onTogglePublished
+ * @param {(id: string) => void} props.onDelete
+ * @returns {JSX.Element}
+ */
 const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(photo.image);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({

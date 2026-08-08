@@ -8,6 +8,10 @@ type TitleSegment = { text: string; hit: boolean };
  * 제목에 그대로 있으면 사용자가 친 글자이니 시각 근거로 표시한다. 원어도 조사는 뗀다 —
  * "캐논으로"가 제목의 "캐논"과 만나야 한다. 순수 시각용이라 랭킹 무영향.
  * scoringTokens는 호출부가 이미 토큰화해뒀으면 재사용(채점기와 공유) — 없으면 여기서 생성.
+ *
+ * @param {string} query
+ * @param {ReadonlySet<string>} [scoringTokens]
+ * @returns {ReadonlySet<string>}
  */
 const highlightTokensFor = (
   query: string,
@@ -27,6 +31,10 @@ const highlightTokensFor = (
  * 정렬 근거를 눈에 보이게 하는 용도라 부분·별칭 일치까지 흉내내지 않는다(그건 마크 없이 통과).
  * 토큰이 NFKC+소문자 정규화본이라 제목도 같은 변환본에서 위치를 찾되, 변환으로 길이가
  * 달라지는 예외 문자(합자·NFD 등)를 만나면 오프셋이 어긋나므로 하이라이트를 포기하고 원문 그대로 낸다.
+ *
+ * @param {string} title
+ * @param {ReadonlySet<string>} queryTokens
+ * @returns {TitleSegment[]}
  */
 const splitTitleByMatches = (title: string, queryTokens: ReadonlySet<string>): TitleSegment[] => {
   const whole: TitleSegment[] = [{ text: title, hit: false }];

@@ -18,6 +18,9 @@ const revalidateAsCurrentAdmin = async (tags: string[]): Promise<void> => {
  * 관리자 쓰기 성공 직후 공개 페이지 ISR 재검증을 요청 — fire-and-forget.
  * 저장은 이미 Firestore 에 반영된 뒤라, 재검증 실패는 "최대 revalidate 주기만큼 늦게 보임"일 뿐
  * 데이터 유실이 아니다 → 저장 UX 를 막지 않고 실패는 경고 로그만 남긴다.
+ *
+ * @param {string[]} tags
+ * @returns {void}
  */
 const requestPublicRevalidate = (...tags: string[]): void => {
   tags.forEach((tag) => pendingTags.add(tag));

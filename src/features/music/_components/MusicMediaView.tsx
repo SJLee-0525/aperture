@@ -15,7 +15,13 @@ const PLAY_ICON = (
   </svg>
 );
 
-/** 영상 (/music/media) — facade 클릭 시 YouTube iframe 재생. id 없는 항목(mock)은 "곧 공개" 안내. */
+/**
+ * 영상 (/music/media) — facade 클릭 시 YouTube iframe 재생. id 없는 항목(mock)은 "곧 공개" 안내.
+ *
+ * @param {{ media: MusicMedia[] }} props
+ * @param {MusicMedia[]} props.media
+ * @returns {JSX.Element}
+ */
 const MusicMediaView = ({ media }: { media: MusicMedia[] }) => {
   const { dict, lang } = useLang();
   const [playing, setPlaying] = useState<string | null>(null);

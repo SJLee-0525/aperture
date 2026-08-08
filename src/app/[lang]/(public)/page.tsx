@@ -15,7 +15,13 @@ export const revalidate = 3600;
 
 type Props = { params: Promise<{ lang: Lang }> };
 
-/** 랜딩은 title template 미적용(absolute) — 사이트 대표 제목 그대로. 설명·canonical·hreflang만 언어별. */
+/**
+ * 랜딩은 title template 미적용(absolute) — 사이트 대표 제목 그대로. 설명·canonical·hreflang만 언어별.
+ *
+ * @param {Props} props
+ * @param {Promise<{ lang: Lang }>} props.params
+ * @returns {Promise<Metadata>}
+ */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang } = await params;
   const description = pickText(SITE_DESCRIPTION, lang);
@@ -44,7 +50,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** 랜딩 허브 (/[lang]) — 이름·태그라인 + 사진/음악/개발 진입. */
+/**
+ * 랜딩 허브 (/[lang]) — 이름·태그라인 + 사진/음악/개발 진입.
+ *
+ * @returns {Promise<JSX.Element>}
+ */
 export default async function RootPage() {
   const site = await getSite();
   return <LandingView tagline={site.tagline} landingLead={site.landingLead} />;

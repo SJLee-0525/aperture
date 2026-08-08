@@ -8,6 +8,8 @@ import styles from "./IntroSplash.module.css";
  * - (public)/layout 에 마운트 → 소프트 내비에선 재생 안 되고, 하드 로드(첫 방문·새로고침)마다 1회.
  * - 장식용이라 aria-hidden(콘텐츠는 뒤에 그대로 → SEO·스크린리더 영향 없음).
  * - prefers-reduced-motion 시 CSS 규칙이 스플래시를 생략(즉시 콘텐츠 노출).
+ *
+ * @returns {JSX.Element}
  */
 const IntroSplash = () => (
   <div aria-hidden="true" data-intro-splash className={styles.splash}>

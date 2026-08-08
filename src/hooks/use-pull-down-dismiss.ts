@@ -13,7 +13,16 @@ type Options = {
   canStart?: (target: EventTarget | null) => boolean;
 };
 
-/** 모바일에서 아래로 끌어 닫는 제스처. 이동값은 DOM에 직접 반영해 매 프레임 렌더를 피한다. */
+/**
+ * 모바일에서 아래로 끌어 닫는 제스처. 이동값은 DOM에 직접 반영해 매 프레임 렌더를 피한다.
+ *
+ * @param {Options} options
+ * @param {boolean} options.enabled
+ * @param {() => void} options.onDismiss
+ * @param {RefObject<HTMLElement | null>} options.surfaceRef
+ * @param {((target: EventTarget | null) => boolean) | undefined} options.canStart
+ * @returns {{ onTouchStart: (event: React.TouchEvent<HTMLElement>) => void; onTouchMove: (event: React.TouchEvent<HTMLElement>) => void; onTouchEnd: () => void; onTouchCancel: () => void }}
+ */
 const usePullDownDismiss = ({ enabled, onDismiss, surfaceRef, canStart }: Options) => {
   const gesture = useRef({
     active: false,

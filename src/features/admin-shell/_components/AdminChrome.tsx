@@ -9,7 +9,13 @@ import { signOutAdmin } from "@/lib/firebase/auth";
 
 import styles from "./AdminChrome.module.css";
 
-/** 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + 컨텐츠 영역. */
+/**
+ * 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + 컨텐츠 영역.
+ *
+ * @param {{ children: ReactNode }} props
+ * @param {ReactNode} props.children
+ * @returns {JSX.Element}
+ */
 const AdminChrome = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 

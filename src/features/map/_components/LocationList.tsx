@@ -16,7 +16,13 @@ type Props = {
   locations: MapLocation[];
 };
 
-/** 촬영 위치 리스트 — 스크롤 컨테이너 근처에 들어온 48px 썸네일만 마운트한다. */
+/**
+ * 촬영 위치 리스트 — 스크롤 컨테이너 근처에 들어온 48px 썸네일만 마운트한다.
+ *
+ * @param {Props} props
+ * @param {MapLocation[]} props.locations
+ * @returns {JSX.Element}
+ */
 const LocationList = ({ locations }: Props) => {
   const { dict, lang } = useLang();
   const listRef = useRef<HTMLElement>(null);

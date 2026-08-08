@@ -18,7 +18,11 @@ import { imageThumbnailUrl } from "@/types/image";
 
 import styles from "./AdminAlbumsList.module.css";
 
-/** 관리자 앨범 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useAlbumsAdmin. */
+/**
+ * 관리자 앨범 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useAlbumsAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminAlbumsPage = () => {
   const { albums, status, error, reorder, togglePublished, remove } = useAlbumsAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));

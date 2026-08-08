@@ -11,6 +11,9 @@ const MATCH_THRESHOLD = 0.5;
 const CHOSEONG_WEIGHT = 0.2;
 
 /** 질의 전체(공백 제외)가 초성 자모 2자 이상일 때만 초성 검색으로 본다 — 1자는 사실상
+ *
+ * @param {string} query
+ * @returns {string | null}
  *  전 문서와 일치해 판별력이 없다(일반 토큰 검색도 2자 미만은 버린다). 혼합 질의는 일반 토큰 검색. */
 const choseongQueryFor = (query: string): string | null => {
   const compact = query.replace(/\s+/g, "");
@@ -22,6 +25,10 @@ const choseongQueryFor = (query: string): string | null => {
  * 0 = 불일치(결과 제외), 양수 = 랭킹 점수(제목 가중 + 전체 일치율). 동점은 문서 배열
  * 순서(관리자 order 큐레이션)가 tiebreak — 정렬 안정성으로 자연 보존된다.
  * queryTokens는 호출부가 이미 토큰화해뒀으면 재사용(하이라이트와 공유) — 없으면 여기서 생성.
+ *
+ * @param {string} query
+ * @param {ReadonlySet<string>} [queryTokens]
+ * @returns {(index: SearchIndex) => number}
  */
 const createDocumentScorer = (
   query: string,

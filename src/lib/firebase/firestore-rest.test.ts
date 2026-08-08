@@ -6,13 +6,44 @@ import { fetchSiteConfig } from "@/lib/firebase/public/site";
 
 type RestValue = Record<string, unknown>;
 
+/**
+ * @param {string} value 문자열 값.
+ * @returns {RestValue} Firestore REST 문자열 표현.
+ */
 const string = (value: string): RestValue => ({ stringValue: value });
+/**
+ * @param {number} value 정수 값.
+ * @returns {RestValue} Firestore REST 정수 표현.
+ */
 const integer = (value: number): RestValue => ({ integerValue: String(value) });
+/**
+ * @param {boolean} value 논리 값.
+ * @returns {RestValue} Firestore REST 논리 표현.
+ */
 const bool = (value: boolean): RestValue => ({ booleanValue: value });
+/**
+ * @param {string} value ISO 날짜 문자열.
+ * @returns {RestValue} Firestore REST 타임스탬프 표현.
+ */
 const timestamp = (value: string): RestValue => ({ timestampValue: value });
+/**
+ * @param {Record<string, RestValue>} fields 중첩 필드.
+ * @returns {RestValue} Firestore REST 맵 표현.
+ */
 const map = (fields: Record<string, RestValue>): RestValue => ({ mapValue: { fields } });
+/**
+ * @param {RestValue[]} values 배열 원소.
+ * @returns {RestValue} Firestore REST 배열 표현.
+ */
 const array = (values: RestValue[]): RestValue => ({ arrayValue: { values } });
 
+/**
+ * fetch 모킹에 사용할 JSON 응답을 만든다.
+ *
+ * @param {unknown} body 직렬화할 응답 본문.
+ * @param {number} [status=200] HTTP 상태 코드.
+ * @returns {Response} JSON 콘텐츠 타입을 가진 테스트 응답.
+ */
 const jsonResponse = (body: unknown, status = 200): Response =>
   new Response(JSON.stringify(body), {
     status,

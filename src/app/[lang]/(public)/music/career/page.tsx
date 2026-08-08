@@ -24,7 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 3600;
 
-/** 음악 — 경력 (/music/career): 학력·경력 타임라인 + 수상. 수상 모달 ?award= 딥링크(useSearchParams) → Suspense. */
+/**
+ * 음악 — 경력 (/music/career): 학력·경력 타임라인 + 수상. 수상 모달 ?award= 딥링크(useSearchParams) → Suspense.
+ *
+ * @returns {Promise<JSX.Element>}
+ */
 export default async function MusicCareerPage() {
   const [config, awards] = await Promise.all([getMusicConfig(), getMusicAwards()]);
   return (

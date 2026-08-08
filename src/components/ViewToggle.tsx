@@ -11,7 +11,16 @@ type Props = {
   squareLabel: string;
 };
 
-/** 그리드 뷰 토글 (메이슨리 / 정사각) — 세그먼트 컨트롤 */
+/**
+ * 그리드 뷰 토글 (메이슨리 / 정사각) — 세그먼트 컨트롤
+ *
+ * @param {Props} props
+ * @param {boolean} props.square
+ * @param {(square: boolean) => void} props.onChange
+ * @param {string} props.masonryLabel
+ * @param {string} props.squareLabel
+ * @returns {JSX.Element}
+ */
 const ViewToggle = ({ square, onChange, masonryLabel, squareLabel }: Props) => (
   <div className={styles.seg}>
     <button

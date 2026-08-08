@@ -73,6 +73,9 @@ const ANALYTICS_CONNECT_HOSTS = [
  * 'unsafe-eval' 은 개발에서만 연다 — Next dev(webpack HMR·React Refresh)가 모듈을 `eval` 로
  * 감싸기 때문이다. 빠뜨리면 dev 서버의 스크립트가 통째로 차단돼 하이드레이션이 죽는다.
  * 프로덕션 빌드는 eval 을 쓰지 않으므로 배포 정책에는 절대 들어가지 않아야 한다.
+ *
+ * @param {boolean} isDevelopment
+ * @returns {string}
  */
 const buildContentSecurityPolicy = (isDevelopment: boolean) =>
   [

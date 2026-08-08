@@ -52,6 +52,19 @@ type Props = {
 /**
  * 소개 공통 레이아웃 — 사진·음악·개발 소개가 공유하는 히어로+통계+목록 블록.
  * 데이터 파생(통계·목록 계산)은 각 섹션 뷰가 하고, 여기는 표시만(props only).
+ *
+ * @param {Props} props
+ * @param {Lang} props.lang - 현재 언어 — 검색 링크 로케일 프리픽스용 (사전 소비는 없음 — props only 유지).
+ * @param {string} props.eyebrow - 액센트 eyebrow (섹션 역할 라벨 — "Aperture."·"Pianist"·"Developer").
+ * @param {string} props.summary - 요약 헤드라인 (bio/intro 첫 문장 파생).
+ * @param {string} props.body - 본문 (요약 이후 문단). 없으면 렌더 안 함.
+ * @param {Stat[]} props.stats - 숫자 통계 (CountUp) — 보통 4개.
+ * @param {Col[]} props.cols - 파생 목록 2열.
+ * @param {number | undefined} props.collapsedItemCount - 각 목록을 접었을 때 노출할 항목 수.
+ * @param {string} props.showMoreLabel - 목록 펼침 토글 라벨 — ko/en 사전은 각 섹션 뷰(features)가 소비하고 여기는 props only.
+ * @param {string} props.showLessLabel
+ * @param {ReactNode} props.children - 섹션 하단 추가 콘텐츠 (예: 개발 소개의 인터뷰 Q&A).
+ * @returns {JSX.Element}
  */
 const AboutSection = ({
   lang,

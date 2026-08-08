@@ -31,6 +31,13 @@ const EMPTY_EXIF: Photo["exif"] = {
   flash: "",
 };
 
+/**
+ * REST API로 읽은 사진 문서를 공개 페이지 모델로 변환한다.
+ *
+ * @param {string} id Firestore 사진 문서 ID.
+ * @param {Record<string, unknown>} data 디코딩된 사진 문서 필드.
+ * @returns {Photo} 날짜, EXIF와 다국어 필드가 정규화된 사진 모델.
+ */
 const toPhoto = (id: string, data: Record<string, unknown>): Photo => ({
   id,
   title: asText(data.title),
@@ -49,6 +56,13 @@ const toPhoto = (id: string, data: Record<string, unknown>): Photo => ({
   published: (data.published as boolean) ?? false,
 });
 
+/**
+ * REST API로 읽은 앨범 문서를 공개 페이지 모델로 변환한다.
+ *
+ * @param {string} id Firestore 앨범 문서 ID.
+ * @param {Record<string, unknown>} data 디코딩된 앨범 문서 필드.
+ * @returns {Album} 기본값과 다국어 필드가 정규화된 앨범 모델.
+ */
 const toAlbum = (id: string, data: Record<string, unknown>): Album => ({
   id,
   title: asText(data.title),
@@ -60,16 +74,37 @@ const toAlbum = (id: string, data: Record<string, unknown>): Album => ({
   published: (data.published as boolean) ?? false,
 });
 
+/**
+ * 공개된 사진 목록을 정렬 순서대로 읽는다.
+ *
+ * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
+ * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
+ * @returns {Promise<Photo[]>} 공개된 사진 목록.
+ */
 const fetchPublishedPhotos = async (options?: { fresh?: boolean }): Promise<Photo[]> =>
   (await runQuery(publishedOrderedQuery(COLLECTIONS.PHOTOS), options)).map(({ id, data }) =>
     toPhoto(id, data),
   );
 
+/**
+ * 공개된 앨범 목록을 정렬 순서대로 읽는다.
+ *
+ * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
+ * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
+ * @returns {Promise<Album[]>} 공개된 앨범 목록.
+ */
 const fetchPublishedAlbums = async (options?: { fresh?: boolean }): Promise<Album[]> =>
   (await runQuery(publishedOrderedQuery(COLLECTIONS.ALBUMS), options)).map(({ id, data }) =>
     toAlbum(id, data),
   );
 
+/**
+ * 채팅 검색에 필요한 공개 사진 필드만 읽는다.
+ *
+ * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
+ * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
+ * @returns {Promise<ChatPhoto[]>} 채팅용 사진 목록.
+ */
 const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto[]> =>
   (
     await runQuery(
@@ -100,6 +135,13 @@ const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto
     };
   });
 
+/**
+ * 채팅 검색에 필요한 공개 앨범 필드만 읽는다.
+ *
+ * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
+ * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
+ * @returns {Promise<ChatAlbum[]>} 채팅용 앨범 목록.
+ */
 const fetchChatAlbums = async (options?: { fresh?: boolean }): Promise<ChatAlbum[]> =>
   (
     await runQuery(

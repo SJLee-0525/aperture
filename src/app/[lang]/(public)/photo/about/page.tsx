@@ -24,7 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 3600;
 
-/** 소개 — 통계는 사진·앨범에서 자동 집계. 파생에 쓰는 필드만 투영해 직렬화. */
+/**
+ * 소개 — 통계는 사진·앨범에서 자동 집계. 파생에 쓰는 필드만 투영해 직렬화.
+ *
+ * @returns {Promise<JSX.Element>}
+ */
 export default async function AboutPage() {
   const [site, photos, albums] = await Promise.all([getSite(), getPhotos(), getAlbums()]);
   const photoFacts = photos.map(({ camera, lens, place }) => ({ camera, lens, place }));

@@ -16,6 +16,8 @@ const SHOW_DISTANCE = 48;
 /**
  * 모바일에서 스크롤 방향에 따라 상·하단 내비게이션 chrome을 전환한다.
  * 잦은 scroll 값을 React 상태로 올리지 않고 루트 속성 하나만 변경해 하위 컴포넌트 리렌더를 피한다.
+ *
+ * @returns {null}
  */
 const MobileNavigationVisibility = () => {
   const pathname = usePathname();

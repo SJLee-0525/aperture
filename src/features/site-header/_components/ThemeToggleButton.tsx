@@ -9,6 +9,8 @@ import styles from "./ThemeToggleButton.module.css";
  * 테마 토글 — 해/달 "지고 뜨는" 전환. 두 SVG를 겹쳐 두고 CSS([data-theme=dark])로
  * translate-y + opacity 크로스페이드. mounted 게이팅 없이 첫 페인트부터 정확하고
  * 첫 로드엔 transition이 안 걸려 정지 상태로 그려진다.
+ *
+ * @returns {JSX.Element}
  */
 const ThemeToggleButton = () => {
   const { dict } = useLang();

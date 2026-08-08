@@ -17,7 +17,11 @@ import { useMusicMediaAdmin } from "@/features/admin-music-media/_hooks/use-musi
 
 import styles from "./AdminMusicMediaList.module.css";
 
-/** 관리자 영상 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicMediaAdmin. */
+/**
+ * 관리자 영상 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicMediaAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminMusicMediaPage = () => {
   const { media, status, error, reorder, togglePublished, remove } = useMusicMediaAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));

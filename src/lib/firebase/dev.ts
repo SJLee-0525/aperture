@@ -15,6 +15,13 @@ import { asText } from "@/lib/i18n/as-text";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 
+/**
+ * 개발 프로젝트 문서의 다국어 필드와 배열 기본값을 정규화한다.
+ *
+ * @param {string} id Firestore 프로젝트 문서 ID.
+ * @param {DocumentData} d Firestore에서 읽은 프로젝트 문서 필드.
+ * @returns {DevProject} 관리자 화면에서 사용하는 프로젝트 모델.
+ */
 const toDevProject = (id: string, d: DocumentData): DevProject => ({
   id,
   title: asText(d.title),
@@ -44,6 +51,12 @@ const devProjectsCrud = listCrud<DevProject>(
 );
 const devProjects = {
   ...devProjectsCrud,
+  /**
+   * 프로젝트 문서를 삭제한 뒤 해당 프로젝트의 Storage 이미지도 정리한다.
+   *
+   * @param {string} id 삭제할 프로젝트 문서 ID.
+   * @returns {Promise<void>} 문서 삭제와 이미지 정리가 끝나면 완료된다.
+   */
   remove: async (id: string): Promise<void> => {
     await devProjectsCrud.remove(id);
     await deleteDevProjectImages(id).catch(() => undefined);
@@ -51,8 +64,9 @@ const devProjects = {
 };
 
 /**
- * site/dev 설정(소개 리드·인터뷰·스택·경력 등) 읽기/저장 — 단일 문서.
- * music/site 와 동일하게 "전체 로드 → 편집 → 전체 저장" 흐름.
+ * 소개 문구, 인터뷰, 기술 스택과 이력을 담은 개발 설정 문서를 읽는다.
+ *
+ * @returns {Promise<DevConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getDevConfigAdmin = async (): Promise<DevConfig> => {
   try {
@@ -72,6 +86,12 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
   }
 };
 
+/**
+ * 개발 설정 문서 전체를 저장하고 공개 캐시와 RAG 문서를 갱신한다.
+ *
+ * @param {DevConfig} config 저장할 개발 소개와 이력 설정.
+ * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
+ */
 const updateDevConfig = async (config: DevConfig): Promise<void> => {
   try {
     await setDoc(doc(db, COLLECTIONS.SITE, SITE_DEV_DOC), {
@@ -85,6 +105,7 @@ const updateDevConfig = async (config: DevConfig): Promise<void> => {
   await requestRagSync("devConfig", SITE_DEV_DOC);
 };
 
+/** 새 프로젝트를 저장할 때 사용하는 문서 ID 제외 입력값. */
 type DevProjectInput = Omit<DevProject, "id">;
 
 export { devProjects, getDevConfigAdmin, updateDevConfig };

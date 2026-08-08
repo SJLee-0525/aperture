@@ -36,6 +36,17 @@ const PAGE_SIZE = 60;
  * - 하단 그리드: 전체 사진 → 클릭으로 포함/제외 토글(선택 시 photoIds 끝에 추가).
  * - 상단 스트립: 선택된 사진 → dnd-kit 으로 순서 변경, 커버 지정.
  * 제외 시 커버였다면 남은 첫 사진으로 커버 이전(없으면 빈 값).
+ *
+ * @param {Props} props
+ * @param {AdminPhotoListItem[]} props.photos
+ * @param {'loading' | 'ready' | 'error'} props.status
+ * @param {string | null} props.error
+ * @param {string[]} props.photoIds
+ * @param {string} props.coverPhotoId
+ * @param {(id: string) => void} props.onToggle
+ * @param {(activeId: string, overId: string) => void} props.onReorder
+ * @param {(id: string) => void} props.onSetCover
+ * @returns {JSX.Element}
  */
 const AlbumPhotoPicker = ({
   photos,

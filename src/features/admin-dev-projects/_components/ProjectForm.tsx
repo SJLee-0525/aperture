@@ -14,7 +14,14 @@ type Props = {
   initial?: DevProject;
 };
 
-/** 공유 프로젝트 폼 — 이중언어 필드 + 담당·트러블슈팅·기술·링크·이미지 + 저장. */
+/**
+ * 공유 프로젝트 폼 — 이중언어 필드 + 담당·트러블슈팅·기술·링크·이미지 + 저장.
+ *
+ * @param {Props} props
+ * @param {string} props.projectId
+ * @param {DevProject | undefined} props.initial - 있으면 수정 모드.
+ * @returns {JSX.Element}
+ */
 const ProjectForm = ({ projectId, initial }: Props) => {
   const {
     form,

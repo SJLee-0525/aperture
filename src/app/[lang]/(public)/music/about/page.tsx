@@ -24,6 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const revalidate = 3600;
 
 /** 음악 — 소개 (/music/about): intro + 통계·레퍼토리(연주/수상/영상에서 파생).
+ *
+ * @returns {Promise<JSX.Element>}
  *  파생에 쓰는 연주 필드(subtitle·venue)와 개수만 투영해 직렬화. */
 export default async function MusicAboutPage() {
   const [config, works, awards, media] = await Promise.all([

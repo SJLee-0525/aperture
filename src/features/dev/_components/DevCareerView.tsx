@@ -11,7 +11,13 @@ import type { DevConfig } from "@/types/dev";
 
 import styles from "./DevCareerView.module.css";
 
-/** 경력 (/dev/career) — 학력·경력 타임라인 + 수상 상세. */
+/**
+ * 경력 (/dev/career) — 학력·경력 타임라인 + 수상 상세.
+ *
+ * @param {{ config: DevConfig }} props
+ * @param {DevConfig} props.config
+ * @returns {JSX.Element}
+ */
 const DevCareerView = ({ config }: { config: DevConfig }) => {
   const { dict, lang } = useLang();
   const { active: selectedAward, open, select, close } = useQueryModal("award", config.awards);

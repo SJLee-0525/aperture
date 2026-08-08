@@ -7,7 +7,11 @@ const TILE_ASPECTS = [0.75, 1, 1.4, 0.72, 1.2, 0.85, 1, 0.7, 1.35, 0.78, 1.1, 0.
 /* 데스크톱은 세 개, 모바일은 CSS로 앞의 두 개만 노출한다. */
 const CHIP_WIDTHS = [64, 88, 52];
 
-/** 작업(홈) RSC fetch 동안의 스켈레톤 — 검색은 내비게이션에 두고 툴바·FilterBar·메이슨리를 실제 셸과 정합한다. */
+/**
+ * 작업(홈) RSC fetch 동안의 스켈레톤 — 검색은 내비게이션에 두고 툴바·FilterBar·메이슨리를 실제 셸과 정합한다.
+ *
+ * @returns {JSX.Element}
+ */
 export default function WorkLoading() {
   return (
     <main className={styles.main}>

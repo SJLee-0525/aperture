@@ -20,6 +20,11 @@ const SUGGESTION_LIMIT = 5;
  * 검색창 자동완성 — 결과 페이지(SearchResults)와 같은 채점기로 전 문서를 점수순 정렬해
  * 상위 N개만 추린다(섹션 무관 통합 랭킹). 대조가 전부 in-memory 라 입력마다 호출해도
  * 디바운스가 필요 없다. 동점은 문서 배열 순서(섹션 고정 순서 + 관리자 큐레이션) 유지.
+ *
+ * @param {SearchDocument[]} documents
+ * @param {string} query
+ * @param {Lang} lang
+ * @returns {SearchSuggestion[]}
  */
 const suggestDocuments = (
   documents: SearchDocument[],

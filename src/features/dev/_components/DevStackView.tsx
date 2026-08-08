@@ -7,7 +7,13 @@ import type { DevConfig } from "@/types/dev";
 
 import styles from "./DevStackView.module.css";
 
-/** 기술 스택 (/dev) — 카테고리별 칩 그룹. 히어로 없음(타이핑은 랜딩). */
+/**
+ * 기술 스택 (/dev) — 카테고리별 칩 그룹. 히어로 없음(타이핑은 랜딩).
+ *
+ * @param {{ config: DevConfig }} props
+ * @param {DevConfig} props.config
+ * @returns {JSX.Element}
+ */
 const DevStackView = ({ config }: { config: DevConfig }) => {
   const { dict } = useLang();
 

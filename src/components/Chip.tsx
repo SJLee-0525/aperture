@@ -6,7 +6,15 @@ type Props = {
   onClick: () => void;
 };
 
-/** 태그/필터 칩 (pill — 각진 디자인에서 유일한 둥근 요소) */
+/**
+ * 태그/필터 칩 (pill — 각진 디자인에서 유일한 둥근 요소)
+ *
+ * @param {Props} props
+ * @param {string} props.label
+ * @param {boolean} props.active
+ * @param {() => void} props.onClick
+ * @returns {JSX.Element}
+ */
 const Chip = ({ label, active, onClick }: Props) => (
   <button
     type="button"

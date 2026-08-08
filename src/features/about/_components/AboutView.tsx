@@ -19,6 +19,12 @@ type Props = {
 };
 
 /** 소개 — 요약 헤드라인·바이오 + 통계(사진에서 자동 집계) + 카메라·렌즈·활동지역 목록.
+ *
+ * @param {Props} props
+ * @param {LocalizedText} props.bio - site/config 중 이 뷰가 소비하는 유일한 필드
+ * @param {PhotoFact[]} props.photoFacts
+ * @param {number} props.albumCount
+ * @returns {JSX.Element}
  *  이름·연락처는 노출하지 않는다(연락은 /contact 로 일원화). 레이아웃은 공통 AboutSection. */
 const AboutView = ({ bio, photoFacts, albumCount }: Props) => {
   const { dict, lang } = useLang();

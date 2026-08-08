@@ -3,6 +3,11 @@
  * OpenAI Responses API 와 Gemini streamGenerateContent 가 같은 SSE 형식을 쓰므로
  * 제공자별 리더를 따로 두지 않는다. (`[DONE]` 종료 표식은 OpenAI 만 보내지만
  * 걸러도 Gemini 에 영향이 없어 여기서 함께 처리한다.)
+ *
+ * @param {Response} response
+ * @param {AbortSignal} signal
+ * @param {(payload: string) => void} onPayload
+ * @returns {Promise<void>}
  */
 const readSseStream = async (
   response: Response,

@@ -17,7 +17,21 @@ type Props = {
   onRemove: (key: TimelineKey, index: number) => void;
 };
 
-/** 경력/학력 타임라인 한 행 — 기간 + 제목(ko/en) 입력 + 위/아래 이동 + 삭제. */
+/**
+ * 경력/학력 타임라인 한 행 — 기간 + 제목(ko/en) 입력 + 위/아래 이동 + 삭제.
+ *
+ * @param {Props} props
+ * @param {TimelineKey} props.groupKey
+ * @param {TimelineEntry} props.entry
+ * @param {number} props.index
+ * @param {boolean} props.isFirst
+ * @param {boolean} props.isLast
+ * @param {(key: TimelineKey, index: number, value: string) => void} props.onEditPeriod
+ * @param {(key: TimelineKey, index: number, field: 'ko' | 'en', value: string) => void} props.onEditTitle
+ * @param {(key: TimelineKey, index: number, offset: -1 | 1) => void} props.onMove
+ * @param {(key: TimelineKey, index: number) => void} props.onRemove
+ * @returns {JSX.Element}
+ */
 const TimelineRow = ({
   groupKey,
   entry,

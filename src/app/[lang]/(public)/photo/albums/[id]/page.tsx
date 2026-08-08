@@ -17,7 +17,11 @@ import type { Photo } from "@/types/photo";
 
 export const revalidate = 3600;
 
-/** 공개 앨범 id들을 미리 프리렌더 — lang은 상위 [lang] layout의 generateStaticParams가 공급 */
+/**
+ * 공개 앨범 id들을 미리 프리렌더 — lang은 상위 [lang] layout의 generateStaticParams가 공급
+ *
+ * @returns {Promise<{ id: string }[]>}
+ */
 export async function generateStaticParams() {
   const albums = await getAlbums();
   return albums.map((album) => ({ id: album.id }));

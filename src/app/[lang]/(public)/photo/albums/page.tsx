@@ -24,7 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 3600;
 
-/** 앨범 목록 — 커버 해석·장수 집계는 서버 투영으로 끝내고 카드 데이터만 직렬화. */
+/**
+ * 앨범 목록 — 커버 해석·장수 집계는 서버 투영으로 끝내고 카드 데이터만 직렬화.
+ *
+ * @returns {Promise<JSX.Element>}
+ */
 export default async function AlbumsPage() {
   const [albums, photos] = await Promise.all([getAlbums(), getPhotos()]);
   return <AlbumsView albums={toAlbumCards(albums, photos)} />;

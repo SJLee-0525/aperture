@@ -12,7 +12,14 @@ import styles from "./MusicCareerView.module.css";
 
 type Props = { config: MusicConfig; awards: MusicAward[] };
 
-/** 경력 (/music/career) — 학력 + 경력 타임라인 + 수상(클릭 시 상세 모달, ?award= 딥링크). */
+/**
+ * 경력 (/music/career) — 학력 + 경력 타임라인 + 수상(클릭 시 상세 모달, ?award= 딥링크).
+ *
+ * @param {Props} props
+ * @param {MusicConfig} props.config
+ * @param {MusicAward[]} props.awards
+ * @returns {JSX.Element}
+ */
 const MusicCareerView = ({ config, awards }: Props) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("award", awards);

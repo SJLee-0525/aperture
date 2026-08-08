@@ -18,6 +18,10 @@ class ChatUpstreamError extends Error {
 /**
  * HTTP 상태를 공통 규칙으로 분류한다. 두 제공자가 같은 상태에 같은 kind 를 쓰게 해
  * 메인·서브를 바꿔도 공개 오류 코드가 달라지지 않도록 한다.
+ *
+ * @param {string} providerLabel
+ * @param {Response} response
+ * @returns {void}
  */
 const assertUpstreamResponseOk = (providerLabel: string, response: Response) => {
   if (response.ok) return;

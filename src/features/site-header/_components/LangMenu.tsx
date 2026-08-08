@@ -17,6 +17,8 @@ const OPTIONS: { code: Lang; label: string }[] = [
 /**
  * 언어 드롭다운 (지구본 → 한국어/English). 디자인에 없는 요소 — 이중언어 지원을 위한 의도적 추가.
  * 데스크톱·모바일 헤더 공용.
+ *
+ * @returns {JSX.Element}
  */
 const LangMenu = () => {
   const { dict, lang, setLang } = useLang();

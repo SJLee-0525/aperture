@@ -76,6 +76,16 @@ const chevRight = (
  * 사진 상세 — 데스크톱 라이트박스 / 모바일 바텀시트(탭으로 peek↔확장).
  * document.body로 포털 렌더 → sticky 헤더 등 어떤 조상 스태킹 컨텍스트에도 안 갇히고 항상 최상단.
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
+ *
+ * @param {Props} props
+ * @param {Photo[]} props.photos
+ * @param {Tag[]} props.tags
+ * @param {string[] | undefined} props.photoIds
+ * @param {(() => void) | undefined} props.onClose
+ * @param {boolean | undefined} props.animateOnOpen
+ * @param {boolean | undefined} props.revealed
+ * @param {((id: string) => void) | undefined} props.onImageReady
+ * @returns {ReactPortal | null}
  */
 const PhotoModal = ({
   photos,

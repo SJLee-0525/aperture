@@ -17,7 +17,15 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-/** 정렬 가능한 프로젝트 행 — 드래그 핸들·대표 썸네일·제목·연도·공개 토글·수정/삭제. */
+/**
+ * 정렬 가능한 프로젝트 행 — 드래그 핸들·대표 썸네일·제목·연도·공개 토글·수정/삭제.
+ *
+ * @param {Props} props
+ * @param {AdminDevProjectListItem} props.project
+ * @param {(id: string, next: boolean) => void} props.onTogglePublished
+ * @param {(id: string) => void} props.onDelete
+ * @returns {JSX.Element}
+ */
 const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(project.cover);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({

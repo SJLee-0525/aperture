@@ -82,10 +82,20 @@ end
 return { count, ttl, daily }
 `;
 
-/** UTC 기준 하루 키 — 인스턴스마다 로컬 타임존이 달라도 같은 버킷을 가리킨다. */
+/**
+ * UTC 기준 하루 키 — 인스턴스마다 로컬 타임존이 달라도 같은 버킷을 가리킨다.
+ *
+ * @param {number} now
+ * @returns {string}
+ */
 const dailyBucket = (now: number): string => new Date(now).toISOString().slice(0, 10);
 
-/** 다음 UTC 자정까지 남은 초 — 일일 상한의 Retry-After 는 리셋 시각이어야 의미가 있다. */
+/**
+ * 다음 UTC 자정까지 남은 초 — 일일 상한의 Retry-After 는 리셋 시각이어야 의미가 있다.
+ *
+ * @param {number} now
+ * @returns {number}
+ */
 const secondsUntilNextUtcDay = (now: number): number => {
   const date = new Date(now);
   const nextMidnight = Date.UTC(
@@ -104,6 +114,9 @@ const secondsUntilNextUtcDay = (now: number): number => {
  * Vercel 이 직접 채우는 `x-vercel-forwarded-for` 를 최우선으로 본다.
  * `x-forwarded-for` 는 클라이언트가 임의로 덧붙일 수 있어, 그 첫 항목을 키로 쓰면
  * 헤더만 바꿔가며 매 요청 새 버킷을 받아 IP 제한이 통째로 무력화된다.
+ *
+ * @param {Request} request
+ * @returns {string}
  */
 const clientKey = (request: Request): string => {
   const address =

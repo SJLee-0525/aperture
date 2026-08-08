@@ -14,6 +14,10 @@ import type { GalleryPhoto } from "@/types/gallery-photo";
 /**
  * 작업 그리드 필터 상태 + 파생 목록.
  * 검색어는 내비게이션 검색이 갱신하는 ?q를 사용한다.
+ *
+ * @param {GalleryPhoto[]} photos
+ * @param {string} initialQuery
+ * @returns {{ tag: string; setTag: Dispatch<SetStateAction<string>>; camera: string; setCamera: Dispatch<SetStateAction<string>>; focalMin: number; focalMax: number; setFocal: (low: number, high: number) => void; resetFilters: () => void; filtersActive: boolean; visible: GalleryPhoto[] }}
  */
 const usePhotoFilter = (photos: GalleryPhoto[], initialQuery: string) => {
   const [tag, setTag] = useState<string>(ALL);

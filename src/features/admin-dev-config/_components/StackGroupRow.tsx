@@ -17,13 +17,31 @@ type Props = {
   onRemove: (index: number) => void;
 };
 
-/** 유효한 hex 색이면 그대로, 아니면 미리보기용 기본색. color input 은 hex 만 받으므로 보정. */
+/**
+ * 유효한 hex 색이면 그대로, 아니면 미리보기용 기본색. color input 은 hex 만 받으므로 보정.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
 const toColorValue = (value: string): string =>
   /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000";
 
 /**
  * 기술 스택 그룹 한 항목 — 카테고리 + 항목들(이름·배경색·글자색).
  * 색은 관리자가 지정하는 데이터라 <input type="color"> 값·인라인 style 로 다룬다.
+ *
+ * @param {Props} props
+ * @param {DevStackGroup} props.group
+ * @param {number} props.index
+ * @param {boolean} props.isFirst
+ * @param {boolean} props.isLast
+ * @param {(index: number, value: string) => void} props.onEditCategory
+ * @param {(index: number) => void} props.onAddItem
+ * @param {(index: number, itemIndex: number, field: keyof DevStackItem, value: string) => void} props.onEditItem
+ * @param {(index: number, itemIndex: number) => void} props.onRemoveItem
+ * @param {(index: number, offset: -1 | 1) => void} props.onMove
+ * @param {(index: number) => void} props.onRemove
+ * @returns {JSX.Element}
  */
 const StackGroupRow = ({
   group,

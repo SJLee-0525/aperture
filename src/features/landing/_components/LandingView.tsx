@@ -40,7 +40,16 @@ const NO_ROLES: string[] = [];
 const ROLE_DELAY = 0.55;
 const ROW_STAGGER = 0.09;
 
-/** 타이핑 상태와 역할 색상 갱신을 랜딩의 정적 콘텐츠에서 격리한다. */
+/**
+ * 타이핑 상태와 역할 색상 갱신을 랜딩의 정적 콘텐츠에서 격리한다.
+ *
+ * @param {{ accentRef: RefObject<HTMLElement | null>; reducedMotion: boolean | null; roles: string[]; started: boolean; }} props
+ * @param {RefObject<HTMLElement | null>} props.accentRef
+ * @param {boolean | null} props.reducedMotion
+ * @param {string[]} props.roles
+ * @param {boolean} props.started
+ * @returns {JSX.Element}
+ */
 const LandingTyping = ({
   accentRef,
   reducedMotion,
@@ -123,6 +132,11 @@ LandingNav.displayName = "LandingNav";
  * 마침표가 공처럼 튀어들어와(역할 색을 따라 변색) → 역할·소개(어절 리빌)·섹션 행이 순차로 등장.
  * 배경 글로우는 평소 우상단에서 역할 색으로 느리게 부유하다가, 섹션 행에 포인터·포커스가 닿으면
  * 그 행 한가운데로 옮겨가며 섹션 액센트로 물든다(위치는 실측, 색·세기는 CSS `:has()`).
+ *
+ * @param {{ tagline: LocalizedText; landingLead: LocalizedText }} props
+ * @param {LocalizedText} props.tagline - site/config 중 랜딩이 소비하는 두 필드만 — 전체 SiteConfig(태그 사전·bio·links)를 직렬화하지 않는다.
+ * @param {LocalizedText} props.landingLead
+ * @returns {JSX.Element}
  */
 const LandingView = ({
   tagline,

@@ -27,6 +27,8 @@ export const revalidate = 3600;
 
 /** 지도 — MapView가 useSearchParams(?photo=)를 읽어 Suspense로 감쌈.
  *  preconnect: 지도 청크가 동적 로드된 뒤에야 CARTO에 접속하므로 DNS+TLS를 미리 끝내 첫 페인트를 당긴다.
+ *
+ * @returns {Promise<JSX.Element>}
  *  (style.json = basemaps.cartocdn.com, 타일·sprite·glyphs = tiles.basemaps.cartocdn.com — 전부 CORS fetch) */
 export default async function MapPage() {
   const photos = await getPhotos();

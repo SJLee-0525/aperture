@@ -20,6 +20,9 @@ const DEFAULT_SECTION: SectionId = "home";
 /**
  * 현재 경로가 속한 섹션 판별 — SectionAccent(A2)·모바일 탭 세트 선택에 사용.
  * 공개 경로는 `/ko`·`/en` 로케일 프리픽스를 달고 오므로 벗겨낸 뒤 매칭한다.
+ *
+ * @param {string} pathname
+ * @returns {SectionId}
  */
 const sectionFromPath = (pathname: string): SectionId => {
   const bare = stripLangPrefix(pathname);

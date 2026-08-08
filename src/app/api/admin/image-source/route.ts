@@ -7,6 +7,11 @@ const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 
 const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+/**
+ * 인증된 관리자가 요청한 Storage 원본 이미지를 프록시한다.
+ * @param {Request} request Bearer 토큰과 원본 이미지 URL을 담은 요청.
+ * @returns {Promise<Response>} 이미지 응답 또는 인증·입력 오류 응답.
+ */
 export async function POST(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
   const idToken = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";

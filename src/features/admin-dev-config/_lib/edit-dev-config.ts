@@ -66,7 +66,13 @@ const moveItem = <T>(list: T[], index: number, offset: MoveOffset): T[] => {
   return next;
 };
 
-/** 관리자 개발 설정의 모든 편집 규칙. React·Firebase와 무관한 순수 command reducer. */
+/**
+ * 관리자 개발 설정의 모든 편집 규칙. React·Firebase와 무관한 순수 command reducer.
+ *
+ * @param {DevConfig} config
+ * @param {DevConfigEdit} edit
+ * @returns {DevConfig}
+ */
 const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
   switch (edit.type) {
     case "heroLead.edit":

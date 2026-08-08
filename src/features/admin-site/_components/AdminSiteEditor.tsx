@@ -8,6 +8,8 @@ import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
 import styles from "./AdminSiteEditor.module.css";
 
 /** 관리자 소개 — 사진 소개 페이지(/photo/about)의 바이오만 편집. 조립만, 로직은 useSiteAdmin.
+ *
+ * @returns {JSX.Element}
  *  이름·연락 링크는 about 에 노출되지 않으므로 여기 없음(전역/연락 CMS 추가 시 그쪽에서 편집). */
 const AdminSitePage = () => {
   const { bio, status, error, saving, saved, editBio, save } = useSiteAdmin();

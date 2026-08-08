@@ -27,7 +27,12 @@ type Props = {
   filtersActive: boolean;
 };
 
-/** 태그 칩 + 필터 팝오버(카메라·초점거리·초기화). 카메라·초점거리는 사진 EXIF에서 파생. */
+/**
+ * 태그 칩 + 필터 팝오버(카메라·초점거리·초기화). 카메라·초점거리는 사진 EXIF에서 파생.
+ *
+ * @param {Props} props
+ * @returns {JSX.Element}
+ */
 const FilterBar = (props: Props) => {
   const { dict, lang } = useLang();
   const [open, setOpen] = useState(false);

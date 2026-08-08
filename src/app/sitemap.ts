@@ -28,6 +28,8 @@ const PUBLIC_ROUTES = [
  * 언어별 URL을 각각 등록(ko·en 2배) + hreflang alternates.
  * alternates는 페이지 <link rel="alternate">(pageMetadata)와 같은 세트를 절대 URL로 출력 —
  * 두 채널이 단일 출처(languageAlternates)를 공유하므로 충돌하지 않는다.
+ *
+ * @returns {Promise<MetadataRoute.Sitemap>}
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const albums = await getAlbums();

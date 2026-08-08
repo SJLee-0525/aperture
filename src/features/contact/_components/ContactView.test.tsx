@@ -25,7 +25,12 @@ vi.mock("@/features/lang/_hooks/use-lang", () => ({
   }),
 }));
 
-/** hCaptcha 가 폼에 심는 토큰 필드를 흉내낸다 — 위젯은 테스트 환경에서 로드되지 않는다. */
+/**
+ * hCaptcha 가 폼에 심는 토큰 필드를 흉내낸다 — 위젯은 테스트 환경에서 로드되지 않는다.
+ *
+ * @param {string} value
+ * @returns {void}
+ */
 const injectCaptchaField = (value: string) => {
   const form = document.querySelector("form");
   const field = document.createElement("textarea");

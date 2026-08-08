@@ -15,7 +15,12 @@ declare global {
   }
 }
 
-/** `url` 은 쿼리까지 포함한 경로(`/ko/photo?photo=abc`) — 모달 딥링크도 개별 조회로 잡힌다. */
+/**
+ * `url` 은 쿼리까지 포함한 경로(`/ko/photo?photo=abc`) — 모달 딥링크도 개별 조회로 잡힌다.
+ *
+ * @param {string} url
+ * @returns {void}
+ */
 const sendPageView = (url: string) => {
   window.gtag?.("event", "page_view", {
     page_location: `${window.location.origin}${url}`,

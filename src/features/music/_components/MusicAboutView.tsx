@@ -22,7 +22,16 @@ type Props = {
   mediaCount: number;
 };
 
-/** 음악 소개 — intro 요약·본문 + 통계(연주/수상/영상/무대) + 레퍼토리·무대·장르. 레이아웃은 공통 AboutSection. */
+/**
+ * 음악 소개 — intro 요약·본문 + 통계(연주/수상/영상/무대) + 레퍼토리·무대·장르. 레이아웃은 공통 AboutSection.
+ *
+ * @param {Props} props
+ * @param {LocalizedText} props.intro - site/music 중 이 뷰가 소비하는 유일한 필드
+ * @param {WorkFact[]} props.workFacts
+ * @param {number} props.awardCount
+ * @param {number} props.mediaCount
+ * @returns {JSX.Element}
+ */
 const MusicAboutView = ({ intro, workFacts, awardCount, mediaCount }: Props) => {
   const { dict, lang } = useLang();
 

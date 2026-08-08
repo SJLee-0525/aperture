@@ -17,6 +17,10 @@ const keywordSimilarity = (query: string, document: string) =>
  * 한쪽 목록이 빗나가도 다른 쪽이 받치고, 합산하지 않아 서로의 분모를 오염시키지 않는다.
  * 분류기 키워드도 로컬과 동일한 tokensFor 파이프라인(별칭 매핑·조사 스트립·불용어)을
  * 거친다 — "사진" 같은 일반어 인플레이션 방지 + "캐논"→canon 한영 별칭 일원화.
+ *
+ * @param {string} queryText
+ * @param {string[]} [keywords]
+ * @returns {(document: string) => number}
  */
 const createKeywordScorer = (queryText: string, keywords: string[] = []) => {
   const localTokens = tokensFor(queryText);

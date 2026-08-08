@@ -27,6 +27,14 @@ const columnCountFor = (width: number) => (width <= 760 ? 2 : width <= 1100 ? 3 
  * 필터 변경 시 항목이 fade+scale 로 들고 나고(AnimatePresence), 남은 항목은 layout 으로 재배치된다.
  * 뷰 토글(메이슨리↔정사각) 시에도 layout 이 타일 크기·위치 변화를 부드럽게 잇는다.
  * initial={false} — 최초 로드는 애니메이션 없이 즉시(LCP 보호, 페이지 전환 페이드로 충분).
+ *
+ * @param {Props} props
+ * @param {GalleryPhoto[]} props.photos
+ * @param {Lang} props.lang
+ * @param {boolean} props.square
+ * @param {string} props.emptyLabel
+ * @param {(() => void) | undefined} props.onTilePreload - 타일 hover/focus 시 상세 모달 리소스 프리로드
+ * @returns {JSX.Element}
  */
 const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) => {
   const [columnCount, setColumnCount] = useState(4);

@@ -13,6 +13,8 @@ import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
  *
  * CSP 는 googletagmanager(script) + google-analytics(connect·img) 를 허용해야 한다 —
  * `constants/security-headers.ts` 의 ANALYTICS_* 목록.
+ *
+ * @returns {JSX.Element | null}
  */
 export function GoogleAnalytics() {
   if (!GA_MEASUREMENT_ID) return null;

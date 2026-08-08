@@ -33,7 +33,11 @@ const SECTIONS: { key: string; label: string; desc: string; href: string }[] = [
   },
 ];
 
-/** 음악 관리자 허브 — 연주·수상·영상·설정 4개 카드. */
+/**
+ * 음악 관리자 허브 — 연주·수상·영상·설정 4개 카드.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminMusicPage = () => (
   <div className={styles.page}>
     <header className={styles.head}>

@@ -13,7 +13,13 @@ type Props = {
 
 const EMPTY: Tag = { id: "", ko: "", en: "" };
 
-/** 새 태그 추가 폼 — id(영문 슬러그) + ko + en. 검증은 상위 훅(onAdd)이 담당. */
+/**
+ * 새 태그 추가 폼 — id(영문 슬러그) + ko + en. 검증은 상위 훅(onAdd)이 담당.
+ *
+ * @param {Props} props
+ * @param {(draft: Tag) => string | null} props.onAdd - 추가 시도 — 실패하면 한국어 사유 문자열, 성공하면 null 을 반환.
+ * @returns {JSX.Element}
+ */
 const TagAddForm = ({ onAdd }: Props) => {
   const [draft, setDraft] = useState<Tag>(EMPTY);
   const [error, setError] = useState<string | null>(null);

@@ -13,7 +13,14 @@ type Props = {
   initial?: MusicWork;
 };
 
-/** 공유 연주 폼 — 이중언어 필드 + 일시·프로그램·포스터·예매 + 저장. */
+/**
+ * 공유 연주 폼 — 이중언어 필드 + 일시·프로그램·포스터·예매 + 저장.
+ *
+ * @param {Props} props
+ * @param {string} props.workId
+ * @param {MusicWork | undefined} props.initial - 있으면 수정 모드.
+ * @returns {JSX.Element}
+ */
 const WorkForm = ({ workId, initial }: Props) => {
   const {
     form,

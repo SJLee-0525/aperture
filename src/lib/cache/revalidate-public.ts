@@ -15,6 +15,10 @@ import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
  *
  * Firebase Auth REST가 ID token을 검증하고 관리자 UID와 일치할 때만 실행해,
  * 공개 호출자가 캐시 무효화와 Firestore 재조회를 반복하는 비용 공격을 막는다.
+ *
+ * @param {string} idToken
+ * @param {string[]} tags
+ * @returns {Promise<void>}
  */
 const revalidatePublicPages = async (idToken: string, tags: string[]): Promise<void> => {
   if (!(await verifyAdminIdToken(idToken))) {

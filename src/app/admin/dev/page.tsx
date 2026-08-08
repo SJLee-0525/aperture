@@ -21,7 +21,11 @@ const SECTIONS: { key: string; label: string; desc: string; href: string }[] = [
   },
 ];
 
-/** 개발 관리자 허브 — 프로젝트·설정 2개 카드. */
+/**
+ * 개발 관리자 허브 — 프로젝트·설정 2개 카드.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminDevPage = () => (
   <div className={styles.page}>
     <header className={styles.head}>

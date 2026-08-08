@@ -43,28 +43,68 @@ const ROUTES = {
   ADMIN_MAINTENANCE: "/admin/maintenance",
 } as const;
 
-/** 앨범 상세 경로 (/photo/albums/[id]) */
+/**
+ * 앨범 상세 경로 (/photo/albums/[id])
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const albumRoute = (id: string) => `${ROUTES.PHOTO_ALBUMS}/${id}`;
 
-/** 관리자 사진 수정 경로 */
+/**
+ * 관리자 사진 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const adminPhotoRoute = (id: string) => `${ROUTES.ADMIN_PHOTOS}/${id}`;
 
-/** 관리자 앨범 수정 경로 */
+/**
+ * 관리자 앨범 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const adminAlbumRoute = (id: string) => `${ROUTES.ADMIN_ALBUMS}/${id}`;
 
-/** 관리자 음악 연주 수정 경로 */
+/**
+ * 관리자 음악 연주 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const adminMusicWorkRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_WORKS}/${id}`;
 
-/** 관리자 음악 수상 수정 경로 */
+/**
+ * 관리자 음악 수상 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const adminMusicAwardRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_AWARDS}/${id}`;
 
-/** 관리자 음악 영상 수정 경로 */
+/**
+ * 관리자 음악 영상 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`;
 
-/** 관리자 개발 프로젝트 수정 경로 */
+/**
+ * 관리자 개발 프로젝트 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}`;
 
-/** 개발 프로젝트 상세 모달 딥링크 */
+/**
+ * 개발 프로젝트 상세 모달 딥링크
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 const devProjectRoute = (id: string) => `${ROUTES.DEV_PROJECTS}?project=${encodeURIComponent(id)}`;
 
 export {

@@ -18,7 +18,16 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-/** 정렬 가능한 앨범 행 — 드래그 핸들·커버 썸네일·제목·사진 수·공개 토글·수정/삭제. */
+/**
+ * 정렬 가능한 앨범 행 — 드래그 핸들·커버 썸네일·제목·사진 수·공개 토글·수정/삭제.
+ *
+ * @param {Props} props
+ * @param {AdminAlbumListItem} props.album
+ * @param {string} props.coverUrl - coverPhotoId → 이미지 URL (없으면 빈 썸네일).
+ * @param {(id: string, next: boolean) => void} props.onTogglePublished
+ * @param {(id: string) => void} props.onDelete
+ * @returns {JSX.Element}
+ */
 const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: album.id,

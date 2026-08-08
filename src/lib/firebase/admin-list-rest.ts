@@ -16,9 +16,16 @@ type RestDocument = { name: string; fields?: Record<string, RestValue> };
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+/** @returns {string} 현재 프로젝트의 Firestore REST 문서 기본 URL. */
 const documentsUrl = () =>
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
+/**
+ * Firestore REST 값 표현을 JavaScript 값으로 재귀 변환한다.
+ *
+ * @param {RestValue | undefined} value Firestore REST API가 반환한 단일 값.
+ * @returns {unknown} 디코딩된 값.
+ */
 const decodeValue = (value: RestValue | undefined): unknown => {
   if (!value || "nullValue" in value) return null;
   if ("stringValue" in value) return value.stringValue;
@@ -37,9 +44,22 @@ const decodeValue = (value: RestValue | undefined): unknown => {
   return null;
 };
 
+/**
+ * Firestore 문서의 필드 맵을 일반 객체로 변환한다.
+ *
+ * @param {Record<string, RestValue>} fields Firestore REST 형식의 문서 필드.
+ * @returns {Record<string, unknown>} 키를 유지한 디코딩 결과.
+ */
 const decodeFields = (fields: Record<string, RestValue>): Record<string, unknown> =>
   Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, decodeValue(value)]));
 
+/**
+ * 관리자 토큰으로 컬렉션의 지정 필드만 `order` 순으로 읽는다.
+ *
+ * @param {string} collectionId 조회할 Firestore 컬렉션 ID.
+ * @param {string[]} fieldPaths 응답에 포함할 필드 경로.
+ * @returns {Promise<Array<{ id: string; data: Record<string, unknown> }>>} 문서 ID와 디코딩된 필드 목록.
+ */
 const listProjected = async (
   collectionId: string,
   fieldPaths: string[],
@@ -75,9 +95,16 @@ const listProjected = async (
   );
 };
 
+/**
+ * 알 수 없는 이미지 값을 목록 카드용 이미지 메타데이터로 맞춘다.
+ *
+ * @param {unknown} value Firestore에서 읽은 이미지 값.
+ * @returns {ImageMeta} 이미지 메타데이터. 값이 없으면 빈 이미지다.
+ */
 const image = (value: unknown): ImageMeta =>
   (value as ImageMeta) ?? { url: "", path: "", w: 0, h: 0 };
 
+/** @returns {Promise<AdminPhotoListItem[]>} 관리자 목록에 필요한 필드만 담은 사진 목록. */
 const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
   (await listProjected("photos", ["title", "image", "order", "published"])).map(({ id, data }) => ({
     id,
@@ -87,6 +114,7 @@ const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
     published: (data.published as boolean) ?? false,
   }));
 
+/** @returns {Promise<AdminAlbumListItem[]>} 관리자 목록에 필요한 필드만 담은 앨범 목록. */
 const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
   (
     await listProjected("albums", [
@@ -107,6 +135,7 @@ const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
     published: (data.published as boolean) ?? false,
   }));
 
+/** @returns {Promise<AdminDevProjectListItem[]>} 관리자 목록에 필요한 필드만 담은 프로젝트 목록. */
 const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
   (await listProjected("devProjects", ["title", "year", "cover", "order", "published"])).map(
     ({ id, data }) => ({
@@ -119,6 +148,7 @@ const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
     }),
   );
 
+/** @returns {Promise<AdminMusicWorkListItem[]>} 관리자 목록에 필요한 필드만 담은 연주 목록. */
 const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
   (await listProjected("musicWorks", ["title", "performedAt", "poster", "order", "published"])).map(
     ({ id, data }) => ({

@@ -22,7 +22,11 @@ const documents = [doc("photo-dawn", "부산의 새벽"), doc("photo-sea", "겨�
 
 const fetchMock = vi.fn();
 
-/** 모듈 캐시(searchIndexPromise)가 테스트 간 새어들지 않게 매번 새 모듈로 훅을 얻는다. */
+/**
+ * 모듈 캐시(searchIndexPromise)가 테스트 간 새어들지 않게 매번 새 모듈로 훅을 얻는다.
+ *
+ * @returns {Promise<(query: string) => { suggestions: SearchSuggestion[]; loadIndex: () => void }>}
+ */
 const freshHook = async () => {
   vi.resetModules();
   const { useSearchSuggestions } =

@@ -8,6 +8,8 @@ import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 /**
  * 사진 상세 세션의 URL·history 규칙.
  * eager와 on-demand adapter가 같은 닫기·이동 동작을 사용하도록 데이터 로딩과 분리한다.
+ *
+ * @returns {{ activeId: string | null; close: () => void; goto: (id: string | null) => void }}
  */
 const usePhotoDetailSession = () => {
   const router = useRouter();

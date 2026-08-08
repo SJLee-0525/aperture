@@ -153,6 +153,9 @@ const splitWrites = (writes: FirestoreWrite[]): FirestoreWrite[][] => {
 /**
  * 업스트림 원문은 서버 로그에만 남긴다 — 응답 본문에 실으면 내부 경로·필드명이 그대로 나간다.
  * 관리자 전용 라우트지만 진단 정보를 응답으로 흘릴 이유는 없다.
+ *
+ * @param {Response} response
+ * @returns {Promise<void>}
  */
 const logFirestoreError = async (response: Response) => {
   const payload = (await response.json().catch(() => null)) as {

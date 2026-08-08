@@ -9,6 +9,10 @@ const EASE = [0.22, 1, 0.36, 1] as const;
  * 통계 숫자 카운트업 (0 → value). prefers-reduced-motion 사용자는 애니메이션 없이 최종값 표시.
  * 프레임마다 바뀌는 값은 React 상태 대신 textContent 직접 갱신 — 카운터당 초당 ~60회 재렌더를 없앤다.
  * 소개 페이지(사진·음악) 공용 순수 UI.
+ *
+ * @param {{ value: number }} props
+ * @param {number} props.value
+ * @returns {JSX.Element}
  */
 const CountUp = ({ value }: { value: number }) => {
   const reduce = useReducedMotion();

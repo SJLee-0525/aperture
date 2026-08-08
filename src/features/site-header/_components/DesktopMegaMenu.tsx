@@ -76,7 +76,11 @@ const MegaMenuGroup = memo(
 
 MegaMenuGroup.displayName = "MegaMenuGroup";
 
-/** 데스크톱 mega-menu. 패널 상호작용 상태를 헤더의 나머지 컨트롤과 격리한다. */
+/**
+ * 데스크톱 mega-menu. 패널 상호작용 상태를 헤더의 나머지 컨트롤과 격리한다.
+ *
+ * @returns {JSX.Element}
+ */
 const DesktopMegaMenu = () => {
   const { dict } = useLang();
   const pathname = usePathname();

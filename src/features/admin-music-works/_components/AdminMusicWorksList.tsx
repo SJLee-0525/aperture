@@ -17,7 +17,11 @@ import { useMusicWorksAdmin } from "@/features/admin-music-works/_hooks/use-musi
 
 import styles from "./AdminMusicWorksList.module.css";
 
-/** 관리자 연주 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicWorksAdmin. */
+/**
+ * 관리자 연주 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicWorksAdmin.
+ *
+ * @returns {JSX.Element}
+ */
 const AdminMusicWorksPage = () => {
   const { works, status, error, reorder, togglePublished, remove } = useMusicWorksAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
