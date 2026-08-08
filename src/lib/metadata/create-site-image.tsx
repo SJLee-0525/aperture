@@ -14,7 +14,7 @@ type Options = {
   accent?: string;
 };
 
-const createSiteImage = async ({ dark = false, accent = "#d45d3f" }: Options = {}) => {
+const createSiteImage = async ({ dark = false, accent = "#0066CC" }: Options = {}) => {
   const [newsreader, splineSansMono] = await Promise.all([newsreaderFont, splineSansMonoFont]);
 
   return new ImageResponse(
