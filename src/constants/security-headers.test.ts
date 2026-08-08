@@ -62,4 +62,11 @@ describe("Content-Security-Policy", () => {
     expect(directive(policy, "base-uri")).toBe("'self'");
     expect(directive(policy, "object-src")).toBe("'none'");
   });
+
+  it("인라인 초기화 스크립트는 유지하면서 HTML 이벤트 속성 실행을 차단한다", () => {
+    const policy = buildContentSecurityPolicy(false);
+
+    expect(directive(policy, "script-src")).toContain("'unsafe-inline'");
+    expect(directive(policy, "script-src-attr")).toBe("'none'");
+  });
 });

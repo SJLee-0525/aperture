@@ -8,6 +8,7 @@ import {
   toDate,
 } from "@/lib/firebase/public/transport";
 import { asText } from "@/lib/i18n/as-text";
+import { normalizePublicHref } from "@/lib/security/public-url";
 
 import type { ImageMeta } from "@/types/image";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
@@ -40,7 +41,7 @@ const toMusicWork = (id: string, data: Record<string, unknown>): MusicWork => ({
   program: (data.program as string[]) ?? [],
   description: asText(data.description),
   poster: (data.poster as ImageMeta) ?? EMPTY_IMAGE,
-  ticketUrl: (data.ticketUrl as string) ?? "",
+  ticketUrl: normalizePublicHref(data.ticketUrl),
   order: (data.order as number) ?? 0,
   published: (data.published as boolean) ?? false,
 });

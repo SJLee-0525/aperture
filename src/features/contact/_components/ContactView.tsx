@@ -15,6 +15,7 @@ import { useCaptchaState } from "@/features/contact/_hooks/use-captcha-state";
 import { useContactForm } from "@/features/contact/_hooks/use-contact-form";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
+import { mailtoAddress } from "@/lib/security/public-url";
 import type { SiteConfig, SiteLink } from "@/types/site";
 
 import styles from "./ContactView.module.css";
@@ -214,8 +215,8 @@ const ContactView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();
 
   const to = useMemo(() => {
-    const mail = site.links.find((link) => link.href.startsWith("mailto:"));
-    return mail ? mail.href.replace(/^mailto:/, "") : FALLBACK_EMAIL;
+    const address = site.links.map(({ href }) => mailtoAddress(href)).find(Boolean);
+    return address || FALLBACK_EMAIL;
   }, [site.links]);
 
   return (

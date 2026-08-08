@@ -7,6 +7,7 @@ import type { SiteLink } from "@/types/site";
 
 import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+import { preparePublicLinks } from "@/lib/security/public-url";
 
 type Status = "loading" | "ready" | "error";
 
@@ -92,7 +93,9 @@ const useGlobalAdmin = () => {
     setError(null);
     setSaving(true);
     try {
-      await updateSiteConfigFields({ tagline, landingLead, contactLead, links });
+      const preparedLinks = preparePublicLinks(links, { allowMailto: true });
+      await updateSiteConfigFields({ tagline, landingLead, contactLead, links: preparedLinks });
+      setLinks(preparedLinks);
       setSaved(true);
     } catch (caught) {
       setError((caught as Error).message);

@@ -85,6 +85,9 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) =>
     "frame-ancestors 'none'",
     "form-action 'self'",
     `script-src ${["'self'", "'unsafe-inline'", ...(isDevelopment ? ["'unsafe-eval'"] : []), ...CAPTCHA_HOSTS, ...ANALYTICS_SCRIPT_HOSTS].join(" ")}`,
+    // Next 부트스트랩과 no-flash <script> 때문에 script-src의 unsafe-inline은 당장 유지하되,
+    // 주입된 onerror/onclick 속성과 javascript: URL은 별도 지시어로 실행을 막는다.
+    "script-src-attr 'none'",
     `style-src 'self' 'unsafe-inline' ${CAPTCHA_HOSTS.join(" ")}`,
     "font-src 'self' data:",
     // GA 는 fetch/beacon 이 막히면 1x1 픽셀로 폴백하므로 img-src 에도 같은 호스트가 필요하다.

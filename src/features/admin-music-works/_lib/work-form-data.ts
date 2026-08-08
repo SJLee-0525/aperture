@@ -1,5 +1,6 @@
 import type { MusicWorkInput } from "@/lib/firebase/music";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+import { normalizePublicHref } from "@/lib/security/public-url";
 
 import type { MusicWork } from "@/types/music";
 
@@ -36,9 +37,17 @@ const workToInput = (work: MusicWork): MusicWorkInput => {
   return input;
 };
 
-const prepareWorkInput = (form: MusicWorkInput): MusicWorkInput => ({
-  ...form,
-  program: form.program.map((piece) => piece.trim()).filter(Boolean),
-});
+const prepareWorkInput = (form: MusicWorkInput): MusicWorkInput => {
+  const ticketUrl = form.ticketUrl.trim();
+  const safeTicketUrl = normalizePublicHref(ticketUrl);
+  if (ticketUrl && !safeTicketUrl) {
+    throw new Error("예매 링크는 HTTPS 또는 사이트 내부 주소만 사용할 수 있습니다.");
+  }
+  return {
+    ...form,
+    ticketUrl: safeTicketUrl,
+    program: form.program.map((piece) => piece.trim()).filter(Boolean),
+  };
+};
 
 export { emptyWorkInput, fromDateValue, prepareWorkInput, toDateValue, workToInput };

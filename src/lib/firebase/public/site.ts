@@ -2,8 +2,9 @@ import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
 
 import { fetchDocument } from "@/lib/firebase/public/transport";
 import { asText } from "@/lib/i18n/as-text";
+import { sanitizePublicLinks } from "@/lib/security/public-url";
 
-import type { SiteConfig, SiteLink } from "@/types/site";
+import type { SiteConfig } from "@/types/site";
 import type { Tag } from "@/types/tag";
 
 /**
@@ -18,7 +19,7 @@ const toSiteConfig = (data: Record<string, unknown>): SiteConfig => ({
   landingLead: asText(data.landingLead),
   contactLead: asText(data.contactLead),
   bio: asText(data.bio),
-  links: (data.links as SiteLink[]) ?? [],
+  links: sanitizePublicLinks(data.links, { allowMailto: true }),
   tags: (data.tags as Tag[]) ?? [],
 });
 

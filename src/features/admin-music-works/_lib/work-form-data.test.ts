@@ -52,6 +52,16 @@ describe("prepareWorkInput", () => {
     expect(prepared).not.toBe(form);
     expect(prepared.program).not.toBe(form.program);
   });
+
+  it("예매 링크는 HTTPS 또는 내부 경로만 허용한다", () => {
+    expect(
+      prepareWorkInput({ ...emptyWorkInput(), ticketUrl: " https://tickets.example.com " })
+        .ticketUrl,
+    ).toBe("https://tickets.example.com");
+    expect(() =>
+      prepareWorkInput({ ...emptyWorkInput(), ticketUrl: "javascript:alert(1)" }),
+    ).toThrow("예매 링크");
+  });
 });
 
 describe("연주 폼 초안", () => {

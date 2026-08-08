@@ -4,6 +4,7 @@ import type { LocalizedText } from "@/types/localized";
 import { hasText } from "@/lib/i18n/has-text";
 import type { DevProjectInput } from "@/lib/firebase/dev";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+import { preparePublicLinks } from "@/lib/security/public-url";
 
 const emptyProjectInput = (): DevProjectInput => ({
   title: EMPTY_TEXT,
@@ -56,7 +57,7 @@ const prepareProjectInput = (form: DevProjectInput): DevProjectInput => {
     troubleshooting: cleanTroubleshooting(form.troubleshooting),
     achievements: cleanLocalized(form.achievements),
     techTags: form.techTags.map((tag) => tag.trim()).filter(Boolean),
-    links: form.links.filter((link) => link.label.trim() || link.href.trim()),
+    links: preparePublicLinks(form.links),
   };
 };
 

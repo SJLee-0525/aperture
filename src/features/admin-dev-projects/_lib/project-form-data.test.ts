@@ -32,17 +32,33 @@ describe("prepareProjectInput", () => {
     expect(prepared.techTags).toEqual(["React", "Next.js"]);
   });
 
-  it("label이나 href 중 하나라도 있는 링크를 보존한다", () => {
+  it("완성된 안전한 링크만 정리해 보존한다", () => {
     const form = {
       ...emptyProjectInput(),
       links: [
-        { label: "GitHub", href: "" },
-        { label: "", href: "https://example.com" },
+        { label: " GitHub ", href: " https://example.com " },
         { label: "  ", href: "\t" },
       ],
     };
 
-    expect(prepareProjectInput(form).links).toEqual(form.links.slice(0, 2));
+    expect(prepareProjectInput(form).links).toEqual([
+      { label: "GitHub", href: "https://example.com" },
+    ]);
+  });
+
+  it("불완전하거나 실행 가능한 링크를 저장하지 않는다", () => {
+    expect(() =>
+      prepareProjectInput({
+        ...emptyProjectInput(),
+        links: [{ label: "GitHub", href: "" }],
+      }),
+    ).toThrow("1번째 링크");
+    expect(() =>
+      prepareProjectInput({
+        ...emptyProjectInput(),
+        links: [{ label: "위험", href: "javascript:alert(1)" }],
+      }),
+    ).toThrow("1번째 링크");
   });
 
   it("모든 내용이 빈 troubleshooting 항목을 제거한다", () => {

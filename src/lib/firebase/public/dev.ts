@@ -9,11 +9,11 @@ import {
   runQuery,
 } from "@/lib/firebase/public/transport";
 import { asText } from "@/lib/i18n/as-text";
+import { sanitizePublicLinks } from "@/lib/security/public-url";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
-import type { SiteLink } from "@/types/site";
 
 type ChatDevProject = Pick<
   DevProject,
@@ -41,7 +41,7 @@ const toDevProject = (id: string, data: Record<string, unknown>): DevProject => 
   troubleshooting: normalizeTroubleshooting(data.troubleshooting),
   achievements: (data.achievements as LocalizedText[]) ?? [],
   techTags: (data.techTags as string[]) ?? [],
-  links: (data.links as SiteLink[]) ?? [],
+  links: sanitizePublicLinks(data.links),
   cover: (data.cover as ImageMeta | null) ?? null,
   images: (data.images as ImageMeta[]) ?? [],
   order: (data.order as number) ?? 0,
