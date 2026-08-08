@@ -257,7 +257,7 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
 | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·Rules·인증) |
 | commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                          |
-| hooks    | env_file_guard(차단), secret_scan(경고), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                  |
+| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                  |
 
 ## Agent skills
 

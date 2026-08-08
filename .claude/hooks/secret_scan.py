@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""secret_scan — 코드/문서에 시크릿 패턴 박혀있는지 검출.
+"""secret_scan — 코드/문서에 시크릿 패턴이 박혀있는지 검출하고 작업을 차단.
 
-Edit/Write 후 파일에 알려진 시크릿 패턴이 있으면 stderr로 경고 (차단 X, exit 0).
+Edit/Write 전 입력과 작업 후 파일을 모두 검사하고, 탐지 시 exit 2로 실패시킨다.
 탐지 키만 라인 번호와 함께 마스킹해서 보고. 시크릿 자체는 로그에 남기지 않음.
 
 이 프로젝트 특이사항:
@@ -9,7 +9,7 @@ Edit/Write 후 파일에 알려진 시크릿 패턴이 있으면 stderr로 경�
     env 관리 원칙 위반이므로 경고 대상.
   - GCP/Firebase 서비스 계정 private key 는 진짜 시크릿 — 최우선 경고.
 
-비활성화: .claude/settings.json 의 PostToolUse 에서 본 항목 제거.
+비활성화: .claude/settings.json 의 PreToolUse와 PostToolUse에서 본 항목 제거.
 """
 from __future__ import annotations
 
@@ -28,10 +28,14 @@ PATTERNS: dict[str, re.Pattern[str]] = {
     "Google/Firebase API key (env로 이동 — 위험은 아니나 하드코딩 금지)": re.compile(
         r"AIza[0-9A-Za-z\-_]{35}"
     ),
-    "OpenAI key": re.compile(r"sk-[A-Za-z0-9]{32,}"),
+    "OpenAI key": re.compile(r"sk-(?:(?:proj|svcacct)-)?[A-Za-z0-9_\-]{20,}"),
     "Anthropic key": re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,}"),
     "AWS access key": re.compile(r"AKIA[0-9A-Z]{16}"),
     "GitHub PAT": re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),
+    "GitHub fine-grained PAT": re.compile(r"github_pat_[A-Za-z0-9_]{20,}"),
+    "GitLab PAT": re.compile(r"glpat-[A-Za-z0-9_\-]{20,}"),
+    "Slack token": re.compile(r"xox[baprs]-[A-Za-z0-9\-]{10,}"),
+    "Stripe live secret": re.compile(r"(?:sk|rk)_live_[A-Za-z0-9]{16,}"),
     "JWT": re.compile(
         r"eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}"
     ),
@@ -39,9 +43,6 @@ PATTERNS: dict[str, re.Pattern[str]] = {
         r"(?i)(api[_-]?key|secret|password)\s*[:=]\s*['\"][A-Za-z0-9+/=_\-]{16,}['\"]"
     ),
 }
-
-ALLOWLIST_TOKENS = ("test", "fixture", "example", "mock", "__pycache__", "node_modules")
-ALLOWLIST_SUFFIXES = (".md",)
 
 
 def mask(s: str) -> str:
@@ -62,37 +63,41 @@ def main() -> int:
         return 0
 
     p = Path(file_path)
-    pl = str(p).replace("\\", "/").lower()
-
-    if any(token in pl for token in ALLOWLIST_TOKENS):
-        return 0
-    if p.suffix in ALLOWLIST_SUFFIXES:
-        return 0
-    if p.name.startswith(".env"):
-        # .env 류는 env_file_guard.py 에서 별도 처리
-        return 0
-    if not p.exists():
-        return 0
-
-    try:
-        text = p.read_text(encoding="utf-8")
-    except Exception:
+    candidates: list[tuple[str, str]] = []
+    for key in ("content", "new_string"):
+        value = tool_input.get(key)
+        if isinstance(value, str):
+            candidates.append((f"incoming {key}", value))
+    if p.exists():
+        try:
+            candidates.append(("file", p.read_text(encoding="utf-8")))
+        except Exception:
+            pass
+    if not candidates:
         return 0
 
     hits: list[str] = []
-    for label, pat in PATTERNS.items():
-        for m in pat.finditer(text):
-            line = text.count("\n", 0, m.start()) + 1
-            hits.append(f"  - {label} (line {line}): {mask(m.group(0))}")
+    seen: set[tuple[str, str]] = set()
+    for source, text in candidates:
+        for label, pat in PATTERNS.items():
+            for m in pat.finditer(text):
+                matched = m.group(0)
+                fingerprint = (label, matched)
+                if fingerprint in seen:
+                    continue
+                seen.add(fingerprint)
+                line = text.count("\n", 0, m.start()) + 1
+                hits.append(f"  - {label} ({source} line {line}): {mask(matched)}")
 
     if hits:
         sys.stderr.write(
             f"[hook:secret_scan] {p}\n"
             f"  시크릿 패턴 의심:\n"
             + "\n".join(hits)
-            + "\n  하드코딩 금지. .env.local + NEXT_PUBLIC_* 환경변수로 옮기세요.\n"
-            f"  오탐이면 .claude/hooks/secret_scan.py 의 ALLOWLIST 에 토큰 추가.\n"
+            + "\n  하드코딩 금지. 공개 값이 아니면 server-only 환경변수로 옮기세요.\n"
+            "  오탐은 탐지 규칙을 좁히거나 Gitleaks 설정에 구체적으로 예외 처리하세요.\n"
         )
+        return 2
     return 0
 
 

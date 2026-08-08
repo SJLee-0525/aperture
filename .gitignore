@@ -59,3 +59,6 @@ Thumbs.db
 
 # Claude Code personal overrides (공유 X)
 .claude/settings.local.json
+
+# 공개 저장소에 포함하지 않는 포트폴리오 원문
+/docs/project-contents/
