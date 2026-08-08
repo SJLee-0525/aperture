@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getMockReply } from "@/features/chat/_lib/mock-chat";
+import { getMockReply, getMockReplyForMessages } from "@/features/chat/_lib/mock-chat";
 
 describe("getMockReply", () => {
   it.each([
@@ -20,6 +20,27 @@ describe("getMockReply", () => {
 
     expect(reference?.title).toBe("Harbor at Dawn");
     expect(reference?.subtitle).toBe("Minato, Tokyo");
+  });
+
+  it("분야명이 없는 바다 질문에도 사진 참조 카드를 제공한다", () => {
+    const references = getMockReply("이성준이 찍은 바다 몇 개 추천해줘", "ko").references;
+
+    expect(references?.length).toBeGreaterThan(0);
+    expect(references?.[0]?.type).toBe("photo");
+  });
+
+  it("후속 질문은 이전 사용자 질문의 분야를 이어받는다", () => {
+    const reply = getMockReplyForMessages(
+      [
+        { role: "user", content: "Tell me about Sungjoon's piano performances." },
+        { role: "assistant", content: "I can introduce the public performance records." },
+        { role: "user", content: "Show me two of them." },
+      ],
+      "en",
+    );
+
+    expect(reply.references).toHaveLength(2);
+    expect(reply.references?.[0]?.type).toBe("music");
   });
 
   it.each([

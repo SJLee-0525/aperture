@@ -1,4 +1,4 @@
-import { getMockReply } from "@/features/chat/_lib/mock-chat";
+import { getMockReplyForMessages } from "@/features/chat/_lib/mock-chat";
 import { createGeminiChatProvider } from "@/features/chat/_lib/gemini-chat-provider";
 import { createOpenAIChatProvider } from "@/features/chat/_lib/openai-chat-provider";
 import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
@@ -34,8 +34,7 @@ const unavailableChatProvider: ChatProvider = async () => {
 
 const mockChatProvider: ChatProvider = async ({ messages, lang, signal }) => {
   if (signal.aborted) throw signal.reason;
-  const question = messages.at(-1)?.content ?? "";
-  const reply = getMockReply(question, lang);
+  const reply = getMockReplyForMessages(messages, lang);
   return {
     content: reply.content,
     links: reply.link ? [reply.link] : undefined,

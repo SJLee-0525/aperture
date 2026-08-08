@@ -77,7 +77,7 @@ const parseStream = async (response, onEvent) => {
   if (buffer.trim()) onEvent(JSON.parse(buffer));
 };
 
-const evaluateCase = async (fixture) => {
+const evaluateCase = async (fixture, index) => {
   const startedAt = performance.now();
   let firstTokenMs = null;
   let lookupSeen = false;
@@ -85,7 +85,13 @@ const evaluateCase = async (fixture) => {
   let streamError = null;
   const response = await fetch(`${baseUrl}/api/chat`, {
     method: "POST",
-    headers: { Accept: "application/x-ndjson", "Content-Type": "application/json" },
+    headers: {
+      Accept: "application/x-ndjson",
+      "Content-Type": "application/json",
+      ...(process.env.CHAT_EVAL_ISOLATE_CLIENTS === "1"
+        ? { "x-real-ip": `192.0.2.${index + 1}` }
+        : {}),
+    },
     body: JSON.stringify({ lang: fixture.lang, messages: fixture.messages }),
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
@@ -136,9 +142,9 @@ if (selectedCase && fixtures.length === 0)
   throw new Error(`Unknown CHAT_EVAL_CASE: ${selectedCase}`);
 
 const results = [];
-for (const fixture of fixtures) {
+for (const [index, fixture] of fixtures.entries()) {
   try {
-    results.push(await evaluateCase(fixture));
+    results.push(await evaluateCase(fixture, index));
   } catch (error) {
     results.push({ id: fixture.id, passed: false, error: error.message });
   }

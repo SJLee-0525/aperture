@@ -1,4 +1,5 @@
 import { devProjectRoute, ROUTES } from "@/constants/routes";
+import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import { pickText } from "@/lib/i18n/pick-text";
 import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
 import { MOCK_MUSIC_WORKS } from "@/mocks/music";
@@ -81,7 +82,7 @@ const REPLIES: Record<Lang, { test: RegExp; reply: MockReply }[]> = {
       },
     },
     {
-      test: /사진|앨범|촬영|카메라/i,
+      test: /사진|앨범|촬영|카메라|풍경|야경|노을|바다/i,
       reply: {
         content:
           "장소와 시선에 따라 기록한 사진 작업을 모아 두었어요. 전체 작업과 앨범을 탐색할 수 있습니다.",
@@ -159,7 +160,23 @@ const FALLBACK: Record<Lang, MockReply> = {
   },
 };
 
-const getMockReply = (question: string, lang: Lang): MockReply =>
-  REPLIES[lang].find(({ test }) => test.test(question))?.reply ?? FALLBACK[lang];
+const findMockReply = (question: string, lang: Lang): MockReply | undefined =>
+  REPLIES[lang].find(({ test }) => test.test(question))?.reply;
 
-export { getMockReply };
+const getMockReply = (question: string, lang: Lang): MockReply =>
+  findMockReply(question, lang) ?? FALLBACK[lang];
+
+const getMockReplyForMessages = (messages: ChatRequestMessage[], lang: Lang): MockReply => {
+  const userQuestions = messages
+    .filter((message) => message.role === "user")
+    .map((message) => message.content)
+    .toReversed();
+
+  for (const question of userQuestions) {
+    const reply = findMockReply(question, lang);
+    if (reply) return reply;
+  }
+  return FALLBACK[lang];
+};
+
+export { getMockReply, getMockReplyForMessages };
