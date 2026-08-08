@@ -3,7 +3,8 @@ import path from "node:path";
 
 import { ImageResponse } from "next/og";
 
-const SIZE = { width: 1200, height: 630 };
+import { SITE_IMAGE_SIZE } from "@/lib/seo/site-meta";
+
 const fontsDirectory = path.join(process.cwd(), "src", "assets", "fonts");
 const newsreaderFont = readFile(path.join(fontsDirectory, "Newsreader_60pt-Medium.ttf"));
 const splineSansMonoFont = readFile(path.join(fontsDirectory, "SplineSansMono-Regular.ttf"));
@@ -54,7 +55,7 @@ const createSiteImage = async ({ dark = false, accent = "#d45d3f" }: Options = {
       </div>
     </div>,
     {
-      ...SIZE,
+      ...SITE_IMAGE_SIZE,
       fonts: [
         { name: "Newsreader", data: newsreader.buffer, weight: 500, style: "normal" },
         { name: "Spline Sans Mono", data: splineSansMono.buffer, weight: 400, style: "normal" },
@@ -63,4 +64,4 @@ const createSiteImage = async ({ dark = false, accent = "#d45d3f" }: Options = {
   );
 };
 
-export { createSiteImage, SIZE as SITE_IMAGE_SIZE };
+export { createSiteImage };

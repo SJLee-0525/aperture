@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
 
-import { LANGS } from "@/constants/langs";
-import { ROUTES } from "@/constants/routes";
 import { LandingView } from "@/features/landing/_components/LandingView";
 import { getSite } from "@/lib/content/site";
-import { localizePath } from "@/lib/i18n/locale-path";
-import { pickText } from "@/lib/i18n/pick-text";
-import { languageAlternates, OG_LOCALE } from "@/lib/seo/metadata";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/seo/site-meta";
+import { siteMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
 
@@ -24,30 +19,7 @@ type Props = { params: Promise<{ lang: Lang }> };
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang } = await params;
-  const description = pickText(SITE_DESCRIPTION, lang);
-  const canonical = localizePath(lang, ROUTES.LANDING);
-
-  return {
-    title: { absolute: SITE_TITLE },
-    description,
-    alternates: {
-      canonical,
-      languages: languageAlternates(ROUTES.LANDING),
-    },
-    openGraph: {
-      type: "website",
-      siteName: SITE_NAME,
-      locale: OG_LOCALE[lang],
-      alternateLocale: LANGS.filter((other) => other !== lang).map((other) => OG_LOCALE[other]),
-      title: SITE_TITLE,
-      description,
-      url: canonical,
-    },
-    twitter: {
-      title: SITE_TITLE,
-      description,
-    },
-  };
+  return siteMetadata(lang);
 }
 
 /**

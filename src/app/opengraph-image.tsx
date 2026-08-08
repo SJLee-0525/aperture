@@ -1,6 +1,7 @@
-import { createSiteImage, SITE_IMAGE_SIZE } from "@/lib/metadata/create-site-image";
+import { createSiteImage } from "@/lib/metadata/create-site-image";
+import { SITE_IMAGE_ALT, SITE_IMAGE_SIZE } from "@/lib/seo/site-meta";
 
-export const alt = "Sungjoon Lee — Developer, Photographer, Pianist";
+export const alt = SITE_IMAGE_ALT;
 export const size = SITE_IMAGE_SIZE;
 export const contentType = "image/png";
 
