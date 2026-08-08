@@ -11,7 +11,7 @@ const CARD_COUNT = 8;
  */
 export default function AlbumsLoading() {
   return (
-    <main className={styles.main}>
+    <main className={styles.main} aria-busy="true">
       <div className={styles.title}>
         <Skeleton width={150} height={34} />
       </div>

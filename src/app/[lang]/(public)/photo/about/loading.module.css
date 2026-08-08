@@ -1,7 +1,10 @@
 /* 소개 로딩 셸 — AboutView.module.css .about/.hero/.stats/.cols 흉내. */
 .about {
   max-width: 980px;
+  height: var(--public-content-height);
+  max-height: var(--public-content-height);
   margin: 0 auto;
+  overflow: hidden;
   padding: var(--s-10) var(--s-6) var(--s-16);
 }
 .hero {

@@ -11,7 +11,7 @@ const SPOT_COUNT = 7;
  */
 export default function MapLoading() {
   return (
-    <div className={styles.view}>
+    <div className={styles.view} aria-busy="true">
       <aside className={styles.list}>
         <div className={styles.head}>
           <Skeleton width={80} height={11} />

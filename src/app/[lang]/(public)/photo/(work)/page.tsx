@@ -8,6 +8,8 @@ import { toGalleryPhotos } from "@/types/gallery-photo";
 
 import type { Lang } from "@/types/lang";
 
+import WorkLoading from "./loading";
+
 type Props = { params: Promise<{ lang: Lang }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -34,7 +36,7 @@ export default async function WorkPage() {
   const [photos, tags] = await Promise.all([getPhotos(), getTags()]);
 
   return (
-    <Suspense>
+    <Suspense fallback={<WorkLoading />}>
       <GalleryView photos={toGalleryPhotos(photos)} tags={tags} />
     </Suspense>
   );

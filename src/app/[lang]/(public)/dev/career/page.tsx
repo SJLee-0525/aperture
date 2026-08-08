@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
 import { DevCareerView } from "@/features/dev/_components/DevCareerView";
 import { getDevConfig } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -32,7 +33,7 @@ export const revalidate = 3600;
 export default async function DevCareerPage() {
   const config = await getDevConfig();
   return (
-    <Suspense>
+    <Suspense fallback={<TimelinePageSkeleton />}>
       <DevCareerView config={config} />
     </Suspense>
   );

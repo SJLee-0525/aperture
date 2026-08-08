@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
 import { MusicWorksView } from "@/features/music/_components/MusicWorksView";
 import { getMusicWorks } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -32,7 +33,7 @@ export const revalidate = 3600;
 export default async function MusicPage() {
   const works = await getMusicWorks();
   return (
-    <Suspense>
+    <Suspense fallback={<CardGridPageSkeleton kind="poster" />}>
       <MusicWorksView works={works} />
     </Suspense>
   );

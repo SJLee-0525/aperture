@@ -8,6 +8,8 @@ import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
 
+import MapLoading from "./loading";
+
 type Props = { params: Promise<{ lang: Lang }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,7 +40,7 @@ export default async function MapPage() {
     <>
       <link rel="preconnect" href="https://basemaps.cartocdn.com" crossOrigin="anonymous" />
       <link rel="preconnect" href="https://tiles.basemaps.cartocdn.com" crossOrigin="anonymous" />
-      <Suspense>
+      <Suspense fallback={<MapLoading />}>
         <MapView locations={locations} />
       </Suspense>
     </>

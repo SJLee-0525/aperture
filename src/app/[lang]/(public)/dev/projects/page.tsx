@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
 import { getDevProjects } from "@/lib/content/dev";
@@ -33,7 +34,7 @@ export const revalidate = 3600;
 export default async function DevProjectsPage() {
   const projects = await getDevProjects();
   return (
-    <Suspense>
+    <Suspense fallback={<CardGridPageSkeleton kind="project" />}>
       <DevProjectsView projects={toDevProjectCards(projects)} />
     </Suspense>
   );

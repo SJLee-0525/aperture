@@ -14,7 +14,7 @@ const LIST_ROW_WIDTHS = ["78%", "64%", "70%", "52%"];
  */
 export default function AboutLoading() {
   return (
-    <main className={styles.about}>
+    <main className={styles.about} aria-busy="true">
       <header className={styles.hero}>
         <Skeleton width="70%" height={56} />
         <div className={styles.bio}>

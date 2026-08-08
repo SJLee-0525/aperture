@@ -15,6 +15,8 @@ import { pageMetadata } from "@/lib/seo/metadata";
 import type { Lang } from "@/types/lang";
 import type { Photo } from "@/types/photo";
 
+import AlbumDetailLoading from "./loading";
+
 export const revalidate = 3600;
 
 /**
@@ -90,7 +92,7 @@ export default async function AlbumDetailPage({ params }: Props) {
   const coverUrl = resolveAlbumCoverPreview(album, albumPhotos);
 
   return (
-    <Suspense>
+    <Suspense fallback={<AlbumDetailLoading />}>
       <AlbumDetailView album={album} photos={albumPhotos} coverUrl={coverUrl} tags={tags} />
     </Suspense>
   );

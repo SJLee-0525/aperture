@@ -14,7 +14,7 @@ const CHIP_WIDTHS = [64, 88, 52];
  */
 export default function WorkLoading() {
   return (
-    <main className={styles.main}>
+    <main className={styles.main} aria-busy="true">
       <div className={styles.toolbar}>
         <div className={styles.titleLine}>
           <Skeleton width={76} height={32} />

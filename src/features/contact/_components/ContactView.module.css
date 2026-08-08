@@ -176,8 +176,9 @@
   display: none !important;
 }
 
-/* hCaptcha 위젯 — 스크립트 로드 전에는 비어 있으므로 자리를 미리 잡지 않는다(레이아웃 시프트 회피). */
-.captcha:not(:empty) {
+/* Web3Forms가 활성화된 경우 lazy script가 위젯을 넣기 전부터 표준 hCaptcha 높이를 예약한다. */
+.captcha {
+  min-height: 78px;
   margin-top: 4px;
 }
 

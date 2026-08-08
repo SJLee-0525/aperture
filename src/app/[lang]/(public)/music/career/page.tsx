@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
 import { MusicCareerView } from "@/features/music/_components/MusicCareerView";
 import { getMusicAwards, getMusicConfig } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -32,7 +33,7 @@ export const revalidate = 3600;
 export default async function MusicCareerPage() {
   const [config, awards] = await Promise.all([getMusicConfig(), getMusicAwards()]);
   return (
-    <Suspense>
+    <Suspense fallback={<TimelinePageSkeleton />}>
       <MusicCareerView config={config} awards={awards} />
     </Suspense>
   );

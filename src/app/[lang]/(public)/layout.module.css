@@ -1,5 +1,13 @@
 .content {
-  min-height: 60vh;
+  --public-content-height: calc(100svh - 58px);
+
+  min-height: var(--public-content-height);
+}
+
+@media (min-width: 768px) {
+  .content {
+    --public-content-height: calc(100svh - 76px);
+  }
 }
 /* 모바일 하단 고정 탭바(62px) 클리어런스는 전역 푸터(SiteFooter)가 담당 —
    콘텐츠 바로 뒤에 푸터가 이어지므로 여기서 여백을 주면 사이 공백이 생긴다. */
