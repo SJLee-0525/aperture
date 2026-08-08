@@ -124,4 +124,4 @@ const siteMetadata = (lang: Lang): Metadata => {
   };
 };
 
-export { languageAlternates, OG_LOCALE, pageMetadata, siteMetadata };
+export { languageAlternates, pageMetadata, siteMetadata };
