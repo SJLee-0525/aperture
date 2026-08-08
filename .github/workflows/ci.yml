@@ -4,16 +4,19 @@ on:
   push:
     branches: [main]
   pull_request:
+  # 필요할 때 GitHub Actions 화면에서도 직접 실행할 수 있다.
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
+  # 같은 브랜치의 이전 실행은 취소해 오래된 커밋에 CI 자원을 쓰지 않는다.
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # 빌드와 독립적인 빠른 검사를 한 작업에서 먼저 수행한다.
   quality:
     name: Unit tests and static checks
     runs-on: ubuntu-latest
@@ -37,6 +40,9 @@ jobs:
 
       - name: Check types
         run: npm run check
+
+      - name: Check dependencies
+        run: npm run deps:check
 
       - name: Lint
         run: npm run lint
@@ -62,10 +68,11 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          # E2E와 Lighthouse가 동일한 프로덕션 빌드를 재사용한다.
           NEXT_DIST_DIR: .next-playwright-v7
           NEXT_PUBLIC_USE_MOCK: "1"
-          # Client Components are evaluated during prerendering, so Firebase Auth needs
-          # syntactically valid public web config even though E2E content uses mocks.
+          # 사전 렌더링 중 Client Component도 평가되므로, E2E 콘텐츠가 mock을 사용하더라도
+          # Firebase Auth에는 문법적으로 유효한 공개 웹 설정이 필요하다.
           NEXT_PUBLIC_FIREBASE_API_KEY: ci-mock-api-key
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-mock.firebaseapp.com
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-mock
@@ -79,8 +86,10 @@ jobs:
           name: production-build
           path: .next-playwright-v7
           include-hidden-files: true
+          # 같은 CI 실행의 후속 작업에서만 쓰는 임시 산출물이다.
           retention-days: 1
 
+  # 실제 Firebase 프로젝트 대신 로컬 에뮬레이터로 보안 규칙을 검증한다.
   rules:
     name: Firebase security rules
     runs-on: ubuntu-latest
@@ -110,9 +119,10 @@ jobs:
 
   e2e:
     name: Production E2E
+    # build 작업에서 만든 산출물을 내려받아 다시 빌드하지 않는다.
     needs: build
-    # Playwright pixel snapshots are OS-dependent. Keep the runner aligned with
-    # the Windows environment used to review and update the committed baselines.
+    # Playwright 픽셀 스냅샷은 OS에 따라 달라진다. 커밋된 기준 이미지를 검토하고
+    # 갱신할 때 사용하는 Windows 환경과 실행 환경을 동일하게 유지한다.
     runs-on: windows-latest
     timeout-minutes: 20
 
@@ -147,6 +157,7 @@ jobs:
           NEXT_PUBLIC_USE_MOCK: "1"
 
       - name: Upload Playwright reports
+        # 테스트 실패 시에도 디버깅에 필요한 리포트를 보존한다.
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -159,6 +170,7 @@ jobs:
 
   lighthouse:
     name: Lighthouse
+    # E2E와 같은 프로덕션 빌드를 대상으로 성능을 측정한다.
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -180,6 +192,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Export Chromium path
+        # Lighthouse가 Playwright에서 설치한 Chromium을 사용하도록 경로를 공유한다.
         run: echo "CHROME_PATH=$(node -e 'process.stdout.write(require(\"playwright\").chromium.executablePath())')" >> "$GITHUB_ENV"
 
       - name: Download production build
@@ -195,6 +208,7 @@ jobs:
           NEXT_PUBLIC_USE_MOCK: "1"
 
       - name: Upload Lighthouse reports
+        # 기준 미달로 실패하더라도 분석할 수 있도록 결과를 업로드한다.
         if: always()
         uses: actions/upload-artifact@v4
         with:
