@@ -16,6 +16,8 @@ const serverEnv = {
   NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? ".next-playwright-v7",
   NEXT_FONT_GOOGLE_MOCKED_RESPONSES: path.resolve(__dirname, "fixtures/google-font-responses.cjs"),
   NEXT_PUBLIC_USE_MOCK: "1",
+  NEXT_PUBLIC_GA_ID: "G-E2ETEST",
+  NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
 };
 
 if (build) {
@@ -25,6 +27,8 @@ if (build) {
     ...process.env,
     NEXT_DIST_DIR: serverEnv.NEXT_DIST_DIR,
     NEXT_PUBLIC_USE_MOCK: "1",
+    NEXT_PUBLIC_GA_ID: "G-E2ETEST",
+    NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
   };
   delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
   const buildResult = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {

@@ -18,6 +18,21 @@ export default defineConfig({
     baseURL,
     locale: "ko-KR",
     timezoneId: "Asia/Seoul",
+    // 일반 E2E는 비차단 상태로 시작한다. 동의 전용 스펙만 init script에서 이 값을 제거한다.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: baseURL,
+          localStorage: [
+            {
+              name: "ap-analytics-consent:v1",
+              value: JSON.stringify({ value: "denied", expiresAt: Date.now() + 86_400_000 }),
+            },
+          ],
+        },
+      ],
+    },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -59,6 +74,8 @@ export default defineConfig({
           NEXT_DIST_DIR: ".next-playwright-v7",
           NEXT_FONT_GOOGLE_MOCKED_RESPONSES: path.resolve("e2e/fixtures/google-font-responses.cjs"),
           NEXT_PUBLIC_USE_MOCK: "1",
+          NEXT_PUBLIC_GA_ID: "G-E2ETEST",
+          NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
         },
       },
 });

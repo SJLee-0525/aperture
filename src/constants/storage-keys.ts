@@ -2,6 +2,7 @@
 const STORAGE_KEYS = {
   THEME: "ap-theme:v1",
   LANG: "ap-lang:v1",
+  ANALYTICS_CONSENT: "ap-analytics-consent:v1",
 } as const;
 
 const LEGACY_STORAGE_KEYS = {

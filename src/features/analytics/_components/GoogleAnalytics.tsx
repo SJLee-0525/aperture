@@ -1,8 +1,11 @@
+"use client";
+
 import Script from "next/script";
-import { Suspense } from "react";
+import { Suspense, useCallback, useState } from "react";
 
 import { PageViewTracker } from "@/features/analytics/_components/PageViewTracker";
 import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
+import { configureGoogleAnalytics } from "@/features/analytics/_lib/gtag";
 
 /**
  * GA4(gtag.js) 로더. 측정 ID 가 없으면 아무것도 렌더하지 않아 개발·프리뷰는 무해하다.
@@ -14,27 +17,36 @@ import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
  * CSP 는 googletagmanager(script) + google-analytics(connect·img) 를 허용해야 한다 —
  * `constants/security-headers.ts` 의 ANALYTICS_* 목록.
  *
- * @returns {JSX.Element | null}
+ * @returns {JSX.Element | null} 동의 후 삽입하는 스크립트와 트래커. 측정 ID가 없으면 `null`.
  */
 export function GoogleAnalytics() {
+  const [ready, setReady] = useState(false);
+
+  /** @returns {void} 외부 스크립트 준비 후 consent와 GA4 설정을 적용한다. */
+  const configure = useCallback(() => {
+    configureGoogleAnalytics(GA_MEASUREMENT_ID);
+    setReady(true);
+  }, []);
+
   if (!GA_MEASUREMENT_ID) return null;
 
   return (
     <>
+      <Script id="ga-consent-bootstrap" strategy="afterInteractive">
+        {
+          "window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){dataLayer.push(arguments)};"
+        }
+      </Script>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
         strategy="afterInteractive"
+        onReady={configure}
       />
-      <Script id="ga-init" strategy="afterInteractive">
-        {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-window.gtag = gtag;
-gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });`}
-      </Script>
-      <Suspense>
-        <PageViewTracker />
-      </Suspense>
+      {ready ? (
+        <Suspense>
+          <PageViewTracker />
+        </Suspense>
+      ) : null}
     </>
   );
 }
