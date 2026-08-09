@@ -31,6 +31,7 @@ type UIDict = {
   contactSent: string;
   contactSendError: string;
   contactCaptchaRequired: string;
+  contactPrivacyNotice: string;
   devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
@@ -85,7 +86,17 @@ type UIDict = {
   photoLoadError: string;
   noImageLabel: string;
   languageLabel: string;
+  languagePreferenceNote: string;
   themeLabel: string;
+  privacyNav: string;
+  termsNav: string;
+  accessibilityNav: string;
+  cookieSettingsLabel: string;
+  analyticsConsentLabel: string;
+  analyticsConsentTitle: string;
+  analyticsConsentBody: string;
+  analyticsConsentAllow: string;
+  analyticsConsentDeny: string;
   mobileNavigationLabel: string;
   sectionsLabel: string;
   searchPlaceholder: string;
@@ -178,6 +189,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactSent: "메일이 전송되었습니다. 확인 후 회신드릴게요.",
     contactSendError: "전송에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     contactCaptchaRequired: "스팸 방지 확인을 완료해 주세요.",
+    contactPrivacyNotice: "입력한 이름, 이메일과 메시지는 문의 전달과 회신에 사용됩니다.",
     devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
@@ -230,7 +242,18 @@ const DICTIONARY: Record<Lang, UIDict> = {
     photoLoadError: "사진을 불러오지 못했습니다.",
     noImageLabel: "이미지 없음",
     languageLabel: "언어",
+    languagePreferenceNote: "선택한 언어를 30일간 기억합니다.",
     themeLabel: "테마 전환",
+    privacyNav: "개인정보 처리방침",
+    termsNav: "사이트 이용 및 콘텐츠",
+    accessibilityNav: "접근성",
+    cookieSettingsLabel: "개인정보 및 쿠키 설정",
+    analyticsConsentLabel: "분석 쿠키 선택",
+    analyticsConsentTitle: "방문 분석을 허용하시겠어요?",
+    analyticsConsentBody:
+      "허용하면 Google Analytics로 사이트 이용 통계를 수집해 포트폴리오를 개선합니다. 거부해도 모든 기능을 이용할 수 있습니다.",
+    analyticsConsentAllow: "분석 허용",
+    analyticsConsentDeny: "거부",
     mobileNavigationLabel: "모바일 내비게이션",
     sectionsLabel: "섹션",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
@@ -326,6 +349,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactSent: "Your message has been sent. I'll get back to you soon.",
     contactSendError: "Failed to send. Please try again in a moment.",
     contactCaptchaRequired: "Please complete the spam check.",
+    contactPrivacyNotice:
+      "Your name, email address, and message are used to deliver and answer your enquiry.",
     devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
@@ -378,7 +403,18 @@ const DICTIONARY: Record<Lang, UIDict> = {
     photoLoadError: "Couldn’t load the photo.",
     noImageLabel: "No image",
     languageLabel: "Language",
+    languagePreferenceNote: "Your language choice is remembered for 30 days.",
     themeLabel: "Toggle theme",
+    privacyNav: "Privacy Policy",
+    termsNav: "Site use & content",
+    accessibilityNav: "Accessibility",
+    cookieSettingsLabel: "Privacy & cookie settings",
+    analyticsConsentLabel: "Analytics cookie choice",
+    analyticsConsentTitle: "Allow visitor analytics?",
+    analyticsConsentBody:
+      "If you allow it, Google Analytics collects site usage statistics to help improve this portfolio. You can use every feature if you decline.",
+    analyticsConsentAllow: "Allow analytics",
+    analyticsConsentDeny: "Decline",
     mobileNavigationLabel: "Mobile navigation",
     sectionsLabel: "Sections",
     searchPlaceholder: "Search · tag / gear / place",

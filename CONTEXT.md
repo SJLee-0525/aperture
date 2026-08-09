@@ -8,23 +8,26 @@
 
 ## Public areas
 
-| Term         | Route           | User-facing responsibility            |
-| ------------ | --------------- | ------------------------------------- |
-| Landing      | `/`             | Photo, Music, Dev 진입 허브           |
-| Photo Work   | `/photo`        | 사진 탐색, 검색, 필터, 사진 상세 모달 |
-| Photo Albums | `/photo/albums` | 앨범 목록과 `/photo/albums/[id]` 상세 |
-| Photo Map    | `/photo/map`    | 촬영 위치 목록과 지도                 |
-| Photo About  | `/photo/about`  | 사진가 소개와 통계                    |
-| Music Works  | `/music`        | 연주 목록과 연주 상세 모달            |
-| Music Career | `/music/career` | 학력, 경력, 수상과 수상 상세 모달     |
-| Music Media  | `/music/media`  | 연주 영상 목록                        |
-| Music About  | `/music/about`  | 피아니스트 소개                       |
-| Dev Stack    | `/dev`          | 기술 스택                             |
-| Dev Projects | `/dev/projects` | 프로젝트 목록과 프로젝트 상세 모달    |
-| Dev Career   | `/dev/career`   | 개발 경력                             |
-| Dev About    | `/dev/about`    | 개발자 소개                           |
-| Contact      | `/contact`      | 연락 양식과 외부 연락 링크            |
-| Search       | `/search`       | 공개 콘텐츠 통합 검색 결과            |
+| Term          | Route            | User-facing responsibility            |
+| ------------- | ---------------- | ------------------------------------- |
+| Landing       | `/`              | Photo, Music, Dev 진입 허브           |
+| Photo Work    | `/photo`         | 사진 탐색, 검색, 필터, 사진 상세 모달 |
+| Photo Albums  | `/photo/albums`  | 앨범 목록과 `/photo/albums/[id]` 상세 |
+| Photo Map     | `/photo/map`     | 촬영 위치 목록과 지도                 |
+| Photo About   | `/photo/about`   | 사진가 소개와 통계                    |
+| Music Works   | `/music`         | 연주 목록과 연주 상세 모달            |
+| Music Career  | `/music/career`  | 학력, 경력, 수상과 수상 상세 모달     |
+| Music Media   | `/music/media`   | 연주 영상 목록                        |
+| Music About   | `/music/about`   | 피아니스트 소개                       |
+| Dev Stack     | `/dev`           | 기술 스택                             |
+| Dev Projects  | `/dev/projects`  | 프로젝트 목록과 프로젝트 상세 모달    |
+| Dev Career    | `/dev/career`    | 개발 경력                             |
+| Dev About     | `/dev/about`     | 개발자 소개                           |
+| Contact       | `/contact`       | 연락 양식과 외부 연락 링크            |
+| Privacy       | `/privacy`       | 언어 저장·분석 동의·외부 처리 안내    |
+| Terms         | `/terms`         | 콘텐츠 권리·외부 링크·챗봇 이용 안내  |
+| Accessibility | `/accessibility` | 접근성 목표·제한·피드백 안내          |
+| Search        | `/search`        | 공개 콘텐츠 통합 검색 결과            |
 
 `Photo`, `Music`, `Dev`는 각 섹션의 공식 명칭이다. 테스트와 문서에서 임의의 동의어 대신 이 명칭을 사용한다.
 
@@ -73,4 +76,5 @@ E2E는 데스크톱과 모바일에서 다음 사용자 관점의 행동을 보�
 - Photo, Music Career, Music Works, Dev Projects의 상세 모달이 열리고 닫힌다.
 - 검색과 필터가 mock 결과를 변경한다.
 - 심각한 브라우저 console error와 처리되지 않은 page error가 없다.
+- 루트 언어 판정과 분석 동의 전 GA 차단이 언어·저장 상태별 계약을 지킨다.
 - 외부 지도 타일, mail client, YouTube와 외부 프로젝트 사이트의 성공 여부는 검사하지 않는다.

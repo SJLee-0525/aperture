@@ -67,22 +67,25 @@ const LangMenu = () => {
             tabIndex={-1}
             onClick={() => setOpen(false)}
           />
-          <div className={styles.menu} role="menu">
-            {OPTIONS.map((option) => (
-              <button
-                key={option.code}
-                type="button"
-                role="menuitemradio"
-                aria-checked={lang === option.code}
-                onClick={() => pick(option.code)}
-                className={styles.option}
-              >
-                <span>{option.label}</span>
-                <span className={`${styles.check} ${lang === option.code ? styles.checkOn : ""}`}>
-                  ●
-                </span>
-              </button>
-            ))}
+          <div className={styles.panel}>
+            <div role="menu">
+              {OPTIONS.map((option) => (
+                <button
+                  key={option.code}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={lang === option.code}
+                  onClick={() => pick(option.code)}
+                  className={styles.option}
+                >
+                  <span>{option.label}</span>
+                  <span className={`${styles.check} ${lang === option.code ? styles.checkOn : ""}`}>
+                    ●
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{dict.languagePreferenceNote}</p>
           </div>
         </>
       ) : null}

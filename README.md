@@ -21,18 +21,23 @@
 - 기술 스택, 개발 프로젝트와 경력 소개
 - 공개 콘텐츠를 관리하는 개인용 Firebase CMS
 - 일반 검색과 포트폴리오 문맥을 사용하는 RAG 챗봇
+- 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
+- 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
+- 개인정보처리방침, 사이트 이용 및 콘텐츠 정책, 접근성 안내
 - 라이트·다크 테마, 화면 크기에 맞춘 내비게이션과 접근성 검사
 
 ## 주요 경로
 
-| 영역    | 경로            | 내용                              |
-| ------- | --------------- | --------------------------------- |
-| Landing | `/`             | Photo, Music, Dev로 이어지는 허브 |
-| Photo   | `/photo`        | 사진, 앨범, 지도와 촬영 정보      |
-| Music   | `/music`        | 연주, 음악 경력과 영상            |
-| Dev     | `/dev/projects` | 개발 프로젝트와 상세 기록         |
-| Search  | `/search`       | 전체 공개 콘텐츠 검색             |
-| Admin   | `/admin`        | 개인용 콘텐츠 관리                |
+| 영역    | 경로                                   | 내용                                                |
+| ------- | -------------------------------------- | --------------------------------------------------- |
+| Entry   | `/`                                    | 쿠키·브라우저 언어에 따라 `/ko` 또는 `/en`으로 이동 |
+| Landing | `/ko`, `/en`                           | Photo, Music, Dev로 이어지는 허브                   |
+| Photo   | `/photo`                               | 사진, 앨범, 지도와 촬영 정보                        |
+| Music   | `/music`                               | 연주, 음악 경력과 영상                              |
+| Dev     | `/dev/projects`                        | 개발 프로젝트와 상세 기록                           |
+| Search  | `/search`                              | 전체 공개 콘텐츠 검색                               |
+| Legal   | `/privacy`, `/terms`, `/accessibility` | 개인정보·이용 정책과 접근성 안내                    |
+| Admin   | `/admin`                               | 개인용 콘텐츠 관리                                  |
 
 언어가 포함된 실제 공개 URL은 `/ko/photo`, `/en/dev/projects`처럼 구성됩니다.
 
@@ -42,7 +47,7 @@
 - 한국어와 영어 콘텐츠를 같은 데이터 구조에서 관리합니다.
 - 공개 페이지는 [`src/lib/content`](./src/lib/content)의 getter만 사용하므로 mock과 Firestore를 교체할 수 있습니다.
 - 공개 데이터는 Firestore REST로 읽고, 관리자 기능은 Firebase SDK로 인증·저장합니다.
-- 일반 검색은 브라우저에서 동작하며, RAG 챗봇만 임베딩과 외부 AI 제공자를 사용합니다.
+- 일반 검색은 브라우저에서 동작하며, RAG 챗봇만 임베딩과 외부 AI 제공자를 사용합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
 - 의존 방향을 `app → features → components`로 제한해 라우팅, 사용자 행동, 공용 UI의 역할을 나눴습니다.
 
 공개 페이지의 읽기 경로와 Admin의 쓰기 경로는 분리되어 있습니다. 외부 서비스까지 포함한 구성은 [프로젝트 아키텍처](./public/readme/architecture.md)에 정리했습니다.
@@ -84,11 +89,12 @@ test/             Firebase Security Rules
 ```text
 src/
 ├── app/
-│   ├── layout.tsx                 # 전역 셸: 폰트, 테마 초기화, 언어·모션 Provider, GA
+│   ├── layout.tsx                 # 전역 셸: 폰트, 테마 초기화, 언어·모션 Provider
+│   ├── .well-known/security.txt/  # 보안 취약점 제보 연락처
 │   ├── [lang]/                    # ko·en 경로 기반 다국어 공개 트리
 │   │   ├── layout.tsx             # 정적 언어 경로 생성, DocumentLang 동기화
 │   │   └── (public)/
-│   │       ├── layout.tsx         # 공개 셸: 헤더, 푸터, 모바일 탭, 챗봇, 이미지 보호
+│   │       ├── layout.tsx         # 공개 셸: 내비게이션, 챗봇, 분석 동의 경계
 │   │       ├── page.tsx           # 랜딩: <LandingView/>
 │   │       ├── photo/
 │   │       │   ├── (work)/page.tsx       # 사진 그리드·필터, ?photo= 상세 모달
@@ -107,7 +113,8 @@ src/
 │   │       │   ├── career/page.tsx # 개발 경력
 │   │       │   └── about/page.tsx  # 개발자 소개
 │   │       ├── search/page.tsx     # 공개 콘텐츠 통합 검색
-│   │       └── contact/page.tsx    # 문의 폼과 외부 연락 링크
+│   │       ├── contact/page.tsx    # 문의 폼과 외부 연락 링크
+│   │       └── privacy/ · terms/ · accessibility/ # 공용 legal 문서 화면
 │   ├── admin/
 │   │   ├── layout.tsx             # noindex 관리자 레이아웃
 │   │   ├── _components/
@@ -133,6 +140,7 @@ src/
 │   ├── music/                      # 연주·경력·영상·소개 화면
 │   ├── dev/                        # 스택·프로젝트·경력·소개 화면
 │   ├── search/ · chat/ · contact/  # 검색, RAG 챗봇, 문의
+│   ├── analytics/ · legal/          # 분석 동의·GA 로딩 경계와 정책 문서
 │   ├── site-header/ · site-footer/ # 데스크톱 mega-menu와 모바일 내비게이션
 │   ├── lang/ · theme/ · motion/    # 언어, 테마, 애니메이션 상태
 │   ├── auth/ · image-upload/       # 관리자 인증과 이미지 처리
@@ -155,6 +163,8 @@ src/
 ├── types/                          # 도메인과 API TypeScript 타입
 ├── constants/                      # 라우트, 내비게이션, 컬렉션, 보안 설정
 └── assets/fonts/                   # Newsreader·Spline Sans Mono와 OFL
+
+src/proxy.ts                        # 루트의 쿠키·Accept-Language 기반 307
 
 design/                             # 디자인 프로토타입, export, 제작 기록
 docs/                               # ADR, 운영·테스트 문서, 프로젝트 설명
@@ -215,6 +225,15 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [챗봇과 RAG](./public/readme/chatbot-rag.md)         | 검색, 임베딩, 폴백과 응답 검증       |
 | [디자인과 구현](./public/readme/design.md)           | 디자인 방향, 반응형 구조와 제작 과정 |
 | [테스트 전략](./public/readme/testing.md)            | 정적 분석·단위·E2E·시각 회귀 테스트  |
+
+구현 결정과 운영 절차는 아래 문서에서 이어서 볼 수 있습니다.
+
+| 문서                                                                         | 내용                                        |
+| ---------------------------------------------------------------------------- | ------------------------------------------- |
+| [도메인 컨텍스트](./CONTEXT.md)                                              | 공개 영역, 아키텍처 경계와 E2E 계약         |
+| [ADR-0002](./docs/adr/0002-path-based-i18n.md)                               | 경로 기반 i18n과 루트 언어 판정 결정        |
+| [언어 진입·동의 운영 문서](./docs/plan/03-browser-language-entry-routing.md) | 위험 분석, 테스트 사례, 배포와 트러블슈팅   |
+| [UI 품질 테스트](./docs/testing.md)                                          | 시각 회귀, 접근성, 언어·분석 동의 검증 방법 |
 
 ## 제작 및 AI 활용
 

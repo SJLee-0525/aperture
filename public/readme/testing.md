@@ -50,6 +50,9 @@ ESLint의 `boundaries` 규칙은 서로 다른 feature의 직접 참조와 share
 대표 mock 콘텐츠를 이용해 다음 흐름을 검사합니다.
 
 - 한국어·영어 공개 라우트
+- 루트의 언어 쿠키·`Accept-Language` 우선순위와 307 응답
+- 분석 동의 전 Google tag 차단, 허용·철회·재허용
+- Privacy, Terms, Accessibility 문서와 내부 표 스크롤
 - 데스크톱 mega-menu와 모바일 내비게이션
 - 사진 검색, 태그 필터와 무한 스크롤
 - 사진, 연주, 수상과 개발 프로젝트 모달
@@ -58,6 +61,10 @@ ESLint의 `boundaries` 규칙은 서로 다른 feature의 직접 참조와 share
 - 브라우저 console error와 처리되지 않은 page error
 
 E2E는 지도와 외부 링크가 표시되는 지점까지 검사합니다. 지도 타일, YouTube, 메일 앱과 외부 프로젝트 사이트의 응답 여부는 범위에서 제외합니다.
+
+일반 E2E는 분석 동의를 거부한 저장 상태로 시작해 배너가 화면 조작과 시각 기준선을 가리지 않게
+합니다. 분석 동의 전용 스펙만 이 값을 제거합니다. CI 프로덕션 빌드는 테스트용 GA 측정 ID를
+빌드 시 넣고 Google tag 요청은 Playwright에서 응답하므로 실제 분석 데이터가 전송되지 않습니다.
 
 ## 챗봇 평가
 

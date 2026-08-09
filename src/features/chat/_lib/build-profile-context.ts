@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 
-import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
+import { CHAT_PROFILE_CACHE_TAG, PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/constants/cache";
 import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
 
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
@@ -174,7 +174,7 @@ const buildProfileSnapshot = unstable_cache(
   },
   // 공개 문맥 projection이 바뀌면 배포 간 Data Cache가 이전 직렬화를 재사용하지 않도록 버전을 올린다.
   ["chat-profile-context-v4-content-source"],
-  { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
+  { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
 const appendRagChunks = (baseContext: string, chunks: StoredRagChunkMeta[]): string => {

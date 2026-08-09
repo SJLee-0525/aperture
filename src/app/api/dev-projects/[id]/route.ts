@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { PUBLIC_CACHE_CONTROL } from "@/constants/cache";
 import { getDevProject } from "@/lib/content/dev";
-
-export const revalidate = 3600;
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -25,7 +24,7 @@ export async function GET(_request: Request, { params }: Context) {
 
   return NextResponse.json(project, {
     headers: {
-      "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": PUBLIC_CACHE_CONTROL,
     },
   });
 }

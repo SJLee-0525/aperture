@@ -15,8 +15,9 @@
   - `/admin`, `/api` 수집 차단
   - `/sitemap.xml` 위치 안내
 - `/sitemap.xml`
-  - 주요 공개 페이지
+  - 주요 공개 페이지와 Privacy, Terms, Accessibility
   - 공개 앨범 상세 URL
+- `/.well-known/security.txt`
 - `/admin/*`, `/search` 검색 결과 제외
 - 이전 사진 URL의 영구 리디렉션
 - Google, 네이버 HTML 메타 태그 소유권 인증 환경변수
@@ -78,6 +79,7 @@ https://대표도메인/
 https://대표도메인/robots.txt
 https://대표도메인/sitemap.xml
 https://대표도메인/opengraph-image
+https://대표도메인/.well-known/security.txt
 ```
 
 추가 확인 사항:
@@ -87,6 +89,9 @@ https://대표도메인/opengraph-image
 - 공개 페이지 소스의 canonical URL이 운영 도메인인가
 - `/admin`과 `/search`에 `noindex`가 출력되는가
 - 공유 이미지와 페이지 제목·설명이 올바르게 출력되는가
+- `/`가 요청 언어에 맞는 `/ko` 또는 `/en`으로 307 이동하고 `private, no-store`를 반환하는가
+- Privacy, Terms, Accessibility의 ko·en URL이 sitemap에 포함되는가
+- `security.txt`의 `Contact`가 실제 신고 창구이고 `Expires`가 지나지 않았는가
 
 `SITE_URL`이 틀렸다면 검색엔진 등록 전에 먼저 수정하고 재배포한다.
 

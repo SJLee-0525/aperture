@@ -21,8 +21,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export const revalidate = 3600;
-
 /** 음악 — 소개 (/music/about): intro + 통계·레퍼토리(연주/수상/영상에서 파생).
  *
  * @returns {Promise<JSX.Element>}

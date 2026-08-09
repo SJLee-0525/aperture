@@ -36,6 +36,7 @@ const SECTION_ACCENTS: Record<string, string> = {
   music: "var(--accent-music)",
   dev: "var(--accent-dev)",
   contact: "var(--accent-contact)",
+  legal: "var(--accent-photo)",
 };
 const LANDING_CURSOR_ACCENT = "var(--cursor-landing-accent)";
 const SCROLLABLE_OVERFLOW = new Set(["auto", "scroll", "overlay"]);

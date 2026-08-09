@@ -5,6 +5,7 @@ import { createContext, useMemo, useSyncExternalStore } from "react";
 import { DICTIONARY, type UIDict } from "@/constants/dictionary";
 import { DEFAULT_LANG, LANGS } from "@/constants/langs";
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
+import { writeLocalePreferenceCookie } from "@/features/lang/_lib/locale-preference-cookie";
 
 import type { Lang } from "@/types/lang";
 
@@ -51,8 +52,15 @@ const readLangSnapshot = (): Lang => {
 
 const readServerLangSnapshot = (): Lang => DEFAULT_LANG;
 
-const writeLang = (next: Lang) => {
+/**
+ * 명시적 언어 선택을 메모리, localStorage와 서버용 기능성 쿠키에 동기화한다.
+ *
+ * @param {Lang} next - 사용자가 선택한 지원 언어.
+ * @returns {void}
+ */
+const writeLang = (next: Lang): void => {
   langCache = next;
+  writeLocalePreferenceCookie(next);
   try {
     localStorage.setItem(STORAGE_KEYS.LANG, next);
     localStorage.removeItem(LEGACY_STORAGE_KEYS.LANG);

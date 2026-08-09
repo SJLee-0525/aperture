@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { PUBLIC_CACHE_CONTROL } from "@/constants/cache";
 import { fetchSearchDocuments } from "@/features/search/_lib/fetch-search-documents";
 
+// Next.js 정적 분석을 위해 리터럴 유지 — 정적 검색 인덱스를 1시간마다 재검증한다.
 export const revalidate = 3600;
 
 /**
@@ -13,7 +15,7 @@ export const revalidate = 3600;
 export async function GET() {
   return NextResponse.json(await fetchSearchDocuments(), {
     headers: {
-      "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": PUBLIC_CACHE_CONTROL,
     },
   });
 }

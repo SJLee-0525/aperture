@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 
-import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
+import { CHAT_PROFILE_CACHE_TAG, PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/constants/cache";
 import { fetchRagChunks } from "@/lib/firebase/public/rag";
 import type { StoredRagChunk, StoredRagChunkMeta } from "@/types/rag";
 
@@ -80,7 +80,7 @@ const loadPackedRagIndex = unstable_cache(
     return packed;
   },
   ["rag-index-v1"],
-  { revalidate: 3_600, tags: [CHAT_PROFILE_CACHE_TAG] },
+  { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
 const getRagIndex = async (): Promise<RagIndexEntry[]> =>

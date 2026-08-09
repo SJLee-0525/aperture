@@ -8,6 +8,9 @@ const ACCESSIBILITY_ROUTES = [
   "/ko/music",
   "/ko/dev/projects",
   "/ko/contact",
+  "/ko/privacy",
+  "/ko/terms",
+  "/ko/accessibility",
 ] as const;
 
 const THEMES = ["light", "dark"] as const;

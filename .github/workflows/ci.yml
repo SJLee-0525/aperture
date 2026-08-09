@@ -88,6 +88,10 @@ jobs:
           # E2E와 Lighthouse가 동일한 프로덕션 빌드를 재사용한다.
           NEXT_DIST_DIR: .next-playwright-v7
           NEXT_PUBLIC_USE_MOCK: "1"
+          # NEXT_PUBLIC 값은 빌드 시 고정된다. 일반 E2E는 저장된 거부 상태로 배너를
+          # 숨기고, 분석 동의 전용 스펙만 저장값을 제거해 이 테스트 ID를 사용한다.
+          NEXT_PUBLIC_GA_ID: G-E2ETEST
+          NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0"
           # 사전 렌더링 중 Client Component도 평가되므로, E2E 콘텐츠가 mock을 사용하더라도
           # Firebase Auth에는 문법적으로 유효한 공개 웹 설정이 필요하다.
           NEXT_PUBLIC_FIREBASE_API_KEY: ci-mock-api-key

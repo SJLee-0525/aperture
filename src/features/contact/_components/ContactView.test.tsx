@@ -21,6 +21,8 @@ vi.mock("@/features/lang/_hooks/use-lang", () => ({
       contactSent: "전송 완료",
       contactSendError: "전송 실패",
       contactCaptchaRequired: "스팸 방지 확인을 완료해 주세요.",
+      contactPrivacyNotice: "입력한 정보는 문의에 사용됩니다.",
+      privacyNav: "개인정보 처리방침",
     },
   }),
 }));

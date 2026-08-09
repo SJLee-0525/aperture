@@ -23,8 +23,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export const revalidate = 3600;
-
 /**
  * 개발 — 경력 (/dev/career): 학력·경력 타임라인 + 수상.
  *
