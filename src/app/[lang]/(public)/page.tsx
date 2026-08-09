@@ -6,8 +6,6 @@ import { siteMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
 
-export const revalidate = 3600;
-
 type Props = { params: Promise<{ lang: Lang }> };
 
 /**

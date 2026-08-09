@@ -1,11 +1,14 @@
-import { firestoreCollectionCacheTag, firestoreDocumentCacheTag } from "@/constants/cache";
+import {
+  PUBLIC_CACHE_REVALIDATE_SECONDS,
+  firestoreCollectionCacheTag,
+  firestoreDocumentCacheTag,
+} from "@/constants/cache";
 
 type RestValue = Record<string, unknown>;
 type RestDocument = { name: string; fields?: Record<string, RestValue> };
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-const REVALIDATE_SECONDS = 3600;
 
 /**
  * 현재 프로젝트의 Firestore REST 문서 기본 URL을 만든다.
@@ -114,7 +117,7 @@ const runQuery = async (
       ? { cache: "no-store" as const }
       : {
           next: {
-            revalidate: REVALIDATE_SECONDS,
+            revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
             tags: collectionIds.map(firestoreCollectionCacheTag),
           },
         }),
@@ -151,7 +154,7 @@ const fetchDocument = async (
       ? { cache: "no-store" as const }
       : {
           next: {
-            revalidate: REVALIDATE_SECONDS,
+            revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
             tags: [firestoreDocumentCacheTag(collectionId, documentId)],
           },
         }),

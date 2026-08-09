@@ -21,8 +21,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export const revalidate = 3600;
-
 /**
  * 음악 — 영상 (/music/media).
  *

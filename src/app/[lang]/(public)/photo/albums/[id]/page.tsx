@@ -17,8 +17,6 @@ import type { Photo } from "@/types/photo";
 
 import AlbumDetailLoading from "./loading";
 
-export const revalidate = 3600;
-
 /**
  * 공개 앨범 id들을 미리 프리렌더 — lang은 상위 [lang] layout의 generateStaticParams가 공급
  *

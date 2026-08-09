@@ -10,6 +10,9 @@ import { getSite } from "@/lib/content/site";
 
 import styles from "./layout.module.css";
 
+// Next.js 정적 분석을 위해 리터럴 유지 — 모든 공개 페이지의 기본 ISR 주기(1시간).
+export const revalidate = 3600;
+
 /**
  * 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config.
  *
