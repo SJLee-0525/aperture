@@ -97,7 +97,8 @@ type ChatProviderResult = {
 - 출력 길이 제한과 timeout
 - 내부 링크 allowlist와 공개 콘텐츠 재검증
 - provider 원문 오류·stack trace 비노출
-- 유효 요청에만 적용되는 IP 기준 분당 6회 공유 제한
+- 유효 요청에만 적용되는 IP 기준 분당 10회 공유 제한
+- 유효 요청 기준 전역 일일 1,000회 공유 상한(UTC 자정 리셋)
 - Redis 키에는 IP 원문 대신 SHA-256 식별자만 사용
 - Upstash timeout·장애 시 인스턴스 메모리 limiter로 폴백
 - 패널 내 민감한 개인정보 입력 주의 문구

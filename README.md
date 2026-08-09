@@ -47,7 +47,7 @@
 - 한국어와 영어 콘텐츠를 같은 데이터 구조에서 관리합니다.
 - 공개 페이지는 [`src/lib/content`](./src/lib/content)의 getter만 사용하므로 mock과 Firestore를 교체할 수 있습니다.
 - 공개 데이터는 Firestore REST로 읽고, 관리자 기능은 Firebase SDK로 인증·저장합니다.
-- 일반 검색은 브라우저에서 동작하며, RAG 챗봇만 임베딩과 외부 AI 제공자를 사용합니다.
+- 일반 검색은 브라우저에서 동작하며, RAG 챗봇만 임베딩과 외부 AI 제공자를 사용합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
 - 의존 방향을 `app → features → components`로 제한해 라우팅, 사용자 행동, 공용 UI의 역할을 나눴습니다.
 
 공개 페이지의 읽기 경로와 Admin의 쓰기 경로는 분리되어 있습니다. 외부 서비스까지 포함한 구성은 [프로젝트 아키텍처](./public/readme/architecture.md)에 정리했습니다.

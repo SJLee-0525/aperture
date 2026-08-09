@@ -11,6 +11,19 @@ const request = (ip: string) =>
   new Request("http://localhost/api/chat", { headers: { "x-forwarded-for": ip } });
 
 describe("chat rate limiter", () => {
+  it("기본 IP 제한은 분당 10회이며 11번째 요청부터 막는다", () => {
+    const limit = createChatRateLimiter();
+    const clientRequest = request("203.0.113.10");
+
+    for (let count = 1; count <= 10; count += 1) {
+      expect(limit(clientRequest, count * 1_000).allowed).toBe(true);
+    }
+    expect(limit(clientRequest, 11_000)).toEqual({
+      allowed: false,
+      retryAfterSeconds: 50,
+    });
+  });
+
   it("IP별 고정 윈도우 제한과 Retry-After를 계산한다", () => {
     const limit = createChatRateLimiter({ limit: 2, windowMs: 10_000 });
 
@@ -89,12 +102,11 @@ describe("chat rate limiter", () => {
     const noon = Date.UTC(2026, 7, 5, 12, 0, 0);
     const fetcher = vi
       .fn<typeof fetch>()
-      .mockResolvedValue(Response.json({ result: [1, 60_000, 501] }));
+      .mockResolvedValue(Response.json({ result: [1, 60_000, 1_001] }));
     const limit = createUpstashChatRateLimiter({
       url: "https://example.upstash.io",
       token: "secret",
       limit: 6,
-      dailyLimit: 500,
       fetcher,
       now: () => noon,
     });

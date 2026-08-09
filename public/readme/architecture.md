@@ -86,7 +86,7 @@ Feature 폴더는 필요에 따라 `_components`, `_hooks`, `_lib`, `_types`로 
 - MapLibre GL은 사진 위치를 지도에 표시합니다.
 - OpenAI와 Gemini는 챗봇 응답, 분야 분류 또는 임베딩에 사용됩니다.
 - Web3Forms는 문의 폼이 설정된 경우에만 사용됩니다.
-- Upstash Redis는 배포 환경에서 챗봇 요청 제한을 공유합니다.
+- Upstash Redis는 배포 환경에서 IP당 분당 10회·전역 일일 1,000회의 챗봇 요청 제한을 공유합니다.
 - Google Analytics는 방문자가 분석을 허용한 뒤에만 로드됩니다.
 
 로컬에서는 외부 서비스 없이 mock 콘텐츠로 공개 화면을 확인할 수 있습니다.

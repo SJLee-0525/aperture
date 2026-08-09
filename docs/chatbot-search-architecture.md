@@ -130,7 +130,7 @@ sequenceDiagram
 - 메시지당 최대 2,000자, 전체 최대 8,000자
 - 언어는 `ko` 또는 `en`
 - 전체 55초 timeout (`maxDuration` 60초 — §4.4 시간 예산)
-- IP 기준 요청 제한
+- IP 기준 분당 10회·전역 일일 1,000회 요청 제한(UTC 자정 리셋)
 
 `openai-intent-classifier.ts`가 현재 질문을 포함한 최근 메시지 6개를 `gpt-5-nano`에 전달해 `profile`, `development`, `music`, `photography`, `none`으로 분류한다. 최근 user/assistant 메시지를 함께 보기 때문에 “울릉도 갔나 보네, 그럼 독도도 있어?”처럼 현재 문장에 `사진`이라는 단어가 없는 후속 질문도 Photo 문맥으로 이어갈 수 있다. 분류와 동시에 대명사·후속 맥락을 해소한 독립 검색어(`searchQuery`)와 한·영 표기 변형을 포함한 검색 키워드(`searchKeywords`, 최대 8개)를 함께 생성해 RAG 검색에 그대로 사용한다. 응답은 엄격한 JSON Schema만 허용하며 `reasoning.effort: minimal`, 최대 출력 240토큰(한·영 키워드가 잘리면 JSON 파싱 실패로 조용히 정규식 폴백에 떨어지므로 여유를 둠)을 사용한다.
 

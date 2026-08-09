@@ -44,7 +44,7 @@ class ChatRateLimitConfigurationError extends Error {
 }
 
 const DEFAULT_OPTIONS: RateLimitOptions = {
-  limit: 6,
+  limit: 10,
   windowMs: 60_000,
   maxEntries: 500,
 };
@@ -54,7 +54,7 @@ const DEFAULT_OPTIONS: RateLimitOptions = {
  * 전역 카운터는 그 자체가 self-DoS 표면이라(1명이 태우면 그날 전원 차단) 낮게 잡으면 안 된다.
  * 역할은 "지갑 방어"가 아니라 프로바이더 예산 상한에 닿기 전 조기 차단이다.
  */
-const DEFAULT_DAILY_LIMIT = 500;
+const DEFAULT_DAILY_LIMIT = 1_000;
 
 const configuredDailyLimit = (): number => {
   const parsed = Number(process.env.CHAT_DAILY_LIMIT);
