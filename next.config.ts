@@ -23,12 +23,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // 경로 기반 i18n(/ko·/en) — 무-로케일 URL은 기본 언어(ko)로 308 직행.
-  // Accept-Language 분기 없는 결정적 이전 (구글 권장: 언어 기반 자동 리다이렉트 금지).
+  // 경로 기반 i18n(/ko·/en) — 루트 / 의 언어 협상은 proxy.ts가 307로 담당한다.
+  // 아래 무-로케일·v1 URL은 검색 신호가 흔들리지 않게 기본 언어(ko)로 308 직행한다.
   // v1 사진 URL(/albums 등)도 체인 리다이렉트(308 두 번)를 피해 /ko/photo/* 로 직행한다.
   async redirects() {
     return [
-      { source: "/", destination: "/ko", permanent: true },
       { source: "/photo/:path*", destination: "/ko/photo/:path*", permanent: true },
       { source: "/music/:path*", destination: "/ko/music/:path*", permanent: true },
       { source: "/dev/:path*", destination: "/ko/dev/:path*", permanent: true },

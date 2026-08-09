@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 /** 경로 기반 i18n — 무-로케일 리다이렉트·hreflang·언어 토글 내비게이션 검증. */
 test.describe("경로 기반 i18n", () => {
-  test("무-로케일 URL은 /ko로 리다이렉트된다 (v1 URL은 체인 없이 직행)", async ({ page }) => {
+  test("루트는 브라우저 언어를 따르고 v1 URL은 /ko로 체인 없이 직행한다", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/ko$/);
 
@@ -12,6 +12,33 @@ test.describe("경로 기반 i18n", () => {
     // v1 사진 URL — /albums → /ko/photo/albums 직행 (중간 /photo/albums 경유 없음)
     await page.goto("/albums");
     await expect(page).toHaveURL(/\/ko\/photo\/albums$/);
+  });
+
+  test("루트 요청의 언어·쿠키 우선순위와 캐시 계약", async ({ request }) => {
+    const korean = await request.get("/", {
+      maxRedirects: 0,
+      headers: { "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8" },
+    });
+    expect(korean.status()).toBe(307);
+    expect(korean.headers().location).toMatch(/\/ko$/);
+    expect(korean.headers()["cache-control"]).toBe("private, no-store");
+    expect(korean.headers()["set-cookie"]).toBeUndefined();
+
+    const english = await request.get("/", {
+      maxRedirects: 0,
+      headers: { "Accept-Language": "ja-JP,ja;q=0.9,en;q=0.8" },
+    });
+    expect(english.status()).toBe(307);
+    expect(english.headers().location).toMatch(/\/en$/);
+
+    const cookieWins = await request.get("/?a=1&a=2", {
+      maxRedirects: 0,
+      headers: {
+        "Accept-Language": "ko-KR",
+        Cookie: "ap-lang-pref-v1=en",
+      },
+    });
+    expect(cookieWins.headers().location).toMatch(/\/en\?a=1&a=2$/);
   });
 
   test("지원하지 않는 언어 세그먼트는 404", async ({ page }) => {
