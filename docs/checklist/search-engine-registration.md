@@ -21,7 +21,8 @@ Bing Webmaster Tools의 `Import from Google Search Console` 로 Google 속성을
 
 ⚠️ **경로 기반 i18n(`/ko`·`/en`) 전환이 아직 프로덕션에 배포되지 않았다면 여기서 멈춘다.**
 
-현재 코드는 공개 URL이 전부 `/ko/*`·`/en/*` 이고 무-로케일 URL은 308로 리다이렉트된다.
+현재 코드는 공개 URL이 전부 `/ko/*`·`/en/*` 이다. 언어가 없는 루트 `/`는 언어 쿠키와
+`Accept-Language`에 따라 307로 이동하고, 그 밖의 무-로케일 구 URL은 `/ko/*`로 308 이동한다.
 구버전이 떠 있는 상태로 검색엔진에 등록하면 **옛 URL(`/photo`)이 색인되고, 배포 후 전부 무효**가 되어
 색인을 처음부터 다시 받아야 한다.
 
@@ -31,8 +32,11 @@ Bing Webmaster Tools의 `Import from Google Search Console` 로 Google 속성을
 # 신규 로케일 라우트가 살아 있는가 (200 이어야 정상)
 (iwr https://sungjoon.works/ko -SkipHttpErrorCheck).StatusCode
 
-# 무-로케일 URL이 리다이렉트되는가 (308 이어야 정상)
+# 무-로케일 구 URL이 리다이렉트되는가 (308 이어야 정상)
 (iwr https://sungjoon.works/photo -MaximumRedirection 0 -SkipHttpErrorCheck).StatusCode
+
+# 루트의 최초 진입 판정이 임시 리다이렉트인가 (307 이어야 정상)
+(iwr https://sungjoon.works/ -MaximumRedirection 0 -SkipHttpErrorCheck).StatusCode
 ```
 
 `/ko` 가 404거나 `/photo` 가 200이면 구버전이다. 배포부터 한다.
@@ -105,7 +109,8 @@ https://sungjoon.works/en/photo/albums
 - **`GOOGLE_SITE_VERIFICATION` 은 비워둬도 된다**
 - TXT 레코드는 인증 후에도 삭제하지 않는다 (삭제 시 소유권 해제)
 
-> 이 방식을 권하는 이유: 이 사이트는 `/` → `/ko` 로 **308 리다이렉트**한다(`next.config.ts`).
+> 이 방식을 권하는 이유: 이 사이트의 `/`는 쿠키·브라우저 언어 판정 뒤 `/ko` 또는 `/en`으로
+> **307 리다이렉트**한다(`src/proxy.ts`).
 > URL 접두어 + meta 태그 방식은 루트가 리다이렉트되면 확인에 실패할 수 있다.
 > DNS를 만질 수 있으면 도메인 속성이 확실하다.
 
@@ -159,7 +164,7 @@ GOOGLE_SITE_VERIFICATION=여기에-content-값
      NAVER_SITE_VERIFICATION=여기에-content-값
      ```
 
-   - 루트가 `/ko` 로 리다이렉트되므로 실패하면 방법 A로 갈아탄다
+   - 루트가 언어 판정 후 `/ko` 또는 `/en`으로 리다이렉트되므로 실패하면 방법 A로 갈아탄다
 
 3. **소유확인 버튼은 4단계 배포 이후에** 누른다.
 
@@ -272,7 +277,7 @@ https://sungjoon.works/ko/contact
 | 증상                      | 확인할 것                                                                                           |
 | ------------------------- | --------------------------------------------------------------------------------------------------- |
 | 소유확인 실패             | `content` 값만 넣었는가 / 재배포했는가 / Production 환경인가 / 4단계 `regex` 명령으로 태그 보이는가 |
-| 루트 URL 확인 실패        | `/` → `/ko` 308 때문. Google=도메인 속성(DNS), 네이버=HTML 파일 업로드로 전환                       |
+| 루트 URL 확인 실패        | `/`의 언어 판정 307 때문. Google=도메인 속성(DNS), 네이버=HTML 파일 업로드로 전환                   |
 | sitemap이 `*.vercel.app`  | `SITE_URL` 미설정 → 1단계 재실행 후 재배포                                                          |
 | sitemap에 `/ko` 없음      | 구버전 배포 → 0단계                                                                                 |
 | 사이트맵 `가져올 수 없음` | `https://sungjoon.works/sitemap.xml` 이 200인지, 소유확인한 도메인과 같은지                         |
@@ -309,15 +314,15 @@ $h = (iwr "$base/ko").Content
 "`n=== 리다이렉트 / noindex ==="
 foreach ($p in @('/', '/photo', '/albums', '/map')) {
   $r = iwr "$base$p" -MaximumRedirection 0 -SkipHttpErrorCheck
-  "{0,-10} -> {1}" -f $p, $r.StatusCode      # 전부 308 이어야 정상
+  "{0,-10} -> {1}" -f $p, $r.StatusCode      # /=307, 나머지=308
 }
 $a = (iwr "$base/admin" -SkipHttpErrorCheck).Content
 [regex]::Matches($a, '<meta name="robots"[^>]*>') | % { $_.Value }
 ```
 
-기대 결과 (2026-08-05 로컬 검증 기준):
+기대 결과 (2026-08-10 구현 기준):
 
-- sitemap 총 URL 수 = (공개 라우트 14 + 공개 앨범 수) × 2
+- sitemap 총 URL 수 = (공개 라우트 17 + 공개 앨범 수) × 2
 - canonical `https://sungjoon.works/ko`, hreflang `ko`·`en`·`x-default` 3종
-- `/`, `/photo`, `/albums`, `/map` 전부 308
+- `/`는 307, `/photo`, `/albums`, `/map`은 308
 - `/admin` 에 `noindex, nofollow, noarchive, nocache`

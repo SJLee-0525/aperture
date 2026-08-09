@@ -37,6 +37,14 @@ npm run test:a11y
 
 axe가 핵심 공개 화면의 문서 구조, ARIA, WCAG AA 색상 대비를 검사한다.
 
+## 언어 진입과 분석 동의
+
+`e2e/pages/locale.e2e.ts`는 루트 `/`의 쿠키·`Accept-Language` 우선순위, 307 상태,
+query 보존과 비공유 캐시 계약을 검증한다. `e2e/pages/analytics-consent.e2e.ts`는 동의 전 Google
+tag 요청 차단, 허용 후 로드, 철회 후 재허용, Footer 재설정, 섹션별 Primary 버튼 색과 배너가 열린
+상태의 챗봇 접근을 검증한다. E2E의 기본 저장 상태는 `denied`라 기존 공개 화면 테스트에 동의 배너가
+겹치지 않는다.
+
 ## Lighthouse
 
 프로덕션 빌드가 있어야 한다.

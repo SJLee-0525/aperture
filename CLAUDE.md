@@ -153,6 +153,8 @@ src/
 │   ├── albums/  map/  about/   # 사진 섹션 뷰 (_components/)
 │   ├── export/                 # 프레임 내보내기
 │   ├── contact/                # _components/ContactView (mailto 폼 + 소셜 링크)
+│   ├── analytics/              # 분석 동의 상태·배너·GA 동적 로딩과 철회 처리
+│   ├── legal/                  # _components/LegalDocumentView 공용 레이아웃 · _lib/legal-documents.tsx 한·영 정책 원문
 │   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
 │   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon) (_components/)
 │   ├── site-header/            # _components/: SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
@@ -181,7 +183,7 @@ import는 **같은 하위폴더면 `./`**(예: `_components/` 안의 컴포넌�
 ### 라우팅 & URL 마이그레이션 (경로 기반 i18n — [ADR-0002](docs/adr/0002-path-based-i18n.md))
 
 - **공개 URL은 전부 `/ko/*`·`/en/*` 로케일 프리픽스**(`app/[lang]/(public)/*`). URL 세그먼트가 언어의 단일 출처 — `LangProvider` 경로 모드가 SSR부터 해당 언어로 렌더한다. `/ko/` = 랜딩(ko), 랜딩의 개발 행은 대표 콘텐츠인 `/dev/projects`로 바로 진입한다.
-- **무-로케일·구 URL은 `next.config` redirects로 `/ko/*`에 308 직행**(체인 금지): `/ → /ko`, `/photo/* → /ko/photo/*`(음악·개발·연락·검색 동일), v1 URL `/albums → /ko/photo/albums`, `/map → /ko/photo/map`, `/about → /ko/photo/about`. **Accept-Language 자동 분기 금지**(구글 정책) — 언어 전환은 헤더 토글(같은 페이지의 다른 언어 경로로 이동)만.
+- **언어가 없는 루트 `/`만 `src/proxy.ts`에서 조건부 307**: 명시적 언어 쿠키(`ap-lang-pref-v1`) → `Accept-Language` → `ko` 기본값 순서로 `/ko` 또는 `/en`을 고르고 query를 보존한다. 응답은 `private, no-store`이며 수동 선택 전에는 쿠키를 쓰지 않는다. 그 밖의 무-로케일·구 URL은 `next.config` redirects로 `/ko/*`에 308 직행(체인 금지): `/photo/* → /ko/photo/*`(음악·개발·연락·검색 동일), v1 URL `/albums → /ko/photo/albums`, `/map → /ko/photo/map`, `/about → /ko/photo/about`. 명시적인 `/ko/*`·`/en/*`는 자동 전환하지 않고 언어 메뉴만 같은 페이지의 반대 언어 경로로 이동한다.
 - 공개 내부 링크는 `LocalizedLink`(현재 언어 프리픽스 자동 부착), 경로 유틸은 `lib/i18n/locale-path.ts` 단일 출처. pathname 소비 코드는 `stripLangPrefix` 경유(섹션 판별·활성 링크). hreflang은 ko·en 상호 참조 + x-default(ko)를 `pageMetadata`·sitemap이 공유한다.
 - 음악·개발은 **개별 페이지**로 구성한다. 개발은 `/dev`=기술 스택, `/dev/projects`=프로젝트, `/dev/career`=경력이며 프로젝트 상세는 `?project=` 딥링크 모달이다.
 - `/admin/*` 는 **로케일 밖**(프리픽스 없음) — 세 섹션 CMS를 모두 포함(사진·음악·개발). 관리자 UI 언어는 기존 localStorage 스토어 모드 유지.
@@ -197,8 +199,14 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비교(Rules 하드코딩 UID와 동기화)
 # NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX      # (선택) GA4 측정 ID. 미설정 시 gtag 미삽입. 실값은 Vercel에만
+# NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER=0|1 # (개발 전용) 저장 상태와 무관하게 동의 배너 미리보기
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션에 '1' 금지
 ```
+
+> GA4는 Basic Consent 방식으로 명시적 허용 뒤에만 client chunk와 Google tag를 로드한다. 선택은
+> `ap-analytics-consent:v1` localStorage에 저장하며 Footer에서 철회·재허용할 수 있다. 언어 선택
+> 쿠키와 분석 동의를 결합하지 않는다. Privacy, Terms, Accessibility 원문은
+> `src/features/legal/_lib/legal-documents.tsx`에서 함께 관리한다.
 
 > **콘텐츠 소스(개발 편의)**: getter는 **개발(`npm run dev`)에선 mock 우선**(음악·개발 미완성 중 UI 테스트),
 > **프로덕션 빌드는 실데이터**(배포 안전). `NEXT_PUBLIC_USE_MOCK` 로 강제 override(`0`=실데이터, `1`=mock). — `lib/content/content-source.ts`
