@@ -144,7 +144,8 @@
    SectionAccent(client)가 라우트별로 data-section 을 세팅 → 컴포넌트는 --accent 만 참조(섹션 색 하드코딩 금지).
    선택자 명시도(0,1,1)가 [data-theme](0,1,0)보다 높아 다크에서도 섹션색이 우선하며, 다크 전용 보정은 (0,2,1)로 덮는다. */
 html[data-section="photo"],
-html[data-section="home"] {
+html[data-section="home"],
+html[data-section="legal"] {
   --accent: var(--accent-photo);
   --accent-press: #004f9f;
   --accent-soft: rgba(0, 102, 204, 0.1);
@@ -166,7 +167,8 @@ html[data-section="contact"] {
 }
 /* 다크: --accent 는 --accent-music/dev/contact 가 자동 전환 → soft 톤만 보정 */
 html[data-theme="dark"][data-section="photo"],
-html[data-theme="dark"][data-section="home"] {
+html[data-theme="dark"][data-section="home"],
+html[data-theme="dark"][data-section="legal"] {
   --accent-press: #278bea;
   --accent-soft: rgba(77, 163, 255, 0.16);
 }

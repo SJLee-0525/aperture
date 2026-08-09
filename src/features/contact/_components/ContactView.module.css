@@ -133,6 +133,17 @@
   opacity: 0.6;
   cursor: default;
 }
+.privacyNotice {
+  max-width: 68ch;
+  color: var(--text-3);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.privacyNotice a {
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .status {
   font-size: 14px;
   color: var(--accent);

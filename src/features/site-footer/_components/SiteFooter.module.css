@@ -119,10 +119,6 @@
   color: var(--text-3);
 }
 .copyright {
-  padding: 4px 8px;
-  font-weight: 500;
-}
-.credit {
   width: fit-content;
   display: inline-flex;
   align-items: center;
@@ -130,13 +126,51 @@
   gap: 6px;
   line-height: 1;
   color: var(--text-3);
+  font: inherit;
   transition: color 0.2s;
+  padding: 4px 8px;
+  font-weight: 500;
 }
-.credit:hover {
+.copyright:hover {
   color: var(--text);
 }
-.credit svg {
+.copyright svg {
   transform: translateY(-1px);
+}
+.legalLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 12px;
+}
+.legalLink {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 6px;
+  line-height: 1;
+  color: var(--text-3);
+  font: inherit;
+  transition: color 0.2s;
+}
+.legalControl {
+  display: contents;
+}
+.legalControl :global(button) {
+  width: fit-content;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.legalLink:hover,
+.legalControl :global(button:hover:not([data-cursor-snapped])) {
+  color: var(--text);
 }
 
 /* 모바일: 세로 스택 + 사이트맵 2컬럼, 하단 탭바에 가리지 않도록 여백(콘텐츠와 동일 기준) */

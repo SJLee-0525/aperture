@@ -67,6 +67,76 @@ test.describe("경로 기반 i18n", () => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/en\/dev$/);
   });
 
+  test("정책 문서가 언어별 canonical과 상호 참조를 제공한다", async ({ page }) => {
+    for (const [path, koTitle, enTitle] of [
+      ["privacy", "개인정보 처리방침", "Privacy Policy"],
+      ["terms", "사이트 이용 및 콘텐츠 안내", "Site Use & Content Notice"],
+      ["accessibility", "접근성 안내", "Accessibility Statement"],
+    ] as const) {
+      await page.goto(`/ko/${path}`);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(koTitle);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        new RegExp(`/ko/${path}$`),
+      );
+      await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
+        "href",
+        new RegExp(`/en/${path}$`),
+      );
+
+      await page.goto(`/en/${path}`);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(enTitle);
+    }
+  });
+
+  test("좁은 화면에서는 정책 표 안에서만 가로 스크롤한다", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/ko/privacy");
+
+    const tableRegion = page.getByRole("region", { name: "처리 정보와 보유 기간 표" });
+    await expect(tableRegion).toBeVisible();
+    expect(await tableRegion.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
+      true,
+    );
+    expect(
+      await tableRegion
+        .locator("xpath=ancestor::section")
+        .evaluate((section) => section.scrollWidth === section.clientWidth),
+    ).toBe(true);
+    await tableRegion.focus();
+    await expect(tableRegion).toBeFocused();
+  });
+
+  test("정책 문서의 페이지·표 스크롤바는 파란 legal 액센트를 사용한다", async ({ page }) => {
+    for (const route of ["/ko/privacy", "/ko/terms", "/ko/accessibility"]) {
+      await page.goto(route);
+      await expect(page.locator("html")).toHaveAttribute("data-section", "legal");
+
+      const colors = await page.evaluate(() => {
+        const pageTrack = document.querySelector<HTMLElement>("[data-custom-scrollbar-ui]");
+        if (!pageTrack) return null;
+        return {
+          page: getComputedStyle(pageTrack).getPropertyValue("--scrollbar-accent").trim(),
+          blue: getComputedStyle(document.documentElement)
+            .getPropertyValue("--accent-photo")
+            .trim(),
+        };
+      });
+
+      expect(colors?.page).toBe(colors?.blue);
+    }
+
+    await page.goto("/ko/privacy");
+    const tableColors = await page
+      .locator(".legal-document-table-scroll")
+      .first()
+      .evaluate((tableScroll) => ({
+        table: getComputedStyle(tableScroll).getPropertyValue("--legal-scrollbar-accent").trim(),
+        blue: getComputedStyle(document.documentElement).getPropertyValue("--accent-photo").trim(),
+      }));
+    expect(tableColors.table).toBe(tableColors.blue);
+  });
+
   test("언어 토글이 같은 페이지의 다른 언어 경로로 이동한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "토글 UI는 데스크톱에서 대표 검증");
 

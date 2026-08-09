@@ -343,6 +343,11 @@
   font-size: var(--t-label);
   line-height: 1.4;
 }
+.privacyNotice a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 .composer:focus-within {
   border-color: var(--accent);

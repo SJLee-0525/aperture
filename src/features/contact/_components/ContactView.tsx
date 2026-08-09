@@ -11,8 +11,10 @@ import {
 } from "react";
 
 import { SocialGlyph } from "@/components/SocialGlyph";
+import { ROUTES } from "@/constants/routes";
 import { useCaptchaState } from "@/features/contact/_hooks/use-captcha-state";
 import { useContactForm } from "@/features/contact/_hooks/use-contact-form";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import { mailtoAddress } from "@/lib/security/public-url";
@@ -176,6 +178,10 @@ const ContactForm = ({ to }: { to: string }) => {
           <Script src="https://web3forms.com/client/script.js" strategy="lazyOnload" />
         </>
       ) : null}
+      <p className={styles.privacyNotice}>
+        {dict.contactPrivacyNotice}{" "}
+        <LocalizedLink href={ROUTES.PRIVACY}>{dict.privacyNav}</LocalizedLink>
+      </p>
       <button
         type="submit"
         className={styles.send}

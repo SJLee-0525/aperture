@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
+import { ROUTES } from "@/constants/routes";
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
 import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
@@ -289,7 +290,12 @@ const ChatPanel = ({ open, onClose }: Props) => {
             isReplying={isReplying}
             onSend={send}
           />
-          <p className={styles.privacyNotice}>{dict.chatPrivacyNote}</p>
+          <p className={styles.privacyNotice}>
+            {dict.chatPrivacyNote}{" "}
+            <LocalizedLink href={ROUTES.PRIVACY} onClick={onClose}>
+              {dict.privacyNav}
+            </LocalizedLink>
+          </p>
         </div>
       </section>
     </div>,

@@ -42,12 +42,12 @@
   background: transparent;
   cursor: default;
 }
-.menu {
+.panel {
   position: absolute;
   right: 0;
   top: 44px;
   z-index: 49;
-  min-width: 146px;
+  width: 210px;
   background: var(--bg);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-card);
@@ -78,4 +78,12 @@
 }
 .checkOn {
   opacity: 1;
+}
+.note {
+  margin: 4px 6px 5px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--text-3);
+  font-size: 0.68rem;
+  line-height: 1.45;
 }

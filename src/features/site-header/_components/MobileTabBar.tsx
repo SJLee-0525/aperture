@@ -28,8 +28,8 @@ const MobileTabBar = () => {
   const pathname = stripLangPrefix(usePathname());
   const section = sectionFromPath(pathname);
 
-  // home·contact 는 섹션 탭 세트가 없다(단일 페이지) → 탭바 숨김.
-  if (section === "home" || section === "contact") return null;
+  // photo·music·dev 외 단일 페이지는 섹션 탭 세트가 없다.
+  if (section !== "photo" && section !== "music" && section !== "dev") return null;
 
   return (
     <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel}>

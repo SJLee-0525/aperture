@@ -8,6 +8,9 @@ describe("sectionFromPath", () => {
     expect(sectionFromPath("/en/music/career")).toBe("music");
     expect(sectionFromPath("/ko/dev/projects")).toBe("dev");
     expect(sectionFromPath("/en/contact")).toBe("contact");
+    expect(sectionFromPath("/ko/privacy")).toBe("legal");
+    expect(sectionFromPath("/en/terms")).toBe("legal");
+    expect(sectionFromPath("/ko/accessibility")).toBe("legal");
     expect(sectionFromPath("/ko")).toBe("home");
   });
 

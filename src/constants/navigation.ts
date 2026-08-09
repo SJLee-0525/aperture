@@ -5,8 +5,8 @@ import type { SectionId } from "@/constants/sections";
 /** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 Icon name */
 type NavItem = { labelKey: keyof UIDict; href: string; icon: string };
 
-/** 섹션 탭 세트를 갖는 섹션(사진·음악·개발) — home·contact(단일 페이지) 제외 */
-type NavSection = Exclude<SectionId, "home" | "contact">;
+/** 섹션 탭 세트를 갖는 섹션(사진·음악·개발) */
+type NavSection = Extract<SectionId, "photo" | "music" | "dev">;
 
 /** 데스크톱 mega-menu 링크 — href는 라우트(사진) 또는 인-페이지 앵커(음악·개발) */
 type MegaLink = { labelKey: keyof UIDict; href: string };
