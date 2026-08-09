@@ -1,6 +1,5 @@
 "use client";
 
-import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { SocialGlyph } from "@/components/SocialGlyph";
 import { CONTACT_NAV, MEGA_MENU } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
@@ -89,7 +88,6 @@ const SiteFooter = ({
       <div className={styles.bottomInner}>
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className={styles.copyright}>
           © 2026 Sungjoon Lee · Seoul, Republic of Korea
-          <GitHubIcon size={13} />
         </a>
         <div className={styles.legalLinks}>
           <LocalizedLink href={ROUTES.PRIVACY} className={styles.legalLink}>

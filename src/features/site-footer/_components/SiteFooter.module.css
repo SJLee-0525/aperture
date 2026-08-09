@@ -134,9 +134,6 @@
 .copyright:hover {
   color: var(--text);
 }
-.copyright svg {
-  transform: translateY(-1px);
-}
 .legalLinks {
   display: flex;
   flex-wrap: wrap;
