@@ -259,7 +259,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
       "아래 항목은 서로 독립적으로 선택할 수 있습니다. 모두 거부해도 사이트의 모든 기능을 이용할 수 있습니다.",
     analyticsConsentAnalyticsLabel: "방문 분석",
     analyticsConsentAnalyticsBody:
-      "페이지를 방문하면 방문 페이지와 일반 기기 정보가 HTTPS를 통해 미국의 Google LLC로 전송됩니다. 이용 통계에 사용하며, 이벤트 데이터는 설정에 따라 2개월 또는 14개월 보관됩니다.",
+      "페이지를 방문하면 방문 페이지와 일반 기기 정보가 HTTPS를 통해 미국의 Google LLC로 전송됩니다. 이용 통계에 사용하며, 이벤트 데이터는 14개월 보관됩니다.",
     analyticsConsentMonitoringLabel: "오류 보고 및 화면 기록",
     analyticsConsentMonitoringBody:
       "오류가 발생하면 오류 정보와 전후 화면 기록이 HTTPS를 통해 {country}의 Sentry, Inc.로 전송되어 30일간 보관됩니다. 입력값과 챗봇 대화는 기록하지 않습니다.",
@@ -427,7 +427,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
       "Choose each item independently. You can use every site feature if you decline both.",
     analyticsConsentAnalyticsLabel: "Visitor analytics",
     analyticsConsentAnalyticsBody:
-      "When you visit a page, its address and general device information are sent over HTTPS to Google LLC in the United States. Event data is used for analytics and kept for 2 or 14 months, depending on the property setting.",
+      "When you visit a page, its address and general device information are sent over HTTPS to Google LLC in the United States. Event data is used for analytics and kept for 14 months.",
     analyticsConsentMonitoringLabel: "Error reporting and screen recording",
     analyticsConsentMonitoringBody:
       "When an error occurs, its details and a recording from around that time are sent over HTTPS to Sentry, Inc. in {country} and kept for 30 days. Inputs and chatbot conversations are not recorded.",

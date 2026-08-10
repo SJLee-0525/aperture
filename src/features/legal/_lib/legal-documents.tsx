@@ -202,7 +202,7 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     </td>
                     <td>방문 페이지, 이벤트, 일반 기기·브라우저 정보</td>
                     <td>미국 · 페이지 방문 등 이벤트 발생 시 · HTTPS</td>
-                    <td>이용 통계 · GA4 속성 설정에 따라 이벤트 데이터 2개월 또는 14개월</td>
+                    <td>이용 통계 · 이벤트 데이터 14개월</td>
                     <td>동의 설정에서 방문 분석을 끌 수 있으며 사이트 기능에는 영향 없음</td>
                   </tr>
                   {SENTRY_ENABLED ? (
@@ -472,9 +472,7 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     </td>
                     <td>Visited pages, events, and general device/browser information</td>
                     <td>United States · when an event occurs · HTTPS</td>
-                    <td>
-                      Usage analytics · event data for 2 or 14 months under the GA4 property setting
-                    </td>
+                    <td>Usage analytics · event data for 14 months</td>
                     <td>Turn off Visitor analytics in settings; site features remain available</td>
                   </tr>
                   {SENTRY_ENABLED ? (
