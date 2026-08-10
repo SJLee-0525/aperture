@@ -34,6 +34,25 @@ const useContactForm = (mailtoTo: string) => {
   const submit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+
+      // WebMCP 에이전트 발 제출은 발송 없이 전면 차단 — 에이전트의 역할은 입력 채우기까지다.
+      // hCaptcha 토큰은 사람만 만들 수 있어 자동 발송은 어차피 실패하지만, 여기서 먼저 끊어
+      // 에이전트에게 다음 행동(사람이 캡차·전송)을 문장으로 알린다 (ADR-0003).
+      const native = event.nativeEvent as SubmitEvent | undefined;
+      if (native?.agentInvoked) {
+        // 스펙 계약은 Promise<any> — 문자열을 직접 넘기면 브라우저에서 타입 오류가 난다.
+        // mailto 폴백(키 미설정) 환경에는 캡차가 없으므로 안내와 상태를 나눈다.
+        native.respondWith?.(
+          Promise.resolve(
+            ACCESS_KEY
+              ? "Form filled. The visitor must solve the captcha and press Send."
+              : "Form filled. The visitor must press Send to open their mail app.",
+          ),
+        );
+        if (ACCESS_KEY) setStatus("captcha-required");
+        return;
+      }
+
       const form = event.currentTarget;
       const formData = new FormData(form);
       const name = String(formData.get("name") ?? "").trim();
