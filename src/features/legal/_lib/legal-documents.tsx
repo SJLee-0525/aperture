@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+import { SENTRY_DSN, SENTRY_TRANSFER_COUNTRY } from "@/lib/monitoring/monitoring-dsn";
 
 import type { Lang } from "@/types/lang";
 
@@ -21,9 +22,13 @@ type LegalDocumentKind = "privacy" | "terms" | "accessibility";
 const EXTERNAL_POLICY_URLS = {
   web3Forms: "https://web3forms.com/privacy",
   googleAnalytics: "https://support.google.com/analytics/answer/6004245",
+  googlePrivacyContact: "https://support.google.com/policies/contact/general_privacy_form",
   openAi: "https://platform.openai.com/docs/models/default-usage-policies-by-endpoint",
   gemini: "https://ai.google.dev/gemini-api/docs/zdr",
+  sentry: "https://sentry.io/privacy/",
 } as const;
+
+const SENTRY_ENABLED = Boolean(SENTRY_DSN);
 
 /**
  * 좁은 화면에서 표만 독립적으로 가로 스크롤하며 키보드 포커스도 받을 수 있게 한다.
@@ -90,6 +95,13 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <td>동의한 경우의 이용 통계</td>
                     <td>Google Analytics 설정과 정책에 따름</td>
                   </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>오류 내용, 발생 시점의 화면 재현과 일반 기기·브라우저 정보</td>
+                      <td>동의한 방문자의 오류 진단과 수정</td>
+                      <td>Sentry Developer 플랜 · 30일</td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
             </LegalTableScroll>
@@ -127,9 +139,9 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   </tr>
                   <tr>
                     <td>
-                      <code>ap-analytics-consent:v1</code>
+                      <code>ap-consent:v3</code>
                     </td>
-                    <td>분석 허용·거부 선택 기억</td>
+                    <td>방문 분석과 오류 보고의 개별 허용·거부 선택 기억</td>
                     <td>localStorage · 180일</td>
                   </tr>
                   <tr>
@@ -139,13 +151,23 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <td>동의한 방문자의 GA4 통계 구분과 상태 유지</td>
                     <td>선택적 분석 쿠키 · Google 기본 설정상 최대 2년</td>
                   </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>
+                        <code>sentryReplaySession</code>
+                      </td>
+                      <td>동의한 방문자의 오류 화면 재현 세션 구분</td>
+                      <td>sessionStorage · 탭을 닫으면 삭제</td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
             </LegalTableScroll>
             <p>
               언어 쿠키는 사용자가 메뉴에서 직접 선택할 때만 생성하며 분석 식별자와 결합하지
-              않습니다. 분석 쿠키는 허용한 뒤에만 생성됩니다. Footer의 개인정보 및 쿠키 설정이나
-              브라우저 설정에서 선택을 변경하고 저장값을 삭제할 수 있습니다.
+              않습니다. 분석·오류 수집 관련 쿠키와 저장값은 허용한 뒤에만 생성됩니다. Footer의
+              개인정보 및 쿠키 설정이나 브라우저 설정에서 선택을 변경하고 저장값을 삭제할 수
+              있습니다.
             </p>
           </>
         ),
@@ -158,6 +180,45 @@ const PRIVACY: Record<Lang, LegalDocument> = {
               아래 기능은 정보를 방문자의 거주국 밖에 있는 제공자 서버로 전송할 수 있습니다. 실제
               처리 지역과 추가 보유는 각 사업자의 계약·정책, 계정 및 배포 설정에 따릅니다.
             </p>
+            <h3>선택 기능의 국외 이전</h3>
+            <LegalTableScroll label="선택 기능 국외 이전 상세 표">
+              <table>
+                <thead>
+                  <tr>
+                    <th>이전받는 자·연락처</th>
+                    <th>항목</th>
+                    <th>국가·시기·방법</th>
+                    <th>목적·보유 기간</th>
+                    <th>거부 방법과 영향</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      Google LLC ·{" "}
+                      <a href={EXTERNAL_POLICY_URLS.googlePrivacyContact}>
+                        개인정보 보호 문의 양식
+                      </a>
+                    </td>
+                    <td>방문 페이지, 이벤트, 일반 기기·브라우저 정보</td>
+                    <td>미국 · 페이지 방문 등 이벤트 발생 시 · HTTPS</td>
+                    <td>이용 통계 · GA4 속성 설정에 따라 이벤트 데이터 2개월 또는 14개월</td>
+                    <td>동의 설정에서 방문 분석을 끌 수 있으며 사이트 기능에는 영향 없음</td>
+                  </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>Sentry, Inc. · privacy@sentry.io</td>
+                      <td>오류 내용, 오류 발생 전후 화면 기록, 일반 기기·브라우저 정보</td>
+                      <td>
+                        {SENTRY_TRANSFER_COUNTRY.ko} · 오류 발생 시 · 동일 출처 터널을 거친 HTTPS
+                      </td>
+                      <td>오류 진단과 수정 · 30일</td>
+                      <td>동의 설정에서 오류 보고를 끌 수 있으며 사이트 기능에는 영향 없음</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </LegalTableScroll>
             <LegalTableScroll label="외부 제공자와 전송 정보 표">
               <table>
                 <thead>
@@ -188,6 +249,13 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <td>챗봇 질문과 제한된 문맥</td>
                     <td>AI 답변 생성</td>
                   </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>Sentry</td>
+                      <td>동의한 방문자의 오류 정보와 오류 전후 화면 기록, 서버 오류 로그</td>
+                      <td>오류 진단과 수정</td>
+                    </tr>
+                  ) : null}
                   <tr>
                     <td>Upstash</td>
                     <td>SHA-256 해시 IP 키와 집계 수</td>
@@ -202,13 +270,26 @@ const PRIVACY: Record<Lang, LegalDocument> = {
               수 있습니다. Google Analytics의 광고 개인화와 Google Signals는 사용하지 않습니다.
               민감한 개인정보를 문의나 챗봇에 입력하지 마세요.
             </p>
+            {SENTRY_ENABLED ? (
+              <p>
+                브라우저 오류 수집과 화면 재현은 동의한 뒤에만 시작하며, 화면 재현에서 입력값과 챗봇
+                대화 영역은 가려집니다. 서버 오류 로그는 서비스 정상 동작 확인을 위해 동의와
+                무관하게 기록하되, 인증 정보·쿠키·요청 본문·방문자 식별 정보를 제거한 오류 내용만
+                전송합니다.
+              </p>
+            ) : null}
             <p>
               자세한 처리 조건은{" "}
               <a href={EXTERNAL_POLICY_URLS.web3Forms}>Web3Forms 개인정보처리방침</a>,{" "}
               <a href={EXTERNAL_POLICY_URLS.googleAnalytics}>Google Analytics 개인정보 보호 안내</a>
-              , <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI API 데이터 제어 안내</a>와{" "}
-              <a href={EXTERNAL_POLICY_URLS.gemini}>Gemini API 데이터 보관 안내</a>에서 확인할 수
-              있습니다.
+              , <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI API 데이터 제어 안내</a>,{" "}
+              <a href={EXTERNAL_POLICY_URLS.gemini}>Gemini API 데이터 보관 안내</a>
+              {SENTRY_ENABLED ? (
+                <>
+                  와 <a href={EXTERNAL_POLICY_URLS.sentry}>Sentry 개인정보처리방침</a>
+                </>
+              ) : null}
+              에서 확인할 수 있습니다.
             </p>
           </>
         ),
@@ -283,6 +364,15 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <td>Consented usage analytics</td>
                     <td>Under Google Analytics settings and policy</td>
                   </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>
+                        Error details, a screen replay of the failure, and general device data
+                      </td>
+                      <td>Error diagnosis and fixes for consenting visitors</td>
+                      <td>Sentry Developer plan · 30 days</td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
             </LegalTableScroll>
@@ -320,9 +410,9 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   </tr>
                   <tr>
                     <td>
-                      <code>ap-analytics-consent:v1</code>
+                      <code>ap-consent:v3</code>
                     </td>
-                    <td>Remember analytics allow/decline choice</td>
+                    <td>Remember separate analytics and error-reporting choices</td>
                     <td>localStorage · 180 days</td>
                   </tr>
                   <tr>
@@ -332,14 +422,23 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <td>Measure consented visits and retain analytics state</td>
                     <td>Optional analytics cookies · up to two years under Google defaults</td>
                   </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>
+                        <code>sentryReplaySession</code>
+                      </td>
+                      <td>Identify a consented error replay session</td>
+                      <td>sessionStorage · removed when the tab closes</td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
             </LegalTableScroll>
             <p>
               The language cookie is created only after a menu choice and is not combined with
-              analytics identifiers. Analytics cookies are created only after permission. Change the
-              choice in Privacy &amp; cookie settings in the footer or clear site storage in the
-              browser.
+              analytics identifiers. Analytics and error-reporting storage is created only after
+              permission. Change the choice in Privacy &amp; cookie settings in the footer or clear
+              site storage in the browser.
             </p>
           </>
         ),
@@ -353,6 +452,48 @@ const PRIVACY: Record<Lang, LegalDocument> = {
               country. Processing regions and retention depend on provider terms, account settings,
               and deployment configuration.
             </p>
+            <h3>International transfers for optional features</h3>
+            <LegalTableScroll label="Optional feature transfer details">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Recipient and contact</th>
+                    <th>Information</th>
+                    <th>Country, timing, and method</th>
+                    <th>Purpose and retention</th>
+                    <th>How to refuse and effect</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      Google LLC ·{" "}
+                      <a href={EXTERNAL_POLICY_URLS.googlePrivacyContact}>privacy contact form</a>
+                    </td>
+                    <td>Visited pages, events, and general device/browser information</td>
+                    <td>United States · when an event occurs · HTTPS</td>
+                    <td>
+                      Usage analytics · event data for 2 or 14 months under the GA4 property setting
+                    </td>
+                    <td>Turn off Visitor analytics in settings; site features remain available</td>
+                  </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>Sentry, Inc. · privacy@sentry.io</td>
+                      <td>
+                        Error details, recording around an error, and general device/browser data
+                      </td>
+                      <td>
+                        {SENTRY_TRANSFER_COUNTRY.en} · when an error occurs · HTTPS through a
+                        same-origin tunnel
+                      </td>
+                      <td>Error diagnosis and fixes · 30 days</td>
+                      <td>Turn off Error reporting in settings; site features remain available</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </LegalTableScroll>
             <LegalTableScroll label="External providers and transfers table">
               <table>
                 <thead>
@@ -383,6 +524,15 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <td>Chatbot question and limited context</td>
                     <td>AI response generation</td>
                   </tr>
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>Sentry</td>
+                      <td>
+                        Error details and screen replays from consenting visitors; server error logs
+                      </td>
+                      <td>Error diagnosis and fixes</td>
+                    </tr>
+                  ) : null}
                   <tr>
                     <td>Upstash</td>
                     <td>SHA-256 hashed IP key and aggregate count</td>
@@ -397,12 +547,26 @@ const PRIVACY: Record<Lang, LegalDocument> = {
               and account settings. Google Signals and advertising personalisation are disabled. Do
               not submit sensitive personal information through the form or chatbot.
             </p>
+            {SENTRY_ENABLED ? (
+              <p>
+                Browser error reporting and screen replay start only after permission, and replays
+                mask typed input and the chatbot conversation area. Server error logs are recorded
+                regardless of consent to keep the service working, but only after removing
+                credentials, cookies, request bodies, and visitor identifiers.
+              </p>
+            ) : null}
             <p>
               See the official data terms from{" "}
               <a href={EXTERNAL_POLICY_URLS.web3Forms}>Web3Forms</a>,{" "}
               <a href={EXTERNAL_POLICY_URLS.googleAnalytics}>Google Analytics</a>,{" "}
-              <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI API</a>, and{" "}
-              <a href={EXTERNAL_POLICY_URLS.gemini}>Gemini API</a> for provider-specific details.
+              <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI API</a>,{" "}
+              <a href={EXTERNAL_POLICY_URLS.gemini}>Gemini API</a>
+              {SENTRY_ENABLED ? (
+                <>
+                  , and <a href={EXTERNAL_POLICY_URLS.sentry}>Sentry</a>
+                </>
+              ) : null}{" "}
+              for provider-specific details.
             </p>
           </>
         ),
