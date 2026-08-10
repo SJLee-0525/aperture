@@ -1,5 +1,7 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
+import packageJson from "./package.json" with { type: "json" };
 import { SECURITY_HEADERS } from "./src/constants/security-headers";
 
 const nextConfig: NextConfig = {
@@ -45,4 +47,36 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry 오류 모니터링(ADR-0004). 브라우저 이벤트는 /monitoring 터널(동일 출처)로 보내
+// security-headers.ts의 connect-src 화이트리스트를 넓히지 않는다. SDK init의 정책(동의 게이팅·
+// 샘플링·dataCollection 잠금)은 features/monitoring과 sentry.*.config.ts가 담당한다.
+export default withSentryConfig(nextConfig, {
+  org: "yonsei-univ-yr",
+  project: "javascript-nextjs",
+
+  // CI 환경에서만 소스맵 업로드 로그를 출력한다.
+  silent: !process.env.CI,
+
+  // 스택 트레이스 가독성을 위해 소스맵 업로드 범위를 넓힌다.
+  widenClientFileUpload: true,
+
+  // 브라우저 이벤트의 동일 출처 터널. proxy.ts matcher는 "/"뿐이라 충돌하지 않는다.
+  tunnelRoute: "/monitoring",
+
+  // 배포별 릴리즈 태깅. Vercel은 commit SHA, 로컬 빌드는 package.json 버전을 사용한다.
+  // SDK init에는 release를 넣지 않는다: 클라이언트 번들에는 VERCEL_GIT_COMMIT_SHA가
+  // 인라인되지 않아 항상 폴백으로 평가되고 3개 런타임·소스맵의 릴리즈가 어긋난다.
+  release: {
+    name: process.env.VERCEL_GIT_COMMIT_SHA
+      ? `aperture@${process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 8)}`
+      : `aperture@${packageJson.version}-local`,
+    setCommits: { auto: true, ignoreMissing: true },
+  },
+
+  // 소스맵은 Sentry 업로드 후 프로덕션 번들에서 제거한다 (원본 코드 비노출).
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+  },
+});
