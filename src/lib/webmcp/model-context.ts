@@ -42,7 +42,13 @@ type SpecModelContext = {
  */
 const specModelContext = (): SpecModelContext | null => {
   if (typeof document === "undefined") return null;
-  return (document as Document & { modelContext?: SpecModelContext }).modelContext ?? null;
+  return (
+    (document as Document & { modelContext?: SpecModelContext }).modelContext ??
+    // Chrome 149(오리진 트라이얼 최소 버전)는 구 진입점만 노출한다. (실기기 검증: 149 = navigator 만 존재)
+    // 150+에서 document 로 이동했지만 149 방문자를 버리지 않도록 둘 다 본다.
+    (navigator as Navigator & { modelContext?: SpecModelContext }).modelContext ??
+    null
+  );
 };
 
 /**
