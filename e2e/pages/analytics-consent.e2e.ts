@@ -122,14 +122,20 @@ test.describe("분석·오류 수집 동의", () => {
       await expect(primary).toBeVisible();
 
       await page.mouse.move(0, 0);
-      const launcherColor = await chatLauncher.evaluate(
-        (element) => getComputedStyle(element).backgroundColor,
-      );
       await expect
-        .poll(() => primary.evaluate((element) => getComputedStyle(element).backgroundColor), {
-          message: `${path}의 Primary 버튼과 챗봇 런처 색`,
-        })
-        .toBe(launcherColor);
+        .poll(
+          async () => {
+            const [primaryColor, launcherColor] = await Promise.all([
+              primary.evaluate((element) => getComputedStyle(element).backgroundColor),
+              chatLauncher.evaluate((element) => getComputedStyle(element).backgroundColor),
+            ]);
+            return primaryColor === launcherColor
+              ? "match"
+              : `Primary ${primaryColor} / Launcher ${launcherColor}`;
+          },
+          { message: `${path}의 Primary 버튼과 챗봇 런처 색` },
+        )
+        .toBe("match");
     }
   });
 });

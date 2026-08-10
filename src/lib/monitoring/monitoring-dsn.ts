@@ -21,7 +21,10 @@ const SENTRY_DATA_REGION: SentryDataRegion | null =
  */
 const isSentryDsnInRegion = (dsn: string, region: SentryDataRegion): boolean => {
   try {
-    const hostname = new URL(dsn).hostname.toLowerCase();
+    const url = new URL(dsn);
+    if (url.protocol !== "https:") return false;
+
+    const hostname = url.hostname.toLowerCase();
     const isDe = hostname === "ingest.de.sentry.io" || hostname.endsWith(".ingest.de.sentry.io");
     const isUs =
       hostname === "ingest.us.sentry.io" ||

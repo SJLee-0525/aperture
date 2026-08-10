@@ -14,6 +14,9 @@ describe("isSentryDsnInRegion", () => {
   it.each([
     ["https://key@o1.ingest.de.sentry.io/1", "US"],
     ["https://key@o1.ingest.us.sentry.io/1", "DE"],
+    ["http://key@o1.ingest.sentry.io/1", "US"],
+    ["https://key@o1.ingest.sentry.io.evil.example/1", "US"],
+    ["https://key@o1.ingest.de.sentry.io.evil.example/1", "DE"],
     ["https://example.com/1", "US"],
     ["not-a-url", "DE"],
   ] as const)("rejects %s for %s", (dsn, region) => {
