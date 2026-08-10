@@ -33,9 +33,11 @@
 }
 
 .body a {
+  display: inline-block;
   color: var(--text);
   text-decoration: underline;
   text-underline-offset: 3px;
+  white-space: nowrap;
 }
 
 .choices {
@@ -46,18 +48,25 @@
 
 .choice {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 10px 10px 10px 14px;
+  border: 1px solid var(--line);
+}
+
+.choiceLabel {
+  display: flex;
   grid-template-columns: auto 1fr;
   gap: var(--s-3);
-  align-items: start;
-  padding: 10px 14.5px 10px 10px;
-  border: 1px solid var(--line);
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
 }
 
-.choice input {
+.choiceLabel input {
   width: 16px;
   height: 16px;
-  margin: 4.5px 0 0 4.5px;
+  margin: 0;
   accent-color: var(--accent);
 }
 
@@ -66,19 +75,54 @@
   accent-color: var(--neutral-solid);
 }
 
-.choice span,
-.choice small {
-  display: block;
-}
-
 .choice strong {
+  flex: 1;
   font: 600 0.85rem/1.4 var(--font-sans);
 }
 
-.choice small {
-  margin-top: 3px;
+.details {
+  display: contents;
   color: var(--text-2);
-  font: 400 0.74rem/1.45 var(--font-sans);
+  font: 400 0.74rem/1.5 var(--font-sans);
+}
+
+.details summary {
+  display: inline-flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.details summary::-webkit-details-marker {
+  display: none;
+}
+
+.details summary::marker {
+  content: "";
+}
+
+.details summary::after {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentcolor;
+  border-bottom: 1.5px solid currentcolor;
+  content: "";
+  transform: rotate(45deg) translate(-1.8px, -1.8px);
+  transition: transform 160ms ease;
+}
+
+.details[open] summary::after {
+  transform: rotate(225deg) translate(-1.8px, -1.8px);
+}
+
+.details p {
+  grid-column: 1 / -1;
+  margin: 2px 0 0 28px;
 }
 
 .actions {

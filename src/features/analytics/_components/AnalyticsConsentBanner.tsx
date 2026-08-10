@@ -60,35 +60,41 @@ const AnalyticsConsentBanner = ({
         </p>
         <div className={styles.choices}>
           {gaEnabled ? (
-            <label className={styles.choice} data-cursor-target>
-              <input
-                type="checkbox"
-                checked={analytics}
-                onChange={(event) => setAnalytics(event.currentTarget.checked)}
-              />
-              <span>
+            <div className={styles.choice}>
+              <label className={styles.choiceLabel} data-cursor-target>
+                <input
+                  type="checkbox"
+                  checked={analytics}
+                  onChange={(event) => setAnalytics(event.currentTarget.checked)}
+                />
                 <strong>{dict.analyticsConsentAnalyticsLabel}</strong>
-                <small>{dict.analyticsConsentAnalyticsBody}</small>
-              </span>
-            </label>
+              </label>
+              <details className={styles.details}>
+                <summary aria-label={dict.analyticsConsentDetailsLabel} data-cursor-target />
+                <p>{dict.analyticsConsentAnalyticsBody}</p>
+              </details>
+            </div>
           ) : null}
           {monitoringEnabled ? (
-            <label className={styles.choice} data-cursor-target>
-              <input
-                type="checkbox"
-                checked={monitoring}
-                onChange={(event) => setMonitoring(event.currentTarget.checked)}
-              />
-              <span>
+            <div className={styles.choice}>
+              <label className={styles.choiceLabel} data-cursor-target>
+                <input
+                  type="checkbox"
+                  checked={monitoring}
+                  onChange={(event) => setMonitoring(event.currentTarget.checked)}
+                />
                 <strong>{dict.analyticsConsentMonitoringLabel}</strong>
-                <small>
+              </label>
+              <details className={styles.details}>
+                <summary aria-label={dict.analyticsConsentDetailsLabel} data-cursor-target />
+                <p>
                   {dict.analyticsConsentMonitoringBody.replace(
                     "{country}",
                     SENTRY_TRANSFER_COUNTRY[lang],
                   )}
-                </small>
-              </span>
-            </label>
+                </p>
+              </details>
+            </div>
           ) : null}
         </div>
       </div>

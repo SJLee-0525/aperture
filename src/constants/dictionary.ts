@@ -99,6 +99,7 @@ type UIDict = {
   analyticsConsentAnalyticsBody: string;
   analyticsConsentMonitoringLabel: string;
   analyticsConsentMonitoringBody: string;
+  analyticsConsentDetailsLabel: string;
   analyticsConsentSave: string;
   analyticsConsentDenyAll: string;
   mobileNavigationLabel: string;
@@ -262,6 +263,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     analyticsConsentMonitoringLabel: "오류 보고 및 화면 기록",
     analyticsConsentMonitoringBody:
       "오류가 발생하면 오류 정보와 전후 화면 기록이 HTTPS를 통해 {country}의 Sentry, Inc.로 전송되어 30일간 보관됩니다. 입력값과 챗봇 대화는 기록하지 않습니다.",
+    analyticsConsentDetailsLabel: "상세 설명",
     analyticsConsentSave: "선택 저장",
     analyticsConsentDenyAll: "모두 거부",
     mobileNavigationLabel: "모바일 내비게이션",
@@ -429,6 +431,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     analyticsConsentMonitoringLabel: "Error reporting and screen recording",
     analyticsConsentMonitoringBody:
       "When an error occurs, its details and a recording from around that time are sent over HTTPS to Sentry, Inc. in {country} and kept for 30 days. Inputs and chatbot conversations are not recorded.",
+    analyticsConsentDetailsLabel: "Details",
     analyticsConsentSave: "Save choices",
     analyticsConsentDenyAll: "Decline all",
     mobileNavigationLabel: "Mobile navigation",

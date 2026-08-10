@@ -38,6 +38,7 @@ vi.mock("@/features/lang/_hooks/use-lang", () => ({
       analyticsConsentAnalyticsBody: "GA 설명",
       analyticsConsentMonitoringLabel: "오류 보고 및 화면 기록",
       analyticsConsentMonitoringBody: "Sentry 설명",
+      analyticsConsentDetailsLabel: "상세 설명",
       analyticsConsentSave: "선택 저장",
       analyticsConsentDenyAll: "모두 거부",
       privacyNav: "개인정보 처리방침",
@@ -161,6 +162,20 @@ describe("AnalyticsConsentProvider", () => {
     expect(screen.queryByTestId("ga-state")).toBeNull();
   });
 
+  it("상세 설명은 접힌 상태로 시작하고 선택지별로 펼칠 수 있다", async () => {
+    render(
+      <AnalyticsConsentProvider gaEnabled monitoringEnabled>
+        <SettingsButton />
+      </AnalyticsConsentProvider>,
+    );
+
+    const details = await screen.findAllByLabelText("상세 설명");
+    expect(details).toHaveLength(2);
+    expect(screen.getByText("GA 설명").closest("details")?.hasAttribute("open")).toBe(false);
+    fireEvent.click(details[0]);
+    expect(screen.getByText("GA 설명").closest("details")?.hasAttribute("open")).toBe(true);
+  });
+
   it("허용을 철회하면 모니터링을 중지한다", async () => {
     window.localStorage.setItem(
       STORAGE_KEYS.CONSENT,
@@ -212,6 +227,7 @@ describe("AnalyticsConsentProvider", () => {
     );
 
     expect(await screen.findByLabelText("선택적 데이터 수집 설정")).toBeTruthy();
+    expect(screen.queryByRole("checkbox")).toBeNull();
     expect(screen.queryByTestId("ga-state")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "모두 거부" }));
     expect(screen.queryByLabelText("선택적 데이터 수집 설정")).toBeNull();
