@@ -33,10 +33,10 @@ type DevProject = {
   published: boolean;
 };
 
-/** 프로젝트 목록 Client Component에 전달하는 최소 카드 데이터. */
+/** 프로젝트 목록 Client Component에 전달하는 최소 카드 데이터. techTags 는 WebMCP 기술 필터용. */
 type DevProjectCardData = Pick<
   DevProject,
-  "id" | "title" | "category" | "year" | "summary" | "cover"
+  "id" | "title" | "category" | "year" | "summary" | "cover" | "techTags"
 >;
 
 /** 소개 인터뷰 Q&A (site/dev.interview) */

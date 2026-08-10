@@ -116,7 +116,12 @@ const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  // tools=(self) — WebMCP 도구 등록을 동일 출처로 한정한다(기본값 의존 대신 문서화된 거부).
+  // 교차 출처 iframe 이 <iframe allow="tools"> 로 위임받는 경로를 명시적으로 차단한다.
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), tools=(self)",
+  },
   // 브라우저 프리로드 목록(hstspreload.org) 등록은 하지 않는다 — `preload` 토큰이 없으면
   // 제출해도 거부된다. 등록은 서브도메인 전체를 HTTPS 전용으로 못 박고 해제에 수개월이 걸려,
   // 개인 사이트가 되돌리기 어려운 약속을 할 이유가 없다. 필요해지면 토큰 추가 + 직접 제출.

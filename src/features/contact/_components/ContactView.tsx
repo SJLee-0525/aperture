@@ -105,6 +105,22 @@ const TextareaResizeHandle = memo(
 );
 TextareaResizeHandle.displayName = "TextareaResizeHandle";
 
+/**
+ * WebMCP 에이전트 조작 표시 — 에이전트가 폼을 도구로 활성화하면 브라우저가 적용하는
+ * 비표준 의사클래스. CSS Modules 파이프라인(Turbopack)이 미지의 의사클래스에 경고를 내므로
+ * 런타임 <style> 주입으로 우회한다(plan 04 §7 대안). 미지원 브라우저는 셀렉터만 무시한다.
+ */
+const TOOL_ACTIVE_STYLE = `
+form[toolname]:tool-form-active {
+  outline: 1px dashed var(--accent);
+  outline-offset: 4px;
+}
+form[toolname] button[type="submit"]:tool-submit-active {
+  outline: 1px dashed var(--accent);
+  outline-offset: 2px;
+}
+`;
+
 const ContactForm = ({ to }: { to: string }) => {
   const { dict } = useLang();
   const { status, submit, resetStatus } = useContactForm(to);
@@ -122,7 +138,12 @@ const ContactForm = ({ to }: { to: string }) => {
       className={styles.form}
       onSubmit={submit}
       onInput={status === "idle" ? undefined : resetStatus}
+      // WebMCP 선언형 도구 — 에이전트는 입력 채우기까지만. toolautosubmit 은 붙이지 않는다
+      // (발송은 hCaptcha + 사람의 확인 필수 — use-contact-form 의 agentInvoked 분기가 차단).
+      toolname="prepare_contact_message"
+      tooldescription="Fill the contact form with a name, email, and message. The visitor must solve the captcha and press Send."
     >
+      <style dangerouslySetInnerHTML={{ __html: TOOL_ACTIVE_STYLE }} />
       {/*
         Web3Forms 허니팟 — 봇은 보이지 않는 필드까지 채우므로 값이 있으면 Web3Forms 가 조용히 버린다.
         access key 는 번들에 노출되는 공개 키라(설계상 정상) 엔드포인트로 직접 쏘는 스팸은

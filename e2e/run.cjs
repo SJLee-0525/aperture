@@ -18,6 +18,7 @@ const serverEnv = {
   NEXT_PUBLIC_USE_MOCK: "1",
   NEXT_PUBLIC_GA_ID: "G-E2ETEST",
   NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
+  NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
 };
 
 if (build) {
@@ -29,6 +30,7 @@ if (build) {
     NEXT_PUBLIC_USE_MOCK: "1",
     NEXT_PUBLIC_GA_ID: "G-E2ETEST",
     NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
+    NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
   };
   delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
   const buildResult = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {

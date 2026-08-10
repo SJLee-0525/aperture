@@ -9,6 +9,7 @@ import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
 import { MobileNavigationVisibility } from "@/features/site-header/_components/MobileNavigationVisibility";
 import { SectionAccent } from "@/features/site-header/_components/SectionAccent";
 import { SiteHeader } from "@/features/site-header/_components/SiteHeader";
+import { WebMcpTools } from "@/features/webmcp/_components/WebMcpTools";
 import { getSite } from "@/lib/content/site";
 
 import styles from "./layout.module.css";
@@ -48,6 +49,8 @@ const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
       />
       <MobileTabBar />
       <ChatLauncher />
+      {/* WebMCP 전역 도구 — 지원 브라우저에서만 dynamic 로드. 프로필 최소 투영만 전달. */}
+      <WebMcpTools profile={{ name: site.name, tagline: site.tagline, bio: site.bio }} />
     </AnalyticsConsentProvider>
   );
 };

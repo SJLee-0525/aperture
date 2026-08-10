@@ -15,6 +15,8 @@ describe("toDevProjectCard", () => {
       year: project.year,
       summary: project.summary,
       cover: project.cover,
+      // WebMCP list_projects 의 기술 필터용 — 평면 문자열 배열이라 직렬화 부담이 작다.
+      techTags: project.techTags,
     });
     expect(card).not.toHaveProperty("overview");
     expect(card).not.toHaveProperty("features");
