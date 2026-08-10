@@ -60,6 +60,7 @@ Next.js App Router 단일 앱이며 의존 방향은 `app → features → compo
 - `features`: 사용자 행동과 도메인 UI
 - `components`: props 기반 재사용 UI
 - `lib/content`: mock과 Firestore 콘텐츠 소스의 교체 지점
+- `lib/monitoring`: Sentry 오류 관측. 공개 브라우저에서는 오류 보고 동의 후 로드하고, 관리자에서는 UID 확인 후 시작한다. 서버·엣지는 최소 수집 설정으로 항상 실행한다(ADR-0004).
 - `mocks`: 결정적인 공개 데모 콘텐츠
 - `admin`: 인증된 CMS이며 공개 E2E에서 제외
 

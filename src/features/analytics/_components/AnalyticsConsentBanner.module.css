@@ -4,11 +4,10 @@
   bottom: calc(max(var(--s-6), env(safe-area-inset-bottom, 0px)) + 48px + var(--s-4));
   z-index: 70;
   display: flex;
-  align-items: stretch;
   flex-direction: column;
   gap: var(--s-0);
-  width: min(620px, calc(100vw - 32px));
   align-items: flex-end;
+  width: min(620px, calc(100vw - 32px));
   padding: 18px 16px 16px;
   border: 1px solid var(--line-strong);
   background: var(--bg);
@@ -34,15 +33,103 @@
 }
 
 .body a {
+  display: inline-block;
   color: var(--text);
   text-decoration: underline;
   text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.choices {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 10px 10px 10px 14px;
+  border: 1px solid var(--line);
+}
+
+.choiceLabel {
+  display: flex;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-3);
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.choiceLabel input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* 섹션 테마가 없는 랜딩에서는 Primary 버튼과 같은 무채색을 사용한다. */
+:global(html[data-section="home"]) .choice input {
+  accent-color: var(--neutral-solid);
+}
+
+.choice strong {
+  flex: 1;
+  font: 600 0.85rem/1.4 var(--font-sans);
+}
+
+.details {
+  display: contents;
+  color: var(--text-2);
+  font: 400 0.74rem/1.5 var(--font-sans);
+}
+
+.details summary {
+  display: inline-flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.details summary::-webkit-details-marker {
+  display: none;
+}
+
+.details summary::marker {
+  content: "";
+}
+
+.details summary::after {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentcolor;
+  border-bottom: 1.5px solid currentcolor;
+  content: "";
+  transform: rotate(45deg) translate(-1.8px, -1.8px);
+  transition: transform 160ms ease;
+}
+
+.details[open] summary::after {
+  transform: rotate(225deg) translate(-1.8px, -1.8px);
+}
+
+.details p {
+  grid-column: 1 / -1;
+  margin: 2px 0 0 28px;
 }
 
 .actions {
   display: flex;
   flex: 0 0 auto;
   gap: var(--s-2);
+  margin-top: var(--s-5);
 }
 
 .primary,
@@ -71,16 +158,13 @@
 
 .secondary:hover:not([data-cursor-snapped]) {
   border-color: var(--accent);
+  color: var(--accent);
 }
 
 .primary:hover:not([data-cursor-snapped]) {
   border-color: var(--consent-primary-hover);
   background: var(--consent-primary-hover);
   color: var(--consent-primary-fg);
-}
-
-.secondary:hover:not([data-cursor-snapped]) {
-  color: var(--accent);
 }
 
 /* 챗봇 런처와 동일하게 랜딩은 섹션 액센트 대신 테마 반전형 무채색을 사용한다. */

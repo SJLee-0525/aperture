@@ -3,6 +3,7 @@ import { PublicImageProtection } from "@/components/PublicImageProtection";
 import { AnalyticsConsentProvider } from "@/features/analytics/_components/AnalyticsConsentProvider";
 import { AnalyticsSettingsButton } from "@/features/analytics/_components/AnalyticsSettingsButton";
 import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
+import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
 import { ChatLauncher } from "@/features/chat/_components/ChatLauncher";
 import { SiteFooter } from "@/features/site-footer/_components/SiteFooter";
 import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
@@ -31,7 +32,8 @@ const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
     process.env.NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER === "1";
   return (
     <AnalyticsConsentProvider
-      analyticsEnabled={Boolean(GA_MEASUREMENT_ID)}
+      gaEnabled={Boolean(GA_MEASUREMENT_ID)}
+      monitoringEnabled={Boolean(SENTRY_DSN)}
       forceBanner={forceConsentBanner}
     >
       <PublicImageProtection />

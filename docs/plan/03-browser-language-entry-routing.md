@@ -842,7 +842,7 @@ Production에서 CDN cache status 헤더를 기록하고, 일반 요청과 강�
 - [x] 언어 쿠키의 목적·보유 기간·삭제 방법이 안내됐고 수동 선택 전에는 저장되지 않는다.
 - [x] 운영 GA4는 명시적 분석 동의 뒤에만 로드되고 거부·철회 시 비활성화된다.
 - [x] 전체 단위/E2E와 production build가 통과한다.
-- [ ] Preview와 Production에서 실제 응답 상태·Location·Cache-Control을 확인했다.
+- [x] Preview와 Production에서 실제 응답 상태·Location·Cache-Control을 확인했다.
 - [x] ADR-0002와 `CLAUDE.md`가 구현 정책에 맞게 갱신됐다.
 - [x] 롤백 절차가 실제 변경 파일 기준으로 검토됐다.
 

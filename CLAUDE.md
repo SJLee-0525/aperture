@@ -45,7 +45,8 @@
 | 애니메이션 | CSS + `motion`             | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
 
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
-> **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **결제 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
+> **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **카드 등록 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
+> 오류 모니터링은 카드 등록이 필요 없는 Sentry Developer 플랜을 사용한다. 쿼터를 초과하면 수집만 중단된다([ADR-0004](docs/adr/0004-consent-gated-error-monitoring.md)).
 
 ### 상단 네비게이션 규칙 (사용자 확정) ★
 
@@ -199,14 +200,19 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비교(Rules 하드코딩 UID와 동기화)
 # NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX      # (선택) GA4 측정 ID. 미설정 시 gtag 미삽입. 실값은 Vercel에만
+# NEXT_PUBLIC_SENTRY_DSN=             # (선택) Sentry DSN. DSN·지역 중 하나라도 비거나 불일치하면 비활성
+# NEXT_PUBLIC_SENTRY_DATA_REGION=US|DE # 필수 짝. 실제 Sentry 저장 지역과 일치하지 않으면 수집 금지
+# SENTRY_AUTH_TOKEN=                  # (빌드 전용 시크릿) 소스맵 업로드용. .env.sentry-build-plugin·Vercel에만 저장
 # NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER=0|1 # (개발 전용) 저장 상태와 무관하게 동의 배너 미리보기
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션에 '1' 금지
 ```
 
-> GA4는 Basic Consent 방식으로 명시적 허용 뒤에만 client chunk와 Google tag를 로드한다. 선택은
-> `ap-analytics-consent:v1` localStorage에 저장하며 Footer에서 철회·재허용할 수 있다. 언어 선택
-> 쿠키와 분석 동의를 결합하지 않는다. Privacy, Terms, Accessibility 원문은
-> `src/features/legal/_lib/legal-documents.tsx`에서 함께 관리한다.
+> GA4와 Sentry 브라우저 수집은 방문자가 각 항목을 허용한 뒤에만 해당 클라이언트 청크를 로드한다(세분화 동의 배너,
+> [ADR-0004](docs/adr/0004-consent-gated-error-monitoring.md)). 선택은 `ap-consent:v3` localStorage에
+> 저장하며 Footer에서 철회·재허용할 수 있다. Sentry 서버·엣지 수집은 동의 무관하되 dataCollection
+> 최소화·스크럽으로 헤더·본문·쿼리·방문자 식별자를 담지 않고, 브라우저 이벤트는 `/monitoring` 터널(동일 출처)로
+> 전송해 CSP를 넓히지 않는다. 언어 선택 쿠키와 동의를 결합하지 않는다. Privacy, Terms, Accessibility
+> 원문은 `src/features/legal/_lib/legal-documents.tsx`에서 함께 관리한다.
 
 > **콘텐츠 소스(개발 편의)**: getter는 **개발(`npm run dev`)에선 mock 우선**(음악·개발 미완성 중 UI 테스트),
 > **프로덕션 빌드는 실데이터**(배포 안전). `NEXT_PUBLIC_USE_MOCK` 로 강제 override(`0`=실데이터, `1`=mock). — `lib/content/content-source.ts`

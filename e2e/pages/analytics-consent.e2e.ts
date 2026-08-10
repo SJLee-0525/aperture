@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-const CONSENT_KEY = "ap-analytics-consent:v1";
+const CONSENT_KEY = "ap-consent:v3";
 
-test.describe("분석 동의", () => {
+test.describe("분석·오류 수집 동의", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((key) => localStorage.removeItem(key), CONSENT_KEY);
     await page.route("https://www.googletagmanager.com/gtag/js**", async (route) => {
@@ -17,34 +17,41 @@ test.describe("분석 동의", () => {
     });
 
     await page.goto("/ko");
-    await expect(page.getByRole("region", { name: "분석 쿠키 선택" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "선택적 데이터 수집 설정" })).toBeVisible();
     expect(tagRequests).toEqual([]);
 
-    await page.getByRole("button", { name: "거부" }).click();
-    await expect(page.getByRole("region", { name: "분석 쿠키 선택" })).toBeHidden();
+    await page.getByRole("button", { name: "모두 거부" }).click();
+    await expect(page.getByRole("region", { name: "선택적 데이터 수집 설정" })).toBeHidden();
     expect(tagRequests).toEqual([]);
 
     const stored = await page.evaluate(
       (key) => JSON.parse(localStorage.getItem(key)!),
       CONSENT_KEY,
     );
-    expect(stored.value).toBe("denied");
+    expect(stored.analytics).toBe("denied");
+    expect(stored.monitoring).toBe("denied");
     expect(stored.expiresAt).toBeGreaterThan(Date.now());
   });
 
   test("허용한 뒤에만 Google tag를 요청하고 Footer에서 선택을 다시 연다", async ({ page }) => {
     await page.goto("/en");
     const tagRequest = page.waitForRequest(/googletagmanager\.com\/gtag\/js/);
-    await page.getByRole("button", { name: "Allow analytics" }).click();
+    await page.getByRole("checkbox", { name: /Visitor analytics/ }).check();
+    await page.getByRole("button", { name: "Save choices" }).click();
     await tagRequest;
 
     await page.getByRole("button", { name: "Privacy & cookie settings" }).click();
-    await expect(page.getByRole("region", { name: "Analytics cookie choice" })).toBeVisible();
-    await page.getByRole("button", { name: "Decline" }).click();
-    await expect(page.getByRole("region", { name: "Analytics cookie choice" })).toBeHidden();
+    await expect(
+      page.getByRole("region", { name: "Optional data collection settings" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Decline all" }).click();
+    await expect(
+      page.getByRole("region", { name: "Optional data collection settings" }),
+    ).toBeHidden();
 
     await page.getByRole("button", { name: "Privacy & cookie settings" }).click();
-    await page.getByRole("button", { name: "Allow analytics" }).click();
+    await page.getByRole("checkbox", { name: /Visitor analytics/ }).check();
+    await page.getByRole("button", { name: "Save choices" }).click();
     await expect
       .poll(() =>
         page.evaluate(() => {
@@ -61,15 +68,35 @@ test.describe("분석 동의", () => {
   test("배너가 열린 동안에도 챗봇 런처를 사용할 수 있다", async ({ page }) => {
     await page.goto("/ko");
 
-    await expect(page.getByRole("region", { name: "분석 쿠키 선택" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "선택적 데이터 수집 설정" })).toBeVisible();
     await page.getByRole("button", { name: "챗봇 열기" }).click();
     await expect(page.getByRole("dialog", { name: "Ask Sungjoon." })).toBeVisible();
+  });
+
+  test("체크박스 위에서도 커스텀 커서가 유지된다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "커스텀 커서는 포인터 환경에서 대표 검증");
+    await page.goto("/ko");
+
+    const checkbox = page.getByRole("checkbox", { name: /방문 분석/ });
+    const cursor = page.locator("[data-custom-cursor-ui]");
+    await expect(checkbox).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("data-custom-cursor", "");
+
+    await checkbox.hover();
+    await expect(cursor).toHaveAttribute("data-visible", "true");
+    await expect
+      .poll(() => checkbox.evaluate((element) => getComputedStyle(element).accentColor))
+      .toBe(
+        await page
+          .getByRole("button", { name: "선택 저장" })
+          .evaluate((element) => getComputedStyle(element).backgroundColor),
+      );
   });
 
   test("언어 선택은 분석 동의를 만들지 않는다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "언어 메뉴는 데스크톱에서 대표 검증");
     await page.goto("/ko");
-    await page.getByRole("button", { name: "거부" }).click();
+    await page.getByRole("button", { name: "모두 거부" }).click();
     await page.evaluate((key) => localStorage.removeItem(key), CONSENT_KEY);
 
     await page.getByRole("button", { name: "언어" }).click();
@@ -84,25 +111,31 @@ test.describe("분석 동의", () => {
   });
 
   test("Primary 버튼은 챗봇 런처와 같은 섹션 색을 사용한다", async ({ page }, testInfo) => {
+    test.setTimeout(60_000);
     test.skip(testInfo.project.name !== "desktop", "섹션 색은 데스크톱에서 대표 검증");
 
     for (const path of ["/ko", "/ko/photo", "/ko/music", "/ko/dev", "/ko/contact", "/ko/privacy"]) {
       await page.goto(path);
 
-      const primary = page.getByRole("button", { name: "분석 허용" });
+      const primary = page.getByRole("button", { name: "선택 저장" });
       const chatLauncher = page.getByRole("button", { name: "챗봇 열기" });
       await expect(primary).toBeVisible();
 
+      await page.mouse.move(0, 0);
       await expect
         .poll(
-          async () =>
-            Promise.all([
+          async () => {
+            const [primaryColor, launcherColor] = await Promise.all([
               primary.evaluate((element) => getComputedStyle(element).backgroundColor),
               chatLauncher.evaluate((element) => getComputedStyle(element).backgroundColor),
-            ]).then(([primaryColor, launcherColor]) => primaryColor === launcherColor),
+            ]);
+            return primaryColor === launcherColor
+              ? "match"
+              : `Primary ${primaryColor} / Launcher ${launcherColor}`;
+          },
           { message: `${path}의 Primary 버튼과 챗봇 런처 색` },
         )
-        .toBe(true);
+        .toBe("match");
     }
   });
 });

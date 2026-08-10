@@ -42,7 +42,7 @@ Firestore projection은 네트워크 응답 크기를 줄이지만 문서 읽기
 
 ### 3. 즉시 반영과 낮은 재조회 비용
 
-검증된 Server Action은 콘텐츠 태그에 `updateTag`ub97c 사용한다. 이로써 무효화 후 첫 요청이 이전 결과를 받는 stale-while-revalidate 구간 없이 새 Firestore 결과를 기다린다. 쿼리당 재조회는 한 번이며 이후 공유 캐시를 재사용하므로 `revalidateTag(..., "max")`와 비교해 Firestore 읽기 수가 의미 있게 늘지 않는다.
+검증된 Server Action은 콘텐츠 태그에 `updateTag`를 사용한다. 이로써 무효화 후 첫 요청이 이전 결과를 받는 stale-while-revalidate 구간 없이 새 Firestore 결과를 기다린다. 쿼리당 재조회는 한 번이며 이후 공유 캐시를 재사용하므로 `revalidateTag(..., "max")`와 비교해 Firestore 읽기 수가 의미 있게 늘지 않는다.
 
 챗봇 프로필 스냅샷은 즉시 표시보다 중복 재생성 억제가 중요하므로 기존 `revalidateTag(..., "max")`를 유지한다.
 
@@ -64,7 +64,7 @@ Firestore projection은 네트워크 응답 크기를 줄이지만 문서 읽기
 
 - Firestore REST 조회에 예상한 `revalidate`와 태그가 전달되는지 Vitest로 검증
 - 관리자 인증 실패 시 어떤 태그도 무효화하지 않는지 검증
-- 중복 태그가 한 번만 `updateTag`ub85c 전달되는지 검증
+- 중복 태그가 한 번만 `updateTag`에 전달되는지 검증
 - TypeScript, ESLint, 전체 Vitest, mock 콘텐츠 프로덕션 빌드 통과
 
 ## 운영 확인

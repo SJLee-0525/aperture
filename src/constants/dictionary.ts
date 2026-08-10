@@ -95,8 +95,13 @@ type UIDict = {
   analyticsConsentLabel: string;
   analyticsConsentTitle: string;
   analyticsConsentBody: string;
-  analyticsConsentAllow: string;
-  analyticsConsentDeny: string;
+  analyticsConsentAnalyticsLabel: string;
+  analyticsConsentAnalyticsBody: string;
+  analyticsConsentMonitoringLabel: string;
+  analyticsConsentMonitoringBody: string;
+  analyticsConsentDetailsLabel: string;
+  analyticsConsentSave: string;
+  analyticsConsentDenyAll: string;
   mobileNavigationLabel: string;
   sectionsLabel: string;
   searchPlaceholder: string;
@@ -248,12 +253,19 @@ const DICTIONARY: Record<Lang, UIDict> = {
     termsNav: "사이트 이용 및 콘텐츠",
     accessibilityNav: "접근성",
     cookieSettingsLabel: "개인정보 및 쿠키 설정",
-    analyticsConsentLabel: "분석 쿠키 선택",
-    analyticsConsentTitle: "방문 분석을 허용하시겠어요?",
+    analyticsConsentLabel: "선택적 데이터 수집 설정",
+    analyticsConsentTitle: "선택적 데이터 수집 설정",
     analyticsConsentBody:
-      "허용하면 Google Analytics로 사이트 이용 통계를 수집해 포트폴리오를 개선합니다. 거부해도 모든 기능을 이용할 수 있습니다.",
-    analyticsConsentAllow: "분석 허용",
-    analyticsConsentDeny: "거부",
+      "아래 항목은 서로 독립적으로 선택할 수 있습니다. 모두 거부해도 사이트의 모든 기능을 이용할 수 있습니다.",
+    analyticsConsentAnalyticsLabel: "방문 분석",
+    analyticsConsentAnalyticsBody:
+      "페이지를 방문하면 방문 페이지와 일반 기기 정보가 HTTPS를 통해 미국의 Google LLC로 전송됩니다. 이용 통계에 사용하며, 이벤트 데이터는 14개월 보관됩니다.",
+    analyticsConsentMonitoringLabel: "오류 보고 및 화면 기록",
+    analyticsConsentMonitoringBody:
+      "오류가 발생하면 오류 정보와 전후 화면 기록이 HTTPS를 통해 {country}의 Sentry, Inc.로 전송되어 30일간 보관됩니다. 입력값과 챗봇 대화는 기록하지 않습니다.",
+    analyticsConsentDetailsLabel: "상세 설명",
+    analyticsConsentSave: "선택 저장",
+    analyticsConsentDenyAll: "모두 거부",
     mobileNavigationLabel: "모바일 내비게이션",
     sectionsLabel: "섹션",
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
@@ -409,12 +421,19 @@ const DICTIONARY: Record<Lang, UIDict> = {
     termsNav: "Site use & content",
     accessibilityNav: "Accessibility",
     cookieSettingsLabel: "Privacy & cookie settings",
-    analyticsConsentLabel: "Analytics cookie choice",
-    analyticsConsentTitle: "Allow visitor analytics?",
+    analyticsConsentLabel: "Optional data collection settings",
+    analyticsConsentTitle: "Optional data collection settings",
     analyticsConsentBody:
-      "If you allow it, Google Analytics collects site usage statistics to help improve this portfolio. You can use every feature if you decline.",
-    analyticsConsentAllow: "Allow analytics",
-    analyticsConsentDeny: "Decline",
+      "Choose each item independently. You can use every site feature if you decline both.",
+    analyticsConsentAnalyticsLabel: "Visitor analytics",
+    analyticsConsentAnalyticsBody:
+      "When you visit a page, its address and general device information are sent over HTTPS to Google LLC in the United States. Event data is used for analytics and kept for 14 months.",
+    analyticsConsentMonitoringLabel: "Error reporting and screen recording",
+    analyticsConsentMonitoringBody:
+      "When an error occurs, its details and a recording from around that time are sent over HTTPS to Sentry, Inc. in {country} and kept for 30 days. Inputs and chatbot conversations are not recorded.",
+    analyticsConsentDetailsLabel: "Details",
+    analyticsConsentSave: "Save choices",
+    analyticsConsentDenyAll: "Decline all",
     mobileNavigationLabel: "Mobile navigation",
     sectionsLabel: "Sections",
     searchPlaceholder: "Search · tag / gear / place",

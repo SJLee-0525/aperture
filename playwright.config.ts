@@ -26,8 +26,12 @@ export default defineConfig({
           origin: baseURL,
           localStorage: [
             {
-              name: "ap-analytics-consent:v1",
-              value: JSON.stringify({ value: "denied", expiresAt: Date.now() + 86_400_000 }),
+              name: "ap-consent:v3",
+              value: JSON.stringify({
+                analytics: "denied",
+                monitoring: "denied",
+                expiresAt: Date.now() + 86_400_000,
+              }),
             },
           ],
         },
