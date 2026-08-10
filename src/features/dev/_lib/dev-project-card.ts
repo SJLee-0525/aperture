@@ -13,6 +13,7 @@ const toDevProjectCard = (project: DevProject): DevProjectCardData => ({
   year: project.year,
   summary: project.summary,
   cover: project.cover,
+  techTags: project.techTags,
 });
 
 const toDevProjectCards = (projects: DevProject[]): DevProjectCardData[] =>

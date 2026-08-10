@@ -3,6 +3,7 @@
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useMusicAwardTools } from "@/features/music/_hooks/use-music-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { MusicAward, MusicConfig } from "@/types/music";
@@ -23,6 +24,8 @@ type Props = { config: MusicConfig; awards: MusicAward[] };
 const MusicCareerView = ({ config, awards }: Props) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("award", awards);
+  // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  useMusicAwardTools(awards);
 
   const toRows = (entries: TimelineEntry[]) =>
     entries.map((entry) => ({ period: entry.period, text: pickText(entry.title, lang) }));

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Modal } from "@/components/Modal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useMusicWorkTools } from "@/features/music/_hooks/use-music-tools";
 
 import { useQueryModal } from "@/hooks/use-query-modal";
 
@@ -34,6 +35,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("work", works);
+  // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  useMusicWorkTools(works);
 
   return (
     <main className={styles.main}>

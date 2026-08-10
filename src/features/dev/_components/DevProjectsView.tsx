@@ -1,6 +1,7 @@
 "use client";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useDevTools } from "@/features/dev/_hooks/use-dev-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import type { DevProjectCardData } from "@/types/dev";
 
@@ -18,6 +19,8 @@ import styles from "./DevProjectsView.module.css";
 const DevProjectsView = ({ projects }: { projects: DevProjectCardData[] }) => {
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("project", projects);
+  // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  useDevTools(projects, select);
 
   return (
     <main className={styles.main}>
