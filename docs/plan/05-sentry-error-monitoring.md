@@ -2,7 +2,8 @@
 
 > 코드 구현과 로컬 검증은 완료됐다. 남은 작업은 배포 환경 확인, Sentry 대시보드 설정,
 > Discord 알림 구성과 운영 데이터에 근거한 노이즈 정리다. 개인정보 처리 원칙은
-> [ADR-0004](../adr/0004-consent-gated-error-monitoring.md)를 따른다.
+> [ADR-0004](../adr/0004-consent-gated-error-monitoring.md)를 따른다. 배포 검증 중 이벤트나
+> 알림이 보이지 않을 때는 [Sentry 오류 수집과 Discord 알림](../troubleshooting/sentry-error-alerts.md)을 본다.
 
 ## 현재 런타임 계약
 
@@ -76,17 +77,18 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] 모든 런타임에 `app_runtime=browser|node|edge` 태그 추가 (`runtime`은 Sentry 예약 태그)
 - [x] 서버와 Edge에 `area=server|proxy` 태그 추가
 - [x] 브라우저의 기존 `area=public|admin` 태그 유지
-- [ ] Event Highlights에 `environment`, `release`, `app_runtime`, `area`, `transaction` 등록
+- [x] Event Highlights에 `environment`, `release`, `app_runtime`, `area`, `transaction` 등록
 - [x] URL 전체, 사용자 입력, 오류 메시지처럼 값 종류가 계속 늘어나는 데이터는 태그로 넣지 않기
 
 ### P1. Discord 알림
 
-- [ ] Sentry의 공식 Discord Integration 설치
-- [ ] Discord에 `#aperture-errors` 채널 생성 및 연결
-- [ ] 알림 카드 표시 태그를 `environment,release,app_runtime,area,transaction`으로 설정
+- [x] Sentry의 공식 Discord Integration 설치
+- [x] Discord에 `#aperture-errors` 채널 생성 및 연결
+- [x] 알림 카드 표시 태그를 `environment,release,app_runtime,area,transaction`으로 설정
 - [ ] Production의 새 서버·Edge·관리자 이슈를 즉시 알림
 - [ ] Production에서 해결 후 다시 발생한 Regressed 이슈를 즉시 알림
-- [ ] 공개 브라우저 오류는 새 이슈 또는 짧은 시간 내 반복 증가 시에만 알림
+- [x] 공개 브라우저 오류는 새 이슈 또는 짧은 시간 내 반복 증가 시에만 알림
+- [x] Preview에서 공개 브라우저 이슈의 Resolve → Regressed 전환과 Discord 알림 확인
 - [ ] Spike Protection 발생 알림도 같은 채널에 연결
 - [ ] 테스트 오류로 Discord 카드의 제목, 태그, 릴리즈와 원본 스택 링크 확인
 

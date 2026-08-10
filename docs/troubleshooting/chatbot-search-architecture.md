@@ -2,7 +2,7 @@
 
 > 상태: 구현 완료, 운영 설정 및 평가 진행 중  
 > 범위: 포트폴리오 챗봇, RAG 임베딩, `/search` 통합검색  
-> 관련 결정: [ADR-0001: Vercel Route Handler 기반 Portfolio RAG](./adr/0001-serverless-rag.md)
+> 관련 결정: [ADR-0001: Vercel Route Handler 기반 Portfolio RAG](../adr/0001-serverless-rag.md)
 
 ## 1. 목적
 
