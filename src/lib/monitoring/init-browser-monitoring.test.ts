@@ -11,7 +11,7 @@ const sentry = vi.hoisted(() => {
     init: vi.fn(),
     replay,
     replayIntegration: vi.fn(() => ({ name: "Replay" })),
-    setTag: vi.fn(),
+    setTags: vi.fn(),
   };
 });
 
@@ -45,7 +45,7 @@ describe("browser monitoring lifecycle", () => {
     expect(sentry.replay.stop.mock.invocationCallOrder[0]).toBeLessThan(
       sentry.close.mock.invocationCallOrder[0],
     );
-    expect(sentry.setTag).toHaveBeenCalledWith("area", "admin");
+    expect(sentry.setTags).toHaveBeenCalledWith({ app_runtime: "browser", area: "admin" });
   });
 
   it("생략 시 수집 허용으로 돌아가는 모든 dataCollection 항목을 잠근다", async () => {
@@ -68,6 +68,6 @@ describe("browser monitoring lifecycle", () => {
         },
       }),
     );
-    expect(sentry.setTag).toHaveBeenCalledWith("area", "public");
+    expect(sentry.setTags).toHaveBeenCalledWith({ app_runtime: "browser", area: "public" });
   });
 });

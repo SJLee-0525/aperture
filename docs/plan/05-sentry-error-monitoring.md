@@ -69,21 +69,21 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] Sentry Developer 플랜의 이벤트 보유기간이 30일인지 확인
 - [x] Sentry 프로젝트의 Spike Protection 활성화
 - [x] 서버 측 Data Scrubbing 활성화 후 인증·쿠키·본문 규칙 확인
-- [ ] Production 배포에서 개인정보 처리방침의 이전 국가와 실제 DSN 지역 비교
+- [x] Production 배포에서 개인정보 처리방침의 이전 국가와 실제 DSN 지역 비교
 
 ### P1. 이벤트 분류 태그
 
-- [ ] 모든 런타임에 `runtime=browser|node|edge` 태그 추가
-- [ ] 서버와 Edge에 `area=server|proxy` 태그 추가
-- [ ] 브라우저의 기존 `area=public|admin` 태그 유지
-- [ ] Event Highlights에 `environment`, `release`, `runtime`, `area`, `transaction` 등록
-- [ ] URL 전체, 사용자 입력, 오류 메시지처럼 값 종류가 계속 늘어나는 데이터는 태그로 넣지 않기
+- [x] 모든 런타임에 `app_runtime=browser|node|edge` 태그 추가 (`runtime`은 Sentry 예약 태그)
+- [x] 서버와 Edge에 `area=server|proxy` 태그 추가
+- [x] 브라우저의 기존 `area=public|admin` 태그 유지
+- [ ] Event Highlights에 `environment`, `release`, `app_runtime`, `area`, `transaction` 등록
+- [x] URL 전체, 사용자 입력, 오류 메시지처럼 값 종류가 계속 늘어나는 데이터는 태그로 넣지 않기
 
 ### P1. Discord 알림
 
 - [ ] Sentry의 공식 Discord Integration 설치
 - [ ] Discord에 `#aperture-errors` 채널 생성 및 연결
-- [ ] 알림 카드 표시 태그를 `environment,release,runtime,area,transaction`으로 설정
+- [ ] 알림 카드 표시 태그를 `environment,release,app_runtime,area,transaction`으로 설정
 - [ ] Production의 새 서버·Edge·관리자 이슈를 즉시 알림
 - [ ] Production에서 해결 후 다시 발생한 Regressed 이슈를 즉시 알림
 - [ ] 공개 브라우저 오류는 새 이슈 또는 짧은 시간 내 반복 증가 시에만 알림

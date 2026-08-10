@@ -82,7 +82,8 @@ const initBrowserMonitoring = async (mode: BrowserMonitoringMode): Promise<void>
     beforeBreadcrumb: scrubBreadcrumb,
   });
 
-  Sentry.setTag("area", mode);
+  // Sentry 예약 태그 `runtime`과 충돌하지 않는 앱 분류 키를 서버 이벤트와 공유한다.
+  Sentry.setTags({ app_runtime: "browser", area: mode });
 
   setLoadedSentry(Sentry);
 };

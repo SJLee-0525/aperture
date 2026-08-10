@@ -31,3 +31,6 @@ Sentry.init({
   // Firebase ID token(Authorization)·민감 쿼리(q·token·code)를 전송 직전에 한 번 더 제거.
   beforeSend: scrubEvent,
 });
+
+// Sentry 예약 태그 `runtime`(예: "node v24")과 충돌하지 않는 앱 분류 키를 사용한다.
+Sentry.setTags({ app_runtime: "node", area: "server" });

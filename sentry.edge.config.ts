@@ -29,3 +29,6 @@ Sentry.init({
   // 언어 쿠키 등 요청 부속 정보가 이벤트에 실리지 않도록 전송 직전에 한 번 더 제거.
   beforeSend: scrubEvent,
 });
+
+// 이 저장소의 Edge 오류는 proxy 표면에서만 발생한다.
+Sentry.setTags({ app_runtime: "edge", area: "proxy" });
