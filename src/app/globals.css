@@ -223,8 +223,6 @@ body {
 
   /* iframe: 교차 출처 문서 안은 부모 CSS가 닿지 않는다 — 경계에서부터 기본 커서로 넘긴다.
      (cursor-target.ts 의 NATIVE_CONTROL_SELECTOR 와 같은 목록을 유지할 것) */
-  html[data-custom-cursor] input[type="checkbox"],
-  html[data-custom-cursor] input[type="radio"],
   html[data-custom-cursor] select,
   html[data-custom-cursor] iframe {
     cursor: auto !important;

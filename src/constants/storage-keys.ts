@@ -2,12 +2,16 @@
 const STORAGE_KEYS = {
   THEME: "ap-theme:v1",
   LANG: "ap-lang:v1",
-  ANALYTICS_CONSENT: "ap-analytics-consent:v1",
+  // v3: GA와 Sentry를 각각 선택할 수 있는 세분화 동의(ADR-0004).
+  CONSENT: "ap-consent:v3",
 } as const;
 
 const LEGACY_STORAGE_KEYS = {
   THEME: "ap-theme",
   LANG: "ap-lang",
+  // 수집 주체가 늘어난 동의는 승계하지 않는다 — 발견 즉시 삭제하고 배너를 다시 띄운다.
+  ANALYTICS_CONSENT: "ap-analytics-consent:v1",
+  COMBINED_CONSENT: "ap-consent:v2",
 } as const;
 
 export { LEGACY_STORAGE_KEYS, STORAGE_KEYS };

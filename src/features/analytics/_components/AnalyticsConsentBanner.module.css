@@ -4,11 +4,10 @@
   bottom: calc(max(var(--s-6), env(safe-area-inset-bottom, 0px)) + 48px + var(--s-4));
   z-index: 70;
   display: flex;
-  align-items: stretch;
   flex-direction: column;
   gap: var(--s-0);
-  width: min(620px, calc(100vw - 32px));
   align-items: flex-end;
+  width: min(620px, calc(100vw - 32px));
   padding: 18px 16px 16px;
   border: 1px solid var(--line-strong);
   background: var(--bg);
@@ -39,10 +38,54 @@
   text-underline-offset: 3px;
 }
 
+.choices {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-3);
+  align-items: start;
+  padding: 10px 14.5px 10px 10px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.choice input {
+  width: 16px;
+  height: 16px;
+  margin: 4.5px 0 0 4.5px;
+  accent-color: var(--accent);
+}
+
+/* 섹션 테마가 없는 랜딩에서는 Primary 버튼과 같은 무채색을 사용한다. */
+:global(html[data-section="home"]) .choice input {
+  accent-color: var(--neutral-solid);
+}
+
+.choice span,
+.choice small {
+  display: block;
+}
+
+.choice strong {
+  font: 600 0.85rem/1.4 var(--font-sans);
+}
+
+.choice small {
+  margin-top: 3px;
+  color: var(--text-2);
+  font: 400 0.74rem/1.45 var(--font-sans);
+}
+
 .actions {
   display: flex;
   flex: 0 0 auto;
   gap: var(--s-2);
+  margin-top: var(--s-5);
 }
 
 .primary,
@@ -71,16 +114,13 @@
 
 .secondary:hover:not([data-cursor-snapped]) {
   border-color: var(--accent);
+  color: var(--accent);
 }
 
 .primary:hover:not([data-cursor-snapped]) {
   border-color: var(--consent-primary-hover);
   background: var(--consent-primary-hover);
   color: var(--consent-primary-fg);
-}
-
-.secondary:hover:not([data-cursor-snapped]) {
-  color: var(--accent);
 }
 
 /* 챗봇 런처와 동일하게 랜딩은 섹션 액센트 대신 테마 반전형 무채색을 사용한다. */

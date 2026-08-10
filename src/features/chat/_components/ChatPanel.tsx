@@ -135,6 +135,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
         aria-hidden="true"
         onClick={onClose}
       />
+      {/* data-chat-panel: Sentry Replay 차단 셀렉터 — 방문자가 입력한 질문이 재생본에 남지 않게 한다(ADR-0004). */}
       <section
         ref={panelRef}
         className={styles.panel}
@@ -142,6 +143,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
+        data-chat-panel
       >
         <div className={styles.header}>
           <div className={styles.identity}>

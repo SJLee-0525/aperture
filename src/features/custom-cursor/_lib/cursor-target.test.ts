@@ -31,11 +31,17 @@ describe("resolveCursorTarget", () => {
     expect(resolveCursorTarget(track)).toMatchObject({ kind: "scrollbar", element: track });
   });
 
-  it("native checkbox에서는 custom cursor를 숨길 수 있도록 분류한다", () => {
+  it("checkbox는 label 전체를 custom cursor target으로 사용한다", () => {
+    const label = document.createElement("label");
+    label.dataset.cursorTarget = "";
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
+    label.append(checkbox);
 
-    expect(resolveCursorTarget(checkbox).kind).toBe("native");
+    expect(resolveCursorTarget(checkbox)).toMatchObject({
+      kind: "interactive",
+      snapTarget: label,
+    });
   });
 
   it("iframe도 native로 분류해 기본 커서에 넘긴다", () => {

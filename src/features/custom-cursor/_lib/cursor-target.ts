@@ -11,6 +11,7 @@ const TEXT_SELECTOR = [
   '[contenteditable="true"]',
 ].join(", ");
 const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
+const CHOICE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"]';
 const PASSIVE_CURSOR_SELECTOR = "[data-cursor-passive]";
 const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
 /**
@@ -19,7 +20,7 @@ const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
  * pointermove 도 경계를 넘지 못한다. 넘기지 않으면 커스텀 커서가 iframe 경계에 굳은 채
  * 안에서는 기본 화살표가 따로 움직여 커서가 둘로 보인다. (hCaptcha·YouTube 임베드 공통)
  */
-const NATIVE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"], select, iframe';
+const NATIVE_CONTROL_SELECTOR = "select, iframe";
 
 type CursorTargetKind =
   "interactive" | "native" | "passive" | "range" | "scrollbar" | "text" | "none";
@@ -48,6 +49,12 @@ const resolveCursorTarget = (eventTarget: EventTarget | null): CursorTarget => {
 
   const range = element.closest(RANGE_CONTROL_SELECTOR);
   if (range) return { element: range, kind: "range", snapTarget: null };
+
+  const choice = element.closest<HTMLElement>(CHOICE_CONTROL_SELECTOR);
+  if (choice) {
+    const choiceTarget = choice.closest<HTMLElement>("label") ?? choice;
+    return { element: choiceTarget, kind: "interactive", snapTarget: choiceTarget };
+  }
 
   const passive = element.closest(PASSIVE_CURSOR_SELECTOR);
   if (passive) return { element: passive, kind: "passive", snapTarget: null };

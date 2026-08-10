@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { captureExceptionIfLoaded } from "@/instrumentation-client";
 
 import styles from "./status.module.css";
 
@@ -16,7 +17,8 @@ type Props = {
 /**
  * 라우트 에러 바운더리 — 렌더 중 오류를 잡는다(루트 레이아웃은 유지).
  * 루트 레이아웃 하위(LangProvider 안)라 useLang으로 ko/en 대응. editorial 톤은 status.module.css 공유.
- * 외부 로깅 없음(서버리스·$0) — 콘솔에만 기록.
+ * 바운더리가 오류를 삼키면 전역 핸들러가 못 보므로 여기서 직접 전송한다 —
+ * 단, 동의 뒤 로드된 SDK가 있을 때만이고 미로드 시 콘솔 기록만 남는다(ADR-0004).
  *
  * @param {Props} props 오류 정보와 재시도 동작.
  * @param {Error & { digest?: string }} props.error 렌더링 중 포착한 오류.
@@ -28,6 +30,7 @@ export default function Error({ error, reset }: Props) {
 
   useEffect(() => {
     console.error(error);
+    captureExceptionIfLoaded(error);
   }, [error]);
 
   return (
