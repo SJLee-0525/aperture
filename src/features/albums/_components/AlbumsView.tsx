@@ -6,6 +6,7 @@ import { AlbumCard } from "@/components/AlbumCard";
 import { albumRoute } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import type { AlbumCard as AlbumCardData } from "@/features/albums/_lib/album-cards";
+import { useAlbumTools } from "@/features/albums/_hooks/use-album-tools";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 
@@ -32,6 +33,8 @@ type Props = {
  */
 const AlbumsView = ({ albums }: Props) => {
   const { dict, lang } = useLang();
+  // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  useAlbumTools(albums);
 
   if (albums.length === 0) {
     return (

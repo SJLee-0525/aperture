@@ -13,6 +13,7 @@ import {
   OnDemandPhotoModal,
   preloadPhotoModal,
 } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+import { useGalleryTools } from "@/features/gallery/_hooks/use-gallery-tools";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 
@@ -36,9 +37,11 @@ const GalleryContent = memo(function GalleryContent({
   const { dict, lang } = useLang();
   const [square, setSquare] = useState(false);
   const filter = usePhotoFilter(photos, initialQuery);
+  const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
+  // WebMCP 도구는 필터 setter 곁에서 등록 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  useGalleryTools(photos, tags, filter, cameras);
   // 필터된 목록을 화면엔 점진 렌더(무한스크롤) — 필터/검색이 바뀌면 자동으로 처음부터.
   const { visible: windowed, hasMore, attachSentinel } = useInfiniteScroll(filter.visible);
-  const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
 
   return (
     <main className={styles.main}>
