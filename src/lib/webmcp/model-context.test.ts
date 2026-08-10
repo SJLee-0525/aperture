@@ -23,6 +23,7 @@ const installModelContext = () => {
 
 const uninstallModelContext = () => {
   delete (document as Document & { modelContext?: unknown }).modelContext;
+  delete (navigator as Navigator & { modelContext?: unknown }).modelContext;
 };
 
 describe("model-context 어댑터", () => {
@@ -36,6 +37,27 @@ describe("model-context 어댑터", () => {
     expect(isWebMcpSupported()).toBe(false);
     const registered = registerWebMcpTool(DEFINITION, () => "ok", new AbortController().signal);
     expect(registered).toBe(false);
+  });
+
+  it("Chrome 149 의 구 진입점(navigator.modelContext)도 지원한다", () => {
+    const registerTool = vi.fn();
+    (navigator as Navigator & { modelContext?: unknown }).modelContext = { registerTool };
+
+    expect(isWebMcpSupported()).toBe(true);
+    expect(registerWebMcpTool(DEFINITION, () => "ok", new AbortController().signal)).toBe(true);
+    expect(registerTool).toHaveBeenCalledTimes(1);
+  });
+
+  it("document 진입점이 있으면 구 진입점보다 우선한다", () => {
+    const documentRegister = installModelContext();
+    const navigatorRegister = vi.fn();
+    (navigator as Navigator & { modelContext?: unknown }).modelContext = {
+      registerTool: navigatorRegister,
+    };
+
+    registerWebMcpTool(DEFINITION, () => "ok", new AbortController().signal);
+    expect(documentRegister).toHaveBeenCalledTimes(1);
+    expect(navigatorRegister).not.toHaveBeenCalled();
   });
 
   it("스펙 형태(정의 + execute + signal)로 등록을 전달한다", () => {
