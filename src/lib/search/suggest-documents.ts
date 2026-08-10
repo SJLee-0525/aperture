@@ -1,7 +1,7 @@
 import { pickText } from "@/lib/i18n/pick-text";
 import type { TitleSegment } from "@/lib/search/highlight-title";
 import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
-import { createDocumentScorer } from "@/lib/search/score-documents";
+import { rankDocuments } from "@/lib/search/rank-documents";
 import { tokensFor } from "@/lib/text/korean-tokenize";
 import type { Lang } from "@/types/lang";
 import type { SearchDocument, SearchSection } from "@/types/search";
@@ -35,21 +35,15 @@ const suggestDocuments = (
   if (!trimmed) return [];
   const queryTokens = tokensFor(trimmed);
   const highlightTokens = highlightTokensFor(trimmed, queryTokens);
-  const scoreDocument = createDocumentScorer(trimmed, queryTokens);
 
-  const scored: Array<{ score: number; document: SearchDocument }> = [];
-  for (const document of documents) {
-    const score = scoreDocument(document.index);
-    if (score > 0) scored.push({ score, document });
-  }
-  scored.sort((a, b) => b.score - a.score);
-
-  return scored.slice(0, SUGGESTION_LIMIT).map(({ document }) => ({
-    key: document.key,
-    section: document.section,
-    titleSegments: splitTitleByMatches(pickText(document.title, lang), highlightTokens),
-    href: document.href,
-  }));
+  return rankDocuments(documents, trimmed, queryTokens)
+    .slice(0, SUGGESTION_LIMIT)
+    .map((document) => ({
+      key: document.key,
+      section: document.section,
+      titleSegments: splitTitleByMatches(pickText(document.title, lang), highlightTokens),
+      href: document.href,
+    }));
 };
 
 export { SUGGESTION_LIMIT, suggestDocuments };

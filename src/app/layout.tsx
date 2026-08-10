@@ -7,6 +7,7 @@ import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { MotionProvider } from "@/features/motion/_components/MotionProvider";
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/seo/site-meta";
+import { WEBMCP_ORIGIN_TRIAL_TOKEN } from "@/lib/webmcp/origin-trial-token";
 import { SITE_URL } from "@/lib/seo/site-url";
 
 import "./globals.css";
@@ -103,6 +104,11 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* WebMCP 오리진 트라이얼 — 토큰은 첫 파싱 시점에 있어야 하므로 metadata API 대신
+            head 직접 삽입(metadata.other 는 name= meta 만 만들어 http-equiv 에 부적합). */}
+        {WEBMCP_ORIGIN_TRIAL_TOKEN ? (
+          <meta httpEquiv="origin-trial" content={WEBMCP_ORIGIN_TRIAL_TOKEN} />
+        ) : null}
       </head>
       <body>
         <LangProvider>

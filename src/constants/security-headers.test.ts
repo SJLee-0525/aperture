@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildContentSecurityPolicy } from "@/constants/security-headers";
+import { buildContentSecurityPolicy, SECURITY_HEADERS } from "@/constants/security-headers";
 
 const directive = (policy: string, name: string) =>
   policy
@@ -68,5 +68,15 @@ describe("Content-Security-Policy", () => {
 
     expect(directive(policy, "script-src")).toContain("'unsafe-inline'");
     expect(directive(policy, "script-src-attr")).toBe("'none'");
+  });
+});
+
+describe("Permissions-Policy", () => {
+  it("WebMCP 도구 등록을 동일 출처로 한정한다", () => {
+    // 빠지면 브라우저 기본값에 의존하게 되고, 교차 출처 iframe 위임 차단이 문서화되지 않는다.
+    const permissionsPolicy = SECURITY_HEADERS.find(
+      (header) => header.key === "Permissions-Policy",
+    );
+    expect(permissionsPolicy?.value).toContain("tools=(self)");
   });
 });
