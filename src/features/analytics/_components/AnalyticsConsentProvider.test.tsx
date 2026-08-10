@@ -162,7 +162,7 @@ describe("AnalyticsConsentProvider", () => {
     expect(screen.queryByTestId("ga-state")).toBeNull();
   });
 
-  it("상세 설명은 접힌 상태로 시작하고 선택지별로 펼칠 수 있다", async () => {
+  it("상세 설명은 선택값을 바꾸지 않고 각 항목에서 독립적으로 펼칠 수 있다", async () => {
     render(
       <AnalyticsConsentProvider gaEnabled monitoringEnabled>
         <SettingsButton />
@@ -170,10 +170,20 @@ describe("AnalyticsConsentProvider", () => {
     );
 
     const details = await screen.findAllByLabelText("상세 설명");
+    const checkboxes = screen.getAllByRole("checkbox");
     expect(details).toHaveLength(2);
     expect(screen.getByText("GA 설명").closest("details")?.hasAttribute("open")).toBe(false);
+    expect(screen.getByText("Sentry 설명").closest("details")?.hasAttribute("open")).toBe(false);
+
     fireEvent.click(details[0]);
     expect(screen.getByText("GA 설명").closest("details")?.hasAttribute("open")).toBe(true);
+    expect(screen.getByText("Sentry 설명").closest("details")?.hasAttribute("open")).toBe(false);
+    expect(checkboxes.every((checkbox) => !(checkbox as HTMLInputElement).checked)).toBe(true);
+
+    fireEvent.click(details[1]);
+    expect(screen.getByText("GA 설명").closest("details")?.hasAttribute("open")).toBe(true);
+    expect(screen.getByText("Sentry 설명").closest("details")?.hasAttribute("open")).toBe(true);
+    expect(checkboxes.every((checkbox) => !(checkbox as HTMLInputElement).checked)).toBe(true);
   });
 
   it("허용을 철회하면 모니터링을 중지한다", async () => {
