@@ -129,7 +129,7 @@ describe("useGalleryTools", () => {
     const result = await execute({ camera: "sony" });
 
     expect(filter.setTag).toHaveBeenCalledTimes(1);
-    expect(result).toContain("1 photo match");
+    expect(result).toContain("1 photo matches");
     expect(result).toContain("야경 (p3)");
     // 누적된 필터를 응답이 밝혀야 에이전트가 0건의 원인을 짚을 수 있다.
     expect(result).toContain("Filters applied (tag=Street, camera=Sony A7 IV)");
@@ -143,8 +143,8 @@ describe("useGalleryTools", () => {
     const result = await execute({ camera: "sony" });
 
     expect(result).toBe(
-      "No photos match. Active filters: tag=Landscape, camera=Sony A7 IV. " +
-        "Pass 'all' to clear a tag or camera filter.",
+      "No photos match. Active filters: tag=Landscape, camera=Sony A7 IV." +
+        " To widen it, pass tag: 'all' or camera: 'all'.",
     );
   });
 
@@ -194,6 +194,54 @@ describe("useGalleryTools", () => {
     expect(filter.setTag).not.toHaveBeenCalled();
     expect(filter.setCamera).not.toHaveBeenCalled();
     expect(filter.setFocal).not.toHaveBeenCalled();
+  });
+
+  it("0건이어도 무인자 호출은 어휘를 돌려준다", async () => {
+    renderTools();
+    const execute = executeOf("filter_photos");
+
+    // 어휘가 가장 필요한 순간이 0건일 때다. 0건 분기가 이 응답을 가로채면 안 된다.
+    await execute({ tag: "landscape", camera: "sony" });
+    const result = await execute({});
+
+    expect(result).toContain("No photos match");
+    expect(result).toContain("Available tags: Street, Landscape.");
+    expect(result).toContain("Available cameras: Fujifilm X100V, Sony A7 IV.");
+  });
+
+  it("검색어만 걸렸을 때 문장이 뒤엉키지 않는다", async () => {
+    window.history.replaceState(null, "", "/ko/photo?q=zzz");
+    renderTools();
+
+    // q 는 결과 계산에 들어가므로 상태 표시에서 빠지면 "none" 이라는 오답이 된다.
+    // 검색어는 이 도구가 못 푸니 "pass" 명령과 한 문장에 섞이면 안 된다.
+    const result = await executeOf("filter_photos")({});
+    expect(result).toContain(
+      'No photos match. Active filters: search="zzz". ' +
+        'The search box controls "zzz" and this tool cannot clear it.',
+    );
+    expect(result).not.toContain("pass the search box");
+  });
+
+  it("풀 수 있는 축과 검색어를 각각의 문장으로 알린다", async () => {
+    window.history.replaceState(null, "", "/ko/photo?q=zzz");
+    const filter = renderTools();
+    filter.tag = "landscape";
+
+    const result = await executeOf("filter_photos")({ tag: "landscape" });
+    expect(result).toBe(
+      'No photos match. Active filters: search="zzz", tag=Landscape.' +
+        " To widen it, pass tag: 'all'." +
+        ' The search box controls "zzz" and this tool cannot clear it.',
+    );
+  });
+
+  it("0건이면 축마다 푸는 방법을 알린다", async () => {
+    renderTools();
+    const execute = executeOf("filter_photos");
+
+    const result = await execute({ tag: "landscape", focalMin: 200, focalMax: 300 });
+    expect(result).toContain("To widen it, pass tag: 'all' or focalMin: 16, focalMax: 300.");
   });
 
   it("get_photo_details 는 photoId 를 생략하면 현재 열린 사진을 설명한다", async () => {
