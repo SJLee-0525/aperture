@@ -15,6 +15,7 @@ import {
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { resolveTargetId } from "@/lib/webmcp/current-target";
 import { clampToolText } from "@/lib/webmcp/tool-output";
 
 import type { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
@@ -31,6 +32,7 @@ const FILTER_TOOL: WebMcpToolDefinition = {
   name: "filter_photos",
   description:
     "Filter the photo grid on this page by tag, camera, or focal length range (mm). " +
+    "Call with no arguments to see the available tags and cameras before filtering. " +
     "Pass 'all' to clear the tag or camera filter. Updates the visible grid and " +
     "returns how many photos match.",
   inputSchema: objectSchema({
@@ -46,10 +48,11 @@ const DETAILS_TOOL: WebMcpToolDefinition = {
   name: "get_photo_details",
   description:
     "Get details of one photo (title, place, camera, lens, exposure) without opening it. " +
+    "Omit photoId to describe the photo currently open in the detail modal. " +
     "Use open_photo instead when the visitor should see the photo.",
-  inputSchema: objectSchema({ photoId: idProperty("Photo id from filter_photos results.") }, [
-    "photoId",
-  ]),
+  inputSchema: objectSchema({
+    photoId: idProperty("Photo id from filter_photos results. Omit for the photo already open."),
+  }),
   annotations: { readOnlyHint: true, untrustedContentHint: false },
 };
 
@@ -205,6 +208,17 @@ const useGalleryTools = (
     // 화면과 같은 순수 함수로 즉시 재계산 — 상태 반영을 기다리지 않는다.
     const query = new URLSearchParams(window.location.search).get("q") ?? "";
     const visible = filterPhotos(photos, { tag, query, camera, focalMin, focalMax });
+
+    // 인자가 하나도 없으면 "무엇으로 거를 수 있는지"를 알려준다 — 어휘를 모르면
+    // 에이전트는 틀린 값으로 한 번 실패해야만 목록을 알게 된다(W5 평가).
+    if (!tagProvided && !cameraProvided && !focalProvided) {
+      return [
+        `${visible.length} photos currently shown. No filter changed.`,
+        `Available tags: ${tags.map((entry) => entry.en).join(", ")}.`,
+        `Available cameras: ${cameras.join(", ")}.`,
+      ].join("\n");
+    }
+
     if (visible.length === 0) return "Filters applied. No photos match.";
 
     const preview = visible
@@ -217,7 +231,9 @@ const useGalleryTools = (
   });
 
   useModelContextTool(DETAILS_TOOL, (args) => {
-    const photo = photos.find((entry) => entry.id === args.photoId);
+    const targetId = resolveTargetId(args.photoId, "photo");
+    if (!targetId) return "No photo is open. Pass photoId, or open a photo first.";
+    const photo = photos.find((entry) => entry.id === targetId);
     if (!photo) return "No photo matches that id.";
     const line = [
       pickText(photo.title, lang),

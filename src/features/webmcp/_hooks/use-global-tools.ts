@@ -57,8 +57,8 @@ const SEARCH_TOOL: WebMcpToolDefinition = {
 const PROFILE_TOOL: WebMcpToolDefinition = {
   name: "get_profile",
   description:
-    "Get a short profile of Sungjoon Lee (photographer, pianist, frontend developer) " +
-    "and the entry path of each portfolio section.",
+    "Get a short profile of Sungjoon Lee (photographer, pianist, frontend developer), " +
+    "the entry path of each portfolio section, and the contact page path.",
   inputSchema: objectSchema({
     section: enumProperty("Focus on one section, or use 'all' for the full profile.", [
       "photo",
@@ -107,9 +107,12 @@ const useGlobalTools = (profile: WebMcpProfile): void => {
     const sectionLines = (section ? [section] : (Object.keys(SECTION_ROUTES) as SearchSection[]))
       .map((key) => `${key}: ${localizePath(lang, SECTION_ROUTES[key])}`)
       .join("\n");
+    // 연락 경로는 섹션 필터와 무관하게 항상 붙인다 — 다른 페이지에서 "연락하고 싶어" 라고 하면
+    // 에이전트가 /contact 로 가는 길을 어디서도 알 수 없었다(W5 평가).
     return clampToolText(
       `${pickText(profile.name, lang)} — ${pickText(profile.tagline, lang)}\n` +
-        `${pickText(profile.bio, lang)}\n${sectionLines}`,
+        `${pickText(profile.bio, lang)}\n${sectionLines}\n` +
+        `contact: ${localizePath(lang, ROUTES.CONTACT)}`,
     );
   });
 };
