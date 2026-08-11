@@ -136,9 +136,16 @@ const useMusicAwardTools = (awards: MusicAward[]): void => {
     return formatToolItems(
       awards,
       args.limit,
+      // 장소가 빈 수상이 있어 " · · " 로 벌어지지 않게 빈 조각을 걸러 붙인다.
       (award) =>
-        `${award.year} · ${pickText(award.name, lang)} · ${award.place} · ` +
-        localizePath(lang, `${ROUTES.MUSIC_CAREER}?award=${award.id}`),
+        [
+          String(award.year),
+          pickText(award.name, lang),
+          award.place,
+          localizePath(lang, `${ROUTES.MUSIC_CAREER}?award=${award.id}`),
+        ]
+          .filter(Boolean)
+          .join(" · "),
     );
   });
 };

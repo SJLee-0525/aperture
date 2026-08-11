@@ -96,7 +96,9 @@ const createSearchDocuments = ({
       key: `award-${award.id}`,
       section: "music" as const,
       title: award.name,
-      index: searchIndexFor(award.name, [], [award.place]),
+      // 설명까지 색인한다 — 이름이 한글뿐이면 "award" 같은 영어 질의가 닿지 못한다.
+      // 개발 프로젝트는 achievements 가 색인돼 한·영 모두 걸리는데 수상만 비대칭이었다.
+      index: searchIndexFor(award.name, [award.description], [award.place]),
       meta: { ko: String(award.year), en: String(award.year) },
       href: `${ROUTES.MUSIC_CAREER}?award=${award.id}`,
     })),

@@ -147,6 +147,13 @@ describe("useMusicAwardTools", () => {
     expect(result).toBe("2022 · 국제 콩쿠르 1위 · Geneva, CH · /ko/music/career?award=aw1");
   });
 
+  it("장소가 빈 수상도 구분자가 겹치지 않는다", async () => {
+    renderHook(() => useMusicAwardTools([{ ...AWARDS[0]!, place: "" }]));
+
+    const result = await executeOf("list_music_awards")({});
+    expect(result).toBe("2022 · 국제 콩쿠르 1위 · /ko/music/career?award=aw1");
+  });
+
   it("빈 목록에 안내 문장을 반환한다", async () => {
     renderHook(() => useMusicAwardTools([]));
     await expect(Promise.resolve(executeOf("list_music_awards")({}))).resolves.toBe(
