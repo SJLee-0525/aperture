@@ -30,6 +30,7 @@ const projectOf = (
   title: string,
   year: string,
   techTags: string[],
+  achievements: string[] = [],
 ): DevProjectCardData => ({
   id,
   title: { ko: title, en: title },
@@ -38,10 +39,11 @@ const projectOf = (
   summary: { ko: `${title} 요약`, en: `${title} summary` },
   cover: null,
   techTags,
+  achievements: achievements.map((text) => ({ ko: text, en: text })),
 });
 
 const PROJECTS: DevProjectCardData[] = [
-  projectOf("recipedia", "Recipedia", "2024", ["React.js", "TypeScript"]),
+  projectOf("recipedia", "Recipedia", "2024", ["React.js", "TypeScript"], ["우수상(2위) 수상"]),
   projectOf("myhero", "MyHero", "2023", ["Vue", "Pinia"]),
   projectOf("mailat", "MailAt", "2024", ["React.js", "Next.js"]),
 ];
@@ -115,6 +117,14 @@ describe("useDevTools", () => {
     await expect(Promise.resolve(executeOf("get_project")({ projectId: "nope" }))).resolves.toBe(
       "No project matches that id.",
     );
+  });
+
+  it("get_project 는 성과·수상을 함께 답한다", async () => {
+    renderHook(() => useDevTools(PROJECTS, vi.fn()));
+
+    // 성과가 빠지면 "무슨 상 받았어" 류 질의에 답할 출처가 없다.
+    const result = await executeOf("get_project")({ projectId: "recipedia" });
+    expect(result).toContain("- 우수상(2위) 수상");
   });
 
   it("open_project 는 뷰의 select 를 호출한다 — 화면 클릭과 같은 경로", async () => {

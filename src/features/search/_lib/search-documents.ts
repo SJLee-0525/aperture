@@ -113,7 +113,12 @@ const createSearchDocuments = ({
       key: `proj-${project.id}`,
       section: "dev" as const,
       title: project.title,
-      index: searchIndexFor(project.title, [project.category, project.summary], project.techTags),
+      // achievements(성과·수상)까지 색인한다: 빠뜨리면 "수상" 같은 질의가 프로젝트에 닿지 못한다.
+      index: searchIndexFor(
+        project.title,
+        [project.category, project.summary, ...project.achievements],
+        project.techTags,
+      ),
       meta: project.category,
       imageUrl: imageThumbnailUrl(project.cover),
       href: `${ROUTES.DEV_PROJECTS}?project=${project.id}`,
