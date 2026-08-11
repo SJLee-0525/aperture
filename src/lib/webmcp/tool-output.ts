@@ -68,6 +68,18 @@ const formatToolItems = <T>(items: T[], rawLimit: unknown, toLine: (item: T) => 
   formatToolList(items.slice(0, clampLimit(rawLimit)).map(toLine), items.length);
 
 /**
+ * 개수와 단위를 함께 적는다 — 도구 출력 문구가 에이전트 답변에 그대로 실려 나가므로
+ * "1 photos" 같은 문장이 방문자에게 보인다.
+ *
+ * @param {number} count
+ * @param {string} singular 단수형 단위. 복수형은 기본 s 를 붙인다.
+ * @param {string} [plural] 불규칙 복수형이 필요할 때만.
+ * @returns {string}
+ */
+const countLabel = (count: number, singular: string, plural = `${singular}s`): string =>
+  `${count} ${count === 1 ? singular : plural}`;
+
+/**
  * 단일 텍스트 출력의 예산 절단 — 넘치면 말줄임 문자로 끝을 표시한다.
  *
  * @param {string} text
@@ -79,6 +91,7 @@ const clampToolText = (text: string): string =>
 export {
   clampLimit,
   clampToolText,
+  countLabel,
   formatToolItems,
   formatToolList,
   DEFAULT_LIST_LIMIT,

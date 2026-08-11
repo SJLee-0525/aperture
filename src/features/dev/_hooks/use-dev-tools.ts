@@ -36,7 +36,8 @@ const LIST_TOOL: WebMcpToolDefinition = {
 const GET_TOOL: WebMcpToolDefinition = {
   name: "get_project",
   description:
-    "Get one project's summary and tech stack without opening it. " +
+    "Get one project's summary, achievements (awards, metrics) and tech stack " +
+    "without opening it. " +
     "Omit projectId to describe the project currently open in the detail modal. " +
     "Use open_project instead when the visitor should see the full detail.",
   inputSchema: objectSchema({
@@ -124,6 +125,8 @@ const useDevTools = (projects: DevProjectCardData[], select: (id: string | null)
       [
         `${pickText(project.title, lang)} (${project.year}) · ${pickText(project.category, lang)}`,
         pickText(project.summary, lang),
+        // 성과·수상은 "무슨 상 받았어" 류 질의의 유일한 출처다 — 빠지면 답할 길이 없다.
+        ...project.achievements.map((item) => `- ${pickText(item, lang)}`),
         `Tech: ${project.techTags.join(", ")}`,
         localizePath(lang, devProjectRoute(project.id)),
       ].join("\n"),

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   clampLimit,
   clampToolText,
+  countLabel,
   formatToolItems,
   formatToolList,
   DEFAULT_LIST_LIMIT,
@@ -29,6 +30,19 @@ describe("clampLimit", () => {
     expect(clampLimit(3.9)).toBe(3);
     expect(clampLimit(20)).toBe(20);
     expect(clampLimit(999)).toBe(20);
+  });
+});
+
+describe("countLabel", () => {
+  it("단수에는 단수형을 쓴다 — 도구 문구가 답변에 그대로 실린다", () => {
+    expect(countLabel(1, "photo")).toBe("1 photo");
+    expect(countLabel(0, "photo")).toBe("0 photos");
+    expect(countLabel(9, "photo")).toBe("9 photos");
+  });
+
+  it("불규칙 복수형을 받을 수 있다", () => {
+    expect(countLabel(1, "entry", "entries")).toBe("1 entry");
+    expect(countLabel(3, "entry", "entries")).toBe("3 entries");
   });
 });
 

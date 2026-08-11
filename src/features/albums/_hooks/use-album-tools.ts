@@ -6,7 +6,7 @@ import { useModelContextTool } from "@/hooks/use-model-context-tool";
 import { limitProperty, objectSchema } from "@/lib/webmcp/tool-schemas";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
-import { formatToolItems } from "@/lib/webmcp/tool-output";
+import { countLabel, formatToolItems } from "@/lib/webmcp/tool-output";
 
 import type { AlbumCard } from "@/features/albums/_lib/album-cards";
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
@@ -34,7 +34,7 @@ const useAlbumTools = (albums: AlbumCard[]): void => {
       [
         pickText(album.title, lang),
         pickText(album.subtitle, lang),
-        `${album.count} photos`,
+        countLabel(album.count, "photo"),
         localizePath(lang, albumRoute(album.id)),
       ]
         .filter(Boolean)

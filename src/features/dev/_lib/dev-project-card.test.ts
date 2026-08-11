@@ -17,6 +17,8 @@ describe("toDevProjectCard", () => {
       cover: project.cover,
       // WebMCP list_projects 의 기술 필터용 — 평면 문자열 배열이라 직렬화 부담이 작다.
       techTags: project.techTags,
+      // "수상 경력" 질의에 답하려면 성과가 카드에 있어야 한다 — 상세 원문은 여전히 제외.
+      achievements: project.achievements,
     });
     expect(card).not.toHaveProperty("overview");
     expect(card).not.toHaveProperty("features");
