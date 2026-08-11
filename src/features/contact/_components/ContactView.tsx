@@ -121,6 +121,9 @@ form[toolname] button[type="submit"]:tool-submit-active {
 }
 `;
 
+/** 렌더마다 __html 객체를 새로 만들지 않도록 엘리먼트째 끌어올린다. */
+const ToolActiveStyle = <style dangerouslySetInnerHTML={{ __html: TOOL_ACTIVE_STYLE }} />;
+
 const ContactForm = ({ to }: { to: string }) => {
   const { dict } = useLang();
   const { status, submit, resetStatus } = useContactForm(to);
@@ -143,7 +146,7 @@ const ContactForm = ({ to }: { to: string }) => {
       toolname="prepare_contact_message"
       tooldescription="Fill the contact form with a name, email, and message. The visitor must solve the captcha and press Send."
     >
-      <style dangerouslySetInnerHTML={{ __html: TOOL_ACTIVE_STYLE }} />
+      {ToolActiveStyle}
       {/*
         Web3Forms 허니팟 — 봇은 보이지 않는 필드까지 채우므로 값이 있으면 Web3Forms 가 조용히 버린다.
         access key 는 번들에 노출되는 공개 키라(설계상 정상) 엔드포인트로 직접 쏘는 스팸은
