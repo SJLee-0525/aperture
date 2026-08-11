@@ -44,11 +44,21 @@ describe("useMapTools", () => {
     vi.clearAllMocks();
   });
 
-  it("촬영 위치를 좌표·지도 딥링크와 함께 직렬화한다", async () => {
-    renderHook(() => useMapTools([locationOf("p1", "Seoul")]));
+  it("같은 장소를 묶어 촬영이 많은 순으로 돌려준다", async () => {
+    renderHook(() =>
+      useMapTools([
+        locationOf("p1", "Seoul"),
+        locationOf("p2", "Busan"),
+        locationOf("p3", "Busan"),
+      ]),
+    );
 
     const result = await lastExecute()({});
-    expect(result).toBe("Seoul (37.5, 127) · /en/photo/map?photo=p1");
+    // 사진마다 한 줄씩 나열하면 같은 장소가 반복돼 "어디서 많이 찍었나" 에 답할 수 없다.
+    expect(result).toBe(
+      "Busan — 2 photos (37.5, 127) · /en/photo/map?photo=p2\n" +
+        "Seoul — 1 photos (37.5, 127) · /en/photo/map?photo=p1",
+    );
   });
 
   it("빈 목록에 안내 문장을 반환한다", async () => {
