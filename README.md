@@ -20,7 +20,7 @@
 - 연주, 음악 경력, 수상 및 영상 아카이브
 - 기술 스택, 개발 프로젝트와 경력 소개
 - 공개 콘텐츠를 관리하는 개인용 Firebase CMS
-- 일반 검색과 포트폴리오 문맥을 사용하는 RAG 챗봇
+- 일반 검색, 현재 화면 문맥과 포트폴리오 RAG를 연결한 챗봇
 - 외부 브라우저 에이전트용 WebMCP 도구 13종과 선언형 연락 폼
 - 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
 - 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
@@ -48,7 +48,7 @@
 - 한국어와 영어 콘텐츠를 같은 데이터 구조에서 관리합니다.
 - 공개 페이지는 [`src/lib/content`](./src/lib/content)의 getter만 사용하므로 mock과 Firestore를 교체할 수 있습니다.
 - 공개 데이터는 Firestore REST로 읽고, 관리자 기능은 Firebase SDK로 인증·저장합니다.
-- 일반 검색은 브라우저에서 동작하며, RAG 챗봇만 임베딩과 외부 AI 제공자를 사용합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
+- 일반 검색은 브라우저에서 동작합니다. 챗봇은 열린 사진·연주·수상·프로젝트를 공개 ID로 직접 조회하고, 범위가 넓은 질문에는 RAG 검색을 더합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
 - 내장 챗봇은 WebMCP를 사용하지 않습니다. WebMCP는 방문자가 데려온 외부 브라우저 에이전트가 공개 콘텐츠를 조회하고 현재 화면을 조작할 때만 사용합니다.
 - 의존 방향을 `app → features → components`로 제한해 라우팅, 사용자 행동, 공용 UI의 역할을 나눴습니다.
 
@@ -59,7 +59,8 @@
 - Next.js 16, React 19, TypeScript
 - Firebase Authentication, Firestore, Storage
 - MapLibre GL
-- OpenAI 또는 Gemini 기반 채팅과 임베딩 검색
+- OpenAI 또는 Gemini 기반 채팅
+- OpenAI 임베딩을 사용하는 포트폴리오 RAG 검색
 - Vitest, Playwright, Storybook, Lighthouse CI
 
 ## 프로젝트 구조
@@ -180,11 +181,13 @@ test/                               # Firebase Security Rules 테스트
 
 <a href="./public/readme/chatbot-rag.md">
   <picture>
-    <img src="./public/readme/chatbot-flowchart.webp" alt="챗봇 RAG 콘텐츠 동기화와 질문 처리 흐름도" width="720">
+    <img src="./public/readme/chatbot-flowchart.webp" alt="화면 문맥과 RAG를 포함한 챗봇 처리 흐름도" width="720">
   </picture>
 </a>
 
-RAG는 코사인 유사도와 키워드 점수를 함께 사용합니다. Firestore 벡터는 서버에서 int8 스냅샷으로 압축해 캐시하며, 콘텐츠가 바뀌면 해당 원본의 청크만 다시 생성합니다. 모델이 반환한 링크와 사진·연주·프로젝트 ID는 공개 데이터와 대조한 뒤 UI에 전달합니다.
+챗봇은 질문을 보낸 순간 열려 있던 사진·연주·수상·프로젝트를 공개 ID로 직접 조회합니다. 사용자 메시지에는 함께 보낸 항목과 당시 URL을 기록해 원래 화면으로 돌아갈 수 있습니다. 더 넓은 포트폴리오 문맥이 필요하면 코사인 유사도와 키워드 점수를 결합한 RAG 검색으로 관련 청크를 찾습니다.
+
+Firestore 벡터는 서버에서 int8 스냅샷으로 압축해 캐시하며, 콘텐츠가 바뀌면 해당 원본의 청크만 다시 생성합니다. 모델이 반환한 링크, 사진 필터, 참조 ID와 연락 초안은 서버 검증을 통과한 것만 UI에 전달합니다. 구조화 응답이 일부만 복구되면 본문만 사용합니다.
 
 일반 `/search`는 이 흐름을 사용하지 않습니다. 공개 콘텐츠를 브라우저에서 바로 검색하므로 임베딩이나 채팅 모델 호출 비용이 들지 않습니다. 자세한 동작은 [챗봇과 RAG](./public/readme/chatbot-rag.md)에 정리했습니다.
 
@@ -209,6 +212,8 @@ npm run lint            # ESLint
 npm run check           # Next.js 타입 생성 및 TypeScript 검사
 npm test                # Vitest 단위 테스트
 npm run test:e2e        # Playwright E2E 테스트
+npm run test:chat-eval  # mock 챗봇 응답·RAG·참조 평가
+npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
 npm run storybook       # 컴포넌트 Storybook
 ```
@@ -221,12 +226,12 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 
 ## 관련 문서
 
-| 문서                                                 | 내용                                 |
-| ---------------------------------------------------- | ------------------------------------ |
-| [프로젝트 아키텍처](./public/readme/architecture.md) | 공개 사이트, CMS와 데이터 계층       |
-| [챗봇과 RAG](./public/readme/chatbot-rag.md)         | 검색, 임베딩, 폴백과 응답 검증       |
-| [디자인과 구현](./public/readme/design.md)           | 디자인 방향, 반응형 구조와 제작 과정 |
-| [테스트 전략](./public/readme/testing.md)            | 정적 분석·단위·E2E·시각 회귀 테스트  |
+| 문서                                                 | 내용                                  |
+| ---------------------------------------------------- | ------------------------------------- |
+| [프로젝트 아키텍처](./public/readme/architecture.md) | 공개 사이트, CMS와 데이터 계층        |
+| [챗봇과 RAG](./public/readme/chatbot-rag.md)         | 화면 문맥, RAG 검색, 폴백과 응답 검증 |
+| [디자인과 구현](./public/readme/design.md)           | 디자인 방향, 반응형 구조와 제작 과정  |
+| [테스트 전략](./public/readme/testing.md)            | 정적 분석·단위·E2E·시각 회귀 테스트   |
 
 구현 결정과 운영 절차는 아래 문서에서 이어서 볼 수 있습니다.
 
