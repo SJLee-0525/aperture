@@ -132,9 +132,13 @@ describe("useGlobalTools", () => {
     expect(full).toContain("photo: /ko/photo");
     expect(full).toContain("music: /ko/music");
     expect(full).toContain("dev: /ko/dev/projects");
+    // 다른 페이지에서 "연락하고 싶어" 라고 해도 경로를 알 수 있어야 한다.
+    expect(full).toContain("contact: /ko/contact");
 
     const scoped = await executeOf("get_profile")({ section: "music" });
     expect(scoped).toContain("music: /ko/music");
     expect(scoped).not.toContain("photo: /ko/photo");
+    // 연락 경로는 섹션 필터와 무관하게 항상 붙는다.
+    expect(scoped).toContain("contact: /ko/contact");
   });
 });

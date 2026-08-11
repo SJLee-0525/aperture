@@ -1,6 +1,6 @@
 # WebMCP 에이전트 도구 구현 계획
 
-> 상태: **W1~W4 구현 완료 / W5 수동 평가 대기** (2026-08-10)
+> 상태: **W1~W5 완료 / 운영 중** (2026-08-11 W5 평가 반영)
 > 결정 근거: [ADR-0003](../adr/0003-webmcp-agent-tools.md)
 > 관련 결정: [ADR-0002 경로 기반 i18n](../adr/0002-path-based-i18n.md), [03-browser-language-entry-routing](03-browser-language-entry-routing.md)
 > 목적: 방문자가 데려온 브라우저 에이전트가 공개 포트폴리오를 DOM 추론이 아니라 도구 호출로 탐색하게 한다.
@@ -67,15 +67,15 @@ src/features/music/_hooks/use-music-tools.ts       # /music · /music/career
 | `search_portfolio`     | 전역            | true         | `query`, `section?`, `limit?`               | 상위 N건 제목·섹션·경로      |
 | `get_profile`          | 전역            | true         | `section?` (photo/music/dev/all)            | 소개 요약 + 대표 경로        |
 | `filter_photos`        | `/photo`        | false        | `tag?`, `camera?`, `focalMin?`, `focalMax?` | 적용 결과 건수 + 상위 항목   |
-| `get_photo_details`    | `/photo`        | true         | `photoId`                                   | 제목·장소·촬영일·EXIF 요약   |
+| `get_photo_details`    | `/photo`        | true         | `photoId?`(생략=열린 사진)                  | 제목·장소·촬영일·EXIF 요약   |
 | `open_photo`           | `/photo`        | false        | `photoId`                                   | 연 사진 제목 (모달 열림)     |
 | `list_albums`          | `/photo/albums` | true         | `limit?`                                    | 앨범 제목·부제·경로          |
 | `list_photo_locations` | `/photo/map`    | true         | `limit?`                                    | 장소명·좌표                  |
 | `list_projects`        | `/dev/projects` | true         | `tech?`, `year?`, `limit?`                  | 제목·요약·경로               |
-| `get_project`          | `/dev/projects` | true         | `projectId`                                 | 개요·담당·스택·링크 요약     |
+| `get_project`          | `/dev/projects` | true         | `projectId?`(생략=열린 항목)                | 개요·담당·스택·링크 요약     |
 | `open_project`         | `/dev/projects` | false        | `projectId`                                 | 연 프로젝트 제목 (모달 열림) |
 | `list_music_works`     | `/music`        | true         | `category?`, `limit?`                       | 제목·부제·공연일·경로        |
-| `get_music_work`       | `/music`        | true         | `workId`                                    | 프로그램·장소·예매 링크      |
+| `get_music_work`       | `/music`        | true         | `workId?`(생략=열린 항목)                   | 프로그램·장소·예매 링크      |
 | `list_music_awards`    | `/music/career` | true         | `limit?`                                    | 연도·수상명                  |
 
 전체는 13개지만 한 페이지에서 동시에 보이는 도구는 전역 2개와 페이지 스코프 1~3개를 합쳐
@@ -182,6 +182,23 @@ NEXT_PUBLIC_WEBMCP_ORIGIN_TRIAL_TOKEN=
 | "이 사진 어디서 찍었어?"        | `get_photo_details` (`open_photo` 아님)          |
 | "연락하고 싶어"                 | 연락 폼 prefill, 제출은 사람                     |
 
+### W5 수동 평가 결과 (2026-08-11)
+
+Model Context Tool Inspector 로 위 시나리오 5종을 프로덕션에서 실행했다. 로직 결함은 1건이고,
+나머지 3건은 모두 **도구가 답은 하되 무엇을 물을 수 있는지·지금 화면이 어떤 상태인지 알려주지
+않는** 같은 종류의 문제였다. 이것이 이번 평가의 핵심 소득이다.
+
+| 시나리오              | 관찰                                                                                   | 조치                                                                               |
+| --------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| React 프로젝트        | `tech:"React"` 실패 → 에러의 태그 목록 보고 `"React.js"` 로 자가 복구                  | 스키마 예시를 실데이터(`React.js`)로 교체 + `.js` 접미사 정규화                    |
+| 필름 카메라 사진      | 어떤 카메라가 있는지 몰라 `filter_photos` 대신 검색으로 우회                           | 인자 없이 호출하면 사용 가능한 태그·카메라 목록 반환                               |
+| 피아노 리사이틀       | `/music` 이 아니어서 `list_music_works` 미등록(설계대로) + 데이터에 해당 카테고리 없음 | 조치 없음 — 페이지 스코프는 의도된 동작                                            |
+| 이 사진 어디서 찍었어 | **열린 사진을 몰라 대화 기록의 낡은 id 를 사용** — 엉뚱한 사진 응답                    | `photoId`·`projectId`·`workId` 를 선택 인자로, 생략 시 URL query 의 열린 모달 대상 |
+| 연락하고 싶어         | 어느 도구도 `/contact` 경로를 알려주지 않아 막다른 길                                  | `get_profile` 출력에 연락 경로 상시 포함                                           |
+
+평가 도구의 무료 모델 쿼터(분당 5회)에 걸리기 쉬우므로 시나리오는 한 번에 하나씩 돌린다.
+페이지 스코프 도구는 해당 페이지를 연 뒤 평가해야 한다.
+
 ## 11. 완료 기준
 
 - 미지원 브라우저에서 공개 페이지 동작과 렌더 결과가 변하지 않는다.
@@ -206,6 +223,8 @@ NEXT_PUBLIC_WEBMCP_ORIGIN_TRIAL_TOKEN=
   eslint boundaries 규칙(feature 간 직접 import 금지). 공유 등록 훅은 `src/hooks/`,
   스키마 조각은 `src/lib/webmcp/` 로 승격했다.
 - 페이지당 도구 상한은 4가 아니라 5다(§3) — 전역 도구 상시 노출을 유지하기로 확정.
+- 상세 도구 3종의 id 는 필수가 아니라 선택이다 — 생략 시 현재 열린 모달을 대상으로 삼는다.
+  화면 상태를 읽지 않으면 에이전트가 낡은 id 를 채워 넣는다(W5 평가에서 실제 발생).
 - 연락 폼의 에이전트 발 제출은 캡차 토큰 유무와 무관하게 전면 차단한다 —
   `agentInvoked` 분기가 `respondWith` 로 다음 행동을 알리고 발송 없이 끝낸다.
 

@@ -165,6 +165,36 @@ describe("useGalleryTools", () => {
     expect(filter.setCamera).toHaveBeenCalledWith("Sony A7 IV");
   });
 
+  it("filter_photos 를 인자 없이 부르면 거를 수 있는 태그·카메라를 알려준다", async () => {
+    const filter = renderTools();
+
+    const result = await executeOf("filter_photos")({});
+    expect(result).toContain("3 photos currently shown");
+    expect(result).toContain("Available tags: Street, Landscape.");
+    expect(result).toContain("Available cameras: Fujifilm X100V, Sony A7 IV.");
+    // 조회만 했으므로 필터 상태는 건드리지 않는다.
+    expect(filter.setTag).not.toHaveBeenCalled();
+    expect(filter.setCamera).not.toHaveBeenCalled();
+    expect(filter.setFocal).not.toHaveBeenCalled();
+  });
+
+  it("get_photo_details 는 photoId 를 생략하면 현재 열린 사진을 설명한다", async () => {
+    window.history.replaceState(null, "", "/ko/photo?photo=p2");
+    renderTools();
+
+    const result = await executeOf("get_photo_details")({});
+    expect(result).toContain("바다");
+    expect(result).not.toContain("야경");
+  });
+
+  it("열린 사진도 photoId 도 없으면 무엇을 해야 하는지 답한다", async () => {
+    renderTools();
+
+    await expect(Promise.resolve(executeOf("get_photo_details")({}))).resolves.toBe(
+      "No photo is open. Pass photoId, or open a photo first.",
+    );
+  });
+
   it("get_photo_details 는 EXIF 요약과 로케일 딥링크를 반환한다", async () => {
     renderTools();
 

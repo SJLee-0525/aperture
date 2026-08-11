@@ -12,6 +12,7 @@ import {
 } from "@/lib/webmcp/tool-schemas";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
+import { resolveTargetId } from "@/lib/webmcp/current-target";
 import { clampToolText, formatToolItems } from "@/lib/webmcp/tool-output";
 
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
@@ -20,10 +21,12 @@ import type { DevProjectCardData } from "@/types/dev";
 const LIST_TOOL: WebMcpToolDefinition = {
   name: "list_projects",
   description:
-    "List dev projects, optionally filtered by tech stack tag (e.g. 'React') or year. " +
+    "List dev projects, optionally filtered by tech stack tag (e.g. 'React.js') or year. " +
     "Returns each project's id, summary, and page path.",
   inputSchema: objectSchema({
-    tech: stringProperty("Tech tag to filter by, matched case-insensitively (e.g. 'React')."),
+    tech: stringProperty(
+      "Tech tag to filter by, e.g. 'React.js'. Case-insensitive; the '.js' suffix is optional.",
+    ),
     year: numberProperty("Only projects from this year."),
     limit: limitProperty(),
   }),
@@ -34,10 +37,13 @@ const GET_TOOL: WebMcpToolDefinition = {
   name: "get_project",
   description:
     "Get one project's summary and tech stack without opening it. " +
+    "Omit projectId to describe the project currently open in the detail modal. " +
     "Use open_project instead when the visitor should see the full detail.",
-  inputSchema: objectSchema({ projectId: idProperty("Project id from list_projects results.") }, [
-    "projectId",
-  ]),
+  inputSchema: objectSchema({
+    projectId: idProperty(
+      "Project id from list_projects results. Omit for the project already open.",
+    ),
+  }),
   annotations: { readOnlyHint: true, untrustedContentHint: false },
 };
 
@@ -51,15 +57,25 @@ const OPEN_TOOL: WebMcpToolDefinition = {
 };
 
 /**
- * 기술 태그 매칭 — 대소문자 무시 정확 일치(부분 일치는 "React"↔"React Native" 혼동을 만든다).
+ * 기술 태그 정규화 — 대소문자와 `.js` 접미사를 지운다.
+ * 에이전트는 "React" 라고 묻는데 데이터는 "React.js" 라 정확 일치만으로는 어긋난다(W5 평가).
+ * 부분 일치는 쓰지 않는다 — "React" 가 "React Router"·"React Hook Form" 까지 걸어 결과를 희석한다.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+const normalizeTech = (value: string): string => value.trim().toLowerCase().replace(/\.js$/, "");
+
+/**
+ * 기술 태그 매칭 — 정규화 후 정확 일치.
  *
  * @param {DevProjectCardData} project
  * @param {string} tech 에이전트가 넘긴 기술 태그 인자.
  * @returns {boolean}
  */
 const matchesTech = (project: DevProjectCardData, tech: string): boolean => {
-  const needle = tech.trim().toLowerCase();
-  return project.techTags.some((tag) => tag.toLowerCase() === needle);
+  const needle = normalizeTech(tech);
+  return project.techTags.some((tag) => normalizeTech(tag) === needle);
 };
 
 /**
@@ -100,7 +116,9 @@ const useDevTools = (projects: DevProjectCardData[], select: (id: string | null)
   });
 
   useModelContextTool(GET_TOOL, (args) => {
-    const project = projects.find((entry) => entry.id === args.projectId);
+    const targetId = resolveTargetId(args.projectId, "project");
+    if (!targetId) return "No project is open. Pass projectId, or open a project first.";
+    const project = projects.find((entry) => entry.id === targetId);
     if (!project) return "No project matches that id.";
     return clampToolText(
       [

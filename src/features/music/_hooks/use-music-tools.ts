@@ -7,6 +7,7 @@ import { idProperty, limitProperty, objectSchema, stringProperty } from "@/lib/w
 import { formatYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
+import { resolveTargetId } from "@/lib/webmcp/current-target";
 import { clampToolText, formatToolItems } from "@/lib/webmcp/tool-output";
 
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
@@ -26,10 +27,12 @@ const LIST_WORKS_TOOL: WebMcpToolDefinition = {
 
 const GET_WORK_TOOL: WebMcpToolDefinition = {
   name: "get_music_work",
-  description: "Get one performance's program, venue, and ticket link.",
-  inputSchema: objectSchema({ workId: idProperty("Work id from list_music_works results.") }, [
-    "workId",
-  ]),
+  description:
+    "Get one performance's program, venue, and ticket link. " +
+    "Omit workId to describe the performance currently open in the detail modal.",
+  inputSchema: objectSchema({
+    workId: idProperty("Work id from list_music_works results. Omit for the one already open."),
+  }),
   annotations: { readOnlyHint: true, untrustedContentHint: false },
 };
 
@@ -96,7 +99,9 @@ const useMusicWorkTools = (works: MusicWork[]): void => {
   });
 
   useModelContextTool(GET_WORK_TOOL, (args) => {
-    const work = works.find((entry) => entry.id === args.workId);
+    const targetId = resolveTargetId(args.workId, "work");
+    if (!targetId) return "No performance is open. Pass workId, or open one first.";
+    const work = works.find((entry) => entry.id === targetId);
     if (!work) return "No performance matches that id.";
     const lines = [
       `${pickText(work.title, lang)} · ${pickText(work.subtitle, lang)}`,

@@ -106,6 +106,19 @@ describe("useMusicWorkTools", () => {
     expect(result).toContain("/ko/music?work=w1");
   });
 
+  it("get_music_work 는 workId 를 생략하면 현재 열린 연주를 설명한다", async () => {
+    window.history.replaceState(null, "", "/ko/music?work=w2");
+    renderHook(() => useMusicWorkTools(WORKS));
+
+    const result = await executeOf("get_music_work")({});
+    expect(result).toContain("라흐마니노프 2번");
+
+    window.history.replaceState(null, "", "/ko/music");
+    await expect(Promise.resolve(executeOf("get_music_work")({}))).resolves.toBe(
+      "No performance is open. Pass workId, or open one first.",
+    );
+  });
+
   it("get_music_work 는 프로그램·장소·예매 링크를 반환한다", async () => {
     renderHook(() => useMusicWorkTools(WORKS));
 

@@ -41,9 +41,9 @@ const projectOf = (
 });
 
 const PROJECTS: DevProjectCardData[] = [
-  projectOf("recipedia", "Recipedia", "2024", ["React", "TypeScript"]),
+  projectOf("recipedia", "Recipedia", "2024", ["React.js", "TypeScript"]),
   projectOf("myhero", "MyHero", "2023", ["Vue", "Pinia"]),
-  projectOf("mailat", "MailAt", "2024", ["React", "Next.js"]),
+  projectOf("mailat", "MailAt", "2024", ["React.js", "Next.js"]),
 ];
 
 const executeOf = (name: string): WebMcpExecute => {
@@ -61,7 +61,7 @@ describe("useDevTools", () => {
   it("list_projects 는 tech 태그를 대소문자 무시로 정확 매칭한다", async () => {
     renderHook(() => useDevTools(PROJECTS, vi.fn()));
 
-    const result = await executeOf("list_projects")({ tech: "react" });
+    const result = await executeOf("list_projects")({ tech: "react.js" });
     expect(result).toContain("Recipedia");
     expect(result).toContain("MailAt");
     expect(result).not.toContain("MyHero");
@@ -73,11 +73,34 @@ describe("useDevTools", () => {
     const execute = executeOf("list_projects");
 
     await expect(Promise.resolve(execute({ tech: "Svelte" }))).resolves.toContain(
-      "Known tech tags: React, TypeScript, Vue, Pinia, Next.js",
+      "Known tech tags: React.js, TypeScript, Vue, Pinia, Next.js",
     );
 
-    const filtered = await execute({ tech: "React", year: 2023 });
+    const filtered = await execute({ tech: "React.js", year: 2023 });
     expect(filtered).toBe("No projects match.");
+  });
+
+  it("list_projects 는 '.js' 접미사를 정규화해 React 로도 React.js 를 찾는다", async () => {
+    renderHook(() => useDevTools(PROJECTS, vi.fn()));
+
+    const result = await executeOf("list_projects")({ tech: "React" });
+    expect(result).toContain("Recipedia");
+    expect(result).toContain("MailAt");
+    // 부분 일치가 아니므로 다른 React 계열 태그까지 끌려오지 않는다.
+    expect(result).not.toContain("MyHero");
+  });
+
+  it("get_project 는 projectId 를 생략하면 현재 열린 프로젝트를 설명한다", async () => {
+    window.history.replaceState(null, "", "/ko/dev/projects?project=myhero");
+    renderHook(() => useDevTools(PROJECTS, vi.fn()));
+
+    const result = await executeOf("get_project")({});
+    expect(result).toContain("MyHero");
+
+    window.history.replaceState(null, "", "/ko/dev/projects");
+    await expect(Promise.resolve(executeOf("get_project")({}))).resolves.toBe(
+      "No project is open. Pass projectId, or open a project first.",
+    );
   });
 
   it("get_project 는 요약·기술·로케일 딥링크를 반환한다", async () => {
