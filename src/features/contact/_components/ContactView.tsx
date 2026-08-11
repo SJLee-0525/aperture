@@ -206,7 +206,12 @@ const ContactForm = ({ to }: { to: string }) => {
       <button
         type="submit"
         className={styles.send}
-        disabled={status === "sending" || blockedByCaptcha}
+        // 전송 중에만 진짜 disabled 로 잠근다. 캡차 대기는 aria-disabled 로 알린다 —
+        // 브라우저는 disabled 버튼을 제출 버튼으로 세지 않아, 실제 disabled 로 두면
+        // 선언형 WebMCP 도구가 "No submit button was found" 로 아예 실패한다(W5 평가).
+        // 미해결 상태의 실제 차단은 use-contact-form 의 captcha-required 분기가 맡는다.
+        disabled={status === "sending"}
+        aria-disabled={blockedByCaptcha}
         // 버튼이 왜 잠겼는지 스크린리더에도 전달한다.
         aria-describedby={blockedByCaptcha ? CAPTCHA_HINT_ID : undefined}
       >

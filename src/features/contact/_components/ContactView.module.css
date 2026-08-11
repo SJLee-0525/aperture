@@ -129,7 +129,8 @@
 .send:hover:not([data-cursor-snapped]) {
   background: var(--accent-press);
 }
-.send:disabled {
+.send:disabled,
+.send[aria-disabled="true"] {
   opacity: 0.6;
   cursor: default;
 }
