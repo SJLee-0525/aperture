@@ -62,6 +62,28 @@ describe("useMapTools", () => {
     );
   });
 
+  it("장소명이 빈 사진은 이름 없는 한 그룹으로 뭉치지 않는다", async () => {
+    renderHook(() =>
+      useMapTools([
+        locationOf("p1", "Seoul"),
+        { ...locationOf("p2", ""), coords: { lat: 1, lng: 1 } },
+        { ...locationOf("p3", ""), coords: { lat: 2, lng: 2 } },
+      ]),
+    );
+
+    // 좌표는 EXIF 자동, 장소명은 관리자 입력이라 빈 값이 정상적으로 생긴다.
+    const result = await lastExecute()({});
+    expect(result).toBe("Seoul — 1 photo (37.5, 127) · /en/photo/map?photo=p1");
+  });
+
+  it("장소명이 하나도 없으면 그 사실을 알린다", async () => {
+    renderHook(() => useMapTools([locationOf("p1", "")]));
+
+    await expect(Promise.resolve(lastExecute()({}))).resolves.toBe(
+      "No photo locations have a place name yet.",
+    );
+  });
+
   it("빈 목록에 안내 문장을 반환한다", async () => {
     renderHook(() => useMapTools([]));
     await expect(Promise.resolve(lastExecute()({}))).resolves.toBe(

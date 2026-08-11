@@ -39,6 +39,9 @@ const useMapTools = (locations: MapLocation[]): void => {
     const byPlace = new Map<string, { count: number; id: string; lat: number; lng: number }>();
     for (const location of locations) {
       const place = pickText(location.place, lang);
+      // 좌표는 EXIF 에서 자동으로 붙고 장소명은 관리자가 입력한다. 장소가 빈 사진이 정상적으로
+      // 생길 수 있는데, 그대로 두면 서로 다른 위치가 이름 없는 한 그룹으로 뭉친다.
+      if (!place.trim()) continue;
       const seen = byPlace.get(place);
       if (seen) seen.count += 1;
       else
@@ -50,6 +53,7 @@ const useMapTools = (locations: MapLocation[]): void => {
         });
     }
     const places = [...byPlace.entries()].sort(([, a], [, b]) => b.count - a.count);
+    if (places.length === 0) return "No photo locations have a place name yet.";
 
     return formatToolItems(
       places,
