@@ -13,6 +13,7 @@ import {
 import { SocialGlyph } from "@/components/SocialGlyph";
 import { ROUTES } from "@/constants/routes";
 import { useCaptchaState } from "@/features/contact/_hooks/use-captcha-state";
+import { useContactDraft } from "@/features/contact/_hooks/use-contact-draft";
 import { useContactForm } from "@/features/contact/_hooks/use-contact-form";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -128,8 +129,12 @@ const ContactForm = ({ to }: { to: string }) => {
   const { dict } = useLang();
   const { status, submit, resetStatus } = useContactForm(to);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const captcha = useCaptchaState(formRef);
+  // 챗봇 연락 초안 프리필 — 마운트 1회, uncontrolled 구조 그대로. 발송은 여전히 방문자 몫.
+  useContactDraft({ nameRef, emailRef, messageRef: textareaRef });
   // 위젯이 렌더되지 않은 동안(스크립트 로드 전·차단됨)에는 잠그지 않는다 —
   // 잠그면 캡차가 끝내 안 뜨는 환경에서 폼이 영영 죽은 버튼이 된다.
   // 그 경우는 제출 시 use-contact-form 이 "captcha-required" 안내로 막는다.
@@ -163,11 +168,18 @@ const ContactForm = ({ to }: { to: string }) => {
       <div className={styles.grid}>
         <label className={styles.field}>
           <span className={styles.label}>{dict.contactName}</span>
-          <input className={styles.input} name="name" autoComplete="name" required />
+          <input ref={nameRef} className={styles.input} name="name" autoComplete="name" required />
         </label>
         <label className={styles.field}>
           <span className={styles.label}>{dict.contactEmail}</span>
-          <input className={styles.input} name="email" type="email" autoComplete="email" required />
+          <input
+            ref={emailRef}
+            className={styles.input}
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+          />
         </label>
       </div>
       <div className={styles.field}>

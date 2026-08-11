@@ -38,9 +38,14 @@ describe("chat response contract", () => {
     expect(result.references).toHaveLength(3);
   });
 
-  it("미완성 JSON은 본문만 회수하고 links·references는 버린다", () => {
-    expect(parseOrSalvageChatResult('{"content":"부분 답변입니다.","links":[{"la')).toEqual({
+  it("미완성 JSON은 본문만 회수하고 links·references·contactDraft는 버린다", () => {
+    expect(
+      parseOrSalvageChatResult(
+        '{"content":"부분 답변입니다.","contactDraft":{"name":"이","email":"a@b.co","mess',
+      ),
+    ).toEqual({
       content: "부분 답변입니다.",
+      contactDraft: null,
     });
   });
 
@@ -87,6 +92,22 @@ describe("chat response contract", () => {
     expect(
       JSON.parse(JSON.stringify(loose).replaceAll('"additionalProperties":false,', "")),
     ).toEqual(JSON.parse(JSON.stringify(strict).replaceAll('"additionalProperties":false,', "")));
-    expect(strict.required).toEqual(["content", "links", "references"]);
+    expect(strict.required).toEqual(["content", "links", "references", "contactDraft"]);
+  });
+
+  it("contactDraft는 nullable required — null과 완전·부분 초안을 파싱한다", () => {
+    const of = (contactDraft: unknown) =>
+      parseChatResult(JSON.stringify({ content: "네.", links: [], references: [], contactDraft }));
+
+    expect(of(null).contactDraft).toBeNull();
+    expect(
+      of({ name: "이성준", email: "sj@example.com", message: "협업 문의드립니다." }).contactDraft,
+    ).toEqual({ name: "이성준", email: "sj@example.com", message: "협업 문의드립니다." });
+    // 이름·메일이 없어도 message가 있으면 초안 — 나머지 칸은 방문자가 채운다.
+    expect(of({ name: null, email: null, message: "문의드립니다." }).contactDraft).toEqual({
+      name: null,
+      email: null,
+      message: "문의드립니다.",
+    });
   });
 });

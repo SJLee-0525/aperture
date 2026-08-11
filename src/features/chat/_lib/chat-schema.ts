@@ -1,4 +1,7 @@
+import { parseChatContext } from "@/features/chat/_lib/chat-context";
+
 import type { Lang } from "@/types/lang";
+import type { ChatContext } from "@/features/chat/_lib/chat-context";
 import type { ChatErrorCode } from "@/features/chat/_lib/chat-errors";
 
 type ChatRequestRole = "assistant" | "user";
@@ -11,6 +14,7 @@ type ChatRequestMessage = {
 type ChatRequest = {
   messages: ChatRequestMessage[];
   lang: Lang;
+  context?: ChatContext;
 };
 
 const CHAT_LIMITS = {
@@ -69,7 +73,9 @@ const parseChatRequest = (value: unknown): ChatRequest => {
     throw new ChatRequestError("LAST_MESSAGE_MUST_BE_USER");
   }
 
-  return { messages, lang: value.lang };
+  // 잘못된 화면 문맥은 버리고 채팅 요청은 계속 처리한다.
+  const context = parseChatContext(value.context);
+  return context ? { messages, lang: value.lang, context } : { messages, lang: value.lang };
 };
 
 export { CHAT_LIMITS, ChatRequestError, parseChatRequest };

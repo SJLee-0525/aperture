@@ -110,4 +110,59 @@ describe("useScrollLock", () => {
 
     rerender({ locked: false });
   });
+
+  it("중첩 잠금은 가장 최근 옵션을 적용하고 해제하면 이전 옵션을 복원한다", () => {
+    Object.defineProperties(window, {
+      innerWidth: { configurable: true, value: 390 },
+      scrollX: { configurable: true, value: 0 },
+      scrollY: { configurable: true, value: 500 },
+    });
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+
+    const modal = renderHook(({ locked }) => useScrollLock(locked), {
+      initialProps: { locked: true },
+    });
+    expect(document.body.style.position).toBe("fixed");
+    expect(document.body.style.top).toBe("-500px");
+
+    const chat = renderHook(({ locked }) => useScrollLock(locked, { fixBodyOnMobile: false }), {
+      initialProps: { locked: true },
+    });
+    expect(document.body.style.position).toBe("");
+    expect(document.body.style.top).toBe("");
+    expect(isScrollLockFixingBody()).toBe(false);
+
+    chat.rerender({ locked: false });
+    expect(document.body.style.position).toBe("fixed");
+    expect(document.body.style.top).toBe("-500px");
+    expect(isScrollLockFixingBody()).toBe(true);
+
+    modal.rerender({ locked: false });
+    expect(document.body.style.position).toBe("");
+    expect(document.body.style.top).toBe("");
+    expect(scrollTo).toHaveBeenLastCalledWith(0, 500);
+  });
+
+  it("잠금 중 viewport가 breakpoint를 넘으면 body 고정 정책을 다시 계산한다", () => {
+    Object.defineProperties(window, {
+      innerWidth: { configurable: true, writable: true, value: 390 },
+      scrollY: { configurable: true, value: 120 },
+    });
+    vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+
+    const modal = renderHook(() => useScrollLock(true));
+    expect(document.body.style.position).toBe("fixed");
+
+    window.innerWidth = 1024;
+    window.dispatchEvent(new Event("resize"));
+    expect(document.body.style.position).toBe("");
+    expect(document.documentElement.style.overflow).toBe("");
+
+    window.innerWidth = 390;
+    window.dispatchEvent(new Event("resize"));
+    expect(document.body.style.position).toBe("fixed");
+    expect(document.body.style.top).toBe("-120px");
+
+    modal.unmount();
+  });
 });

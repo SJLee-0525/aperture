@@ -17,12 +17,30 @@ import type { SiteConfig } from "@/types/site";
 
 type ChatPhoto = Pick<
   Photo,
-  "id" | "title" | "camera" | "lens" | "place" | "tags" | "image" | "order" | "published"
+  | "id"
+  | "title"
+  | "shotAt"
+  | "camera"
+  | "lens"
+  | "exif"
+  | "place"
+  | "tags"
+  | "image"
+  | "order"
+  | "published"
 >;
 type ChatAlbum = Pick<Album, "id" | "title" | "subtitle" | "cover" | "order" | "published">;
 type ChatDevProject = Pick<
   DevProject,
-  "id" | "title" | "summary" | "position" | "techTags" | "cover" | "order" | "published"
+  | "id"
+  | "title"
+  | "summary"
+  | "position"
+  | "techTags"
+  | "achievements"
+  | "cover"
+  | "order"
+  | "published"
 >;
 type ChatMusicWork = Pick<
   MusicWork,

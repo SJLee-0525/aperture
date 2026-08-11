@@ -1,10 +1,6 @@
-import type { GalleryPhoto } from "@/types/gallery-photo";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
 
-/** 태그 필터의 "전체" 센티넬 (특정 태그 id와 겹치지 않는 값) */
-const ALL = "__all__";
-/** 초점거리 슬라이더 범위 (mm) */
-const FOCAL_MIN = 16;
-const FOCAL_MAX = 300;
+import type { GalleryPhoto } from "@/types/gallery-photo";
 
 type FilterState = {
   tag: string;
@@ -75,4 +71,4 @@ const filterPhotos = (
   });
 };
 
-export { buildSearchIndex, filterPhotos, ALL, FOCAL_MIN, FOCAL_MAX };
+export { ALL, buildSearchIndex, filterPhotos };

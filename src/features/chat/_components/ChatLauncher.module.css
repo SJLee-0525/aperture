@@ -2,7 +2,10 @@
   position: fixed;
   right: max(var(--s-6), env(safe-area-inset-right, 0px));
   bottom: max(var(--s-6), env(safe-area-inset-bottom, 0px));
-  z-index: 70;
+  /* 상세 모달(사진·연주·수상·프로젝트, z 100) 위 — "지금 보고 있는 항목"을 챗봇에
+     물으려면 모달이 열린 동안에도 런처가 눌려야 한다(화면 문맥, plan 06 §1).
+     내보내기 줌 라이트박스(z 120)에는 가려진다. */
+  z-index: 105;
   display: grid;
   place-items: center;
   width: 48px;

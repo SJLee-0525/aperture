@@ -83,6 +83,7 @@ describe.each(FIXTURES)("제공자 동작 대칭성 ($label)", ({ create, stream
       content: "사진을 확인해 보세요.",
       links: [{ label: "사진", href: "/photo" }],
       references: [{ type: "photo", id: "p01" }],
+      contactDraft: null,
     });
   });
 
@@ -114,7 +115,7 @@ describe.each(FIXTURES)("제공자 동작 대칭성 ($label)", ({ create, stream
 
     const result = await invoke(provider(), (delta) => deltas.push(delta));
 
-    expect(result).toEqual({ content: "여기서 잘렸습니다" });
+    expect(result).toEqual({ content: "여기서 잘렸습니다", contactDraft: null });
     expect(deltas.join("")).toBe("여기서 잘렸습니다");
   });
 
@@ -124,7 +125,10 @@ describe.each(FIXTURES)("제공자 동작 대칭성 ($label)", ({ create, stream
       vi.fn().mockResolvedValue(jsonOf('{"content":"부분 답변입니다.","links":[{"la')),
     );
 
-    await expect(invoke(provider())).resolves.toEqual({ content: "부분 답변입니다." });
+    await expect(invoke(provider())).resolves.toEqual({
+      content: "부분 답변입니다.",
+      contactDraft: null,
+    });
   });
 
   it.each([

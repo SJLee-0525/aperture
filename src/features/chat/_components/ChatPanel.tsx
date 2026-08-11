@@ -1,32 +1,94 @@
 "use client";
 
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
-import { useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 import { ROUTES } from "@/constants/routes";
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
+import { ChatContactDraftButton } from "@/features/chat/_components/ChatContactDraftButton";
 import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
 import { useChat } from "@/features/chat/_hooks/use-chat";
+import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
+import type { ChatScreenTargetType } from "@/lib/chat-screen-target-context";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
+import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import styles from "./ChatPanel.module.css";
 
+import type { UIDict } from "@/constants/dictionary";
+
 type Props = { open: boolean; onClose: () => void };
+
+/** 상세 항목 종류에 맞는 chip 문구와 입력 안내를 고른다. */
+const SCREEN_NOTICES: Record<
+  ChatScreenTargetType,
+  (dict: UIDict) => { notice: string; placeholder: string }
+> = {
+  photo: (dict) => ({
+    notice: dict.chatScreenNoticePhoto,
+    placeholder: dict.chatScreenPlaceholderPhoto,
+  }),
+  work: (dict) => ({
+    notice: dict.chatScreenNoticeWork,
+    placeholder: dict.chatScreenPlaceholderWork,
+  }),
+  award: (dict) => ({
+    notice: dict.chatScreenNoticeAward,
+    placeholder: dict.chatScreenPlaceholderAward,
+  }),
+  project: (dict) => ({
+    notice: dict.chatScreenNoticeProject,
+    placeholder: dict.chatScreenPlaceholderProject,
+  }),
+};
 
 const MESSAGE_TRANSITION = { duration: 0.22, ease: [0.22, 1, 0.36, 1] } as const;
 const PRESENCE_TRANSITION = { duration: 0.16, ease: "easeOut" } as const;
 
 const ChatPanel = ({ open, onClose }: Props) => {
   const { lang, dict } = useLang();
-  const { messages, isReplying, retry, send } = useChat(lang);
+
+  // 제목은 표시용이다. 요청에 넣을 항목은 useChat이 현재 URL에서 다시 읽는다.
+  const screenTarget = useChatScreenTarget();
+  const targetKey = screenTarget ? `${screenTarget.type}:${screenTarget.id}` : null;
+  const [excludedKey, setExcludedKey] = useState<string | null>(null);
+  // 제외 설정은 해당 항목에만 적용한다. 다른 항목을 열면 다시 활성화한다.
+  const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
+  if (prevTargetKey !== targetKey) {
+    setPrevTargetKey(targetKey);
+    if (excludedKey !== null) setExcludedKey(null);
+  }
+  const excludedRef = useRef(excludedKey);
+  useEffect(() => {
+    excludedRef.current = excludedKey;
+  }, [excludedKey]);
+  const getExcludedTargetKey = useCallback(() => excludedRef.current, []);
+  const chipTarget = screenTarget && excludedKey !== targetKey ? screenTarget : null;
+  const screenTexts = chipTarget ? SCREEN_NOTICES[chipTarget.type](dict) : null;
+  const dismissScreenTarget = useCallback(() => setExcludedKey(targetKey), [targetKey]);
+  // ChatComposer는 memo라 토큰 객체 identity를 안정화한다.
+  const contextToken = useMemo(
+    () =>
+      chipTarget && screenTexts
+        ? {
+            label: chipTarget.label,
+            notice: screenTexts.notice,
+            dismissLabel: dict.chatScreenNoticeDismiss,
+            onDismiss: dismissScreenTarget,
+          }
+        : null,
+    [chipTarget, screenTexts, dict.chatScreenNoticeDismiss, dismissScreenTarget],
+  );
+
+  const { messages, isReplying, retry, send } = useChat(lang, getExcludedTargetKey);
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
@@ -41,14 +103,18 @@ const ChatPanel = ({ open, onClose }: Props) => {
     )?.content ?? "";
 
   useScrollLock(open, { fixBodyOnMobile: false });
+  const isTopLayer = useOverlayLayer(open);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (open && event.key === "Escape") onClose();
+      if (open && isTopLayer && event.key === "Escape") {
+        event.stopImmediatePropagation();
+        onClose();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, open]);
+  }, [isTopLayer, onClose, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -247,6 +313,14 @@ const ChatPanel = ({ open, onClose }: Props) => {
                       {link.label} <span aria-hidden="true">↗</span>
                     </LocalizedLink>
                   ))}
+                  {message.contactDraft && !message.pending ? (
+                    <ChatContactDraftButton
+                      draft={message.contactDraft}
+                      label={dict.chatContactDraftLabel}
+                      className={styles.link}
+                      onNavigate={onClose}
+                    />
+                  ) : null}
                   {message.references?.length ? (
                     <div className={styles.references}>
                       {message.references.map((reference) => (
@@ -287,10 +361,11 @@ const ChatPanel = ({ open, onClose }: Props) => {
         <div className={styles.composerArea}>
           <ChatComposer
             inputLabel={dict.chatInputLabel}
-            placeholder={dict.chatPlaceholder}
+            placeholder={screenTexts?.placeholder ?? dict.chatPlaceholder}
             sendLabel={dict.chatSendLabel}
             isReplying={isReplying}
             onSend={send}
+            contextToken={contextToken}
           />
           <p className={styles.privacyNotice}>
             {dict.chatPrivacyNote}{" "}

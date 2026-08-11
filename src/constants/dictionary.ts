@@ -117,6 +117,16 @@ type UIDict = {
   chatPlaceholder: string;
   chatSendLabel: string;
   chatRetryLabel: string;
+  chatContactDraftLabel: string;
+  chatScreenNoticePhoto: string;
+  chatScreenNoticeWork: string;
+  chatScreenNoticeAward: string;
+  chatScreenNoticeProject: string;
+  chatScreenPlaceholderPhoto: string;
+  chatScreenPlaceholderWork: string;
+  chatScreenPlaceholderAward: string;
+  chatScreenPlaceholderProject: string;
+  chatScreenNoticeDismiss: string;
   chatPrivacyNote: string;
   chatSuggestionsLabel: string;
   chatSuggestions: string[];
@@ -280,6 +290,16 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatPlaceholder: "궁금한 내용을 입력하세요…",
     chatSendLabel: "메시지 보내기",
     chatRetryLabel: "다시 시도",
+    chatContactDraftLabel: "연락 페이지에서 이어 쓰기",
+    chatScreenNoticePhoto: "보고 있는 사진",
+    chatScreenNoticeWork: "보고 있는 연주",
+    chatScreenNoticeAward: "보고 있는 수상 내역",
+    chatScreenNoticeProject: "보고 있는 프로젝트",
+    chatScreenPlaceholderPhoto: "이 사진에 대해 물어보세요…",
+    chatScreenPlaceholderWork: "이 연주에 대해 물어보세요…",
+    chatScreenPlaceholderAward: "이 수상에 대해 물어보세요…",
+    chatScreenPlaceholderProject: "이 프로젝트에 대해 물어보세요…",
+    chatScreenNoticeDismiss: "이 항목을 답변에서 제외",
     chatPrivacyNote: "민감한 개인정보는 입력하지 마세요.",
     chatSuggestionsLabel: "추천 질문",
     chatSuggestions: [
@@ -448,6 +468,16 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatPlaceholder: "Ask about the portfolio…",
     chatSendLabel: "Send message",
     chatRetryLabel: "Try again",
+    chatContactDraftLabel: "Continue on the contact page",
+    chatScreenNoticePhoto: "Viewing photo",
+    chatScreenNoticeWork: "Viewing performance",
+    chatScreenNoticeAward: "Viewing award",
+    chatScreenNoticeProject: "Viewing project",
+    chatScreenPlaceholderPhoto: "Ask about this photo…",
+    chatScreenPlaceholderWork: "Ask about this performance…",
+    chatScreenPlaceholderAward: "Ask about this award…",
+    chatScreenPlaceholderProject: "Ask about this project…",
+    chatScreenNoticeDismiss: "Exclude this item from the answer",
     chatPrivacyNote: "Please don’t share sensitive personal information.",
     chatSuggestionsLabel: "Suggested questions",
     chatSuggestions: [

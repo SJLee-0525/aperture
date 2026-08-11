@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
 import type { ImageMeta } from "@/types/image";
@@ -156,6 +157,7 @@ const ImageLightbox = ({
   const imageKey = image ? image.path || image.url : "";
   const loaded = imageKey ? loadedImages.has(imageKey) : false;
   useScrollLock(true);
+  const isTopLayer = useOverlayLayer(true);
   const {
     onTouchStart: onDismissTouchStart,
     onTouchMove: onDismissTouchMove,
@@ -170,8 +172,9 @@ const ImageLightbox = ({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (!isTopLayer) return;
       if (event.key === "Escape") {
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         onClose();
         return;
       }
@@ -190,7 +193,7 @@ const ImageLightbox = ({
     };
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
-  }, [index, count, loaded, onClose]);
+  }, [index, count, isTopLayer, loaded, onClose]);
 
   useEffect(() => {
     const node = containerRef.current;

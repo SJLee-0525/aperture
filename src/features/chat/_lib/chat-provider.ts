@@ -3,7 +3,7 @@ import { createGeminiChatProvider } from "@/features/chat/_lib/gemini-chat-provi
 import { createOpenAIChatProvider } from "@/features/chat/_lib/openai-chat-provider";
 import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import type { Lang } from "@/types/lang";
-import type { ChatLink, ChatReferenceRequest } from "@/types/chat";
+import type { ChatLink, ChatReferenceRequest, ContactDraft } from "@/types/chat";
 
 type ChatProviderInput = {
   instructions: string;
@@ -17,6 +17,8 @@ type ChatProviderResult = {
   content: string;
   links?: ChatLink[];
   references?: ChatReferenceRequest[];
+  // JSON 스키마와 마찬가지로 초안이 없을 때는 null을 반환한다.
+  contactDraft: ContactDraft | null;
 };
 
 type ChatProvider = (input: ChatProviderInput) => Promise<ChatProviderResult>;
@@ -39,15 +41,16 @@ const mockChatProvider: ChatProvider = async ({ messages, lang, signal }) => {
     content: reply.content,
     links: reply.link ? [reply.link] : undefined,
     references: reply.references?.map(({ type, id }) => ({ type, id })),
+    contactDraft: null,
   };
 };
 
 /**
  * primary가 무응답으로 매달리면 요청 전체 타임아웃(55초)을 혼자 소진해 폴백이
- * 시도조차 못 된다. 첫 본문 출력 전까지만 적용하는 상한 — 본문이 나가기 시작하면
+ * 시도조차 못 된다. 이 제한은 첫 본문 출력 전까지만 적용한다. 본문이 나가기 시작하면
  * 폴백하지 않으므로(emitted 가드) 건강한 스트림을 중간에 죽이지 않는다.
  * 비스트리밍 호출은 끝까지 이 상한을 받지만, 걸려도 폴백이 이어받으므로 응답은 나간다.
- * 최악 케이스 배분: 인텐트 분류 + 이 상한 + 폴백 나머지 — 전체 예산은 handle-chat-request.ts.
+ * 전체 제한 시간은 인텐트 분류, 이 상한, 폴백에 나눠 쓴다(handle-chat-request.ts 참고).
  * Gemini 실측(2026-08): 정상 TTFB ~1초, 간헐적으로 응답 시작 전 14~24초 큐잉 스파이크.
  */
 const PRIMARY_NO_OUTPUT_TIMEOUT_MS = 25_000;
@@ -56,8 +59,7 @@ const withFallback =
   (primary: ChatProvider, fallback: ChatProvider): ChatProvider =>
   async (input) => {
     let emitted = false;
-    // 무응답 타임아웃은 primary 전용 신호로만 중단한다 — 요청 전체(input.signal)를
-    // 건드리면 폴백이 남은 시간 예산을 이어받을 수 없다.
+    // 무응답 타임아웃은 primary 요청만 중단한다. 전체 요청 신호는 폴백도 사용한다.
     const attemptController = new AbortController();
     const noOutputTimer = setTimeout(() => {
       attemptController.abort(

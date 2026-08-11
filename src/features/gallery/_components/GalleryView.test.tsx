@@ -29,7 +29,10 @@ vi.mock("@/features/gallery/_hooks/use-photo-filter", () => ({
     focalMin: 0,
     focalMax: 600,
     setFocal: vi.fn(),
+    commitFocal: vi.fn(),
+    cancelFocal: vi.fn(),
     resetFilters: vi.fn(),
+    applyFilters: vi.fn(),
     filtersActive: false,
   }),
 }));
@@ -62,6 +65,28 @@ describe("GalleryView", () => {
     const view = render(<GalleryView photos={photos} tags={tags} />);
 
     mocks.search = new URLSearchParams("photo=p02");
+    view.rerender(<GalleryView photos={photos} tags={tags} />);
+
+    expect(mocks.gridRender).toHaveBeenCalledOnce();
+  });
+
+  it("tag 쿼리가 바뀌면 파싱된 primitive props가 달라져 그리드를 다시 렌더한다", () => {
+    const photos = [] as GalleryPhoto[];
+    const tags: Tag[] = [{ id: "sea", ko: "바다", en: "Sea" }];
+    const view = render(<GalleryView photos={photos} tags={tags} />);
+
+    mocks.search = new URLSearchParams("tag=sea");
+    view.rerender(<GalleryView photos={photos} tags={tags} />);
+
+    expect(mocks.gridRender).toHaveBeenCalledTimes(2);
+  });
+
+  it("알 수 없는 필터 쿼리는 기본값으로 파싱돼 그리드를 다시 렌더하지 않는다", () => {
+    const photos = [] as GalleryPhoto[];
+    const tags: Tag[] = [{ id: "sea", ko: "바다", en: "Sea" }];
+    const view = render(<GalleryView photos={photos} tags={tags} />);
+
+    mocks.search = new URLSearchParams("tag=zzz&redirect=evil");
     view.rerender(<GalleryView photos={photos} tags={tags} />);
 
     expect(mocks.gridRender).toHaveBeenCalledOnce();

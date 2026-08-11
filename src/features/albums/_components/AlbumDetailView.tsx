@@ -89,7 +89,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
         <PhotoGrid photos={photos} lang={lang} square={false} emptyLabel={dict.emptyResults} />
       </m.main>
 
-      <PhotoModal photos={photos} tags={tags} />
+      <PhotoModal photos={photos} tags={tags} chatTarget />
     </>
   );
 };

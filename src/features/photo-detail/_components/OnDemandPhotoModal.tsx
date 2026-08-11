@@ -36,9 +36,19 @@ type Props = {
   photoIds: string[];
   endpoint: string;
   initialTags?: Tag[];
+  /**
+   * 열린 사진을 챗봇 입력창에 표시할지 결정한다.
+   * 작업 페이지에서만 사용하며 지도 모달에서는 끈다.
+   */
+  chatTarget?: boolean;
 };
 
-const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Props) => {
+const OnDemandPhotoModal = ({
+  photoIds,
+  endpoint,
+  initialTags = EMPTY_TAGS,
+  chatTarget,
+}: Props) => {
   const { dict } = useLang();
   const { activeId, close: closeSession } = usePhotoDetailSession();
   const { activePhoto, failed, photos, retry, tags } = useOnDemandPhotoDetails(
@@ -85,6 +95,7 @@ const OnDemandPhotoModal = ({ photoIds, endpoint, initialTags = EMPTY_TAGS }: Pr
           animateOnOpen={false}
           revealed={readyId === activeId}
           onImageReady={setReadyId}
+          chatTarget={chatTarget}
         />
       ) : null}
       {pendingOpen && mounted

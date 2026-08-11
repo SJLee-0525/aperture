@@ -14,6 +14,7 @@ import {
   preloadPhotoModal,
 } from "@/features/photo-detail/_components/OnDemandPhotoModal";
 import { useGalleryTools } from "@/features/gallery/_hooks/use-gallery-tools";
+import { parsePhotoFilterQuery } from "@/lib/photo-filter-query";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 
@@ -25,22 +26,37 @@ type Props = {
 };
 
 type GalleryContentProps = Props & {
+  cameras: string[];
   initialQuery: string;
+  // primitive 필터 props는 ?photo=만 바뀔 때 memo된 그리드의 재렌더를 막는다.
+  tag: string;
+  camera: string;
+  focalMin: number;
+  focalMax: number;
 };
 
 /** photo 쿼리만 바뀔 때 정적인 배경 갤러리가 다시 렌더되지 않도록 모달 구독과 분리한다. */
 const GalleryContent = memo(function GalleryContent({
   photos,
   tags,
+  cameras,
   initialQuery,
+  tag,
+  camera,
+  focalMin,
+  focalMax,
 }: GalleryContentProps) {
   const { dict, lang } = useLang();
   const [square, setSquare] = useState(false);
-  const filter = usePhotoFilter(photos, initialQuery);
-  const cameras = useMemo(() => [...new Set(photos.map((photo) => photo.camera))], [photos]);
-  // WebMCP 도구는 필터 setter 곁에서 등록 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  const vocabulary = useMemo(() => ({ tags, cameras }), [tags, cameras]);
+  const urlFilters = useMemo(
+    () => ({ tag, camera, focalMin, focalMax }),
+    [tag, camera, focalMin, focalMax],
+  );
+  const filter = usePhotoFilter(photos, initialQuery, urlFilters, vocabulary);
+  // WebMCP 도구는 필터 상태와 같은 컴포넌트에서 등록한다.
   useGalleryTools(photos, tags, filter, cameras);
-  // 필터된 목록을 화면엔 점진 렌더(무한스크롤) — 필터/검색이 바뀌면 자동으로 처음부터.
+  // 필터된 목록은 무한스크롤로 나눠 렌더한다.
   const { visible: windowed, hasMore, attachSentinel } = useInfiniteScroll(filter.visible);
 
   return (
@@ -68,6 +84,8 @@ const GalleryContent = memo(function GalleryContent({
         focalMin={filter.focalMin}
         focalMax={filter.focalMax}
         onFocal={filter.setFocal}
+        onFocalCommit={filter.commitFocal}
+        onFocalCancel={filter.cancelFocal}
         onReset={filter.resetFilters}
         filtersActive={filter.filtersActive}
       />
@@ -80,14 +98,15 @@ const GalleryContent = memo(function GalleryContent({
         onTilePreload={preloadPhotoModal}
       />
 
-      {/* 무한스크롤 트리거 — 남은 사진이 있을 때만. 보이면 다음 페이지 렌더. */}
+      {/* 남은 사진이 있을 때만 무한스크롤 sentinel을 렌더한다. */}
       {hasMore ? <div ref={attachSentinel} className={styles.sentinel} aria-hidden="true" /> : null}
     </main>
   );
 });
 
 /**
- * 작업(Work) 뷰 — 검색 쿼리와 상세 모달만 구독하고, 배경 갤러리는 memo 경계로 격리한다.
+ * 작업(Work) 뷰는 URL의 검색, 필터, 상세 모달 상태를 구독한다. 배경 갤러리는
+ * 파싱된 primitive props의 memo 경계로 격리한다.
  *
  * @param {Props} props
  * @param {GalleryPhoto[]} props.photos
@@ -98,12 +117,34 @@ const GalleryView = ({ photos, tags }: Props) => {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
   const photoIds = useMemo(() => photos.map((photo) => photo.id), [photos]);
+  const cameras = useMemo(
+    () => [...new Set(photos.map((photo) => photo.camera).filter((camera) => camera.trim()))],
+    [photos],
+  );
+  const parsed = useMemo(
+    () => parsePhotoFilterQuery(searchParams, { tags, cameras }),
+    [searchParams, tags, cameras],
+  );
 
   return (
     <>
-      <GalleryContent photos={photos} tags={tags} initialQuery={initialQuery} />
+      <GalleryContent
+        photos={photos}
+        tags={tags}
+        cameras={cameras}
+        initialQuery={initialQuery}
+        tag={parsed.tag}
+        camera={parsed.camera}
+        focalMin={parsed.focalMin}
+        focalMax={parsed.focalMax}
+      />
       {/* 상세 모달은 필터와 무관한 전체 ID 순서를 유지하고 현재·양옆 상세만 가져온다. */}
-      <OnDemandPhotoModal photoIds={photoIds} endpoint="/api/photos" initialTags={tags} />
+      <OnDemandPhotoModal
+        photoIds={photoIds}
+        endpoint="/api/photos"
+        initialTags={tags}
+        chatTarget
+      />
     </>
   );
 };

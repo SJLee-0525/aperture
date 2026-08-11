@@ -4,10 +4,13 @@ import { useEffect, useLayoutEffect } from "react";
 
 const useBrowserLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-let lockCount = 0;
+type NormalizedScrollLockOptions = Required<ScrollLockOptions>;
+
+const activeLocks = new Map<symbol, NormalizedScrollLockOptions>();
 let lockedScrollX = 0;
 let lockedScrollY = 0;
-let bodyWasFixed = false;
+let bodyIsFixed = false;
+let bodyWasFixedDuringLock = false;
 let originalRootOverflow = "";
 let originalBodyStyles = {
   overflow: "",
@@ -23,17 +26,73 @@ type ScrollLockOptions = {
   lockRootOnMobile?: boolean;
 };
 
-const acquireScrollLock = ({
+const normalizeOptions = ({
   fixBodyOnMobile = true,
   lockRootOnMobile = true,
-}: ScrollLockOptions) => {
-  const { body, documentElement } = document;
+}: ScrollLockOptions): NormalizedScrollLockOptions => ({
+  fixBodyOnMobile,
+  lockRootOnMobile,
+});
 
-  if (lockCount === 0) {
+/** 활성 잠금 중 가장 나중에 등록된 항목을 반환한다. */
+const topLock = (): NormalizedScrollLockOptions | undefined => [...activeLocks.values()].at(-1);
+
+/**
+ * 현재 최상위 오버레이의 옵션을 root와 body에 반영한다.
+ * 아래 오버레이의 잠금은 Map에 남겨 두었다가 최상위 잠금이 해제되면 복원한다.
+ */
+const applyActiveLock = () => {
+  const { body, documentElement } = document;
+  const options = topLock();
+
+  if (!options) {
+    documentElement.style.overflow = originalRootOverflow;
+    Object.assign(body.style, originalBodyStyles);
+    bodyIsFixed = false;
+    if (bodyWasFixedDuringLock && (lockedScrollX !== 0 || lockedScrollY !== 0)) {
+      window.scrollTo(lockedScrollX, lockedScrollY);
+    }
+    bodyWasFixedDuringLock = false;
+    return;
+  }
+
+  const mobile = window.innerWidth <= 767;
+  const shouldFixBody = mobile && options.fixBodyOnMobile;
+  const wasFixed = bodyIsFixed;
+
+  documentElement.style.overflow =
+    mobile && options.lockRootOnMobile ? "hidden" : originalRootOverflow;
+  body.style.overflow = "hidden";
+
+  if (shouldFixBody) {
+    Object.assign(body.style, {
+      position: "fixed",
+      top: `${-lockedScrollY}px`,
+      left: `${-lockedScrollX}px`,
+      width: "100%",
+    });
+    bodyWasFixedDuringLock = true;
+  } else {
+    Object.assign(body.style, {
+      position: originalBodyStyles.position,
+      top: originalBodyStyles.top,
+      left: originalBodyStyles.left,
+      width: originalBodyStyles.width,
+    });
+    // fixed body 아래에서 열린 키보드 대응 오버레이는 문서 offset을 상속하면 안 된다.
+    if (wasFixed) window.scrollTo(0, 0);
+  }
+  bodyIsFixed = shouldFixBody;
+};
+
+const acquireScrollLock = (options: ScrollLockOptions): (() => void) => {
+  const { body, documentElement } = document;
+  const token = Symbol("scroll-lock");
+
+  if (activeLocks.size === 0) {
     const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
     lockedScrollX = window.scrollX;
     lockedScrollY = window.scrollY;
-    bodyWasFixed = fixBodyOnMobile && window.innerWidth <= 767;
     originalRootOverflow = documentElement.style.overflow;
     originalBodyStyles = {
       overflow: body.style.overflow,
@@ -43,28 +102,18 @@ const acquireScrollLock = ({
       left: body.style.left,
       width: body.style.width,
     };
-
-    /* root(html) overflow 를 잠그면 body overflow 의 viewport 승격이 끊겨 body 가
-       자체 스크롤 컨테이너가 되고, sticky 헤더의 기준이 viewport → body(scrollTop 0)로 바뀌어
-       헤더가 문서 최상단(-scrollY)으로 밀려난다. 헤더가 시트 위에 계속 보여야 하는
-       오버레이(모바일 메뉴)는 lockRootOnMobile:false 로 body overflow 승격만 사용하고,
-       화면 전체를 덮는 오버레이(모달·모바일 챗 — 키보드 대응이 root 잠금에 의존)는 기본값 유지. */
-    if (window.innerWidth <= 767 && lockRootOnMobile) documentElement.style.overflow = "hidden";
-    Object.assign(body.style, {
-      overflow: "hidden",
-    });
-    if (bodyWasFixed) {
-      Object.assign(body.style, {
-        position: "fixed",
-        top: `${-lockedScrollY}px`,
-        left: `${-lockedScrollX}px`,
-        width: "100%",
-      });
-    }
     if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+    window.addEventListener("resize", applyActiveLock);
   }
 
-  lockCount += 1;
+  activeLocks.set(token, normalizeOptions(options));
+  applyActiveLock();
+
+  return () => {
+    if (!activeLocks.delete(token)) return;
+    if (activeLocks.size === 0) window.removeEventListener("resize", applyActiveLock);
+    applyActiveLock();
+  };
 };
 
 /**
@@ -72,19 +121,7 @@ const acquireScrollLock = ({
  *
  * @returns {boolean}
  */
-const isScrollLockFixingBody = () => lockCount > 0 && bodyWasFixed;
-
-const releaseScrollLock = () => {
-  lockCount = Math.max(0, lockCount - 1);
-  if (lockCount > 0) return;
-
-  const { body, documentElement } = document;
-  documentElement.style.overflow = originalRootOverflow;
-  Object.assign(body.style, originalBodyStyles);
-  if (bodyWasFixed && (lockedScrollX !== 0 || lockedScrollY !== 0)) {
-    window.scrollTo(lockedScrollX, lockedScrollY);
-  }
-};
+const isScrollLockFixingBody = () => activeLocks.size > 0 && bodyIsFixed;
 
 /**
  * 모달·오버레이가 열려 있는 동안 root와 body 스크롤 잠금 (2개 이상 feature 공유 → hooks 승격).
@@ -103,8 +140,7 @@ const useScrollLock = (locked: boolean, options: ScrollLockOptions = {}) => {
   useBrowserLayoutEffect(() => {
     if (!locked) return;
 
-    acquireScrollLock(options);
-    return releaseScrollLock;
+    return acquireScrollLock(options);
   }, [locked, options.fixBodyOnMobile, options.lockRootOnMobile]);
 };
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { Profiler } from "react";
+import { Profiler, StrictMode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ContactView } from "@/features/contact/_components/ContactView";
@@ -99,6 +99,96 @@ describe("ContactView", () => {
 
     await vi.waitFor(() => expect(sendBlocked()).toBe(false));
     expect(screen.queryByText("스팸 방지 확인을 완료해 주세요.")).toBeNull();
+  });
+
+  describe("연락 초안 프리필 (ContactForm draft injection)", () => {
+    const KEY = "ap-contact-draft:v1";
+    const storedDraft = (fields: { name: string; email: string; message: string }) =>
+      JSON.stringify({
+        version: 1,
+        createdAt: Date.now() - 1_000,
+        expiresAt: Date.now() + 60_000,
+        ...fields,
+      });
+
+    afterEach(() => window.sessionStorage.clear());
+
+    it("초안을 폼에 채우고 storage에서 삭제하며 첫 빈 칸에 초점을 둔다", () => {
+      window.sessionStorage.setItem(
+        KEY,
+        storedDraft({ name: "이성준", email: "", message: "협업 문의드립니다." }),
+      );
+      render(<ContactView site={MOCK_SITE} />);
+
+      expect((screen.getByRole("textbox", { name: "이름" }) as HTMLInputElement).value).toBe(
+        "이성준",
+      );
+      expect((screen.getByRole("textbox", { name: /^메시지$/ }) as HTMLTextAreaElement).value).toBe(
+        "협업 문의드립니다.",
+      );
+      // one-shot — 읽는 즉시 삭제.
+      expect(window.sessionStorage.getItem(KEY)).toBeNull();
+      // 비어 있는 이메일 칸으로 초점 이동.
+      expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "이메일" }));
+    });
+
+    it("자동 제출하지 않고 name·required·WebMCP toolname 구조를 유지한다", () => {
+      window.sessionStorage.setItem(
+        KEY,
+        storedDraft({ name: "이성준", email: "sj@example.com", message: "문의" }),
+      );
+      const submit = vi.fn();
+      render(<ContactView site={MOCK_SITE} />);
+      document.querySelector("form")?.addEventListener("submit", submit);
+
+      expect(submit).not.toHaveBeenCalled();
+      const form = document.querySelector("form")!;
+      expect(form.getAttribute("toolname")).toBe("prepare_contact_message");
+      for (const name of ["name", "email", "message"]) {
+        expect(form.querySelector(`[name="${name}"]`)?.hasAttribute("required")).toBe(true);
+      }
+    });
+
+    it("Strict Mode의 effect 재실행에도 초안은 한 번만 적용되고 값이 유지된다", () => {
+      window.sessionStorage.setItem(
+        KEY,
+        storedDraft({ name: "이성준", email: "", message: "협업 문의드립니다." }),
+      );
+      render(
+        <StrictMode>
+          <ContactView site={MOCK_SITE} />
+        </StrictMode>,
+      );
+
+      // 두 번째 effect 실행에서는 storage가 이미 비어 있어 no-op — 값은 그대로 남는다.
+      expect((screen.getByRole("textbox", { name: "이름" }) as HTMLInputElement).value).toBe(
+        "이성준",
+      );
+      expect((screen.getByRole("textbox", { name: /^메시지$/ }) as HTMLTextAreaElement).value).toBe(
+        "협업 문의드립니다.",
+      );
+      expect(window.sessionStorage.getItem(KEY)).toBeNull();
+    });
+
+    it("만료된 초안은 폼에 넣지 않되 storage에서는 삭제한다", () => {
+      window.sessionStorage.setItem(
+        KEY,
+        JSON.stringify({
+          version: 1,
+          createdAt: Date.now() - 120_000,
+          expiresAt: Date.now() - 60_000,
+          name: "이성준",
+          email: "",
+          message: "지난 문의",
+        }),
+      );
+      render(<ContactView site={MOCK_SITE} />);
+
+      expect((screen.getByRole("textbox", { name: /^메시지$/ }) as HTMLTextAreaElement).value).toBe(
+        "",
+      );
+      expect(window.sessionStorage.getItem(KEY)).toBeNull();
+    });
   });
 
   it.each([

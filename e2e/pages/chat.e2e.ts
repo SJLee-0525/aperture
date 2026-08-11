@@ -159,6 +159,56 @@ test.describe("Chat", () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY);
   });
 
+  test("모바일 프로젝트 모달 위에서 챗봇을 열면 최상위 잠금 정책을 적용한다", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "모바일 viewport에서만 검증");
+    await page.goto("/ko/dev/projects");
+    await page.evaluate(() => {
+      window.scrollTo(0, 500);
+      window.history.pushState(window.history.state, "", "/ko/dev/projects?project=portfolio");
+      window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+    });
+    await expect(page.getByRole("dialog", { name: "개인 포트폴리오" })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
+    await expect.poll(() => page.evaluate(() => document.body.style.top)).toBe("-500px");
+
+    await openChat(page);
+    const chat = page.getByRole("dialog", { name: "Ask Sungjoon." });
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("");
+    await expect
+      .poll(() => chat.evaluate((element) => element.getBoundingClientRect().top))
+      .toBe(0);
+    await expect(page.getByRole("textbox", { name: "메시지" })).toBeInViewport();
+
+    await page.keyboard.press("Escape");
+    await expect(chat).toBeHidden();
+    await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
+    await expect.poll(() => page.evaluate(() => document.body.style.top)).toBe("-500px");
+    await expect(page.getByRole("dialog", { name: "개인 포트폴리오" })).toBeVisible();
+  });
+
+  test("사진 모달 위 챗봇이 열린 동안 방향키와 Escape는 챗봇만 처리한다", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "모바일 viewport에서만 검증");
+    await page.goto("/ko/photo?photo=p01");
+    const photoDialog = page.getByRole("dialog", { name: "새벽의 항구" });
+    await expect(photoDialog).toBeVisible();
+
+    await openChat(page);
+    const chat = page.getByRole("dialog", { name: "Ask Sungjoon." });
+    const input = page.getByRole("textbox", { name: "메시지" });
+    await input.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page).toHaveURL(/photo=p01/);
+
+    await page.keyboard.press("Escape");
+    await expect(chat).toBeHidden();
+    await expect(photoDialog).toBeVisible();
+    await expect(page).toHaveURL(/photo=p01/);
+  });
+
   test("패널을 닫았다 열어도 새로고침 전까지 대화를 유지한다", async ({ page }) => {
     let requests = 0;
     await page.route("**/api/chat", async (route) => {
@@ -223,6 +273,228 @@ test.describe("Chat", () => {
 
     await expect(page).toHaveURL(/\/ko\/photo\?photo=p01$/);
     await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
+  });
+
+  test("열린 사진 모달을 화면 문맥으로 요청 본문에 실어 보낸다", async ({ page }) => {
+    let context: unknown;
+    await page.route("**/api/chat", async (route) => {
+      context = route.request().postDataJSON().context;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: { role: "assistant", content: "도쿄 미나토구에서 찍은 사진이에요." },
+        }),
+      });
+    });
+    await page.goto("/ko/photo?photo=p01");
+    await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
+
+    await openChat(page);
+    await submit(page, "이 사진 어디서 찍었어?");
+
+    await expect(chatMessages(page).getByText("도쿄 미나토구에서 찍은 사진이에요.")).toBeVisible();
+    expect(context).toEqual({
+      pathname: "/ko/photo",
+      openTarget: { type: "photo", id: "p01" },
+    });
+  });
+
+  test("앨범에서 연 사진도 화면 문맥으로 요청 본문에 실어 보낸다", async ({ page }) => {
+    let context: unknown;
+    await page.route("**/api/chat", async (route) => {
+      context = route.request().postDataJSON().context;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: { role: "assistant", content: "앨범에서 고른 사진을 기준으로 답했어요." },
+        }),
+      });
+    });
+    await page.goto("/ko/photo/albums/city-night?photo=p01");
+    await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
+
+    await openChat(page);
+    const dialog = page.getByRole("dialog", { name: "Ask Sungjoon." });
+    await expect(dialog.getByText("보고 있는 사진")).toBeVisible();
+    await expect(dialog.getByText("새벽의 항구", { exact: true })).toBeVisible();
+    await submit(page, "이 사진 어디서 찍었어?");
+
+    await expect(
+      chatMessages(page).getByText("앨범에서 고른 사진을 기준으로 답했어요."),
+    ).toBeVisible();
+    expect(context).toEqual({
+      pathname: "/ko/photo/albums/city-night",
+      openTarget: { type: "photo", id: "p01" },
+    });
+  });
+
+  test("모달을 바꾼 뒤 재시도하면 그 시점의 화면 문맥을 다시 보낸다", async ({ page }) => {
+    const contexts: unknown[] = [];
+    await page.route("**/api/chat", async (route) => {
+      contexts.push(route.request().postDataJSON().context);
+      if (contexts.length === 1) {
+        await route.fulfill({
+          status: 502,
+          contentType: "application/json",
+          body: JSON.stringify({ error: { code: "UPSTREAM_ERROR", message: "일시 오류입니다." } }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: { role: "assistant", content: "두 번째 사진 기준으로 답했어요." },
+        }),
+      });
+    });
+    await page.goto("/ko/photo?photo=p01");
+    await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
+
+    await openChat(page);
+    await submit(page, "이 사진 어디서 찍었어?");
+    await expect(chatMessages(page).getByText("일시 오류입니다.")).toBeVisible();
+
+    // 모달 prev/next 내비게이션과 같은 방식으로 열린 사진을 바꾼다 (replaceState + popstate).
+    await page.evaluate(() => {
+      window.history.replaceState(window.history.state, "", "/ko/photo?photo=p02");
+      window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+    });
+
+    await chatMessages(page).getByRole("button", { name: "다시 시도" }).click();
+
+    await expect(chatMessages(page).getByText("두 번째 사진 기준으로 답했어요.")).toBeVisible();
+    // 재시도는 저장된 문맥이 아니라 그 시점의 URL을 다시 읽는다.
+    expect(contexts[0]).toMatchObject({ openTarget: { type: "photo", id: "p01" } });
+    expect(contexts[1]).toMatchObject({ openTarget: { type: "photo", id: "p02" } });
+  });
+
+  test("화면 문맥 chip — 표시·제외·모달 전환 시 초기화", async ({ page }) => {
+    const contexts: unknown[] = [];
+    await page.route("**/api/chat", async (route) => {
+      contexts.push(route.request().postDataJSON().context);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ message: { role: "assistant", content: "네, 확인했어요." } }),
+      });
+    });
+    await page.goto("/ko/photo?photo=p01");
+    await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeVisible();
+
+    await openChat(page);
+    const dialog = page.getByRole("dialog", { name: "Ask Sungjoon." });
+    // 열린 사진이 chip으로 표시되고 placeholder가 바뀐다.
+    await expect(dialog.getByText("보고 있는 사진")).toBeVisible();
+    await expect(dialog.getByText("새벽의 항구", { exact: true })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "메시지" })).toHaveAttribute(
+      "placeholder",
+      "이 사진에 대해 물어보세요…",
+    );
+
+    // ×는 모달을 닫지 않고 챗봇 문맥에서만 제외한다.
+    await dialog.getByRole("button", { name: "이 항목을 답변에서 제외" }).click();
+    await expect(dialog.getByText("보고 있는 사진")).toBeHidden();
+    await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeAttached();
+    await submit(page, "사진 페이지 이야기");
+    await expect(chatMessages(page).getByText("네, 확인했어요.").first()).toBeVisible();
+    expect(contexts[0]).toEqual({ pathname: "/ko/photo" });
+
+    // 다른 사진으로 바꾸면(모달 prev/next와 같은 방식) 제외가 초기화되고 chip이 갱신된다.
+    await page.evaluate(() => {
+      window.history.replaceState(window.history.state, "", "/ko/photo?photo=p02");
+      window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+    });
+    await expect(dialog.getByText("보고 있는 사진")).toBeVisible();
+    await expect(dialog.getByText("골목, 5시", { exact: true })).toBeVisible();
+    await submit(page, "이 사진은 어디서 찍었어?");
+    await expect(chatMessages(page).getByText("네, 확인했어요.").nth(1)).toBeVisible();
+    expect(contexts[1]).toMatchObject({ openTarget: { type: "photo", id: "p02" } });
+  });
+
+  test("연주 모달의 화면 문맥 chip이 표시된다", async ({ page }) => {
+    await page.goto("/ko/music?work=winterreise");
+    await expect(page.getByRole("dialog")).toBeVisible();
+
+    await openChat(page);
+    const dialog = page.getByRole("dialog", { name: "Ask Sungjoon." });
+    await expect(dialog.getByText("보고 있는 연주")).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "메시지" })).toHaveAttribute(
+      "placeholder",
+      "이 연주에 대해 물어보세요…",
+    );
+  });
+
+  test("연락 초안은 버튼을 눌렀을 때만 저장되고 연락 폼을 채운다", async ({ page }) => {
+    await page.route("**/api/chat", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: {
+            role: "assistant",
+            content: "문의 내용을 정리해 두었어요.",
+            contactDraft: { name: "이성준", email: null, message: "협업 문의드립니다." },
+          },
+        }),
+      }),
+    );
+    await page.goto("/ko");
+
+    await openChat(page);
+    await submit(page, "협업 문의를 대신 전달해줘");
+    const button = page.getByRole("link", { name: /연락 페이지에서 이어 쓰기/ });
+    await expect(button).toBeVisible();
+    // 클릭 전에는 storage에 아무것도 없다.
+    expect(await page.evaluate(() => sessionStorage.getItem("ap-contact-draft:v1"))).toBeNull();
+
+    await button.click();
+
+    await expect(page).toHaveURL(/\/ko\/contact$/);
+    await expect(page.getByRole("textbox", { name: "이름" })).toHaveValue("이성준");
+    await expect(page.getByRole("textbox", { name: /^메시지$/ })).toHaveValue("협업 문의드립니다.");
+    // one-shot — 연락 페이지가 읽는 즉시 삭제.
+    expect(await page.evaluate(() => sessionStorage.getItem("ap-contact-draft:v1"))).toBeNull();
+    // 초안이 채워져도 자동 제출은 없다 — 발송은 방문자 몫.
+    await expect(page.getByText("전송 완료")).toHaveCount(0);
+    // 비어 있는 첫 칸(이메일)으로 초점 이동.
+    await expect(page.getByRole("textbox", { name: "이메일" })).toBeFocused();
+  });
+
+  test("sessionStorage를 쓸 수 없어도 초안 버튼은 일반 연락 링크로 동작한다", async ({ page }) => {
+    // 저장 용량 초과·차단 환경처럼 sessionStorage 쓰기가 실패하는 상황을 흉내낸다.
+    // (프로퍼티 접근 자체가 던지는 극단 케이스는 프레임워크 전체가 깨지는 환경이라
+    //  단위 테스트의 가드로만 검증한다.)
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem = () => {
+        throw new DOMException("QuotaExceededError", "QuotaExceededError");
+      };
+    });
+    await page.route("**/api/chat", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: {
+            role: "assistant",
+            content: "문의 내용을 정리해 두었어요.",
+            contactDraft: { name: "이성준", email: null, message: "협업 문의드립니다." },
+          },
+        }),
+      }),
+    );
+    await page.goto("/ko");
+
+    await openChat(page);
+    await submit(page, "협업 문의를 대신 전달해줘");
+    await page.getByRole("link", { name: /연락 페이지에서 이어 쓰기/ }).click();
+
+    // 저장은 실패하지만 이동은 그대로 — 폼은 비어 있는 일반 연락 폼이다.
+    await expect(page).toHaveURL(/\/ko\/contact$/);
+    await expect(page.getByRole("textbox", { name: "이름" })).toHaveValue("");
+    await expect(page.getByRole("textbox", { name: /^메시지$/ })).toHaveValue("");
   });
 
   test("영어 설정을 API 요청과 오류 없는 접근성 트리에 반영한다", async ({ page }, testInfo) => {

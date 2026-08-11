@@ -9,6 +9,8 @@ export default defineConfig({
       reporter: ["text", "html"],
       include: [
         "src/features/**/_lib/*.ts",
+        "src/lib/photo-filter-query.ts",
+        "src/lib/contact-draft-storage.ts",
         "src/lib/search/*.ts",
         "src/lib/i18n/*.ts",
         "src/lib/format/*.ts",
@@ -19,6 +21,7 @@ export default defineConfig({
         "src/hooks/use-focus-trap.ts",
         "src/hooks/use-scroll-lock.ts",
         "src/features/contact/_hooks/use-contact-form.ts",
+        "src/features/contact/_hooks/use-contact-draft.ts",
         "src/features/search/_components/SearchResults.tsx",
         "src/components/Modal.tsx",
       ],

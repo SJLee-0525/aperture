@@ -1,8 +1,15 @@
 "use client";
 
 import { ROUTES } from "@/constants/routes";
-import { ALL, FOCAL_MAX, FOCAL_MIN, filterPhotos } from "@/features/gallery/_lib/filter-photos";
-import { useEffect, useRef } from "react";
+import { filterPhotos } from "@/features/gallery/_lib/filter-photos";
+import {
+  ALL,
+  FOCAL_MAX,
+  FOCAL_MIN,
+  parsePhotoFilterQuery,
+  resolveCamera,
+  resolveTag,
+} from "@/lib/photo-filter-query";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useModelContextTool } from "@/hooks/use-model-context-tool";
@@ -64,40 +71,6 @@ const OPEN_TOOL: WebMcpToolDefinition = {
     "photoId",
   ]),
   annotations: { readOnlyHint: false, untrustedContentHint: false },
-};
-
-/**
- * 태그 인자를 통제 사전과 대조 — id 또는 ko/en 라벨, 대소문자 무시.
- *
- * @param {Tag[]} tags site/config 의 통제 태그 사전.
- * @param {string} raw 에이전트가 넘긴 태그 인자.
- * @returns {Tag | null} 매칭 실패 시 null — 호출부가 알려진 태그 목록으로 안내한다.
- */
-const resolveTag = (tags: Tag[], raw: string): Tag | null => {
-  const needle = raw.trim().toLowerCase();
-  return (
-    tags.find(
-      (tag) =>
-        tag.id.toLowerCase() === needle ||
-        tag.ko.toLowerCase() === needle ||
-        tag.en.toLowerCase() === needle,
-    ) ?? null
-  );
-};
-
-/**
- * 카메라 인자를 실제 카메라 목록과 대조 — 정확 일치 우선, 유일한 부분 일치 허용.
- *
- * @param {string[]} cameras 사진 목록에서 파생한 카메라명 집합.
- * @param {string} raw 에이전트가 넘긴 카메라 인자.
- * @returns {string | null} 매칭 실패·중의적 부분 일치 시 null.
- */
-const resolveCamera = (cameras: string[], raw: string): string | null => {
-  const needle = raw.trim().toLowerCase();
-  const exact = cameras.find((camera) => camera.toLowerCase() === needle);
-  if (exact) return exact;
-  const partial = cameras.filter((camera) => camera.toLowerCase().includes(needle));
-  return partial.length === 1 ? (partial[0] ?? null) : null;
 };
 
 /**
@@ -198,7 +171,7 @@ const describeReset = (state: {
  *
  * @param {GalleryPhoto[]} photos 서버가 내려준 공개 사진 투영.
  * @param {Tag[]} tags 통제 태그 사전.
- * @param {PhotoFilter} filter usePhotoFilter 반환값 — setter 와 현재 필터 상태.
+ * @param {PhotoFilter} filter usePhotoFilter 반환값 — applyFilters 와 현재 필터 상태.
  * @param {string[]} cameras 뷰가 이미 memo 한 카메라 목록 — 도구에서 재파생하지 않는다.
  * @returns {void}
  */
@@ -210,25 +183,13 @@ const useGalleryTools = (
 ): void => {
   const { lang } = useLang();
 
-  // 재렌더 전 연속 도구 호출이 서로의 변경을 되돌리지 않도록, 마지막으로 적용한 필터를
-  // ref 로 유지한다 — 렌더 클로저의 filter.* 는 직전 커밋 시점 값이라 stale 할 수 있다.
-  const appliedRef = useRef({
-    tag: filter.tag,
-    camera: filter.camera,
-    focalMin: filter.focalMin,
-    focalMax: filter.focalMax,
-  });
-  useEffect(() => {
-    appliedRef.current = {
-      tag: filter.tag,
-      camera: filter.camera,
-      focalMin: filter.focalMin,
-      focalMax: filter.focalMax,
-    };
-  });
-
   useModelContextTool(FILTER_TOOL, (args) => {
-    const applied = appliedRef.current;
+    // URL이 상태의 단일 출처이고 pushState는 동기라, 재렌더 전 연속 도구 호출도
+    // execute 시점 URL 파싱만으로 서로의 변경을 본다 — 별도 ref가 필요 없다.
+    const applied = parsePhotoFilterQuery(new URLSearchParams(window.location.search), {
+      tags,
+      cameras,
+    });
 
     let tag = applied.tag;
     const tagProvided = typeof args.tag === "string";
@@ -264,11 +225,17 @@ const useGalleryTools = (
     // 역전된 범위(min > max)는 불가능한 상태를 슬라이더에 커밋하지 않도록 뒤집어 받는다.
     if (focalMin > focalMax) [focalMin, focalMax] = [focalMax, focalMin];
 
-    // 인자로 받은 차원만 set 한다 — 미지정 차원을 stale 값으로 다시 쓰지 않는다.
-    if (tagProvided) filter.setTag(tag);
-    if (cameraProvided) filter.setCamera(camera);
-    if (focalProvided) filter.setFocal(focalMin, focalMax);
-    appliedRef.current = { tag, camera, focalMin, focalMax };
+    // 인자로 받은 차원만 병합해 1회 push — 도구 호출당 history entry 하나.
+    if (tagProvided || cameraProvided || focalProvided) {
+      filter.applyFilters(
+        {
+          ...(tagProvided ? { tag } : {}),
+          ...(cameraProvided ? { camera } : {}),
+          ...(focalProvided ? { focalMin, focalMax } : {}),
+        },
+        "push",
+      );
+    }
 
     // 화면과 같은 순수 함수로 즉시 재계산 — 상태 반영을 기다리지 않는다.
     const query = new URLSearchParams(window.location.search).get("q") ?? "";

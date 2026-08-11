@@ -6,7 +6,7 @@ import { Chip } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
 import { RangeSlider } from "@/components/RangeSlider";
 import { Select } from "@/components/Select";
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/features/gallery/_lib/filter-photos";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Tag } from "@/types/tag";
@@ -23,6 +23,10 @@ type Props = {
   focalMin: number;
   focalMax: number;
   onFocal: (low: number, high: number) => void;
+  /** 슬라이더 조작이 끝났을 때 현재 범위를 전달한다. */
+  onFocalCommit?: (low: number, high: number) => void;
+  /** pointercancel에서 focal draft를 취소한다. */
+  onFocalCancel?: () => void;
   onReset: () => void;
   filtersActive: boolean;
 };
@@ -108,6 +112,8 @@ const FilterBar = (props: Props) => {
                   high={props.focalMax}
                   unit="mm"
                   onChange={props.onFocal}
+                  onChangeEnd={props.onFocalCommit}
+                  onChangeCancel={props.onFocalCancel}
                 />
               </div>
 

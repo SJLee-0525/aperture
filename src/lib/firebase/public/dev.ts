@@ -17,7 +17,15 @@ import type { LocalizedText } from "@/types/localized";
 
 type ChatDevProject = Pick<
   DevProject,
-  "id" | "title" | "summary" | "position" | "techTags" | "cover" | "order" | "published"
+  | "id"
+  | "title"
+  | "summary"
+  | "position"
+  | "techTags"
+  | "achievements"
+  | "cover"
+  | "order"
+  | "published"
 >;
 
 /**
@@ -102,6 +110,7 @@ const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<Chat
         "summary",
         "position",
         "techTags",
+        "achievements",
         "cover",
         "order",
         "published",
@@ -116,6 +125,7 @@ const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<Chat
       summary: project.summary,
       position: project.position,
       techTags: project.techTags,
+      achievements: project.achievements,
       cover: project.cover,
       order: project.order,
       published: project.published,

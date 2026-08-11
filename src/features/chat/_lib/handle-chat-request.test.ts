@@ -5,6 +5,9 @@ import { ChatRateLimitConfigurationError } from "@/features/chat/_lib/chat-rate-
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import { handleChatRequest, MAX_BODY_BYTES } from "@/features/chat/_lib/handle-chat-request";
 
+import type { ChatReference } from "@/types/chat";
+import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
+
 const createRequest = (body: unknown, headers?: HeadersInit) =>
   new Request("http://localhost/api/chat", {
     method: "POST",
@@ -12,12 +15,30 @@ const createRequest = (body: unknown, headers?: HeadersInit) =>
     body: JSON.stringify(body),
   });
 
+const EMPTY_LOOKUP = { photo: {}, work: {}, award: {}, project: {} };
+const createSnapshot = (overrides?: Partial<ReturnType<typeof baseSnapshot>>) => ({
+  ...baseSnapshot(),
+  ...overrides,
+});
+const baseSnapshot = () => ({
+  context: "# PROFILE_CONTEXT\ncontext",
+  references: [] as ChatReference[],
+  screenLookup: EMPTY_LOOKUP,
+  linkVocabulary: { tags: [], cameras: [], photoIds: [] } as PhotoFilterVocabulary,
+});
+
+const PHOTO_VOCABULARY: PhotoFilterVocabulary = {
+  tags: [{ id: "sea", ko: "바다", en: "Sea" }],
+  cameras: ["Leica Q3"],
+  photoIds: ["p01"],
+};
+
 describe("handleChatRequest", () => {
   it("답변 조각을 NDJSON으로 전송하고 완료 시 구조화 메시지를 확정한다", async () => {
     const provider = vi.fn(async ({ onContentDelta }) => {
       onContentDelta?.("사진을 ");
       onContentDelta?.("확인해 보세요.");
-      return { content: "사진을 확인해 보세요." };
+      return { content: "사진을 확인해 보세요.", contactDraft: null };
     });
     const response = await handleChatRequest(
       createRequest(
@@ -81,7 +102,7 @@ describe("handleChatRequest", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ message: { role: "assistant", content: answer } });
     expect(buildContext).toHaveBeenCalledWith(
-      lang,
+      expect.any(Function),
       ["profile", "development"],
       { text: "development project" },
       expect.anything(),
@@ -119,7 +140,7 @@ describe("handleChatRequest", () => {
 
     expect(response.status).toBe(200);
     expect(buildContext).toHaveBeenCalledWith(
-      "ko",
+      expect.any(Function),
       ["profile", "development"],
       { text: "개발 수상 내역", keywords: ["수상", "우수상"] },
       expect.anything(),
@@ -144,7 +165,7 @@ describe("handleChatRequest", () => {
 
     expect(response.status).toBe(200);
     expect(buildContext).toHaveBeenCalledWith(
-      "ko",
+      expect.any(Function),
       ["profile", "development"],
       { text: "개발 프로젝트를 알려줘\n그건 언제 했어?" },
       expect.anything(),
@@ -161,7 +182,7 @@ describe("handleChatRequest", () => {
       {
         provider: async ({ onContentDelta }) => {
           onContentDelta?.("안녕하세요!");
-          return { content: "안녕하세요!" };
+          return { content: "안녕하세요!", contactDraft: null };
         },
         buildContext,
       },
@@ -229,6 +250,7 @@ describe("handleChatRequest", () => {
       image: { url: "/photo.webp", width: 320, height: 240 },
     };
     const resolveReferences = vi.fn().mockResolvedValue([reference]);
+    const cachedReferences = [reference];
     const response = await handleChatRequest(
       createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여줘" }] }),
       {
@@ -239,7 +261,9 @@ describe("handleChatRequest", () => {
             { href: "https://evil.example", label: "외부 링크" },
           ],
           references: [{ type: "photo", id: "p01" }],
+          contactDraft: null,
         }),
+        loadSnapshot: async () => createSnapshot({ references: cachedReferences }),
         buildContext: async () => "context",
         resolveReferences,
       },
@@ -252,7 +276,11 @@ describe("handleChatRequest", () => {
         references: [reference],
       },
     });
-    expect(resolveReferences).toHaveBeenCalledWith([{ type: "photo", id: "p01" }], "ko");
+    expect(resolveReferences).toHaveBeenCalledWith(
+      [{ type: "photo", id: "p01" }],
+      cachedReferences,
+      undefined,
+    );
   });
 
   it("references 조회가 실패해도 완성된 답변을 references 없이 반환한다", async () => {
@@ -264,7 +292,9 @@ describe("handleChatRequest", () => {
         provider: async () => ({
           content: "이 사진부터 확인해 보세요.",
           references: [{ type: "photo", id: "p01" }],
+          contactDraft: null,
         }),
+        loadSnapshot: async () => createSnapshot(),
         buildContext: async () => "context",
         resolveReferences,
       },
@@ -434,5 +464,223 @@ describe("handleChatRequest", () => {
     );
 
     expect(response.status).toBe(504);
+  });
+
+  it("열린 모달 문맥을 SCREEN_CONTEXT 블록으로 지침에 넣는다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "새벽의 항구는 도쿄에서 찍었어요." });
+    const loadSnapshot = vi.fn(async () =>
+      createSnapshot({
+        screenLookup: { ...EMPTY_LOOKUP, photo: { p01: "Photo: 새벽의 항구 | place: 도쿄" } },
+      }),
+    );
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "이 사진 어디서 찍었어?" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p01" } },
+      }),
+      { provider, loadSnapshot, buildContext: async () => "context" },
+    );
+
+    expect(response.status).toBe(200);
+    const instructions = provider.mock.calls[0]?.[0].instructions as string;
+    expect(instructions).toContain("# SCREEN_CONTEXT");
+    expect(instructions).toContain("새벽의 항구 | place: 도쿄");
+  });
+
+  it("인텐트가 프로필 로드를 생략해도 화면 문맥은 포함하고 스냅샷은 1회만 로드한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "네, 이 사진이에요." });
+    const loadSnapshot = vi.fn(async () =>
+      createSnapshot({ screenLookup: { ...EMPTY_LOOKUP, photo: { p01: "Photo: 새벽의 항구" } } }),
+    );
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        // 인사말은 섹션이 비어 프로필 로드를 건너뛰는 입력이다.
+        messages: [{ role: "user", content: "안녕하세요" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p01" } },
+      }),
+      { provider, loadSnapshot },
+    );
+
+    expect(response.status).toBe(200);
+    expect(loadSnapshot).toHaveBeenCalledTimes(1);
+    const instructions = provider.mock.calls[0]?.[0].instructions as string;
+    expect(instructions).toContain("# SCREEN_CONTEXT");
+    expect(instructions).toContain("No portfolio lookup was needed");
+  });
+
+  it("openTarget이 없고 프로필도 불필요하면 스냅샷을 로드하지 않는다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "안녕하세요!" });
+    const loadSnapshot = vi.fn(async () => createSnapshot());
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "안녕하세요" }],
+        context: { pathname: "/ko/photo" },
+      }),
+      { provider, loadSnapshot },
+    );
+
+    expect(response.status).toBe(200);
+    expect(loadSnapshot).not.toHaveBeenCalled();
+  });
+
+  it("화면 문맥 조회가 실패해도 SCREEN_CONTEXT 없이 답변을 계속한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "사진 이야기를 해볼까요?" });
+    const loadSnapshot = vi.fn(async () => {
+      throw new Error("firestore down");
+    });
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "안녕하세요" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p01" } },
+      }),
+      { provider, loadSnapshot },
+    );
+
+    expect(response.status).toBe(200);
+    const instructions = provider.mock.calls[0]?.[0].instructions as string;
+    expect(instructions).not.toContain("# SCREEN_CONTEXT");
+  });
+
+  it("존재하지 않는 id의 화면 문맥은 무시하고 기존 응답과 동일하게 답한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "안녕하세요!" });
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "안녕하세요" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "no-such" } },
+      }),
+      { provider, loadSnapshot: async () => createSnapshot() },
+    );
+
+    expect(response.status).toBe(200);
+    const instructions = provider.mock.calls[0]?.[0].instructions as string;
+    expect(instructions).not.toContain("# SCREEN_CONTEXT");
+    expect(await response.json()).toEqual({
+      message: { role: "assistant", content: "안녕하세요!" },
+    });
+  });
+
+  const linksOf = async (links: Array<{ href: string; label: string }>) => {
+    const loadSnapshot = vi.fn(async () => createSnapshot({ linkVocabulary: PHOTO_VOCABULARY }));
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여줘" }] }),
+      {
+        provider: async () => ({ content: "확인해 보세요.", links, contactDraft: null }),
+        loadSnapshot,
+        buildContext: async () => "context",
+      },
+    );
+    const body = (await response.json()) as { message: { links?: unknown } };
+    return { links: body.message.links, loadSnapshot };
+  };
+
+  it("사진 필터 링크를 canonical로 재직렬화한다 (라벨 정규화·순서 재정렬)", async () => {
+    const { links, loadSnapshot } = await linksOf([
+      { href: "/photo?camera=leica&tag=Sea", label: "바다 사진" },
+    ]);
+
+    expect(links).toEqual([{ href: "/photo?tag=sea&camera=Leica+Q3", label: "바다 사진" }]);
+    expect(loadSnapshot).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["unknown key 포함", "/photo?redirect=https://evil.example"],
+    ["known+unknown 혼합", "/photo?tag=sea&redirect=https://evil.example"],
+    ["사전에 없는 태그", "/photo?tag=zzz"],
+    ["역전 초점 범위", "/photo?focalMin=200&focalMax=35"],
+    ["존재하지 않는 photo id", "/photo?photo=zzz"],
+    ["중복 known key", "/photo?tag=sea&tag=sea"],
+    ["fragment 포함", "/photo#top"],
+    ["protocol-relative", "//evil.example/photo"],
+    ["credentials", "https://user:pw@evil.example/photo"],
+    ["encoded slash 우회", "/photo%2F../admin"],
+    ["dot segment 우회", "/foo/../photo"],
+  ])("%s 링크는 전체 폐기한다", async (_, href) => {
+    const { links } = await linksOf([{ href, label: "링크" }]);
+    expect(links).toBeUndefined();
+  });
+
+  it("query 없는 /photo와 검증 통과 링크는 유지된다", async () => {
+    const { links } = await linksOf([
+      { href: "/photo", label: "사진 작업" },
+      { href: "/photo?photo=p01", label: "이 사진" },
+    ]);
+
+    expect(links).toEqual([
+      { href: "/photo", label: "사진 작업" },
+      { href: "/photo?photo=p01", label: "이 사진" },
+    ]);
+  });
+
+  it("참조 카드와 같은 사진을 가리키는 query 링크는 중복이라 버린다", async () => {
+    const reference = {
+      type: "photo" as const,
+      id: "p01",
+      title: "새벽의 항구",
+      subtitle: "도쿄",
+      href: "/photo?photo=p01",
+      image: null,
+    };
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여줘" }] }),
+      {
+        provider: async () => ({
+          content: "이 사진이에요.",
+          links: [
+            { href: "/photo?photo=p01", label: "이 사진 열기" },
+            // 같은 사진이라도 필터 링크는 목록 진입이라 유지된다 (정책).
+            { href: "/photo?tag=sea", label: "바다 사진 더 보기" },
+          ],
+          references: [{ type: "photo", id: "p01" }],
+          contactDraft: null,
+        }),
+        loadSnapshot: async () =>
+          createSnapshot({ references: [reference], linkVocabulary: PHOTO_VOCABULARY }),
+        buildContext: async () => "context",
+        resolveReferences: async () => [reference],
+      },
+    );
+
+    const body = (await response.json()) as { message: { links?: unknown } };
+    expect(body.message.links).toEqual([{ href: "/photo?tag=sea", label: "바다 사진 더 보기" }]);
+  });
+
+  it("사진 외 허용 경로의 query는 현행대로 통과한다 (정책 명시)", async () => {
+    const { links } = await linksOf([{ href: "/contact?subject=hello", label: "연락" }]);
+
+    expect(links).toEqual([{ href: "/contact?subject=hello", label: "연락" }]);
+  });
+
+  it("어휘 로드가 실패하면 query 있는 /photo 링크만 fail-closed로 버린다", async () => {
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여줘" }] }),
+      {
+        provider: async () => ({
+          content: "확인해 보세요.",
+          links: [
+            { href: "/photo?tag=sea", label: "바다 사진" },
+            { href: "/contact", label: "연락" },
+          ],
+          contactDraft: null,
+        }),
+        loadSnapshot: async () => {
+          throw new Error("firestore down");
+        },
+        buildContext: async () => "context",
+      },
+    );
+
+    const body = (await response.json()) as { message: { links?: unknown; content: string } };
+    expect(body.message.content).toBe("확인해 보세요.");
+    expect(body.message.links).toEqual([{ href: "/contact", label: "연락" }]);
   });
 });
