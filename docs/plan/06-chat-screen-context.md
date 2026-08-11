@@ -1,11 +1,11 @@
 # 챗봇 화면 문맥 인식 계획
 
-> 상태: **1차 구현 완료 / 검증 중**
+> 상태: **구현 및 검증 완료**
 > 관련 결정: [ADR-0001 Route Handler 기반 Portfolio RAG](../adr/0001-serverless-rag.md)
 > 참고: [04-webmcp-agent-tools](04-webmcp-agent-tools.md)
 > 목적: 챗봇이 현재 화면을 이해하고, 사진 필터와 연락 초안을 기존 웹 기능으로 이어 준다.
 
-## 결론
+## 구현 결과
 
 내장 챗봇은 WebMCP를 사용하지 않는다. WebMCP API를 호출하지 않고, WebMCP 지원 여부도 확인하지
 않는다. WebMCP 도구의 공개 계약, 등록 구조, 결과 의미도 유지한다. 사진 필터가 URL 상태를 쓰게
@@ -19,7 +19,7 @@ WebMCP는 외부 브라우저 에이전트용으로 유지한다. 외부 에이�
 없으므로 `search_portfolio`, `get_*`, `filter_photos` 같은 도구가 필요하다. 내장 챗봇과 대상이
 다르다.
 
-이번 계획에서 하지 않는 일은 다음과 같다.
+구현 범위에서 제외한 작업은 다음과 같다.
 
 - 챗봇에서 `getTools` 또는 `executeTool` 호출
 - `/api/chat`을 WebMCP 도구로 공개
@@ -29,7 +29,7 @@ WebMCP는 외부 브라우저 에이전트용으로 유지한다. 외부 에이�
 
 ## 1. 화면 문맥 읽기
 
-### 현재 문제
+### 해결한 문제
 
 사진 모달을 열어둔 채 "이거 어디서 찍었어?"라고 물으면 챗봇은 어느 사진인지 모른다. "이
 프로젝트 기술 스택이 뭐야"나 "지금 보고 있는 연주 프로그램 알려줘"도 마찬가지다.
@@ -48,31 +48,22 @@ type ChatContextTarget = "photo" | "work" | "award" | "project";
 type ChatContext = {
   pathname: string;
   openTarget?: { type: ChatContextTarget; id: string };
-  photoFilters?: {
-    tag?: string;
-    camera?: string;
-    focalMin?: number;
-    focalMax?: number;
-  };
 };
 ```
 
-첫 구현에서는 `pathname`과 `openTarget`만 보낸다. `photoFilters`는 2단계에서 필터를 URL로 옮긴
-뒤 추가한다.
+요청 계약은 `pathname`과 `openTarget`만 보낸다. 사진 필터는 URL 상태와 검증된 액션 링크로
+사용하고 `ChatContext`에 복제하지 않는다.
 
 ### 화면 문맥 전용 resolver
 
-화면 문맥은 채팅 레퍼런스와 별도로 해석한다. 현재 `formatProfileReferences`는 사진, 연주,
+화면 문맥은 채팅 레퍼런스와 별도로 해석한다. `formatProfileReferences`는 사진, 연주,
 프로젝트만 다루며 음악 수상은 포함하지 않는다. `award`를 `music` 레퍼런스로 바꾸면 같은 id의
 연주를 찾게 되므로 기존 `resolveProfileReferences`를 재사용할 수 없다.
 
-서버에 `resolveChatScreenContext`를 둔다.
+서버에 `resolveScreenContext`를 둔다.
 
 ```ts
-resolveChatScreenContext({
-  pathname,
-  target: { type: "award", id },
-});
+resolveScreenContext({ type: "award", id }, dependencies);
 ```
 
 resolver는 공개 데이터에서 id를 다시 찾고 프롬프트에 넣을 짧은 문맥을 만든다.
@@ -95,22 +86,37 @@ resolver는 공개 데이터에서 id를 다시 찾고 프롬프트에 넣을 �
 - 경로에 맞는 query key 하나만 사용한다. `/ko/dev/projects`에서 받은 `photo`는 버린다.
 - id는 문자열만 받고 64자로 제한한다. 제목, 본문, 이미지 URL은 클라이언트에서 받지 않는다.
 - id가 공개 데이터에 없으면 화면 문맥 없이 기존 채팅 흐름을 계속한다.
-- 태그와 카메라는 공개 데이터에서 만든 목록과 대조한다.
-- 초점거리는 갤러리와 같은 범위로 제한하고 역전된 범위는 거부한다.
 - 클라이언트의 `ChatContext`와 서버가 만든 프롬프트 문맥에 각각 크기 상한을 둔다.
 - 화면 문맥 원문은 서버 로그, Sentry 이벤트, 분석 이벤트에 기록하지 않는다.
 
-현재 요청 본문은 20KB로 제한된다. `ChatContext`에는 별도의 작은 상한을 두고, resolver 출력은
+요청 본문은 20KB로 제한된다. `ChatContext`에는 별도의 작은 상한을 두고, resolver 출력은
 대상 하나당 1,500자를 넘기지 않는다.
 
 ### 전송 시점
 
-문맥은 질문을 보낼 때마다 현재 URL에서 새로 만든다. 메시지 기록에는 복사하지 않는다. 재시도할
-때도 저장된 문맥을 재사용하지 않고 그 시점의 URL을 다시 읽는다. 사용자가 모달을 바꾼 뒤 재시도한
-경우 현재 화면을 기준으로 답해야 하기 때문이다.
+문맥은 질문을 보낼 때마다 현재 URL에서 새로 만든다. 모델에 전달하는 대화 이력에는 문맥을 복사하지
+않는다. 대신 사용자 메시지에는 실제 요청의 `openTarget`과 화면 target이 일치할 때만 표시용
+`ChatSentContext` 스냅샷을 남긴다.
 
-문맥은 항상 보내되 값이 없으면 `openTarget`과 `photoFilters`를 생략한다. 클라이언트에서 지시어를
-판별하면 언어별 예외가 늘고, 잘못 생략했을 때 서버가 복구할 방법이 없다.
+```ts
+type ChatSentContext = {
+  type: ChatContextTarget;
+  id: string;
+  label: string;
+  href: string;
+};
+```
+
+채팅 기록에는 “함께 보낸 사진·연주·수상 내역·프로젝트”와 제목을 표시한다. `href`는 전송 순간의
+`pathname + search`를 저장하므로 일반 상세뿐 아니라 앨범과 사진 필터 상태로도 돌아갈 수 있다.
+표시는 클라이언트 세션의 메시지 상태에만 존재하며 서버 문맥 적용 성공의 증명으로 사용하지 않는다.
+
+재시도할 때는 저장된 문맥을 재사용하지 않고 그 시점의 URL을 다시 읽는다. 사용자가 모달을 바꾼 뒤
+재시도한 경우 현재 화면을 기준으로 답해야 하기 때문이다. 실패한 사용자 메시지와 응답을 제거한 뒤
+새 요청의 문맥 스냅샷을 다시 기록한다.
+
+허용된 공개 경로에서는 pathname 문맥을 항상 보내되 열린 상세가 없으면 `openTarget`을 생략한다.
+클라이언트에서 지시어를 판별하면 언어별 예외가 늘고, 잘못 생략했을 때 서버가 복구할 방법이 없다.
 
 ### 테스트
 
@@ -120,11 +126,14 @@ resolver는 공개 데이터에서 id를 다시 찾고 프롬프트에 넣을 �
 - 여러 modal key가 있어도 현재 경로에 맞는 대상 하나만 쓴다.
 - 문맥이 없어도 기존 채팅 응답이 달라지지 않는다.
 - 재시도 시 저장된 값이 아니라 현재 URL을 다시 읽는다.
+- 실제 요청 target과 화면 target이 일치할 때만 사용자 메시지에 표시용 문맥을 남긴다.
+- 사용자가 문맥 칩에서 항목을 제외하면 요청과 메시지 기록에서 모두 빠진다.
+- 보낸 문맥을 누르면 전송 당시의 경로와 query로 돌아가고 챗봇은 닫힌다.
 
 ## 2. 사진 필터를 URL로 이전
 
-현재 `q`만 URL에 있고 태그, 카메라, 초점거리는 `usePhotoFilter`의 `useState`에 있다. 필터를 URL로
-옮기면 공유, 새로고침 복원, 뒤로가기가 가능해진다. 챗봇도 현재 필터를 읽거나 필터 링크를 줄 수
+`q`, 태그, 카메라, 초점거리는 URL 상태로 관리한다. 공유한 URL, 새로고침, 뒤로가기에서 같은 필터를
+복원할 수 있고, 챗봇은 서버에서 검증한 필터 링크를 줄 수
 있다.
 
 ### URL 계약
@@ -209,7 +218,7 @@ codec으로 다시 만든다. 검증에 실패하면 링크를 버린다.
 
 ### 응답 계약
 
-현재 응답 계약에는 초안을 전달할 필드가 없으므로 nullable 필드를 추가한다.
+응답 계약은 초안을 nullable 필드로 전달한다.
 
 ```ts
 type ContactDraft = {
@@ -280,7 +289,7 @@ submit 구조는 바꾸지 않는다.
 - 만료된 값은 폼에 넣지 않는다.
 - 이메일과 메시지를 assistant 본문이나 버튼 label에 다시 출력하지 않는다.
 - 캡차 확인과 발송은 방문자가 직접 한다.
-- 개인정보 처리방침에 탭 단위 임시 저장 목적과 삭제 시점을 반영할지 확인한다.
+- 개인정보 처리방침에 탭 단위 임시 저장 목적, 읽은 직후 삭제와 최대 10분 보관을 반영한다.
 
 채팅 메시지 자체에는 사용자가 입력한 내용이 남는다. 이번 규칙은 같은 값을 별도 저장소와 로그에
 추가로 복제하지 않는다는 뜻이다.
@@ -317,19 +326,22 @@ submit 구조는 바꾸지 않는다.
 
 ## 5. 구현 순서
 
-1. `ChatContext` 요청 파서와 `resolveChatScreenContext`를 구현한다.
+1. `ChatContext` 요청 파서와 `resolveScreenContext`를 구현한다.
 2. 화면 문맥을 서버 프롬프트에 넣고 사진, 연주, 음악 수상, 프로젝트 지시어를 평가한다.
-3. 사진 필터 query codec과 URL 기반 `usePhotoFilter`를 구현한다.
-4. `sanitizeLinks`에 사진 필터 query 검증과 canonical 직렬화를 추가한다.
-5. 채팅 응답에 nullable `contactDraft`를 추가한다.
-6. 챗봇 버튼, storage 어댑터, 연락 폼 초기값 적용을 구현한다.
-7. 개인정보 처리방침 반영 여부를 확인하고 단위·E2E 테스트를 실행한다.
+3. 전송한 화면 항목을 사용자 메시지에 기록하고 원래 경로로 돌아가는 링크를 연결한다.
+4. 사진 필터 query codec과 URL 기반 `usePhotoFilter`를 구현한다.
+5. `sanitizeLinks`에 사진 필터 query 검증과 canonical 직렬화를 추가한다.
+6. 채팅 응답에 nullable `contactDraft`를 추가한다.
+7. 챗봇 버튼, storage 어댑터, 연락 폼 초기값 적용을 구현한다.
+8. 개인정보 처리방침을 반영하고 단위·E2E 테스트를 실행한다.
 
 각 단계는 WebMCP 없이 구현하고 검증한다. 기존 WebMCP 테스트는 회귀 확인용으로만 실행한다.
 
 ## 6. 완료 기준
 
 - 열린 사진, 연주, 음악 수상, 프로젝트를 가리키는 질문에 현재 화면 기준으로 답한다.
+- 사용자 메시지는 함께 전송한 화면 항목을 표시하고 누르면 전송 당시 URL로 돌아간다.
+- 표시용 화면 문맥은 모델 대화 이력에 복제하지 않으며 문맥 칩에서 제외한 항목은 기록하지 않는다.
 - 잘못된 경로, id와 필터 값은 프롬프트나 링크에 들어가지 않는다.
 - 사진 필터 URL이 공유, 새로고침, 뒤로가기에서 정한 정책대로 동작한다.
 - 챗봇이 만든 사진 링크는 서버 검증과 canonical codec을 통과한다.

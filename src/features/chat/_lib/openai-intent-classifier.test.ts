@@ -95,6 +95,7 @@ describe("OpenAI intent classifier", () => {
         input: expect.arrayContaining([{ role: "user", content: "그럼 독도도 있어?" }]),
       }),
     );
+    expect(body.instructions).toContain("A standalone number or similarly ambiguous input");
     expect(body.text.format).toEqual(
       expect.objectContaining({ type: "json_schema", strict: true }),
     );

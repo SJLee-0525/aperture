@@ -8,6 +8,7 @@ import { buildChatContext } from "@/features/chat/_lib/chat-context";
 import { createInitialMessage } from "@/features/chat/_lib/chat-welcome";
 
 import type { ChatMessage } from "@/types/chat";
+import type { ChatScreenTarget } from "@/lib/chat-screen-target-context";
 import type { Lang } from "@/types/lang";
 
 type ChatSuccessResponse = { message: Omit<ChatMessage, "id"> };
@@ -103,9 +104,15 @@ const readEventStream = async (response: Response, onEvent: (event: ChatStreamEv
  * @param {Lang} lang 응답 및 오류 문구에 사용할 언어.
  * @param {(() => string | null) | undefined} getExcludedTargetKey 사용자가 제외한 항목의
  * `"type:id"` 키를 전송 시점에 읽는 함수.
+ * @param {(() => ChatScreenTarget | null) | undefined} getScreenTarget 입력창에 표시된 화면
+ * 항목을 전송 시점에 읽는 함수.
  * @returns {{ messages: ChatMessage[]; isReplying: boolean; retry: (messageId: string) => boolean; send: (rawQuestion: string) => boolean }} 메시지 목록과 전송 API.
  */
-const useChat = (lang: Lang, getExcludedTargetKey?: () => string | null) => {
+const useChat = (
+  lang: Lang,
+  getExcludedTargetKey?: () => string | null,
+  getScreenTarget?: () => ChatScreenTarget | null,
+) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => [createInitialMessage(lang)]);
   const [isReplying, setIsReplying] = useState(false);
   const messagesRef = useRef(messages);
@@ -133,10 +140,38 @@ const useChat = (lang: Lang, getExcludedTargetKey?: () => string | null) => {
       const question = rawQuestion.trim();
       if (!question || replyingRef.current) return false;
 
+      // 재시도할 때도 저장된 값 대신 현재 URL을 사용한다.
+      let context = buildChatContext(
+        window.location.pathname,
+        new URLSearchParams(window.location.search),
+      );
+      // 사용자가 제외한 항목과 현재 URL의 항목이 같을 때만 상세 정보를 뺀다.
+      const excludedKey = getExcludedTargetKey?.() ?? null;
+      if (
+        context?.openTarget &&
+        excludedKey === `${context.openTarget.type}:${context.openTarget.id}`
+      ) {
+        context = { pathname: context.pathname };
+      }
+      // 칩의 표시 대상과 실제 요청 target이 일치할 때만 사용자 메시지에 기록한다.
+      const screenTarget = getScreenTarget?.() ?? null;
+      const sentContext =
+        context?.openTarget &&
+        screenTarget?.type === context.openTarget.type &&
+        screenTarget.id === context.openTarget.id
+          ? {
+              type: screenTarget.type,
+              id: screenTarget.id,
+              label: screenTarget.label,
+              href: `${window.location.pathname}${window.location.search}`,
+            }
+          : undefined;
+
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
         content: question,
+        ...(sentContext ? { sentContext } : {}),
       };
       const assistantId = crypto.randomUUID();
       const pendingMessage: ChatMessage = {
@@ -157,20 +192,6 @@ const useChat = (lang: Lang, getExcludedTargetKey?: () => string | null) => {
 
       const controller = new AbortController();
       requestRef.current = controller;
-
-      // 재시도할 때도 저장된 값 대신 현재 URL을 사용한다.
-      let context = buildChatContext(
-        window.location.pathname,
-        new URLSearchParams(window.location.search),
-      );
-      // 사용자가 제외한 항목과 현재 URL의 항목이 같을 때만 상세 정보를 뺀다.
-      const excludedKey = getExcludedTargetKey?.() ?? null;
-      if (
-        context?.openTarget &&
-        excludedKey === `${context.openTarget.type}:${context.openTarget.id}`
-      ) {
-        context = { pathname: context.pathname };
-      }
 
       void fetch("/api/chat", {
         method: "POST",
@@ -249,7 +270,7 @@ const useChat = (lang: Lang, getExcludedTargetKey?: () => string | null) => {
 
       return true;
     },
-    [lang, getExcludedTargetKey],
+    [lang, getExcludedTargetKey, getScreenTarget],
   );
 
   const retry = useCallback(

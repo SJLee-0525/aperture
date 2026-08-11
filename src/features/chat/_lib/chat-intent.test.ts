@@ -119,6 +119,70 @@ describe("selectChatIntentWithClassifier", () => {
     expect(classifier).toHaveBeenCalledWith(messages, expect.any(AbortSignal));
   });
 
+  it.each(["안녕하세요", "안녕!", "hello", "???"])(
+    "명백한 비조회 입력은 LLM 분류기를 호출하지 않는다: %s",
+    async (content) => {
+      const classifier = vi.fn().mockResolvedValue({
+        sections: ["profile"],
+        searchQuery: content,
+        searchKeywords: [content],
+      });
+
+      await expect(
+        selectChatIntentWithClassifier(
+          [{ role: "user", content }],
+          new AbortController().signal,
+          classifier,
+        ),
+      ).resolves.toEqual({ sections: [] });
+      expect(classifier).not.toHaveBeenCalled();
+    },
+  );
+
+  it("인사 뒤에 질문이 이어지면 LLM 분류기에 전달한다", async () => {
+    const messages = [{ role: "user" as const, content: "안녕, 이 사람은 뭐 하는 사람이야?" }];
+    const classified = {
+      sections: ["profile" as const],
+      searchQuery: "이성준 소개",
+      searchKeywords: ["이성준", "Sungjoon Lee"],
+    };
+    const classifier = vi.fn().mockResolvedValue(classified);
+
+    await expect(
+      selectChatIntentWithClassifier(messages, new AbortController().signal, classifier),
+    ).resolves.toEqual(classified);
+    expect(classifier).toHaveBeenCalledWith(messages, expect.any(AbortSignal));
+  });
+
+  it.each(["4242", "2024", "35"])("단독 숫자 입력은 LLM 분류기에 전달한다: %s", async (content) => {
+    const messages = [{ role: "user" as const, content }];
+    const classifier = vi.fn().mockResolvedValue({ sections: [] });
+
+    await expect(
+      selectChatIntentWithClassifier(messages, new AbortController().signal, classifier),
+    ).resolves.toEqual({ sections: [] });
+    expect(classifier).toHaveBeenCalledWith(messages, expect.any(AbortSignal));
+  });
+
+  it("대화 중 숫자 입력은 앞 문맥을 해석하도록 LLM 분류기에 전달한다", async () => {
+    const conversation = [
+      { role: "user" as const, content: "수상 연도를 알려줘" },
+      { role: "assistant" as const, content: "어느 수상을 찾으시나요?" },
+      { role: "user" as const, content: "2024" },
+    ];
+    const classified = {
+      sections: ["profile", "music"] as const,
+      searchQuery: "2024년 음악 수상",
+      searchKeywords: ["2024", "수상"],
+    };
+    const classifier = vi.fn().mockResolvedValue(classified);
+
+    await expect(
+      selectChatIntentWithClassifier(conversation, new AbortController().signal, classifier),
+    ).resolves.toEqual(classified);
+    expect(classifier).toHaveBeenCalledWith(conversation, expect.any(AbortSignal));
+  });
+
   it.each(["none", "failure"])("LLM %s 시 기존 정규식 결과로 폴백한다", async (mode) => {
     const directMessages = [{ role: "user" as const, content: "독도 사진 없어 정말?" }];
     const classifier =
