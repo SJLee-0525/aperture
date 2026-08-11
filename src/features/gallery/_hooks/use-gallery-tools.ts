@@ -32,9 +32,10 @@ const FILTER_TOOL: WebMcpToolDefinition = {
   name: "filter_photos",
   description:
     "Filter the photo grid on this page by tag, camera, or focal length range (mm). " +
-    "Filters stack: an argument you omit keeps its current value, so pass 'all' to clear " +
-    "a tag or camera filter. Call with no arguments to see the available tags and cameras " +
-    "plus the filters already active. Updates the visible grid and returns how many photos match.",
+    "Filters stack: an argument you omit keeps its current value. Clear a tag or camera with " +
+    "'all'; reset the focal range by passing focalMin 16 and focalMax 300. Call with no " +
+    "arguments to see the available tags and cameras plus the filters already active, even " +
+    "when nothing matches. Updates the visible grid and returns how many photos match.",
   inputSchema: objectSchema({
     tag: stringProperty("Tag id or label to filter by, or 'all' to clear."),
     camera: stringProperty("Camera name to filter by, or 'all' to clear."),
@@ -133,15 +134,19 @@ const isClearValue = (raw: string): boolean => raw.trim().toLowerCase() === "all
  * 에이전트가 "왜 0건인지" 를 알 수 없다. 앞서 건 태그를 잊은 채 카메라만 바꿔가며
  * 헛돌던 사례가 있었다(W5 평가 2-10).
  *
- * @param {{ tag: string; camera: string; focalMin: number; focalMax: number }} state
+ * 검색어(`?q`)도 함께 적는다. 결과 계산에는 들어가는데 상태 표시에서 빠지면
+ * `/photo?q=zzz` 에서 0건인데 "Active filters: none" 이라는 오답이 나온다(W5 리뷰).
+ *
+ * @param {{ tag: string; camera: string; focalMin: number; focalMax: number; query: string }} state
  * @param {Tag[]} tags 태그 id 를 사람이 읽는 라벨로 되돌리기 위한 사전.
  * @returns {string} 걸린 게 없으면 "none".
  */
 const describeFilters = (
-  state: { tag: string; camera: string; focalMin: number; focalMax: number },
+  state: { tag: string; camera: string; focalMin: number; focalMax: number; query: string },
   tags: Tag[],
 ): string => {
   const parts: string[] = [];
+  if (state.query.trim()) parts.push(`search="${state.query.trim()}"`);
   if (state.tag !== ALL) {
     parts.push(`tag=${tags.find((entry) => entry.id === state.tag)?.en ?? state.tag}`);
   }
@@ -150,6 +155,40 @@ const describeFilters = (
     parts.push(`focal=${state.focalMin}-${state.focalMax}mm`);
   }
   return parts.length > 0 ? parts.join(", ") : "none";
+};
+
+/**
+ * 0건일 때 무엇을 어떻게 풀 수 있는지 알린다.
+ *
+ * 이 도구가 인자로 풀 수 있는 축과 그렇지 않은 검색어를 **다른 문장**으로 나눈다.
+ * 한 문장에 섞으면 `pass the search box clears "zzz"` 처럼 명령과 설명이 뒤엉킨다.
+ *
+ * @param {{ tag: string; camera: string; focalMin: number; focalMax: number; query: string }} state
+ * @returns {string} 알릴 것이 없으면 빈 문자열. 있으면 앞에 공백 하나가 붙는다.
+ */
+const describeReset = (state: {
+  tag: string;
+  camera: string;
+  focalMin: number;
+  focalMax: number;
+  query: string;
+}): string => {
+  const passable: string[] = [];
+  if (state.tag !== ALL) passable.push(`tag: 'all'`);
+  if (state.camera !== ALL) passable.push(`camera: 'all'`);
+  if (state.focalMin > FOCAL_MIN || state.focalMax < FOCAL_MAX) {
+    passable.push(`focalMin: ${FOCAL_MIN}, focalMax: ${FOCAL_MAX}`);
+  }
+
+  const sentences: string[] = [];
+  if (passable.length > 0) sentences.push(`To widen it, pass ${passable.join(" or ")}.`);
+  // 검색어는 URL 의 ?q 라 이 도구가 건드리지 않는다. 방문자나 검색창이 지운다.
+  if (state.query.trim()) {
+    sentences.push(
+      `The search box controls "${state.query.trim()}" and this tool cannot clear it.`,
+    );
+  }
+  return sentences.length > 0 ? ` ${sentences.join(" ")}` : "";
 };
 
 /**
@@ -236,10 +275,8 @@ const useGalleryTools = (
     const visible = filterPhotos(photos, { tag, query, camera, focalMin, focalMax });
 
     // 필터는 누적된다 — 0건일 때 무엇이 걸려 있는지 말해주지 않으면 원인을 찾을 수 없다.
-    const active = describeFilters({ tag, camera, focalMin, focalMax }, tags);
-    if (visible.length === 0) {
-      return `No photos match. Active filters: ${active}. Pass 'all' to clear a tag or camera filter.`;
-    }
+    const state = { tag, camera, focalMin, focalMax, query };
+    const active = describeFilters(state, tags);
 
     // 상위 몇 장은 항상 id 와 함께 돌려준다 — open_photo 가 쓸 수 있는 유일한 id 출처다.
     const preview =
@@ -248,18 +285,26 @@ const useGalleryTools = (
         .map((photo) => `${pickText(photo.title, lang)} (${photo.id})`)
         .join(", ") + (visible.length > PREVIEW_COUNT ? ", …" : "");
 
-    // 인자가 하나도 없으면 "무엇으로 거를 수 있는지"까지 덧붙인다 — 어휘를 모르면
-    // 에이전트는 틀린 값으로 한 번 실패해야만 목록을 알게 된다(W5 평가).
+    // 인자가 하나도 없으면 어휘 조회다. 0건 분기보다 **먼저** 답해야 한다 —
+    // 결과가 0건일 때야말로 에이전트가 어휘를 가장 필요로 한다(W5 리뷰).
     if (!tagProvided && !cameraProvided && !focalProvided) {
       return [
-        `${countLabel(visible.length, "photo")} currently shown. Active filters: ${active}.`,
-        `Showing: ${preview}`,
+        visible.length > 0
+          ? `${countLabel(visible.length, "photo")} currently shown. Active filters: ${active}.`
+          : `No photos match. Active filters: ${active}.${describeReset(state)}`,
+        ...(visible.length > 0 ? [`Showing: ${preview}`] : []),
         `Available tags: ${tags.map((entry) => entry.en).join(", ")}.`,
         `Available cameras: ${cameras.join(", ")}.`,
       ].join("\n");
     }
 
-    return `Filters applied (${active}). ${countLabel(visible.length, "photo")} match: ${preview}`;
+    if (visible.length === 0) {
+      return `No photos match. Active filters: ${active}.${describeReset(state)}`;
+    }
+
+    return `Filters applied (${active}). ${countLabel(visible.length, "photo")} ${
+      visible.length === 1 ? "matches" : "match"
+    }: ${preview}`;
   });
 
   useModelContextTool(DETAILS_TOOL, (args) => {
