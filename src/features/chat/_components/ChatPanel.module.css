@@ -151,6 +151,46 @@
   line-height: 1.55;
 }
 
+/* 전송 당시의 화면 문맥 — 입력 칩과 달리 제거·이동 동작이 없는 메시지 기록이다. */
+.sentContext {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-1);
+  margin-top: var(--s-2);
+  padding-top: var(--s-2);
+  border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  color: inherit;
+  font-size: var(--t-label);
+  line-height: 1.4;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sentContext:hover .sentContextLabel {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sentContext:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.sentContextType {
+  flex: none;
+  opacity: 0.78;
+}
+
+.sentContextLabel {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .streamingCursor {
   width: 1px;
   height: 1em;
@@ -362,9 +402,9 @@
   flex: none;
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
-  margin: 2px;
+  width: 12px;
+  height: 12px;
+  margin: 4px;
   padding: 0;
   border: 0;
   background: none;
@@ -403,7 +443,7 @@
 /* 입력줄(textarea + 전송) — 토큰이 있을 때 그 아래 행. */
 .composerRow {
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: var(--s-2);
   min-width: 0;
 }

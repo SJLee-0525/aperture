@@ -164,14 +164,16 @@ test.describe("Chat", () => {
   }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "모바일 viewport에서만 검증");
     await page.goto("/ko/dev/projects");
-    await page.evaluate(() => {
-      window.scrollTo(0, 500);
-      window.history.pushState(window.history.state, "", "/ko/dev/projects?project=portfolio");
-      window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
-    });
+    const projectButton = page.getByRole("button", { name: /개인 포트폴리오/ });
+    await expect(projectButton).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 500));
+    // hydration 전 합성 popstate가 유실되지 않도록 실제 사용자 경로로 모달을 연다.
+    await projectButton.click();
     await expect(page.getByRole("dialog", { name: "개인 포트폴리오" })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
-    await expect.poll(() => page.evaluate(() => document.body.style.top)).toBe("-500px");
+    await expect.poll(() => page.evaluate(() => document.body.style.top)).toMatch(/^-\d+px$/);
+    const projectScrollLockTop = await page.evaluate(() => document.body.style.top);
+    expect(Number.parseFloat(projectScrollLockTop)).toBeLessThan(0);
 
     await openChat(page);
     const chat = page.getByRole("dialog", { name: "Ask Sungjoon." });
@@ -184,7 +186,9 @@ test.describe("Chat", () => {
     await page.keyboard.press("Escape");
     await expect(chat).toBeHidden();
     await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
-    await expect.poll(() => page.evaluate(() => document.body.style.top)).toBe("-500px");
+    await expect
+      .poll(() => page.evaluate(() => document.body.style.top))
+      .toBe(projectScrollLockTop);
     await expect(page.getByRole("dialog", { name: "개인 포트폴리오" })).toBeVisible();
   });
 
@@ -293,11 +297,20 @@ test.describe("Chat", () => {
     await openChat(page);
     await submit(page, "이 사진 어디서 찍었어?");
 
+    await expect(chatMessages(page).getByLabel("함께 보낸 사진: 새벽의 항구")).toBeVisible();
     await expect(chatMessages(page).getByText("도쿄 미나토구에서 찍은 사진이에요.")).toBeVisible();
     expect(context).toEqual({
       pathname: "/ko/photo",
       openTarget: { type: "photo", id: "p01" },
     });
+
+    await page.evaluate(() => {
+      window.history.replaceState(window.history.state, "", "/ko/photo?photo=p02");
+      window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+    });
+    await chatMessages(page).getByRole("link", { name: "함께 보낸 사진: 새벽의 항구" }).click();
+    await expect(page).toHaveURL(/\/ko\/photo\?photo=p01$/);
+    await expect(page.getByRole("dialog", { name: "Ask Sungjoon." })).toBeHidden();
   });
 
   test("앨범에서 연 사진도 화면 문맥으로 요청 본문에 실어 보낸다", async ({ page }) => {
@@ -400,6 +413,7 @@ test.describe("Chat", () => {
     await expect(page.getByRole("dialog", { name: "새벽의 항구" })).toBeAttached();
     await submit(page, "사진 페이지 이야기");
     await expect(chatMessages(page).getByText("네, 확인했어요.").first()).toBeVisible();
+    await expect(chatMessages(page).getByLabel(/함께 보낸 사진/)).toHaveCount(0);
     expect(contexts[0]).toEqual({ pathname: "/ko/photo" });
 
     // 다른 사진으로 바꾸면(모달 prev/next와 같은 방식) 제외가 초기화되고 chip이 갱신된다.
@@ -411,6 +425,7 @@ test.describe("Chat", () => {
     await expect(dialog.getByText("골목, 5시", { exact: true })).toBeVisible();
     await submit(page, "이 사진은 어디서 찍었어?");
     await expect(chatMessages(page).getByText("네, 확인했어요.").nth(1)).toBeVisible();
+    await expect(chatMessages(page).getByLabel("함께 보낸 사진: 골목, 5시")).toBeVisible();
     expect(contexts[1]).toMatchObject({ openTarget: { type: "photo", id: "p02" } });
   });
 

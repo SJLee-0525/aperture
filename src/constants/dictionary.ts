@@ -127,6 +127,10 @@ type UIDict = {
   chatScreenPlaceholderAward: string;
   chatScreenPlaceholderProject: string;
   chatScreenNoticeDismiss: string;
+  chatSentContextPhoto: string;
+  chatSentContextWork: string;
+  chatSentContextAward: string;
+  chatSentContextProject: string;
   chatPrivacyNote: string;
   chatSuggestionsLabel: string;
   chatSuggestions: string[];
@@ -300,6 +304,10 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatScreenPlaceholderAward: "이 수상에 대해 물어보세요…",
     chatScreenPlaceholderProject: "이 프로젝트에 대해 물어보세요…",
     chatScreenNoticeDismiss: "이 항목을 답변에서 제외",
+    chatSentContextPhoto: "함께 보낸 사진",
+    chatSentContextWork: "함께 보낸 연주",
+    chatSentContextAward: "함께 보낸 수상 내역",
+    chatSentContextProject: "함께 보낸 프로젝트",
     chatPrivacyNote: "민감한 개인정보는 입력하지 마세요.",
     chatSuggestionsLabel: "추천 질문",
     chatSuggestions: [
@@ -478,6 +486,10 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatScreenPlaceholderAward: "Ask about this award…",
     chatScreenPlaceholderProject: "Ask about this project…",
     chatScreenNoticeDismiss: "Exclude this item from the answer",
+    chatSentContextPhoto: "Sent with photo",
+    chatSentContextWork: "Sent with performance",
+    chatSentContextAward: "Sent with award",
+    chatSentContextProject: "Sent with project",
     chatPrivacyNote: "Please don’t share sensitive personal information.",
     chatSuggestionsLabel: "Suggested questions",
     chatSuggestions: [

@@ -11,6 +11,7 @@ import { ChatComposer } from "@/features/chat/_components/ChatComposer";
 import { ChatContactDraftButton } from "@/features/chat/_components/ChatContactDraftButton";
 import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
+import { ChatSentContext } from "@/features/chat/_components/ChatSentContext";
 import { useChat } from "@/features/chat/_hooks/use-chat";
 import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
 import type { ChatScreenTargetType } from "@/lib/chat-screen-target-context";
@@ -67,10 +68,15 @@ const ChatPanel = ({ open, onClose }: Props) => {
     if (excludedKey !== null) setExcludedKey(null);
   }
   const excludedRef = useRef(excludedKey);
+  const screenTargetRef = useRef(screenTarget);
   useEffect(() => {
     excludedRef.current = excludedKey;
   }, [excludedKey]);
+  useEffect(() => {
+    screenTargetRef.current = screenTarget;
+  }, [screenTarget]);
   const getExcludedTargetKey = useCallback(() => excludedRef.current, []);
+  const getScreenTarget = useCallback(() => screenTargetRef.current, []);
   const chipTarget = screenTarget && excludedKey !== targetKey ? screenTarget : null;
   const screenTexts = chipTarget ? SCREEN_NOTICES[chipTarget.type](dict) : null;
   const dismissScreenTarget = useCallback(() => setExcludedKey(targetKey), [targetKey]);
@@ -88,7 +94,11 @@ const ChatPanel = ({ open, onClose }: Props) => {
     [chipTarget, screenTexts, dict.chatScreenNoticeDismiss, dismissScreenTarget],
   );
 
-  const { messages, isReplying, retry, send } = useChat(lang, getExcludedTargetKey);
+  const { messages, isReplying, retry, send } = useChat(
+    lang,
+    getExcludedTargetKey,
+    getScreenTarget,
+  );
   const titleId = useId();
   useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
@@ -283,6 +293,9 @@ const ChatPanel = ({ open, onClose }: Props) => {
                       ) : null}
                     </p>
                   )}
+                  {message.role === "user" && message.sentContext ? (
+                    <ChatSentContext context={message.sentContext} onNavigate={onClose} />
+                  ) : null}
                   {message.error?.retryable ? (
                     <button
                       type="button"
