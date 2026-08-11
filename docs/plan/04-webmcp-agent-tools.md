@@ -1,8 +1,8 @@
 # WebMCP 에이전트 도구 구현 계획
 
-> 상태: **W1~W4 구현 완료 · W5 주요 시나리오 평가 완료 / 후속 재검증 중** (2026-08-11)
-> W5 범위는 평가 절차를 만들고 주요 도구를 검증하는 데까지다. 남은 재검증과 데이터 작업은
-> [webmcp-tool-eval](../troubleshooting/webmcp-tool-eval.md) 의 목록을 따른다.
+> 상태: **W1~W5 완료 · WebMCP 14개 표면 검증 완료** (2026-08-11)
+> 명령형 도구 13종과 선언형 연락 폼 1종을 5차 평가까지 검증했다. 실행 기록과 수정 내역은
+> [webmcp-tool-eval](../troubleshooting/webmcp-tool-eval.md)에 정리했다.
 > 결정 근거: [ADR-0003](../adr/0003-webmcp-agent-tools.md)
 > 관련 결정: [ADR-0002 경로 기반 i18n](../adr/0002-path-based-i18n.md), [03-browser-language-entry-routing](03-browser-language-entry-routing.md)
 > 목적: 방문자가 데려온 브라우저 에이전트가 공개 포트폴리오를 DOM 추론이 아니라 도구 호출로 탐색하게 한다.
@@ -97,6 +97,9 @@ src/features/music/_hooks/use-music-tools.ts       # /music · /music/career
 | 페이지 스코프      | 서버가 내려준 props (`photos` 등) | 없음                          |
 | `search_portfolio` | `/api/search-index` (ISR 1시간)   | 세션당 최대 1회 fetch, 재사용 |
 | `get_profile`      | `site` config props               | 없음                          |
+
+페이지 스코프 도구는 서버가 이미 내려준 props를 사용한다. WebMCP만을 위한 별도 데이터 요청이나
+큰 필드의 추가 직렬화는 피한다. 예외가 필요하면 증가분을 측정하고 이 문서에 근거를 남긴다.
 
 검색 랭킹은 `src/lib/search/rank-documents.ts`를 쓴다. 이 함수는 `score-documents.ts` 채점기를
 기반으로 하며 자동완성의 `suggest-documents.ts`와 공유된다. 사진 필터는
@@ -197,6 +200,8 @@ Model Context Tool Inspector로 위 시나리오 5종을 프로덕션에서 실�
 | 이 사진 어디서 찍었어 | 열린 사진을 몰라 대화 기록의 낡은 id를 사용해 다른 사진을 설명함                      | `photoId`·`projectId`·`workId`를 선택 인자로 바꾸고, 생략 시 열린 모달을 대상으로 함 |
 | 연락하고 싶어         | 어느 도구도 `/contact` 경로를 알려주지 않아 막다른 길                                 | `get_profile` 출력에 연락 경로 상시 포함                                             |
 
+5차 평가에서 명령형 도구 13종과 선언형 연락 폼을 모두 확인했다. 코드 재검증 대기 항목은 없다.
+
 평가 도구의 무료 모델 쿼터(분당 5회)에 걸리기 쉬우므로 시나리오는 한 번에 하나씩 돌린다.
 페이지 스코프 도구는 해당 페이지를 연 뒤 평가해야 한다.
 
@@ -218,8 +223,15 @@ Model Context Tool Inspector로 위 시나리오 5종을 프로덕션에서 실�
 - `get_photo_details` 출력에 촬영일이 없다. `GalleryPhoto` 투영에 `shotAt`이 없기 때문이다.
 - `get_project`는 카드 투영의 요약·성과·기술·경로를 반환한다. 담당 업무와 트러블슈팅 전문은
   `open_project`로 유도한다.
-- `DevProjectCardData`에 `techTags` 필드를 추가했다. 기술 필터는 텍스트 부분일치보다
-  `list_projects({tech})`의 정확 매칭이 적합하다.
+- `DevProjectCardData`에 `techTags`와 `achievements`를 추가했다. §4의 직렬화 원칙에 둔 두 번의
+  예외다.
+  - `techTags` — 기술 필터는 텍스트 부분일치보다 `list_projects({tech})`의 정확 매칭이 적합하다.
+    평면 문자열 배열이라 증가분이 수백 바이트다.
+  - `achievements` — `get_project`가 성과·수상을 답하려면 필요하다. 8개 프로젝트 기준 RSC
+    payload 증가는 **약 7.7KB**다(2026-08-11, 같은 측정 기준의 페이지 문서 86.9KB 대비 8.9%).
+    별도 fetch로 바꾸면 실패 경로와 캐시 미스 지연, 상세 모달과의 중복 조회가 생기므로 현재
+    규모에서는 직렬화 비용을 감수한다. **재검토 조건**: achievements 직렬화가 25KB를 넘거나
+    문서 payload의 15% 이상이 되면 같은 방식으로 다시 측정한다.
 - 섹션 도구 훅은 `features/webmcp`가 아니라 각 소유 feature의 `_hooks/`에 있다.
   eslint boundaries 규칙이 feature 간 직접 import를 막기 때문이다. 공유 등록 훅은 `src/hooks/`,
   스키마 조각은 `src/lib/webmcp/` 로 승격했다.

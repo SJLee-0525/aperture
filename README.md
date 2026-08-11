@@ -21,6 +21,7 @@
 - 기술 스택, 개발 프로젝트와 경력 소개
 - 공개 콘텐츠를 관리하는 개인용 Firebase CMS
 - 일반 검색과 포트폴리오 문맥을 사용하는 RAG 챗봇
+- 외부 브라우저 에이전트용 WebMCP 도구 13종과 선언형 연락 폼
 - 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
 - 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
 - 개인정보처리방침, 사이트 이용 및 콘텐츠 정책, 접근성 안내
@@ -48,6 +49,7 @@
 - 공개 페이지는 [`src/lib/content`](./src/lib/content)의 getter만 사용하므로 mock과 Firestore를 교체할 수 있습니다.
 - 공개 데이터는 Firestore REST로 읽고, 관리자 기능은 Firebase SDK로 인증·저장합니다.
 - 일반 검색은 브라우저에서 동작하며, RAG 챗봇만 임베딩과 외부 AI 제공자를 사용합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
+- 내장 챗봇은 WebMCP를 사용하지 않습니다. WebMCP는 방문자가 데려온 외부 브라우저 에이전트가 공개 콘텐츠를 조회하고 현재 화면을 조작할 때만 사용합니다.
 - 의존 방향을 `app → features → components`로 제한해 라우팅, 사용자 행동, 공용 UI의 역할을 나눴습니다.
 
 공개 페이지의 읽기 경로와 Admin의 쓰기 경로는 분리되어 있습니다. 외부 서비스까지 포함한 구성은 [프로젝트 아키텍처](./public/readme/architecture.md)에 정리했습니다.
@@ -233,6 +235,8 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [도메인 컨텍스트](./CONTEXT.md)                                              | 공개 영역, 아키텍처 경계와 E2E 계약         |
 | [언어 진입·동의 운영 문서](./docs/plan/03-browser-language-entry-routing.md) | 위험 분석, 테스트 사례, 배포와 트러블슈팅   |
 | [WebMCP 에이전트 도구](./docs/plan/04-webmcp-agent-tools.md)                 | 브라우저 에이전트용 도구 설계, 보안과 평가  |
+| [WebMCP 도구 평가 기록](./docs/troubleshooting/webmcp-tool-eval.md)          | 명령형 도구 13종과 선언형 연락 폼 평가      |
+| [챗봇 화면 문맥 인식 계획](./docs/plan/06-chat-screen-context.md)            | URL 화면 문맥, 사진 필터와 연락 초안 전달   |
 | [UI 품질 테스트](./docs/testing.md)                                          | 시각 회귀, 접근성, 언어·분석 동의 검증 방법 |
 
 ## 제작 및 AI 활용
