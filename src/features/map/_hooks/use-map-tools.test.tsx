@@ -54,10 +54,11 @@ describe("useMapTools", () => {
     );
 
     const result = await lastExecute()({});
+    // 단수에 "1 photos" 가 나가면 답변 문장에 그대로 실린다.
     // 사진마다 한 줄씩 나열하면 같은 장소가 반복돼 "어디서 많이 찍었나" 에 답할 수 없다.
     expect(result).toBe(
       "Busan — 2 photos (37.5, 127) · /en/photo/map?photo=p2\n" +
-        "Seoul — 1 photos (37.5, 127) · /en/photo/map?photo=p1",
+        "Seoul — 1 photo (37.5, 127) · /en/photo/map?photo=p1",
     );
   });
 

@@ -6,7 +6,7 @@ import { useModelContextTool } from "@/hooks/use-model-context-tool";
 import { limitProperty, objectSchema } from "@/lib/webmcp/tool-schemas";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
-import { formatToolItems } from "@/lib/webmcp/tool-output";
+import { countLabel, formatToolItems } from "@/lib/webmcp/tool-output";
 
 import type { MapLocation } from "@/features/map/_types/map-location";
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
@@ -34,6 +34,8 @@ const useMapTools = (locations: MapLocation[]): void => {
 
     // 좌표는 사진마다 있어 같은 장소가 수십 번 반복된다. "어디서 많이 찍었나" 라는 질문에
     // 답하려면 장소로 묶어 횟수를 세는 편이 맞다(W5 평가 3-9).
+    // 좌표를 키에 넣지 않는다 — place 는 전체 주소라 이름 충돌이 사실상 없고, 좌표를 넣으면
+    // 사진마다 GPS 가 조금씩 다를 때 같은 장소가 다시 쪼개져 원래 문제로 돌아간다.
     const byPlace = new Map<string, { count: number; id: string; lat: number; lng: number }>();
     for (const location of locations) {
       const place = pickText(location.place, lang);
@@ -53,7 +55,7 @@ const useMapTools = (locations: MapLocation[]): void => {
       places,
       args.limit,
       ([place, entry]) =>
-        `${place} — ${entry.count} photos (${entry.lat}, ${entry.lng}) · ` +
+        `${place} — ${countLabel(entry.count, "photo")} (${entry.lat}, ${entry.lng}) · ` +
         localizePath(lang, `${ROUTES.PHOTO_MAP}?photo=${entry.id}`),
     );
   });

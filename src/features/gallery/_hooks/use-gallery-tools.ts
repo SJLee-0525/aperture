@@ -16,7 +16,7 @@ import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
 import { resolveTargetId } from "@/lib/webmcp/current-target";
-import { clampToolText } from "@/lib/webmcp/tool-output";
+import { clampToolText, countLabel } from "@/lib/webmcp/tool-output";
 
 import type { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
@@ -252,14 +252,14 @@ const useGalleryTools = (
     // 에이전트는 틀린 값으로 한 번 실패해야만 목록을 알게 된다(W5 평가).
     if (!tagProvided && !cameraProvided && !focalProvided) {
       return [
-        `${visible.length} photos currently shown. Active filters: ${active}.`,
+        `${countLabel(visible.length, "photo")} currently shown. Active filters: ${active}.`,
         `Showing: ${preview}`,
         `Available tags: ${tags.map((entry) => entry.en).join(", ")}.`,
         `Available cameras: ${cameras.join(", ")}.`,
       ].join("\n");
     }
 
-    return `Filters applied (${active}). ${visible.length} photos match: ${preview}`;
+    return `Filters applied (${active}). ${countLabel(visible.length, "photo")} match: ${preview}`;
   });
 
   useModelContextTool(DETAILS_TOOL, (args) => {

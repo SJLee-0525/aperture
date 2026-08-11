@@ -129,7 +129,7 @@ describe("useGalleryTools", () => {
     const result = await execute({ camera: "sony" });
 
     expect(filter.setTag).toHaveBeenCalledTimes(1);
-    expect(result).toContain("1 photos match");
+    expect(result).toContain("1 photo match");
     expect(result).toContain("야경 (p3)");
     // 누적된 필터를 응답이 밝혀야 에이전트가 0건의 원인을 짚을 수 있다.
     expect(result).toContain("Filters applied (tag=Street, camera=Sony A7 IV)");
