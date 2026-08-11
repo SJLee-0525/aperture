@@ -2,8 +2,10 @@
 import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/features/gallery/_lib/filter-photos";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
+import { buildPhotoFilterHref, parsePhotoFilterQuery } from "@/lib/photo-filter-query";
 
+import type { PhotoFilterState } from "@/lib/photo-filter-query";
 import type { WebMcpExecute, WebMcpToolDefinition } from "@/lib/webmcp/model-context";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
@@ -59,6 +61,10 @@ const TAGS: Tag[] = [
   { id: "landscape", ko: "풍경", en: "Landscape" },
 ];
 
+const CAMERAS = [...new Set(PHOTOS.map((photo) => photo.camera))];
+
+// 실제 usePhotoFilter.applyFilters 처럼 URL을 병합·직렬화해 갱신하는 fake —
+// 도구는 execute 시점 URL을 읽으므로 fake 도 URL을 실제로 바꿔야 연속 호출 의미가 유지된다.
 const filterOf = () => ({
   tag: ALL,
   setTag: vi.fn(),
@@ -67,12 +73,24 @@ const filterOf = () => ({
   focalMin: FOCAL_MIN,
   focalMax: FOCAL_MAX,
   setFocal: vi.fn(),
+  commitFocal: vi.fn(),
+  cancelFocal: vi.fn(),
   resetFilters: vi.fn(),
+  applyFilters: vi.fn((partial: Partial<PhotoFilterState>, history: "push" | "replace") => {
+    const params = new URLSearchParams(window.location.search);
+    const merged = {
+      ...parsePhotoFilterQuery(params, { tags: TAGS, cameras: CAMERAS }),
+      ...partial,
+    };
+    const href = buildPhotoFilterHref(window.location.pathname, merged, {
+      q: params.get("q"),
+      photo: params.get("photo"),
+    });
+    window.history[history === "push" ? "pushState" : "replaceState"](null, "", href);
+  }),
   filtersActive: false,
   visible: PHOTOS,
 });
-
-const CAMERAS = [...new Set(PHOTOS.map((photo) => photo.camera))];
 
 const renderTools = (filter = filterOf()) => {
   renderHook(() => useGalleryTools(PHOTOS, TAGS, filter, CAMERAS));
@@ -107,17 +125,16 @@ describe("useGalleryTools", () => {
     expect(byName.get("open_photo")?.annotations.readOnlyHint).toBe(false);
   });
 
-  it("filter_photos 는 setter 를 호출하고 화면과 같은 함수로 건수를 계산한다", async () => {
+  it("filter_photos 는 준 차원만 병합해 1회 push 하고 화면과 같은 함수로 건수를 계산한다", async () => {
     const filter = renderTools();
 
-    // 태그는 en 라벨 대소문자 무시 매칭 → id 로 setter 호출.
+    // 태그는 en 라벨 대소문자 무시 매칭 → id 로 병합.
     const result = await executeOf("filter_photos")({ tag: "street" });
-    expect(filter.setTag).toHaveBeenCalledWith("street");
+    expect(filter.applyFilters).toHaveBeenCalledTimes(1);
+    expect(filter.applyFilters).toHaveBeenCalledWith({ tag: "street" }, "push");
     expect(result).toContain("2 photos match");
     expect(result).toContain("골목 (p1)");
-    // 인자로 받지 않은 차원은 set 하지 않는다 — stale 값 재커밋 방지.
-    expect(filter.setCamera).not.toHaveBeenCalled();
-    expect(filter.setFocal).not.toHaveBeenCalled();
+    expect(window.location.search).toBe("?tag=street");
   });
 
   it("재렌더 전 연속 호출이 앞 호출의 필터를 되돌리지 않는다", async () => {
@@ -125,10 +142,10 @@ describe("useGalleryTools", () => {
     const execute = executeOf("filter_photos");
 
     await execute({ tag: "street" });
-    // 재렌더 없이 곧바로 카메라만 좁힌다 — 앞의 태그 필터가 유지돼야 한다.
+    // 재렌더 없이 곧바로 카메라만 좁힌다 — URL이 단일 출처라 앞의 태그 필터가 유지된다.
     const result = await execute({ camera: "sony" });
 
-    expect(filter.setTag).toHaveBeenCalledTimes(1);
+    expect(filter.applyFilters).toHaveBeenNthCalledWith(2, { camera: "Sony A7 IV" }, "push");
     expect(result).toContain("1 photo matches");
     expect(result).toContain("야경 (p3)");
     // 누적된 필터를 응답이 밝혀야 에이전트가 0건의 원인을 짚을 수 있다.
@@ -153,10 +170,10 @@ describe("useGalleryTools", () => {
     const execute = executeOf("filter_photos");
 
     await execute({ focalMin: 200, focalMax: 50 });
-    expect(filter.setFocal).toHaveBeenCalledWith(50, 200);
+    expect(filter.applyFilters).toHaveBeenCalledWith({ focalMin: 50, focalMax: 200 }, "push");
 
     await execute({ focalMin: "30" });
-    expect(filter.setFocal).toHaveBeenLastCalledWith(30, 200);
+    expect(filter.applyFilters).toHaveBeenLastCalledWith({ focalMin: 30, focalMax: 200 }, "push");
   });
 
   it("filter_photos 는 미지의 태그·카메라에 알려진 값 목록을 답한다", async () => {
@@ -176,8 +193,7 @@ describe("useGalleryTools", () => {
     const execute = executeOf("filter_photos");
 
     await execute({ tag: "all", camera: "sony" });
-    expect(filter.setTag).toHaveBeenCalledWith(ALL);
-    expect(filter.setCamera).toHaveBeenCalledWith("Sony A7 IV");
+    expect(filter.applyFilters).toHaveBeenCalledWith({ tag: ALL, camera: "Sony A7 IV" }, "push");
   });
 
   it("filter_photos 를 인자 없이 부르면 거를 수 있는 태그·카메라를 알려준다", async () => {
@@ -190,10 +206,8 @@ describe("useGalleryTools", () => {
     expect(result).toContain("Available cameras: Fujifilm X100V, Sony A7 IV.");
     // open_photo 가 쓸 id 도 함께 준다 — 어휘만 주면 사진을 열 방법이 사라진다.
     expect(result).toContain("Showing: 골목 (p1)");
-    // 조회만 했으므로 필터 상태는 건드리지 않는다.
-    expect(filter.setTag).not.toHaveBeenCalled();
-    expect(filter.setCamera).not.toHaveBeenCalled();
-    expect(filter.setFocal).not.toHaveBeenCalled();
+    // 조회만 했으므로 필터 상태(URL)는 건드리지 않는다.
+    expect(filter.applyFilters).not.toHaveBeenCalled();
   });
 
   it("0건이어도 무인자 호출은 어휘를 돌려준다", async () => {
@@ -225,8 +239,7 @@ describe("useGalleryTools", () => {
 
   it("풀 수 있는 축과 검색어를 각각의 문장으로 알린다", async () => {
     window.history.replaceState(null, "", "/ko/photo?q=zzz");
-    const filter = renderTools();
-    filter.tag = "landscape";
+    renderTools();
 
     const result = await executeOf("filter_photos")({ tag: "landscape" });
     expect(result).toBe(

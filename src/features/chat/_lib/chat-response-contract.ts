@@ -1,3 +1,4 @@
+import { parseContactDraft } from "@/features/chat/_lib/contact-draft";
 import { MAX_RESPONSE_CHARS } from "@/features/chat/_lib/chat-tuning";
 import type { ChatProviderResult } from "@/features/chat/_lib/chat-provider";
 import type { ChatLink, ChatReferenceRequest } from "@/types/chat";
@@ -8,6 +9,10 @@ const LINKS_DESCRIPTION =
   "Up to two directly relevant internal navigation actions. Usually empty. Do not add contact unless requested or the answer is unknown.";
 const REFERENCES_DESCRIPTION =
   "Up to three concrete portfolio items directly relevant to the answer. Empty for general profile or contact questions.";
+const CONTACT_DRAFT_DESCRIPTION =
+  "Almost always null. Fill only when the visitor asked to send a contact message AND already " +
+  "provided its content in this chat. Use only values the visitor actually stated. Name and " +
+  "email stay null unless they said them. Never invent or guess values.";
 
 /**
  * 두 제공자가 같은 응답 계약을 쓰도록 한 곳에서 만든다.
@@ -47,8 +52,20 @@ const buildChatResponseSchema = ({ strict }: { strict: boolean }) => {
           ["type", "id"],
         ),
       },
+      contactDraft: {
+        // 두 provider가 지원하는 표준 type 배열로 nullable을 표현한다.
+        type: ["object", "null"],
+        description: CONTACT_DRAFT_DESCRIPTION,
+        ...(strict ? { additionalProperties: false } : {}),
+        properties: {
+          name: { type: ["string", "null"] },
+          email: { type: ["string", "null"] },
+          message: { type: "string" },
+        },
+        required: ["name", "email", "message"],
+      },
     },
-    ["content", "links", "references"],
+    ["content", "links", "references", "contactDraft"],
   );
 };
 
@@ -93,6 +110,7 @@ const parseChatResult = (text: string): ChatProviderResult => {
     content,
     links: parseLinks(parsed.links),
     references: parseReferences(parsed.references),
+    contactDraft: parseContactDraft(parsed.contactDraft),
   };
 };
 
@@ -111,7 +129,8 @@ const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   } catch (error) {
     const content = contentFromPartialJson(text).slice(0, MAX_RESPONSE_CHARS).trim();
     if (!content) throw error;
-    return { content };
+    // 잘린 JSON에서는 본문만 회수한다. 나머지 구조화 필드는 모두 버린다.
+    return { content, contactDraft: null };
   }
 };
 

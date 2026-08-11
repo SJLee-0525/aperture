@@ -87,6 +87,22 @@ describe("OnDemandPhotoModal fetch 회귀", () => {
     );
   });
 
+  it("화면 문맥 사용 여부를 실제 사진 모달에 전달한다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ photos: ["p3", "p1", "p2"].map(serialized), tags: [] }),
+      }),
+    );
+
+    render(<OnDemandPhotoModal photoIds={["p1", "p2", "p3"]} endpoint="/api/photos" chatTarget />);
+
+    await waitFor(() =>
+      expect(photoModalRender.mock.calls.some(([props]) => props.chatTarget === true)).toBe(true),
+    );
+  });
+
   it("태그가 0개인 사이트에서도 상세 요청은 1회로 끝난다", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

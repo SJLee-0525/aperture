@@ -6,6 +6,12 @@ const STORAGE_KEYS = {
   CONSENT: "ap-consent:v3",
 } as const;
 
+/** sessionStorage 키 단일 출처 — 탭 단위 일회성 전달에만 쓴다. */
+const SESSION_STORAGE_KEYS = {
+  // 챗봇 연락 초안 — 연락 페이지가 읽는 즉시 삭제한다(one-shot).
+  CONTACT_DRAFT: "ap-contact-draft:v1",
+} as const;
+
 const LEGACY_STORAGE_KEYS = {
   THEME: "ap-theme",
   LANG: "ap-lang",
@@ -14,4 +20,4 @@ const LEGACY_STORAGE_KEYS = {
   COMBINED_CONSENT: "ap-consent:v2",
 } as const;
 
-export { LEGACY_STORAGE_KEYS, STORAGE_KEYS };
+export { LEGACY_STORAGE_KEYS, SESSION_STORAGE_KEYS, STORAGE_KEYS };

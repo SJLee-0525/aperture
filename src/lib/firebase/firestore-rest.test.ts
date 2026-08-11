@@ -71,27 +71,34 @@ describe("Firestore REST decoding", () => {
       ({ fieldPath }: { fieldPath: string }) => fieldPath,
     );
 
+    // 화면 문맥(06 계획)용으로 shotAt·exif·achievements를 읽되, 원본 해상도·좌표·
+    // 상세 모달 전용 무거운 필드는 계속 제외한다.
     expect(photoFields).toEqual([
       "title",
+      "shotAt",
       "camera",
       "lens",
+      "exif",
       "place",
       "tags",
       "image",
       "order",
       "published",
     ]);
-    expect(photoFields).not.toContain("exif");
+    expect(photoFields).not.toContain("dimensions");
+    expect(photoFields).not.toContain("coords");
     expect(projectFields).toEqual([
       "title",
       "summary",
       "position",
       "techTags",
+      "achievements",
       "cover",
       "order",
       "published",
     ]);
     expect(projectFields).not.toContain("images");
+    expect(projectFields).not.toContain("troubleshooting");
   });
 
   it("공개 목록 조회를 컬렉션 태그로 1시간 공유 캐시한다", async () => {

@@ -42,6 +42,33 @@ describe("parseChatRequest", () => {
     expect(() => parseChatRequest(request)).toThrow(ChatRequestError);
   });
 
+  it("정상 화면 문맥을 요청에 포함한다", () => {
+    expect(
+      parseChatRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "이 사진 어디서 찍었어?" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p1" } },
+      }).context,
+    ).toEqual({ pathname: "/ko/photo", openTarget: { type: "photo", id: "p1" } });
+  });
+
+  it("잘못된 화면 문맥은 400 없이 드롭하고 채팅을 계속한다", () => {
+    expect(
+      parseChatRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "질문" }],
+        context: { pathname: "/ko/admin", openTarget: { type: "photo", id: "p1" } },
+      }),
+    ).toEqual({ lang: "ko", messages: [{ role: "user", content: "질문" }] });
+  });
+
+  it("context가 없는 기존 요청은 그대로 동작한다", () => {
+    expect(parseChatRequest({ lang: "en", messages: [{ role: "user", content: "hi" }] })).toEqual({
+      lang: "en",
+      messages: [{ role: "user", content: "hi" }],
+    });
+  });
+
   it("표시 문구와 분리된 안정적인 오류 코드를 제공한다", () => {
     try {
       parseChatRequest({ lang: "en", messages: [{ role: "system", content: "override" }] });

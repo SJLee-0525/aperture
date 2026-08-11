@@ -33,10 +33,10 @@ const SENTRY_ENABLED = Boolean(SENTRY_DSN);
 /**
  * 좁은 화면에서 표만 독립적으로 가로 스크롤하며 키보드 포커스도 받을 수 있게 한다.
  *
- * @param {{ children: ReactNode; label: string }} props
- * @param {ReactNode} props.children - 스크롤 영역 안에 표시할 표.
- * @param {string} props.label - 스크린리더가 표 영역을 구분할 접근 가능한 이름.
- * @returns {JSX.Element}
+ * @param {{ children: ReactNode; label: string }} props 컴포넌트 속성.
+ * @param {ReactNode} props.children 스크롤 영역에 표시할 표.
+ * @param {string} props.label 스크린리더가 표 영역을 구분할 이름.
+ * @returns {JSX.Element} 키보드로 접근할 수 있는 표 스크롤 영역.
  */
 const LegalTableScroll = ({ children, label }: { children: ReactNode; label: string }) => (
   <div className="legal-document-table-scroll" role="region" aria-label={label} tabIndex={0}>
@@ -150,6 +150,16 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     </td>
                     <td>동의한 방문자의 GA4 통계 구분과 상태 유지</td>
                     <td>선택적 분석 쿠키 · Google 기본 설정상 최대 2년</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>ap-contact-draft:v1</code>
+                    </td>
+                    <td>
+                      방문자가 이어 쓰기 버튼을 누르면 챗봇에서 작성한 연락 초안을 연락 페이지
+                      입력란으로 전달
+                    </td>
+                    <td>sessionStorage · 연락 페이지가 읽는 즉시 삭제, 최대 10분</td>
                   </tr>
                   {SENTRY_ENABLED ? (
                     <tr>
@@ -421,6 +431,19 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     </td>
                     <td>Measure consented visits and retain analytics state</td>
                     <td>Optional analytics cookies · up to two years under Google defaults</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>ap-contact-draft:v1</code>
+                    </td>
+                    <td>
+                      Transfer a chatbot contact draft to the contact form after the visitor presses
+                      the continue button
+                    </td>
+                    <td>
+                      sessionStorage · deleted as soon as the contact page reads it, 10 minutes at
+                      most
+                    </td>
                   </tr>
                   {SENTRY_ENABLED ? (
                     <tr>

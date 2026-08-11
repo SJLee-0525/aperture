@@ -12,6 +12,7 @@ import { SectionAccent } from "@/features/site-header/_components/SectionAccent"
 import { SiteHeader } from "@/features/site-header/_components/SiteHeader";
 import { WebMcpTools } from "@/features/webmcp/_components/WebMcpTools";
 import { getSite } from "@/lib/content/site";
+import { ChatScreenTargetProvider } from "@/components/ChatScreenTargetProvider";
 
 import styles from "./layout.module.css";
 
@@ -41,16 +42,19 @@ const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
       <SectionAccent />
       <IntroSplash />
       <SiteHeader />
-      <div id="page-content" className={styles.content}>
-        {children}
-      </div>
-      <SiteFooter
-        tagline={site.tagline}
-        links={site.links}
-        privacyControls={<AnalyticsSettingsButton />}
-      />
-      <MobileTabBar />
-      <ChatLauncher />
+      {/* 상세 모달의 제목을 챗봇 입력창에 표시한다. */}
+      <ChatScreenTargetProvider>
+        <div id="page-content" className={styles.content}>
+          {children}
+        </div>
+        <SiteFooter
+          tagline={site.tagline}
+          links={site.links}
+          privacyControls={<AnalyticsSettingsButton />}
+        />
+        <MobileTabBar />
+        <ChatLauncher />
+      </ChatScreenTargetProvider>
       {/* WebMCP 전역 도구 — 지원 브라우저에서만 dynamic 로드. 프로필 최소 투영만 전달. */}
       <WebMcpTools profile={{ name: site.name, tagline: site.tagline, bio: site.bio }} />
     </AnalyticsConsentProvider>

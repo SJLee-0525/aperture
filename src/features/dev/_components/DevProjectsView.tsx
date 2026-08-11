@@ -3,6 +3,8 @@
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useDevTools } from "@/features/dev/_hooks/use-dev-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
+import { pickText } from "@/lib/i18n/pick-text";
+import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 import type { DevProjectCardData } from "@/types/dev";
 
 import { DevProjectCard } from "./DevProjectCard";
@@ -21,6 +23,10 @@ const DevProjectsView = ({ projects }: { projects: DevProjectCardData[] }) => {
   const { active: selected, open, select, close } = useQueryModal("project", projects);
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
   useDevTools(projects, select);
+  // 개발 수상 모달은 별도 화면 문맥이 없으므로 프로젝트만 등록한다.
+  useRegisterChatScreenTarget(
+    selected ? { type: "project", id: selected.id, label: pickText(selected.title, lang) } : null,
+  );
 
   return (
     <main className={styles.main}>

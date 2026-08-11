@@ -1,6 +1,6 @@
 # 챗봇 화면 문맥 인식 계획
 
-> 상태: **구상 / 착수 전**
+> 상태: **1차 구현 완료 / 검증 중**
 > 관련 결정: [ADR-0001 Route Handler 기반 Portfolio RAG](../adr/0001-serverless-rag.md)
 > 참고: [04-webmcp-agent-tools](04-webmcp-agent-tools.md)
 > 목적: 챗봇이 현재 화면을 이해하고, 사진 필터와 연락 초안을 기존 웹 기능으로 이어 준다.
@@ -8,7 +8,8 @@
 ## 결론
 
 내장 챗봇은 WebMCP를 사용하지 않는다. WebMCP API를 호출하지 않고, WebMCP 지원 여부도 확인하지
-않는다. 이번 작업으로 기존 WebMCP 도구나 등록 구조를 수정하지도 않는다.
+않는다. WebMCP 도구의 공개 계약, 등록 구조, 결과 의미도 유지한다. 사진 필터가 URL 상태를 쓰게
+되면서 `filter_photos`의 내부 연결만 setter 3회 호출에서 `applyFilters` 1회 호출로 바꾼다.
 
 챗봇은 서버의 공개 포트폴리오 데이터와 RAG를 이미 사용한다. 현재 화면은 URL에서 읽을 수 있다.
 사진 필터는 URL로 표현하고, 연락 초안은 `sessionStorage`로 연락 페이지에 전달한다. 이 세 작업에
@@ -33,8 +34,13 @@ WebMCP는 외부 브라우저 에이전트용으로 유지한다. 외부 에이�
 사진 모달을 열어둔 채 "이거 어디서 찍었어?"라고 물으면 챗봇은 어느 사진인지 모른다. "이
 프로젝트 기술 스택이 뭐야"나 "지금 보고 있는 연주 프로그램 알려줘"도 마찬가지다.
 
-상세 모달은 URL query를 상태의 단일 출처로 쓴다. 공개 레이아웃의 챗봇 패널에서
-`usePathname()`과 `useSearchParams()`를 읽어 요청에 포함한다.
+상세 모달은 URL query를 상태의 단일 출처로 쓴다. 챗봇은 질문을 보내는 순간
+`window.location.pathname`과 `window.location.search`를 읽어 요청에 포함한다.
+
+이 시나리오가 성립하려면 상세 모달이 열린 동안에도 챗봇 런처가 눌려야 한다. 챗봇 런처는
+상세 모달(z 100) 위(z 105), 챗봇 오버레이는 그 위(z 110)에 둔다. 챗봇이 열리면 격리 훅이
+모달 포털을 inert 처리하므로 모달은 열린 채 배경으로 남는다. 내보내기 줌 라이트박스(z 120)가
+떠 있는 동안은 런처가 가려진다(의도).
 
 ```ts
 type ChatContextTarget = "photo" | "work" | "award" | "project";
@@ -155,11 +161,14 @@ src/lib/photo-filter-query.ts
 갱신하도록 바꾼다. `FilterBar`의 props 계약과 `filterPhotos`는 유지한다. 필터 결과가 바뀌면 기존
 `useInfiniteScroll`이 처음부터 다시 렌더하는지도 확인한다.
 
-히스토리는 입력 성격에 따라 나눈다.
+히스토리는 입력 방식에 따라 다르게 기록한다.
 
 - 태그와 카메라 선택, 필터 초기화는 `push`를 사용한다.
-- 초점거리 슬라이더를 움직이는 동안에는 `replace`를 사용한다.
-- 슬라이더에 별도 commit 이벤트를 붙인다면 최종 값만 `push`할 수 있다.
+- 초점거리 슬라이더는 **드래그 중 URL을 기록하지 않고**(로컬 draft로만 화면 반영), 조작이
+  끝났을 때(pointerup·keyup·blur) **최종 값만 `replace` 1회** 커밋한다. 드래그마다
+  `replaceState`를 부르면 Safari의 rate limit(30초당 약 100회 초과 시 SecurityError)에
+  걸리기 때문이다. pointercancel은 커밋하지 않고 드래그 전 값으로 되돌린다.
+- 같은 최종 값이 여러 종료 이벤트에서 중복 커밋돼도 URL 갱신은 1회다(동일값 no-op).
 - 검색어 `q`는 현재 검색 UI의 정책을 유지한다.
 
 ### 챗봇이 주는 필터 링크
@@ -207,7 +216,6 @@ type ContactDraft = {
   name: string | null;
   email: string | null;
   message: string;
-  label: string;
 };
 
 type ChatProviderResult = {
@@ -219,8 +227,11 @@ type ChatProviderResult = {
 ```
 
 OpenAI strict schema에서는 `contactDraft`를 항상 required로 두고 없을 때 `null`을 받는다. object가
-있다면 `name`, `email`, `message`, `label`도 모두 required이며 선택값은 nullable로 표현한다.
+있다면 `name`, `email`, `message`도 모두 required이며 선택값은 nullable로 표현한다.
 Gemini도 같은 응답 계약을 사용한다.
+
+`label` 필드는 사용하지 않는다. 버튼 문구는 ko/en dictionary의 `chatContactDraftLabel`로
+고정한다. 모델이 만든 문구를 표시하지 않으므로 이름, 이메일, 문의 내용이 버튼에 노출되지 않는다.
 
 서버 파서는 문자열 길이, 이메일 형식과 빈 메시지를 검사한다. 검증에 실패하면 `contactDraft`를
 버리고 본문만 전달한다. 이름이나 메일이 아직 없더라도 메시지가 있으면 초안을 허용하고 연락 페이지의
@@ -254,10 +265,9 @@ storage key는 버전을 포함한 상수 하나로 관리한다. 만료 시간�
 `try/catch`로 감싼다. 저장에 실패하면 초안을 잃었다고 표시하지 않고 일반 `/contact` 링크로 이동한다.
 새 탭에서는 같은 storage를 기대하지 않는다. 버튼은 현재 탭에서 이동한다.
 
-연락 폼은 현재 uncontrolled input을 사용하므로, 초안을 읽는 시점과 DOM에 값을 넣는 방식을 구현
-전에 확인한다. React 상태로 폼 전체를 바꾸지 않고 `defaultValue`용 초기 draft를 상위에서 전달하거나
-각 input ref에 한 번만 반영하는 방법을 우선 검토한다. WebMCP 선언형 폼이 input을 찾을 수 있도록
-기존 `name`, `required`, submit 구조는 유지한다.
+연락 폼은 uncontrolled input을 유지한다. 컴포넌트가 마운트된 뒤 초안을 한 번 읽고, 비어 있는
+input에만 ref로 값을 넣는다. WebMCP 선언형 폼이 input을 찾을 수 있도록 기존 `name`, `required`,
+submit 구조는 바꾸지 않는다.
 
 ### 개인정보 처리
 

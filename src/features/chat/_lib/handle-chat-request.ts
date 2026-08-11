@@ -1,10 +1,17 @@
 import {
-  buildProfileContext,
-  resolveProfileReferences,
+  buildProfileContextFromSnapshot,
+  formatProfileReferences,
+  loadProfileSnapshot,
+  resolveReferencesWithRefresh,
+  type ProfileSnapshot,
 } from "@/features/chat/_lib/build-profile-context";
 import { ROUTES } from "@/constants/routes";
 import { getChatErrorMessage, type ChatErrorCode } from "@/features/chat/_lib/chat-errors";
 import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
+import {
+  buildScreenContextLookup,
+  resolveScreenContext,
+} from "@/features/chat/_lib/resolve-chat-screen-context";
 import {
   buildRagQueryText,
   selectChatIntentWithClassifier,
@@ -22,15 +29,22 @@ import {
 } from "@/features/chat/_lib/chat-provider";
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
+import { getChatProfileData, type ChatProfileData } from "@/lib/content/chat";
+import { getContentSource, type ContentSource } from "@/lib/content/content-source";
+import {
+  buildPhotoFilterHref,
+  parsePhotoFilterQueryStrict,
+  type PhotoFilterVocabulary,
+} from "@/lib/photo-filter-query";
 import type { Lang } from "@/types/lang";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
 import type { RagQuery } from "@/types/rag";
 
-// route.ts의 maxDuration(60초 — Fluid Compute 미활성 Hobby 한도 안)보다 5초 여유를
-// 둔다 — Vercel이 함수를 먼저 끊으면 TIMEOUT 에러 이벤트 대신 연결이 그냥 끊긴다.
+// route.ts의 maxDuration(60초)보다 5초 먼저 요청을 끝낸다. Vercel이 함수를 먼저
+// 종료하면 TIMEOUT 이벤트를 보낼 수 없다.
 // 예산 배분: 인텐트 분류(CHAT_INTENT_TIMEOUT_MS) + primary 무응답 상한
-// (chat-provider.ts) + 폴백 나머지 — 세 값은 이 총량 안에서 함께 조정한다.
+// (chat-provider.ts) + 폴백 나머지. 세 값의 합은 이 총량을 넘지 않아야 한다.
 const DEFAULT_TIMEOUT_MS = 55_000;
 const MAX_BODY_BYTES = 20_000;
 const STREAM_MEDIA_TYPE = "application/x-ndjson";
@@ -52,52 +66,151 @@ const ALLOWED_ACTION_ROUTES = new Set<string>([
 
 type ChatHandlerDependencies = {
   provider: ChatProvider;
+  /** 캐시된 프로필 스냅샷 로더. 요청 안에서는 하나의 promise를 공유한다. */
+  loadSnapshot?: (lang: Lang, source: ContentSource) => Promise<ProfileSnapshot>;
+  /** live 캐시에서 항목을 찾지 못했을 때 사용할 최신 데이터 로더. */
+  loadFreshData?: (source: ContentSource) => Promise<ChatProfileData>;
   buildContext?: (
-    lang: Lang,
+    getSnapshot: () => Promise<ProfileSnapshot>,
     sections?: ProfileSection[],
     query?: RagQuery,
     signal?: AbortSignal,
   ) => Promise<string>;
-  resolveReferences?: (references: ChatReferenceRequest[], lang: Lang) => Promise<ChatReference[]>;
+  resolveReferences?: (
+    requested: ChatReferenceRequest[],
+    cachedReferences: ChatReference[],
+    loadFreshReferences?: () => Promise<ChatReference[]>,
+  ) => Promise<ChatReference[]>;
   rateLimiter?: ChatRateLimiter;
   intentClassifier?: ChatIntentClassifier;
   timeoutMs?: number;
 };
 
+/**
+ * Accept-Language 헤더에서 기본 응답 언어를 고른다.
+ *
+ * @param {Request} request 채팅 HTTP 요청.
+ * @returns {Lang} 영어로 시작하면 en, 그 밖에는 ko.
+ */
 const getHeaderLang = (request: Request): Lang => {
   const languages = request.headers.get("accept-language")?.toLowerCase() ?? "";
   return languages.startsWith("en") ? "en" : "ko";
 };
 
+/**
+ * 요청 본문의 언어를 읽고 유효하지 않으면 헤더 언어를 사용한다.
+ *
+ * @param {unknown} body 파싱된 요청 본문.
+ * @param {Lang} fallback Accept-Language에서 고른 언어.
+ * @returns {Lang} 응답과 오류 메시지에 사용할 언어.
+ */
 const getBodyLang = (body: unknown, fallback: Lang): Lang => {
   if (typeof body !== "object" || body === null || Array.isArray(body)) return fallback;
   const lang = (body as Record<string, unknown>).lang;
   return lang === "ko" || lang === "en" ? lang : fallback;
 };
 
+/**
+ * 공개 채팅 오류 응답을 만든다.
+ *
+ * @param {number} status HTTP 상태 코드.
+ * @param {ChatErrorCode} code 공개 오류 코드.
+ * @param {Lang} lang 오류 메시지 언어.
+ * @param {HeadersInit | undefined} headers 추가 응답 헤더.
+ * @returns {Response} JSON 오류 응답.
+ */
 const jsonError = (status: number, code: ChatErrorCode, lang: Lang, headers?: HeadersInit) =>
   Response.json({ error: { code, message: getChatErrorMessage(code, lang) } }, { status, headers });
 
+/**
+ * 모델이 반환한 href를 내부 상대 경로로 검증한다. `new URL()`이 dot segment를
+ * 정규화하기 전에 raw pathname을 검사한다. 공개 pathname에는 percent encoding을
+ * 허용하지 않으며 query 값에서만 허용한다.
+ *
+ * @param {string} href
+ * @returns {{ pathname: string; searchParams: URLSearchParams } | null}
+ */
+const parseInternalHref = (
+  href: string,
+): { pathname: string; searchParams: URLSearchParams } | null => {
+  if (!href.startsWith("/") || href.startsWith("//") || href.includes("\\")) return null;
+  const rawPath = href.split(/[?#]/)[0] ?? "";
+  if (rawPath.includes("%")) return null;
+  if (rawPath.split("/").some((segment) => segment === "." || segment === "..")) return null;
+
+  let url: URL;
+  try {
+    url = new URL(href, "https://internal.invalid");
+  } catch {
+    return null;
+  }
+  if (url.username || url.password || url.host !== "internal.invalid") return null;
+  // 내부 액션 링크에는 fragment를 사용하지 않는다.
+  if (url.hash !== "") return null;
+  // raw와 정규화 결과가 다르면 위장 입력이다.
+  if (url.pathname !== rawPath) return null;
+  return { pathname: url.pathname, searchParams: url.searchParams };
+};
+
+/** 사진 작업 경로에 하나 이상의 query가 있는지 확인한다. */
+const isPhotoQueryRoute = (parsed: { pathname: string; searchParams: URLSearchParams }): boolean =>
+  parsed.pathname === ROUTES.PHOTO && !parsed.searchParams.keys().next().done;
+
+/**
+ * 모델이 반환한 링크를 공개 내부 경로로 제한하고 사진 query를 canonical URL로 바꾼다.
+ *
+ * @param {ChatLink[] | undefined} links provider가 반환한 링크 후보.
+ * @param {ChatReference[] | undefined} references 응답에 함께 표시할 참조 카드.
+ * @param {PhotoFilterVocabulary | undefined} photoVocabulary 사진 query 검증용 공개 어휘.
+ * @returns {ChatLink[] | undefined} 최대 두 개의 검증된 링크.
+ */
 const sanitizeLinks = (
   links: ChatLink[] | undefined,
   references: ChatReference[] | undefined,
+  photoVocabulary?: PhotoFilterVocabulary,
 ): ChatLink[] | undefined => {
-  const referencedSections = new Set(
-    references?.map(({ type }) => (type === "project" ? ROUTES.DEV : `/${type}`)),
-  );
+  const referencedSections = [
+    ...new Set(references?.map(({ type }) => (type === "project" ? ROUTES.DEV : `/${type}`))),
+  ];
   const safe = links
-    ?.filter(
-      ({ href, label }) =>
-        label.trim() &&
-        ALLOWED_ACTION_ROUTES.has(href.split("?")[0] ?? "") &&
-        !Array.from(referencedSections).some(
-          (section) => href === section || href.startsWith(`${section}/`),
-        ),
-    )
+    ?.flatMap((link) => {
+      if (!link.label.trim()) return [];
+      const parsed = parseInternalHref(link.href);
+      if (!parsed || !ALLOWED_ACTION_ROUTES.has(parsed.pathname)) return [];
+
+      let href = link.href;
+      if (isPhotoQueryRoute(parsed)) {
+        // /photo 필터 query는 strict codec으로 검증 후 canonical로 재직렬화한다.
+        // 공개 어휘를 읽지 못하면 query가 있는 사진 링크를 버린다.
+        if (!photoVocabulary) return [];
+        const strict = parsePhotoFilterQueryStrict(parsed.searchParams, photoVocabulary);
+        if (!strict) return [];
+        href = buildPhotoFilterHref(ROUTES.PHOTO, strict.state, {
+          q: strict.q,
+          photo: strict.photoId,
+        });
+      }
+
+      if (
+        referencedSections.some((section) => href === section || href.startsWith(`${section}/`))
+      ) {
+        return [];
+      }
+      // 참조 카드가 이미 가리키는 딥링크와 canonical href가 같으면 중복 노출이다.
+      if (references?.some((reference) => reference.href === href)) return [];
+      return [{ ...link, href }];
+    })
     .slice(0, 2);
   return safe?.length ? safe : undefined;
 };
 
+/**
+ * 내부 오류를 공개 HTTP 상태와 오류 코드로 바꾼다.
+ *
+ * @param {unknown} error 처리 중 발생한 오류.
+ * @param {boolean} timedOut 요청 제한 시간을 넘겼는지 여부.
+ * @returns {{ status: number; code: ChatErrorCode }} 클라이언트에 보낼 상태와 코드.
+ */
 const publicErrorFor = (
   error: unknown,
   timedOut: boolean,
@@ -114,12 +227,21 @@ const publicErrorFor = (
   return { status: 502, code: "UPSTREAM_ERROR" };
 };
 
+/**
+ * 채팅 요청을 검증하고 provider 응답을 JSON 또는 NDJSON 스트림으로 반환한다.
+ *
+ * @param {Request} request 채팅 HTTP 요청.
+ * @param {ChatHandlerDependencies} dependencies provider와 테스트용 의존성.
+ * @returns {Promise<Response>} 채팅 응답 또는 공개 오류 응답.
+ */
 const handleChatRequest = async (
   request: Request,
   {
     provider,
-    buildContext = buildProfileContext,
-    resolveReferences = resolveProfileReferences,
+    loadSnapshot = loadProfileSnapshot,
+    loadFreshData = (source) => getChatProfileData({ freshPublicFields: true, source }),
+    buildContext = buildProfileContextFromSnapshot,
+    resolveReferences = resolveReferencesWithRefresh,
     rateLimiter,
     intentClassifier,
     timeoutMs = DEFAULT_TIMEOUT_MS,
@@ -167,7 +289,7 @@ const handleChatRequest = async (
       return jsonError(503, "RATE_LIMIT_UNAVAILABLE", responseLang);
     }
     if (!rateLimit.allowed) {
-      // 전역 일일 상한은 "잠시 후 다시"가 거짓말이 된다 — 리셋은 UTC 자정이다.
+      // 전역 일일 상한은 UTC 자정에 초기화된다.
       const code = rateLimit.scope === "daily" ? "DAILY_LIMIT" : "TOO_MANY_REQUESTS";
       return jsonError(429, code, responseLang, {
         "Retry-After": String(rateLimit.retryAfterSeconds),
@@ -215,12 +337,34 @@ const handleChatRequest = async (
     keywords: chatIntent.searchKeywords,
   };
 
+  // 프로필 문맥, 화면 문맥, 참조 카드는 요청 안에서 같은 lazy snapshot promise를 쓴다.
+  const contentSource = getContentSource();
+  let snapshotPromise: Promise<ProfileSnapshot> | undefined;
+  const getSnapshot = () => (snapshotPromise ??= loadSnapshot(chatRequest.lang, contentSource));
+  // 최신 데이터 재조회도 요청 안에서 하나의 promise를 공유한다.
+  let freshDataPromise: Promise<ChatProfileData> | undefined;
+  const getFreshData =
+    contentSource === "live"
+      ? () => (freshDataPromise ??= loadFreshData(contentSource))
+      : undefined;
+
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
-    const profileContext = shouldLoadProfile
-      ? await buildContext(chatRequest.lang, profileSections, ragQuery, controller.signal)
-      : "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.";
+    const [profileContext, screenContext] = await Promise.all([
+      shouldLoadProfile
+        ? buildContext(getSnapshot, profileSections, ragQuery, controller.signal)
+        : Promise.resolve(
+            "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.",
+          ),
+      // 화면 문맥 조회에 실패해도 답변은 계속하며 원문과 오류는 기록하지 않는다.
+      resolveScreenContext(chatRequest.context?.openTarget, {
+        getScreenLookup: async () => (await getSnapshot()).screenLookup,
+        getFreshScreenLookup: getFreshData
+          ? async () => buildScreenContextLookup(await getFreshData(), chatRequest.lang)
+          : undefined,
+      }).catch(() => undefined),
+    ]);
     const result = await provider({
-      instructions: buildChatInstructions(chatRequest.lang, profileContext),
+      instructions: buildChatInstructions(chatRequest.lang, profileContext, screenContext),
       messages: chatRequest.messages,
       lang: chatRequest.lang,
       signal: controller.signal,
@@ -228,23 +372,45 @@ const handleChatRequest = async (
     });
     const content = result.content.trim();
     if (!content) throw new Error("Provider returned an empty response");
-    // 참조 카드는 부가 정보다 — 조회 실패가 이미 완성된(스트리밍이면 이미 보여준)
-    // 답변을 폐기하게 두지 않고 카드만 포기한다.
+    // 참조 카드 조회가 실패하면 완성된 답변은 유지하고 카드만 생략한다.
     const references = result.references?.length
-      ? await resolveReferences(result.references, chatRequest.lang).catch((error: unknown) => {
-          console.warn(
-            "[chat] reference resolution failed; sending answer without references:",
-            error,
-          );
-          return undefined;
-        })
+      ? await Promise.resolve()
+          .then(async () =>
+            resolveReferences(
+              result.references ?? [],
+              (await getSnapshot()).references,
+              getFreshData
+                ? async () => formatProfileReferences(await getFreshData(), chatRequest.lang)
+                : undefined,
+            ),
+          )
+          .catch((error: unknown) => {
+            console.warn(
+              "[chat] reference resolution failed; sending answer without references:",
+              error,
+            );
+            return undefined;
+          })
+      : undefined;
+
+    // 사진 query 링크가 있을 때만 어휘를 기다린다. 로드에 실패하면 해당 링크를 버린다.
+    const hasPhotoQueryLink = result.links?.some((link) => {
+      const parsed = parseInternalHref(link.href);
+      return parsed ? isPhotoQueryRoute(parsed) : false;
+    });
+    const photoVocabulary = hasPhotoQueryLink
+      ? await getSnapshot()
+          .then((snapshot) => snapshot.linkVocabulary)
+          .catch(() => undefined)
       : undefined;
 
     return {
       role: "assistant" as const,
       content,
-      links: sanitizeLinks(result.links, references),
+      links: sanitizeLinks(result.links, references, photoVocabulary),
       references: references?.length ? references : undefined,
+      // 스트리밍 응답의 contactDraft는 done 이벤트에만 포함한다.
+      ...(result.contactDraft ? { contactDraft: result.contactDraft } : {}),
     };
   };
 

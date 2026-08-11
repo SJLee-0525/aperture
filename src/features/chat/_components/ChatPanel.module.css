@@ -7,7 +7,9 @@
   right: 0;
   left: 0;
   height: var(--chat-viewport-height, 100dvh);
-  z-index: 90;
+  /* 런처(105)와 상세 모달(100) 위 — 챗봇이 열리면 useDialogIsolation이 모달 포털을
+     inert 처리하므로 시각적 겹침만 남는다(모달은 열린 채 유지 — 화면 문맥의 전제). */
+  z-index: 110;
   pointer-events: none;
 }
 
@@ -324,9 +326,70 @@
   padding: 0 var(--s-3) var(--s-3);
 }
 
-.composer {
+/* 입력창 안 화면 문맥 토큰 — 열린 상세 항목이 이 질문에 첨부됨을 입력창 위 행에서
+   표시한다. 액센트 마커가 "활성 문맥"을 말하고, 제외 설명은 × 버튼의 툴팁이 담당한다. */
+.contextToken {
   display: flex;
   align-items: center;
+  gap: var(--s-1);
+  /* 내용 길이에 맞추되(column stretch 해제) 입력창 폭을 넘으면 제목만 말줄임된다. */
+  align-self: flex-start;
+  max-width: 100%;
+  min-width: 0;
+  padding: 2px 2px 2px var(--s-2);
+  border-left: 2px solid var(--accent);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: var(--t-label);
+  line-height: 1.4;
+}
+
+.contextTokenNotice {
+  flex: none;
+}
+
+.contextTokenLabel {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* .composer button(0-1-1)보다 우선하도록 조합 셀렉터(0-2-0)로 둔다. */
+.composer .contextTokenDismiss {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.composer .contextTokenDismiss:hover {
+  color: var(--accent);
+}
+
+.composer .contextTokenDismiss:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.composer .contextTokenDismiss svg {
+  width: 12px;
+  height: 12px;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: var(--s-2);
   min-width: 0;
   margin: 0;
@@ -335,6 +398,14 @@
   background: var(--surface-2);
   color: var(--text-3);
   transition: border-color var(--dur);
+}
+
+/* 입력줄(textarea + 전송) — 토큰이 있을 때 그 아래 행. */
+.composerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
 }
 
 .privacyNotice {

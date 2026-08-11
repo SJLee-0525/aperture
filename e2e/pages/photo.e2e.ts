@@ -107,4 +107,65 @@ test.describe("Photo", () => {
 
     await expect(page).toHaveURL(/\/ko\/photo$/);
   });
+
+  test("태그 칩 선택이 URL에 반영되고 새로고침·뒤로가기가 동작한다", async ({ page }) => {
+    await page.goto("/ko/photo");
+    const count = page.locator("main").getByText(/\d+ photos/);
+    const totalText = await count.textContent();
+
+    await page.getByRole("button", { name: "야경", exact: true }).click();
+    await expect(page).toHaveURL(/\/ko\/photo\?tag=night$/);
+    await expect(count).not.toHaveText(totalText!);
+    const filteredText = await count.textContent();
+
+    // 새로고침해도 URL의 필터가 그대로 복원된다.
+    await page.reload();
+    await expect(page).toHaveURL(/\?tag=night$/);
+    await expect(count).toHaveText(filteredText!);
+
+    // 뒤로가기는 태그 선택 전(push 이전) 상태로 되돌린다.
+    await page.goBack();
+    await expect(page).toHaveURL(/\/ko\/photo$/);
+    await expect(count).toHaveText(totalText!);
+  });
+
+  test("복합 필터 딥링크를 복원하고 불량 태그는 무시한다", async ({ page }) => {
+    await page.goto("/ko/photo");
+    const count = page.locator("main").getByText(/\d+ photos/);
+    const totalText = await count.textContent();
+
+    await page.goto("/ko/photo?tag=night&focalMin=24&focalMax=70");
+    await expect(count).not.toHaveText(totalText!);
+    await page.getByRole("button", { name: "필터" }).click();
+    await expect(page.getByText("24mm")).toBeVisible();
+    await expect(page.getByText("70mm")).toBeVisible();
+
+    // 공개 사전에 없는 태그는 기본값으로 무시된다 — 전체가 표시된다.
+    await page.goto("/ko/photo?tag=zzz");
+    await expect(count).toHaveText(totalText!);
+  });
+
+  test("열린 사진이 필터 결과에서 빠져도 모달은 유지된다", async ({ page }) => {
+    // p01(야경·도쿄)은 street 태그가 아니지만, 상세 열람과 배경 필터는 독립이다.
+    await page.goto("/ko/photo?tag=street&photo=p01");
+    await commonAssertions.dialogOpened(page, "새벽의 항구");
+    await expect(page).toHaveURL(/tag=street/);
+
+    await commonAssertions.closeDialog(page);
+    // 모달을 닫아도 필터는 남는다.
+    await expect(page).toHaveURL(/\/ko\/photo\?tag=street$/);
+  });
+
+  test("슬라이더 키보드 조작은 replace 커밋이라 히스토리를 늘리지 않는다", async ({ page }) => {
+    await page.goto("/ko/photo");
+    await page.getByRole("button", { name: "필터" }).click();
+    const historyLength = await page.evaluate(() => window.history.length);
+
+    const minSlider = page.getByLabel("min mm");
+    await minSlider.focus();
+    await page.keyboard.press("ArrowRight");
+
+    await expect(page).toHaveURL(/\?focalMin=17$/);
+    expect(await page.evaluate(() => window.history.length)).toBe(historyLength);
+  });
 });

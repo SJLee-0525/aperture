@@ -8,6 +8,7 @@ import { useChat } from "@/features/chat/_hooks/use-chat";
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  window.history.replaceState(null, "", "/");
 });
 
 describe("useChat", () => {
@@ -68,6 +69,7 @@ describe("useChat", () => {
           role: "assistant",
           content: "사진을 확인해 보세요.",
           links: [{ label: "사진", href: "/photo" }],
+          contactDraft: { name: null, email: null, message: "문의" },
         },
       },
     ];
@@ -89,6 +91,77 @@ describe("useChat", () => {
       content: "사진을 확인해 보세요.",
       pending: false,
       links: [{ label: "사진", href: "/photo" }],
+      // done 이벤트의 contactDraft가 메시지에 보존된다 — delta에는 실리지 않는다.
+      contactDraft: { name: null, email: null, message: "문의" },
+    });
+  });
+
+  it("전송 시점의 URL에서 화면 문맥을 새로 만들어 보낸다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: { role: "assistant", content: "네." } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState(null, "", "/ko/photo?photo=p01");
+    const { result } = renderHook(() => useChat("ko"));
+
+    act(() => expect(result.current.send("이 사진 어디서 찍었어?")).toBe(true));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string).context).toEqual({
+      pathname: "/ko/photo",
+      openTarget: { type: "photo", id: "p01" },
+    });
+
+    // 모달을 바꾼 뒤의 다음 전송은 저장된 값이 아니라 새 URL에서 문맥을 다시 만든다.
+    window.history.replaceState(null, "", "/ko/music?work=w1");
+    act(() => expect(result.current.send("지금 보고 있는 연주 알려줘")).toBe(true));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    expect(JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string).context).toEqual({
+      pathname: "/ko/music",
+      openTarget: { type: "work", id: "w1" },
+    });
+  });
+
+  it("제외 키가 현재 열린 항목과 일치하면 openTarget만 빼고 pathname은 유지한다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: { role: "assistant", content: "네." } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState(null, "", "/ko/photo?photo=p01");
+    const { result } = renderHook(() => useChat("ko", () => "photo:p01"));
+
+    act(() => expect(result.current.send("사진 페이지 이야기")).toBe(true));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string).context).toEqual({
+      pathname: "/ko/photo",
+    });
+  });
+
+  it("제외 키가 다른 항목이면 openTarget을 그대로 보낸다 — 이동하면 제외는 무효", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: { role: "assistant", content: "네." } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState(null, "", "/ko/photo?photo=p02");
+    const { result } = renderHook(() => useChat("ko", () => "photo:p01"));
+
+    act(() => expect(result.current.send("이 사진 어디서 찍었어?")).toBe(true));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string).context).toEqual({
+      pathname: "/ko/photo",
+      openTarget: { type: "photo", id: "p02" },
     });
   });
 

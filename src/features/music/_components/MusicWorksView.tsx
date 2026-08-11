@@ -11,6 +11,7 @@ import { useQueryModal } from "@/hooks/use-query-modal";
 
 import { formatYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
+import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
 import { imagePreviewUrl } from "@/types/image";
 import type { MusicWork } from "@/types/music";
@@ -37,6 +38,10 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   const { active: selected, open, select, close } = useQueryModal("work", works);
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
   useMusicWorkTools(works);
+  // 선택한 연주 제목을 챗봇 입력창에 표시한다.
+  useRegisterChatScreenTarget(
+    selected ? { type: "work", id: selected.id, label: pickText(selected.title, lang) } : null,
+  );
 
   return (
     <main className={styles.main}>

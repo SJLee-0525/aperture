@@ -13,7 +13,9 @@ import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanel
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
+import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
+import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Photo } from "@/types/photo";
@@ -29,6 +31,7 @@ type Props = {
   animateOnOpen?: boolean;
   revealed?: boolean;
   onImageReady?: (id: string) => void;
+  chatTarget?: boolean;
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -85,6 +88,7 @@ const chevRight = (
  * @param {boolean | undefined} props.animateOnOpen
  * @param {boolean | undefined} props.revealed
  * @param {((id: string) => void) | undefined} props.onImageReady
+ * @param {boolean | undefined} props.chatTarget 열린 사진을 챗봇 화면 문맥으로 등록할지 여부.
  * @returns {ReactPortal | null}
  */
 const PhotoModal = ({
@@ -95,6 +99,7 @@ const PhotoModal = ({
   animateOnOpen = true,
   revealed = true,
   onImageReady,
+  chatTarget = false,
 }: Props) => {
   const { dict, lang } = useLang();
   const [expanded, setExpanded] = useState(false);
@@ -102,6 +107,7 @@ const PhotoModal = ({
   const [imgLoaded, setImgLoaded] = useState(false);
   const mobile = useSyncExternalStore(subscribeMobile, readMobile, readServerMobile);
   const navigationLocked = mobile && expanded;
+  const isTopLayer = useOverlayLayer(Boolean(photos.length));
   const showPhotoChrome = !navigationLocked && photoChromeVisible;
   const onNavigateStart = useCallback(() => setImgLoaded(false), []);
   const { photo, open, close, next, prev } = usePhotoModal(
@@ -110,6 +116,12 @@ const PhotoModal = ({
     onNavigateStart,
     photoIds,
     onClose,
+    isTopLayer,
+  );
+  useRegisterChatScreenTarget(
+    chatTarget && open && photo
+      ? { type: "photo", id: photo.id, label: pickText(photo.title, lang) }
+      : null,
   );
   const [seenId, setSeenId] = useState<string | undefined>(photo?.id);
   const touchStartY = useRef<number | null>(null);

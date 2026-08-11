@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DICTIONARY } from "@/constants/dictionary";
 
+import { buildChatContext } from "@/features/chat/_lib/chat-context";
 import { createInitialMessage } from "@/features/chat/_lib/chat-welcome";
 
 import type { ChatMessage } from "@/types/chat";
@@ -96,7 +97,15 @@ const readEventStream = async (response: Response, onEvent: (event: ChatStreamEv
   if (!terminalSeen) throw new Error("Chat stream ended before a terminal event");
 };
 
-const useChat = (lang: Lang) => {
+/**
+ * 챗봇 메시지와 요청 상태를 관리한다. 화면 정보는 전송 직전 URL에서 읽는다.
+ *
+ * @param {Lang} lang 응답 및 오류 문구에 사용할 언어.
+ * @param {(() => string | null) | undefined} getExcludedTargetKey 사용자가 제외한 항목의
+ * `"type:id"` 키를 전송 시점에 읽는 함수.
+ * @returns {{ messages: ChatMessage[]; isReplying: boolean; retry: (messageId: string) => boolean; send: (rawQuestion: string) => boolean }} 메시지 목록과 전송 API.
+ */
+const useChat = (lang: Lang, getExcludedTargetKey?: () => string | null) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => [createInitialMessage(lang)]);
   const [isReplying, setIsReplying] = useState(false);
   const messagesRef = useRef(messages);
@@ -149,10 +158,28 @@ const useChat = (lang: Lang) => {
       const controller = new AbortController();
       requestRef.current = controller;
 
+      // 재시도할 때도 저장된 값 대신 현재 URL을 사용한다.
+      let context = buildChatContext(
+        window.location.pathname,
+        new URLSearchParams(window.location.search),
+      );
+      // 사용자가 제외한 항목과 현재 URL의 항목이 같을 때만 상세 정보를 뺀다.
+      const excludedKey = getExcludedTargetKey?.() ?? null;
+      if (
+        context?.openTarget &&
+        excludedKey === `${context.openTarget.type}:${context.openTarget.id}`
+      ) {
+        context = { pathname: context.pathname };
+      }
+
       void fetch("/api/chat", {
         method: "POST",
         headers: { Accept: "application/x-ndjson", "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, messages: [...history, { role: "user", content: question }] }),
+        body: JSON.stringify({
+          lang,
+          messages: [...history, { role: "user", content: question }],
+          ...(context ? { context } : {}),
+        }),
         signal: controller.signal,
       })
         .then(async (response) => {
@@ -222,7 +249,7 @@ const useChat = (lang: Lang) => {
 
       return true;
     },
-    [lang],
+    [lang, getExcludedTargetKey],
   );
 
   const retry = useCallback(

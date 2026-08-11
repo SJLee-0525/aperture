@@ -55,6 +55,7 @@ describe("OpenAI chat provider", () => {
     expect(result).toEqual({
       content: "사진을 확인해 보세요.",
       references: [{ type: "photo", id: "p01" }],
+      contactDraft: null,
     });
   });
 
@@ -150,7 +151,7 @@ describe("OpenAI chat provider", () => {
       onContentDelta: (delta) => deltas.push(delta),
     });
 
-    expect(result).toEqual({ content: "긴 답변이 여기서 잘렸습니다" });
+    expect(result).toEqual({ content: "긴 답변이 여기서 잘렸습니다", contactDraft: null });
     expect(deltas.join("")).toBe("긴 답변이 여기서 잘렸습니다");
   });
 
@@ -170,6 +171,6 @@ describe("OpenAI chat provider", () => {
       signal: new AbortController().signal,
     });
 
-    expect(result).toEqual({ content: "부분 답변입니다." });
+    expect(result).toEqual({ content: "부분 답변입니다.", contactDraft: null });
   });
 });

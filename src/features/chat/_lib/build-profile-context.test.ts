@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   appendRagChunks,
+  formatLinkVocabulary,
   formatProfileContext,
   formatProfileReferences,
   resolveReferencesWithRefresh,
@@ -95,6 +96,31 @@ describe("formatProfileContext", () => {
     expect(references.find(({ type }) => type === "project")).toMatchObject({
       href: expect.stringContaining("/dev/projects?project="),
     });
+  });
+});
+
+describe("formatLinkVocabulary", () => {
+  it("통제 태그 사전과 공개 사진 파생 카메라·id를 담는다", () => {
+    const vocabulary = formatLinkVocabulary(data);
+
+    expect(vocabulary.tags).toBe(data.site.tags);
+    expect(vocabulary.cameras).toContain("Sony α7 IV");
+    // dedupe — 같은 카메라가 여러 사진에 있어도 한 번만.
+    expect(new Set(vocabulary.cameras).size).toBe(vocabulary.cameras.length);
+    expect(vocabulary.photoIds).toContain("p01");
+  });
+
+  it("published=false 사진과 빈 카메라 문자열은 제외한다", () => {
+    const vocabulary = formatLinkVocabulary({
+      ...data,
+      photos: [
+        { ...data.photos[0], id: "no-camera", camera: "  " },
+        { ...data.photos[1], id: "private", published: false },
+      ],
+    });
+
+    expect(vocabulary.cameras).toEqual([]);
+    expect(vocabulary.photoIds).toEqual(["no-camera"]);
   });
 });
 

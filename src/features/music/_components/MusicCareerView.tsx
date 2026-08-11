@@ -6,6 +6,7 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useMusicAwardTools } from "@/features/music/_hooks/use-music-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import { pickText } from "@/lib/i18n/pick-text";
+import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 import type { MusicAward, MusicConfig } from "@/types/music";
 import type { TimelineEntry } from "@/types/timeline";
 
@@ -26,6 +27,10 @@ const MusicCareerView = ({ config, awards }: Props) => {
   const { active: selected, open, select, close } = useQueryModal("award", awards);
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
   useMusicAwardTools(awards);
+  // 선택한 수상 내역의 이름을 챗봇 입력창에 표시한다.
+  useRegisterChatScreenTarget(
+    selected ? { type: "award", id: selected.id, label: pickText(selected.name, lang) } : null,
+  );
 
   const toRows = (entries: TimelineEntry[]) =>
     entries.map((entry) => ({ period: entry.period, text: pickText(entry.title, lang) }));

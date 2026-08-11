@@ -85,6 +85,7 @@ describe("Gemini chat provider", () => {
       content: "사진을 확인해 보세요.",
       links: [{ label: "사진", href: "/photo" }],
       references: [{ type: "photo", id: "p01" }],
+      contactDraft: null,
     });
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     const body = JSON.parse(init.body as string);
@@ -167,7 +168,7 @@ describe("Gemini chat provider", () => {
       onContentDelta: (delta) => deltas.push(delta),
     });
 
-    expect(result).toEqual({ content: "잘린 답변" });
+    expect(result).toEqual({ content: "잘린 답변", contactDraft: null });
     expect(deltas.join("")).toBe("잘린 답변");
   });
 

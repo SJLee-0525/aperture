@@ -59,6 +59,82 @@ const CASES = [
     expectsLookup: true,
     referenceType: "music",
   },
+  // 화면 문맥(§1) — 열린 모달을 가리키는 지시어 질문. id는 mock 데이터 기준.
+  {
+    id: "screen-photo-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "이 사진 어디서 찍었어?" }],
+    context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p01" } },
+    expectsLookup: true,
+  },
+  {
+    id: "screen-work-en",
+    lang: "en",
+    messages: [
+      { role: "user", content: "Tell me the program of the performance I am looking at." },
+    ],
+    context: { pathname: "/en/music", openTarget: { type: "work", id: "winterreise" } },
+    expectsLookup: true,
+    extended: true,
+  },
+  {
+    id: "screen-award-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "지금 보고 있는 이 수상 내역 알려줘" }],
+    context: { pathname: "/ko/music/career", openTarget: { type: "award", id: "geneva-2024" } },
+    expectsLookup: true,
+    extended: true,
+  },
+  {
+    id: "screen-project-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "이 프로젝트 기술 스택이 뭐야?" }],
+    context: { pathname: "/ko/dev/projects", openTarget: { type: "project", id: "portfolio" } },
+    expectsLookup: true,
+    extended: true,
+  },
+  // 사진 필터 링크(§2) — 조건 질문에 모델이 검증 가능한 필터 URL을 생성해야 한다.
+  {
+    id: "filter-link-focal-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "35mm에서 85mm 사이에서 찍은 사진들을 보고 싶어" }],
+    expectsLookup: true,
+    expectsLinkContaining: "focalMin=35&focalMax=85",
+    extended: true,
+  },
+  {
+    id: "filter-link-tag-camera-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "Leica로 찍은 야경 사진 보여줘" }],
+    expectsLookup: true,
+    expectsLinkContaining: "tag=night&camera=Leica",
+    extended: true,
+  },
+  // 연락 초안(§3) — 대화에 실제 내용이 있을 때만 contactDraft가 채워져야 한다.
+  {
+    id: "contact-draft-ko",
+    lang: "ko",
+    messages: [
+      { role: "user", content: "촬영 의뢰를 하고 싶은데 대신 전달해 줄 수 있어?" },
+      { role: "assistant", content: "네, 성함과 연락받을 이메일, 문의 내용을 알려주세요." },
+      {
+        role: "user",
+        content:
+          "이름은 박도현이고 이메일은 dh.park@example.com이야. 10월 셋째 주에 제품 촬영을 의뢰하고 싶다고 전해줘.",
+      },
+    ],
+    expectsLookup: false,
+    expectsContactDraft: true,
+    extended: true,
+  },
+  {
+    id: "no-contact-draft-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "연락은 어떻게 해?" }],
+    expectsContactDraft: false,
+    expectsLookup: true,
+    extended: true,
+  },
 ];
 
 const parseStream = async (response, onEvent) => {
@@ -92,7 +168,11 @@ const evaluateCase = async (fixture, index) => {
         ? { "x-real-ip": `192.0.2.${index + 1}` }
         : {}),
     },
-    body: JSON.stringify({ lang: fixture.lang, messages: fixture.messages }),
+    body: JSON.stringify({
+      lang: fixture.lang,
+      messages: fixture.messages,
+      ...(fixture.context ? { context: fixture.context } : {}),
+    }),
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
 
@@ -120,6 +200,20 @@ const evaluateCase = async (fixture, index) => {
   }
   if (/공식 포트폴리오의 각 섹션을 참고|official portfolio sections/i.test(message.content)) {
     failures.push("generic rejection fallback returned");
+  }
+  if (fixture.expectsContactDraft !== undefined) {
+    const hasDraft = Boolean(message.contactDraft?.message?.trim());
+    if (hasDraft !== fixture.expectsContactDraft) {
+      failures.push(`contactDraft=${hasDraft}, expected=${fixture.expectsContactDraft}`);
+    }
+  }
+  if (fixture.expectsLinkContaining) {
+    const links = message.links ?? [];
+    if (!links.some((link) => link.href.includes(fixture.expectsLinkContaining))) {
+      failures.push(
+        `missing link containing "${fixture.expectsLinkContaining}" (got: ${links.map(({ href }) => href).join(", ") || "none"})`,
+      );
+    }
   }
 
   return {

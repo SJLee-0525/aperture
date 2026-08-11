@@ -14,6 +14,7 @@ import type { Photo } from "@/types/photo";
  * @param {(id: string) => void} [onNavigateStart]
  * @param {string[]} [photoIds]
  * @param {() => void} [onClose]
+ * @param {boolean} [keyboardEnabled]
  * @returns {{ photo: Photo | null; open: boolean; close: () => void; next: () => void; prev: () => void }}
  */
 const usePhotoModal = (
@@ -22,6 +23,7 @@ const usePhotoModal = (
   onNavigateStart?: (id: string) => void,
   photoIds?: string[],
   onClose?: () => void,
+  keyboardEnabled = true,
 ) => {
   const { activeId, close: closeSession, goto } = usePhotoDetailSession();
   const navigationIds = useMemo(
@@ -52,15 +54,22 @@ const usePhotoModal = (
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !keyboardEnabled) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-      else if (navigationEnabled && event.key === "ArrowLeft") step(-1);
-      else if (navigationEnabled && event.key === "ArrowRight") step(1);
+      if (event.key === "Escape") {
+        event.stopImmediatePropagation();
+        close();
+      } else if (navigationEnabled && event.key === "ArrowLeft") {
+        event.stopImmediatePropagation();
+        step(-1);
+      } else if (navigationEnabled && event.key === "ArrowRight") {
+        event.stopImmediatePropagation();
+        step(1);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, navigationEnabled, close, step]);
+  }, [open, keyboardEnabled, navigationEnabled, close, step]);
 
   return {
     photo,

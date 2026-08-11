@@ -15,7 +15,17 @@ import type { Photo } from "@/types/photo";
 
 type ChatPhoto = Pick<
   Photo,
-  "id" | "title" | "camera" | "lens" | "place" | "tags" | "image" | "order" | "published"
+  | "id"
+  | "title"
+  | "shotAt"
+  | "camera"
+  | "lens"
+  | "exif"
+  | "place"
+  | "tags"
+  | "image"
+  | "order"
+  | "published"
 >;
 type ChatAlbum = Pick<Album, "id" | "title" | "subtitle" | "cover" | "order" | "published">;
 
@@ -110,8 +120,10 @@ const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto
     await runQuery(
       projectedPublishedOrderedQuery(COLLECTIONS.PHOTOS, [
         "title",
+        "shotAt",
         "camera",
         "lens",
+        "exif",
         "place",
         "tags",
         "image",
@@ -125,8 +137,10 @@ const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto
     return {
       id: photo.id,
       title: photo.title,
+      shotAt: photo.shotAt,
       camera: photo.camera,
       lens: photo.lens,
+      exif: photo.exif,
       place: photo.place,
       tags: photo.tags,
       image: photo.image,
