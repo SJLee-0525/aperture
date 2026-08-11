@@ -29,12 +29,16 @@ const useAlbumTools = (albums: AlbumCard[]): void => {
 
   useModelContextTool(LIST_TOOL, (args) => {
     if (albums.length === 0) return "No albums are published yet.";
-    return formatToolItems(
-      albums,
-      args.limit,
-      (album) =>
-        `${pickText(album.title, lang)} · ${pickText(album.subtitle, lang)} · ` +
-        `${album.count} photos · ${localizePath(lang, albumRoute(album.id))}`,
+    // 부제가 빈 앨범이 있어 " · · " 로 벌어지지 않게 빈 조각을 걸러 붙인다.
+    return formatToolItems(albums, args.limit, (album) =>
+      [
+        pickText(album.title, lang),
+        pickText(album.subtitle, lang),
+        `${album.count} photos`,
+        localizePath(lang, albumRoute(album.id)),
+      ]
+        .filter(Boolean)
+        .join(" · "),
     );
   });
 };

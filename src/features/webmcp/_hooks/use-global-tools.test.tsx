@@ -129,15 +129,18 @@ describe("useGlobalTools", () => {
 
     const full = await executeOf("get_profile")({});
     expect(full).toContain("이성준 — 사진가 · 피아니스트 · 개발자");
-    expect(full).toContain("photo: /ko/photo");
-    expect(full).toContain("music: /ko/music");
-    expect(full).toContain("dev: /ko/dev/projects");
+    expect(full).toContain("photos: /ko/photo");
+    expect(full).toContain("performances: /ko/music");
+    expect(full).toContain("projects: /ko/dev/projects");
+    // 하위 페이지까지 알려야 에이전트가 어디로 가야 할지 안다(수상 경력은 career 페이지).
+    expect(full).toContain("career and awards: /ko/music/career");
+    expect(full).toContain("albums: /ko/photo/albums");
     // 다른 페이지에서 "연락하고 싶어" 라고 해도 경로를 알 수 있어야 한다.
     expect(full).toContain("contact: /ko/contact");
 
     const scoped = await executeOf("get_profile")({ section: "music" });
-    expect(scoped).toContain("music: /ko/music");
-    expect(scoped).not.toContain("photo: /ko/photo");
+    expect(scoped).toContain("career and awards: /ko/music/career");
+    expect(scoped).not.toContain("photos: /ko/photo");
     // 연락 경로는 섹션 필터와 무관하게 항상 붙는다.
     expect(scoped).toContain("contact: /ko/contact");
   });

@@ -14,7 +14,8 @@ import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
 const LIST_TOOL: WebMcpToolDefinition = {
   name: "list_photo_locations",
   description:
-    "List places where published photos were taken, with coordinates and the map deep link.",
+    "List places where published photos were taken, grouped by place and ordered by how " +
+    "many photos were shot there. Includes coordinates and the map deep link.",
   inputSchema: objectSchema({ limit: limitProperty() }),
   annotations: { readOnlyHint: true, untrustedContentHint: false },
 };
@@ -30,12 +31,30 @@ const useMapTools = (locations: MapLocation[]): void => {
 
   useModelContextTool(LIST_TOOL, (args) => {
     if (locations.length === 0) return "No photo locations are published yet.";
+
+    // 좌표는 사진마다 있어 같은 장소가 수십 번 반복된다. "어디서 많이 찍었나" 라는 질문에
+    // 답하려면 장소로 묶어 횟수를 세는 편이 맞다(W5 평가 3-9).
+    const byPlace = new Map<string, { count: number; id: string; lat: number; lng: number }>();
+    for (const location of locations) {
+      const place = pickText(location.place, lang);
+      const seen = byPlace.get(place);
+      if (seen) seen.count += 1;
+      else
+        byPlace.set(place, {
+          count: 1,
+          id: location.id,
+          lat: location.coords.lat,
+          lng: location.coords.lng,
+        });
+    }
+    const places = [...byPlace.entries()].sort(([, a], [, b]) => b.count - a.count);
+
     return formatToolItems(
-      locations,
+      places,
       args.limit,
-      (location) =>
-        `${pickText(location.place, lang)} (${location.coords.lat}, ${location.coords.lng}) · ` +
-        localizePath(lang, `${ROUTES.PHOTO_MAP}?photo=${location.id}`),
+      ([place, entry]) =>
+        `${place} — ${entry.count} photos (${entry.lat}, ${entry.lng}) · ` +
+        localizePath(lang, `${ROUTES.PHOTO_MAP}?photo=${entry.id}`),
     );
   });
 };

@@ -22,11 +22,31 @@ import type { SiteConfig } from "@/types/site";
 /** 전역 도구가 쓰는 site config 최소 투영 — 레이아웃이 이미 내려주는 필드만. */
 type WebMcpProfile = Pick<SiteConfig, "name" | "tagline" | "bio">;
 
-/** 섹션별 대표 진입 경로 — 랜딩 허브와 같은 목적지(개발은 프로젝트가 대표 콘텐츠). */
-const SECTION_ROUTES: Record<SearchSection, string> = {
-  photo: ROUTES.PHOTO,
-  music: ROUTES.MUSIC,
-  dev: ROUTES.DEV_PROJECTS,
+/**
+ * 섹션별 진입 경로와 하위 페이지 — 대표 경로만 주면 에이전트가 사이트 지도를 갖지 못한다.
+ * 수상 경력을 물었을 때 `/music/career` 를 몰라 검색만 아홉 번 두드린 사례가 있었다
+ * (W5 평가 3-10). 페이지 스코프 도구는 그 페이지에서만 등록되므로, 어디로 가야 하는지는
+ * 전역 도구가 알려주는 수밖에 없다.
+ */
+const SECTION_ROUTES: Record<SearchSection, Array<{ label: string; path: string }>> = {
+  photo: [
+    { label: "photos", path: ROUTES.PHOTO },
+    { label: "albums", path: ROUTES.PHOTO_ALBUMS },
+    { label: "shooting locations", path: ROUTES.PHOTO_MAP },
+    { label: "about", path: ROUTES.PHOTO_ABOUT },
+  ],
+  music: [
+    { label: "performances", path: ROUTES.MUSIC },
+    { label: "career and awards", path: ROUTES.MUSIC_CAREER },
+    { label: "videos", path: ROUTES.MUSIC_MEDIA },
+    { label: "about", path: ROUTES.MUSIC_ABOUT },
+  ],
+  dev: [
+    { label: "projects", path: ROUTES.DEV_PROJECTS },
+    { label: "tech stack", path: ROUTES.DEV },
+    { label: "career", path: ROUTES.DEV_CAREER },
+    { label: "about", path: ROUTES.DEV_ABOUT },
+  ],
 };
 
 /**
@@ -57,8 +77,9 @@ const SEARCH_TOOL: WebMcpToolDefinition = {
 const PROFILE_TOOL: WebMcpToolDefinition = {
   name: "get_profile",
   description:
-    "Get a short profile of Sungjoon Lee (photographer, pianist, frontend developer), " +
-    "the entry path of each portfolio section, and the contact page path.",
+    "Get a short profile of Sungjoon Lee (photographer, pianist, frontend developer) and a " +
+    "map of the site: every page of each section plus the contact page. Use this to find " +
+    "which page holds what before navigating.",
   inputSchema: objectSchema({
     section: enumProperty("Focus on one section, or use 'all' for the full profile.", [
       "photo",
@@ -105,7 +126,13 @@ const useGlobalTools = (profile: WebMcpProfile): void => {
   useModelContextTool(PROFILE_TOOL, (args) => {
     const section = isSearchSection(args.section) ? args.section : null;
     const sectionLines = (section ? [section] : (Object.keys(SECTION_ROUTES) as SearchSection[]))
-      .map((key) => `${key}: ${localizePath(lang, SECTION_ROUTES[key])}`)
+      .map(
+        (key) =>
+          `${key} — ` +
+          SECTION_ROUTES[key]
+            .map((page) => `${page.label}: ${localizePath(lang, page.path)}`)
+            .join(", "),
+      )
       .join("\n");
     // 연락 경로는 섹션 필터와 무관하게 항상 붙인다 — 다른 페이지에서 "연락하고 싶어" 라고 하면
     // 에이전트가 /contact 로 가는 길을 어디서도 알 수 없었다(W5 평가).
