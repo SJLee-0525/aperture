@@ -92,9 +92,17 @@ const useMusicWorkTools = (works: MusicWork[]): void => {
     return formatToolItems(
       matched,
       args.limit,
+      // 부제가 빈 연주가 있어 " · · " 로 벌어지지 않게 빈 조각을 걸러 붙인다.
       (work) =>
-        `${pickText(work.title, lang)} · ${pickText(work.subtitle, lang)} · ${dateOf(work)} · ` +
-        `${work.id} · ${localizePath(lang, `${ROUTES.MUSIC}?work=${work.id}`)}`,
+        [
+          pickText(work.title, lang),
+          pickText(work.subtitle, lang),
+          dateOf(work),
+          work.id,
+          localizePath(lang, `${ROUTES.MUSIC}?work=${work.id}`),
+        ]
+          .filter(Boolean)
+          .join(" · "),
     );
   });
 

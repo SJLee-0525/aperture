@@ -68,10 +68,13 @@ describe("ContactView", () => {
 
   const sendButton = () => screen.getByRole("button", { name: "메일 보내기" }) as HTMLButtonElement;
 
+  const sendBlocked = () => sendButton().getAttribute("aria-disabled") === "true";
+
   it("캡차 위젯이 없으면 보내기 버튼을 잠그지 않는다", () => {
     render(<ContactView site={MOCK_SITE} />);
 
     // 스크립트가 차단된 환경에서 버튼이 영영 죽으면 안 된다 — 제출 시 안내로 막는 쪽이 낫다.
+    expect(sendBlocked()).toBe(false);
     expect(sendButton().disabled).toBe(false);
   });
 
@@ -79,19 +82,22 @@ describe("ContactView", () => {
     render(<ContactView site={MOCK_SITE} />);
     injectCaptchaField("");
 
-    await vi.waitFor(() => expect(sendButton().disabled).toBe(true));
+    await vi.waitFor(() => expect(sendBlocked()).toBe(true));
     expect(screen.getByText("스팸 방지 확인을 완료해 주세요.")).toBeTruthy();
+    // 실제 disabled 로 잠그면 브라우저가 제출 버튼으로 세지 않아 선언형 WebMCP 도구가
+    // "No submit button was found" 로 실패한다 — 잠금은 aria-disabled 로만 표시한다.
+    expect(sendButton().disabled).toBe(false);
   });
 
   it("캡차를 해결하면 보내기 버튼이 풀린다", async () => {
     render(<ContactView site={MOCK_SITE} />);
     injectCaptchaField("");
-    await vi.waitFor(() => expect(sendButton().disabled).toBe(true));
+    await vi.waitFor(() => expect(sendBlocked()).toBe(true));
 
     // 방문자가 체크박스를 통과하면 hCaptcha 가 같은 필드에 토큰을 채운다.
     document.querySelector<HTMLTextAreaElement>('[name="h-captcha-response"]')!.value = "token";
 
-    await vi.waitFor(() => expect(sendButton().disabled).toBe(false));
+    await vi.waitFor(() => expect(sendBlocked()).toBe(false));
     expect(screen.queryByText("스팸 방지 확인을 완료해 주세요.")).toBeNull();
   });
 

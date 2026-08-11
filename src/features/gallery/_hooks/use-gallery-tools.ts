@@ -32,9 +32,9 @@ const FILTER_TOOL: WebMcpToolDefinition = {
   name: "filter_photos",
   description:
     "Filter the photo grid on this page by tag, camera, or focal length range (mm). " +
-    "Call with no arguments to see the available tags and cameras before filtering. " +
-    "Pass 'all' to clear the tag or camera filter. Updates the visible grid and " +
-    "returns how many photos match.",
+    "Filters stack: an argument you omit keeps its current value, so pass 'all' to clear " +
+    "a tag or camera filter. Call with no arguments to see the available tags and cameras " +
+    "plus the filters already active. Updates the visible grid and returns how many photos match.",
   inputSchema: objectSchema({
     tag: stringProperty("Tag id or label to filter by, or 'all' to clear."),
     camera: stringProperty("Camera name to filter by, or 'all' to clear."),
@@ -127,6 +127,32 @@ const parseFocalArg = (raw: unknown): number | null => {
 const isClearValue = (raw: string): boolean => raw.trim().toLowerCase() === "all";
 
 /**
+ * 지금 걸려 있는 필터를 한 줄로 적는다.
+ *
+ * 필터는 호출마다 누적되므로(인자로 안 준 차원은 유지) 응답이 상태를 밝히지 않으면
+ * 에이전트가 "왜 0건인지" 를 알 수 없다. 앞서 건 태그를 잊은 채 카메라만 바꿔가며
+ * 헛돌던 사례가 있었다(W5 평가 2-10).
+ *
+ * @param {{ tag: string; camera: string; focalMin: number; focalMax: number }} state
+ * @param {Tag[]} tags 태그 id 를 사람이 읽는 라벨로 되돌리기 위한 사전.
+ * @returns {string} 걸린 게 없으면 "none".
+ */
+const describeFilters = (
+  state: { tag: string; camera: string; focalMin: number; focalMax: number },
+  tags: Tag[],
+): string => {
+  const parts: string[] = [];
+  if (state.tag !== ALL) {
+    parts.push(`tag=${tags.find((entry) => entry.id === state.tag)?.en ?? state.tag}`);
+  }
+  if (state.camera !== ALL) parts.push(`camera=${state.camera}`);
+  if (state.focalMin > FOCAL_MIN || state.focalMax < FOCAL_MAX) {
+    parts.push(`focal=${state.focalMin}-${state.focalMax}mm`);
+  }
+  return parts.length > 0 ? parts.join(", ") : "none";
+};
+
+/**
  * /photo 작업 그리드의 WebMCP 도구 3종 — GalleryContent 안(필터 상태 곁)에서 마운트한다.
  * 결과 건수는 화면과 같은 `filterPhotos` 를 동기 재호출해 계산하므로 setter 반영 시점과
  * 무관하게 도구 응답과 화면이 일치한다. `?q` 검색어는 execute 시점 URL 에서 읽는다.
@@ -209,25 +235,31 @@ const useGalleryTools = (
     const query = new URLSearchParams(window.location.search).get("q") ?? "";
     const visible = filterPhotos(photos, { tag, query, camera, focalMin, focalMax });
 
-    // 인자가 하나도 없으면 "무엇으로 거를 수 있는지"를 알려준다 — 어휘를 모르면
+    // 필터는 누적된다 — 0건일 때 무엇이 걸려 있는지 말해주지 않으면 원인을 찾을 수 없다.
+    const active = describeFilters({ tag, camera, focalMin, focalMax }, tags);
+    if (visible.length === 0) {
+      return `No photos match. Active filters: ${active}. Pass 'all' to clear a tag or camera filter.`;
+    }
+
+    // 상위 몇 장은 항상 id 와 함께 돌려준다 — open_photo 가 쓸 수 있는 유일한 id 출처다.
+    const preview =
+      visible
+        .slice(0, PREVIEW_COUNT)
+        .map((photo) => `${pickText(photo.title, lang)} (${photo.id})`)
+        .join(", ") + (visible.length > PREVIEW_COUNT ? ", …" : "");
+
+    // 인자가 하나도 없으면 "무엇으로 거를 수 있는지"까지 덧붙인다 — 어휘를 모르면
     // 에이전트는 틀린 값으로 한 번 실패해야만 목록을 알게 된다(W5 평가).
     if (!tagProvided && !cameraProvided && !focalProvided) {
       return [
-        `${visible.length} photos currently shown. No filter changed.`,
+        `${visible.length} photos currently shown. Active filters: ${active}.`,
+        `Showing: ${preview}`,
         `Available tags: ${tags.map((entry) => entry.en).join(", ")}.`,
         `Available cameras: ${cameras.join(", ")}.`,
       ].join("\n");
     }
 
-    if (visible.length === 0) return "Filters applied. No photos match.";
-
-    const preview = visible
-      .slice(0, PREVIEW_COUNT)
-      .map((photo) => `${pickText(photo.title, lang)} (${photo.id})`)
-      .join(", ");
-    return `Filters applied. ${visible.length} photos match: ${preview}${
-      visible.length > PREVIEW_COUNT ? ", …" : ""
-    }`;
+    return `Filters applied (${active}). ${visible.length} photos match: ${preview}`;
   });
 
   useModelContextTool(DETAILS_TOOL, (args) => {

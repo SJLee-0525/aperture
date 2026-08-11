@@ -131,6 +131,21 @@ describe("useGalleryTools", () => {
     expect(filter.setTag).toHaveBeenCalledTimes(1);
     expect(result).toContain("1 photos match");
     expect(result).toContain("야경 (p3)");
+    // 누적된 필터를 응답이 밝혀야 에이전트가 0건의 원인을 짚을 수 있다.
+    expect(result).toContain("Filters applied (tag=Street, camera=Sony A7 IV)");
+  });
+
+  it("0건이면 무엇이 걸려 있는지와 푸는 방법을 함께 알린다", async () => {
+    renderTools();
+    const execute = executeOf("filter_photos");
+
+    await execute({ tag: "landscape" });
+    const result = await execute({ camera: "sony" });
+
+    expect(result).toBe(
+      "No photos match. Active filters: tag=Landscape, camera=Sony A7 IV. " +
+        "Pass 'all' to clear a tag or camera filter.",
+    );
   });
 
   it("역전된 초점 범위는 뒤집어 받고, 문자열 숫자도 해석한다", async () => {
@@ -170,8 +185,11 @@ describe("useGalleryTools", () => {
 
     const result = await executeOf("filter_photos")({});
     expect(result).toContain("3 photos currently shown");
+    expect(result).toContain("Active filters: none.");
     expect(result).toContain("Available tags: Street, Landscape.");
     expect(result).toContain("Available cameras: Fujifilm X100V, Sony A7 IV.");
+    // open_photo 가 쓸 id 도 함께 준다 — 어휘만 주면 사진을 열 방법이 사라진다.
+    expect(result).toContain("Showing: 골목 (p1)");
     // 조회만 했으므로 필터 상태는 건드리지 않는다.
     expect(filter.setTag).not.toHaveBeenCalled();
     expect(filter.setCamera).not.toHaveBeenCalled();
