@@ -1,6 +1,8 @@
 # WebMCP 에이전트 도구 구현 계획
 
-> 상태: **W1~W5 완료 / 운영 중** (2026-08-11 W5 평가 반영)
+> 상태: **W1~W4 구현 완료 · W5 주요 시나리오 평가 완료 / 후속 재검증 중** (2026-08-11)
+> W5 범위는 평가 절차를 만들고 주요 도구를 검증하는 데까지다. 남은 재검증과 데이터 작업은
+> [webmcp-tool-eval](../troubleshooting/webmcp-tool-eval.md) 의 목록을 따른다.
 > 결정 근거: [ADR-0003](../adr/0003-webmcp-agent-tools.md)
 > 관련 결정: [ADR-0002 경로 기반 i18n](../adr/0002-path-based-i18n.md), [03-browser-language-entry-routing](03-browser-language-entry-routing.md)
 > 목적: 방문자가 데려온 브라우저 에이전트가 공개 포트폴리오를 DOM 추론이 아니라 도구 호출로 탐색하게 한다.
@@ -32,7 +34,7 @@ Chrome WebMCP 오리진 트라이얼(Chrome 149+)을 사용해 공개 페이지�
 
 ```text
 src/lib/webmcp/
-├── model-context.ts        # 벤더 어댑터 — 기능 감지 + /admin 가드 + registerTool 래핑
+├── model-context.ts        # 벤더 어댑터: 기능 감지 + /admin 가드 + registerTool 래핑
 ├── tool-output.ts          # 1,500자 예산 직렬화 (clampLimit·formatToolList·clampToolText)
 ├── tool-schemas.ts         # 공유 JSON Schema 조각
 └── origin-trial-token.ts   # NEXT_PUBLIC 토큰 빌드타임 상수
@@ -40,11 +42,11 @@ src/lib/webmcp/
 src/hooks/
 └── use-model-context-tool.ts   # 등록/해제 공유 훅 (6개 feature 가 사용)
 
-src/features/webmcp/            # 전역 도구만 — 섹션 도구는 각 소유 feature 에 있다
+src/features/webmcp/            # 전역 도구만. 섹션 도구는 각 소유 feature 에 있다
 ├── _hooks/use-global-tools.ts  # search_portfolio · get_profile
 └── _components/{WebMcpTools,WebMcpGlobalTools}.tsx   # 기능 감지 게이트 + dynamic 청크
 
-# 섹션별 도구 훅 — eslint boundaries 규칙(feature 간 직접 import 금지)에 따라
+# 섹션별 도구 훅. eslint boundaries 규칙(feature 간 직접 import 금지)에 따라
 # 도구가 조작하는 데이터·상태를 소유한 feature 의 _hooks/ 에 둔다.
 src/features/gallery/_hooks/use-gallery-tools.ts   # /photo
 src/features/albums/_hooks/use-album-tools.ts      # /photo/albums
@@ -56,33 +58,32 @@ src/features/music/_hooks/use-music-tools.ts       # /music · /music/career
 어댑터를 한 파일로 두는 이유는 진입점이 이미 `navigator.modelContext`에서
 `document.modelContext`로 한 번 옮겨갔기 때문이다. 스펙이 또 바뀌면 이 파일만 고친다.
 훅과 도구 정의는 이 파일의 타입만 본다. `/admin` 가드도 이 파일(모든 등록의 단일
-통과점)에 있다 — admin 은 로케일 밖 경로라 프리픽스 스트립 없이 startsWith 로 충분하다.
+통과점)에 있다. admin은 로케일 밖 경로이므로 프리픽스를 벗겨낼 필요 없이 `startsWith`로 검사한다.
 
 ## 3. 도구 목록
 
 이름·설명·스키마는 영어로 고정하고, 출력 텍스트는 현재 로케일을 따르며, 경로에는 `localizePath`를 적용한다.
 
-| 도구                   | 스코프          | readOnlyHint | 입력                                        | 출력                         |
-| ---------------------- | --------------- | ------------ | ------------------------------------------- | ---------------------------- |
-| `search_portfolio`     | 전역            | true         | `query`, `section?`, `limit?`               | 상위 N건 제목·섹션·경로      |
-| `get_profile`          | 전역            | true         | `section?` (photo/music/dev/all)            | 소개 요약 + 대표 경로        |
-| `filter_photos`        | `/photo`        | false        | `tag?`, `camera?`, `focalMin?`, `focalMax?` | 적용 결과 건수 + 상위 항목   |
-| `get_photo_details`    | `/photo`        | true         | `photoId?`(생략=열린 사진)                  | 제목·장소·촬영일·EXIF 요약   |
-| `open_photo`           | `/photo`        | false        | `photoId`                                   | 연 사진 제목 (모달 열림)     |
-| `list_albums`          | `/photo/albums` | true         | `limit?`                                    | 앨범 제목·부제·경로          |
-| `list_photo_locations` | `/photo/map`    | true         | `limit?`                                    | 장소명·좌표                  |
-| `list_projects`        | `/dev/projects` | true         | `tech?`, `year?`, `limit?`                  | 제목·요약·경로               |
-| `get_project`          | `/dev/projects` | true         | `projectId?`(생략=열린 항목)                | 개요·담당·스택·링크 요약     |
-| `open_project`         | `/dev/projects` | false        | `projectId`                                 | 연 프로젝트 제목 (모달 열림) |
-| `list_music_works`     | `/music`        | true         | `category?`, `limit?`                       | 제목·부제·공연일·경로        |
-| `get_music_work`       | `/music`        | true         | `workId?`(생략=열린 항목)                   | 프로그램·장소·예매 링크      |
-| `list_music_awards`    | `/music/career` | true         | `limit?`                                    | 연도·수상명                  |
+| 도구                   | 스코프          | readOnlyHint | 입력                                        | 출력                             |
+| ---------------------- | --------------- | ------------ | ------------------------------------------- | -------------------------------- |
+| `search_portfolio`     | 전역            | true         | `query`, `section?`, `limit?`               | 상위 N건 제목·섹션·경로          |
+| `get_profile`          | 전역            | true         | `section?` (photo/music/dev/all)            | 소개 + 섹션별 하위 페이지 지도   |
+| `filter_photos`        | `/photo`        | false        | `tag?`, `camera?`, `focalMin?`, `focalMax?` | 활성 필터 + 건수 + 상위 항목(id) |
+| `get_photo_details`    | `/photo`        | true         | `photoId?`(생략=열린 사진)                  | 제목·장소·장비·EXIF 요약         |
+| `open_photo`           | `/photo`        | false        | `photoId`                                   | 연 사진 제목 (모달 열림)         |
+| `list_albums`          | `/photo/albums` | true         | `limit?`                                    | 앨범 제목·부제·장수·경로         |
+| `list_photo_locations` | `/photo/map`    | true         | `limit?`                                    | 장소별 촬영 수(내림차순)·좌표    |
+| `list_projects`        | `/dev/projects` | true         | `tech?`, `year?`, `limit?`                  | 제목·요약·경로                   |
+| `get_project`          | `/dev/projects` | true         | `projectId?`(생략=열린 항목)                | 요약·성과(수상)·스택·딥링크      |
+| `open_project`         | `/dev/projects` | false        | `projectId`                                 | 연 프로젝트 제목 (모달 열림)     |
+| `list_music_works`     | `/music`        | true         | `category?`, `limit?`                       | 제목·부제·공연일·경로            |
+| `get_music_work`       | `/music`        | true         | `workId?`(생략=열린 항목)                   | 프로그램·장소·예매 링크          |
+| `list_music_awards`    | `/music/career` | true         | `limit?`                                    | 연도·수상명                      |
 
 전체는 13개지만 한 페이지에서 동시에 보이는 도구는 전역 2개와 페이지 스코프 1~3개를 합쳐
 최대 5개다(/photo·/dev/projects 가 5개, 나머지는 그 이하). 도구 수가 늘면 에이전트의 선택
-정확도가 떨어진다는 것이 권장사항 문서의 전제이므로 이 상한은 설계 제약으로 유지한다.
-전역 도구를 특정 페이지로 좁혀 4개로 줄이는 안은 검토 후 기각했다 — 어느 페이지에서든
-검색·프로필 조회가 가능한 편익이 더 크다.
+정확도가 떨어질 수 있어 이 상한을 유지한다. 전역 도구를 특정 페이지로 좁히면 최대 도구 수는
+4개가 되지만, 어느 페이지에서든 검색과 프로필 조회가 가능해야 하므로 적용하지 않았다.
 
 `get_*`와 `open_*`는 의도적으로 분리했다. 에이전트는 정보만 필요한 경우와 사용자에게 화면을
 보여줘야 하는 경우를 도구 선택으로 구분할 수 있어야 한다. 하나로 합치면 조회할 때마다 모달이
@@ -97,10 +98,10 @@ src/features/music/_hooks/use-music-tools.ts       # /music · /music/career
 | `search_portfolio` | `/api/search-index` (ISR 1시간)   | 세션당 최대 1회 fetch, 재사용 |
 | `get_profile`      | `site` config props               | 없음                          |
 
-검색 랭킹은 `src/lib/search/rank-documents.ts`(채점기 `score-documents.ts` 기반 — 자동완성
-`suggest-documents.ts`와 공유)를, 사진 필터는 `features/gallery/_lib/filter-photos.ts`를 그대로
-호출한다. 도구용 로직을 따로 만들면 UI와 도구의 결과가 갈라지고, 에이전트가 화면과 다른 답을
-하게 된다. 같은 함수를 쓰면 이 드리프트가 구조적으로 막힌다.
+검색 랭킹은 `src/lib/search/rank-documents.ts`를 쓴다. 이 함수는 `score-documents.ts` 채점기를
+기반으로 하며 자동완성의 `suggest-documents.ts`와 공유된다. 사진 필터는
+`features/gallery/_lib/filter-photos.ts`를 호출한다. UI와 도구가 같은 함수를 쓰므로 같은 조건에는
+같은 결과가 나온다.
 
 ## 5. 출력 규약
 
@@ -150,8 +151,7 @@ NEXT_PUBLIC_WEBMCP_ORIGIN_TRIAL_TOKEN=
 
 `app/layout.tsx`가 값이 있을 때만 `<meta http-equiv="origin-trial">`를 넣는다. 실값은 Vercel에만
 둔다. 로컬 검증은 토큰 없이 `chrome://flags/#enable-webmcp-testing` 활성화로 대체한다.
-별도 기능 플래그는 두지 않는다. 토큰을 지우면 트라이얼이 꺼지고 API가 사라지므로 환경변수
-하나가 그대로 킬 스위치다.
+별도 기능 플래그는 두지 않는다. 토큰을 지우면 트라이얼이 꺼지고 API가 사라진다.
 
 ## 9. 단계
 
@@ -184,17 +184,18 @@ NEXT_PUBLIC_WEBMCP_ORIGIN_TRIAL_TOKEN=
 
 ### W5 수동 평가 결과 (2026-08-11)
 
-Model Context Tool Inspector 로 위 시나리오 5종을 프로덕션에서 실행했다. 로직 결함은 1건이고,
-나머지 3건은 모두 **도구가 답은 하되 무엇을 물을 수 있는지·지금 화면이 어떤 상태인지 알려주지
-않는** 같은 종류의 문제였다. 이것이 이번 평가의 핵심 소득이다.
+Model Context Tool Inspector로 위 시나리오 5종을 프로덕션에서 실행했다. 첫 평가에서는 로직 결함
+1건을 찾았다. 다른 실패는 도구가 사용 가능한 값이나 현재 화면 상태를 충분히 설명하지 않아
+발생했다. 전체 실행 기록과 후속 평가는
+[webmcp-tool-eval](../troubleshooting/webmcp-tool-eval.md)에 남겼다.
 
-| 시나리오              | 관찰                                                                                   | 조치                                                                               |
-| --------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| React 프로젝트        | `tech:"React"` 실패 → 에러의 태그 목록 보고 `"React.js"` 로 자가 복구                  | 스키마 예시를 실데이터(`React.js`)로 교체 + `.js` 접미사 정규화                    |
-| 필름 카메라 사진      | 어떤 카메라가 있는지 몰라 `filter_photos` 대신 검색으로 우회                           | 인자 없이 호출하면 사용 가능한 태그·카메라 목록 반환                               |
-| 피아노 리사이틀       | `/music` 이 아니어서 `list_music_works` 미등록(설계대로) + 데이터에 해당 카테고리 없음 | 조치 없음 — 페이지 스코프는 의도된 동작                                            |
-| 이 사진 어디서 찍었어 | **열린 사진을 몰라 대화 기록의 낡은 id 를 사용** — 엉뚱한 사진 응답                    | `photoId`·`projectId`·`workId` 를 선택 인자로, 생략 시 URL query 의 열린 모달 대상 |
-| 연락하고 싶어         | 어느 도구도 `/contact` 경로를 알려주지 않아 막다른 길                                  | `get_profile` 출력에 연락 경로 상시 포함                                           |
+| 시나리오              | 관찰                                                                                  | 조치                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| React 프로젝트        | `tech:"React"` 실패 → 에러의 태그 목록 보고 `"React.js"` 로 자가 복구                 | 스키마 예시를 실데이터(`React.js`)로 교체 + `.js` 접미사 정규화                      |
+| 필름 카메라 사진      | 어떤 카메라가 있는지 몰라 `filter_photos` 대신 검색으로 우회                          | 인자 없이 호출하면 사용 가능한 태그·카메라 목록 반환                                 |
+| 피아노 리사이틀       | `/music`이 아니어서 `list_music_works` 미등록(설계대로) + 데이터에 해당 카테고리 없음 | 조치 없음. 페이지 스코프는 의도한 동작                                               |
+| 이 사진 어디서 찍었어 | 열린 사진을 몰라 대화 기록의 낡은 id를 사용해 다른 사진을 설명함                      | `photoId`·`projectId`·`workId`를 선택 인자로 바꾸고, 생략 시 열린 모달을 대상으로 함 |
+| 연락하고 싶어         | 어느 도구도 `/contact` 경로를 알려주지 않아 막다른 길                                 | `get_profile` 출력에 연락 경로 상시 포함                                             |
 
 평가 도구의 무료 모델 쿼터(분당 5회)에 걸리기 쉬우므로 시나리오는 한 번에 하나씩 돌린다.
 페이지 스코프 도구는 해당 페이지를 연 뒤 평가해야 한다.
@@ -210,23 +211,23 @@ Model Context Tool Inspector 로 위 시나리오 5종을 프로덕션에서 실
 - 연락 폼이 에이전트 호출만으로 발송되지 않는다.
 - typecheck, lint, unit, production build가 통과한다.
 
-## 12. 확정 문서와의 구현 편차
+## 12. 초안에서 달라진 점
 
-구현(2026-08-10)에서 다음이 계획 원문과 달라졌다. 모두 §4의 "새 직렬화 금지" 원칙 또는
-저장소 lint 규칙이 도구표 서술보다 우선한 결과다.
+구현하면서 초안의 일부를 다음과 같이 바꿨다.
 
-- `get_photo_details` 출력에 촬영일 없음 — `GalleryPhoto` 투영에 `shotAt` 이 없다.
-- `get_project` 는 카드 투영의 요약·기술·경로만 반환 — 담당·트러블슈팅 전문은 `open_project` 로 유도.
-- `DevProjectCardData` 에 `techTags` 1필드를 추가했다(유일한 직렬화 확장) —
-  `list_projects({tech})` 정확 매칭이 텍스트 부분일치보다 낫다고 판단.
-- 섹션 도구 훅은 `features/webmcp` 가 아니라 각 소유 feature 의 `_hooks/` 에 있다 —
-  eslint boundaries 규칙(feature 간 직접 import 금지). 공유 등록 훅은 `src/hooks/`,
+- `get_photo_details` 출력에 촬영일이 없다. `GalleryPhoto` 투영에 `shotAt`이 없기 때문이다.
+- `get_project`는 카드 투영의 요약·성과·기술·경로를 반환한다. 담당 업무와 트러블슈팅 전문은
+  `open_project`로 유도한다.
+- `DevProjectCardData`에 `techTags` 필드를 추가했다. 기술 필터는 텍스트 부분일치보다
+  `list_projects({tech})`의 정확 매칭이 적합하다.
+- 섹션 도구 훅은 `features/webmcp`가 아니라 각 소유 feature의 `_hooks/`에 있다.
+  eslint boundaries 규칙이 feature 간 직접 import를 막기 때문이다. 공유 등록 훅은 `src/hooks/`,
   스키마 조각은 `src/lib/webmcp/` 로 승격했다.
-- 페이지당 도구 상한은 4가 아니라 5다(§3) — 전역 도구 상시 노출을 유지하기로 확정.
-- 상세 도구 3종의 id 는 필수가 아니라 선택이다 — 생략 시 현재 열린 모달을 대상으로 삼는다.
+- 페이지당 도구 상한은 4가 아니라 5다(§3). 전역 도구를 모든 공개 페이지에 유지하기로 했다.
+- 상세 도구 3종의 id는 선택값이다. 생략하면 현재 열린 모달을 대상으로 삼는다.
   화면 상태를 읽지 않으면 에이전트가 낡은 id 를 채워 넣는다(W5 평가에서 실제 발생).
-- 연락 폼의 에이전트 발 제출은 캡차 토큰 유무와 무관하게 전면 차단한다 —
-  `agentInvoked` 분기가 `respondWith` 로 다음 행동을 알리고 발송 없이 끝낸다.
+- 연락 폼의 에이전트 제출은 캡차 토큰과 관계없이 막는다. `agentInvoked` 분기가 `respondWith`로
+  다음 행동을 알리고 발송 없이 끝낸다.
 
 ## 13. 열린 질문
 
@@ -266,5 +267,5 @@ Model Context Tool Inspector 로 위 시나리오 5종을 프로덕션에서 실
 - [Model Context Tool Inspector](https://chromewebstore.google.com/detail/model-context-tool-inspec/gbpdfapgefenggkahomfgkhfehlcenpd):
   등록 도구 모니터링, 수동 호출, 스키마 검증, 자연어 에이전트 테스트에 쓰는 확장. W5 평가 도구
 
-스펙과 Chrome 구현이 모두 변경 중이므로, 구현 착수 시점에 명령형 API 문서의 진입점과 시그니처를
-다시 확인한다. 문서와 다르면 이 계획이 아니라 어댑터(`lib/webmcp/model-context.ts`)를 고친다.
+스펙이나 Chrome 구현이 바뀌면 명령형 API의 진입점과 시그니처를 다시 확인한다. 변경 사항은
+이 계획 문서가 아니라 어댑터(`lib/webmcp/model-context.ts`)에서 처리한다.
