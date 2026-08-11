@@ -90,6 +90,7 @@ const createOpenAIIntentClassifier =
           "Classify which public portfolio sections are needed to answer the latest user message.",
           "Use the recent conversation to resolve follow-up questions and implied subjects.",
           "Return none only when no portfolio lookup is useful.",
+          "A standalone number or similarly ambiguous input is none unless the recent conversation or the input itself gives a concrete reason to connect it to a public portfolio item, year, measurement, or identifier.",
           "Prefer including a plausible section over none when the user asks whether a portfolio item exists.",
           "development covers software projects, skills, career, education, and development awards.",
           "music covers performances, repertoire, music career, education, and music awards.",

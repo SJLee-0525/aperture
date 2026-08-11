@@ -30,6 +30,9 @@ const ALL_SECTION_TERMS = /포트폴리오|portfolio|모든 작업|전체 작업
 const SHARED_HISTORY_TERMS = /경력|학력|수상|career|education|award/i;
 const FOLLOW_UP_TERMS =
   /^(?:(?:그|그거|그건|그게|그중|이거|이건|언제|어디|어떤|왜|어떻게|더|또|보여|알려)|(?:한|두|세|네|몇)\s*개|which|that|it|when|where|what|why|how|more|show|tell)(?:\s|[?!.]|$)/i;
+const GREETING_ONLY_TERMS =
+  /^(?:(?:안녕(?:하세요|하십니까)?|반가워(?:요)?|하이)|(?:hi|hello|hey))(?:[\s!?.~]*)$/iu;
+const PUNCTUATION_ONLY_INPUT = /^[\p{P}\p{S}\s]+$/u;
 const DEFAULT_INTENT_CLASSIFIER_TIMEOUT_MS = 3_000;
 
 const getIntentClassifierTimeoutMs = (): number => {
@@ -95,13 +98,28 @@ const buildRagQueryText = (messages: ChatRequestMessage[]): string => {
   return [...previous, current].join("\n");
 };
 
+/**
+ * 첫 사용자 입력 전체가 인사 또는 기호뿐이면 포트폴리오 분류를 생략한다.
+ * 인사 뒤에 질문이 이어지거나 숫자가 들어오면 LLM이 포트폴리오 의도를 판단한다.
+ */
+const isStandaloneNonLookupInput = (messages: ChatRequestMessage[]): boolean => {
+  const current = messages.at(-1)?.content.trim() ?? "";
+  const hasPreviousUserMessage = messages.slice(0, -1).some((message) => message.role === "user");
+  return (
+    !hasPreviousUserMessage &&
+    (GREETING_ONLY_TERMS.test(current) || PUNCTUATION_ONLY_INPUT.test(current))
+  );
+};
+
 const selectChatIntentWithClassifier = async (
   messages: ChatRequestMessage[],
   signal: AbortSignal,
   classifier?: (messages: ChatRequestMessage[], signal: AbortSignal) => Promise<ChatIntent>,
 ): Promise<ChatIntent> => {
   const regexIntent: ChatIntent = { sections: selectProfileSections(messages) };
-  if (!classifier) return regexIntent;
+  if (!classifier || (regexIntent.sections.length === 0 && isStandaloneNonLookupInput(messages))) {
+    return regexIntent;
+  }
 
   try {
     const classifierSignal = AbortSignal.any([
