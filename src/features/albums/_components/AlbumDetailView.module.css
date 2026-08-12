@@ -1,17 +1,32 @@
 /* 히어로 껍데기·scrim·복귀/공유 버튼은 공용 DetailHero 가 소유한다. 여기 남는 것은
-   앨범이 슬롯에 채우는 제목·부제뿐이다. */
+   앨범이 슬롯에 채우는 제목·부제뿐이다. 글자색은 커버 유무로 갈린다 — 커버가 없으면
+   DetailHero 가 scrim 을 걷고 --surface-1 을 칠해 흰 글자가 배경에 묻힌다. */
 .heroTitle {
   font-family: var(--font-display);
   font-size: 2.4rem;
   font-weight: 500;
-  color: var(--text-inverse);
   letter-spacing: -0.01em;
 }
 .heroMeta {
   margin-top: 5px;
-  color: rgba(255, 255, 255, 0.82);
   font-size: var(--t-small);
   font-variant-numeric: tabular-nums;
+}
+
+/* 사진 위 — scrim 이 깔린 어두운 배경 기준. */
+.heroText[data-variant="image"] .heroTitle {
+  color: var(--text-inverse);
+}
+.heroText[data-variant="image"] .heroMeta {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* 커버가 없는 앨범 — 지면 배경 위라 일반 본문 색으로 되돌린다. */
+.heroText[data-variant="plain"] .heroTitle {
+  color: var(--text);
+}
+.heroText[data-variant="plain"] .heroMeta {
+  color: var(--text-3);
 }
 .main {
   max-width: 1180px;

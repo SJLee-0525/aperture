@@ -47,9 +47,13 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
         back={{ href: localizePath(lang, ROUTES.PHOTO_ALBUMS), label: dict.albumsNav }}
         share={{ title, label: dict.shareLabel }}
       >
-        <h1 className={styles.heroTitle}>{title}</h1>
-        <div className={styles.heroMeta}>
-          {pickText(album.subtitle, lang)} · {photos.length} photos
+        {/* 커버 유무를 글자색에 전달한다. DetailHero 는 커버가 없으면 scrim 을 걷고 밝은
+            지면 배경을 칠하므로, 흰 글자를 그대로 두면 라이트 모드에서 읽히지 않는다. */}
+        <div className={styles.heroText} data-variant={coverUrl ? "image" : "plain"}>
+          <h1 className={styles.heroTitle}>{title}</h1>
+          <div className={styles.heroMeta}>
+            {pickText(album.subtitle, lang)} · {photos.length} photos
+          </div>
         </div>
       </DetailHero>
 
