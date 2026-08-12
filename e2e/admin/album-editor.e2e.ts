@@ -7,6 +7,17 @@ const FIRST_PHOTO = "새벽의 항구";
 const SECOND_PHOTO = "골목, 5시";
 
 /**
+ * 드롭 뒤 dnd-kit 이 document 의 click 을 삼키는 구간(ms).
+ *
+ * `AbstractPointerSensor.detach()` 가 `setTimeout(removeAll, 50)` 으로 click 리스너를 늦게
+ * 뗀다 — 드래그를 끝낸 클릭이 그 아래 버튼을 누르지 않게 하려는 장치다. 사람 손으로는
+ * 닿지 않는 창이지만 자동화는 그 안에서 다음 버튼을 누르므로, 드래그 직후 클릭하는
+ * 곳에서만 창이 닫히기를 기다린다. 라이브러리가 정한 고정 시간이라 관찰할 DOM 신호가 없다.
+ * 50ms 에 CI 지연 여유를 더해 잡는다.
+ */
+const DND_CLICK_SUPPRESSION_MS = 250;
+
+/**
  * 앨범 편집 폼 — 사진 선택·커버 지정·저장, 그리고 사진 삭제 시 앨범 참조 정리.
  *
  * 마지막 단계는 live 의 batch 정리(`deletePhoto`)에 해당하는 mock 후처리
@@ -53,6 +64,7 @@ test.describe("Admin · 앨범 편집", () => {
     ).toBeVisible();
 
     // 커버를 두 번째 사진으로 옮긴다 — 활성화된 "커버로" 버튼은 커버가 아닌 칩의 것이다.
+    await page.waitForTimeout(DND_CLICK_SUPPRESSION_MS);
     await page.getByRole("button", { name: "커버로" }).click();
     await expect(
       strip.locator("li").first().getByRole("button", { name: "커버", exact: true }),

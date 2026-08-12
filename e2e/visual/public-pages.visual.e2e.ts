@@ -8,6 +8,9 @@ const VISUAL_ROUTES = [
   { name: "photo-album-detail", path: "/ko/photo/albums/city-night" },
   { name: "music-works", path: "/ko/music" },
   { name: "dev-projects", path: "/ko/dev/projects" },
+  // 블로그 두 지면은 기준선 png 만 있고 라우트가 빠져 있어 아무 테스트도 소비하지 않았다.
+  { name: "dev-articles", path: "/ko/dev/articles" },
+  { name: "dev-article-detail", path: "/ko/dev/articles/serverless-portfolio" },
   { name: "contact", path: "/ko/contact" },
 ] as const;
 

@@ -97,6 +97,57 @@ test.describe("개발 블로그 상세", () => {
     await expect(page.getByText("서버 없이 포트폴리오를 운영한다").last()).toBeVisible();
   });
 
+  test("다른 글 표는 행 어디를 눌러도 그 글로 간다", async ({ page }) => {
+    await page.goto(ARTICLE);
+
+    // 어느 글이 같은 쪽에 오는지는 발행일 순서에 달렸으므로 표의 첫 링크를 쓴다.
+    const table = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "다른 글" }) });
+    const row = table.getByRole("link").first();
+    const href = await row.getAttribute("href");
+    if (!href) throw new Error("다른 글 표의 행에 주소가 없다");
+
+    // 제목 글자가 아니라 날짜 쪽을 누른다 — 셀마다 링크를 두던 때는 죽은 영역이었다.
+    await row.scrollIntoViewIfNeeded();
+    const box = await row.boundingBox();
+    if (!box) throw new Error("다른 글 표의 행을 찾지 못했다");
+    await row.click({ position: { x: box.width - 24, y: box.height / 2 } });
+
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+  });
+
+  test("현재 글 행은 hover 로 밀리지 않는다", async ({ page }) => {
+    await page.goto(ARTICLE);
+
+    // 이 행은 링크가 아니라 현재 위치 표시다. hover 배경이 다시 깔리면 두 상태를 구분할 수 없다.
+    const current = page.locator('[aria-current="page"]');
+    const before = await current.evaluate((element) => getComputedStyle(element).paddingLeft);
+    await current.hover();
+    await expect
+      .poll(() => current.evaluate((element) => getComputedStyle(element).paddingLeft))
+      .toBe(before);
+  });
+
+  test("본문 이미지를 눌러 크게 보고 다음 이미지로 넘긴다", async ({ page }) => {
+    await page.goto(ARTICLE);
+
+    const zoom = page.getByRole("button", { name: /크게 보기/ });
+    await expect(zoom.first()).toBeAttached();
+    await zoom.first().scrollIntoViewIfNeeded();
+    await zoom.first().click();
+
+    const lightbox = page.getByRole("dialog");
+    await expect(lightbox).toBeVisible();
+
+    // 이 글에는 이미지가 둘 이상이라 앞뒤로 넘길 수 있어야 한다.
+    await lightbox.getByRole("button", { name: "다음 이미지" }).click();
+    await expect(lightbox).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(lightbox).toBeHidden();
+  });
+
   test("없는 slug 는 404 다", async ({ page }) => {
     const response = await page.goto("/ko/dev/articles/does-not-exist");
     expect(response?.status()).toBe(404);
