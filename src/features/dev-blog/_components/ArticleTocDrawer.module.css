@@ -13,10 +13,13 @@
   border: 0;
   background: var(--scrim);
   cursor: default;
+  animation: tocDrawerFade var(--dur) var(--ease);
 }
 
 /* 화면을 다 덮지 않는다 — 목차는 지금 읽던 자리를 잃지 않고 옮겨 다니려고 여는 것이라,
-   본문이 뒤에 그대로 보이는 편이 낫다. 인디케이터가 있던 오른쪽 가운데에서 자란다. */
+   본문이 뒤에 그대로 보이는 편이 낫다. 인디케이터가 있던 오른쪽 가운데에서 자란다.
+   그래서 진입도 그 방향에서 밀려 나온다. 닫힐 때는 컴포넌트가 곧바로 빠지므로 진입만
+   그린다 — 라이트박스(`ImageLightbox`)와 같은 방식이다. */
 .panel {
   position: absolute;
   top: 50%;
@@ -30,6 +33,21 @@
   border: 1px solid var(--line);
   box-shadow: var(--shadow-pop);
   padding-bottom: var(--s-2);
+  animation: tocDrawerIn 0.24s var(--ease-spring);
+}
+
+@keyframes tocDrawerFade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* `to` 를 적지 않는다 — 요소가 이미 가진 값(translateY(-50%))으로 자연스럽게 끝난다. */
+@keyframes tocDrawerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px) scale(0.97);
+  }
 }
 
 .head {
@@ -60,4 +78,11 @@
 }
 .close:hover {
   color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .panel {
+    animation: none;
+  }
 }

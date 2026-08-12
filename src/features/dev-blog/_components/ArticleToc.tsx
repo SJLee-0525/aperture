@@ -113,8 +113,10 @@ const ArticleToc = ({ items, zoneSelector, lang }: Props) => {
           onOpen={() => (finePointer ? hover.onEnter() : setDrawerOpen(true))}
         />
 
+        {/* 패널은 `hidden` 대신 data 속성으로 여닫는다 — display 를 전환 목록에 넣어야
+            나타나고 사라질 때 튀지 않는다. 닫힌 동안 display:none 인 것은 CSS 가 유지한다. */}
         {finePointer ? (
-          <div className={styles.panel} id={panelId} hidden={!hover.open}>
+          <div className={styles.panel} id={panelId} data-open={hover.open}>
             <ArticleTocList
               items={items}
               activeId={activeId}
