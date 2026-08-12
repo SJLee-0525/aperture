@@ -35,6 +35,13 @@ const PATHS: Record<string, ReactNode> = {
       <rect x="14" y="12" width="7" height="9" />
     </>
   ),
+  list: <path d="M4 6h16M4 12h16M4 18h16" />,
+  article: (
+    <>
+      <rect x="4" y="3" width="16" height="18" />
+      <path d="M8 8h8M8 12h8M8 16h5" />
+    </>
+  ),
   funnel: <path d="M3 5h18M6 12h12M10 19h4" />,
   album: (
     <>

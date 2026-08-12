@@ -87,7 +87,7 @@
   color: var(--accent);
 }
 .pd {
-  margin-top: var(--s-1);
+  margin: 0;
   font-size: var(--t-small);
   line-height: 1.6;
   color: var(--text-2);

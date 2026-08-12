@@ -8,12 +8,13 @@ import { ROUTES } from "@/constants/routes";
 const devGroup = MEGA_MENU.find((group) => group.section === "dev");
 
 describe("MEGA_MENU", () => {
-  it("개발 그룹은 소개 → 경력·기술 → 프로젝트 순서다", () => {
+  it("개발 그룹은 소개 → 경력·기술 → 프로젝트 → 블로그 순서다", () => {
     expect(devGroup?.href).toBe(ROUTES.DEV);
     expect(devGroup?.links).toEqual([
       { labelKey: "aboutNav", href: ROUTES.DEV },
       { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER },
       { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
+      { labelKey: "devArticlesNav", href: ROUTES.DEV_ARTICLES },
     ]);
   });
 

@@ -153,6 +153,22 @@ type UIDict = {
   emptyAlbums: string;
   viewMasonry: string;
   viewSquare: string;
+  viewGrid: string;
+  viewList: string;
+  // 블로그 목록
+  articlesEmptyTag: string;
+  articlesEmptyAll: string;
+  articleReadingMinutes: string;
+  articleKoreanOnlyNotice: string;
+  articleDraftLabel: string;
+  articleRelatedProjects: string;
+  articleListNav: string;
+  tocLabel: string;
+  tocOpenLabel: string;
+  paginationLabel: string;
+  paginationPrev: string;
+  paginationNext: string;
+  paginationPage: string;
   // EXIF 라벨 (상세 패널)
   exifAperture: string;
   exifShutter: string;
@@ -341,6 +357,21 @@ const DICTIONARY: Record<Lang, UIDict> = {
     emptyAlbums: "아직 등록된 앨범이 없습니다",
     viewMasonry: "메이슨리",
     viewSquare: "정사각",
+    viewGrid: "그리드",
+    viewList: "목록",
+    articlesEmptyTag: "이 태그로 발행한 글이 아직 없습니다",
+    articlesEmptyAll: "아직 발행한 글이 없습니다",
+    articleReadingMinutes: "{n}분",
+    articleKoreanOnlyNotice: "This article is available in Korean only.",
+    articleDraftLabel: "초안",
+    articleRelatedProjects: "연관 프로젝트",
+    articleListNav: "다른 글",
+    tocLabel: "목차",
+    tocOpenLabel: "목차 열기",
+    paginationLabel: "페이지 이동",
+    paginationPrev: "이전 페이지",
+    paginationNext: "다음 페이지",
+    paginationPage: "{n}페이지",
     exifAperture: "조리개",
     exifShutter: "셔터",
     exifIso: "감도",
@@ -525,6 +556,21 @@ const DICTIONARY: Record<Lang, UIDict> = {
     emptyAlbums: "No albums yet",
     viewMasonry: "Masonry",
     viewSquare: "Square",
+    viewGrid: "Grid",
+    viewList: "List",
+    articlesEmptyTag: "No published articles with this tag yet",
+    articlesEmptyAll: "No published articles yet",
+    articleReadingMinutes: "{n} min",
+    articleKoreanOnlyNotice: "This article is available in Korean only.",
+    articleDraftLabel: "Draft",
+    articleRelatedProjects: "Related projects",
+    articleListNav: "More articles",
+    tocLabel: "Contents",
+    tocOpenLabel: "Open table of contents",
+    paginationLabel: "Pagination",
+    paginationPrev: "Previous page",
+    paginationNext: "Next page",
+    paginationPage: "Page {n}",
     exifAperture: "Aperture",
     exifShutter: "Shutter",
     exifIso: "ISO",

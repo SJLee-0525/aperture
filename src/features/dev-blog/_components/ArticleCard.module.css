@@ -1,0 +1,115 @@
+/* 개발 프로젝트 카드와 같은 골격 — 같은 섹션에서 목록마다 카드 모양이 달라지지 않게 한다. */
+.item {
+  list-style: none;
+  min-width: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: inherit;
+  transition: border-color var(--dur) var(--ease);
+}
+.card:hover {
+  border-color: var(--accent);
+}
+
+.cover {
+  position: relative;
+  flex: none;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.coverImg {
+  object-fit: cover;
+}
+.fallbackDark {
+  display: none;
+}
+:global(html[data-theme="dark"]) .fallbackLight {
+  display: none;
+}
+:global(html[data-theme="dark"]) .fallbackDark {
+  display: block;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+  padding: var(--s-5) var(--s-6) var(--s-6);
+}
+.meta {
+  display: flex;
+  gap: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+.title {
+  font-size: var(--t-h3);
+  font-weight: 600;
+  color: var(--text);
+}
+.tags {
+  overflow: hidden;
+  font-size: var(--t-small);
+  color: var(--accent);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/* 목록 보기 — 커버를 왼쪽 고정 폭으로 눕힌다. */
+.item[data-view="list"] .card {
+  flex-direction: row;
+  align-items: stretch;
+}
+.item[data-view="list"] .cover {
+  width: 200px;
+  aspect-ratio: 16 / 10;
+  border-bottom: 0;
+  border-right: 1px solid var(--line);
+}
+.item[data-view="list"] .cardBody {
+  flex: 1;
+  justify-content: center;
+  padding: var(--s-4) var(--s-5);
+}
+@media (max-width: 560px) {
+  .item[data-view="list"] .cover {
+    width: 116px;
+  }
+  .item[data-view="list"] .title {
+    font-size: var(--t-body);
+  }
+  .item[data-view="list"] .summary {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

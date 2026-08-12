@@ -27,6 +27,7 @@ const MEGA_MENU: MegaSection[] = [
       { labelKey: "aboutNav", href: ROUTES.DEV },
       { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER },
       { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
+      { labelKey: "devArticlesNav", href: ROUTES.DEV_ARTICLES },
     ],
   },
   {
@@ -65,6 +66,7 @@ const MOBILE_TABS: Record<NavSection, NavItem[]> = {
     { labelKey: "aboutNav", href: ROUTES.DEV, icon: "user" },
     { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER, icon: "cal" },
     { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
+    { labelKey: "devArticlesNav", href: ROUTES.DEV_ARTICLES, icon: "article" },
   ],
   photo: [
     { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT, icon: "user" },

@@ -1,0 +1,54 @@
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
+}
+
+.list {
+  display: grid;
+  gap: clamp(16px, 2.4vw, 24px);
+  /* ul 기본 여백을 지운다 — 카드가 지면 왼쪽 끝에서 시작해야 다른 목록과 폭이 맞는다. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.list[data-view="grid"] {
+  grid-template-columns: repeat(2, 1fr);
+}
+.list[data-view="list"] {
+  grid-template-columns: 1fr;
+  gap: var(--s-4);
+}
+@media (max-width: 767px) {
+  .list[data-view="grid"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-16) 0;
+  color: var(--text-2);
+  text-align: center;
+}
+.reset {
+  padding: 7px var(--s-4);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text-2);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.reset:hover {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reset {
+    transition: none;
+  }
+}
