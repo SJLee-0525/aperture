@@ -10,8 +10,11 @@ import type { Page } from "@playwright/test";
  * 이후 다른 관리자 기능의 E2E 도 같은 방식으로 자기 키를 지우면 된다.
  */
 
-/** 지울 키의 접두사. `constants/storage-keys.ts` 의 값과 맞춘다. */
-const ADMIN_STORAGE_PREFIXES = ["ap-admin-dev-articles:", "ap-admin-dev-article-draft:"];
+/**
+ * 지울 키의 접두사. mock 관리자 컬렉션·설정·복구본 키는 전부 `ap-admin-` 으로 시작한다
+ * (`constants/storage-keys.ts`) — 컬렉션이 늘어도 이 목록을 고칠 필요가 없다.
+ */
+const ADMIN_STORAGE_PREFIXES = ["ap-admin-"];
 
 /** 세션에 붙들린 "저장 전 새 글 ID". 남아 있으면 이전 테스트의 초안을 이어받는다. */
 const NEW_ARTICLE_ID_KEY = "ap-admin-dev-article-new:v1";

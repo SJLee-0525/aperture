@@ -4,7 +4,7 @@ import { resetAdminStorage } from "../utils/admin-fixtures";
 
 /**
  * 관리자 블로그 작성 흐름. 로컬 저장소를 Firestore 대신 쓰는 mock 단계를 검증한다.
- * 인증은 `NEXT_PUBLIC_E2E_ADMIN_SESSION` 으로 열린다(비-프로덕션 전용).
+ * 인증은 `NEXT_PUBLIC_ADMIN_TEST_SESSION` 으로 열린다(비-프로덕션 전용).
  */
 const BODY = [
   "## 첫 번째 문단",
@@ -31,7 +31,8 @@ test.describe("Admin · 블로그", () => {
     await expect(page.getByRole("heading", { name: "블로그", level: 1 })).toBeVisible();
 
     await page.getByRole("link", { name: "+ 새 글" }).click();
-    await expect(page.getByRole("heading", { name: "새 글" })).toBeVisible();
+    // dev 서버가 편집 라우트를 처음 컴파일하는 시간을 담는다.
+    await expect(page.getByRole("heading", { name: "새 글" })).toBeVisible({ timeout: 30_000 });
 
     await page.getByLabel("제목 (한국어)").fill("E2E 작성 흐름");
     await page.getByLabel("제목 (English)").fill("E2E writing flow");
