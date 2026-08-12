@@ -44,8 +44,9 @@ const config = [
         { type: "app", pattern: "src/app" },
         {
           // 여러 feature가 소비하는 횡단 기능. 일반 feature와 달리 다른 feature를 참조할 수 없다.
+          // dev-blog: 공개 상세와 관리자 편집기가 같은 Markdown 계약·본문 렌더러를 쓴다.
           type: "platform",
-          pattern: "src/features/(lang|theme|image-upload|photo-detail)",
+          pattern: "src/features/(lang|theme|image-upload|photo-detail|dev-blog)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {
