@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { isRecord, readLocalStore, writeLocalStore } from "@/lib/admin/mock/local-store";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
@@ -8,25 +9,18 @@ import type { LocalizedText } from "@/types/localized";
 /**
  * mock 단계에서 Firestore 를 대신하는 브라우저 저장소의 읽기·쓰기.
  *
- * JSON 은 Date 를 담지 못하므로 시각을 ISO 문자열로 바꿔 저장하고 읽을 때 되돌린다.
- * 형이 하나라도 어긋나면 **저장소 전체를 버린다** — 일부만 살리면 어느 글이 사라졌는지
- * 모른 채 편집을 이어가게 되고, 이 저장소는 어차피 mock 글로 다시 채울 수 있다.
- * 운영 데이터가 아니라 개발 편의를 위한 자리라는 계획 §5의 전제를 그대로 따른다.
+ * 버전 봉투·JSON 직렬화·용량 초과 처리는 관리자 mock 공용 봉투(`lib/admin/mock/local-store`)가
+ * 맡고, 이 파일은 담긴 값의 형 검증만 갖는다. JSON 은 Date 를 담지 못하므로 시각을 ISO
+ * 문자열로 바꿔 저장하고 읽을 때 되돌린다. 형이 하나라도 어긋나면 **저장소 전체를 버린다** —
+ * 일부만 살리면 어느 글이 사라졌는지 모른 채 편집을 이어가게 되고, 이 저장소는 어차피 mock
+ * 글로 다시 채울 수 있다. 운영 데이터가 아니라 개발 편의를 위한 자리라는 계획 §5의 전제를
+ * 그대로 따른다.
  */
 
-/** 저장 형식 버전. 필드 계약이 바뀌면 올리고, 과거 값은 승계하지 않고 버린다. */
-const STORE_VERSION = 1;
+/** 저장 형식 버전. 필드 계약이 바뀌면 올리고, 과거 값은 승계하지 않고 버린다. v2: 공용 봉투 이관. */
+const STORE_VERSION = 2;
 
 type DevArticleStore = { articles: DevArticle[]; tags: DevArticleTag[] };
-
-/**
- * 배열이 아닌 객체인지 확인한다.
- *
- * @param {unknown} value 확인할 값.
- * @returns {value is Record<string, unknown>} 일반 객체이면 true.
- */
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
  * 한·영 텍스트 필드인지 확인한다.
@@ -128,36 +122,31 @@ const toTag = (value: unknown): DevArticleTag | null => {
 };
 
 /**
+ * 봉투에서 꺼낸 값을 검증해 저장소 형태로 되돌린다.
+ *
+ * @param {unknown} value 봉투에 담겨 있던 값.
+ * @returns {DevArticleStore | null} 글과 태그 전부가 계약을 만족하면 저장소, 아니면 null.
+ */
+const decodeStore = (value: unknown): DevArticleStore | null => {
+  if (!isRecord(value)) return null;
+  if (!Array.isArray(value.articles) || !Array.isArray(value.tags)) return null;
+
+  const articles = value.articles.map(toArticle);
+  const tags = value.tags.map(toTag);
+  if (articles.some((article) => article === null) || tags.some((tag) => tag === null)) return null;
+
+  return { articles: articles as DevArticle[], tags: tags as DevArticleTag[] };
+};
+
+/**
  * 로컬 저장소를 읽는다.
  *
  * @param {Pick<Storage, "getItem">} storage 읽을 저장소.
  * @returns {DevArticleStore | null} 저장된 글과 태그. 값이 없거나 형이 어긋나면 null이며
  *   호출부는 mock 으로 다시 seed 한다.
  */
-const readDevArticleStore = (storage: Pick<Storage, "getItem">): DevArticleStore | null => {
-  let raw: string | null;
-  try {
-    raw = storage.getItem(STORAGE_KEYS.ADMIN_DEV_ARTICLES);
-  } catch {
-    return null;
-  }
-  if (raw === null) return null;
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-  if (!isRecord(parsed) || parsed.version !== STORE_VERSION) return null;
-  if (!Array.isArray(parsed.articles) || !Array.isArray(parsed.tags)) return null;
-
-  const articles = parsed.articles.map(toArticle);
-  const tags = parsed.tags.map(toTag);
-  if (articles.some((article) => article === null) || tags.some((tag) => tag === null)) return null;
-
-  return { articles: articles as DevArticle[], tags: tags as DevArticleTag[] };
-};
+const readDevArticleStore = (storage: Pick<Storage, "getItem">): DevArticleStore | null =>
+  readLocalStore(storage, STORAGE_KEYS.ADMIN_DEV_ARTICLES, STORE_VERSION, decodeStore);
 
 /**
  * 로컬 저장소를 통째로 덮어쓴다. 용량 초과·차단은 저장 실패로 알린다.
@@ -166,20 +155,8 @@ const readDevArticleStore = (storage: Pick<Storage, "getItem">): DevArticleStore
  * @param {DevArticleStore} store 저장할 글과 태그 전체.
  * @returns {boolean} 저장 성공 여부.
  */
-const writeDevArticleStore = (
-  storage: Pick<Storage, "setItem">,
-  store: DevArticleStore,
-): boolean => {
-  try {
-    storage.setItem(
-      STORAGE_KEYS.ADMIN_DEV_ARTICLES,
-      JSON.stringify({ version: STORE_VERSION, ...store }),
-    );
-    return true;
-  } catch {
-    return false;
-  }
-};
+const writeDevArticleStore = (storage: Pick<Storage, "setItem">, store: DevArticleStore): boolean =>
+  writeLocalStore(storage, STORAGE_KEYS.ADMIN_DEV_ARTICLES, STORE_VERSION, store);
 
 export { readDevArticleStore, STORE_VERSION, writeDevArticleStore };
 export type { DevArticleStore };

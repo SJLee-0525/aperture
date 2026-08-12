@@ -84,16 +84,20 @@ describe("writeDevArticleStore · readDevArticleStore", () => {
     expect(readDevArticleStore(memoryStorage())).toBeNull();
   });
 
+  /** 봉투 형식의 원시 JSON — 검증 거부 경로를 만들 때만 직접 조립한다. */
+  const envelope = (value: unknown) => JSON.stringify({ version: STORE_VERSION, value });
+
   it("JSON 이 아니거나 버전이 다르면 통째로 버린다", () => {
     expect(readDevArticleStore(memoryStorage("{"))).toBeNull();
     expect(
-      readDevArticleStore(memoryStorage(JSON.stringify({ version: 99, articles: [], tags: [] }))),
+      readDevArticleStore(
+        memoryStorage(JSON.stringify({ version: 99, value: { articles: [], tags: [] } })),
+      ),
     ).toBeNull();
   });
 
   it("글 하나라도 계약을 어기면 전체를 버린다", () => {
-    const broken = JSON.stringify({
-      version: STORE_VERSION,
+    const broken = envelope({
       articles: [article(), { id: "b2", title: "문자열 제목" }],
       tags: [],
     });
@@ -102,18 +106,13 @@ describe("writeDevArticleStore · readDevArticleStore", () => {
   });
 
   it("필수 시각이 깨진 글을 거부한다", () => {
-    const broken = JSON.stringify({
-      version: STORE_VERSION,
-      articles: [{ ...article(), createdAt: "어제" }],
-      tags: [],
-    });
+    const broken = envelope({ articles: [{ ...article(), createdAt: "어제" }], tags: [] });
 
     expect(readDevArticleStore(memoryStorage(broken))).toBeNull();
   });
 
   it("cover 가 이미지 모양이 아니면 거부한다", () => {
-    const broken = JSON.stringify({
-      version: STORE_VERSION,
+    const broken = envelope({
       articles: [{ ...article(), cover: { url: "https://a" } }],
       tags: [],
     });
@@ -122,11 +121,7 @@ describe("writeDevArticleStore · readDevArticleStore", () => {
   });
 
   it("라벨이 없는 태그를 거부한다", () => {
-    const broken = JSON.stringify({
-      version: STORE_VERSION,
-      articles: [],
-      tags: [{ id: "nextjs", ko: "Next.js" }],
-    });
+    const broken = envelope({ articles: [], tags: [{ id: "nextjs", ko: "Next.js" }] });
 
     expect(readDevArticleStore(memoryStorage(broken))).toBeNull();
   });
