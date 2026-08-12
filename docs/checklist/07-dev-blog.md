@@ -2,21 +2,21 @@
 
 > 원본 계획: [`docs/plan/07-dev-blog.md`](../plan/07-dev-blog.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(B1→B7)가 곧 의존 순서다. 요약표의 상태도 함께 갱신한다.
-> 마지막 갱신: 2026-08-13 (B4.5 코드 완료 · 시각 기준선만 남음)
+> 마지막 갱신: 2026-08-13 (B4.5 완료 — 시각 기준선 갱신과 CI 실패 대응까지)
 
 ## 진행 요약
 
-| 단계 | 내용                            | 상태       |
-| ---- | ------------------------------- | ---------- |
-| B1   | 개발 정보 구조 개편             | ✅ 완료    |
-| B2   | Mock 데이터와 Markdown renderer | ✅ 완료    |
-| B3   | Mock 기반 관리자 작성 환경      | ✅ 완료    |
-| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료    |
-| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료    |
-| B4.5 | B4 검수 후속 수정               | 🔄 진행 중 |
-| B5   | Firebase 전환과 배포            | ⬜ 미착수  |
-| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수  |
-| B7   | 검증과 마이그레이션             | ⬜ 미착수  |
+| 단계 | 내용                            | 상태      |
+| ---- | ------------------------------- | --------- |
+| B1   | 개발 정보 구조 개편             | ✅ 완료   |
+| B2   | Mock 데이터와 Markdown renderer | ✅ 완료   |
+| B3   | Mock 기반 관리자 작성 환경      | ✅ 완료   |
+| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료   |
+| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료   |
+| B4.5 | B4 검수 후속 수정               | ✅ 완료   |
+| B5   | Firebase 전환과 배포            | ⬜ 미착수 |
+| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수 |
+| B7   | 검증과 마이그레이션             | ⬜ 미착수 |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
 
@@ -322,6 +322,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 > 적용 시점: **B4 완료 후, B5 시작 전.** P0는 빌드 실패나 보안 경계 훼손으로 이어질 수 있으므로 Firestore 연동보다 먼저 처리한다.
 > 검수 시점 상태: `vitest` 1242/1242 통과, `npm run lint` 통과, `npm run check` 통과. bare `tsc --noEmit`은 오래된 `.next/types`에 영향을 받으므로 검증 명령으로 쓰지 않는다.
 > 별도 수정이 필요 없다고 확인한 범위: shiki 서버 전용 격리, URL·이미지 출처 정책, raw HTML 차단, `/dev/about` 308 단일 홉, live CRUD·RAG 후처리, mock과 실데이터 사이의 교차 쓰기 방지.
+> 종료 상태: 직접 수정 41건과 검증을 모두 마쳤다. 아직 열려 있는 두 칸(`960 프리뷰 / 2048 원본 분리`, `B5 진입 전 확인`)은 B4.5 의 잔여 작업이 아니라 **B5 에서 처리하기로 정한 것**이다.
 
 ### P0 — 배포를 막는 결함
 
@@ -338,7 +339,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - [x] `photo/(work)/loading.module.css:70` — 스켈레톤의 데스크톱 규칙은 예전 `FilterBar`처럼 여러 줄로 감싼다. 실제 `TagFilterBar`는 모든 화면 폭에서 한 줄이므로 로딩 화면이 본문으로 바뀔 때 masonry 그리드의 시작 위치가 달라진다. 파일 첫 주석도 예전 컴포넌트를 가리킨다 → 스켈레톤을 현재 태그 행 규격(`nowrap`, `gap: --s-3`, `align-items: center`)에 맞춘다
 - [x] 태그 행 한 줄 정책을 `design/README.md`의 의도적 이탈 목록에 넣는다. 디자인 원본의 `.chiprow`는 여러 줄을 허용하지만 현재 확정 사양은 한 줄과 좌우 스크롤이다. 지금은 근거가 이 체크리스트의 B4 항목에만 있어 `/design-check`가 위반으로 판단한다. 동작은 바꾸지 않는다
 - [x] `ArticleBodyEditor.tsx:46,77` — 이미지 업로드가 끝난 뒤 실행되는 `insert`는 업로드 시작 시점의 `value`를 사용한다. 업로드 중 textarea에 입력한 내용은 이미지 삽입과 함께 사라질 수 있다 → 최신 값을 ref로 읽거나 상위 상태가 함수형 업데이트를 받도록 바꾼다. `ArticleCoverField`의 `setForm(prev => …)` 방식은 이 문제가 없다
-- [x] `e2e/visual/public-pages.visual.e2e.ts` 의 기준선 상태를 정리한다 → 고아 기준선 4개(`dev-articles-*` · `dev-article-detail-*`)는 png 만 커밋되고 `VISUAL_ROUTES` 에 라우트가 없어 아무 테스트도 소비하지 않았다. **두 라우트를 추가했다.** `photo-album-detail-*` 는 `930a6eb` 이후 히어로 교체를 반영하지 않았다 — 아래 갱신 항목에서 함께 다시 만든다
+- [x] `e2e/visual/public-pages.visual.e2e.ts` 의 기준선 상태를 정리한다 → 고아 기준선 4개(`dev-articles-*` · `dev-article-detail-*`)는 png 만 커밋되고 `VISUAL_ROUTES` 에 라우트가 없어 아무 테스트도 소비하지 않았다. **두 라우트를 추가했다.** `photo-album-detail-*` 는 `930a6eb` 이후 히어로 교체를 반영하지 않았다 — 아래 갱신 항목에서 왜 그 png 가 그대로인지 함께 설명한다
 - [x] `DetailHero.module.css` — 공용 히어로로 옮기며 앨범 하단 padding 32→24px, 고정 `height`→`min-height`, 복귀 버튼 간격·굵기·글리프가 달라졌다 → **현재 규격을 확정 사양으로 둔다**(사용자 확정). 상단 여백 계산은 좁은 화면에서 제목이 버튼 아래로 파고드는 것을 막고, `min-height` 전환은 커버 없는 지면이 빈 자리를 남기지 않게 한다. 글리프는 이번에 SVG 로 바뀌었다
 
 ### P2 — 계약 불일치와 오류 은폐
@@ -388,7 +389,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - [x] 교체한 버튼에서 `line-height: 0px` 보정 3곳과 `.arrowBack`의 `font-size` 지정을 걷어낸다 → 저장소에 `line-height: 0px` 가 0건이 됐다
 - [x] **시각 규격 변경**: `ArticlePagination`의 `← →`가 chevron 이 되어 목록 페이저와 표 페이저 모양이 같아진다(사용자 승인)
 - [x] 교체 대상이 아닌 것을 구분해 남긴다 — `ExifPanel.tsx:37`의 `${w} × ${h}`는 곱셈 기호, 관리자 허브 카드의 `관리 →`는 문구 일부, `LangMenu.tsx:83`의 `●`는 현재 언어 표시, 외부 링크 `↗` 7곳은 범위 밖(사용자 확정)
-- [ ] 앨범 상세·블로그 상세·사진 작업 목록의 시각 기준선을 다시 만든다. 위 P1의 히어로 규격 항목과 같은 화면을 건드리므로 기준선 갱신은 한 번에 처리한다
+- [x] 앨범 상세·블로그 상세·사진 작업 목록의 시각 기준선을 다시 만든다. 위 P1의 히어로 규격 항목과 같은 화면을 건드리므로 기준선 갱신은 한 번에 처리한다 → 아래 「B4.5 검증」의 기준선 항목에 결과를 적었다
 
 ### 기록만 하고 이번에 고치지 않는 것
 
@@ -411,6 +412,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - [x] **본문 이미지 캡션 가운데 정렬**(사용자 요청)
 - [x] **목차 여닫힘 애니메이션**(사용자 요청) — 데스크톱 패널은 `hidden`(= display:none)이라 전환 자체가 불가능해 튀었다. `data-open` + `transition-behavior: allow-discrete` + `@starting-style` 로 바꾸고, 모바일 드로어는 언마운트되므로 진입만 그린다(`ImageLightbox` 와 같은 방식). 둘 다 `prefers-reduced-motion` 에서 꺼진다. 브라우저 지원 범위는 `ArticleToc.module.css` 주석 참조
 - [x] `e2e/admin/album-editor.e2e.ts` 가 드래그 직후 클릭이 삼켜져 실패했다 — **B4.5 이전부터 있던 결함**으로, 작업분을 stash 하고 HEAD 에서도 같은 실패를 확인했다. dnd-kit 의 `AbstractPointerSensor.detach()` 가 `setTimeout(removeAll, 50)` 으로 click 억제기를 늦게 떼는 설계라 제품 결함이 아니다(사람 손으로는 닿지 않는 창). 그 spec 안에 이유를 적은 상수를 두고 창이 닫히기를 기다린다
+- [x] `markdown-normalize.test.ts` 의 깊은 목록 테스트가 CI 에서 vitest 기본 타임아웃(5초)을 넘겨 `test:coverage` 잡을 떨어뜨렸다. 로컬 173ms 짜리 파싱이 커버리지를 켠 느린 러너에서 7.4초가 됐다 — 목록은 한 단계마다 들여쓰기가 길어져 micromark 가 줄마다 열린 컨테이너를 전부 다시 확인한다 → 반복 횟수를 200 에서 `MAX_NESTING_DEPTH` 의 두 배인 64 로 낮추고, 같은 문서를 `not.toThrow()` 와 `codes()` 로 두 번 파싱하던 것을 한 번으로 줄였다(던지면 그 자리에서 그대로 실패한다). 커버리지 포함 실행이 1.46초에서 55ms 가 됐고 깊이 상한은 여전히 두 배 여유로 넘긴다
 - [ ] **960 프리뷰 / 2048 원본 분리는 B5 로 미룬다**(사용자 확정) — Markdown 이 주소를 하나만 담고, 이 저장소의 3단 이미지는 하위 폴더에 각각 다른 UUID 로 올라가 프리뷰 주소를 원본에서 유도할 수 없다. Storage 업로더를 만들 때 마크다운이 두 주소를 담을지 함께 정한다
 
 ### 사용자가 직접 넣은 변경 — 되돌리지 말 것 ★
@@ -432,8 +434,11 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 ### B4.5 검증
 
 - [x] P0 6건에 회귀 테스트를 붙인다 — `constructor`·`toString` fence, `</script>`가 든 제목의 JSON-LD 이스케이프, 세 재귀 경로(`toBlocks`·`toInlines`·`toPlainText`)의 깊이 초과와 issue 중복 없음, `정리`/`정리 2`/`정리` heading id, Firebase 설정 없이 모듈 평가와 관리자 화면 mount, 프로덕션 mock 가드의 차단·탈출구 양방향
-- [ ] `npm run lint` · `npm run check` · `npm test` · `e2e/pages` · `test:a11y`가 통과한다
-- [ ] **시각 기준선을 다시 만든다 — 이 단계에 남은 유일한 작업.** - macOS 에서는 `test.skip(process.platform !== "win32")` 로 건너뛰므로 로컬에서 갱신할 수 없다. - `update-visual-snapshots.yml` 은 `workflow_dispatch` 전용이고 **결과를 그 브랜치에 커밋·푸시**한 뒤 `ci.yml` 을 다시 돌린다. 따라서 **이 작업분을 먼저 커밋·푸시해야** 의미가 있다. - 그 뒤 Actions 에서 브랜치를 골라 실행하거나, Windows 에서 `npm run test:visual:update` 를 돌린다. - 달라져야 할 화면: 태그 행, 히어로 복귀 버튼(글리프→SVG), 페이저 chevron, 앨범 히어로 글자색, 본문 글자·표·링크, 카드 요약 제거, 목차 레일 padding. - `dev-articles`·`dev-article-detail` 두 라우트는 `VISUAL_ROUTES` 에 새로 넣었으므로 기준선을 처음 만든다(png 는 이미 있었지만 라우트가 없어 아무 테스트도 소비하지 않았다).
+- [x] `npm run lint` · `npm run check` · `npm test` · `e2e/pages` · `test:a11y`가 통과한다 → 커밋 시점 `vitest` 1279 통과, `e2e/pages` 221 통과(1건은 dev 서버 첫 컴파일 타임아웃으로, 단독 재실행에서 1.0초에 통과), `test:a11y` 22 통과
+- [x] **시각 기준선을 다시 만들었다** — Actions 의 `update-visual-snapshots` 를 `feature/dev-blog` 에서 돌려 `39b74b1` 로 커밋됐다. macOS 에서는 `test.skip(process.platform !== "win32")` 로 건너뛰므로 로컬 갱신이 불가능하고, 이 workflow 는 결과를 그 브랜치에 커밋·푸시한 뒤 `ci.yml` 을 다시 돌린다.
+  - 18장 중 **6장만 바뀌었다** — `dev-articles-*` · `dev-article-detail-*`(`VISUAL_ROUTES` 에 새로 넣은 두 라우트라 이번이 첫 기준선이다. png 는 전부터 있었지만 소비하는 테스트가 없었다) · `dev-projects-*`(카드 요약 제거로 카드 높이가 줄었다).
+  - 나머지 12장이 그대로인 것은 누락이 아니라 허용 오차다. 값을 주지 않은 `--update-snapshots` 는 `changed` 모드이고(`playwright/lib/program.js` 의 `preset: "changed"`), 이 모드는 **비교가 실패할 때만** png 를 다시 쓴다. `playwright.config.ts:49` 의 `maxDiffPixelRatio: 0.01` 안에 드는 차이는 통과로 처리된다. 앨범 상세 데스크톱은 1440×1361 = 196만 픽셀이라 1% 가 19,598 픽셀인데, 복귀 버튼의 글리프→SVG 교체가 건드리는 넓이는 그 수십분의 일이다. 태그 행 chevron 도 같다.
+  - 앨범 히어로 글자색은 애초에 이 기준선에 찍히지 않는다. `city-night` 은 커버가 있어 image variant 로 렌더되고, 고친 것은 plain variant 다. 커버 없는 fixture 를 넣는 일은 B5 로 넘긴다.
 - [x] `src/`의 `.tsx`에서 `‹ › ← → ↑ ↓ ✕ ✓`가 렌더 위치에 남지 않았는지 확인한다. 남기기로 한 것은 `ExifPanel.tsx`의 곱셈 기호, 관리자 허브 카드의 `관리 →`, `LangMenu`의 `●`, 외부 링크 `↗` 뿐이다
 - [x] 이번에 고친 주석·오류 문구·상수명에 `avoid-ai-writing`을 적용한다(전 단계 공통 규칙 「주석·상수·메시지 문체」)
 
