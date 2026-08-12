@@ -117,6 +117,7 @@ import은 **같은 하위폴더면 `./`**(컴포넌트↔짝 CSS↔형제 컴포
 
 - **chrome(헤더/탭바)은 `(public)/layout.tsx`에서만 마운트.** page.tsx 직접 import 금지.
 - **AuthGuard 는 `admin/layout.tsx`에서만.** 비로그인 → `/admin/login` 리다이렉트.
+- **관리자 데이터 접근은 `lib/admin/*-repository.ts` 경유(B3.5).** 훅·페이지가 `lib/firebase/*` 를 직접 import 하지 않는다 — repository 가 mock(브라우저 로컬)/live(Firestore)를 고르고, mock 모드는 상단 MOCK 배지로 표시된다.
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](../memory/feedback_srp_per_file.md)). `utils.ts`/`helpers.ts` 잡탕 파일 금지.
 
 ## 80% 작업 규칙

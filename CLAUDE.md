@@ -170,6 +170,7 @@ src/
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
 │   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css
 ├── lib/firebase/               # client.ts, auth.ts, firestore.ts, firestore-rest.ts, storage.ts
+├── lib/admin/                  # 관리자 저장소 경계 — 컬렉션별 *-repository.ts 가 mock(로컬)↔live(Firestore) 선택 ★ + mock/(로컬 저장 구현)
 ├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
 ├── lib/exif/                   # exifr 래퍼 (사진 전용)
@@ -209,6 +210,7 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 # SENTRY_AUTH_TOKEN=                  # (빌드 전용 시크릿) 소스맵 업로드용. .env.sentry-build-plugin·Vercel에만 저장
 # NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER=0|1 # (개발 전용) 저장 상태와 무관하게 동의 배너 미리보기
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션에 '1' 금지
+# NEXT_PUBLIC_ADMIN_TEST_SESSION=0|1  # (개발·E2E 전용) AuthGuard 우회 — 프로덕션 빌드에서 '1'이면 즉시 throw. mock 여부와 무관한 별도 플래그
 ```
 
 > GA4와 Sentry 브라우저 수집은 방문자가 각 항목을 허용한 뒤에만 해당 클라이언트 청크를 로드한다(세분화 동의 배너,
@@ -220,6 +222,8 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 
 > **콘텐츠 소스(개발 편의)**: getter는 **개발(`npm run dev`)에선 mock 우선**(음악·개발 미완성 중 UI 테스트),
 > **프로덕션 빌드는 실데이터**(배포 안전). `NEXT_PUBLIC_USE_MOCK` 로 강제 override(`0`=실데이터, `1`=mock). — `lib/content/content-source.ts`
+> **관리자 화면도 같은 스위치를 따른다(B3.5)**: mock 모드의 관리자 저장은 Firestore 가 아니라 브라우저 로컬 저장소로
+> 간다(`lib/admin/*-repository.ts` 가 mock/live 선택, 상단 MOCK 배지로 표시). **실데이터를 만지려면 `NEXT_PUBLIC_USE_MOCK=0`.**
 
 > 지도(MapLibre+CARTO)는 **키가 없다** — CARTO 무료 타일 사용.
 > Firebase 웹 키(`AIza…`)는 공개돼도 보안 위험이 아니다 — 보안은 Rules가 담당.

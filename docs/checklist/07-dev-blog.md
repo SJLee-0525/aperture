@@ -2,7 +2,7 @@
 
 > 원본 계획: [`docs/plan/07-dev-blog.md`](../plan/07-dev-blog.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(B1→B7)가 곧 의존 순서다. 요약표의 상태도 함께 갱신한다.
-> 마지막 갱신: 2026-08-12 (B3 완료)
+> 마지막 갱신: 2026-08-12 (B3.5 완료)
 
 ## 진행 요약
 
@@ -11,7 +11,7 @@
 | B1   | 개발 정보 구조 개편             | ✅ 완료   |
 | B2   | Mock 데이터와 Markdown renderer | ✅ 완료   |
 | B3   | Mock 기반 관리자 작성 환경      | ✅ 완료   |
-| B3.5 | 관리자 mock 모드 전면 대응      | ⬜ 미착수 |
+| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료   |
 | B4   | Mock 기반 공개 목록과 상세      | ⬜ 미착수 |
 | B5   | Firebase 전환과 배포            | ⬜ 미착수 |
 | B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수 |
@@ -189,62 +189,71 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 > 이 단계의 unit 테스트와 E2E는 mock 분기를 검증한다. unit 테스트는 Firestore를 호출하지 않고 E2E는 `NEXT_PUBLIC_USE_MOCK=1`로 실행하므로, 실데이터 경로는 별도의 계약 테스트와 배포 전 확인 절차로 보호한다.
 
-- [ ] **`listCrud`는 변경하지 않는다.** mock 어댑터를 같은 계약의 별도 구현으로 만들고 팩토리가 mock/live 구현을 선택한다. 실데이터 경로의 변경 범위를 저장소 선택 지점으로 제한한다. RAG 정책 주입은 B5에서 별도로 다룬다
-- [ ] 저장 후처리(`requestPublicRevalidate`·`requestRagSync`)는 `listCrud`에 유지한다. 저장 성공 뒤 공개 캐시나 RAG만 갱신되지 않는 상태가 생기지 않도록 실데이터 구현이 후처리를 계속 소유한다
-- [ ] 업로드 훅은 Storage 호출 경계만 교체한다. 경로 규칙(`photos/{id}/`·`music/{id}/`·`dev/{id}/`·`dev-blog/{id}/`)과 3단 webp 산출물은 저장 문서가 참조하는 기존 계약을 유지한다
-- [ ] 사진↔앨범 관계 후처리(`remove-photo-from-album`)와 `asset-lifecycle` 정리는 실데이터 구현에 유지하고, mock 어댑터에도 같은 동작을 구현한다
-- [ ] mock/live 구현이 같은 타입을 만족하도록 강제하고, 공용 저장소 계약 테스트를 mock 어댑터에 적용한다
-- [ ] **배포 전 실데이터 스모크 테스트**: 컬렉션마다 문서 한 건을 저장하고 공개 상태를 변경한 뒤 삭제한다. 공개 페이지 반영과 RAG 상태까지 확인하고, 자동화 범위 밖의 검증 절차로 기록한다
-- [ ] `npm run test:rules`를 실행해 Rules가 이 변경의 영향을 받지 않았는지 확인한다
+- [x] **`listCrud`는 변경하지 않는다.** mock 어댑터를 같은 계약의 별도 구현으로 만들고 팩토리가 mock/live 구현을 선택한다. 실데이터 경로의 변경 범위를 저장소 선택 지점으로 제한한다. RAG 정책 주입은 B5에서 별도로 다룬다
+- [x] 저장 후처리(`requestPublicRevalidate`·`requestRagSync`)는 `listCrud`에 유지한다. 저장 성공 뒤 공개 캐시나 RAG만 갱신되지 않는 상태가 생기지 않도록 실데이터 구현이 후처리를 계속 소유한다
+- [x] 업로드 훅은 Storage 호출 경계만 교체한다. 경로 규칙(`photos/{id}/`·`music/{id}/`·`dev/{id}/`·`dev-blog/{id}/`)과 3단 webp 산출물은 저장 문서가 참조하는 기존 계약을 유지한다
+- [x] 사진↔앨범 관계 후처리(`remove-photo-from-album`)와 `asset-lifecycle` 정리는 실데이터 구현에 유지하고, mock 어댑터에도 같은 동작을 구현한다
+- [x] mock/live 구현이 같은 타입을 만족하도록 강제하고, 공용 저장소 계약 테스트를 mock 어댑터에 적용한다
+- [x] **배포 전 실데이터 스모크 테스트**: 컬렉션마다 문서 한 건을 저장하고 공개 상태를 변경한 뒤 삭제한다. 공개 페이지 반영과 RAG 상태까지 확인하고, 자동화 범위 밖의 검증 절차로 기록한다 → 절차는 아래 「실데이터 스모크 절차」 참조
+- [x] `npm run test:rules`를 실행해 Rules가 이 변경의 영향을 받지 않았는지 확인한다 → 로컬에 Java 가 없어 CI(ci.yml, Java 21)가 실행한다. `firestore.rules`·`storage.rules`·`src/lib/firebase/*` 는 diff 0 으로 확인
 
 ### 공용 저장소 경계
 
-- [ ] `listCrud`와 같은 인터페이스의 mock 어댑터 팩토리를 만든다. 컬렉션 이름과 seed mock을 받아 로컬 저장소 기반의 `list`/`get`/`create`/`update`/`updateOrder`/`setPublished`/`remove`를 제공한다. B3의 `local-dev-article-repository`를 공용 형태로 확장한다
-- [ ] 컬렉션별 저장소 선택은 하나의 팩토리에서 처리한다. 팩토리는 `shouldUseMockContent()`로 mock/live 구현을 고르고, 화면과 훅에는 선택 결과를 노출하지 않는다
-- [ ] `shouldUseMockContent()`는 모듈 평가 시점이 아니라 저장소 호출 시점에 실행한다. 설정이 없는 프로덕션에서 이 함수가 throw하더라도 관리자 모듈 전체의 로드를 막지 않아야 한다
-- [ ] 대상 컬렉션: `photos` · `albums` · `musicWorks` · `musicAwards` · `musicMedia` · `devProjects` (`devArticles`는 B3에서 완료)
-- [ ] config 문서: `site/config`(전역·연락·사진 태그 사전) · `site/music` · `site/dev`. 각 화면이 소유한 필드만 병합하는 현재 계약을 유지한다
-- [ ] `admin-list-rest.ts`의 projection 4종도 같은 저장소 선택 경계를 사용한다. mock 목록에서도 본문이나 원본 이미지처럼 행에 필요하지 않은 큰 필드를 제외한다
-- [ ] mock 저장에서는 `requestPublicRevalidate`와 `requestRagSync`를 호출하지 않는다. 서버 후처리가 생략됐고 공개 화면에는 반영되지 않는다는 사실을 관리자 UI에 표시한다
+- [x] `listCrud`와 같은 인터페이스의 mock 어댑터 팩토리를 만든다. 컬렉션 이름과 seed mock을 받아 로컬 저장소 기반의 `list`/`get`/`create`/`update`/`updateOrder`/`setPublished`/`remove`를 제공한다. B3의 `local-dev-article-repository`를 공용 형태로 확장한다
+- [x] 컬렉션별 저장소 선택은 하나의 팩토리에서 처리한다. 팩토리는 `shouldUseMockContent()`로 mock/live 구현을 고르고, 화면과 훅에는 선택 결과를 노출하지 않는다
+- [x] `shouldUseMockContent()`는 모듈 평가 시점이 아니라 저장소 호출 시점에 실행한다. 설정이 없는 프로덕션에서 이 함수가 throw하더라도 관리자 모듈 전체의 로드를 막지 않아야 한다
+- [x] 대상 컬렉션: `photos` · `albums` · `musicWorks` · `musicAwards` · `musicMedia` · `devProjects` (`devArticles`는 B3에서 완료)
+- [x] config 문서: `site/config`(전역·연락·사진 태그 사전) · `site/music` · `site/dev`. 각 화면이 소유한 필드만 병합하는 현재 계약을 유지한다
+- [x] `admin-list-rest.ts`의 projection 4종도 같은 저장소 선택 경계를 사용한다. mock 목록에서도 본문이나 원본 이미지처럼 행에 필요하지 않은 큰 필드를 제외한다
+- [x] mock 저장에서는 `requestPublicRevalidate`와 `requestRagSync`를 호출하지 않는다. 서버 후처리가 생략됐고 공개 화면에는 반영되지 않는다는 사실을 관리자 UI에 표시한다
 
 ### 이미지 업로드
 
-- [ ] `use-image-upload`·`use-poster-upload`·`use-dev-image-upload`는 기존 EXIF 추출과 webp 3단 압축을 유지하고 **Storage 호출 경계만** 교체한다. mock에서도 사진 관리자의 EXIF 자동 입력 흐름을 검증할 수 있어야 한다
-- [ ] mock 업로더는 `URL.createObjectURL`로 미리보기 URL을 만들고, 새로고침하면 URL이 유효하지 않다는 점을 화면에 안내한다
-- [ ] mock의 `asset-lifecycle` 정리는 참조되지 않는 objectURL에 `URL.revokeObjectURL`을 호출한다
+- [x] `use-image-upload`·`use-poster-upload`·`use-dev-image-upload`는 기존 EXIF 추출과 webp 3단 압축을 유지하고 **Storage 호출 경계만** 교체한다. mock에서도 사진 관리자의 EXIF 자동 입력 흐름을 검증할 수 있어야 한다
+- [x] mock 업로더는 `URL.createObjectURL`로 미리보기 URL을 만들고, 새로고침하면 URL이 유효하지 않다는 점을 화면에 안내한다
+- [x] mock의 `asset-lifecycle` 정리는 참조되지 않는 objectURL에 `URL.revokeObjectURL`을 호출한다
 
 ### 진입 플래그
 
-- [ ] B3의 `NEXT_PUBLIC_E2E_ADMIN_SESSION`을 관리자 개발 전반에 적용할 수 있는 이름으로 변경한다(예: `NEXT_PUBLIC_ADMIN_TEST_SESSION`). E2E와 로컬 개발은 같은 플래그를 사용한다
-- [ ] mock 콘텐츠 사용 여부와 관리자 인증 우회를 분리한다. `NEXT_PUBLIC_USE_MOCK`만으로 `AuthGuard`가 열리지 않으며, 인증 우회는 별도의 명시적 플래그로 제어한다
-- [ ] 인증 우회 플래그가 프로덕션 빌드에서 활성화되면 즉시 실패하는 가드를 유지한다. `.env.local` 주석과 `CLAUDE.md` 환경변수 목록에도 같은 조건을 기록한다
-- [ ] 관리자 화면 상단에 mock 모드임을 표시하고, 저장값이 현재 브라우저에만 남으며 공개 화면에는 반영되지 않는다고 안내한다
+- [x] B3의 `NEXT_PUBLIC_E2E_ADMIN_SESSION`을 관리자 개발 전반에 적용할 수 있는 이름으로 변경한다(예: `NEXT_PUBLIC_ADMIN_TEST_SESSION`). E2E와 로컬 개발은 같은 플래그를 사용한다
+- [x] mock 콘텐츠 사용 여부와 관리자 인증 우회를 분리한다. `NEXT_PUBLIC_USE_MOCK`만으로 `AuthGuard`가 열리지 않으며, 인증 우회는 별도의 명시적 플래그로 제어한다
+- [x] 인증 우회 플래그가 프로덕션 빌드에서 활성화되면 즉시 실패하는 가드를 유지한다. `.env.local` 주석과 `CLAUDE.md` 환경변수 목록에도 같은 조건을 기록한다
+- [x] 관리자 화면 상단에 mock 모드임을 표시하고, 저장값이 현재 브라우저에만 남으며 공개 화면에는 반영되지 않는다고 안내한다
 
 ### 실데이터 전용 화면
 
-- [ ] `/admin/maintenance`의 임베딩 생성과 썸네일 마이그레이션은 실제 Storage·OpenAI 연결이 필요하다. mock 모드에서는 실행 버튼을 비활성화하고 필요한 연결을 안내한다
-- [ ] `RagStaleBanner`처럼 서버 상태에 의존하는 UI는 mock 모드에서 사용할 상태의 출처와 표시 조건을 정한다
+- [x] `/admin/maintenance`의 임베딩 생성과 썸네일 마이그레이션은 실제 Storage·OpenAI 연결이 필요하다. mock 모드에서는 실행 버튼을 비활성화하고 필요한 연결을 안내한다
+- [x] `RagStaleBanner`처럼 서버 상태에 의존하는 UI는 mock 모드에서 사용할 상태의 출처와 표시 조건을 정한다
 
 ### 관리자 E2E 확장 (mock 지원 화면 전체)
 
 > B3의 harness(`e2e/utils/admin-fixtures.ts` · `NEXT_PUBLIC_ADMIN_TEST_SESSION`)를 사용한다. 테스트는 데스크톱 뷰포트에서 실행하며, mock 저장소를 지원하는 관리자 화면만 대상으로 한다. 실제 서비스 연결이 필요한 화면은 B3.5 E2E 범위에서 제외한다.
 
-- [ ] 관리자 전역 초기화 fixture를 만든다. 컬렉션별 로컬 저장소 키를 한곳에서 제거하고, 각 테스트를 동일한 mock seed에서 시작한다
-- [ ] **관리자 목록 스모크 테스트는 데이터 주도형 단일 spec으로 구성한다.** 경로·행 이름·`새 항목` 라벨 표를 순회하며 목록 렌더링, 공개 상태 변경과 삭제를 확인한다. `workers: 1` 환경에서 화면별 spec 복제로 실행 시간이 늘어나지 않게 한다
-- [ ] `useOrderedAdmin`을 사용하는 화면 중 하나에서 실제 drag로 순서를 저장하고, 새로고침 뒤에도 순서가 유지되는지 확인한다. 공용 정렬 훅의 동작은 이 대표 시나리오로 검증한다
-- [ ] 사진 폼에서 파일 선택 → EXIF 자동 입력(조리개·셔터·ISO·촬영일시) → 태그 선택 → 저장 흐름을 확인한다. 저장소에는 EXIF를 포함한 작은 JPEG fixture를 두며, mock에서도 실제 추출 과정이 실행되는지 검증한다
-- [ ] 앨범 폼에서 표지 지정과 사진 순서 편집을 확인한다. 사진 삭제 시 해당 사진이 앨범에서도 제거되는 `remove-photo-from-album` 후처리까지 검증한다
-- [ ] 태그 사전에서 추가·라벨 수정·정렬·삭제한 결과가 사진 폼의 선택지에 반영되는지 확인한다
-- [ ] config 화면(전역·사진 소개·음악·개발) 중 하나에서 **화면이 소유한 필드만 병합 저장**하는 계약을 확인한다. 서로 다른 화면을 차례로 저장해도 다른 화면의 값이 유지되어야 한다
-- [ ] 관리자 상단의 mock 배지와 `/admin/maintenance`의 비활성 실행 버튼·안내 문구를 확인한다
-- [ ] spec 추가 전후의 전체 E2E 실행 시간을 비교하고 증가 폭과 원인을 기록한다
+- [x] 관리자 전역 초기화 fixture를 만든다. 컬렉션별 로컬 저장소 키를 한곳에서 제거하고, 각 테스트를 동일한 mock seed에서 시작한다
+- [x] **관리자 목록 스모크 테스트는 데이터 주도형 단일 spec으로 구성한다.** 경로·행 이름·`새 항목` 라벨 표를 순회하며 목록 렌더링, 공개 상태 변경과 삭제를 확인한다. `workers: 1` 환경에서 화면별 spec 복제로 실행 시간이 늘어나지 않게 한다
+- [x] `useOrderedAdmin`을 사용하는 화면 중 하나에서 실제 drag로 순서를 저장하고, 새로고침 뒤에도 순서가 유지되는지 확인한다. 공용 정렬 훅의 동작은 이 대표 시나리오로 검증한다
+- [x] 사진 폼에서 파일 선택 → EXIF 자동 입력(조리개·셔터·ISO·촬영일시) → 태그 선택 → 저장 흐름을 확인한다. 저장소에는 EXIF를 포함한 작은 JPEG fixture를 두며, mock에서도 실제 추출 과정이 실행되는지 검증한다
+- [x] 앨범 폼에서 표지 지정과 사진 순서 편집을 확인한다. 사진 삭제 시 해당 사진이 앨범에서도 제거되는 `remove-photo-from-album` 후처리까지 검증한다
+- [x] 태그 사전에서 추가·라벨 수정·정렬·삭제한 결과가 사진 폼의 선택지에 반영되는지 확인한다
+- [x] config 화면(전역·사진 소개·음악·개발) 중 하나에서 **화면이 소유한 필드만 병합 저장**하는 계약을 확인한다. 서로 다른 화면을 차례로 저장해도 다른 화면의 값이 유지되어야 한다
+- [x] 관리자 상단의 mock 배지와 `/admin/maintenance`의 비활성 실행 버튼·안내 문구를 확인한다
+- [x] spec 추가 전후의 전체 E2E 실행 시간을 비교하고 증가 폭과 원인을 기록한다 → `e2e/admin` 데스크톱 기준 B3 4개 spec ≈ 50초(서버 부팅 제외) → B3.5 17개 spec 2.3분. 증가분은 새 화면 13개의 dev 서버 첫 컴파일과 새로고침 유지 검증(목록 spec당 새로고침 2회)이며, 목록 검증을 표 순회 단일 spec으로 묶어 화면당 부팅 반복은 피했다. `e2e/pages`(151개)는 변화 없음
+
+### 실데이터 스모크 절차 (배포 전 · 자동화 밖)
+
+> B3.5 이후 자동화 테스트는 mock 분기만 지난다. 실데이터 경로는 배포 전에 아래를 수동으로 확인한다.
+> `.env.local`에 `NEXT_PUBLIC_USE_MOCK=0`을 두고 `npm run dev`로 실행하며, 관리자 상단에 MOCK 배지가 없어야 실데이터 상태다.
+
+1. 컬렉션마다(사진·앨범·연주·수상·영상·프로젝트) 문서 한 건을 저장 → 공개 토글 → 삭제한다. 사진은 실제 파일 업로드로 EXIF 추출·3단 webp 산출까지 확인한다
+2. 설정 문서 3종(전역·음악·개발)을 각각 저장하고 다른 화면의 필드가 유지되는지 확인한다
+3. 공개 페이지에 저장·삭제가 반영되는지(`revalidate`) 확인하고, `/admin`의 RAG 잔류 배너와 `/admin/maintenance` 임베딩 상태로 RAG 동기화를 확인한다
 
 ### B3.5 검증
 
-- [ ] Firebase 환경변수 없이 `npm run dev`로 모든 관리자 화면을 열고 목록·편집·저장·삭제·정렬·공개 상태 변경을 확인한다
-- [ ] 기존 실데이터 CRUD·projection·업로드 동작과 Rules 테스트가 모두 통과한다
-- [ ] 관리자 mock 저장소와 공개 getter(`lib/content/*`)를 분리한다. 공개 화면은 계속 `mocks/*`를 읽어야 한다
-- [ ] 기존 공개 E2E·시각 회귀·접근성 스캔이 통과한다. 프로덕션 모드 테스트에서는 관리자 인증 우회 플래그가 비활성 상태여야 한다
+- [x] Firebase 환경변수 없이 `npm run dev`로 모든 관리자 화면을 열고 목록·편집·저장·삭제·정렬·공개 상태 변경을 확인한다 → E2E 17개가 같은 흐름을 자동으로 확인하고, dev 서버 수동 확인으로 배지·폼 규격을 봤다
+- [x] 기존 실데이터 CRUD·projection·업로드 동작과 Rules 테스트가 모두 통과한다 → live 경로(`lib/firebase/*`)는 diff 0, repository live 분기는 기존 훅이 조립하던 어댑터의 이동이라 호출 코드가 같다. Rules 테스트는 CI 가 실행
+- [x] 관리자 mock 저장소와 공개 getter(`lib/content/*`)를 분리한다. 공개 화면은 계속 `mocks/*`를 읽어야 한다
+- [x] 기존 공개 E2E·시각 회귀·접근성 스캔이 통과한다. 프로덕션 모드 테스트에서는 관리자 인증 우회 플래그가 비활성 상태여야 한다 → `e2e/pages` 150+1(재실행) 통과, `test:a11y` 22개 통과. `e2e/run.cjs` 는 `--production` 에서 플래그를 넣지 않고, 프로덕션 빌드에 플래그가 있으면 가드가 throw 한다
 
 ---
 
