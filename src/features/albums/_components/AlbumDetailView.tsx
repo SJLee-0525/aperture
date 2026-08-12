@@ -1,14 +1,13 @@
 "use client";
 
 import { m } from "motion/react";
-import Image from "next/image";
 
+import { DetailHero } from "@/components/DetailHero";
 import { PhotoGrid } from "@/components/PhotoGrid";
-import { ShareButton } from "@/components/ShareButton";
 import { ROUTES } from "@/constants/routes";
-import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
+import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
@@ -43,42 +42,16 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
 
   return (
     <>
-      <div className={styles.hero} data-protected-image>
-        <m.div
-          className={styles.heroImgWrap}
-          initial={{ scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.9, ease: EASE }}
-        >
-          {coverUrl ? (
-            <Image
-              src={coverUrl}
-              alt={title}
-              fill
-              sizes="100vw"
-              className={styles.heroImg}
-              draggable={false}
-              priority
-            />
-          ) : null}
-        </m.div>
-        <div className={styles.scrim} />
-        <LocalizedLink href={ROUTES.PHOTO_ALBUMS} prefetch={false} className={styles.back}>
-          ← {dict.albumsNav}
-        </LocalizedLink>
-        <ShareButton title={title} label={dict.shareLabel} className={styles.share} />
-        <m.div
-          className={styles.heroText}
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.12 }}
-        >
-          <h1 className={styles.heroTitle}>{title}</h1>
-          <div className={styles.heroMeta}>
-            {pickText(album.subtitle, lang)} · {photos.length} photos
-          </div>
-        </m.div>
-      </div>
+      <DetailHero
+        cover={coverUrl ? { url: coverUrl, alt: title } : null}
+        back={{ href: localizePath(lang, ROUTES.PHOTO_ALBUMS), label: dict.albumsNav }}
+        share={{ title, label: dict.shareLabel }}
+      >
+        <h1 className={styles.heroTitle}>{title}</h1>
+        <div className={styles.heroMeta}>
+          {pickText(album.subtitle, lang)} · {photos.length} photos
+        </div>
+      </DetailHero>
 
       <m.main
         className={styles.main}
