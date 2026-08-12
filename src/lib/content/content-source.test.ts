@@ -25,18 +25,12 @@ describe("shouldUseMockContent", () => {
     expect(() => shouldUseMockContent()).toThrow("Firebase 공개 콘텐츠 설정이 없습니다");
   });
 
-  it("Vercel 프로덕션 빌드에서 NEXT_PUBLIC_USE_MOCK=1 이면 즉시 실패한다 — mock 노출 사고 차단", () => {
+  it("프로덕션 빌드가 확정한 플래그를 그대로 읽는다 — 여기서 배포 환경을 다시 판정하지 않는다", () => {
+    // 이 함수는 브라우저에서도 돌고, 거기에는 배포 환경을 알려 줄 값이 없다.
+    // mock 프로덕션 빌드를 막는 일은 `assertDeployableContentSource` 가 빌드 시점에 맡는다.
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "1");
     vi.stubEnv("VERCEL", "1");
-
-    expect(() => shouldUseMockContent()).toThrow("Vercel 프로덕션 빌드에서 금지");
-  });
-
-  it("로컬 프로덕션 빌드는 명시적 mock 을 허용한다 — mock 빌드 점검 용도", () => {
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "1");
-    vi.stubEnv("VERCEL", "");
 
     expect(shouldUseMockContent()).toBe(true);
   });

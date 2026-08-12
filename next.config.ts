@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 
 import packageJson from "./package.json" with { type: "json" };
 import { SECURITY_HEADERS } from "./src/constants/security-headers";
+import { assertDeployableContentSource } from "./src/lib/content/assert-deployable-content-source";
 
 const nextConfig: NextConfig = {
   // Playwright는 실행 중인 로컬 dev 서버와 충돌하지 않도록 전용 distDir를 주입한다.
@@ -54,7 +55,7 @@ const nextConfig: NextConfig = {
 // Sentry 오류 모니터링(ADR-0004). 브라우저 이벤트는 /monitoring 터널(동일 출처)로 보내
 // security-headers.ts의 connect-src 화이트리스트를 넓히지 않는다. SDK init의 정책(동의 게이팅·
 // 샘플링·dataCollection 잠금)은 features/monitoring과 sentry.*.config.ts가 담당한다.
-export default withSentryConfig(nextConfig, {
+const sentryConfig = withSentryConfig(nextConfig, {
   org: "yonsei-univ-yr",
   project: "javascript-nextjs",
 
@@ -84,3 +85,21 @@ export default withSentryConfig(nextConfig, {
     treeshake: { removeDebugLogging: true },
   },
 });
+
+/**
+ * 함수형 설정으로 두는 이유는 phase 를 받기 위해서다.
+ *
+ * 배포 산출물이 mock 콘텐츠로 만들어지는 것은 여기서만 막을 수 있다 — 브라우저에는 배포
+ * 환경을 알려 줄 값이 없다(`NEXT_PUBLIC_` 이 아닌 변수는 번들에 인라인되지 않는다).
+ * `NODE_ENV` 가 아니라 phase 로 가르는 이유는 `next typegen` 처럼 산출물과 무관한 명령까지
+ * 막지 않기 위함이다.
+ *
+ * @param {string} phase Next 가 넘기는 실행 단계.
+ * @returns {NextConfig} Sentry 를 감싼 설정.
+ */
+const config = (phase: string): NextConfig => {
+  assertDeployableContentSource(phase);
+  return sentryConfig;
+};
+
+export default config;

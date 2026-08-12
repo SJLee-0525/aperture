@@ -22,6 +22,9 @@ const serverEnv = {
   // 관리자 E2E 전용 인증 우회. 프로덕션 모드에서는 가드가 throw 하므로 명시적으로 끈다 —
   // 개발자가 .env.local 에 이 플래그를 두고 쓰더라도 프로덕션 실행이 그 값을 물려받지 않게 한다.
   NEXT_PUBLIC_ADMIN_TEST_SESSION: production ? "0" : "1",
+  // next.config.ts 가 프로덕션 + mock 조합을 막는다. next start 도 설정을 읽으므로
+  // 빌드뿐 아니라 서버 실행에도 탈출구가 필요하다. NEXT_PUBLIC_ 이 아니라 번들에는 안 들어간다.
+  APERTURE_E2E_ALLOW_PRODUCTION_MOCK: "1",
 };
 
 if (build) {
@@ -35,6 +38,7 @@ if (build) {
     NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
     NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
     NEXT_PUBLIC_ADMIN_TEST_SESSION: "0",
+    APERTURE_E2E_ALLOW_PRODUCTION_MOCK: "1",
   };
   delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
   const buildResult = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {
