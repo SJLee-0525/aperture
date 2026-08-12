@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Chip } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
 import { RangeSlider } from "@/components/RangeSlider";
 import { Select } from "@/components/Select";
+import { TagFilterBar } from "@/components/TagFilterBar";
 import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -54,79 +54,73 @@ const FilterBar = (props: Props) => {
   }, [open]);
 
   return (
-    <div className={styles.bar}>
-      <div className={styles.tagbar}>
-        <Chip label={dict.allTag} active={props.tag === ALL} onClick={() => props.onTag(ALL)} />
-        {props.tags.map((tag) => (
-          <Chip
-            key={tag.id}
-            label={pickText(tag, lang)}
-            active={props.tag === tag.id}
-            onClick={() => props.onTag(tag.id)}
-          />
-        ))}
-      </div>
+    <TagFilterBar
+      items={props.tags.map((tag) => ({ id: tag.id, label: pickText(tag, lang) }))}
+      activeId={props.tag === ALL ? null : props.tag}
+      allLabel={dict.allTag}
+      onSelect={(id) => props.onTag(id ?? ALL)}
+      trailing={
+        <div className={styles.filters}>
+          <button
+            ref={triggerRef}
+            type="button"
+            className={styles.filterBtn}
+            aria-label={dict.filterLabel}
+            aria-expanded={open}
+            onClick={() => setOpen((isOpen) => !isOpen)}
+          >
+            <Icon name="funnel" size={16} />
+            {props.filtersActive ? <span className={styles.badge} /> : null}
+          </button>
 
-      <div className={styles.filters}>
-        <button
-          ref={triggerRef}
-          type="button"
-          className={styles.filterBtn}
-          aria-label={dict.filterLabel}
-          aria-expanded={open}
-          onClick={() => setOpen((isOpen) => !isOpen)}
-        >
-          <Icon name="funnel" size={16} />
-          {props.filtersActive ? <span className={styles.badge} /> : null}
-        </button>
+          {open ? (
+            <>
+              <button
+                type="button"
+                className={styles.backdrop}
+                aria-hidden="true"
+                tabIndex={-1}
+                onClick={() => setOpen(false)}
+              />
+              <div className={styles.pop}>
+                <div className={styles.row}>
+                  <span className="u-label">{dict.cameraLabel}</span>
+                  <Select
+                    ariaLabel={dict.cameraLabel}
+                    value={props.camera}
+                    onChange={props.onCamera}
+                    options={[
+                      { value: ALL, label: dict.allTag },
+                      ...props.cameras.map((camera) => ({ value: camera, label: camera })),
+                    ]}
+                  />
+                </div>
 
-        {open ? (
-          <>
-            <button
-              type="button"
-              className={styles.backdrop}
-              aria-hidden="true"
-              tabIndex={-1}
-              onClick={() => setOpen(false)}
-            />
-            <div className={styles.pop}>
-              <div className={styles.row}>
-                <span className="u-label">{dict.cameraLabel}</span>
-                <Select
-                  ariaLabel={dict.cameraLabel}
-                  value={props.camera}
-                  onChange={props.onCamera}
-                  options={[
-                    { value: ALL, label: dict.allTag },
-                    ...props.cameras.map((camera) => ({ value: camera, label: camera })),
-                  ]}
-                />
+                <div className={styles.row}>
+                  <span className="u-label">{dict.focalLabel}</span>
+                  <RangeSlider
+                    min={FOCAL_MIN}
+                    max={FOCAL_MAX}
+                    low={props.focalMin}
+                    high={props.focalMax}
+                    unit="mm"
+                    onChange={props.onFocal}
+                    onChangeEnd={props.onFocalCommit}
+                    onChangeCancel={props.onFocalCancel}
+                  />
+                </div>
+
+                <div className={styles.foot}>
+                  <button type="button" className={styles.reset} onClick={props.onReset}>
+                    {dict.resetLabel}
+                  </button>
+                </div>
               </div>
-
-              <div className={styles.row}>
-                <span className="u-label">{dict.focalLabel}</span>
-                <RangeSlider
-                  min={FOCAL_MIN}
-                  max={FOCAL_MAX}
-                  low={props.focalMin}
-                  high={props.focalMax}
-                  unit="mm"
-                  onChange={props.onFocal}
-                  onChangeEnd={props.onFocalCommit}
-                  onChangeCancel={props.onFocalCancel}
-                />
-              </div>
-
-              <div className={styles.foot}>
-                <button type="button" className={styles.reset} onClick={props.onReset}>
-                  {dict.resetLabel}
-                </button>
-              </div>
-            </div>
-          </>
-        ) : null}
-      </div>
-    </div>
+            </>
+          ) : null}
+        </div>
+      }
+    />
   );
 };
 

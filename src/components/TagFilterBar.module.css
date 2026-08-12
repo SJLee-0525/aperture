@@ -1,0 +1,70 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+
+/* 칩 줄과 화살표를 겹치기 위한 기준 상자. 폭은 남는 만큼 전부 쓴다. */
+.scroller {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 어느 폭에서든 한 줄 — 태그가 늘어도 목록을 아래로 밀지 않는다. 스크롤바는 숨긴다. */
+.tagbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+.tagbar::-webkit-scrollbar {
+  display: none;
+}
+.tagbar > * {
+  flex: none;
+}
+
+/* 더 남은 방향에만 나타난다. 배경 그라데이션이 잘린 칩을 덮어 스크롤 여지를 알린다. */
+.arrow {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  display: none;
+  place-items: center;
+  width: 16px;
+  height: 100%;
+  padding: 0 5px;
+  border: 0;
+  color: var(--text-2);
+  font-size: 18px;
+  line-height: 0px;
+  cursor: pointer;
+}
+.arrow:hover {
+  color: var(--text);
+}
+.arrowStart {
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 65%, transparent);
+  justify-content: start;
+}
+.arrowEnd {
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 65%, transparent);
+  justify-content: end;
+}
+.scroller[data-overflow-start="true"] .arrowStart,
+.scroller[data-overflow-end="true"] .arrowEnd {
+  display: grid;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tagbar {
+    scroll-behavior: auto;
+  }
+}
