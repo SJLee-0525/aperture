@@ -2,7 +2,7 @@
 
 > 원본 계획: [`docs/plan/07-dev-blog.md`](../plan/07-dev-blog.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(B1→B7)가 곧 의존 순서다. 요약표의 상태도 함께 갱신한다.
-> 마지막 갱신: 2026-08-12 (B3.5 완료)
+> 마지막 갱신: 2026-08-12 (B4 완료)
 
 ## 진행 요약
 
@@ -12,7 +12,7 @@
 | B2   | Mock 데이터와 Markdown renderer | ✅ 완료   |
 | B3   | Mock 기반 관리자 작성 환경      | ✅ 완료   |
 | B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료   |
-| B4   | Mock 기반 공개 목록과 상세      | ⬜ 미착수 |
+| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료   |
 | B5   | Firebase 전환과 배포            | ⬜ 미착수 |
 | B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수 |
 | B7   | 검증과 마이그레이션             | ⬜ 미착수 |
@@ -261,50 +261,57 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### 공용 primitive 선행 추출 (사진 회귀 필수)
 
-- [ ] page toolbar — 갤러리의 인라인 `제목/결과 수/보기 전환` 마크업을 공용 shell로 추출, 사진 회귀 테스트 통과 (§6)
-- [ ] `TagFilterBar` — 사진 `FilterBar`에서 태그 칩 행 + overflow 스타일만 승격 (카메라·초점거리 popover는 잔류), 사진 회귀 테스트 통과 (§6)
-- [ ] `ViewToggle` — boolean `square`·사진 아이콘 고정 API를 option id·label·icon 주입식 범용 segmented control로 리팩터링, `aria-pressed`·키보드 동작 공유, 사진 회귀 테스트 통과 (§6) — 사진의 로컬 view state를 URL로 옮기는 일은 범위 외
-- [ ] 앨범 상세 hero — shell·scrim·back/share 위치·진입 motion을 공용 hero primitive로 추출(metadata는 slot), 앨범 회귀 테스트 통과 (§6)
+- [x] page toolbar — 갤러리의 인라인 `제목/결과 수/보기 전환` 마크업을 공용 shell로 추출, 사진 회귀 테스트 통과 (§6) → `components/PageToolbar`, CSS는 글자 그대로 이동. 결과 수는 포맷을 모르는 `count?: string`
+- [x] `TagFilterBar` — 사진 `FilterBar`에서 태그 칩 행 + overflow 스타일만 승격 (카메라·초점거리 popover는 잔류), 사진 회귀 테스트 통과 (§6) → popover는 `trailing` 슬롯. 어느 폭에서든 한 줄 + 좌우 스크롤이며 넘치는 방향에만 화살표(사용자 요청, 사진 데스크톱 스냅샷 갱신)
+- [x] `ViewToggle` — boolean `square`·사진 아이콘 고정 API를 option id·label·icon 주입식 범용 segmented control로 리팩터링, `aria-pressed`·키보드 동작 공유, 사진 회귀 테스트 통과 (§6) — 사진의 로컬 view state를 URL로 옮기는 일은 범위 외
+- [x] 앨범 상세 hero — shell·scrim·back/share 위치·진입 motion을 공용 hero primitive로 추출(metadata는 slot), 앨범 회귀 테스트 통과 (§6) → `components/DetailHero`. 커버 없으면 타이포그래피형(scrim 생략·버튼 surface 전환). 추출 전 앨범 상세 시각 기준선을 먼저 만들고, 교체 후 픽셀 동일을 확인했다
 
 ### 블로그 목록 (`/dev/articles`)
 
-- [ ] URL 계약 — `?tag`(없거나 삭제된 id는 `전체` 정규화, 변경 시 page 1 리셋)·`?view=grid|list`(기본 grid)·`?page`(범위 밖·비숫자는 canonical 1페이지 정규화), 세 키만 직렬화·기본값 생략 (§6)
-- [ ] 정렬·pagination — `publishedAt desc, id asc`, 페이지당 8개, 뒤로가기·공유 URL 복원 (§6)
-- [ ] 그리드 보기 — 데스크톱 2열·모바일 1열, 대표 이미지·제목·요약·태그·발행일·읽기 시간 (§6)
-- [ ] 목록 보기 — 행 구성, 작은 화면 metadata 줄바꿈, 이미지 없는 글은 이미지 칸 생략 (§6)
-- [ ] 이미지 없는 그리드 카드 — 개발 섹션 토큰 기반 블로그 전용 CSS·실제 텍스트 대체 구성 (프로젝트 카드의 라이트/다크 OG 이미지 2장 방식 복제 금지) (§6)
-- [ ] 빈 필터 결과 — 선택 태그 표시 + 초기화 동작 (§6)
+- [x] URL 계약 — `?tag`(없거나 삭제된 id는 `전체` 정규화, 변경 시 page 1 리셋)·`?view=grid|list`(기본 grid)·`?page`(범위 밖·비숫자는 canonical 1페이지 정규화), 세 키만 직렬화·기본값 생략 (§6) → `_lib/article-list-query`. 서버 `searchParams` 대신 클라 `useSearchParams`+`pushCurrentUrl`(ISR 유지·Next 16 동일 pathname no-op 회피)
+- [x] 정렬·pagination — `publishedAt desc, id asc`, 페이지당 8개, 뒤로가기·공유 URL 복원 (§6) → 정렬은 getter 가 이미 마쳤고 화면은 자르기만 한다. mock 공개 글을 9건으로 늘려 2페이지를 만든다
+- [x] 그리드 보기 — 데스크톱 2열·모바일 1열, 대표 이미지·제목·요약·태그·발행일·읽기 시간 (§6)
+- [x] 목록 보기 — 행 구성, 작은 화면 metadata 줄바꿈, 이미지 없는 글은 이미지 칸 생략 (§6) → 카드 골격은 개발 프로젝트 카드와 같게 맞췄다(사용자 요청)
+- [x] 이미지 없는 그리드 카드 — ~~블로그 전용 CSS·실제 텍스트 대체 구성~~ → **결정 변경**: 프로젝트 카드와 같은 라이트/다크 워드마크 이미지를 쓴다. 같은 개발 섹션에서 목록마다 카드 모양이 갈리는 편이 더 어색하다는 판단(사용자 요청)
+- [x] 빈 필터 결과 — 선택 태그 표시 + 초기화 동작 (§6) → mock 사전의 `accessibility` 태그를 어느 글도 쓰지 않게 두어 이 화면을 확인한다
 
 ### 블로그 상세 (`/dev/articles/[slug]`)
 
-- [ ] hero(이미지 有) — full-bleed 배경 + scrim, 실제 HTML 텍스트 제목·요약·발행일·수정일·읽기 시간·태그, 좌상단 목록 복귀·우상단 `ShareButton`(canonical URL) (§6)
-- [ ] hero(이미지 無) — 타이포그래피형, scrim 생략, back/share 버튼 WCAG 대비 surface 전환, 같은 정보 위계 (§6)
-- [ ] `cover`의 focal position 지원 여부를 구현 전 확인하고 결정을 기록한다 (현재 `ImageMeta`에는 없음) (§6)
-- [ ] 본문 — 긴 글용 최대 폭·행간, 서체는 기존 토큰만(`--font-display` 제목·본문 / `--font-sans` UI / `--font-mono` 코드), 코드 라이트·다크 테마 (§6)
+- [x] hero(이미지 有) — full-bleed 배경 + scrim, 실제 HTML 텍스트 제목·요약·발행일·읽기 시간·태그, 좌상단 목록 복귀·우상단 `ShareButton`(canonical URL) (§6) → 배경은 지면 전체, 글은 본문과 같은 폭(860px)에 맞춘다. 넓은 화면에서는 태그 왼쪽·발행 정보 오른쪽. **수정일은 표시하지 않는다** — 읽기 전에 필요한 것은 언제 쓴 글이고 얼마나 걸리는지 두 가지뿐이라는 판단(구조화 데이터에는 남는다)
+- [x] hero(이미지 無) — 타이포그래피형, scrim 생략, back/share 버튼 WCAG 대비 surface 전환, 같은 정보 위계 (§6) → 최소 높이도 두지 않는다. 채울 사진이 없는데 자리만 비우면 제목이 아래로 밀린다
+- [x] `cover`의 focal position 지원 여부를 구현 전 확인하고 결정을 기록한다 (§6) → **도입하지 않는다.** `ImageMeta` 에 필드가 없고 저장소 전체에 `object-position` 사용이 0건이다. 넣으려면 타입·업로더·관리자 폼·기존 문서 이행이 함께 움직여야 해서, 실제 커버에서 잘림이 문제가 될 때 다시 판단한다
+- [x] 본문 — 긴 글용 최대 폭·행간, 서체는 기존 토큰만, 코드 라이트·다크 테마 (§6) → B2 가 미뤄 둔 지면 타이포를 확정했다: 행간 1.65, 문단 사이는 좁게(`--s-3`) 두고 제목 **위** 여백만 크게(h2 `--s-10`·h3 `--s-8`) 잡아 절 구분이 간격으로 읽히게 했다. 폭 860px
 
 ### 노션식 floating 목차 (§6)
 
-- [ ] 축소 인디케이터 — 오른쪽 중앙 세로 선(h3는 짧게), 현재 heading 강조(색상 외 수단 병행), heading 2개 미만이면 미렌더, 본문 구간에서만 표시
-- [ ] 현재 위치 추적 — `IntersectionObserver` 기반(heading별 scroll listener 금지), 읽기 기준선·문서 끝 규칙
-- [ ] 데스크톱 확장 — hover/focus 시 왼쪽 확장, 유예 후 축소(focus 중엔 유지), `aria-current="location"`, 2줄 말줄임 + 전체 accessible name
-- [ ] 모바일 drawer — 44×44px hit area, `min(82vw, 320px)`·`100dvh`, focus trap, backdrop·닫기·`Escape`·뒤로가기로 닫힘, 배경·챗봇 trigger `inert`
-- [ ] 챗봇 버튼 좌표 공용화 — `ChatLauncher.module.css`의 크기·offset을 CSS custom property로 승격, 목차와 최소 간격 공유, `data-section="dev"` 모바일 offset 회귀 테스트 (§6)
-- [ ] fragment/history — `history.pushState` 계약, 뒤로가기 시 fragment·스크롤 복원, heading 공통 `scroll-margin-top`
-- [ ] 접근성·motion — `목차 열기` accessible name + `aria-expanded`/`aria-controls`, `prefers-reduced-motion` 즉시 처리, 확대·고대비 시 텍스트 라벨
-- [ ] component + E2E 테스트로 계층·추적·확장·drawer·복원 고정 (§12-B4)
+- [x] 축소 인디케이터 — 오른쪽 중앙 세로 선(h3는 짧게), 현재 heading 강조(색상 외 수단 병행), heading 2개 미만이면 미렌더, 본문 구간에서만 표시 → 눈금은 작고 연하게(기본 `opacity: .42`) 두고 포인터가 오면 또렷해진다. 커서 스냅은 `data-cursor-passive` 로 끈다 — 반응은 커서가 아니라 눈금이 해야 한다
+- [x] 현재 위치 추적 — `IntersectionObserver` 기반(heading별 scroll listener 금지), 읽기 기준선·문서 끝 규칙 → 읽기 기준선 96px 은 `--reading-line-offset` 과 `READING_LINE_PX` 가 같은 값을 쓰고, heading `scroll-margin-top` 도 여기에 맞춰 이동 직후 그 제목이 현재 항목이 된다
+- [x] 데스크톱 확장 — hover/focus 시 왼쪽 확장, 유예 후 축소(focus 중엔 유지), `aria-current="location"`, 2줄 말줄임 + 전체 accessible name
+- [x] 모바일 drawer — 44×44px hit area, focus trap, backdrop·닫기·`Escape` 로 닫힘, 배경·챗봇 trigger `inert` → **전면 시트 대신 오른쪽 가운데의 작은 패널**(`min(78vw,300px)`·`max-height: min(56dvh,420px)`). 목차는 읽던 자리를 잃지 않으려고 여는 것이라 본문이 뒤에 보이는 편이 낫다는 판단(사용자 요청)
+- [x] 챗봇 버튼 좌표 공용화 — `ChatLauncher.module.css`의 크기·offset을 CSS custom property로 승격, 목차와 최소 간격 공유 (§6) → `--chat-launcher-size`·`--mobile-tab-bar-height` 를 `globals.css` 단일 출처로. 62px 이 탭바와 런처 두 곳에 중복돼 있던 것도 함께 정리했다
+- [x] fragment/history — `history.pushState` 계약, 뒤로가기 시 fragment·스크롤 복원, heading 공통 `scroll-margin-top` → 이동 전 현재 기록에 `scrollY` 를 적고 되돌아올 때 그 값이 있을 때만 복원한다(목차가 만든 새 기록에는 없으므로 앞으로 가기와 섞이지 않는다)
+- [x] 접근성·motion — `목차 열기` accessible name + `aria-expanded`/`aria-controls`, `prefers-reduced-motion` 즉시 처리, 고대비 대응 → 보이지 않을 때는 `visibility: hidden` 으로 Tab 순서에서도 뺀다(투명한 버튼에 포커스가 가면 화면에 없는 것이 읽힌다)
+- [x] component + E2E 테스트로 계층·추적·확장·drawer·복원 고정 (§12-B4) → `use-hover-grace`·`heading-navigation` 단위 테스트 + `e2e/pages/dev-article-detail.e2e.ts`(표시 구간·hover 확장·이동 위치·모바일 열고 닫기·항목 선택 이동)
 
 ### 본문 하단·언어·SEO
 
-- [ ] 연관 프로젝트 카드 — 지정 순서, 비공개 ID 제외 (§7)
-- [ ] 블로그 탐색 목록 — 표 형태 5개, 현재 글 페이지 우선·현재 행 강조, `?articlePage=` 분리, 본문 유지 갱신, 키보드 탐색 (§6)
-- [ ] 관계·목록 projection — 본문 없이 id·slug·제목·요약·cover·태그·발행일·읽기 시간·프로젝트 ID만 캐시 (§6, §7)
-- [ ] 영어 경로 — `This article is available in Korean only.` 안내, 본문 `lang="ko"` (§8)
-- [ ] metadata — 언어별 제목·요약 metadata + Article 구조화 데이터, canonical은 한국어 URL, 초안·미리보기 `noindex`, sitemap 등재 (§8)
+- [x] 연관 프로젝트 카드 — 지정 순서, 비공개 ID 제외 (§7) → 프로젝트 상세는 목록 화면의 모달이라 `?project=` 딥링크로 보낸다(상세 지면에 모달과 데이터를 다시 세우지 않는다)
+- [x] 블로그 탐색 목록 — 표 형태 5개, 현재 글 페이지 우선·현재 행 강조, `?articlePage=` 분리, 본문 유지 갱신, 키보드 탐색 (§6) → 쪽 이동은 `replaceCurrentUrl`(push 아님) — 표를 넘긴 횟수만큼 뒤로가기가 쌓이면 목차 fragment 기록과 섞인다
+- [x] 관계·목록 projection — 본문 없이 id·slug·제목·요약·cover·태그·발행일·읽기 시간·프로젝트 ID만 캐시 (§6, §7) → `_lib/article-projection` 하나를 목록·상세·탐색 표가 함께 쓴다
+- [x] 영어 경로 — `This article is available in Korean only.` 안내, 본문 `lang="ko"` (§8)
+- [x] metadata — 언어별 제목·요약 metadata + Article 구조화 데이터, canonical은 한국어 URL, 초안·미리보기 `noindex`, sitemap 등재 (§8) → `pageMetadata` 결과의 `alternates` 를 통째로 바꿔 canonical 을 한국어로 고정하고 hreflang 은 달지 않는다(영어 경로는 번역본이 아니다). BlogPosting JSON-LD 는 저장소 최초. sitemap 도 같은 정책으로 글별 한국어 URL 하나만 올린다. 관리자 미리보기는 `robots.ts` 의 `/admin` disallow 로 이미 차단돼 있어 추가 작업 없음
 
 ### B4 검증
 
-- [ ] 공개 목록·상세 + 관리자 작성 흐름 mock E2E 통과 → 콘텐츠 계약 고정 (§12-B4)
-- [ ] 추출한 공용 컴포넌트가 사진·앨범 화면을 회귀시키지 않는다 (§14)
+- [x] 공개 목록·상세 + 관리자 작성 흐름 mock E2E 통과 → 콘텐츠 계약 고정 (§12-B4) → `e2e/pages/dev-articles.e2e.ts`(태그·보기·페이지 URL 계약, canonical 정규화, 빈 결과) · `dev-article-detail.e2e.ts`(목차 표시 구간·hover 확장·이동 위치·모바일 패널·하단 영역·없는 slug/초안 404) · `public-routes`·`ACCESSIBILITY_ROUTES` 등록
+- [x] 추출한 공용 컴포넌트가 사진·앨범 화면을 회귀시키지 않는다 (§14) → 앨범 상세는 hero 교체 전후 시각 기준선이 픽셀 동일. 사진 작업 목록은 태그 줄 정책을 바꾼 데스크톱 스냅샷만 의도적으로 갱신했고 나머지는 무변화
+
+### B4 에서 함께 고친 것 (계획 밖)
+
+- 상세 지면에 `main` 랜드마크가 없어 지면 전체가 landmark 밖에 있었다 — `ArticleDetailView` 에 `landmark` 옵션을 두고 공개 라우트만 `main` 으로 감싼다(관리자 미리보기는 이미 다른 `main` 안).
+- 목차 인디케이터가 `opacity: 0` 로만 숨겨져 보이지 않는 동안에도 Tab 으로 잡혔다 → `visibility` 로 함께 감춘다.
+- 모바일에서 목차 항목을 눌러도 이동하지 않던 문제 — 패널을 닫을 때 배경 스크롤 잠금을 푸는 처리가 저장해 둔 위치로 되돌리고 있었다. 닫힌 뒤에 이동하도록 순서를 바꿨다.
+- `e2e/run.cjs` 가 프로덕션 모드에서 `NEXT_PUBLIC_ADMIN_TEST_SESSION=0` 을 명시한다 — `.env.local` 에 이 플래그를 두고 개발하면 프로덕션 빌드 가드에 걸려 시각 회귀를 돌릴 수 없었다.
 
 ---
 
