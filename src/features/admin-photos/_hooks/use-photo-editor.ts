@@ -6,7 +6,8 @@ import { useCallback, useRef, useState, type FormEvent } from "react";
 import { ROUTES } from "@/constants/routes";
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
-import { createPhoto, updatePhoto, type PhotoInput } from "@/lib/firebase/firestore";
+import { getPhotoRepository } from "@/lib/admin/photo-repository";
+import type { PhotoInput } from "@/lib/firebase/firestore";
 import type { Photo } from "@/types/photo";
 
 import {
@@ -65,7 +66,10 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
     const input = { ...form, coords: parseCoords(lat, lng) };
     setSaving(true);
     try {
-      await (isEdit ? updatePhoto(photoId, input) : createPhoto(photoId, input));
+      const photoRepository = getPhotoRepository();
+      await (isEdit
+        ? photoRepository.update(photoId, input)
+        : photoRepository.create(photoId, input));
       await removeUnreferencedImages(
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.image]),

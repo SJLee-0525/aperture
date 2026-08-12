@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 
 import { PhotoForm } from "@/features/admin-photos/_components/PhotoForm";
-import { getPhotoAdmin } from "@/lib/firebase/firestore";
+import { getPhotoRepository } from "@/lib/admin/photo-repository";
 import type { Photo } from "@/types/photo";
 
 import styles from "./page.module.css";
@@ -20,7 +20,8 @@ const EditPhotoPage = ({ params }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    getPhotoAdmin(id)
+    getPhotoRepository()
+      .get(id)
       .then((loaded) => {
         if (!alive) return;
         if (loaded) {

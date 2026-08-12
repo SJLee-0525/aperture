@@ -11,8 +11,9 @@ import {
   normalizeAlbumInput,
   validateAlbumInput,
 } from "@/features/admin-albums/_lib/album-form-data";
-import { createAlbum, updateAlbum, type AlbumInput } from "@/lib/firebase/albums";
-import { listPhotoItemsAdmin } from "@/lib/firebase/admin-list-rest";
+import { getAlbumRepository } from "@/lib/admin/album-repository";
+import { getPhotoRepository } from "@/lib/admin/photo-repository";
+import type { AlbumInput } from "@/lib/firebase/albums";
 import type { AdminPhotoListItem } from "@/types/admin";
 import type { Album } from "@/types/album";
 
@@ -32,7 +33,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
 
   useEffect(() => {
     let active = true;
-    listPhotoItemsAdmin()
+    getPhotoRepository()
+      .list()
       .then((loaded) => {
         if (!active) return;
         setPhotos(loaded);
@@ -107,7 +109,10 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
 
     setSaving(true);
     try {
-      await (isEdit ? updateAlbum(albumId, input) : createAlbum(albumId, input));
+      const albumRepository = getAlbumRepository();
+      await (isEdit
+        ? albumRepository.update(albumId, input)
+        : albumRepository.create(albumId, input));
       router.replace(ROUTES.ADMIN_ALBUMS);
     } catch (caught) {
       setError((caught as Error).message);

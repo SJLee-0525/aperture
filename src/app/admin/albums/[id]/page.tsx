@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 
 import { AlbumForm } from "@/features/admin-albums/_components/AlbumForm";
-import { getAlbumAdmin } from "@/lib/firebase/albums";
+import { getAlbumRepository } from "@/lib/admin/album-repository";
 import type { Album } from "@/types/album";
 
 import styles from "./page.module.css";
@@ -27,7 +27,8 @@ const EditAlbumPage = ({ params }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    getAlbumAdmin(id)
+    getAlbumRepository()
+      .get(id)
       .then((loaded) => {
         if (!alive) return;
         if (loaded) {
