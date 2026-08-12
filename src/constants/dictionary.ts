@@ -32,9 +32,11 @@ type UIDict = {
   contactSendError: string;
   contactCaptchaRequired: string;
   contactPrivacyNotice: string;
-  devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
+  devCareerStackNav: string;
+  devStackHeading: string;
+  devArticlesNav: string;
   devEducationLabel: string;
   devAwardsLabel: string;
   devAwardProjectLink: string;
@@ -209,9 +211,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactSendError: "전송에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     contactCaptchaRequired: "스팸 방지 확인을 완료해 주세요.",
     contactPrivacyNotice: "입력한 이름, 이메일과 메시지는 문의 전달과 회신에 사용됩니다.",
-    devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
+    devCareerStackNav: "경력·기술",
+    devStackHeading: "기술",
+    devArticlesNav: "블로그",
     devEducationLabel: "학력",
     devAwardsLabel: "수상",
     devAwardProjectLink: "프로젝트 보기",
@@ -391,9 +395,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactCaptchaRequired: "Please complete the spam check.",
     contactPrivacyNotice:
       "Your name, email address, and message are used to deliver and answer your enquiry.",
-    devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
+    devCareerStackNav: "Career & Stack",
+    devStackHeading: "Stack",
+    devArticlesNav: "Blog",
     devEducationLabel: "Education",
     devAwardsLabel: "Awards",
     devAwardProjectLink: "View project",

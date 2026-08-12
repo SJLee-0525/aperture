@@ -24,9 +24,8 @@ const MEGA_MENU: MegaSection[] = [
     labelKey: "sectionDev",
     href: ROUTES.DEV,
     links: [
-      { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT },
-      { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER },
-      { labelKey: "devStackNav", href: ROUTES.DEV },
+      { labelKey: "aboutNav", href: ROUTES.DEV },
+      { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER },
       { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
     ],
   },
@@ -63,9 +62,8 @@ const CONTACT_NAV: MegaLink = { labelKey: "contactNav", href: ROUTES.CONTACT };
 /** 모바일 섹션별 하단 탭 — 섹션에 따라 탭 세트가 다름 (A2 MobileTabBar 소비) */
 const MOBILE_TABS: Record<NavSection, NavItem[]> = {
   dev: [
-    { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT, icon: "user" },
-    { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER, icon: "cal" },
-    { labelKey: "devStackNav", href: ROUTES.DEV, icon: "code" },
+    { labelKey: "aboutNav", href: ROUTES.DEV, icon: "user" },
+    { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER, icon: "cal" },
     { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
   ],
   photo: [

@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
   // v1 사진 URL(/albums 등)도 체인 리다이렉트(308 두 번)를 피해 /ko/photo/* 로 직행한다.
   async redirects() {
     return [
+      // /dev/about 은 /dev(소개)로 통합했다. redirects 는 첫 매치가 이기므로 아래 /dev/:path* 보다
+      // 위에 둬야 무-로케일 유입이 /ko/dev/about 을 거치는 308 두 번(체인)이 되지 않는다.
+      { source: "/dev/about", destination: "/ko/dev", permanent: true },
+      { source: "/:lang(ko|en)/dev/about", destination: "/:lang/dev", permanent: true },
       { source: "/photo/:path*", destination: "/ko/photo/:path*", permanent: true },
       { source: "/music/:path*", destination: "/ko/music/:path*", permanent: true },
       { source: "/dev/:path*", destination: "/ko/dev/:path*", permanent: true },
