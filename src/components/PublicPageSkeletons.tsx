@@ -48,7 +48,34 @@ const CardGridPageSkeleton = ({ kind }: { kind: GridKind }) => {
   );
 };
 
-const TimelinePageSkeleton = () => (
+const StackGroupsSkeleton = () => (
+  <div className={styles.stackGroups}>
+    {STACK_GROUPS.map((chipCount, groupIndex) => (
+      <div key={`stack-${groupIndex}`} className={styles.stackGroup}>
+        <Skeleton width={104} height={11} />
+        <div className={styles.chips}>
+          {Array.from({ length: chipCount }).map((_, chipIndex) => (
+            <Skeleton
+              key={`chip-${groupIndex}-${chipIndex}`}
+              width={CHIP_WIDTHS[(groupIndex + chipIndex) % CHIP_WIDTHS.length]}
+              height={36}
+              radius={4}
+            />
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/**
+ * 학력·경력·수상 타임라인 자리표시자.
+ *
+ * @param {{ withStack?: boolean }} props
+ * @param {boolean | undefined} props.withStack - 경력 페이지처럼 타임라인 아래 기술 스택 칩 그룹이 이어질 때 켠다.
+ * @returns {JSX.Element}
+ */
+const TimelinePageSkeleton = ({ withStack = false }: { withStack?: boolean }) => (
   <main className={styles.main} aria-busy="true">
     <PageTitleSkeleton />
     <div className={styles.timeline}>
@@ -68,6 +95,7 @@ const TimelinePageSkeleton = () => (
           </div>
         </section>
       ))}
+      {withStack ? <StackGroupsSkeleton /> : null}
     </div>
   </main>
 );
@@ -117,29 +145,6 @@ const AboutPageSkeleton = ({ extended = false }: { extended?: boolean }) => (
         ))}
       </div>
     ) : null}
-  </main>
-);
-
-const StackPageSkeleton = () => (
-  <main className={styles.main} aria-busy="true">
-    <PageTitleSkeleton />
-    <div className={styles.stackGroups}>
-      {STACK_GROUPS.map((chipCount, groupIndex) => (
-        <div key={`stack-${groupIndex}`} className={styles.stackGroup}>
-          <Skeleton width={104} height={11} />
-          <div className={styles.chips}>
-            {Array.from({ length: chipCount }).map((_, chipIndex) => (
-              <Skeleton
-                key={`chip-${groupIndex}-${chipIndex}`}
-                width={CHIP_WIDTHS[(groupIndex + chipIndex) % CHIP_WIDTHS.length]}
-                height={36}
-                radius={4}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
   </main>
 );
 
@@ -207,6 +212,5 @@ export {
   CardGridPageSkeleton,
   ContactPageSkeleton,
   SearchPageSkeleton,
-  StackPageSkeleton,
   TimelinePageSkeleton,
 };

@@ -16,22 +16,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     lang,
     title: { ko: "개발 경력", en: "Development Career" },
     description: {
-      ko: "개발자 이성준의 학력, 경력과 수상 이력을 소개합니다.",
-      en: "The education, career, and awards of developer Sungjoon Lee.",
+      ko: "개발자 이성준의 학력, 경력, 수상 이력과 사용 기술을 소개합니다.",
+      en: "The education, career, awards, and tech stack of developer Sungjoon Lee.",
     },
     pathname: "/dev/career",
   });
 }
 
 /**
- * 개발 — 경력 (/dev/career): 학력·경력 타임라인 + 수상.
+ * 개발 — 경력 (/dev/career): 학력·경력 타임라인 + 수상 + 기술 스택.
+ * 수상 모달이 `?award=` 를 읽으므로 Suspense 경계가 필요하다.
  *
  * @returns {Promise<JSX.Element>}
  */
 export default async function DevCareerPage() {
   const config = await getDevConfig();
   return (
-    <Suspense fallback={<TimelinePageSkeleton />}>
+    <Suspense fallback={<TimelinePageSkeleton withStack />}>
       <DevCareerView config={config} />
     </Suspense>
   );
