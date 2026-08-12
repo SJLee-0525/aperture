@@ -160,11 +160,12 @@ src/
 │   ├── legal/                  # _components/LegalDocumentView 공용 레이아웃 · _lib/legal-documents.tsx 한·영 정책 원문
 │   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
 │   ├── dev/                    # 개발 섹션: 소개·경력(+기술 스택)·프로젝트 뷰 + 프로젝트 모달 (_components/)
-│   ├── dev-blog/               # 개발 블로그: _lib/markdown-*(파서·검증·목차·읽기 시간·서버 하이라이팅) · _components/{ArticleBody,ArticleCodeBlock,ArticleYouTube}
+│   ├── dev-blog/               # ★ 횡단(platform) — 공개 상세와 관리자 편집기가 공유. _lib/markdown-*(파서·검증·목차·읽기 시간·서버 색칠) · _components/{ArticleDocumentView,ArticleBody,ArticleCodeBlock,ArticleYouTube}
 │   ├── site-header/            # _components/: SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
 │   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context — _hooks/·_lib/·_components/
 │   ├── auth/                   # _components/{LoginForm,AuthGuard} · _hooks/use-auth
 │   ├── image-upload/           # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
+│   ├── admin-dev-articles/     # 블로그 CMS: _lib/(저장소 경계·slug·발행 조건·복구본·미리보기 action) · _hooks/ · _components/
 │   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
 │   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css

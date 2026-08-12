@@ -77,11 +77,12 @@ src/
 │   ├── export/                  # _components/ExportModal · _hooks/use-export · _lib/framePreview
 │   ├── music/                   # _components/: MusicWorksView·MusicCareerView·MusicMediaView·MusicAboutView (+ 연주/수상 모달)
 │   ├── dev/                     # _components/: DevAboutView(/dev)·DevCareerView+DevStackSection(/dev/career)·DevProjectsView (+ 프로젝트 모달, reveal·타이핑)
-│   ├── dev-blog/                # _lib/markdown-*(파서·검증·목차·읽기 시간·서버 하이라이팅) · _components/{ArticleBody,ArticleCodeBlock,ArticleYouTube}
+│   ├── dev-blog/                # ★ 횡단(platform, 공개+관리자 공용) — _lib/markdown-*(파서·검증·목차·읽기 시간·서버 색칠) · _components/{ArticleDocumentView,ArticleBody,ArticleCodeBlock,ArticleYouTube}
 │   ├── site-header/             # _components/: SiteHeader(mega-menu), MobileTabBar/MobileMenu, ThemeToggleButton, LangMenu, SearchBox, SectionAccent
 │   ├── theme/  lang/            # _hooks/use-theme-toggle·_lib/theme-script / _components/LangProvider·_hooks/use-lang (useSyncExternalStore)
 │   ├── auth/                    # _components/{LoginForm,AuthGuard} · _hooks/use-auth
 │   ├── image-upload/            # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
+│   ├── admin-dev-articles/      # 블로그 CMS — _lib/(저장소 경계·slug·발행 조건·복구본·미리보기 action) · _hooks/ · _components/
 │   └── admin-*/                 # _components/*Form·*Row + _hooks/use-*-admin (dnd-kit 정렬) — 사진·음악·개발
 ├── components/                  # ★ 순수 재사용 UI — props 만. + 각 컴포넌트 .module.css
 │   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock, SectionHeading, WorkPoster, ScheduleRow, ProjectCard, YouTubeFacade …
