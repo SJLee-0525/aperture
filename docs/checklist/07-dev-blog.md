@@ -9,7 +9,7 @@
 | 단계 | 내용                            | 상태      |
 | ---- | ------------------------------- | --------- |
 | B1   | 개발 정보 구조 개편             | ✅ 완료   |
-| B2   | Mock 데이터와 Markdown renderer | ⬜ 미착수 |
+| B2   | Mock 데이터와 Markdown renderer | ✅ 완료   |
 | B3   | Mock 기반 관리자 작성 환경      | ⬜ 미착수 |
 | B4   | Mock 기반 공개 목록과 상세      | ⬜ 미착수 |
 | B5   | Firebase 전환과 배포            | ⬜ 미착수 |
@@ -106,34 +106,35 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### 타입과 repository 경계
 
-- [ ] `types/dev-article.ts` — `DevArticle` 타입: `title`/`summary`/`coverAlt`는 `LocalizedText`, `body`는 한국어 Markdown 단일 문자열, `publishedAt`/`firstPublishedAt`/`createdAt`/`updatedAt` 구분 (§2)
-- [ ] `types/dev-article-tag.ts` — `DevArticleTag` 타입: 기존 `Tag`와 같은 `id/ko/en` 계약 (§2)
-- [ ] `lib/content/dev-articles.ts` — 공개 getter 경계: 화면은 mock/Firestore를 구분하지 못한다 (기존 `lib/content/dev.ts` 패턴, mock은 동적 import)
-- [ ] `mocks/dev-articles.ts` — 대표 글 mock 작성, 아래 경계 사례를 모두 포함 (§2):
-  - [ ] 대표 이미지 있는 글 / 없는 글
-  - [ ] 긴 목차 + 같은 이름의 heading + 표가 있는 글
-  - [ ] JavaScript·TypeScript·Java·C·C++·Python 코드 블록
-  - [ ] 본문 중간 이미지 여러 장 + YouTube 영상
-  - [ ] 연관 프로젝트가 여러 개인 글 / 없는 글
-  - [ ] 발행일이 같은 글, 초안과 발행 글
+- [x] `types/dev-article.ts` — `DevArticle` 타입: `title`/`summary`/`coverAlt`는 `LocalizedText`, `body`는 한국어 Markdown 단일 문자열, `publishedAt`/`firstPublishedAt`/`createdAt`/`updatedAt` 구분 (§2)
+- [x] `types/dev-article-tag.ts` — `DevArticleTag` 타입: 기존 `Tag`와 같은 `id/ko/en` 계약 (§2)
+- [x] `lib/content/dev-articles.ts` — 공개 getter 경계: 화면은 mock/Firestore를 구분하지 못한다 (기존 `lib/content/dev.ts` 패턴, mock은 동적 import) — live 분기는 B5에서 Firestore reader로 교체할 때까지 빈 목록
+- [x] `mocks/dev-articles.ts` — 대표 글 mock 작성, 아래 경계 사례를 모두 포함 (§2):
+  - [x] 대표 이미지 있는 글 / 없는 글
+  - [x] 긴 목차 + 같은 이름의 heading + 표가 있는 글
+  - [x] JavaScript·TypeScript·Java·C·C++·Python 코드 블록
+  - [x] 본문 중간 이미지 여러 장 + YouTube 영상
+  - [x] 연관 프로젝트가 여러 개인 글 / 없는 글
+  - [x] 발행일이 같은 글, 초안과 발행 글
 
 ### Markdown 계약 (`features/dev-blog/_lib/markdown-*`)
 
-- [ ] parser — 제목·문단·강조·목록·인용·링크·구분선·표·fenced code·이미지 지원 범위를 순수 함수 경계로 구현한다 (§3)
-- [ ] sanitizer — 허용 요소·속성 제한, 임의 HTML/MDX/스크립트 차단 (§3)
-- [ ] 링크 검증 — `https`/`http`/`mailto`/내부 경로만 허용, 외부 링크에 안전한 `rel` 부여 (§3)
-- [ ] 이미지 출처 — 관리자 Storage URL과 명시적 허용 출처만 통과, 대체 텍스트 필수 (§3)
-- [ ] `::caption` directive — 바로 앞 이미지에만 연결 (§3)
-- [ ] `::youtube` directive — `youtube.com`/`youtu.be`만 영상 ID 추출, `title` 필수·`source` 선택, 임의 iframe 제거 (§3)
-- [ ] heading id — renderer가 생성, 소문자 slug + 중복 시 문서 순서대로 `-2`, `-3` suffix. 목차·본문·URL fragment가 같은 parser 결과 사용 (§3)
-- [ ] 예상 읽기 시간 — AST를 받는 단일 순수 함수: `CJK/500 + 비CJK 단어/265 + 코드 비어 있지 않은 줄/20`, 올림·최소 1분, 표식·URL·directive 제외 (§3)
-- [ ] 코드 하이라이팅 — 서버 전용 처리(클라이언트 언어 번들 금지), 언어 별칭 한곳 정규화, 미지 언어는 일반 코드 블록 폴백, 라이트·다크 색 토큰·대비 준수 (§3)
-- [ ] 잘못된 directive·비허용 URL·대체 텍스트 누락·제목 없는 YouTube를 오류 위치와 함께 보고하는 검증 결과 계약 (§3)
+- [x] parser — 제목·문단·강조·목록·인용·링크·구분선·표·fenced code·이미지 지원 범위를 순수 함수 경계로 구현한다 (§3)
+- [x] sanitizer — 허용 요소·속성 제한, 임의 HTML/MDX/스크립트 차단 (§3) — HTML 문자열 단계를 두지 않고 mdast를 허용 노드로만 옮겨(`markdown-normalize`) sanitizer 계층 자체를 없앴다
+- [x] 링크 검증 — `https`/`mailto`/내부 경로만 허용(`http` 제외 — §3 각주), 외부 링크에 안전한 `rel` 부여 (§3)
+- [x] 이미지 출처 — 관리자 Storage URL과 명시적 허용 출처만 통과, 대체 텍스트 필수 (§3)
+- [x] `::caption` directive — 바로 앞 이미지에만 연결 (§3)
+- [x] `::youtube` directive — `youtube.com`/`youtu.be`만 영상 ID 추출, `title` 필수·`source` 선택, 임의 iframe 제거 (§3)
+- [x] heading id — renderer가 생성, 소문자 slug + 중복 시 문서 순서대로 `-2`, `-3` suffix. 목차·본문·URL fragment가 같은 parser 결과 사용 (§3)
+- [x] 예상 읽기 시간 — AST를 받는 단일 순수 함수: `CJK/500 + 비CJK 단어/265 + 코드 비어 있지 않은 줄/20`, 올림·최소 1분, 표식·URL·directive 제외 (§3)
+- [x] 코드 하이라이팅 — 서버 전용 처리(클라이언트 언어 번들 금지), 언어 별칭 한곳 정규화, 미지 언어는 일반 코드 블록 폴백, 라이트·다크 색 토큰·대비 준수 (§3)
+- [x] 잘못된 directive·비허용 URL·대체 텍스트 누락·제목 없는 YouTube를 오류 위치와 함께 보고하는 검증 결과 계약 (§3) — 문구가 아니라 코드로 반환하고, 관리자 문구는 화면이 생기는 B3에서 사전으로 붙인다
 
 ### B2 검증
 
-- [ ] parser·sanitizer·목차·읽기 시간·별칭 정규화가 `_lib` 단위 테스트로 고정된다 (커버리지 화이트리스트 자동 포함)
-- [ ] 이미지·YouTube 전용 문법의 서버 렌더링 결과를 테스트로 검증한다
+- [x] parser·sanitizer·목차·읽기 시간·별칭 정규화가 `_lib` 단위 테스트로 고정된다 (커버리지 화이트리스트 자동 포함)
+- [x] 이미지·YouTube 전용 문법의 서버 렌더링 결과를 테스트로 검증한다 (`ArticleBody`·`ArticleCodeBlock` 컴포넌트 테스트)
+- [x] YouTube facade를 `components/YouTubeFacade`로 승격하고 음악 영상 목록의 단일 재생 동작을 회귀 테스트로 고정한다
 
 ---
 

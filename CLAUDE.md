@@ -30,19 +30,21 @@
 
 ## 확정 스택 & 결정 기록
 
-| 레이어     | 선택                       | 왜 (결정 사유)                                                                                                                         |
-| ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                                                                          |
-| 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                                                               |
-| 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                                                                            |
-| DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)                                                              |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
-| 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**                                                 |
-| i18n       | 자체 구현 (라이브러리 X)   | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
-| 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
-| EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)                                                        |
-| 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                                                                       |
-| 애니메이션 | CSS + `motion`             | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
+| 레이어      | 선택                                              | 왜 (결정 사유)                                                                                                                         |
+| ----------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 프레임워크  | Next.js (App Router)                              | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                                                                          |
+| 호스팅      | Vercel Hobby                                      | 무료, git push 자동 배포                                                                                                               |
+| 인증        | Firebase Auth                                     | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                                                                            |
+| DB          | Firestore                                         | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)                                                              |
+| 이미지      | Firebase Storage                                  | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
+| 스타일      | **CSS Modules + CSS 변수**                        | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**                                                 |
+| i18n        | 자체 구현 (라이브러리 X)                          | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
+| 지도        | **MapLibre GL + CARTO**                           | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
+| EXIF        | `exifr`                                           | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)                                                        |
+| 내보내기    | 클라이언트 canvas                                 | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                                                                       |
+| 애니메이션  | CSS + `motion`                                    | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
+| 블로그 본문 | `mdast-util-from-markdown` (+gfm-table·directive) | 파싱만 라이브러리, 렌더는 **허용 노드 → React element 직접 매핑**. HTML 문자열 단계가 없어 sanitizer·`dangerouslySetInnerHTML` 불필요  |
+| 코드 색칠   | `shiki` **서버 전용**                             | 문법·테마를 브라우저에 보내지 않는다. 토큰만 넘기고 라이트·다크는 CSS 변수 한 쌍(`--shiki-light`/`--shiki-dark`)                       |
 
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
 > **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **카드 등록 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
@@ -157,14 +159,15 @@ src/
 │   ├── analytics/              # 분석 동의 상태·배너·GA 동적 로딩과 철회 처리
 │   ├── legal/                  # _components/LegalDocumentView 공용 레이아웃 · _lib/legal-documents.tsx 한·영 정책 원문
 │   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
-│   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon) (_components/)
+│   ├── dev/                    # 개발 섹션: 소개·경력(+기술 스택)·프로젝트 뷰 + 프로젝트 모달 (_components/)
+│   ├── dev-blog/               # 개발 블로그: _lib/markdown-*(파서·검증·목차·읽기 시간·서버 하이라이팅) · _components/{ArticleBody,ArticleCodeBlock,ArticleYouTube}
 │   ├── site-header/            # _components/: SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
 │   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context — _hooks/·_lib/·_components/
 │   ├── auth/                   # _components/{LoginForm,AuthGuard} · _hooks/use-auth
 │   ├── image-upload/           # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
 │   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
-│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard …) + 각 .module.css
+│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css
 ├── lib/firebase/               # client.ts, auth.ts, firestore.ts, firestore-rest.ts, storage.ts
 ├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
@@ -172,7 +175,7 @@ src/
 ├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
 ├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES, STORAGE_KEYS, FRAME_STYLES, SECTIONS(액센트)
 ├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-scroll-lock)
-└── types/                      # photo, album, music(work/award/media/config), dev(project), site, tag, localized, timeline, lang, image, coords
+└── types/                      # photo, album, music(work/award/media/config), dev(project), dev-article(+tag), site, tag, localized, timeline, lang, image, coords
 ```
 
 의존 방향: `app → features → components` (역방향 금지). barrel export(index.ts) 금지 — 직접 경로 import.

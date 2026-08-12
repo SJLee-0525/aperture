@@ -109,9 +109,9 @@ mock 단계에서는 Firebase 컬렉션, Rules, index와 Storage 경로를 만�
 
 임의 HTML, MDX, JSX와 실행 가능한 스크립트는 허용하지 않는다. Markdown을 HTML로 바꾸는 단계에서 허용 요소와 속성을 제한하고 다음 항목을 별도로 검증한다.
 
-- 링크 프로토콜은 `https`, `http`, `mailto`와 내부 경로만 허용한다.
+- 링크 프로토콜은 `https`, `mailto`와 내부 경로만 허용한다. `http`는 넣지 않는다 — 사이트의 다른 공개 링크가 이미 `lib/security/public-url.ts`에서 HTTPS만 통과시키고 있어 같은 판정을 재사용하며, 전역 CSP의 `upgrade-insecure-requests`가 어차피 HTTPS로 올린다. 정책을 두 벌 두면 한쪽만 느슨해진다.
 - 외부 링크에는 안전한 `rel` 값을 붙인다.
-- 이미지는 관리자가 업로드한 Storage URL과 명시적으로 허용한 이미지 출처만 사용한다.
+- 이미지는 관리자가 업로드한 Storage URL과 명시적으로 허용한 이미지 출처만 사용한다. 허용 호스트는 CSP `img-src`와 같은 상수(`constants/security-headers.ts`의 `STORAGE_IMAGE_HOSTS`)를 본다.
 - YouTube는 영상 ID를 추출할 수 있는 `youtube.com`과 `youtu.be` URL만 iframe으로 바꾼다. 임의 iframe은 제거한다.
 - 제목 id는 renderer가 생성하며 중복 제목에도 안정적인 고유 id를 부여한다.
 
