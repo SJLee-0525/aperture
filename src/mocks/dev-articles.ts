@@ -9,13 +9,20 @@ import type { DevArticle } from "@/types/dev-article";
  */
 const body = (...rows: string[]): string => rows.join("\n");
 
-/** mock 이미지 주소 — 실제 파일은 없지만 CSP·이미지 출처 정책이 허용하는 형태를 그대로 쓴다. */
+/**
+ * 본문 이미지 주소 — 실제 파일은 없지만 CSP·이미지 출처 정책이 허용하는 형태를 그대로 쓴다.
+ * 본문 이미지는 관리자 Storage origin 만 통과하므로(`markdown-url-policy`) 로컬 파일로 바꿀 수 없다.
+ */
 const storageImage = (articleId: string, name: string) =>
   `https://firebasestorage.googleapis.com/v0/b/aperture-demo.appspot.com/o/dev-blog%2F${articleId}%2F${name}.webp?alt=media`;
 
-const coverImage = (articleId: string) => ({
-  url: storageImage(articleId, "cover"),
-  path: `dev-blog/${articleId}/cover.webp`,
+/**
+ * 대표 이미지는 저장소에 있는 샘플 파일을 쓴다. 목록 카드와 상세 hero 가 실제로 그려져야
+ * 레이아웃과 시각 회귀를 확인할 수 있다 — 본문 이미지와 달리 출처 정책을 지나지 않는다.
+ */
+const coverImage = (file: string, path: string) => ({
+  url: `/design-samples/${file}`,
+  path: `dev-blog/${path}/cover.webp`,
   w: 1600,
   h: 900,
 });
@@ -30,6 +37,10 @@ const coverImage = (articleId: string) => ({
  * - `first-note` 대표 이미지 없음 · 연관 프로젝트 없음 · 짧은 본문(읽기 시간 하한)
  * - `css-modules-tokens` · `testing-boundary` 발행일이 같아 id 보조 정렬을 확인한다
  * - `rag-chunking-draft` 초안 — 공개 getter 에서 빠져야 한다
+ *
+ * 공개 글은 목록 한 페이지 정원(8)을 넘겨 두 페이지가 되게 둔다. pagination 이 한 페이지에서만
+ * 돌면 페이지 이동과 URL 복원을 확인할 수 없다. 사전의 `accessibility` 태그는 어느 글도 쓰지
+ * 않는다 — 결과가 빈 태그 필터의 안내 화면을 확인하려는 것이다.
  */
 const MOCK_DEV_ARTICLES: DevArticle[] = [
   {
@@ -110,7 +121,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
       "",
       "결정 기록은 [프로젝트 목록](/dev/projects)과 [Next.js 문서](https://nextjs.org/docs)에 나눠 뒀다.",
     ),
-    cover: coverImage("serverless-portfolio"),
+    cover: coverImage("wide1.png", "serverless-portfolio"),
     coverAlt: {
       ko: "Vercel 배포 로그와 Firestore 콘솔을 나란히 띄운 화면",
       en: "A Vercel deployment log next to the Firestore console",
@@ -194,7 +205,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
       "npm run build",
       "```",
     ),
-    cover: coverImage("code-block-themes"),
+    cover: coverImage("wide3.png", "code-block-themes"),
     coverAlt: {
       ko: "같은 코드 블록을 라이트 테마와 다크 테마로 나란히 띄운 화면",
       en: "The same code block shown side by side in light and dark themes",
@@ -296,6 +307,137 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     firstPublishedAt: new Date("2026-02-11T18:45:00+09:00"),
     createdAt: new Date("2026-02-11T18:20:00+09:00"),
     updatedAt: new Date("2026-02-11T18:45:00+09:00"),
+  },
+  {
+    id: "isr-revalidate-tags",
+    slug: "isr-revalidate-tags",
+    title: {
+      ko: "캐시 태그를 콘텐츠 종류로 나눈다",
+      en: "Splitting cache tags by content type",
+    },
+    summary: {
+      ko: "한 번의 저장이 사이트 전체를 다시 만들지 않게 한 기준.",
+      en: "Keeping one save from rebuilding the whole site.",
+    },
+    body: body(
+      "저장할 때마다 전체를 재검증하면 무료 한도가 먼저 바닥난다.",
+      "",
+      "## 나눈 단위",
+      "",
+      "- 목록과 상세를 다른 태그로 둔다",
+      "- 설정 문서는 그 화면만 무효화한다",
+      "",
+      "재검증이 실패해도 저장은 되돌리지 않는다. 실패는 관리자에게 알린다.",
+    ),
+    cover: coverImage("wide2.png", "isr-revalidate-tags"),
+    coverAlt: {
+      ko: "재검증 요청과 응답을 나열한 네트워크 탭",
+      en: "A network tab listing revalidation requests and responses",
+    },
+    tags: ["nextjs", "architecture"],
+    relatedProjectIds: ["portfolio"],
+    published: true,
+    publishedAt: new Date("2026-06-20T21:00:00+09:00"),
+    firstPublishedAt: new Date("2026-06-20T21:00:00+09:00"),
+    createdAt: new Date("2026-06-18T20:10:00+09:00"),
+    updatedAt: new Date("2026-06-20T21:00:00+09:00"),
+  },
+  {
+    id: "firestore-composite-index",
+    slug: "firestore-composite-index",
+    title: {
+      ko: "정렬을 바꾸면 인덱스도 함께 바뀐다",
+      en: "Changing a sort order changes the index too",
+    },
+    summary: {
+      ko: "발행일 내림차순에 id 보조 정렬을 붙이며 배운 것.",
+      en: "What a secondary id sort taught me about composite indexes.",
+    },
+    body: body(
+      "발행일만으로 정렬하면 같은 시각의 글이 요청마다 다른 순서로 나온다.",
+      "",
+      "## 보조 정렬이 필요한 이유",
+      "",
+      "페이지 경계가 흔들리면 2페이지에서 이미 본 글이 다시 나온다.",
+      "쿼리와 인덱스 양쪽에 문서 id 정렬을 함께 적었다.",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["firebase"],
+    relatedProjectIds: [],
+    published: true,
+    publishedAt: new Date("2026-03-15T19:20:00+09:00"),
+    firstPublishedAt: new Date("2026-03-15T19:20:00+09:00"),
+    createdAt: new Date("2026-03-14T22:40:00+09:00"),
+    updatedAt: new Date("2026-03-15T19:20:00+09:00"),
+  },
+  {
+    id: "mock-first-admin",
+    slug: "mock-first-admin",
+    title: {
+      ko: "Firebase 계정 없이 관리자 화면을 만든다",
+      en: "Building the admin screens without a Firebase account",
+    },
+    summary: {
+      ko: "저장소 경계를 하나 두고 로컬 저장소 구현을 끼운 기록.",
+      en: "Adding one repository boundary and plugging in local storage behind it.",
+    },
+    body: body(
+      "화면은 지금 저장이 어디로 가는지 몰라야 한다.",
+      "",
+      "## 경계를 어디에 뒀나",
+      "",
+      "컬렉션마다 저장소 모듈을 두고 mock 과 실제 구현 중 하나를 고른다.",
+      "화면과 훅은 그 결과만 받는다.",
+      "",
+      "## 남는 문제",
+      "",
+      "업로드한 이미지는 새로고침하면 사라진다. objectURL 이라 그렇다.",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["architecture", "testing"],
+    relatedProjectIds: ["portfolio"],
+    published: true,
+    publishedAt: new Date("2026-02-28T13:05:00+09:00"),
+    firstPublishedAt: new Date("2026-02-28T13:05:00+09:00"),
+    createdAt: new Date("2026-02-26T09:15:00+09:00"),
+    updatedAt: new Date("2026-03-01T10:30:00+09:00"),
+  },
+  {
+    id: "webp-three-sizes",
+    slug: "webp-three-sizes",
+    title: {
+      ko: "이미지를 세 벌로 저장하는 이유",
+      en: "Why every image is stored three times",
+    },
+    summary: {
+      ko: "목록·상세·썸네일이 같은 파일을 쓰면 대역폭이 먼저 소진된다.",
+      en: "Serving one file everywhere burns the bandwidth quota first.",
+    },
+    body: body(
+      "그리드 한 화면에 2048px 원본을 스무 장 내려보내면 무료 한도가 하루를 못 간다.",
+      "",
+      "## 세 벌의 쓰임",
+      "",
+      "1. 메인 2048px — 상세와 내보내기",
+      "2. 프리뷰 960px — 목록 카드",
+      "3. 썸네일 320px — 관리자 목록",
+      "",
+      "압축은 업로드 전에 브라우저에서 끝낸다.",
+    ),
+    cover: coverImage("wide4.png", "webp-three-sizes"),
+    coverAlt: {
+      ko: "같은 사진을 세 가지 크기로 저장한 Storage 폴더",
+      en: "A storage folder holding the same photo in three sizes",
+    },
+    tags: ["firebase", "css"],
+    relatedProjectIds: ["photo-portfolio"],
+    published: true,
+    publishedAt: new Date("2025-12-05T11:50:00+09:00"),
+    firstPublishedAt: new Date("2025-12-05T11:50:00+09:00"),
+    createdAt: new Date("2025-12-03T20:00:00+09:00"),
+    updatedAt: new Date("2025-12-05T11:50:00+09:00"),
   },
   {
     id: "rag-chunking-draft",

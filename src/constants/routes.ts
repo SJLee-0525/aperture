@@ -127,6 +127,14 @@ const adminDevArticlePreviewRoute = (id: string) => `${adminDevArticleRoute(id)}
  */
 const devProjectRoute = (id: string) => `${ROUTES.DEV_PROJECTS}?project=${encodeURIComponent(id)}`;
 
+/**
+ * 블로그 글 상세 경로 (/dev/articles/[slug]) — 식별자는 문서 ID 가 아니라 slug 다.
+ *
+ * @param {string} slug 발행 후에는 바뀌지 않는 글 slug.
+ * @returns {string}
+ */
+const devArticleRoute = (slug: string) => `${ROUTES.DEV_ARTICLES}/${slug}`;
+
 export {
   ROUTES,
   albumRoute,
@@ -138,5 +146,6 @@ export {
   adminMusicMediaRoute,
   adminDevProjectRoute,
   adminPhotoRoute,
+  devArticleRoute,
   devProjectRoute,
 };
