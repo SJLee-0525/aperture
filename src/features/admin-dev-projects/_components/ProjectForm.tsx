@@ -1,5 +1,6 @@
 "use client";
 
+import { CloseIcon } from "@/components/CloseIcon";
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 import type { DevProject } from "@/types/dev";
 
@@ -260,7 +261,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
                   aria-label={`${tag} 삭제`}
                   onClick={() => removeTag(tag)}
                 >
-                  ×
+                  <CloseIcon size={13} />
                 </button>
               </li>
             ))}

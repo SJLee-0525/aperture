@@ -5,6 +5,7 @@ import Image from "next/image";
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { Icon } from "@/components/Icon";
 import { CloseIcon } from "@/components/CloseIcon";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
@@ -16,33 +17,6 @@ import styles from "./ImageLightbox.module.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const CHROME_TRANSITION = { duration: 0.2, ease: EASE } as const;
-
-const chevLeft = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
-const chevRight = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
 
 type Props = {
   images: ImageMeta[];
@@ -320,7 +294,7 @@ const ImageLightbox = ({
             exit={{ opacity: 0, x: -6, y: "-50%" }}
             transition={CHROME_TRANSITION}
           >
-            {chevLeft}
+            <Icon name="chevronLeft" size={17} />
           </m.button>
         ) : null}
         {chromeVisible && count > 1 ? (
@@ -336,7 +310,7 @@ const ImageLightbox = ({
             exit={{ opacity: 0, x: 6, y: "-50%" }}
             transition={CHROME_TRANSITION}
           >
-            {chevRight}
+            <Icon name="chevronRight" size={17} />
           </m.button>
         ) : null}
         {chromeVisible && count > 1 ? (

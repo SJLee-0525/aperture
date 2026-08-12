@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import type { TimelineEntry } from "@/types/timeline";
 
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
@@ -82,7 +83,7 @@ const TimelineRow = ({
         disabled={isFirst}
         onClick={() => onMove(groupKey, index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -91,7 +92,7 @@ const TimelineRow = ({
         disabled={isLast}
         onClick={() => onMove(groupKey, index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(groupKey, index)}>
         삭제

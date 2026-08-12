@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
  * 인라인 SVG 아이콘 세트 (라이브러리 미도입 — 디자인 P_ICON/MI 이식).
  * 순수 UI: name·size만 받는다. 테마/언어 토글의 해·달·지구본은 애니메이션 때문에 각 컴포넌트에 인라인.
  */
-const PATHS: Record<string, ReactNode> = {
+const PATHS = {
   search: (
     <>
       <circle cx="11" cy="11" r="7" />
@@ -108,10 +108,25 @@ const PATHS: Record<string, ReactNode> = {
       <path d="m11 13 4-4" />
     </>
   ),
-};
+  // 방향 표시 — 예전에는 ‹ › ← → ↑ ↓ 문자로 그렸다. 글자는 폰트 폴백에 따라 굵기와 모양이
+  // 달라지고 baseline 이 버튼 중앙에 맞지 않아 line-height 보정이 따라붙는다.
+  chevronLeft: <path d="M15 18l-6-6 6-6" />,
+  chevronRight: <path d="M9 18l6-6-6-6" />,
+  arrowUp: <path d="M12 20V5M6 11l6-6 6 6" />,
+  arrowDown: <path d="M12 4v15M6 13l6 6 6-6" />,
+  check: <path d="M4 12.5l5 5L20 6.5" />,
+} as const satisfies Record<string, ReactNode>;
+
+/**
+ * 등록된 아이콘 이름.
+ *
+ * `Record<string, ReactNode>` 로 선언한 뒤 `keyof` 를 쓰면 결과가 사실상 `string` 이라
+ * 오타를 잡지 못한다. `as const satisfies` 로 리터럴 키를 남겨야 이름이 실제로 좁혀진다.
+ */
+type IconName = keyof typeof PATHS;
 
 type Props = {
-  name: string;
+  name: IconName;
   size?: number;
   className?: string;
 };
@@ -129,8 +144,9 @@ const Icon = ({ name, size = 20, className }: Props) => (
     className={className}
     aria-hidden="true"
   >
-    {PATHS[name] ?? null}
+    {PATHS[name]}
   </svg>
 );
 
 export { Icon };
+export type { IconName };

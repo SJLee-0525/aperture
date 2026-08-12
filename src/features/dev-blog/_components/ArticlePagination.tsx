@@ -1,3 +1,5 @@
+import { Icon } from "@/components/Icon";
+
 import type { UIDict } from "@/constants/dictionary";
 
 import styles from "./ArticlePagination.module.css";
@@ -37,7 +39,7 @@ const ArticlePagination = ({ page, pageCount, dict, onSelect }: Props) => {
         disabled={page === 1}
         onClick={() => onSelect(page - 1)}
       >
-        ←
+        <Icon name="chevronLeft" size={16} />
       </button>
       {pages.map((number) => (
         <button
@@ -58,7 +60,7 @@ const ArticlePagination = ({ page, pageCount, dict, onSelect }: Props) => {
         disabled={page === pageCount}
         onClick={() => onSelect(page + 1)}
       >
-        →
+        <Icon name="chevronRight" size={16} />
       </button>
     </nav>
   );

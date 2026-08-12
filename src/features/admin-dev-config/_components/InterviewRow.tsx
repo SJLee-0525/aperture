@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import type { DevInterview } from "@/types/dev";
 
 import styles from "./InterviewRow.module.css";
@@ -70,7 +71,7 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -79,7 +80,7 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
         삭제

@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import type { TimelineEntry } from "@/types/timeline";
 
 import styles from "./DevTimelineRow.module.css";
@@ -79,7 +80,7 @@ const DevEducationRow = ({
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -88,7 +89,7 @@ const DevEducationRow = ({
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
         삭제

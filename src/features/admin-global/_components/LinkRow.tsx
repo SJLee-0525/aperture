@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import type { SiteLink } from "@/types/site";
 
 import styles from "./LinkRow.module.css";
@@ -57,7 +58,7 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -66,7 +67,7 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
         삭제

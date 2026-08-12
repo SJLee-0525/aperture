@@ -12,6 +12,7 @@ import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortabl
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import type { AdminPhotoListItem } from "@/types/admin";
 import { imageThumbnailUrl } from "@/types/image";
 
@@ -172,7 +173,11 @@ const AlbumPhotoPicker = ({
                           className={styles.tileImg}
                         />
                       ) : null}
-                      {on ? <span className={styles.check}>✓</span> : null}
+                      {on ? (
+                        <span className={styles.check}>
+                          <Icon name="check" size={14} />
+                        </span>
+                      ) : null}
                     </button>
                   </li>
                 );

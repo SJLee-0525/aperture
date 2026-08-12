@@ -31,20 +31,16 @@
   height: 36px;
   box-sizing: border-box;
   gap: 10px;
-  padding: 8px 14px;
+  padding: 8px 14px 8px 8px;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   color: var(--text-inverse);
   border: 1px solid rgba(255, 255, 255, 0.22);
   font-size: var(--t-small);
   font-weight: 500;
-  line-height: 0px;
 }
 .back:hover:not([data-cursor-snapped]) {
   background: rgba(0, 0, 0, 0.58);
-}
-.arrowBack {
-  font-size: var(--t-h3);
 }
 .share {
   position: absolute;

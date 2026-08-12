@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import type { DevProjectOption } from "@/features/admin-dev-articles/_lib/dev-project-options";
 
 import styles from "./ArticleForm.module.css";
@@ -81,7 +82,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
                 disabled={index === 0}
                 onClick={() => move(index, -1)}
               >
-                ↑
+                <Icon name="arrowUp" size={14} />
               </button>
               <button
                 type="button"
@@ -90,7 +91,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
                 disabled={index === selected.length - 1}
                 onClick={() => move(index, 1)}
               >
-                ↓
+                <Icon name="arrowDown" size={14} />
               </button>
               <button
                 type="button"

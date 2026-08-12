@@ -1,13 +1,14 @@
 "use client";
 
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 
 import styles from "./ViewToggle.module.css";
 
 type ViewToggleOption<Id extends string> = {
   id: Id;
   label: string;
-  icon: string;
+  /** `Icon` 이 아는 이름만 받는다. `string` 이면 오타가 빈 `<svg>` 로 조용히 렌더된다. */
+  icon: IconName;
 };
 
 type Props<Id extends string> = {

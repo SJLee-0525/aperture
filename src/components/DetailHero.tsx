@@ -4,6 +4,7 @@ import { m } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Icon } from "@/components/Icon";
 import { ShareButton } from "@/components/ShareButton";
 
 import type { CSSProperties, ReactNode } from "react";
@@ -77,7 +78,7 @@ const DetailHero = ({ cover, back, share, minHeight, children }: Props) => {
       ) : null}
 
       <Link href={back.href} prefetch={false} className={styles.back}>
-        <span className={styles.arrowBack}>‹</span> <span>{back.label}</span>
+        <Icon name="chevronLeft" size={16} /> <span>{back.label}</span>
       </Link>
       <ShareButton
         title={share.title}

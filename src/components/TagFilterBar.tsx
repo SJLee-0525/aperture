@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Chip } from "@/components/Chip";
+import { Icon } from "@/components/Icon";
 
 import type { ReactNode } from "react";
 
@@ -112,7 +113,7 @@ const TagFilterBar = ({ items, activeId, allLabel, onSelect, trailing }: Props) 
           aria-hidden="true"
           onClick={() => scrollStep(-1)}
         >
-          ‹
+          <Icon name="chevronLeft" size={16} />
         </button>
         <button
           type="button"
@@ -121,7 +122,7 @@ const TagFilterBar = ({ items, activeId, allLabel, onSelect, trailing }: Props) 
           aria-hidden="true"
           onClick={() => scrollStep(1)}
         >
-          ›
+          <Icon name="chevronRight" size={16} />
         </button>
       </div>
       {trailing}

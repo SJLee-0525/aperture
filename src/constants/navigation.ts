@@ -1,9 +1,10 @@
+import type { IconName } from "@/components/Icon";
 import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
 import type { SectionId } from "@/constants/sections";
 
-/** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 Icon name */
-type NavItem = { labelKey: keyof UIDict; href: string; icon: string };
+/** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 등록된 Icon 이름 */
+type NavItem = { labelKey: keyof UIDict; href: string; icon: IconName };
 
 /** 섹션 탭 세트를 갖는 섹션(사진·음악·개발) */
 type NavSection = Extract<SectionId, "photo" | "music" | "dev">;
