@@ -163,6 +163,8 @@ type UIDict = {
   articleDraftLabel: string;
   articleRelatedProjects: string;
   articleListNav: string;
+  articleTableLabel: string;
+  articleImageZoomLabel: string;
   tocLabel: string;
   tocOpenLabel: string;
   paginationLabel: string;
@@ -366,6 +368,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     articleDraftLabel: "초안",
     articleRelatedProjects: "연관 프로젝트",
     articleListNav: "다른 글",
+    articleTableLabel: "표",
+    articleImageZoomLabel: "크게 보기",
     tocLabel: "목차",
     tocOpenLabel: "목차 열기",
     paginationLabel: "페이지 이동",
@@ -565,6 +569,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     articleDraftLabel: "Draft",
     articleRelatedProjects: "Related projects",
     articleListNav: "More articles",
+    articleTableLabel: "Table",
+    articleImageZoomLabel: "View larger",
     tocLabel: "Contents",
     tocOpenLabel: "Open table of contents",
     paginationLabel: "Pagination",
