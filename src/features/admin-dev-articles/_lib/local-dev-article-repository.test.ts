@@ -121,12 +121,30 @@ describe("createLocalDevArticleRepository", () => {
 
   it("목록 토글로 발행해도 최초 발행 시각을 남긴다", async () => {
     const repo = repository();
-    await repo.create("fresh", input());
+    await repo.create("fresh", input({ publishedAt: NOW }));
     await repo.setPublished("fresh", true);
 
     const toggled = await repo.get("fresh");
     expect(toggled?.published).toBe(true);
     expect(toggled?.firstPublishedAt).toEqual(NOW);
+  });
+
+  it("발행 조건을 만족하지 않는 초안은 목록 토글로도 발행되지 않는다", async () => {
+    // 이 검사가 없으면 발행일 없는 글이 `published: true` · `publishedAt: null` 로 남는다.
+    // 폼에서는 막히는 상태이고, 공개 목록은 그 글의 날짜를 작성일로 대신 보여 준다.
+    const repo = repository();
+    await repo.create("fresh", input());
+
+    await expect(repo.setPublished("fresh", true)).rejects.toThrow("발행 조건을 만족하지 않습니다");
+    expect((await repo.get("fresh"))?.published).toBe(false);
+  });
+
+  it("발행 취소는 조건을 보지 않는다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input({ published: true, publishedAt: NOW }));
+
+    await expect(repo.setPublished("fresh", false)).resolves.toBeUndefined();
+    expect((await repo.get("fresh"))?.published).toBe(false);
   });
 
   it("없는 글의 수정·상태 변경은 실패로 알린다", async () => {

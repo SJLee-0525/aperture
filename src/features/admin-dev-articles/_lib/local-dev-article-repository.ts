@@ -1,8 +1,12 @@
+import { markdownIssueMessage } from "@/features/admin-dev-articles/_lib/dev-article-issue-message";
+import { publishIssueMessage } from "@/features/admin-dev-articles/_lib/dev-article-issue-message";
+import { checkArticlePublishable } from "@/features/admin-dev-articles/_lib/dev-article-publish-check";
 import {
   readDevArticleStore,
   writeDevArticleStore,
   type DevArticleStore,
 } from "@/features/admin-dev-articles/_lib/local-dev-article-store";
+import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 import type { AdminDevArticleListItem } from "@/types/admin";
 import type { DevArticle } from "@/types/dev-article";
@@ -75,7 +79,8 @@ const createLocalDevArticleRepository = (
     if (existing) return existing;
 
     const seeded = await seedStore();
-    writeDevArticleStore(storage, seeded);
+    // seed 쓰기 실패를 무시하면 매 호출 mock 을 다시 만들어 편집이 전혀 남지 않는다.
+    save(seeded);
     // 다시 읽어 저장 형식을 거친 사본을 쓴다 — mock 모듈의 객체를 그대로 들고 있지 않는다.
     return readDevArticleStore(storage) ?? seeded;
   };
@@ -102,6 +107,45 @@ const createLocalDevArticleRepository = (
     const firstPublishedAt = previous?.firstPublishedAt ?? input.firstPublishedAt;
     if (firstPublishedAt || !input.published) return { ...input, firstPublishedAt };
     return { ...input, firstPublishedAt: now() };
+  };
+
+  /**
+   * 목록에서 바로 발행할 때도 폼과 같은 조건을 건다.
+   *
+   * 이 검사가 없으면 발행일 없는 초안이 `published: true` · `publishedAt: null` 로 넘어간다.
+   * 폼에서는 막히는 상태이고, 공개 목록은 그 글의 날짜를 작성일로 대신 보여 주게 된다.
+   *
+   * 연관 프로젝트 공개 여부만은 여기서 보지 못한다 — 저장소가 프로젝트 목록을 모른다.
+   * 그 항목은 공개 상세가 렌더 단계에서 걸러 내므로(비공개 프로젝트 카드는 빠진다)
+   * 잘못된 저장 상태로 남지는 않는다.
+   *
+   * @param {DevArticle} article 발행하려는 글.
+   * @param {DevArticleStore} store 중복 slug·태그 사전을 볼 현재 저장소.
+   * @returns {void}
+   * @throws {Error} 조건을 만족하지 않을 때. 문구는 폼과 같은 출처를 쓴다.
+   */
+  const assertPublishable = (article: DevArticle, store: DevArticleStore): void => {
+    const markdownIssues = parseArticleMarkdown(article.body).issues;
+    const issues = checkArticlePublishable(
+      { ...article, published: true },
+      {
+        articles: store.articles,
+        selfId: article.id,
+        markdownIssues,
+        knownTagIds: store.tags.map((tag) => tag.id),
+        publishableProjectIds: article.relatedProjectIds,
+      },
+    );
+    if (issues.length === 0) return;
+
+    const reasons = issues
+      .map((issue) =>
+        issue.code === "markdown-blocked" && markdownIssues[0]
+          ? markdownIssueMessage(markdownIssues[0])
+          : publishIssueMessage(issue),
+      )
+      .join(" ");
+    throw new Error(`발행 조건을 만족하지 않습니다. ${reasons}`);
   };
 
   return {
@@ -148,6 +192,7 @@ const createLocalDevArticleRepository = (
       const store = await load();
       const previous = store.articles.find((article) => article.id === id);
       if (!previous) throw new Error("상태를 바꿀 글을 찾지 못했습니다.");
+      if (published) assertPublishable(previous, store);
       save({
         ...store,
         articles: store.articles.map((article) =>
