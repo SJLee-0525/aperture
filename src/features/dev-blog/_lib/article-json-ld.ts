@@ -44,4 +44,33 @@ const buildArticleJsonLd = ({
   ...(tagLabels.length > 0 ? { keywords: tagLabels.join(", ") } : {}),
 });
 
-export { buildArticleJsonLd };
+/**
+ * HTML 안에 그대로 두면 태그 경계를 흔드는 문자. `JSON.stringify` 는 이들을 건드리지 않는다.
+ * 값은 전부 JSON 문자열 안의 유니코드 이스케이프라 파서가 읽는 내용은 바뀌지 않는다.
+ */
+const HTML_UNSAFE_ESCAPES: Record<string, string> = {
+  "<": "\\u003c",
+  ">": "\\u003e",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+};
+
+/**
+ * 구조화 데이터를 `<script type="application/ld+json">` 안에 넣을 문자열로 만든다.
+ *
+ * `JSON.stringify` 만으로는 안 된다. 이 함수가 받는 값에는 제목·요약·태그 라벨처럼
+ * 관리자가 자유롭게 입력한 문자열이 들어가는데, `JSON.stringify` 는 `<` 를 그대로 두므로
+ * 제목에 닫는 script 태그가 있으면 script 요소가 거기서 끝나고 뒤 내용이 문서 본문이 된다.
+ * 현재 CSP 는 인라인 script 를 허용하므로 그렇게 새어 나온 조각이 실행된다.
+ *
+ * @param {Record<string, unknown>} jsonLd `buildArticleJsonLd` 가 만든 객체.
+ * @returns {string} script 안에 그대로 넣어도 태그 경계를 깨지 않는 JSON 문자열.
+ */
+const serializeJsonLdScript = (jsonLd: Record<string, unknown>): string =>
+  JSON.stringify(jsonLd).replace(
+    /[<>&\u2028\u2029]/g,
+    (character) => HTML_UNSAFE_ESCAPES[character] ?? character,
+  );
+
+export { buildArticleJsonLd, serializeJsonLdScript };

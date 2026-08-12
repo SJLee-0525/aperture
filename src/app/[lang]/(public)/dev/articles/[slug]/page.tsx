@@ -10,7 +10,10 @@ import {
   toDevArticleSummaries,
   toDevArticleSummary,
 } from "@/features/dev-blog/_lib/article-projection";
-import { buildArticleJsonLd } from "@/features/dev-blog/_lib/article-json-ld";
+import {
+  buildArticleJsonLd,
+  serializeJsonLdScript,
+} from "@/features/dev-blog/_lib/article-json-ld";
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
 import { highlightArticleDocument } from "@/features/dev-blog/_lib/markdown-highlight";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
@@ -125,8 +128,9 @@ export default async function DevArticlePage({ params }: Props) {
     <Suspense fallback={<DevArticleLoading />}>
       <script
         type="application/ld+json"
-        // 서버에서 만든 객체를 직렬화한 것이라 사용자 입력이 그대로 들어가지 않는다.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // 제목·요약·태그 라벨은 관리자가 자유롭게 쓴 값이라 태그 경계를 깨는 문자가 들어올 수 있다.
+        // 직렬화는 그 문자를 이스케이프하는 `serializeJsonLdScript` 를 반드시 거친다.
+        dangerouslySetInnerHTML={{ __html: serializeJsonLdScript(jsonLd) }}
       />
       <ArticleDetailView
         title={pickText(article.title, lang)}

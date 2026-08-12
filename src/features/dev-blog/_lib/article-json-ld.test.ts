@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { buildArticleJsonLd } from "@/features/dev-blog/_lib/article-json-ld";
+import {
+  buildArticleJsonLd,
+  serializeJsonLdScript,
+} from "@/features/dev-blog/_lib/article-json-ld";
 
 import type { DevArticle } from "@/types/dev-article";
 
@@ -67,5 +70,39 @@ describe("buildArticleJsonLd", () => {
 
   it("본문을 싣지 않는다", () => {
     expect("articleBody" in build()).toBe(false);
+  });
+});
+
+describe("serializeJsonLdScript", () => {
+  it("제목에 든 닫는 script 태그가 script 요소를 끝내지 못한다", () => {
+    const serialized = serializeJsonLdScript(
+      build({
+        article: { ...article, title: { ko: "제목 </script><script>alert(1)", en: "t" } },
+      }),
+    );
+
+    expect(serialized).not.toContain("</script>");
+    expect(serialized).not.toContain("<script>");
+    expect(serialized).toContain("\\u003c");
+  });
+
+  it("이스케이프해도 파싱 결과는 원문 그대로다", () => {
+    const title = "a < b & c > d";
+    const serialized = serializeJsonLdScript(
+      build({ article: { ...article, title: { ko: title, en: "t" } } }),
+    );
+
+    expect((JSON.parse(serialized) as { headline: string }).headline).toBe(title);
+  });
+
+  it("줄 구분자도 이스케이프한다", () => {
+    const serialized = serializeJsonLdScript(
+      build({ article: { ...article, summary: { ko: "앞\u2028뒤\u2029끝", en: "s" } } }),
+    );
+
+    expect(serialized).not.toMatch(/[\u2028\u2029]/);
+    expect((JSON.parse(serialized) as { description: string }).description).toBe(
+      "앞\u2028뒤\u2029끝",
+    );
   });
 });
