@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { ArticleCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
-import { highlightArticleCode } from "@/features/dev-blog/_lib/markdown-highlight";
+import {
+  highlightArticleCode,
+  highlightArticleDocument,
+} from "@/features/dev-blog/_lib/markdown-highlight";
+import { articleCodeHighlightKey } from "@/features/dev-blog/_lib/markdown-highlight-map";
+import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 /** 문법 로더는 언어마다 한 줄씩 손으로 적어 둔다 — 주소를 잘못 적으면 그 언어에서만 색이 사라진다. */
 const ALL_LANGUAGES: ArticleCodeLanguage[] = [
@@ -65,5 +70,59 @@ describe("highlightArticleCode", () => {
     const second = await highlightArticleCode("print('a')", "python");
 
     expect(second).toEqual(first);
+  });
+});
+
+const body = (...rows: string[]) => rows.join("\n");
+
+describe("highlightArticleDocument", () => {
+  it("목록·인용 안에 들어간 코드까지 모은다", async () => {
+    const { document } = parseArticleMarkdown(
+      body(
+        "- 목록 안",
+        "",
+        "  ```ts",
+        "  const inList = 1;",
+        "  ```",
+        "",
+        "> 인용 안",
+        ">",
+        "> ```python",
+        "> in_quote = 1",
+        "> ```",
+      ),
+    );
+
+    const highlights = await highlightArticleDocument(document);
+
+    expect(Object.keys(highlights)).toEqual(
+      expect.arrayContaining([
+        articleCodeHighlightKey("typescript", "const inList = 1;"),
+        articleCodeHighlightKey("python", "in_quote = 1"),
+      ]),
+    );
+  });
+
+  it("같은 코드가 두 번 나오면 키 하나로 합친다", async () => {
+    const fence = ["```js", "const a = 1;", "```"];
+    const { document } = parseArticleMarkdown(body(...fence, "", ...fence));
+
+    const highlights = await highlightArticleDocument(document);
+
+    expect(Object.keys(highlights)).toEqual([
+      articleCodeHighlightKey("javascript", "const a = 1;"),
+    ]);
+  });
+
+  it("모르는 언어는 색칠 대상에서 빼 렌더러가 원문을 그대로 그리게 한다", async () => {
+    const { document } = parseArticleMarkdown(body("```brainfuck", "+++", "```"));
+
+    await expect(highlightArticleDocument(document)).resolves.toEqual({});
+  });
+
+  it("코드가 없는 글은 빈 결과를 낸다", async () => {
+    const { document } = parseArticleMarkdown("## 제목\n\n본문 한 줄.");
+
+    await expect(highlightArticleDocument(document)).resolves.toEqual({});
   });
 });

@@ -3,6 +3,10 @@ import type { ReactNode } from "react";
 
 import { ArticleCodeBlock } from "@/features/dev-blog/_components/ArticleCodeBlock";
 import { ArticleYouTube } from "@/features/dev-blog/_components/ArticleYouTube";
+import {
+  articleCodeHighlightKey,
+  type ArticleCodeHighlights,
+} from "@/features/dev-blog/_lib/markdown-highlight-map";
 import type {
   ArticleBlock,
   ArticleDocument,
@@ -59,7 +63,11 @@ const renderInlines = (nodes: ArticleInline[], lang: Lang): ReactNode[] =>
     }
   });
 
-const renderBlocks = (blocks: ArticleBlock[], lang: Lang): ReactNode[] =>
+const renderBlocks = (
+  blocks: ArticleBlock[],
+  lang: Lang,
+  highlights: ArticleCodeHighlights,
+): ReactNode[] =>
   blocks.map((block, index) => {
     switch (block.type) {
       case "heading": {
@@ -76,7 +84,7 @@ const renderBlocks = (blocks: ArticleBlock[], lang: Lang): ReactNode[] =>
 
       case "list": {
         const items = block.items.map((item, itemIndex) => (
-          <li key={itemIndex}>{renderBlocks(item.children, lang)}</li>
+          <li key={itemIndex}>{renderBlocks(item.children, lang, highlights)}</li>
         ));
         return block.ordered ? <ol key={index}>{items}</ol> : <ul key={index}>{items}</ul>;
       }
@@ -84,7 +92,7 @@ const renderBlocks = (blocks: ArticleBlock[], lang: Lang): ReactNode[] =>
       case "blockquote":
         return (
           <blockquote key={index} className={styles.quote}>
-            {renderBlocks(block.children, lang)}
+            {renderBlocks(block.children, lang, highlights)}
           </blockquote>
         );
 
@@ -128,9 +136,13 @@ const renderBlocks = (blocks: ArticleBlock[], lang: Lang): ReactNode[] =>
         return (
           <ArticleCodeBlock
             key={index}
-            language={block.language}
             rawLanguage={block.rawLanguage}
             value={block.value}
+            tokens={
+              block.language
+                ? (highlights[articleCodeHighlightKey(block.language, block.value)] ?? null)
+                : null
+            }
           />
         );
 
@@ -158,14 +170,18 @@ const renderBlocks = (blocks: ArticleBlock[], lang: Lang): ReactNode[] =>
     }
   });
 
-type Props = { document: ArticleDocument; lang: Lang };
+type Props = { document: ArticleDocument; lang: Lang; highlights: ArticleCodeHighlights };
 
 /**
  * 검증을 통과한 본문 트리를 화면에 그린다. 공개 상세와 관리자 미리보기가 같은 컴포넌트를 쓴다.
  *
  * 여기서 다루는 노드 종류는 `markdown-nodes` 가 정의한 것이 전부다. 원문 문자열도 HTML 문자열도
  * 받지 않으므로 `dangerouslySetInnerHTML` 이 필요한 자리가 없고, 허용 목록 밖의 요소는 애초에
- * 이 함수까지 오지 않는다. 코드 블록만 비동기 조각으로 갈라져 서버에서 색을 입힌다.
+ * 이 함수까지 오지 않는다.
+ *
+ * 동기 컴포넌트다. 색칠은 호출부가 `highlightArticleDocument` 로 미리 끝내 결과만 넘기므로,
+ * 서버에서 렌더하는 공개 상세와 브라우저에서 렌더하는 관리자 미리보기가 같은 코드를 쓰면서도
+ * 문법 번들은 서버에만 남는다.
  *
  * 본문은 한국어 원문 하나뿐이라 컨테이너에 `lang="ko"` 를 못 박는다. 영어 경로에서도 같은
  * 원문을 보여 주므로, 이 표시가 없으면 보조 기술과 브라우저 번역이 문서 언어를 잘못 읽는다.
@@ -173,11 +189,12 @@ type Props = { document: ArticleDocument; lang: Lang };
  * @param {Props} props
  * @param {ArticleDocument} props.document `parseArticleMarkdown` 이 만든 렌더 트리.
  * @param {Lang} props.lang 내부 링크에 붙일 언어 프리픽스. 본문 언어와는 별개다.
+ * @param {ArticleCodeHighlights} props.highlights 코드 블록 색칠 결과. 키가 없는 블록은 색 없이 그린다.
  * @returns {JSX.Element}
  */
-const ArticleBody = ({ document, lang }: Props) => (
+const ArticleBody = ({ document, lang, highlights }: Props) => (
   <div className={styles.body} lang="ko">
-    {renderBlocks(document.blocks, lang)}
+    {renderBlocks(document.blocks, lang, highlights)}
   </div>
 );
 

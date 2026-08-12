@@ -4,15 +4,24 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ArticleBody } from "@/features/dev-blog/_components/ArticleBody";
+import { highlightArticleDocument } from "@/features/dev-blog/_lib/markdown-highlight";
+import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 import { buildArticleToc } from "@/features/dev-blog/_lib/markdown-toc";
 
 const STORAGE_IMAGE =
   "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
 
-const renderMarkdown = (markdown: string, lang: "ko" | "en" = "ko") => {
+const renderMarkdown = (
+  markdown: string,
+  lang: "ko" | "en" = "ko",
+  highlights: ArticleCodeHighlights = {},
+) => {
   const { document } = parseArticleMarkdown(markdown);
-  return { ...render(<ArticleBody document={document} lang={lang} />), document };
+  return {
+    ...render(<ArticleBody document={document} lang={lang} highlights={highlights} />),
+    document,
+  };
 };
 
 describe("ArticleBody", () => {
@@ -76,6 +85,19 @@ describe("ArticleBody", () => {
     const [, cost] = screen.getAllByRole("columnheader");
     expect(cost.style.textAlign).toBe("right");
     expect(screen.getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["호스팅", "$0"]);
+  });
+
+  it("색칠 결과에서 해당 코드 블록의 토큰을 찾아 그린다", async () => {
+    const markdown = ["```ts", "const a = 1;", "```", "", "```brainfuck", "+++", "```"].join("\n");
+    const { document } = parseArticleMarkdown(markdown);
+    const { container } = renderMarkdown(markdown, "ko", await highlightArticleDocument(document));
+
+    const [typescript, unknown] = Array.from(container.querySelectorAll("pre"));
+    expect(typescript.querySelectorAll("code span[style]").length).toBeGreaterThan(0);
+    expect(typescript.textContent).toBe("const a = 1;");
+    // 색칠 대상이 아닌 블록은 map 에 키가 없어 원문만 남는다.
+    expect(unknown.querySelectorAll("code span")).toHaveLength(0);
+    expect(unknown.textContent).toBe("+++");
   });
 
   it("허용하지 않은 요소는 화면에 남기지 않는다", () => {
