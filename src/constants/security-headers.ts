@@ -25,12 +25,17 @@ const FIREBASE_HOSTS = [
  */
 const CARTO_HOSTS = ["https://basemaps.cartocdn.com", "https://*.basemaps.cartocdn.com"] as const;
 
-const IMAGE_HOSTS = [
+/**
+ * 관리자가 올린 이미지가 실제로 저장되는 호스트.
+ * 블로그 본문 Markdown 의 이미지 출처 정책(`features/dev-blog/_lib/markdown-url-policy.ts`)이
+ * 같은 목록을 본다 — 두 곳에 따로 적으면 한쪽만 늘었을 때 CSP 나 렌더 중 하나가 조용히 막는다.
+ */
+const STORAGE_IMAGE_HOSTS = [
   "https://firebasestorage.googleapis.com",
   "https://storage.googleapis.com",
-  "https://i.ytimg.com",
-  ...CARTO_HOSTS,
 ] as const;
+
+const IMAGE_HOSTS = [...STORAGE_IMAGE_HOSTS, "https://i.ytimg.com", ...CARTO_HOSTS] as const;
 
 const YOUTUBE_FRAME_HOSTS = [
   "https://www.youtube.com",
@@ -129,4 +134,4 @@ const SECURITY_HEADERS = [
   { key: CSP_HEADER_NAME, value: CONTENT_SECURITY_POLICY },
 ] as const;
 
-export { buildContentSecurityPolicy, SECURITY_HEADERS };
+export { buildContentSecurityPolicy, SECURITY_HEADERS, STORAGE_IMAGE_HOSTS };

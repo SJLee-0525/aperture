@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildContentSecurityPolicy, SECURITY_HEADERS } from "@/constants/security-headers";
+import {
+  buildContentSecurityPolicy,
+  SECURITY_HEADERS,
+  STORAGE_IMAGE_HOSTS,
+} from "@/constants/security-headers";
 
 const directive = (policy: string, name: string) =>
   policy
@@ -39,6 +43,13 @@ describe("Content-Security-Policy", () => {
     expect(directive(policy, "frame-src")).toContain("https://*.hcaptcha.com");
     // 공개 사진은 Storage 파생본을 그대로 전송한다.
     expect(directive(policy, "img-src")).toContain("https://firebasestorage.googleapis.com");
+  });
+
+  it("업로드 이미지 호스트를 img-src 에 모두 연다", () => {
+    const imgSrc = directive(buildContentSecurityPolicy(false), "img-src");
+
+    // 콘텐츠가 참조하는 출처와 CSP 가 어긋나면 렌더는 통과했는데 브라우저가 막아 빈 칸만 남는다.
+    STORAGE_IMAGE_HOSTS.forEach((host) => expect(imgSrc).toContain(host));
   });
 
   it("GA4 로더와 수집 비콘 경로를 함께 연다", () => {
