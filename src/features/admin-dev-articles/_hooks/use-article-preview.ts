@@ -7,7 +7,7 @@ import {
   type ArticlePreviewResult,
 } from "@/features/admin-dev-articles/_lib/preview-article-markdown";
 
-import { auth } from "@/lib/firebase/client";
+import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
 
 /** 입력이 멈춘 뒤 미리보기를 다시 요청하기까지 기다리는 시간. 타자마다 서버를 부르지 않기 위한 값이다. */
 const PREVIEW_DEBOUNCE_MS = 600;
@@ -44,7 +44,7 @@ const useArticlePreview = (markdown: string, active: boolean): PreviewState => {
 
     const timer = window.setTimeout(async () => {
       try {
-        const idToken = (await auth.currentUser?.getIdToken()) ?? "";
+        const idToken = await adminIdToken();
         const result = await previewArticleMarkdown(idToken, markdown);
         if (alive) setState({ result, loading: false, error: null });
       } catch (caught) {

@@ -14,7 +14,7 @@ import {
 import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
-import { auth } from "@/lib/firebase/client";
+import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { DevArticle } from "@/types/dev-article";
@@ -64,7 +64,7 @@ const ArticleFullPreview = ({ articleId }: Props) => {
         if (alive) setStatus("missing");
         return;
       }
-      const idToken = (await auth.currentUser?.getIdToken()) ?? "";
+      const idToken = await adminIdToken();
       const preview = await previewArticleMarkdown(idToken, article.body);
       if (!alive) return;
       setLoaded({ article, tags, preview });
