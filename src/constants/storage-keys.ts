@@ -6,6 +6,17 @@ const STORAGE_KEYS = {
   CONSENT: "ap-consent:v3",
   // mock 단계의 블로그 글 저장소. Firestore를 대신하며 B5에서 쓰지 않게 된다.
   ADMIN_DEV_ARTICLES: "ap-admin-dev-articles:v1",
+  // mock 단계의 나머지 관리자 컬렉션·설정 문서 저장소(B3.5). 전부 `ap-admin-` 접두사를
+  // 유지한다 — E2E 초기화 fixture 가 이 접두사로 한 번에 지운다.
+  ADMIN_PHOTOS: "ap-admin-photos:v1",
+  ADMIN_ALBUMS: "ap-admin-albums:v1",
+  ADMIN_MUSIC_WORKS: "ap-admin-music-works:v1",
+  ADMIN_MUSIC_AWARDS: "ap-admin-music-awards:v1",
+  ADMIN_MUSIC_MEDIA: "ap-admin-music-media:v1",
+  ADMIN_DEV_PROJECTS: "ap-admin-dev-projects:v1",
+  ADMIN_SITE_CONFIG: "ap-admin-site-config:v1",
+  ADMIN_MUSIC_CONFIG: "ap-admin-music-config:v1",
+  ADMIN_DEV_CONFIG: "ap-admin-dev-config:v1",
 } as const;
 
 /** 글마다 하나씩 두는 편집 중 복구본의 키 접두사. 저장에 성공하면 지운다. */
