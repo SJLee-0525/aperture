@@ -1,0 +1,314 @@
+/* 관리자 블로그 편집 폼 — 하위 필드 컴포넌트가 같은 스타일시트를 공유한다. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  padding-bottom: var(--s-16);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 500;
+  color: var(--text);
+}
+.headState {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.legend {
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--text-2);
+}
+.note {
+  font-size: var(--t-micro);
+  color: var(--text-4);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.label {
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--t-small);
+  font-family: inherit;
+}
+/* datetime-local 은 달력 아이콘 때문에 내용 높이가 일반 입력보다 커진다.
+   한 줄 입력의 높이를 못 박아 같은 행에 놓인 필드가 서로 어긋나지 않게 한다. */
+.input {
+  height: 34px;
+}
+.input:focus-visible,
+.textarea:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+.input:disabled {
+  background: var(--surface-2);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.chip {
+  height: 30px;
+  padding: 0 var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.chip:hover {
+  border-color: var(--line-strong);
+}
+.chip[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.inlineForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: flex-end;
+}
+.inlineForm .field {
+  flex: 1;
+  min-width: 120px;
+}
+
+.add,
+.remove {
+  height: 32px;
+  padding: 0 var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.add:hover,
+.remove:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+.remove:hover {
+  color: var(--danger);
+}
+.add:disabled {
+  color: var(--text-4);
+  cursor: not-allowed;
+}
+
+.orderedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.orderedRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.orderedTitle {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  font-size: var(--t-small);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.orderedWarn {
+  flex: none;
+  color: var(--danger);
+  font-size: var(--t-micro);
+}
+.move {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  cursor: pointer;
+}
+.move:disabled {
+  color: var(--text-4);
+  cursor: not-allowed;
+}
+
+.cover {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+.coverPreview {
+  position: relative;
+  flex: none;
+  width: 160px;
+  aspect-ratio: 3 / 2;
+  background: var(--photo-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.coverImg {
+  object-fit: cover;
+}
+.coverSide {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--danger);
+  border-radius: var(--r-sm);
+  list-style: none;
+}
+.issue {
+  color: var(--text-2);
+  font-size: var(--t-micro);
+  line-height: 1.6;
+}
+
+.error {
+  color: var(--danger);
+  font-size: var(--t-small);
+}
+
+.actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+  background: var(--surface-0);
+  border-top: 1px solid var(--line);
+}
+.primary {
+  height: 40px;
+  padding: 0 var(--s-5);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-sm);
+  color: var(--text-inverse);
+  font-size: var(--t-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.primary:hover:not(:disabled) {
+  background: var(--accent-press);
+}
+.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.secondary {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--s-4);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.secondary:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+.spacer {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+  .cover {
+    flex-direction: column;
+  }
+  .coverPreview {
+    width: 100%;
+  }
+}
