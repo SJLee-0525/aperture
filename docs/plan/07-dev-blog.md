@@ -37,6 +37,7 @@ type DevArticle = {
   summary: string;
   body: string;
   cover?: ImageMeta;
+  coverAlt?: string;
   tags: string[];
   relatedProjectIds: string[];
   published: boolean;
@@ -44,6 +45,11 @@ type DevArticle = {
   firstPublishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+};
+
+type DevArticleTag = {
+  id: string;
+  label: string;
 };
 ```
 
@@ -53,8 +59,11 @@ type DevArticle = {
 - `createdAt`과 `updatedAt`은 시스템 기록이며 공개 정렬에 사용하지 않는다.
 - 예상 읽기 시간과 목차는 Markdown에서 계산한다. 파생값을 Firestore의 별도 원본으로 중복 저장하지 않는다.
 - 대표 이미지가 없으면 프로젝트 카드와 같은 타이포그래피 중심 대체 디자인을 사용한다.
+- 대표 이미지가 있으면 `coverAlt`에 이미지 자체를 설명하는 대체 텍스트를 요구한다. 제목을 반복 입력하지 않으며 목록 카드와 상세 hero가 같은 값을 사용한다.
 - `slug`는 제목에서 영문·숫자·하이픈 형태로 자동 제안하되 관리자가 첫 발행 전까지 수정할 수 있다. 저장할 때 정규화하고 중복을 거부한다. 첫 발행 이후에는 URL 보존을 위해 변경할 수 없다.
 - 연관 프로젝트는 `relatedProjectIds`에 순서대로 저장한다. 프로젝트 문서에 글 ID를 중복 저장하지 않는다.
+- `tags`에는 자유 입력 문자열이 아니라 `DevArticleTag.id`를 저장한다. 개발 글의 주제·기술 태그는 사진의 촬영 주제인 `site/config.tags`와 수명과 의미가 다르므로 사진 태그 사전을 공유하지 않고 별도 통제 사전으로 관리한다.
+- `DevArticleTag.label`은 `React`, `Next.js`, `Firebase`처럼 원문 표기 하나를 사용하며 언어별로 번역하지 않는다. id는 저장 후 안정적으로 유지하고, 라벨 변경은 허용하되 이미 사용 중인 태그 삭제는 사용 글 수와 영향을 확인한 뒤에만 허용한다.
 
 ### Mock 우선 개발 원칙
 
@@ -157,7 +166,7 @@ Firestore 문서 삭제와 해당 글 폴더 정리는 기존 CRUD에서 먼저 
 | `/admin/dev/articles/[id]`         | 글 편집                                        |
 | `/admin/dev/articles/[id]/preview` | 실제 공개 레이아웃을 쓰는 관리자 전용 미리보기 |
 
-편집 폼에는 제목, slug 자동 생성·수정, 요약, 대표 이미지, 태그, 발행일, 연관 프로젝트, Markdown 본문, 발행 상태를 둔다. 발행일은 날짜와 시간을 직접 입력하며 최초 발행 시 자동으로 덮어쓰지 않는다.
+편집 폼에는 제목, slug 자동 생성·수정, 요약, 대표 이미지, 태그, 발행일, 연관 프로젝트, Markdown 본문, 발행 상태를 둔다. 발행일은 날짜와 시간을 직접 입력하며 최초 발행 시 자동으로 덮어쓰지 않는다. 태그는 통제 사전에서 여러 개를 선택하고, 필요한 태그가 없으면 관리자 권한 안에서 새 태그를 추가할 수 있게 한다. 태그 생성 시 id 중복과 공백뿐인 라벨을 거부하고, 저장된 글에는 태그 라벨이 아니라 안정적인 id 배열을 기록한다.
 
 미리보기 경로는 관리자 인증 안에서만 접근하고 sitemap, 검색 인덱스, RAG와 WebMCP에는 노출하지 않는다. live에서는 마지막으로 Firestore에 저장한 초안을 서버가 읽어 공개 상세와 같은 컴포넌트로 렌더링한다. mock 단계에는 서버가 브라우저 저장소를 직접 읽을 수 없으므로 미리보기 shell이 로컬 article repository의 저장본을 읽어 인증된 preview handler로 보내고 같은 renderer 결과를 표시한다. 저장하지 않은 변경이 있으면 전체 페이지 미리보기 전에 저장 안내를 표시한다.
 
@@ -169,7 +178,7 @@ Firestore 문서 삭제와 해당 글 폴더 정리는 기존 CRUD에서 먼저 
 
 - 제목, slug, 요약, 본문과 발행일이 있다.
 - slug가 유효하고 다른 글과 겹치지 않는다.
-- 본문 이미지에 대체 텍스트가 있다.
+- 대표 이미지와 본문 이미지에 대체 텍스트가 있다.
 - YouTube URL과 연관 프로젝트 ID가 공개 가능한 값이다.
 - Markdown이 허용된 출력으로 렌더링된다.
 
@@ -177,13 +186,47 @@ Firestore 문서 삭제와 해당 글 폴더 정리는 기존 CRUD에서 먼저 
 
 ### 블로그 목록
 
-프로젝트 목록의 그리드, 여백과 카드 리듬을 재사용하되 컴포넌트를 억지로 하나로 합치지 않는다. 블로그 카드에는 대표 이미지, 제목, 요약, 태그, 발행일과 예상 읽기 시간을 표시한다. 대표 이미지가 없으면 프로젝트 카드와 같은 배경·타이포그래피 구성을 사용한다.
+사진 작업 목록의 상단 구조를 기준으로 `제목 / 현재 결과 수 / 보기 전환` toolbar와 그 아래 가로 스크롤 가능한 태그 칩 행을 둔다. 태그는 `전체` 또는 하나의 태그를 선택하는 단일 선택 방식이며 선택값을 `?tag={tagId}`에 기록한다. 존재하지 않거나 삭제된 태그 id는 `전체`로 정규화한다. 태그를 바꾸면 현재 페이지는 1로 돌아가며 보기 방식은 유지한다.
 
-목록은 프로젝트처럼 데스크톱 2열이며 한 페이지에 8개 카드를 `publishedAt desc`로 표시한다. 페이지 번호는 `?page=` query에 남겨 새로고침과 뒤로가기가 동작하게 한다. 모바일은 한 열로 바꾸되 페이지당 개수는 유지한다. 빈 목록과 범위를 벗어나거나 숫자가 아닌 페이지는 1페이지의 canonical URL로 정규화한다.
+보기 전환은 `그리드 보기 / 목록 보기` 두 가지다. 선택값은 `?view=grid|list`에 기록해 공유 URL, 새로고침과 뒤로가기에서 보존하고, 값이 없거나 잘못되면 `grid`를 기본값으로 사용한다. 그리드 보기는 데스크톱 2열 카드, 모바일 1열 카드이며 대표 이미지, 제목, 요약, 태그, 발행일과 예상 읽기 시간을 표시한다. 목록 보기는 한 행에 제목, 요약 또는 짧은 발췌, 태그, 발행일과 예상 읽기 시간을 배치하고 작은 화면에서는 제목 아래 metadata를 줄바꿈한다. 대표 이미지가 없으면 그리드에서는 프로젝트 카드와 같은 배경·타이포그래피 대체 구성을 사용하며, 목록에서는 레이아웃이 비지 않도록 이미지 칸 자체를 생략한다.
+
+공용화 경계는 사진 화면을 복제하지 않고 다음처럼 잡는다.
+
+- 현재 전역 `ViewToggle`의 `square`, `masonryLabel`, `squareLabel`처럼 사진 용어에 묶인 API를 두 선택지의 id·label·icon을 받는 범용 segmented view toggle로 확장한다. 사진은 기존 `masonry/square`, 블로그는 `grid/list` 설정을 주입하며 `aria-pressed`와 키보드 동작을 공유한다.
+- 사진 `FilterBar`에서 `Chip`을 나열하는 태그 행과 overflow 스타일만 공용 `TagFilterBar`로 승격한다. 카메라·초점거리 popover와 사진 필터 상태는 기존 `FilterBar`에 남기고, 블로그는 공용 태그 행만 사용한다.
+- 제목·결과 수·보기 전환의 배치와 최대 폭은 공용 page toolbar shell로 승격할 수 있으면 사용하되, 사진의 무한 스크롤·모달·검색 상태와 블로그의 pagination 상태를 하나의 뷰 컴포넌트로 합치지 않는다.
+
+태그 필터를 적용한 결과를 `publishedAt desc`, `id asc`로 정렬하고 보기 방식과 관계없이 한 페이지에 8개씩 표시한다. 페이지 번호는 `?page=` query에 남겨 새로고침과 뒤로가기가 동작하게 한다. 빈 필터 결과에는 선택 태그와 초기화 동작을 보여준다. 범위를 벗어나거나 숫자가 아닌 페이지는 같은 `tag`와 `view`를 보존한 1페이지 canonical URL로 정규화한다. URL query 직렬화는 `tag`, `view`, `page`만 허용하며 기본값은 생략한다.
 
 ### 블로그 상세
 
-상세 상단에는 제목, 요약, 발행일, 수정일, 예상 읽기 시간, 태그와 선택적 대표 이미지를 둔다. 목차는 `h2`와 `h3`에서 만들고 현재 헤딩을 표시한다. 모바일에서는 접을 수 있게 하며 키보드와 reduced motion을 지원한다.
+상세 상단은 앨범 상세의 full-bleed hero 구성을 기준으로 한다. 대표 이미지를 배경으로 채우고 하단 scrim 위에 제목, 요약, 발행일·수정일·예상 읽기 시간과 태그를 표시한다. 좌상단에는 같은 언어의 블로그 목록으로 돌아가는 링크, 우상단에는 기존 `ShareButton`을 둔다. 공유 제목은 글 제목, URL은 canonical 상세 URL을 사용한다. 앨범의 hero shell·scrim·back/share 위치·진입 motion을 공용 hero primitive로 승격할 수 있으면 재사용하되, 앨범/블로그 metadata 내용은 slot으로 주입한다.
+
+대표 이미지가 없는 글도 같은 정보 위계를 유지하되 빈 이미지 영역을 만들지 않는다. 전역 색 토큰을 사용한 타이포그래피형 hero를 렌더하고 scrim은 생략하며, 뒤로가기·공유 버튼은 해당 배경에서 WCAG 대비를 만족하는 일반 surface 스타일로 전환한다. 대표 이미지의 초점 위치가 필요해질 수 있으므로 `cover`의 기존 `ImageMeta`가 focal position을 지원하는지 구현 전에 확인하고, 지원하면 앨범과 같은 `object-position` 계약을 사용한다.
+
+hero 다음에는 긴 글에 맞춘 본문 최대 폭을 배치한다. hero의 텍스트가 이미지에 포함된 것으로 취급되지 않도록 실제 HTML 텍스트로 유지하고, 대표 이미지 alt는 제목을 기계적으로 반복하지 말고 관리자가 입력한 `coverAlt`를 사용한다.
+
+#### 노션식 floating 목차
+
+목차는 본문 옆에 항상 펼쳐진 열이나 상단 고정 bar로 만들지 않고, Notion의 page-level table of contents처럼 화면 오른쪽 가장자리에 붙는 축소 인디케이터를 기본 상태로 사용한다. 본문 흐름과 너비를 침범하지 않으면서 스크롤 중 어느 위치에서도 접근할 수 있어야 한다.
+
+- Markdown parser가 만든 동일한 heading 결과 중 `h2`, `h3`만 문서 순서대로 사용한다. `h3`는 바로 앞 `h2` 아래에 들여쓴 계층으로 표현하고, 목차·본문 heading·URL fragment가 같은 id를 사용한다.
+- heading이 2개 미만이면 floating 목차를 렌더링하지 않는다. hero를 지나 본문 영역에 진입하면 나타나고, 본문 아래의 연관 프로젝트 영역에 도달하면 사라져 하단 콘텐츠를 가리지 않는다.
+- 축소 상태는 화면 오른쪽 중앙에 세로로 나열한 짧은 가로선으로 표시한다. 각 선은 heading 하나에 대응하고 `h3` 선은 `h2`보다 짧게 보여 계층을 암시한다. 현재 heading의 선은 길이·굵기·색 대비로 강조하되 색상만으로 상태를 전달하지 않는다.
+- 데스크톱에서는 인디케이터에 pointer hover가 들어오거나 내부 컨트롤이 keyboard focus를 받으면 왼쪽 방향으로 확장해 전체 heading 제목을 보여준다. pointer가 벗어난 뒤 짧은 유예 시간 후 축소하되, focus가 내부에 있거나 사용자가 항목을 누르는 동안에는 닫지 않는다.
+- 확장 패널은 현재 heading을 `aria-current="location"`으로 표시하고 `h3`를 시각적으로 들여쓴다. 제목이 긴 항목은 최대 두 줄까지 표시한 뒤 말줄임하며, 해당 요소의 accessible name에는 전체 제목을 유지한다.
+- 항목을 선택하면 같은 parser가 만든 fragment로 이동하고 URL hash를 `history.pushState` 계약에 맞춰 갱신한다. 브라우저 뒤로가기로 이전 fragment와 스크롤 위치를 복원할 수 있어야 한다. 고정된 전역 header에 heading이 가리지 않도록 본문 heading에 공통 `scroll-margin-top`을 적용한다.
+- 현재 heading은 `IntersectionObserver`로 추적한다. header 아래의 읽기 기준선을 지난 마지막 heading을 현재 항목으로 삼고, 문서 끝에서는 마지막 heading을 유지한다. 관찰 대상이 많아도 heading별 scroll listener를 만들지 않는다.
+
+모바일과 coarse pointer 환경에서도 오른쪽 중앙의 같은 선 인디케이터를 사용한다. hover를 흉내 내지 않고 첫 tap으로 목차를 열며, 우하단은 기존 챗봇 버튼 전용 공간으로 남긴다.
+
+- 인디케이터의 시각적 선은 작게 유지하되 전체 trigger는 최소 `44 × 44px` hit area를 확보한다. safe-area와 viewport 높이를 고려해 오른쪽 중앙에 두고, 챗봇 버튼의 reserved rectangle과 겹치면 위쪽으로 이동한다.
+- tap하면 오른쪽에서 목차 drawer가 열리고 backdrop을 표시한다. drawer 너비는 작은 화면 대부분을 덮지 않는 범위에서 `min(82vw, 320px)`, 높이는 `100dvh`로 하며 긴 목차만 내부 스크롤한다.
+- drawer가 열리면 현재 heading을 처음 보이는 위치로 스크롤한다. focus를 drawer 제목 또는 현재 항목으로 옮기고 focus trap을 적용하며, backdrop tap·닫기 버튼·`Escape`·브라우저 뒤로가기로 닫을 수 있게 한다. 닫은 뒤에는 인디케이터 trigger로 focus를 돌려준다.
+- 목차 항목을 선택하면 drawer를 닫고 해당 heading으로 이동한다. heading에는 일시적으로 programmatic focus가 가능하도록 하되 focus ring을 불필요하게 노출하지 않고, 화면 낭독기가 새 섹션의 제목을 인지할 수 있게 한다.
+- drawer가 열린 동안에는 배경 본문과 챗봇 trigger를 `inert` 처리해 동시에 조작되지 않게 한다. drawer를 닫으면 기존 챗봇 상태를 바꾸지 않고 상호작용만 복원한다.
+
+인디케이터와 패널은 hover에만 의존하지 않는다. 축소 trigger에는 현지화한 `목차 열기` accessible name과 `aria-expanded`, `aria-controls`를 제공한다. `prefers-reduced-motion`에서는 인디케이터 등장, 패널 확장과 heading 이동을 즉시 처리하고, 그 밖의 환경에서도 scroll animation은 짧게 제한한다. 확대·고대비 모드에서는 선만으로 조작을 요구하지 않도록 focus 시 텍스트 라벨을 함께 드러낸다.
 
 서체는 새 체계를 만들지 않고 현재 전역 토큰을 그대로 사용한다. 블로그 제목, 본문과 본문 heading은 `--font-display`의 Newsreader·Noto Serif KR 계열을 중심으로 구성한다. 날짜, 태그, 목차, 버튼과 페이지 탐색 같은 UI 정보는 `--font-sans`, 인라인 코드와 코드 블록은 `--font-mono`를 사용한다. 기존 개발 화면과 같은 자간·색·굵기 범위 안에서 본문 행간과 최대 폭만 긴 글에 맞게 조정한다. 외부 폰트나 블로그 전용 서체는 추가하지 않는다.
 
@@ -283,15 +326,17 @@ RAG 동기화는 공개 검색에 영향을 주는 변경에만 실행한다.
 
 ### B3 — Mock 기반 관리자 작성 환경
 
-- 블로그 목록·폼, slug 제안·중복 검사, 발행일 입력과 연관 프로젝트 선택을 구현한다.
+- 블로그 목록·폼, slug 제안·중복 검사, 발행일 입력, 별도 블로그 태그 사전의 선택·추가와 연관 프로젝트 선택을 구현한다.
 - Markdown 편집/서버 미리보기 토글과 커서 위치 이미지·YouTube 삽입을 mock uploader로 구현한다.
 - 개발용 브라우저 로컬 초안 adapter로 저장·수정·미리보기 흐름을 검증한다.
 - 관리자 전용 전체 페이지 미리보기를 연결한다.
 
 ### B4 — Mock 기반 공개 목록과 상세
 
-- 프로젝트 목록과 어울리는 카드 그리드, 대표 이미지 대체 디자인과 목록 pagination을 구현한다.
-- 상세, 목차, 코드 테마, 미디어, 연관 프로젝트와 하단 블로그 탐색 목록을 구현한다.
+- 사진 작업 목록과 같은 toolbar·태그 칩 행을 공용 경계로 추출하고, URL에 보존되는 그리드/목록 전환·태그 필터·pagination을 구현한다.
+- 앨범 상세 hero에서 공용 hero primitive를 추출해 대표 이미지·실제 텍스트·뒤로가기·공유를 갖춘 블로그 hero를 구현한다.
+- 대표 이미지 없는 hero 대체 디자인, 상세 본문, 목차, 코드 테마, 미디어, 연관 프로젝트와 하단 블로그 탐색 목록을 구현한다.
+- 노션식 floating 목차의 heading 계층·현재 위치 추적·데스크톱 hover/focus 확장·모바일 drawer·fragment/history 복원을 component와 E2E 테스트로 고정한다.
 - 한국어 본문 언어 표시, 영어 안내, metadata, sitemap과 구조화 데이터를 추가한다.
 - 공개 화면과 관리자 작성 흐름의 mock E2E가 통과하면 콘텐츠 계약을 고정한다.
 
@@ -322,6 +367,7 @@ RAG 동기화는 공개 검색에 영향을 주는 변경에만 실행한다.
 | -------------------- | ---------------------------------------------------------- |
 | 개발 경로·메뉴       | `constants/routes.ts`, `navigation.ts`, `dictionary.ts`    |
 | 콘텐츠 타입          | `types/dev-article.ts`                                     |
+| 블로그 태그 사전     | `types/dev-article-tag.ts`, dev article repository 경계    |
 | mock·공개 getter     | `mocks/dev-articles.ts`, `lib/content/dev-articles.ts`     |
 | Firebase 공개·관리자 | `lib/firebase/public/`, `lib/firebase/`                    |
 | Markdown 처리        | `features/dev-blog/_lib/markdown-*`                        |
@@ -347,8 +393,12 @@ RAG 동기화는 공개 검색에 영향을 주는 변경에만 실행한다.
 - 본문 임의 위치에 이미지와 검증된 YouTube 영상을 넣을 수 있다.
 - `/admin/maintenance`에서 어떤 글도 참조하지 않는 24시간 이전 이미지만 확인 후 정리할 수 있다.
 - 대표 이미지 유무에 관계없이 목록 카드가 기존 개발 디자인과 어울린다.
+- 목록의 태그 선택과 그리드/목록 전환이 URL에 보존되고 pagination과 함께 뒤로가기·공유 URL에서 복원된다.
+- 사진의 태그 행·보기 전환과 앨범의 hero에서 추출한 공용 컴포넌트가 기존 사진 화면을 회귀시키지 않는다.
+- 글 상세 hero에 대표 이미지, 실제 텍스트 제목·metadata, 목록 복귀와 공유 동작이 있고 이미지가 없어도 같은 정보 위계와 대비를 유지한다.
 - 제목과 긴 본문은 Newsreader 기반의 기존 display 서체 토큰을 사용하고 UI·코드는 기존 sans·mono 역할을 유지한다.
-- 목차, 예상 읽기 시간, 연관 프로젝트와 하단 페이지형 탐색 목록이 모바일·키보드에서도 동작한다.
+- 노션식 floating 목차가 본문 구간의 오른쪽 가장자리에서 현재 `h2/h3` 위치를 표시하고 데스크톱 hover/focus와 모바일 tap 모두로 열리며, 챗봇 버튼과 겹치거나 동시에 조작되지 않는다.
+- 목차 이동, URL fragment, 브라우저 뒤로가기, 키보드 focus와 reduced motion이 같은 heading id 계약으로 동작한다.
 - 프로젝트 모달에서 공개된 연관 글을 역방향으로 찾을 수 있다.
 - 영어 경로에서도 한국어 원문과 언어 안내가 올바르게 표시된다.
 - 초안은 공개 getter, sitemap, 검색, RAG, 챗봇 참조와 WebMCP에 노출되지 않는다.
