@@ -43,9 +43,8 @@ const SECTION_ROUTES: Record<SearchSection, Array<{ label: string; path: string 
   ],
   dev: [
     { label: "projects", path: ROUTES.DEV_PROJECTS },
-    { label: "tech stack", path: ROUTES.DEV },
-    { label: "career", path: ROUTES.DEV_CAREER },
-    { label: "about", path: ROUTES.DEV_ABOUT },
+    { label: "career and tech stack", path: ROUTES.DEV_CAREER },
+    { label: "about", path: ROUTES.DEV },
   ],
 };
 

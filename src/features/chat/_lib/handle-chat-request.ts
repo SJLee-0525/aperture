@@ -51,7 +51,6 @@ const STREAM_MEDIA_TYPE = "application/x-ndjson";
 const ALLOWED_ACTION_ROUTES = new Set<string>([
   ROUTES.CONTACT,
   ROUTES.DEV,
-  ROUTES.DEV_ABOUT,
   ROUTES.DEV_CAREER,
   ROUTES.DEV_PROJECTS,
   ROUTES.MUSIC,
@@ -169,8 +168,12 @@ const sanitizeLinks = (
   references: ChatReference[] | undefined,
   photoVocabulary?: PhotoFilterVocabulary,
 ): ChatLink[] | undefined => {
+  // 참조 카드가 이미 대신하는 섹션 경로. project 카드는 /dev 전체가 아니라 프로젝트 목록만 가린다 —
+  // /dev 는 소개 페이지라 여기에 넣으면 프로젝트 카드가 붙은 답변에서 소개 링크까지 사라진다.
   const referencedSections = [
-    ...new Set(references?.map(({ type }) => (type === "project" ? ROUTES.DEV : `/${type}`))),
+    ...new Set(
+      references?.map(({ type }) => (type === "project" ? ROUTES.DEV_PROJECTS : `/${type}`)),
+    ),
   ];
   const safe = links
     ?.flatMap((link) => {
