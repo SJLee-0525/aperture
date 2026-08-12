@@ -11,15 +11,20 @@ import {
   type PortfolioEmbeddingStatus,
 } from "@/features/admin-maintenance/_lib/get-portfolio-embedding-status";
 
+import { shouldUseMockContent } from "@/lib/content/content-source";
+
 import styles from "./ImageMigrationPanel.module.css";
 
 const EmbeddingMigrationPanel = () => {
+  // 임베딩 생성·상태 조회는 실제 Firestore 와 OpenAI 연결을 요구한다 — mock 모드에서는 잠근다.
+  const mock = shouldUseMockContent();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<PortfolioEmbeddingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<PortfolioEmbeddingStatus | null>(null);
 
   useEffect(() => {
+    if (mock) return;
     let active = true;
     getPortfolioEmbeddingStatus()
       .then((value) => {
@@ -31,7 +36,7 @@ const EmbeddingMigrationPanel = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [mock]);
 
   const run = async () => {
     if (!window.confirm("공개 포트폴리오 전체의 검색 임베딩을 생성하거나 갱신할까요?")) return;
@@ -56,10 +61,16 @@ const EmbeddingMigrationPanel = () => {
         저장합니다. 공개 콘텐츠나 임베딩 모델을 변경한 뒤 다시 실행하세요.
       </p>
       <div className={styles.actions}>
-        <button type="button" disabled={pending} onClick={run}>
+        <button type="button" disabled={pending || mock} onClick={run}>
           {pending ? "임베딩 생성 중…" : "전체 임베딩 생성·갱신"}
         </button>
       </div>
+      {mock ? (
+        <p className={styles.status}>
+          mock 모드에서는 실행할 수 없습니다. 실제 Firestore·OpenAI 연결이 필요합니다. .env.local에
+          NEXT_PUBLIC_USE_MOCK=0을 두고 다시 실행하세요.
+        </p>
+      ) : null}
       {status ? (
         <div className={styles.summary} aria-live="polite">
           <div className={styles.summaryLine}>

@@ -1,0 +1,31 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-6);
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+}
+
+.chip {
+  flex-shrink: 0;
+  padding: 2px var(--s-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-wide);
+  color: var(--accent);
+  border: 1px solid currentcolor;
+  border-radius: var(--r-sm);
+}
+
+.text {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+@media (max-width: 640px) {
+  .banner {
+    padding: var(--s-2) var(--s-4);
+  }
+}

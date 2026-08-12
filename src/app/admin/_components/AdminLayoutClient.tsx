@@ -8,6 +8,7 @@ import { RagStaleBanner } from "@/features/admin-maintenance/_components/RagStal
 import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
 import { AdminMonitoring } from "@/features/monitoring/_components/AdminMonitoring";
+import { shouldUseMockContent } from "@/lib/content/content-source";
 
 /**
  * 관리자 클라이언트 셸. 서버 레이아웃은 noindex 메타데이터를 내보내고,
@@ -29,7 +30,8 @@ const AdminLayoutClient = ({ children }: { children: ReactNode }) => {
       {/* AuthGuard가 관리자 UID를 확인한 뒤에만 동의 없는 운영자 모니터링을 시작한다. */}
       <AdminMonitoring />
       <AdminChrome>
-        <RagStaleBanner />
+        {/* RAG 잔류 감지는 실제 Firestore·임베딩 API 를 조회한다 — mock 모드에서는 조회 대상이 없다. */}
+        {shouldUseMockContent() ? null : <RagStaleBanner />}
         {children}
       </AdminChrome>
     </AuthGuard>
