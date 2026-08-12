@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { uploadDevImage, uploadDevPreview, uploadDevThumbnail } from "@/lib/firebase/storage";
+import { getAdminImageStore } from "@/lib/admin/image-store";
 import type { ImageMeta } from "@/types/image";
 
 import {
@@ -29,6 +29,7 @@ const useDevImageUpload = (projectId: string) => {
 
   const upload = useCallback(
     async (file: File): Promise<ImageMeta> => {
+      const imageStore = getAdminImageStore();
       const [compressed, preview, thumbnail] = await Promise.all([
         compressToWebp(file),
         compressPreviewToWebp(file),
@@ -39,9 +40,9 @@ const useDevImageUpload = (projectId: string) => {
           readDimensions(compressed),
           readDimensions(preview),
           readDimensions(thumbnail),
-          uploadDevImage(projectId, compressed),
-          uploadDevPreview(projectId, preview),
-          uploadDevThumbnail(projectId, thumbnail),
+          imageStore.uploadDevImage(projectId, compressed),
+          imageStore.uploadDevPreview(projectId, preview),
+          imageStore.uploadDevThumbnail(projectId, thumbnail),
         ]);
       return {
         ...mainUpload,

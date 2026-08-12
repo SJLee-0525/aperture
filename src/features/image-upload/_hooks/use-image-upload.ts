@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { extractExif, type ExtractedExif } from "@/lib/exif/extract";
-import { uploadPhotoImage, uploadPhotoPreview, uploadPhotoThumbnail } from "@/lib/firebase/storage";
+import { getAdminImageStore } from "@/lib/admin/image-store";
 import type { ImageMeta } from "@/types/image";
 
 import {
@@ -37,6 +37,7 @@ const useImageUpload = (photoId: string) => {
       setPending(true);
       setError(null);
       try {
+        const imageStore = getAdminImageStore();
         const [exif, dimensions] = await Promise.all([
           extractExif(file), // ① 압축 前 EXIF·GPS
           readDimensions(file), // ② 원본 크기
@@ -51,9 +52,9 @@ const useImageUpload = (photoId: string) => {
             readDimensions(compressed),
             readDimensions(preview),
             readDimensions(thumbnail),
-            uploadPhotoImage(photoId, compressed),
-            uploadPhotoPreview(photoId, preview),
-            uploadPhotoThumbnail(photoId, thumbnail),
+            imageStore.uploadPhotoImage(photoId, compressed),
+            imageStore.uploadPhotoPreview(photoId, preview),
+            imageStore.uploadPhotoThumbnail(photoId, thumbnail),
           ]); // ④ 크기 확인과 세 이미지 업로드 병렬 실행
         return {
           image: {

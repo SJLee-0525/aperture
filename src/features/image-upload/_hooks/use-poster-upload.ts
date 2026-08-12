@@ -2,11 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import {
-  uploadMusicPoster,
-  uploadMusicPosterPreview,
-  uploadMusicPosterThumbnail,
-} from "@/lib/firebase/storage";
+import { getAdminImageStore } from "@/lib/admin/image-store";
 import type { ImageMeta } from "@/types/image";
 
 import {
@@ -33,6 +29,7 @@ const usePosterUpload = (workId: string) => {
       setPending(true);
       setError(null);
       try {
+        const imageStore = getAdminImageStore();
         const [compressed, preview, thumbnail] = await Promise.all([
           compressToWebp(file),
           compressPreviewToWebp(file),
@@ -43,9 +40,9 @@ const usePosterUpload = (workId: string) => {
             readDimensions(compressed),
             readDimensions(preview),
             readDimensions(thumbnail),
-            uploadMusicPoster(workId, compressed),
-            uploadMusicPosterPreview(workId, preview),
-            uploadMusicPosterThumbnail(workId, thumbnail),
+            imageStore.uploadMusicPoster(workId, compressed),
+            imageStore.uploadMusicPosterPreview(workId, preview),
+            imageStore.uploadMusicPosterThumbnail(workId, thumbnail),
           ]);
         return {
           ...mainUpload,
