@@ -4,9 +4,24 @@ import path from "node:path";
 const PORT = 3100;
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
+/**
+ * 관리자 E2E 는 프로덕션 모드에서 돌 수 없다.
+ *
+ * `/admin/*` 은 `AuthGuard` 를 지나야 하고, 그 통과 조건은 `isAdmin || testSession` 이다.
+ * `testSession` 을 여는 `NEXT_PUBLIC_ADMIN_TEST_SESSION` 은 번들에 박히는 빌드 시점 값인데
+ * `lib/auth/test-admin-session.ts` 가 프로덕션 빌드에서 그 값이 켜져 있으면 즉시 throw 한다 —
+ * 인증 우회가 배포에 섞이지 않게 하려고 일부러 둔 가드다. 실 Firebase 계정도 쓰지 않으므로
+ * `isAdmin` 도 참이 될 수 없다.
+ *
+ * 그래서 프로덕션 실행에서는 이 디렉터리를 아예 수집하지 않고, CI 의 `Admin E2E` 잡이 dev
+ * 서버로 따로 돌린다. 스펙마다 `test.skip` 을 흩어 두는 대신 한 곳에서 끊는다.
+ */
+const PRODUCTION_MODE_IGNORE = process.env.E2E_PRODUCTION === "1" ? ["**/e2e/admin/**"] : [];
+
 export default defineConfig({
   testDir: "./e2e",
   testMatch: "**/*.e2e.ts",
+  testIgnore: PRODUCTION_MODE_IGNORE,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
