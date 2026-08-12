@@ -476,7 +476,7 @@ const MOCK_DEV_CONFIG: DevConfig = {
       category: "AI · Services",
       items: [
         { name: "OpenAI API", bg: "#10a37f", fg: "#000000" },
-        { name: "Google Gemini", bg: "#4285f4", fg: "#ffffff" },
+        { name: "Google Gemini", bg: "#1967d2", fg: "#ffffff" },
         { name: "ElevenLabs", bg: "#1f1f1f", fg: "#ffffff" },
       ],
     },
@@ -513,7 +513,7 @@ const MOCK_DEV_CONFIG: DevConfig = {
         { name: "Python 3.12", bg: "#3776ab", fg: "#ffffff" },
         { name: "Django", bg: "#092e20", fg: "#ffffff" },
         { name: "SQLAlchemy", bg: "#d71f00", fg: "#ffffff" },
-        { name: "PostgreSQL", bg: "#4169e1", fg: "#000000" },
+        { name: "PostgreSQL", bg: "#336791", fg: "#ffffff" },
         { name: "pgvector", bg: "#336791", fg: "#ffffff" },
         { name: "Redis", bg: "#dc382d", fg: "#ffffff" },
         { name: "Firebase", bg: "#ffca28", fg: "#000000" },

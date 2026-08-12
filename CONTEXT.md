@@ -19,10 +19,9 @@
 | Music Career  | `/music/career`  | 학력, 경력, 수상과 수상 상세 모달     |
 | Music Media   | `/music/media`   | 연주 영상 목록                        |
 | Music About   | `/music/about`   | 피아니스트 소개                       |
-| Dev Stack     | `/dev`           | 기술 스택                             |
+| Dev About     | `/dev`           | 개발자 소개 (구 `/dev/about` 은 308)  |
+| Dev Career    | `/dev/career`    | 학력, 경력, 수상과 기술 스택          |
 | Dev Projects  | `/dev/projects`  | 프로젝트 목록과 프로젝트 상세 모달    |
-| Dev Career    | `/dev/career`    | 개발 경력                             |
-| Dev About     | `/dev/about`     | 개발자 소개                           |
 | Contact       | `/contact`       | 연락 양식과 외부 연락 링크            |
 | Privacy       | `/privacy`       | 언어 저장·분석 동의·외부 처리 안내    |
 | Terms         | `/terms`         | 콘텐츠 권리·외부 링크·챗봇 이용 안내  |

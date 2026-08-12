@@ -8,7 +8,7 @@
 
 | 단계 | 내용                            | 상태      |
 | ---- | ------------------------------- | --------- |
-| B1   | 개발 정보 구조 개편             | ⬜ 미착수 |
+| B1   | 개발 정보 구조 개편             | ✅ 완료   |
 | B2   | Mock 데이터와 Markdown renderer | ⬜ 미착수 |
 | B3   | Mock 기반 관리자 작성 환경      | ⬜ 미착수 |
 | B4   | Mock 기반 공개 목록과 상세      | ⬜ 미착수 |
@@ -82,21 +82,23 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ## B1 — 개발 정보 구조 개편 (§1, §12-B1)
 
-- [ ] `/dev`에 기존 소개 콘텐츠(`DevAboutView`)를 옮기고, 기존 `/dev`의 기술 스택은 경력 페이지로 이동한다
-- [ ] `/dev/about`을 같은 언어의 `/dev`로 영구 리다이렉트한다 (`next.config` redirects, 로케일 prefix 보존, 체인 금지)
-- [ ] `/dev/career`에 경력·수상·기술 스택을 합친다 (`DevCareerView` + `DevStackView` 통합)
-- [ ] `constants/routes.ts`에 `DEV_ARTICLES`(`/dev/articles`)와 상세 경로 헬퍼를 추가한다
-- [ ] `constants/navigation.ts`의 `MEGA_MENU` dev 링크를 `소개 → 경력·기술 → 프로젝트 → 블로그` 순서로 바꾼다
-- [ ] `MOBILE_TABS.dev`를 새 4탭 구성(아이콘 포함)으로 갱신한다
-- [ ] `constants/dictionary.ts`에 블로그 라벨(`블로그`/`Blog`)과 관련 UI 키를 추가한다
-- [ ] sitemap에서 `/dev/about`을 제거하고 새 구조를 반영한다 (hreflang ko·en + x-default 유지)
-- [ ] 모바일 버거 메뉴 시트(아코디언)의 dev 섹션 링크를 갱신한다
+- [x] `/dev`에 기존 소개 콘텐츠(`DevAboutView`)를 옮기고, 기존 `/dev`의 기술 스택은 경력 페이지로 이동한다
+- [x] `/dev/about`을 같은 언어의 `/dev`로 영구 리다이렉트한다 (`next.config` redirects, 로케일 prefix 보존, 체인 금지)
+- [x] `/dev/career`에 경력·수상·기술 스택을 합친다 (`DevCareerView` + `DevStackSection`)
+- [x] `constants/routes.ts`에 `DEV_ARTICLES`(`/dev/articles`)를 추가한다 (상세 경로 헬퍼는 slug 계약이 정해지는 B2 이후)
+- [x] `constants/navigation.ts`의 `MEGA_MENU` dev 링크를 `소개 → 경력·기술 → 프로젝트` 순서로 바꾼다 (블로그는 화면이 생기는 B4에서 추가)
+- [x] `MOBILE_TABS.dev`를 같은 3탭 구성(아이콘 포함)으로 갱신한다
+- [x] `constants/dictionary.ts`에 `devCareerStackNav`(네비 `경력·기술`), `devStackHeading`(페이지 안 h2 `기술`), 블로그 라벨(`블로그`/`Blog`)을 추가한다 — 경력 페이지는 h1 `경력`과 같은 크기·서체의 h2 `기술` 두 제목으로 읽힌다
+- [x] sitemap에서 `/dev/about`을 제거하고 새 구조를 반영한다 (hreflang ko·en + x-default 유지)
+- [x] 모바일 버거 메뉴 시트(아코디언)의 dev 섹션 링크를 갱신한다 (`MEGA_MENU` 공유 — 데스크톱·푸터와 함께 반영)
+- [x] `/dev` 의미 반전에 딸린 참조를 함께 고친다 — 챗봇 참조 카드 중복 억제(`ROUTES.DEV` → `DEV_PROJECTS`), 링크·문맥 화이트리스트, WebMCP `get_profile` 사이트맵
 
 ### B1 검증
 
-- [ ] 기존 직접 링크(`/dev`, `/dev/career`, `/dev/projects`)와 로케일 prefix가 회귀 없이 동작한다
-- [ ] 활성 메뉴 판정(`stripLangPrefix` 경유)이 새 경로 구조에서 올바르다
-- [ ] 기존 unit·E2E 테스트가 통과한다
+- [x] 기존 직접 링크(`/dev`, `/dev/career`, `/dev/projects`)와 로케일 prefix가 회귀 없이 동작한다
+- [x] 활성 메뉴 판정(`stripLangPrefix` 경유)이 새 경로 구조에서 올바르다
+- [x] 기존 unit·E2E 테스트가 통과한다
+- [x] 회귀를 잡을 테스트를 추가한다 — `navigation.test.ts`(메뉴 순서·사전 키), `sitemap.test.ts`(리다이렉트 URL 제외), `sections.test.ts`(`/dev/articles`), `locale.e2e.ts`(308 1홉), a11y 스캔에 `/dev`·`/dev/career`
 
 ---
 

@@ -76,7 +76,7 @@ src/
 │   ├── albums/  map/  about/    # _components/: AlbumsView·AlbumDetailView / MapView·MapCanvas·LocationList / AboutView
 │   ├── export/                  # _components/ExportModal · _hooks/use-export · _lib/framePreview
 │   ├── music/                   # _components/: MusicWorksView·MusicCareerView·MusicMediaView·MusicAboutView (+ 연주/수상 모달)
-│   ├── dev/                     # _components/: DevStackView·DevProjectsView·DevCareerView·DevAboutView (+ 프로젝트 모달, reveal·타이핑)
+│   ├── dev/                     # _components/: DevAboutView(/dev)·DevCareerView+DevStackSection(/dev/career)·DevProjectsView (+ 프로젝트 모달, reveal·타이핑)
 │   ├── site-header/             # _components/: SiteHeader(mega-menu), MobileTabBar/MobileMenu, ThemeToggleButton, LangMenu, SearchBox, SectionAccent
 │   ├── theme/  lang/            # _hooks/use-theme-toggle·_lib/theme-script / _components/LangProvider·_hooks/use-lang (useSyncExternalStore)
 │   ├── auth/                    # _components/{LoginForm,AuthGuard} · _hooks/use-auth

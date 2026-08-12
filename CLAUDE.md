@@ -19,7 +19,7 @@
 | **랜딩** | `/`        | 블루               | 3섹션 진입 허브 — 개발 행은 프로젝트(`/dev/projects`), 사진·음악 행은 각 섹션 루트로 이동 |
 | **사진** | `/photo/*` | **블루** `#0a84ff` | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달 + 프레임 내보내기                |
 | **음악** | `/music/*` | **레드** `#e5484d` | 피아니스트 — 연주·경력(학력·경력·수상)·영상·소개 (개별 페이지 + 연주/수상 모달)           |
-| **개발** | `/dev/*`   | **그린** `#16a34a` | 프론트엔드 개발자 — 기술 스택·프로젝트·경력·소개 (개별 페이지, Phase C)                   |
+| **개발** | `/dev/*`   | **그린** `#16a34a` | 프론트엔드 개발자 — 소개·경력(기술 스택 포함)·프로젝트 (개별 페이지, Phase C)             |
 | **연락** | `/contact` | **주황** `#f5820d` | 전역 연락 페이지 — mailto 폼 + 인스타·깃헙·메일 링크 (섹션 아니지만 자체 액센트)          |
 
 - **방문자**: 로그인 없음, **ko/en 토글**, 다크모드. 각 섹션을 자유 열람.
@@ -138,7 +138,7 @@ src/
 │   │   │   ├── map/page.tsx    # 지도 (MapLibre+CARTO — next/dynamic ssr:false)
 │   │   │   └── about/page.tsx  # 소개 (통계 파생)
 │   │   ├── music/              # 음악 — 연주·경력·영상·소개 개별 페이지
-│   │   ├── dev/                # 개발 — 스택(/dev)·프로젝트·경력·소개 개별 페이지
+│   │   ├── dev/                # 개발 — 소개(/dev)·경력+기술 스택(/dev/career)·프로젝트 개별 페이지
 │   │   └── layout.tsx          # chrome(SiteHeader) 마운트는 여기서만 + 섹션 액센트 세팅
 │   ├── admin/                  # 관리자 — 전부 client, AuthGuard 마운트는 admin/layout.tsx
 │   │   ├── login/
@@ -186,7 +186,7 @@ import는 **같은 하위폴더면 `./`**(예: `_components/` 안의 컴포넌�
 - **공개 URL은 전부 `/ko/*`·`/en/*` 로케일 프리픽스**(`app/[lang]/(public)/*`). URL 세그먼트가 언어의 단일 출처 — `LangProvider` 경로 모드가 SSR부터 해당 언어로 렌더한다. `/ko/` = 랜딩(ko), 랜딩의 개발 행은 대표 콘텐츠인 `/dev/projects`로 바로 진입한다.
 - **언어가 없는 루트 `/`만 `src/proxy.ts`에서 조건부 307**: 명시적 언어 쿠키(`ap-lang-pref-v1`) → `Accept-Language` → `ko` 기본값 순서로 `/ko` 또는 `/en`을 고르고 query를 보존한다. 응답은 `private, no-store`이며 수동 선택 전에는 쿠키를 쓰지 않는다. 그 밖의 무-로케일·구 URL은 `next.config` redirects로 `/ko/*`에 308 직행(체인 금지): `/photo/* → /ko/photo/*`(음악·개발·연락·검색 동일), v1 URL `/albums → /ko/photo/albums`, `/map → /ko/photo/map`, `/about → /ko/photo/about`. 명시적인 `/ko/*`·`/en/*`는 자동 전환하지 않고 언어 메뉴만 같은 페이지의 반대 언어 경로로 이동한다.
 - 공개 내부 링크는 `LocalizedLink`(현재 언어 프리픽스 자동 부착), 경로 유틸은 `lib/i18n/locale-path.ts` 단일 출처. pathname 소비 코드는 `stripLangPrefix` 경유(섹션 판별·활성 링크). hreflang은 ko·en 상호 참조 + x-default(ko)를 `pageMetadata`·sitemap이 공유한다.
-- 음악·개발은 **개별 페이지**로 구성한다. 개발은 `/dev`=기술 스택, `/dev/projects`=프로젝트, `/dev/career`=경력이며 프로젝트 상세는 `?project=` 딥링크 모달이다.
+- 음악·개발은 **개별 페이지**로 구성한다. 개발은 `/dev`=소개, `/dev/career`=학력·경력·수상 + 기술 스택, `/dev/projects`=프로젝트이며 프로젝트 상세는 `?project=` 딥링크 모달이다. 구 `/dev/about`은 같은 언어의 `/dev`로 308 리다이렉트한다.
 - `/admin/*` 는 **로케일 밖**(프리픽스 없음) — 세 섹션 CMS를 모두 포함(사진·음악·개발). 관리자 UI 언어는 기존 localStorage 스토어 모드 유지.
 
 ## 환경변수 (`.env.local` — hook이 자동 수정 차단, 직접 편집)
