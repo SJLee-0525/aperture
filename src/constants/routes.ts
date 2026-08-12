@@ -43,6 +43,7 @@ const ROUTES = {
   ADMIN_DEV: "/admin/dev",
   ADMIN_DEV_PROJECTS: "/admin/dev/projects",
   ADMIN_DEV_CONFIG: "/admin/dev/config",
+  ADMIN_DEV_ARTICLES: "/admin/dev/articles",
   ADMIN_MAINTENANCE: "/admin/maintenance",
 } as const;
 
@@ -103,6 +104,22 @@ const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`
 const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}`;
 
 /**
+ * 관리자 블로그 글 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
+const adminDevArticleRoute = (id: string) => `${ROUTES.ADMIN_DEV_ARTICLES}/${id}`;
+
+/**
+ * 관리자 전용 블로그 전체 페이지 미리보기 경로. 공개 상세와 같은 화면을 관리자 인증 안에서만 연다.
+ *
+ * @param {string} id
+ * @returns {string}
+ */
+const adminDevArticlePreviewRoute = (id: string) => `${adminDevArticleRoute(id)}/preview`;
+
+/**
  * 개발 프로젝트 상세 모달 딥링크
  *
  * @param {string} id
@@ -114,6 +131,8 @@ export {
   ROUTES,
   albumRoute,
   adminAlbumRoute,
+  adminDevArticlePreviewRoute,
+  adminDevArticleRoute,
   adminMusicWorkRoute,
   adminMusicAwardRoute,
   adminMusicMediaRoute,
