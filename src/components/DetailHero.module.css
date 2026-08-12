@@ -1,0 +1,100 @@
+.hero {
+  position: relative;
+  min-height: var(--detail-hero-min-height, 300px);
+  display: flex;
+  align-items: flex-end;
+  /* 위쪽은 복귀·공유 버튼(36px)이 앉는 자리를 비운다 — 내용이 길어지는 좁은 화면에서
+     제목 첫 줄이 버튼 아래로 파고들지 않게 한다. */
+  padding: calc(var(--s-12) + 36px + var(--s-6)) var(--s-6) var(--s-6);
+  margin-bottom: var(--s-8);
+  overflow: hidden;
+}
+.heroImgWrap {
+  position: absolute;
+  inset: 0;
+}
+.heroImg {
+  object-fit: cover;
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 28%, rgba(0, 0, 0, 0.66));
+}
+.back {
+  position: absolute;
+  top: var(--s-5);
+  left: var(--s-6);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  box-sizing: border-box;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  color: var(--text-inverse);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: var(--t-small);
+  font-weight: 500;
+  line-height: 0px;
+}
+.back:hover:not([data-cursor-snapped]) {
+  background: rgba(0, 0, 0, 0.58);
+}
+.arrowBack {
+  font-size: var(--t-h3);
+}
+.share {
+  position: absolute;
+  top: var(--s-5);
+  right: var(--s-6);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  color: var(--text-inverse);
+  cursor: pointer;
+}
+.share:hover:not([data-cursor-snapped]) {
+  background: rgba(0, 0, 0, 0.58);
+}
+.share:focus-visible {
+  outline: 2px solid var(--text-inverse);
+  outline-offset: 2px;
+}
+.heroText {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* 대표 이미지가 없는 지면 — 어두운 사진 위를 전제한 스타일을 전부 되돌린다.
+   반투명 검정 배경과 흰 글자는 배경이 밝아지는 순간 대비를 잃는다. */
+.hero[data-variant="plain"] {
+  /* 배경 사진이 없으면 자리를 비워 둘 이유도 없다 — 글 높이에 맞춘다. */
+  min-height: 0;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--line);
+}
+.hero[data-variant="plain"] .back,
+.hero[data-variant="plain"] .share {
+  background: var(--bg);
+  color: var(--text-2);
+  border-color: var(--line-strong);
+  backdrop-filter: none;
+}
+.hero[data-variant="plain"] .back:hover:not([data-cursor-snapped]),
+.hero[data-variant="plain"] .share:hover:not([data-cursor-snapped]) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.hero[data-variant="plain"] .share:focus-visible {
+  outline-color: var(--accent);
+}

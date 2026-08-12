@@ -3,6 +3,7 @@
 type Props = {
   title: string;
   label: string;
+  url?: string;
   className?: string;
 };
 
@@ -31,12 +32,13 @@ const shareIcon = (
  * @param {Props} props
  * @param {string} props.title
  * @param {string} props.label
+ * @param {string | undefined} props.url 공유할 주소. 생략하면 지금 보고 있는 주소를 쓴다. 블로그 상세처럼 언어 경로가 갈리는 지면은 canonical 주소를 넘긴다.
  * @param {string | undefined} props.className
  * @returns {JSX.Element}
  */
-const ShareButton = ({ title, label, className }: Props) => {
+const ShareButton = ({ title, label, url: shareUrl, className }: Props) => {
   const share = async () => {
-    const url = window.location.href;
+    const url = shareUrl ?? window.location.href;
     if (typeof navigator.share !== "function") {
       await navigator.clipboard?.writeText(url);
       return;
