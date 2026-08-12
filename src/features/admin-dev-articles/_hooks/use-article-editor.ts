@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { adminDevArticleRoute, ROUTES } from "@/constants/routes";
 
@@ -60,32 +60,31 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const savedFingerprint = useRef(
+  // 마지막으로 저장한 값의 지문. ref 가 아니라 state 다 — `dirty` 를 렌더 중 파생값으로
+  // 계산하려면 이 값이 바뀔 때 다시 렌더돼야 한다.
+  const [savedFingerprint, setSavedFingerprint] = useState(() =>
     fingerprint(initial ? articleToInput(initial) : emptyArticleInput()),
   );
-  const [dirty, setDirty] = useState(false);
 
   const slugLocked = Boolean(initial?.firstPublishedAt);
 
-  const applyForm = useCallback((next: DevArticleInput) => {
-    setForm(next);
-    setDirty(fingerprint(next) !== savedFingerprint.current);
-  }, []);
+  const applyForm = useCallback((next: DevArticleInput) => setForm(next), []);
 
   const patch = useCallback(
     (next: Partial<DevArticleInput>) =>
       setForm((previous) => {
         const merged = { ...previous, ...next };
         // 관리자가 주소를 아직 건드리지 않았으면 제목을 따라간다.
-        const withSlug =
-          next.title && !slugTouched && !slugLocked
-            ? { ...merged, slug: suggestArticleSlug(merged.title) }
-            : merged;
-        setDirty(fingerprint(withSlug) !== savedFingerprint.current);
-        return withSlug;
+        return next.title && !slugTouched && !slugLocked
+          ? { ...merged, slug: suggestArticleSlug(merged.title) }
+          : merged;
       }),
     [slugLocked, slugTouched],
   );
+
+  // 저장 여부는 상태가 아니라 두 값의 차이다. updater 안에서 setDirty 를 부르면 렌더 도중
+  // 다른 상태를 갱신하게 되고, 복구본 적용·저장처럼 두 값이 함께 움직이는 경로에서 어긋난다.
+  const dirty = useMemo(() => fingerprint(form) !== savedFingerprint, [form, savedFingerprint]);
 
   const onSlugChange = useCallback(
     (value: string) => {
@@ -113,8 +112,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   );
 
   const markSaved = useCallback((input: DevArticleInput) => {
-    savedFingerprint.current = fingerprint(input);
-    setDirty(false);
+    setSavedFingerprint(fingerprint(input));
   }, []);
 
   const save = useCallback(async (): Promise<boolean> => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
 import { ArticleMarkdownHelp } from "@/features/admin-dev-articles/_components/ArticleMarkdownHelp";
 import { ArticlePreviewPanel } from "@/features/admin-dev-articles/_components/ArticlePreviewPanel";
@@ -43,13 +43,22 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 삽입은 업로드가 끝난 뒤에도 일어난다. 그때 `props.value` 는 업로드를 시작하던 시점의
+  // 값이라, 그 값으로 본문을 통째로 바꾸면 올리는 동안 입력한 글이 사라진다. textarea 는
+  // 업로드 중에도 열려 있으므로 최신 본문을 따로 붙들어 둔다.
+  const latestValue = useRef(value);
+  useEffect(() => {
+    latestValue.current = value;
+  }, [value]);
+
   const insert = (snippet: string) => {
     const textarea = textareaRef.current;
+    const current = latestValue.current;
     const selection = textarea
       ? { start: textarea.selectionStart, end: textarea.selectionEnd }
-      : { start: value.length, end: value.length };
+      : { start: current.length, end: current.length };
 
-    const next = insertAtSelection(value, selection, snippet);
+    const next = insertAtSelection(current, selection, snippet);
     onChange(next.value);
     // 삽입한 조각 뒤로 커서를 옮긴다. 값이 반영된 뒤여야 해서 다음 프레임에 미룬다.
     window.requestAnimationFrame(() => {

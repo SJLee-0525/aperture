@@ -67,7 +67,11 @@ const imageMarkdown = (url: string, alt: string, caption?: string): string => {
  * YouTube 조각을 만든다. 제목은 facade 와 iframe 의 accessible name 이라 필수이고,
  * 출처는 선택이다(계획 §4).
  *
- * @param {string} url 영상 주소. 검증은 렌더 단계의 `::youtube` 해석이 맡는다.
+ * 주소도 제목·출처와 같은 수준으로 정리한다. `]` 나 `}` 가 그대로 들어가면 지시자가 거기서
+ * 끊겨 `::youtube` 가 아니라 깨진 문단이 되고, 관리자는 자기가 붙여 넣은 주소에서 원인을
+ * 찾기 어렵다. 잘라 낸 주소는 영상 ID 를 못 뽑아 렌더 단계가 `youtube-url-invalid` 로 알린다.
+ *
+ * @param {string} url 영상 주소. 유효성 검증은 렌더 단계의 `::youtube` 해석이 맡는다.
  * @param {string} title 영상 제목.
  * @param {string} [source] 출처 표기.
  * @returns {string} 삽입할 Markdown.
@@ -76,7 +80,7 @@ const youtubeMarkdown = (url: string, title: string, source?: string): string =>
   const attributes = [`title="${inline(title).replace(/"/g, "")}"`];
   const text = source ? inline(source).replace(/"/g, "") : "";
   if (text) attributes.push(`source="${text}"`);
-  return `::youtube[${url.trim()}]{${attributes.join(" ")}}`;
+  return `::youtube[${inline(url).replace(/[{}]/g, "")}]{${attributes.join(" ")}}`;
 };
 
 export { imageMarkdown, insertAtSelection, youtubeMarkdown };
