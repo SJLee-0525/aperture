@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { Icon } from "@/components/Icon";
 import { DICTIONARY } from "@/constants/dictionary";
 import { devArticleRoute } from "@/constants/routes";
 import { formatYMD } from "@/lib/format/format-date";
@@ -82,25 +83,28 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
             const current = article.slug === currentSlug;
             return (
               <tr key={article.id} className={current ? styles.current : undefined}>
-                <td className={styles.titleCell}>
+                {/* 셀마다 링크를 두면 클릭·hover·커서가 제목 글자 폭에서만 반응한다. 행을
+                    통째로 감싸는 링크 하나를 두어 어디를 눌러도 글로 넘어가게 한다. */}
+                <td colSpan={2}>
                   {current ? (
-                    <span aria-current="page" className={styles.currentTitle}>
-                      {title}
-                    </span>
+                    <div aria-current="page" className={styles.currentRow}>
+                      <span className={styles.currentTitle}>{title}</span>
+                      <time className={styles.date} dateTime={article.publishedAt.toISOString()}>
+                        {formatYMD(article.publishedAt)}
+                      </time>
+                    </div>
                   ) : (
                     <Link
                       href={localizePath(lang, devArticleRoute(article.slug))}
                       prefetch={false}
-                      className={styles.link}
+                      className={styles.row}
                     >
-                      {title}
+                      <span className={styles.title}>{title}</span>
+                      <time className={styles.date} dateTime={article.publishedAt.toISOString()}>
+                        {formatYMD(article.publishedAt)}
+                      </time>
                     </Link>
                   )}
-                </td>
-                <td className={styles.dateCell}>
-                  <time dateTime={article.publishedAt.toISOString()}>
-                    {formatYMD(article.publishedAt)}
-                  </time>
                 </td>
               </tr>
             );
@@ -116,7 +120,7 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
             disabled={page === 1}
             onClick={() => goPage(page - 1)}
           >
-            ‹
+            <Icon name="chevronLeft" size={16} />
           </button>
           <span className={styles.pageState}>
             {page} / {pageCount}
@@ -127,7 +131,7 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
             disabled={page === pageCount}
             onClick={() => goPage(page + 1)}
           >
-            ›
+            <Icon name="chevronRight" size={16} />
           </button>
         </nav>
       ) : null}
