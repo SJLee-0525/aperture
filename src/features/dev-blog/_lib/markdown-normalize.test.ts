@@ -7,15 +7,21 @@ const STORAGE_IMAGE =
 
 const codes = (markdown: string) => parseArticleMarkdown(markdown).issues.map(({ code }) => code);
 
-/** `MAX_NESTING_DEPTH` 를 확실히 넘기는 반복 횟수. 상한을 올려도 이 값이면 여전히 넘는다. */
-const OVER_LIMIT = 200;
+/**
+ * `MAX_NESTING_DEPTH`(32)의 두 배 — 상한을 한 번 올려도 이 값이면 여전히 넘는다.
+ *
+ * 더 키우지 않는 이유는 파싱 비용이다. 목록은 한 단계마다 들여쓰기가 길어져
+ * micromark 가 줄마다 열린 컨테이너를 전부 다시 확인한다. 200단계로 잡았더니
+ * 커버리지를 켠 CI 에서 이 한 건이 vitest 기본 타임아웃(5초)을 넘겼다.
+ *
+ * 아래 테스트들이 문서를 한 번만 파싱하는 것도 같은 이유다. 던지면 그 자리에서
+ * 그대로 실패하므로 `not.toThrow()` 를 따로 부를 필요가 없다.
+ */
+const OVER_LIMIT = 64;
 
 describe("normalizeArticleTree — 중첩 깊이", () => {
   it("깊은 인용은 RangeError 대신 issue 를 돌려준다", () => {
-    const markdown = `${">".repeat(OVER_LIMIT)} 본문`;
-
-    expect(() => parseArticleMarkdown(markdown)).not.toThrow();
-    expect(codes(markdown)).toContain("nesting-too-deep");
+    expect(codes(`${">".repeat(OVER_LIMIT)} 본문`)).toContain("nesting-too-deep");
   });
 
   it("깊은 목록도 같은 경로로 막는다", () => {
@@ -24,7 +30,6 @@ describe("normalizeArticleTree — 중첩 깊이", () => {
       (_, index) => `${" ".repeat(index * 2)}- 항목`,
     ).join("\n");
 
-    expect(() => parseArticleMarkdown(markdown)).not.toThrow();
     expect(codes(markdown)).toContain("nesting-too-deep");
   });
 
@@ -32,7 +37,6 @@ describe("normalizeArticleTree — 중첩 깊이", () => {
     // toInlines 경로 — 강조가 자기 자신을 감싸며 내려간다.
     const markdown = `${"*".repeat(OVER_LIMIT * 2)}글${"*".repeat(OVER_LIMIT * 2)}`;
 
-    expect(() => parseArticleMarkdown(markdown)).not.toThrow();
     expect(codes(markdown)).toContain("nesting-too-deep");
   });
 
@@ -40,7 +44,6 @@ describe("normalizeArticleTree — 중첩 깊이", () => {
     // toPlainText 경로 — heading 라벨은 인라인 트리를 따로 훑으므로 상한이 따로 걸려야 한다.
     const markdown = `## ${"*".repeat(OVER_LIMIT * 2)}제목${"*".repeat(OVER_LIMIT * 2)}`;
 
-    expect(() => parseArticleMarkdown(markdown)).not.toThrow();
     expect(codes(markdown)).toContain("nesting-too-deep");
   });
 
