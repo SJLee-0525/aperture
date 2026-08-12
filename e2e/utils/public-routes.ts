@@ -9,6 +9,8 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   { path: "/ko/dev", expectedText: "사용 기술" },
   { path: "/ko/dev/career", expectedText: "경력" },
   { path: "/ko/dev/projects", expectedText: "개인 포트폴리오" },
+  { path: "/ko/dev/articles", expectedText: "서버 없이 포트폴리오를 운영한다" },
+  { path: "/ko/dev/articles/serverless-portfolio", expectedText: "왜 서버를 두지 않았나" },
   { path: "/ko/photo", expectedText: "새벽의 항구" },
   { path: "/ko/photo/about", expectedText: "Aperture." },
   { path: "/ko/photo/albums", expectedText: "도시의 밤" },
@@ -26,6 +28,11 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   // en 스팟 체크 — /en 경로가 영어 UI로 SSR 되는지 대표 페이지만 검증
   { path: "/en", expectedText: "Sungjoon Lee." },
   { path: "/en/dev", expectedText: "Tech Used" },
+  // 본문은 한국어 원문 하나뿐이라 영어 경로에는 안내가 함께 나온다.
+  {
+    path: "/en/dev/articles/serverless-portfolio",
+    expectedText: "This article is available in Korean only.",
+  },
   { path: "/en/privacy", expectedText: "Privacy Policy" },
   { path: "/en/terms", expectedText: "Site Use & Content Notice" },
   { path: "/en/accessibility", expectedText: "Accessibility Statement" },

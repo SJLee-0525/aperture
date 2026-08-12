@@ -9,6 +9,8 @@ const ACCESSIBILITY_ROUTES = [
   "/ko/dev",
   "/ko/dev/career",
   "/ko/dev/projects",
+  "/ko/dev/articles",
+  "/ko/dev/articles/serverless-portfolio",
   "/ko/contact",
   "/ko/privacy",
   "/ko/terms",

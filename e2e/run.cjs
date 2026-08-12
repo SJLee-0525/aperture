@@ -19,8 +19,9 @@ const serverEnv = {
   NEXT_PUBLIC_GA_ID: "G-E2ETEST",
   NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
   NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
-  // 관리자 E2E 전용 인증 우회. 프로덕션 모드 실행에서는 가드가 throw 하므로 켜지 않는다.
-  ...(production ? {} : { NEXT_PUBLIC_ADMIN_TEST_SESSION: "1" }),
+  // 관리자 E2E 전용 인증 우회. 프로덕션 모드에서는 가드가 throw 하므로 명시적으로 끈다 —
+  // 개발자가 .env.local 에 이 플래그를 두고 쓰더라도 프로덕션 실행이 그 값을 물려받지 않게 한다.
+  NEXT_PUBLIC_ADMIN_TEST_SESSION: production ? "0" : "1",
 };
 
 if (build) {
@@ -33,6 +34,7 @@ if (build) {
     NEXT_PUBLIC_GA_ID: "G-E2ETEST",
     NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
     NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
+    NEXT_PUBLIC_ADMIN_TEST_SESSION: "0",
   };
   delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
   const buildResult = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {
