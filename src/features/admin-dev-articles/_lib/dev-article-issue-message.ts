@@ -19,11 +19,14 @@ const MARKDOWN_ISSUE_MESSAGES = {
   "image-source-not-allowed": "허용하지 않은 이미지 주소입니다. 편집기의 이미지 버튼으로 올리세요.",
   "link-not-allowed": "링크는 https 주소, 메일 주소, 사이트 내부 경로만 넣을 수 있습니다.",
   "caption-without-image": "캡션 바로 앞 줄에 이미지가 없습니다. 이미지 다음 줄로 옮기세요.",
+  "caption-duplicated": "앞 이미지에 캡션이 이미 붙어 있습니다. 남길 한 줄만 두세요.",
   "caption-empty": "캡션 내용이 비어 있습니다. 설명을 넣거나 줄을 지우세요.",
   "youtube-url-invalid":
     "영상 주소에서 ID를 찾지 못했습니다. youtube.com 또는 youtu.be 주소를 넣으세요.",
   "youtube-title-missing": "영상 제목을 넣으세요. 화면 낭독기가 읽을 이름입니다.",
   "unknown-directive": "모르는 전용 문법입니다. `::caption` 과 `::youtube` 만 씁니다.",
+  "reference-not-supported": "참조 링크는 쓸 수 없습니다. 주소를 `[글자](주소)` 로 직접 넣으세요.",
+  "nesting-too-deep": "인용·목록·강조가 너무 깊게 겹쳤습니다. 겹친 단계를 줄이세요.",
 } as const satisfies Record<ArticleMarkdownIssue["code"], string>;
 
 const PUBLISH_ISSUE_MESSAGES = {

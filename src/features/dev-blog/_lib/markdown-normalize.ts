@@ -20,9 +20,20 @@ import {
 const MIN_HEADING_DEPTH = 2;
 const MAX_HEADING_DEPTH = 4;
 
+/**
+ * 중첩을 따라 들어갈 수 있는 최대 단계.
+ *
+ * 이 트리는 재귀로 훑으므로 깊이가 곧 호출 스택 깊이다. 상한이 없으면 `">".repeat(2000)`
+ * 정도의 2KB 입력이 `RangeError` 를 내고, 그 예외를 잡는 곳이 없어 공개 지면 생성이 통째로
+ * 멈춘다. 사람이 쓴 글은 인용·목록을 겹쳐도 열 단계를 넘기지 않아 32 는 넉넉한 여유다.
+ */
+const MAX_NESTING_DEPTH = 32;
+
 type NormalizeContext = {
   issues: ArticleMarkdownIssue[];
   headingId: (text: string) => string;
+  /** 깊이 초과는 문서마다 한 번만 알린다. 넘어선 지점마다 쌓으면 목록이 같은 사유로 뒤덮인다. */
+  depthReported: boolean;
 };
 
 /** 위치를 모르는 노드도 있어(합성 노드) 1:1 로 떨어뜨린다. */
@@ -41,12 +52,45 @@ const report = (
   context.issues.push({ code, point: pointOf(node), ...(detail ? { detail } : {}) });
 };
 
-/** heading 라벨과 지시자 인자를 읽기 위한 평문화. 서식은 버리고 글자만 잇는다. */
-const toPlainText = (nodes: PhrasingContent[]): string =>
+/**
+ * 깊이 상한을 넘었는지 본다. 넘었으면 문서에서 처음 한 번만 issue 로 남긴다.
+ *
+ * @param {NormalizeContext} context issue 수집기.
+ * @param {Parameters<typeof pointOf>[0]} node 상한을 넘어선 지점의 노드.
+ * @param {number} depth 지금 들어와 있는 단계.
+ * @returns {boolean} 상한을 넘었으면 true — 호출부는 더 내려가지 않는다.
+ */
+const exceedsDepth = (
+  context: NormalizeContext,
+  node: Parameters<typeof pointOf>[0],
+  depth: number,
+): boolean => {
+  if (depth <= MAX_NESTING_DEPTH) return false;
+  if (!context.depthReported) {
+    context.depthReported = true;
+    report(context, "nesting-too-deep", node, `${MAX_NESTING_DEPTH}단계`);
+  }
+  return true;
+};
+
+/**
+ * heading 라벨과 지시자 인자를 읽기 위한 평문화. 서식은 버리고 글자만 잇는다.
+ *
+ * 블록·인라인과 같은 깊이 계약을 쓴다. 이 경로에도 중첩이 들어오기 때문이다 —
+ * 제목 안의 강조, 지시자 인자 안의 링크가 모두 여기로 내려온다.
+ *
+ * @param {PhrasingContent[]} nodes 평문으로 바꿀 인라인 노드.
+ * @param {NormalizeContext} context issue 수집기.
+ * @param {number} depth 지금 들어와 있는 단계.
+ * @returns {string} 서식을 뗀 글자. 상한을 넘은 가지는 빈 문자열이 된다.
+ */
+const toPlainText = (nodes: PhrasingContent[], context: NormalizeContext, depth: number): string =>
   nodes
     .map((node) => {
       if (node.type === "text" || node.type === "inlineCode") return node.value;
-      return "children" in node ? toPlainText(node.children) : "";
+      if (!("children" in node)) return "";
+      if (exceedsDepth(context, node, depth + 1)) return "";
+      return toPlainText(node.children, context, depth + 1);
     })
     .join("");
 
@@ -56,31 +100,52 @@ const toPlainText = (nodes: PhrasingContent[]): string =>
  * 허용하지 않은 링크는 링크만 벗기고 글자는 남긴다 — 문장 한가운데가 통째로 사라지면
  * 관리자가 원문의 어디를 고쳐야 하는지 미리보기에서 알아보기 어렵다.
  *
+ * 참조 문법(`[글자][라벨]`)도 같은 규칙을 따른다. 주소는 버리되 글자는 남긴다.
+ *
  * @param {PhrasingContent[]} nodes mdast 인라인 노드.
  * @param {NormalizeContext} context issue 수집기.
+ * @param {number} depth 지금 들어와 있는 단계. 자식으로 내려갈 때만 오른다.
  * @returns {ArticleInline[]} 렌더 가능한 인라인 노드.
  */
-const toInlines = (nodes: PhrasingContent[], context: NormalizeContext): ArticleInline[] =>
+const toInlines = (
+  nodes: PhrasingContent[],
+  context: NormalizeContext,
+  depth: number,
+): ArticleInline[] =>
   nodes.flatMap((node): ArticleInline[] => {
     switch (node.type) {
       case "text":
         return [{ type: "text", value: node.value }];
       case "strong":
-        return [{ type: "strong", children: toInlines(node.children, context) }];
+        return exceedsDepth(context, node, depth + 1)
+          ? []
+          : [{ type: "strong", children: toInlines(node.children, context, depth + 1) }];
       case "emphasis":
-        return [{ type: "emphasis", children: toInlines(node.children, context) }];
+        return exceedsDepth(context, node, depth + 1)
+          ? []
+          : [{ type: "emphasis", children: toInlines(node.children, context, depth + 1) }];
       case "inlineCode":
         return [{ type: "inlineCode", value: node.value }];
       case "break":
         return [{ type: "break" }];
       case "link": {
+        if (exceedsDepth(context, node, depth + 1)) return [];
         const link = resolveArticleLink(node.url);
         if (!link) {
           report(context, "link-not-allowed", node, node.url);
-          return toInlines(node.children, context);
+          return toInlines(node.children, context, depth + 1);
         }
-        return [{ ...link, type: "link", children: toInlines(node.children, context) }];
+        return [{ ...link, type: "link", children: toInlines(node.children, context, depth + 1) }];
       }
+      case "linkReference":
+        report(context, "reference-not-supported", node, node.label ?? node.identifier);
+        return exceedsDepth(context, node, depth + 1)
+          ? []
+          : toInlines(node.children, context, depth + 1);
+      case "imageReference":
+        // 이미지는 주소가 정해져야 뜻이 생긴다. 글자만 남겨 봐야 문장에 섞인 라벨이 될 뿐이다.
+        report(context, "reference-not-supported", node, node.label ?? node.identifier);
+        return [];
       case "image":
         report(context, "inline-image", node, node.url);
         return [];
@@ -103,21 +168,40 @@ const standaloneImage = (children: PhrasingContent[]): PhrasingContent | null =>
   return meaningful.length === 1 && first?.type === "image" ? first : null;
 };
 
+/** `::caption` 을 붙이려다 만난 상황. 실패 사유가 둘이라 boolean 으로는 구분할 수 없다. */
+type CaptionAttachment = "attached" | "no-image" | "already-captioned";
+
 /**
  * `::caption` 을 바로 앞 이미지에 붙인다.
  *
+ * 실패를 두 갈래로 나눠 돌려준다. 둘을 뭉뚱그리면 이미지에 캡션을 두 번 단 글에도
+ * "앞에 이미지가 없다" 는 사실과 다른 사유가 붙고, 그 문장을 보고는 고칠 데를 찾을 수 없다.
+ *
  * @param {ArticleBlock[]} blocks 지금까지 만든 블록.
  * @param {string} text 캡션 평문.
- * @returns {boolean} 붙였으면 true, 앞이 이미지가 아니면 false.
+ * @returns {CaptionAttachment} 붙였으면 `attached`, 아니면 실패 사유.
  */
-const attachCaption = (blocks: ArticleBlock[], text: string): boolean => {
+const attachCaption = (blocks: ArticleBlock[], text: string): CaptionAttachment => {
   const previous = blocks.at(-1);
-  if (previous?.type !== "image" || previous.caption !== null) return false;
+  if (previous?.type !== "image") return "no-image";
+  if (previous.caption !== null) return "already-captioned";
   previous.caption = text;
-  return true;
+  return "attached";
 };
 
-const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock[] => {
+/**
+ * 블록 노드를 허용 목록으로 옮긴다.
+ *
+ * @param {RootContent[]} nodes mdast 블록 노드.
+ * @param {NormalizeContext} context issue 수집기.
+ * @param {number} depth 지금 들어와 있는 단계. 목록 항목과 인용 안으로 내려갈 때만 오른다.
+ * @returns {ArticleBlock[]} 렌더 가능한 블록.
+ */
+const toBlocks = (
+  nodes: RootContent[],
+  context: NormalizeContext,
+  depth: number,
+): ArticleBlock[] => {
   const blocks: ArticleBlock[] = [];
 
   nodes.forEach((node) => {
@@ -128,15 +212,17 @@ const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock
         if (node.depth < MIN_HEADING_DEPTH || node.depth > MAX_HEADING_DEPTH) {
           report(context, "heading-level", node, `h${node.depth}`);
         }
-        const depth = Math.min(Math.max(node.depth, MIN_HEADING_DEPTH), MAX_HEADING_DEPTH) as
-          2 | 3 | 4;
-        const text = toPlainText(node.children);
+        const headingDepth = Math.min(
+          Math.max(node.depth, MIN_HEADING_DEPTH),
+          MAX_HEADING_DEPTH,
+        ) as 2 | 3 | 4;
+        const text = toPlainText(node.children, context, depth + 1);
         blocks.push({
           type: "heading",
-          depth,
+          depth: headingDepth,
           id: context.headingId(text),
           text,
-          children: toInlines(node.children, context),
+          children: toInlines(node.children, context, depth + 1),
         });
         return;
       }
@@ -154,21 +240,31 @@ const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock
           blocks.push({ type: "image", src, alt, caption: null });
           return;
         }
-        const children = toInlines(node.children, context);
+        const children = toInlines(node.children, context, depth + 1);
         if (children.length > 0) blocks.push({ type: "paragraph", children });
         return;
       }
 
-      case "list":
+      case "list": {
+        if (exceedsDepth(context, node, depth + 1)) return;
         blocks.push({
           type: "list",
           ordered: node.ordered ?? false,
-          items: node.children.map((item) => ({ children: toBlocks(item.children, context) })),
+          items: node.children.map((item) => ({
+            children: toBlocks(item.children, context, depth + 1),
+          })),
         });
         return;
+      }
 
       case "blockquote":
-        blocks.push({ type: "blockquote", children: toBlocks(node.children, context) });
+        if (exceedsDepth(context, node, depth + 1)) return;
+        blocks.push({ type: "blockquote", children: toBlocks(node.children, context, depth + 1) });
+        return;
+
+      case "definition":
+        // 참조 정의 줄. 화면에 남는 것은 없지만 사유를 알려야 본문의 `[글자][라벨]` 과 함께 고친다.
+        report(context, "reference-not-supported", node, node.label ?? node.identifier);
         return;
 
       case "thematicBreak":
@@ -192,8 +288,10 @@ const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock
         blocks.push({
           type: "table",
           align: [...(node.align ?? [])],
-          header: header.children.map((cell) => toInlines(cell.children, context)),
-          rows: rows.map((row) => row.children.map((cell) => toInlines(cell.children, context))),
+          header: header.children.map((cell) => toInlines(cell.children, context, depth + 1)),
+          rows: rows.map((row) =>
+            row.children.map((cell) => toInlines(cell.children, context, depth + 1)),
+          ),
         });
         return;
       }
@@ -201,7 +299,7 @@ const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock
       case "leafDirective": {
         const result = resolveArticleDirective(
           node.name,
-          toPlainText(node.children),
+          toPlainText(node.children, context, depth + 1),
           node.attributes ?? {},
         );
         if (result.kind === "issue") {
@@ -209,7 +307,9 @@ const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock
           return;
         }
         if (result.kind === "caption") {
-          if (!attachCaption(blocks, result.text)) report(context, "caption-without-image", node);
+          const attachment = attachCaption(blocks, result.text);
+          if (attachment === "no-image") report(context, "caption-without-image", node);
+          else if (attachment === "already-captioned") report(context, "caption-duplicated", node);
           return;
         }
         blocks.push({
@@ -242,8 +342,12 @@ const toBlocks = (nodes: RootContent[], context: NormalizeContext): ArticleBlock
 const normalizeArticleTree = (
   root: Root,
 ): { document: ArticleDocument; issues: ArticleMarkdownIssue[] } => {
-  const context: NormalizeContext = { issues: [], headingId: createHeadingIdFactory() };
-  const blocks = toBlocks(root.children, context);
+  const context: NormalizeContext = {
+    issues: [],
+    headingId: createHeadingIdFactory(),
+    depthReported: false,
+  };
+  const blocks = toBlocks(root.children, context, 0);
   return { document: { blocks }, issues: context.issues };
 };
 

@@ -26,13 +26,17 @@ const toHeadingSlug = (text: string): string => {
  * @returns {(text: string) => string} 평문을 받아 문서 안에서 유일한 id 를 돌려주는 함수.
  */
 const createHeadingIdFactory = (): ((text: string) => string) => {
-  const used = new Map<string, number>();
+  // 세는 대상은 slug 등장 횟수가 아니라 **이미 발급한 id** 다. 횟수만 세면 뒤에 붙인 번호가
+  // 다른 제목의 slug 와 부딪친다 — `정리` · `정리 2` · `정리` 는 두 번째와 세 번째가 모두
+  // `정리-2` 가 되어 목차와 fragment 가 같은 곳을 가리킨다.
+  const issued = new Set<string>();
 
   return (text: string) => {
     const slug = toHeadingSlug(text);
-    const seen = used.get(slug) ?? 0;
-    used.set(slug, seen + 1);
-    return seen === 0 ? slug : `${slug}-${seen + 1}`;
+    let id = slug;
+    for (let suffix = 2; issued.has(id); suffix += 1) id = `${slug}-${suffix}`;
+    issued.add(id);
+    return id;
   };
 };
 

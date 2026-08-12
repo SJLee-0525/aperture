@@ -95,6 +95,8 @@ type ArticleMarkdownIssueCode =
   | "link-not-allowed"
   /** 앞에 이미지가 없는 `::caption`. */
   | "caption-without-image"
+  /** 앞 이미지에 이미 캡션이 붙어 있는 `::caption` — 어느 쪽을 남길지 글쓴이만 안다. */
+  | "caption-duplicated"
   /** 설명이 비어 있는 `::caption` — 지우려던 것인지 쓰다 만 것인지 구분할 수 없다. */
   | "caption-empty"
   /** 영상 ID 를 뽑을 수 없는 `::youtube` 주소. */
@@ -102,7 +104,11 @@ type ArticleMarkdownIssueCode =
   /** `title` 없는 `::youtube` — facade 와 iframe 의 accessible name 이 비어 버린다. */
   | "youtube-title-missing"
   /** 이름을 모르는 지시자. */
-  | "unknown-directive";
+  | "unknown-directive"
+  /** `[글자][라벨]` 참조 문법. 별도 정의 줄을 함께 읽어야 주소가 정해져 지원 범위 밖이다. */
+  | "reference-not-supported"
+  /** 중첩이 허용 깊이를 넘었다. 문서마다 한 번만 보고한다. */
+  | "nesting-too-deep";
 
 type ArticleMarkdownIssue = {
   code: ArticleMarkdownIssueCode;

@@ -30,6 +30,16 @@ describe("createHeadingIdFactory", () => {
     expect(nextId("정리")).toBe("정리-3");
   });
 
+  it("붙인 번호가 다른 제목의 slug 와 부딪히면 다음 번호로 넘어간다", () => {
+    // 등장 횟수만 세면 두 번째 `정리` 가 `정리 2` 와 같은 id 를 받아 목차와 fragment 가
+    // 같은 곳을 가리킨다. 발급한 id 를 기억해야 이 입력이 세 개의 서로 다른 id 로 갈린다.
+    const nextId = createHeadingIdFactory();
+
+    expect(nextId("정리")).toBe("정리");
+    expect(nextId("정리 2")).toBe("정리-2");
+    expect(nextId("정리")).toBe("정리-3");
+  });
+
   it("문서마다 새 factory 를 만들면 번호가 이어지지 않는다", () => {
     expect(createHeadingIdFactory()("정리")).toBe("정리");
     expect(createHeadingIdFactory()("정리")).toBe("정리");

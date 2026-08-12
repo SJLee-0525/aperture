@@ -47,19 +47,31 @@ const loadedLanguages = new Map<ArticleCodeLanguage, Promise<void>>();
  * @returns {Promise<HighlighterCore>} 테마 두 개만 올라간 하이라이터.
  */
 const getHighlighter = (): Promise<HighlighterCore> => {
+  // 거부된 Promise 를 그대로 두면 wasm 초기화가 한 번 실패한 뒤로 프로세스가 사는 동안
+  // 모든 글이 색 없이 렌더된다. 실패는 캐시에서 지워 다음 요청이 다시 시도하게 한다.
   highlighter ??= createHighlighterCore({
     themes: [import("@shikijs/themes/github-light"), import("@shikijs/themes/github-dark")],
     langs: [],
     engine: createOnigurumaEngine(import("shiki/wasm")),
+  }).catch((caught: unknown) => {
+    highlighter = null;
+    throw caught;
   });
   return highlighter;
 };
 
 const ensureLanguage = (core: HighlighterCore, language: ArticleCodeLanguage): Promise<void> => {
-  const loading =
-    loadedLanguages.get(language) ??
-    LANGUAGE_LOADERS[language]().then(async (module) => {
+  const cached = loadedLanguages.get(language);
+  if (cached) return cached;
+
+  // 문법 청크도 같은 이유로 실패를 캐시하지 않는다.
+  const loading = LANGUAGE_LOADERS[language]()
+    .then(async (module) => {
       await core.loadLanguage(module as Parameters<HighlighterCore["loadLanguage"]>[0]);
+    })
+    .catch((caught: unknown) => {
+      loadedLanguages.delete(language);
+      throw caught;
     });
   loadedLanguages.set(language, loading);
   return loading;
@@ -94,7 +106,10 @@ const highlightArticleCode = async (
     return tokens.map((line) =>
       line.map((token) => ({ content: token.content, style: token.htmlStyle ?? {} })),
     );
-  } catch {
+  } catch (caught) {
+    // 색이 없다고 글을 못 열게 할 수는 없어 삼키되, 흔적은 남긴다. 이 줄이 없으면
+    // 문법 청크가 계속 실패해도 "원래 색이 없는 언어" 와 구분할 방법이 없다.
+    console.warn(`[dev-blog] ${language} 코드 색칠에 실패해 원문 그대로 렌더한다.`, caught);
     return null;
   }
 };

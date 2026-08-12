@@ -2,7 +2,10 @@ import type { ArticleDocument } from "@/features/dev-blog/_lib/markdown-nodes";
 
 type ArticleTocEntry = { id: string; text: string };
 
-/** h3 는 바로 앞 h2 아래에 들어간다. h2 보다 먼저 나온 h3 는 자기 자리를 만들어 최상위에 둔다. */
+/**
+ * h3 는 바로 앞 h2 아래에 들어간다. 앞선 h2 가 없는 h3 는 각자 최상위 항목이 된다 —
+ * 서로 형제인 h3 를 먼저 나온 쪽 아래에 묶으면 원문에 없는 계층을 만들어 낸다.
+ */
 type ArticleTocItem = ArticleTocEntry & { children: ArticleTocEntry[] };
 
 /**
@@ -17,14 +20,24 @@ type ArticleTocItem = ArticleTocEntry & { children: ArticleTocEntry[] };
  */
 const buildArticleToc = (document: ArticleDocument): ArticleTocItem[] => {
   const items: ArticleTocItem[] = [];
+  // 마지막 최상위 항목이 아니라 **마지막 h2** 를 들고 있어야 한다. `items.at(-1)` 을 쓰면
+  // h2 없이 시작한 문서에서 두 번째 h3 가 첫 h3 의 자식이 되어, 문서에 없는 계층이 생긴다.
+  let lastHeadingTwo: ArticleTocItem | null = null;
 
   document.blocks.forEach((block) => {
     if (block.type !== "heading" || block.depth > 3) return;
     const entry = { id: block.id, text: block.text };
 
-    const parent = items.at(-1);
-    if (block.depth === 3 && parent) parent.children.push(entry);
-    else items.push({ ...entry, children: [] });
+    const parent = lastHeadingTwo;
+    if (block.depth === 3 && parent) {
+      parent.children.push(entry);
+      return;
+    }
+
+    const item: ArticleTocItem = { ...entry, children: [] };
+    items.push(item);
+    // 앞선 h2 가 없는 h3 는 자기 자리를 만들어 최상위에 서되, 뒤따르는 h3 를 품지는 않는다.
+    if (block.depth === 2) lastHeadingTwo = item;
   });
 
   return items;

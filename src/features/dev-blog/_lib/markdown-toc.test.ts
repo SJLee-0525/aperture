@@ -35,6 +35,15 @@ describe("buildArticleToc", () => {
     ]);
   });
 
+  it("앞선 h2 가 없는 h3 끼리는 서로를 품지 않는다", () => {
+    // `items.at(-1)` 을 부모로 삼으면 `나중` 이 `먼저` 의 자식이 되어, 원문에 없는 계층이 생긴다.
+    expect(tocOf(["### 먼저", "", "### 나중", "", "## 절", "", "### 안쪽"].join("\n"))).toEqual([
+      { id: "먼저", text: "먼저", children: [] },
+      { id: "나중", text: "나중", children: [] },
+      { id: "절", text: "절", children: [{ id: "안쪽", text: "안쪽" }] },
+    ]);
+  });
+
   it("본문 heading id 와 같은 값을 쓴다", () => {
     const { document } = parseArticleMarkdown(["## 정리", "", "## 정리"].join("\n"));
     const ids = document.blocks.flatMap((block) => (block.type === "heading" ? [block.id] : []));

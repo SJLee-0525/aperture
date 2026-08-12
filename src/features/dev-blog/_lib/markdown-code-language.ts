@@ -60,8 +60,14 @@ const CODE_LANGUAGE_ALIASES: Record<string, ArticleCodeLanguage> = {
  * @param {string} raw fence 에 적힌 표기. 언어를 적지 않았으면 빈 문자열.
  * @returns {ArticleCodeLanguage | null} 아는 언어면 문법 이름, 아니면 null(색 없이 렌더).
  */
-const normalizeCodeLanguage = (raw: string): ArticleCodeLanguage | null =>
-  CODE_LANGUAGE_ALIASES[raw.trim().toLowerCase()] ?? null;
+const normalizeCodeLanguage = (raw: string): ArticleCodeLanguage | null => {
+  const key = raw.trim().toLowerCase();
+  // 사전에 직접 담긴 키만 본다. `Object.prototype` 이 들고 있는 이름(`constructor`,
+  // `toString` …)은 인덱스 접근으로도 잡히고, 그때 돌아오는 함수는 `?? null` 을 통과해
+  // 그대로 렌더 트리에 실린다. 그 트리가 Client Component 로 넘어가면 직렬화가 거부돼
+  // 지면 하나가 아니라 빌드 전체가 멈춘다.
+  return Object.hasOwn(CODE_LANGUAGE_ALIASES, key) ? CODE_LANGUAGE_ALIASES[key] : null;
+};
 
 export { normalizeCodeLanguage };
 export type { ArticleCodeLanguage };
