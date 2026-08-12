@@ -2,20 +2,21 @@
 
 > 원본 계획: [`docs/plan/07-dev-blog.md`](../plan/07-dev-blog.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(B1→B7)가 곧 의존 순서다. 요약표의 상태도 함께 갱신한다.
-> 마지막 갱신: 2026-08-12 (B4 완료)
+> 마지막 갱신: 2026-08-13 (B4.5 코드 완료 · 시각 기준선만 남음)
 
 ## 진행 요약
 
-| 단계 | 내용                            | 상태      |
-| ---- | ------------------------------- | --------- |
-| B1   | 개발 정보 구조 개편             | ✅ 완료   |
-| B2   | Mock 데이터와 Markdown renderer | ✅ 완료   |
-| B3   | Mock 기반 관리자 작성 환경      | ✅ 완료   |
-| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료   |
-| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료   |
-| B5   | Firebase 전환과 배포            | ⬜ 미착수 |
-| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수 |
-| B7   | 검증과 마이그레이션             | ⬜ 미착수 |
+| 단계 | 내용                            | 상태       |
+| ---- | ------------------------------- | ---------- |
+| B1   | 개발 정보 구조 개편             | ✅ 완료    |
+| B2   | Mock 데이터와 Markdown renderer | ✅ 완료    |
+| B3   | Mock 기반 관리자 작성 환경      | ✅ 완료    |
+| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료    |
+| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료    |
+| B4.5 | B4 검수 후속 수정               | 🔄 진행 중 |
+| B5   | Firebase 전환과 배포            | ⬜ 미착수  |
+| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수  |
+| B7   | 검증과 마이그레이션             | ⬜ 미착수  |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
 
@@ -312,6 +313,129 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - 목차 인디케이터가 `opacity: 0` 로만 숨겨져 보이지 않는 동안에도 Tab 으로 잡혔다 → `visibility` 로 함께 감춘다.
 - 모바일에서 목차 항목을 눌러도 이동하지 않던 문제 — 패널을 닫을 때 배경 스크롤 잠금을 푸는 처리가 저장해 둔 위치로 되돌리고 있었다. 닫힌 뒤에 이동하도록 순서를 바꿨다.
 - `e2e/run.cjs` 가 프로덕션 모드에서 `NEXT_PUBLIC_ADMIN_TEST_SESSION=0` 을 명시한다 — `.env.local` 에 이 플래그를 두고 개발하면 프로덕션 빌드 가드에 걸려 시각 회귀를 돌릴 수 없었다.
+
+---
+
+## B4.5 — B4 검수 후속 수정 (계획 문서 밖 · 이 문서가 원본)
+
+> 범위: `7ece62d`(B1 직전)부터 현재까지 바뀐 306개 파일을 검수했다. B1~B4에서 생긴 결함과 공용 컴포넌트 추출 과정에서 기존 화면에 생긴 회귀를 함께 다룬다.
+> 적용 시점: **B4 완료 후, B5 시작 전.** P0는 빌드 실패나 보안 경계 훼손으로 이어질 수 있으므로 Firestore 연동보다 먼저 처리한다.
+> 검수 시점 상태: `vitest` 1242/1242 통과, `npm run lint` 통과, `npm run check` 통과. bare `tsc --noEmit`은 오래된 `.next/types`에 영향을 받으므로 검증 명령으로 쓰지 않는다.
+> 별도 수정이 필요 없다고 확인한 범위: shiki 서버 전용 격리, URL·이미지 출처 정책, raw HTML 차단, `/dev/about` 308 단일 홉, live CRUD·RAG 후처리, mock과 실데이터 사이의 교차 쓰기 방지.
+
+### P0 — 배포를 막는 결함
+
+- [x] `markdown-code-language.ts:63` — `CODE_LANGUAGE_ALIASES[key]`가 프로토타입 체인까지 조회한다. ` ```constructor ` fence를 넣으면 `block.language`에 함수가 들어가고, 이 값은 `?? null`에도 걸러지지 않는다. 공개 상세에서는 React Flight가 함수를 직렬화하지 못해 prerender가 실패하고, 관리자 미리보기도 같은 값을 반환한다 → 별칭 조회에 `Object.hasOwn`을 사용하거나 prototype이 없는 사전을 쓴다
+- [x] `dev/articles/[slug]/page.tsx:129` — JSON-LD를 `JSON.stringify` 결과 그대로 `dangerouslySetInnerHTML`에 넣는다. `JSON.stringify`는 `<`를 이스케이프하지 않으며 제목·요약·태그 라벨은 관리자 입력값이다. `</script>`가 들어가면 script 요소가 일찍 닫히고, 현재 CSP는 `script-src 'unsafe-inline'`을 허용한다 → 직렬화 결과의 `<`를 `\u003c`로 바꾸고 필요하면 `>`와 `&`도 함께 이스케이프한다. 128행의 “사용자 입력이 그대로 들어가지 않는다”는 주석도 삭제하거나 바로잡는다
+- [x] `markdown-normalize.ts:63,120` — `toInlines`와 `toBlocks`에 중첩 깊이 제한이 없다. `">".repeat(2000)`처럼 약 2KB에 불과한 입력도 재귀 호출에서 `RangeError`를 내며, 현재 호출 경로에는 이를 처리하는 경계가 없다. `PREVIEW_MAX_BODY_LENGTH = 200_000`도 이 입력을 막지 못한다 → 중첩 깊이 상한을 두고 초과 지점을 issue로 반환한다
+- [x] `markdown-heading-id.ts:29` — `used`는 발급한 id가 아니라 base slug의 등장 횟수만 센다. `## 정리` / `## 정리 2` / `## 정리`는 `정리` / `정리-2` / `정리-2`가 되어 id가 겹친다. 목차 이동 대상과 `ArticleTocRail`의 React key도 함께 중복된다 → 발급한 id를 `Set`으로 관리하고 비어 있는 번호를 찾는다
+- [x] `firebase/client.ts:21`과 관리자 Firebase import 경계 — `getAuth(app)`이 모듈 평가 시점에 실행되어 API 키가 없으면 `auth/invalid-api-key`를 던진다. `AuthGuard`는 테스트 세션에서도 `useAuth`를 먼저 호출하고, mock 저장소 모듈도 live 구현을 정적 import한다. 따라서 B3.5의 “Firebase 없이 관리자 개발” 계약이 성립하지 않는다. 저장소의 live 분기만 지연 import해도 `AuthGuard` 경로가 남으므로 충분하지 않다 → Firebase client 초기화와 인증 훅, 저장소 live 구현을 함께 지연하고 테스트 세션에서는 Firebase 모듈을 평가하지 않는 회귀 테스트를 둔다
+- [x] `content-source.ts:22` — 프로덕션 mock 차단이 `VERCEL`에만 의존한다. 이 값은 클라이언트 번들에서 사용할 수 없고, Vercel이 아닌 프로덕션에서는 `NEXT_PUBLIC_USE_MOCK=1`을 허용한다. 반면 Windows production E2E는 같은 플래그가 필요하므로 `NODE_ENV`만 보고 전부 막을 수도 없다 → 서버의 빌드·부팅 단계에서 배포 환경을 검증하고, production E2E 예외는 배포 산출물에 남지 않는 전용 설정으로 분리한다. 클라이언트는 서버가 확정한 콘텐츠 소스만 받게 한다
+
+### P1 — 사용자에게 보이는 회귀
+
+- [x] `AlbumDetailView.module.css:7,12` — 앨범 제목과 메타 정보는 흰색 계열로 고정되어 있지만, `DetailHero`의 plain variant는 scrim 없이 `--surface-1`을 쓴다. 커버로 쓸 공개 사진이 없으면 라이트 모드의 밝은 배경 위에 흰 글자가 놓인다. `ArticleHero`에는 이미 variant별 글자색 규칙이 있다 → 앨범 텍스트에도 같은 variant 분기를 둔다
+- [x] `photo/(work)/loading.module.css:70` — 스켈레톤의 데스크톱 규칙은 예전 `FilterBar`처럼 여러 줄로 감싼다. 실제 `TagFilterBar`는 모든 화면 폭에서 한 줄이므로 로딩 화면이 본문으로 바뀔 때 masonry 그리드의 시작 위치가 달라진다. 파일 첫 주석도 예전 컴포넌트를 가리킨다 → 스켈레톤을 현재 태그 행 규격(`nowrap`, `gap: --s-3`, `align-items: center`)에 맞춘다
+- [x] 태그 행 한 줄 정책을 `design/README.md`의 의도적 이탈 목록에 넣는다. 디자인 원본의 `.chiprow`는 여러 줄을 허용하지만 현재 확정 사양은 한 줄과 좌우 스크롤이다. 지금은 근거가 이 체크리스트의 B4 항목에만 있어 `/design-check`가 위반으로 판단한다. 동작은 바꾸지 않는다
+- [x] `ArticleBodyEditor.tsx:46,77` — 이미지 업로드가 끝난 뒤 실행되는 `insert`는 업로드 시작 시점의 `value`를 사용한다. 업로드 중 textarea에 입력한 내용은 이미지 삽입과 함께 사라질 수 있다 → 최신 값을 ref로 읽거나 상위 상태가 함수형 업데이트를 받도록 바꾼다. `ArticleCoverField`의 `setForm(prev => …)` 방식은 이 문제가 없다
+- [x] `e2e/visual/public-pages.visual.e2e.ts` 의 기준선 상태를 정리한다 → 고아 기준선 4개(`dev-articles-*` · `dev-article-detail-*`)는 png 만 커밋되고 `VISUAL_ROUTES` 에 라우트가 없어 아무 테스트도 소비하지 않았다. **두 라우트를 추가했다.** `photo-album-detail-*` 는 `930a6eb` 이후 히어로 교체를 반영하지 않았다 — 아래 갱신 항목에서 함께 다시 만든다
+- [x] `DetailHero.module.css` — 공용 히어로로 옮기며 앨범 하단 padding 32→24px, 고정 `height`→`min-height`, 복귀 버튼 간격·굵기·글리프가 달라졌다 → **현재 규격을 확정 사양으로 둔다**(사용자 확정). 상단 여백 계산은 좁은 화면에서 제목이 버튼 아래로 파고드는 것을 막고, `min-height` 전환은 커버 없는 지면이 빈 자리를 남기지 않게 한다. 글리프는 이번에 SVG 로 바뀌었다
+
+### P2 — 계약 불일치와 오류 은폐
+
+- [x] `markdown-normalize.ts:87` — reference 문법을 처리하지 않아 `linkReference`의 라벨과 `imageReference`의 대체 텍스트가 사라진다. `[문서][doc] 뒤 문장`은 `" 뒤 문장"`만 남아 “허용하지 않은 링크도 글자는 남긴다”는 계약과 어긋난다 → `linkReference`는 링크만 벗기고 자식을 유지한다. `imageReference`는 허용 여부를 명시적으로 보고하고 대체 텍스트를 보존할지 계약을 정한다
+- [x] `markdown-toc.ts:25` — `items.at(-1)`은 마지막 h2가 아니라 마지막 최상위 항목이다. 문서가 `### a / ### b`로 시작하면 `b`가 `a`의 자식이 된다 → 마지막 h2를 따로 추적한다. h2보다 먼저 나온 h3를 어떻게 표시할지도 주석과 테스트에 함께 고정한다
+- [x] `markdown-normalize.ts:113` — `attachCaption`은 앞 블록이 이미지가 아닌 경우와 이미지에 이미 캡션이 있는 경우를 모두 `false`로 반환한다. 이 때문에 두 번째 `::caption`에도 `caption-without-image`가 붙고 발행을 막는다 → 두 경우에 서로 다른 issue를 반환한다
+- [x] `markdown-highlight.ts:50,64` — `highlighter ??=`와 `loadedLanguages.set`이 reject된 Promise를 계속 보관한다. wasm 또는 언어 청크 로드가 한 번 실패하면 같은 프로세스에서 재시도하지 않으며, 호출부의 빈 `catch` 때문에 원인도 남지 않는다 → 실패한 Promise는 캐시에서 지우고 관찰 가능한 로그를 남긴다
+- [x] `local-list-repository.ts:106,116` — 항목 하나가 형 검증에 실패해도 `decode`는 배열 전체를 버리고 `load`는 곧바로 mock seed를 채운다. 기존 편집 내용이 폐기됐다는 사실은 화면에 드러나지 않는다 → 폐기 사유를 관리자에게 표시하거나 최소한 개발 콘솔에 남긴다
+- [x] `local-store.ts:38,123` — `getItem` 예외는 `null`로 바뀌고 seed 저장 실패도 무시된다. localStorage가 차단된 환경에서는 저장소가 정상 초기화된 것처럼 보인다 → 읽기 실패와 seed 저장 실패를 일반 저장 실패처럼 드러낸다
+- [x] `local-doc-repository.ts:53,80` — mock은 `{ ...seeded, ...existing }`로 누락 필드를 mock 문구에서 채운다. live는 문서가 없으면 `EMPTY_*`를 반환하고, 문서가 있으면 필드별 빈 기본값을 쓴다. 따라서 오래된 저장본에 새 필드가 생겼을 때 mock과 live의 화면 값이 달라질 수 있다. `merge`도 최상위 shallow merge라 Firestore의 `setDoc(..., { merge: true })`와 중첩 객체 동작이 다르다 → 누락 필드와 중첩 병합 계약을 각각 정해 두 구현을 맞춘다
+- [x] `local-list-repository.ts:161,172` — mock은 `order`가 같으면 삽입 순서를 유지하지만 live 쿼리는 문서 id를 보조 정렬 키로 쓴다. `AwardForm`과 `MediaForm`은 새 항목의 `order`를 모두 0으로 만들어 동률이 흔하다. `create`도 mock은 중복 id를 거부하지만 live의 `setDoc`은 덮어쓴다 → mock 정렬에 id 보조 키를 넣고 중복 id 계약을 맞춘다
+- [x] `use-article-editor.ts:84` — `setForm` updater 안에서 `setDirty`를 호출한다 → `dirty`를 `fingerprint(form) !== savedFingerprint.current`에서 계산한다
+- [x] `markdown-insert.ts:79` — `youtubeMarkdown`은 title과 source만 정리하고 URL의 `]`와 `}`는 그대로 둔다. 이 문자가 들어가면 directive가 깨질 수 있다 → URL에도 directive 인자용 정규화를 적용한다
+- [x] `ArticleHero.tsx:80` — 태그 라벨을 React key로 쓴다. 라벨이 겹치거나 알 수 없는 태그 id의 폴백 문자열이 겹치면 key도 중복된다 → 태그 id를 key로 쓴다
+- [x] `ViewToggle.tsx:9` — `icon: string`이라 오타가 컴파일 오류 없이 빈 `<svg>`를 만든다 → `Icon`이 허용하는 이름을 별도 타입으로 내보내고 option의 `icon`을 그 타입으로 제한한다
+- [x] `PublicPageSkeletons.tsx:51` — `StackGroupsSkeleton`에는 `기술` h2와 `clamp(56px, 7vw, 88px)` 상단 여백이 없다. `/dev/career`에서 스켈레톤의 기술 영역이 실제 화면보다 100~120px 위에 놓인다
+- [x] `globals.css:51` 토큰 승격의 미적용분을 확인한다 → `AnalyticsConsentBanner.module.css:4` 의 `48px` 은 챗봇 런처 크기와 정확히 같고 "런처 위에 쌓기" 계산이라 `var(--chat-launcher-size)` 로 바꿨다. **나머지 둘은 바꾸지 않는다** — `SiteFooter.module.css:193` 의 64px 와 `AnalyticsConsentBanner.module.css:180` 의 74px 는 탭바 높이(62px)와 값이 달라 같은 치수를 뜻한다고 볼 근거가 없다
+
+### 블로그 탐색 표의 행 단위 hover·커서 스냅
+
+> 현상: 상세 지면 하단 「다른 글」 표는 `<td>` 안의 `<Link>` 하나만 인터랙티브해서(`ArticleNavigationTable.tsx:91-97`) 클릭·hover·커스텀 커서 스냅이 전부 **제목 글자 폭**에서만 일어난다. 날짜 셀은 눌리지 않고, hover 반응은 `.link:hover { color: var(--accent) }` 글자색뿐이다(`ArticleNavigationTable.module.css:35-37`).
+> 기준으로 삼을 것: `/dev/career`의 수상 행(`DevCareerView.tsx:68-77` · `DevCareerView.module.css:51-71`). **행 전체가 `<button>`이라 어디를 가리켜도 반응한다**는 점이 핵심이다. `padding-left: 16px` + `background: var(--surface-1)` 로 행이 오른쪽으로 밀리며 배경이 깔린다. 음악 경력 행(`MusicCareerView.module.css:30-47`)이 같은 규격을 공유한다.
+> 커서는 행 크기로 스냅하지 않는다 — `CustomCursor.tsx:233`의 `targetCompact` 조건이 `width <= 450 && height <= 128`인데 이 행들은 그보다 넓어 `:320`에서 `setSnapped(null)` 후 `link` 모드(30px 원)가 된다. 따라서 `data-cursor-snapped`가 붙지 않아 CSS hover가 그대로 작동한다. `:hover:not([data-cursor-snapped])` 가드는 저장소 25곳이 쓰는 규약이라 함께 붙이되, 좁은 창에서의 snap 경계는 이번 범위에서 다루지 않는다(사용자 확정).
+> **레이아웃은 바꾸지 않는다** — 제목 왼쪽·날짜 오른쪽·구분선·현재 글 강조는 그대로 두고 hit area와 hover 반응만 행 단위로 올린다.
+
+- [x] 행 전체를 하나의 링크로 만든다. `<td>`마다 `<a>`를 두면 hit area 가 셀 단위로 갈리므로, `<tr>` 안에 `<td colSpan={2}>` 하나를 두고 그 안의 `<a>`를 `display: flex; justify-content: space-between`으로 편다
+- [x] hover 반응을 수상 행 규격으로 맞춘다 — `padding-left` 이동 + 배경 전환, `transition: background .2s, padding-left .2s`. 색만 바뀌던 기존 반응을 대체한다
+- [x] `:hover:not([data-cursor-snapped])`를 붙인다. 저장소 25곳이 쓰는 규약인데 `ArticleNavigationTable.module.css`만 빠져 있었다
+- [x] 현재 글 행은 hover 대상에서 제외한다(사용자 확정). 링크가 아니므로 `.current`의 `--surface-1` 배경을 그대로 두고 hover 규칙을 적용하지 않는다 → 같은 색이지만 두 상태가 한 행에서 겹치지 않는다
+- [x] 현재 글 행의 `aria-current="page"`와 `<time dateTime>`을 `colSpan` 마크업에서도 유지한다
+- [x] `prefers-reduced-motion` 블록이 `padding-left` transition도 끈다
+- [x] 행 어디를 눌러도 이동하는지, 현재 글 행에는 hover 가 안 걸리는지 `e2e/pages/dev-article-detail.e2e.ts`에 추가한다 → 기존 spec 은 표의 쪽 이동조차 확인하지 않았다
+
+### 글리프 아이콘을 SVG로 교체 (16개 파일 28곳)
+
+> 배경: 화살표·닫기·체크를 `‹ › ← → ↑ ↓ ✕ × ✓` 문자로 그리는 곳이 남아 있다. 저장소에는 이미 인라인 SVG 세트(`components/Icon.tsx` 20종)와 닫기 전용 `components/CloseIcon.tsx`가 있고, `ImageCarousel.tsx:32,45`와 `ImageLightbox.tsx:30,43`은 같은 chevron SVG를 각자 중복 정의한다. 화살표가 필요할 때 SVG·글리프·복붙 세 갈래로 갈려 있다.
+> 근거: `line-height: 0px`가 저장소 전체에서 글리프 3파일(`DetailHero.module.css:41` · `TagFilterBar.module.css:45` · `ArticleNavigationTable.module.css:77`)에만 있다. 글리프 baseline이 버튼 중앙에 맞지 않아 넣은 보정이고, `DetailHero.module.css:47`은 `.arrowBack { font-size: var(--t-h3) }`로 아이콘 크기를 폰트 크기에 맡긴다. 폰트 폴백에 따라 굵기가 달라져 `Icon.tsx`의 `strokeWidth={1.7}`과도 어긋난다.
+> 접근성은 이미 확보돼 있다 — 조작 버튼에는 `aria-label`이 붙어 있고 `TagFilterBar` 화살표는 의도적으로 `aria-hidden`이다. 이 항목은 시각 일관성만 다룬다.
+
+- [x] `Icon.tsx`에 `chevronLeft` · `chevronRight` · `arrowUp` · `arrowDown` · `check`를 추가하고, `ImageCarousel`·`ImageLightbox`가 각자 들고 있던 chevron 을 흡수한다(로컬 정의 삭제)
+- [x] `PATHS` 를 `as const satisfies Record<string, ReactNode>` 로 바꿔 `IconName` 이 literal key 를 유지하게 하고, `Icon.name` · `ViewToggleOption.icon` · `NavItem.icon` 이 그 타입을 쓴다 → 위 P2 의 `ViewToggle.tsx:9` 항목과 같은 작업이다
+- [x] 공개 화면 교체 — `DetailHero`(복귀) · `TagFilterBar`(스크롤, `aria-hidden` 유지) · `ArticlePagination`(쪽 이동) · `ArticleNavigationTable`(쪽 이동)
+- [x] `ArticleTocDrawer`의 `✕`를 `CloseIcon`으로 바꾼다. `CloseIcon` JSDoc이 "모든 닫기 액션이 공유하는 아이콘"이라고 적은 계약을 이 한 곳만 지키지 않았다
+- [x] 관리자 정렬 버튼 `↑ ↓` 9개 파일 18곳 — `admin-music-config/TimelineRow` · `admin-global/LinkRow` · `admin-dev-config/{DevTimelineRow,DevEducationRow,InterviewRow,DevAwardRow,StackGroupRow}` · `admin-dev-articles/ArticleRelatedProjectsField` · `admin-dev-projects/DevImageField`. `aria-label`은 그대로 뒀다
+- [x] 관리자 나머지 — `ProjectForm`(`×` 태그 삭제 → `CloseIcon`) · `AlbumPhotoPicker`(`✓` 선택 표시 → `check`)
+- [x] 교체한 버튼에서 `line-height: 0px` 보정 3곳과 `.arrowBack`의 `font-size` 지정을 걷어낸다 → 저장소에 `line-height: 0px` 가 0건이 됐다
+- [x] **시각 규격 변경**: `ArticlePagination`의 `← →`가 chevron 이 되어 목록 페이저와 표 페이저 모양이 같아진다(사용자 승인)
+- [x] 교체 대상이 아닌 것을 구분해 남긴다 — `ExifPanel.tsx:37`의 `${w} × ${h}`는 곱셈 기호, 관리자 허브 카드의 `관리 →`는 문구 일부, `LangMenu.tsx:83`의 `●`는 현재 언어 표시, 외부 링크 `↗` 7곳은 범위 밖(사용자 확정)
+- [ ] 앨범 상세·블로그 상세·사진 작업 목록의 시각 기준선을 다시 만든다. 위 P1의 히어로 규격 항목과 같은 화면을 건드리므로 기준선 갱신은 한 번에 처리한다
+
+### 기록만 하고 이번에 고치지 않는 것
+
+- `ArticleDetailView.tsx:1` 이 `"use client"` 라 `ArticleBody`·`ArticleCodeBlock` 전체와 파싱된 AST·shiki 토큰이 RSC 페이로드로 브라우저에 실린다(SSR HTML 과 이중). 클라이언트가 실제로 필요한 것은 `ArticleToc` 뿐이다. 경계를 다시 그으면 상세 지면 구조가 바뀌므로 B5 에서 실데이터 본문 크기를 보고 판단한다
+- `preview-article-markdown.ts:46` 의 server action 이 `isTestAdminSessionEnabled() || verifyAdminIdToken(...)` 이다. 비프로덕션에서 플래그가 켜진 서버는 미인증 호출자에게 shiki 렌더를 연다. 프로덕션 빌드 가드가 있어 의도된 개발 전용이지만 조건을 여기 남긴다
+- `use-article-references.ts` 는 로딩 중 `articles` 가 `[]` 라 그 사이에 저장하면 slug 중복 검사가 통과한다. 태그가 없는 글에 한정되고 창이 매우 좁다 — B5 에서 서버 유일성 검사가 붙으면 함께 닫힌다
+- `crypto.randomUUID()` 는 secure context 전용이라 `http://192.168.x.x` 실기기 접속에서 던진다. `local-list-repository.ts:158` · `mock-image-store.ts:26` 이 관리자 폼 경로로 확장했지만 `lib/firebase/storage.ts:14` · `use-chat.ts:171` 부터 있던 저장소 전반의 패턴이라 이 단계에서 따로 고치지 않는다
+- 챗봇 화면 문맥·링크 화이트리스트·WebMCP 사이트맵에 `/dev/articles` 가 없다. `ROUTES.DEV_ABOUT` 만 지우고 새 경로를 넣지 않은 결과인데, 블로그 대응 자체가 B6 범위라 거기서 함께 넣는다
+
+### 재검수와 사용자 요청으로 추가한 것
+
+> 1차 수정 뒤 다시 검수하며 나온 결함과, 사용자가 요청한 지면 변경이다.
+
+- [x] `use-article-preview.ts` · `ArticleFullPreview.tsx` 가 `getFirebaseAuth()` 를 조건 없이 불러, 설정이 없으면 미리보기가 오류 배너로만 떴다 — 서버 액션은 이미 테스트 세션을 토큰 없이 받아 주는데 클라이언트가 먼저 죽었다 → `_lib/admin-id-token.ts` 가 테스트 세션에서 Firebase 를 건드리지 않고 빈 토큰을 준다. P0 의 "Firebase 없이 관리자 개발" 이 여기서 새고 있었다
+- [x] `local-dev-article-repository.setPublished` 가 발행 조건을 건너뛰어, 목록 배지 토글로 발행일 없는 초안이 `published: true` · `publishedAt: null` 이 됐다(폼에서는 막히는 상태) → 폼과 같은 `checkArticlePublishable` 을 태운다. 연관 프로젝트 공개 여부만은 저장소가 알 수 없어 제외했고, 그 항목은 공개 상세가 렌더 단계에서 거른다
+- [x] `heading-navigation.ts` 가 떠나는 entry 에 적은 `scrollY` 가 `pushCurrentUrl` 의 기본 state 복사로 새 entry 에도 실렸다 — 목차 클릭 → 뒤로 → 앞으로 가 heading 이 아니라 클릭 전 위치로 갔다 → `pushCurrentUrl` 에 state 인자를 두고 `scrollY` 를 뺀 state 를 넘긴다. JSDoc 의 단언도 사실에 맞췄다
+- [x] **본문 글자·표를 정책 지면(`/privacy` 등) 규격에 맞춘다**(사용자 요청) — 본문 `--text-2`(크기 0.95rem 은 원래 같았다), 링크는 액센트색 대신 `--text` + 밑줄 `offset 3px`, 표는 셀 전체 테두리 + 헤더 `--surface-2` + `min-width: 620px` 가로 스크롤, 인라인 코드는 `--surface-2` · 0.84em. 스크롤되는 표에는 정책 지면과 같이 `role="region"` · `tabIndex={0}` 을 붙였다(사전 키 `articleTableLabel`). 행간만 정책 지면(1.85)을 따르지 않는다 — 아래 「되돌리지 말 것」 참조
+- [x] **본문 이미지를 눌러 크게 보고 그 글의 이미지들을 순회한다**(사용자 요청) — 프로젝트 캐러셀과 같은 `ImageLightbox` 를 처음 열 때 내려받아 쓴다. 순회 목록은 `_lib/article-images.ts` 가 문서 순서로 모으고, 스테이지 비율은 본문 이미지가 실려 올 때 읽은 원본 픽셀 크기를 쓴다
+- [x] **주소가 죽은 본문 이미지의 폴백**(사용자 요청) — 표지 없는 카드가 쓰는 워드마크로 갈아탄다. 본문은 테마에 맞는 쪽을, 확대 뷰는 두 테마 모두 어두운 scrim 위라 항상 dark 를 쓴다. 깨진 자리도 순회 목록에서 빼지 않는다 — 빼면 `›` 로 넘길 때 인덱스가 어긋난다. 폴백 규칙에 `.figure` 를 함께 적은 것은 명시도 때문이다(`.figure img` 가 클래스+요소라 클래스 하나로는 덮이지 않아 두 장이 같이 보였다)
+- [x] **본문 이미지 캡션 가운데 정렬**(사용자 요청)
+- [x] **목차 여닫힘 애니메이션**(사용자 요청) — 데스크톱 패널은 `hidden`(= display:none)이라 전환 자체가 불가능해 튀었다. `data-open` + `transition-behavior: allow-discrete` + `@starting-style` 로 바꾸고, 모바일 드로어는 언마운트되므로 진입만 그린다(`ImageLightbox` 와 같은 방식). 둘 다 `prefers-reduced-motion` 에서 꺼진다. 브라우저 지원 범위는 `ArticleToc.module.css` 주석 참조
+- [x] `e2e/admin/album-editor.e2e.ts` 가 드래그 직후 클릭이 삼켜져 실패했다 — **B4.5 이전부터 있던 결함**으로, 작업분을 stash 하고 HEAD 에서도 같은 실패를 확인했다. dnd-kit 의 `AbstractPointerSensor.detach()` 가 `setTimeout(removeAll, 50)` 으로 click 억제기를 늦게 떼는 설계라 제품 결함이 아니다(사람 손으로는 닿지 않는 창). 그 spec 안에 이유를 적은 상수를 두고 창이 닫히기를 기다린다
+- [ ] **960 프리뷰 / 2048 원본 분리는 B5 로 미룬다**(사용자 확정) — Markdown 이 주소를 하나만 담고, 이 저장소의 3단 이미지는 하위 폴더에 각각 다른 UUID 로 올라가 프리뷰 주소를 원본에서 유도할 수 없다. Storage 업로더를 만들 때 마크다운이 두 주소를 담을지 함께 정한다
+
+### 사용자가 직접 넣은 변경 — 되돌리지 말 것 ★
+
+> 아래는 B4.5 검수 범위 밖에서 사용자가 의도적으로 넣은 변경이다. 검수 도구가 "범위 밖 변경"
+> 또는 "의도 확인 필요"로 잡더라도 되돌리지 않는다. 시각 기준선이 달라지는 것도 예상된 결과다.
+
+- **목록 카드에서 요약문 제거** — `ArticleCard.tsx`(블로그)와 `DevProjectCard.tsx`(프로젝트)에서 요약 `<p>` 와 짝 CSS(`.summary` · `.pd`)를 지웠다. 카드는 제목·메타로만 읽는다
+- **`ArticleCard` 태그 줄 `word-spacing: var(--s-1)`** — 간격 토큰을 `word-spacing` 에 쓴 것이 의도다
+- **`ArticleTocRail.module.css` 좌우 padding 축소** — `var(--s-4) var(--s-5)` → `var(--s-4)`
+- **`ArticleDetailView.module.css` 여백 조정** — 하단 padding 과 900px 이하 좌우 여백을 다시 잡았다
+- **`DetailHero.module.css` 복귀 버튼 좌측 padding** — SVG 아이콘으로 바뀐 뒤 `8px 14px 8px 8px` 로 맞췄다
+- **`ArticleBody` 본문 행간 1.6** — 정책 지면과 색·크기는 맞추되 행간만 좁게 둔다. 훑어보는 약관과 달리 블로그는 이어서 읽는 글이라 1.85 는 줄 사이가 벌어져 문단이 흩어져 보인다
+
+### B5 진입 전 확인
+
+- [ ] `lib/content/dev-articles.ts:32`의 live 분기는 아직 빈 목록을 반환하지만 메가메뉴·모바일 탭·sitemap은 이미 `/dev/articles`를 노출한다. B5 연결 전에 배포하면 블로그 메뉴가 빈 목록으로 열린다 → Firestore reader 연결과 노출 변경을 같은 배포에 묶거나, 연결 전까지 메뉴와 sitemap에서 숨긴다
+
+### B4.5 검증
+
+- [x] P0 6건에 회귀 테스트를 붙인다 — `constructor`·`toString` fence, `</script>`가 든 제목의 JSON-LD 이스케이프, 세 재귀 경로(`toBlocks`·`toInlines`·`toPlainText`)의 깊이 초과와 issue 중복 없음, `정리`/`정리 2`/`정리` heading id, Firebase 설정 없이 모듈 평가와 관리자 화면 mount, 프로덕션 mock 가드의 차단·탈출구 양방향
+- [ ] `npm run lint` · `npm run check` · `npm test` · `e2e/pages` · `test:a11y`가 통과한다
+- [ ] **시각 기준선을 다시 만든다 — 이 단계에 남은 유일한 작업.** - macOS 에서는 `test.skip(process.platform !== "win32")` 로 건너뛰므로 로컬에서 갱신할 수 없다. - `update-visual-snapshots.yml` 은 `workflow_dispatch` 전용이고 **결과를 그 브랜치에 커밋·푸시**한 뒤 `ci.yml` 을 다시 돌린다. 따라서 **이 작업분을 먼저 커밋·푸시해야** 의미가 있다. - 그 뒤 Actions 에서 브랜치를 골라 실행하거나, Windows 에서 `npm run test:visual:update` 를 돌린다. - 달라져야 할 화면: 태그 행, 히어로 복귀 버튼(글리프→SVG), 페이저 chevron, 앨범 히어로 글자색, 본문 글자·표·링크, 카드 요약 제거, 목차 레일 padding. - `dev-articles`·`dev-article-detail` 두 라우트는 `VISUAL_ROUTES` 에 새로 넣었으므로 기준선을 처음 만든다(png 는 이미 있었지만 라우트가 없어 아무 테스트도 소비하지 않았다).
+- [x] `src/`의 `.tsx`에서 `‹ › ← → ↑ ↓ ✕ ✓`가 렌더 위치에 남지 않았는지 확인한다. 남기기로 한 것은 `ExifPanel.tsx`의 곱셈 기호, 관리자 허브 카드의 `관리 →`, `LangMenu`의 `●`, 외부 링크 `↗` 뿐이다
+- [x] 이번에 고친 주석·오류 문구·상수명에 `avoid-ai-writing`을 적용한다(전 단계 공통 규칙 「주석·상수·메시지 문체」)
 
 ---
 
