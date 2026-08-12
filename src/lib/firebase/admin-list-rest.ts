@@ -1,6 +1,6 @@
 "use client";
 
-import { auth } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 import { asText } from "@/lib/i18n/as-text";
 
 import type {
@@ -64,7 +64,7 @@ const listProjected = async (
   collectionId: string,
   fieldPaths: string[],
 ): Promise<Array<{ id: string; data: Record<string, unknown> }>> => {
-  const user = auth.currentUser;
+  const user = getFirebaseAuth().currentUser;
   if (!user) throw new Error("관리자 로그인이 필요합니다.");
   const token = await user.getIdToken();
   const response = await fetch(`${documentsUrl()}:runQuery?key=${API_KEY}`, {

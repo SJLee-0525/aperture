@@ -6,7 +6,7 @@ import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
 import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
@@ -70,7 +70,7 @@ const devProjects = {
  */
 const getDevConfigAdmin = async (): Promise<DevConfig> => {
   try {
-    const snap = await getDoc(doc(db, COLLECTIONS.SITE, SITE_DEV_DOC));
+    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DEV_DOC));
     if (!snap.exists()) return EMPTY_DEV_CONFIG;
     const d = snap.data();
     return {
@@ -94,7 +94,7 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
  */
 const updateDevConfig = async (config: DevConfig): Promise<void> => {
   try {
-    await setDoc(doc(db, COLLECTIONS.SITE, SITE_DEV_DOC), {
+    await setDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DEV_DOC), {
       ...config,
       updatedAt: serverTimestamp(),
     });

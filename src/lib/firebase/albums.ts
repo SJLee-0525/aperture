@@ -17,7 +17,7 @@ import { firestoreCollectionCacheTag } from "@/constants/cache";
 
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { Album } from "@/types/album";
@@ -50,7 +50,7 @@ const toAlbum = (id: string, data: DocumentData): Album => ({
  *
  * @returns {string} Firestore에서 미리 발급한 앨범 문서 ID.
  */
-const newAlbumId = (): string => doc(collection(db, COLLECTIONS.ALBUMS)).id;
+const newAlbumId = (): string => doc(collection(getFirebaseDb(), COLLECTIONS.ALBUMS)).id;
 
 /**
  * 관리자 앨범 목록 — 초안 포함 전체, order 순.
@@ -59,7 +59,9 @@ const newAlbumId = (): string => doc(collection(db, COLLECTIONS.ALBUMS)).id;
  */
 const listAlbumsAdmin = async (): Promise<Album[]> => {
   try {
-    const snap = await getDocs(query(collection(db, COLLECTIONS.ALBUMS), orderBy("order")));
+    const snap = await getDocs(
+      query(collection(getFirebaseDb(), COLLECTIONS.ALBUMS), orderBy("order")),
+    );
     return snap.docs.map((d) => toAlbum(d.id, d.data()));
   } catch {
     throw new Error("앨범 목록을 불러오지 못했습니다.");
@@ -74,7 +76,7 @@ const listAlbumsAdmin = async (): Promise<Album[]> => {
  */
 const getAlbumAdmin = async (id: string): Promise<Album | null> => {
   try {
-    const snap = await getDoc(doc(db, COLLECTIONS.ALBUMS, id));
+    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.ALBUMS, id));
     return snap.exists() ? toAlbum(snap.id, snap.data()) : null;
   } catch {
     throw new Error("앨범을 불러오지 못했습니다.");
@@ -90,7 +92,7 @@ const getAlbumAdmin = async (id: string): Promise<Album | null> => {
  */
 const createAlbum = async (id: string, input: AlbumInput): Promise<void> => {
   try {
-    await setDoc(doc(db, COLLECTIONS.ALBUMS, id), {
+    await setDoc(doc(getFirebaseDb(), COLLECTIONS.ALBUMS, id), {
       ...input,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -111,7 +113,10 @@ const createAlbum = async (id: string, input: AlbumInput): Promise<void> => {
  */
 const updateAlbum = async (id: string, input: AlbumInput): Promise<void> => {
   try {
-    await updateDoc(doc(db, COLLECTIONS.ALBUMS, id), { ...input, updatedAt: serverTimestamp() });
+    await updateDoc(doc(getFirebaseDb(), COLLECTIONS.ALBUMS, id), {
+      ...input,
+      updatedAt: serverTimestamp(),
+    });
   } catch {
     throw new Error("앨범 수정에 실패했습니다.");
   }
@@ -128,7 +133,10 @@ const updateAlbum = async (id: string, input: AlbumInput): Promise<void> => {
  */
 const updateAlbumOrder = async (id: string, order: number): Promise<void> => {
   try {
-    await updateDoc(doc(db, COLLECTIONS.ALBUMS, id), { order, updatedAt: serverTimestamp() });
+    await updateDoc(doc(getFirebaseDb(), COLLECTIONS.ALBUMS, id), {
+      order,
+      updatedAt: serverTimestamp(),
+    });
   } catch {
     throw new Error("순서 저장에 실패했습니다.");
   }
@@ -144,7 +152,10 @@ const updateAlbumOrder = async (id: string, order: number): Promise<void> => {
  */
 const setAlbumPublished = async (id: string, published: boolean): Promise<void> => {
   try {
-    await updateDoc(doc(db, COLLECTIONS.ALBUMS, id), { published, updatedAt: serverTimestamp() });
+    await updateDoc(doc(getFirebaseDb(), COLLECTIONS.ALBUMS, id), {
+      published,
+      updatedAt: serverTimestamp(),
+    });
   } catch {
     throw new Error("공개 상태 변경에 실패했습니다.");
   }
@@ -160,7 +171,7 @@ const setAlbumPublished = async (id: string, published: boolean): Promise<void> 
  */
 const deleteAlbum = async (id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, COLLECTIONS.ALBUMS, id));
+    await deleteDoc(doc(getFirebaseDb(), COLLECTIONS.ALBUMS, id));
   } catch {
     throw new Error("앨범 삭제에 실패했습니다.");
   }

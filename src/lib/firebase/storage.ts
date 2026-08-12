@@ -1,6 +1,6 @@
 import { deleteObject, getDownloadURL, listAll, ref, uploadBytes } from "firebase/storage";
 
-import { storage } from "@/lib/firebase/client";
+import { getFirebaseStorage } from "@/lib/firebase/client";
 
 /**
  * WebP 이미지를 UUID 파일명으로 업로드한다.
@@ -13,7 +13,7 @@ import { storage } from "@/lib/firebase/client";
 const uploadWebp = async (folder: string, blob: Blob): Promise<{ url: string; path: string }> => {
   const path = `${folder}/${crypto.randomUUID()}.webp`;
   try {
-    const target = ref(storage, path);
+    const target = ref(getFirebaseStorage(), path);
     await uploadBytes(target, blob, { contentType: "image/webp" });
     const url = await getDownloadURL(target);
     return { url, path };
@@ -29,7 +29,7 @@ const uploadWebp = async (folder: string, blob: Blob): Promise<{ url: string; pa
  * @returns {Promise<void>} 모든 하위 객체가 삭제되면 완료된다.
  */
 const deleteFolder = async (folder: string): Promise<void> => {
-  const listing = await listAll(ref(storage, folder));
+  const listing = await listAll(ref(getFirebaseStorage(), folder));
   await Promise.all([
     ...listing.items.map((item) => deleteObject(item)),
     ...listing.prefixes.map((prefix) => deleteFolder(prefix.fullPath)),
@@ -48,7 +48,7 @@ const deleteImages = async (paths: Iterable<string>): Promise<void> => {
   await Promise.all(
     uniquePaths.map(async (path) => {
       try {
-        await deleteObject(ref(storage, path));
+        await deleteObject(ref(getFirebaseStorage(), path));
       } catch (caught) {
         if ((caught as { code?: string }).code !== "storage/object-not-found") throw caught;
       }

@@ -48,11 +48,11 @@ vi.mock("@/lib/firebase/music", () => ({
   musicWorks: { list: mocks.musicList, update: mocks.musicUpdate },
 }));
 vi.mock("@/lib/firebase/client", () => ({
-  auth: {
+  getFirebaseAuth: () => ({
     get currentUser() {
       return mocks.currentUser;
     },
-  },
+  }),
 }));
 vi.mock("@/lib/firebase/storage", () => ({
   uploadDevPreview: mocks.uploadDevPreview,

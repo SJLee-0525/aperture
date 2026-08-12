@@ -1,5 +1,5 @@
 import { revalidatePublicPages } from "@/lib/cache/revalidate-public";
-import { auth } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 /** 연속 저장(드래그 재정렬 = 문서 N개 병렬 쓰기)을 1회 호출로 합치는 지연. */
 const DEBOUNCE_MS = 300;
@@ -8,7 +8,7 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 const pendingTags = new Set<string>();
 
 const revalidateAsCurrentAdmin = async (tags: string[]): Promise<void> => {
-  const user = auth.currentUser;
+  const user = getFirebaseAuth().currentUser;
   if (!user) throw new Error("관리자 인증이 필요합니다.");
   const idToken = await user.getIdToken();
   await revalidatePublicPages(idToken, tags);

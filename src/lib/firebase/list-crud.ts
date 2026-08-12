@@ -15,7 +15,7 @@ import {
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { firestoreCollectionCacheTag } from "@/constants/cache";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
 import type { RagSyncSourceType } from "@/types/rag";
 
 type WithId = { id: string };
@@ -39,7 +39,7 @@ const listCrud = <T extends WithId>(
 ) => {
   type Input = Omit<T, "id">;
   /** @returns {ReturnType<typeof collection>} 현재 CRUD가 사용하는 컬렉션 참조. */
-  const col = () => collection(db, name);
+  const col = () => collection(getFirebaseDb(), name);
   const cacheTag = firestoreCollectionCacheTag(name);
   return {
     /** 새 문서 ID를 미리 발급한다. Storage 경로를 먼저 정할 때 사용한다. */
@@ -61,7 +61,7 @@ const listCrud = <T extends WithId>(
      */
     get: async (id: string): Promise<T | null> => {
       try {
-        const snap = await getDoc(doc(db, name, id));
+        const snap = await getDoc(doc(getFirebaseDb(), name, id));
         return snap.exists() ? toEntity(snap.id, snap.data()) : null;
       } catch {
         throw new Error(`${label}을(를) 불러오지 못했습니다.`);
@@ -76,7 +76,7 @@ const listCrud = <T extends WithId>(
      */
     create: async (id: string, input: Input): Promise<void> => {
       try {
-        await setDoc(doc(db, name, id), {
+        await setDoc(doc(getFirebaseDb(), name, id), {
           ...input,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -96,7 +96,7 @@ const listCrud = <T extends WithId>(
      */
     update: async (id: string, input: Input): Promise<void> => {
       try {
-        await updateDoc(doc(db, name, id), { ...input, updatedAt: serverTimestamp() });
+        await updateDoc(doc(getFirebaseDb(), name, id), { ...input, updatedAt: serverTimestamp() });
       } catch {
         throw new Error(`${label} 수정에 실패했습니다.`);
       }
@@ -106,7 +106,7 @@ const listCrud = <T extends WithId>(
     /** 드래그 정렬 결과에 맞춰 `order` 필드만 갱신한다. */
     updateOrder: async (id: string, order: number): Promise<void> => {
       try {
-        await updateDoc(doc(db, name, id), { order, updatedAt: serverTimestamp() });
+        await updateDoc(doc(getFirebaseDb(), name, id), { order, updatedAt: serverTimestamp() });
       } catch {
         throw new Error("순서 저장에 실패했습니다.");
       }
@@ -121,7 +121,10 @@ const listCrud = <T extends WithId>(
      */
     setPublished: async (id: string, published: boolean): Promise<void> => {
       try {
-        await updateDoc(doc(db, name, id), { published, updatedAt: serverTimestamp() });
+        await updateDoc(doc(getFirebaseDb(), name, id), {
+          published,
+          updatedAt: serverTimestamp(),
+        });
       } catch {
         throw new Error("공개 상태 변경에 실패했습니다.");
       }
@@ -136,7 +139,7 @@ const listCrud = <T extends WithId>(
      */
     remove: async (id: string): Promise<void> => {
       try {
-        await deleteDoc(doc(db, name, id));
+        await deleteDoc(doc(getFirebaseDb(), name, id));
       } catch {
         throw new Error(`${label} 삭제에 실패했습니다.`);
       }

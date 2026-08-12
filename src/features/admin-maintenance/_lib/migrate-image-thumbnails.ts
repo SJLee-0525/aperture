@@ -9,7 +9,7 @@ import { listAlbumsAdmin, updateAlbum } from "@/lib/firebase/albums";
 import { devProjects } from "@/lib/firebase/dev";
 import { listPhotosAdmin, updatePhoto } from "@/lib/firebase/firestore";
 import { musicWorks } from "@/lib/firebase/music";
-import { auth } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 import {
   uploadDevThumbnail,
   uploadDevPreview,
@@ -60,7 +60,7 @@ const createMissingVariants = async (
   const needsThumbnail = !image.thumbnail?.url;
   if (!needsPreview && !needsThumbnail) return image;
 
-  const user = auth.currentUser;
+  const user = getFirebaseAuth().currentUser;
   if (!user) throw new Error("관리자 로그인이 필요합니다.");
   const idToken = await user.getIdToken();
   const response = await fetch("/api/admin/image-source", {

@@ -18,7 +18,7 @@ import { firestoreCollectionCacheTag } from "@/constants/cache";
 
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
 import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
@@ -84,7 +84,7 @@ const toDoc = (input: PhotoInput) => ({
  *
  * @returns {string} Firestore에서 미리 발급한 사진 문서 ID.
  */
-const newPhotoId = (): string => doc(collection(db, COLLECTIONS.PHOTOS)).id;
+const newPhotoId = (): string => doc(collection(getFirebaseDb(), COLLECTIONS.PHOTOS)).id;
 
 /**
  * 관리자 사진 목록 — 초안 포함 전체, order 순.
@@ -93,7 +93,9 @@ const newPhotoId = (): string => doc(collection(db, COLLECTIONS.PHOTOS)).id;
  */
 const listPhotosAdmin = async (): Promise<Photo[]> => {
   try {
-    const snap = await getDocs(query(collection(db, COLLECTIONS.PHOTOS), orderBy("order")));
+    const snap = await getDocs(
+      query(collection(getFirebaseDb(), COLLECTIONS.PHOTOS), orderBy("order")),
+    );
     return snap.docs.map((d) => toPhoto(d.id, d.data()));
   } catch {
     throw new Error("사진 목록을 불러오지 못했습니다.");
@@ -108,7 +110,7 @@ const listPhotosAdmin = async (): Promise<Photo[]> => {
  */
 const getPhotoAdmin = async (id: string): Promise<Photo | null> => {
   try {
-    const snap = await getDoc(doc(db, COLLECTIONS.PHOTOS, id));
+    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.PHOTOS, id));
     return snap.exists() ? toPhoto(snap.id, snap.data()) : null;
   } catch {
     throw new Error("사진을 불러오지 못했습니다.");
@@ -124,7 +126,7 @@ const getPhotoAdmin = async (id: string): Promise<Photo | null> => {
  */
 const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
   try {
-    await setDoc(doc(db, COLLECTIONS.PHOTOS, id), {
+    await setDoc(doc(getFirebaseDb(), COLLECTIONS.PHOTOS, id), {
       ...toDoc(input),
       createdAt: serverTimestamp(),
     });
@@ -144,7 +146,7 @@ const createPhoto = async (id: string, input: PhotoInput): Promise<void> => {
  */
 const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
   try {
-    await updateDoc(doc(db, COLLECTIONS.PHOTOS, id), toDoc(input));
+    await updateDoc(doc(getFirebaseDb(), COLLECTIONS.PHOTOS, id), toDoc(input));
   } catch {
     throw new Error("사진 수정에 실패했습니다.");
   }
@@ -160,10 +162,10 @@ const updatePhoto = async (id: string, input: PhotoInput): Promise<void> => {
  */
 const deletePhoto = async (id: string): Promise<void> => {
   try {
-    const albums = await getDocs(collection(db, COLLECTIONS.ALBUMS));
-    const batch = writeBatch(db);
+    const albums = await getDocs(collection(getFirebaseDb(), COLLECTIONS.ALBUMS));
+    const batch = writeBatch(getFirebaseDb());
 
-    batch.delete(doc(db, COLLECTIONS.PHOTOS, id));
+    batch.delete(doc(getFirebaseDb(), COLLECTIONS.PHOTOS, id));
     albums.docs.forEach((albumDoc) => {
       const album = albumDoc.data() as Album;
       if (!album.photoIds?.includes(id) && album.coverPhotoId !== id) return;
@@ -196,7 +198,10 @@ const deletePhoto = async (id: string): Promise<void> => {
  */
 const updatePhotoOrder = async (id: string, order: number): Promise<void> => {
   try {
-    await updateDoc(doc(db, COLLECTIONS.PHOTOS, id), { order, updatedAt: serverTimestamp() });
+    await updateDoc(doc(getFirebaseDb(), COLLECTIONS.PHOTOS, id), {
+      order,
+      updatedAt: serverTimestamp(),
+    });
   } catch {
     throw new Error("순서 저장에 실패했습니다.");
   }
@@ -212,7 +217,10 @@ const updatePhotoOrder = async (id: string, order: number): Promise<void> => {
  */
 const setPhotoPublished = async (id: string, published: boolean): Promise<void> => {
   try {
-    await updateDoc(doc(db, COLLECTIONS.PHOTOS, id), { published, updatedAt: serverTimestamp() });
+    await updateDoc(doc(getFirebaseDb(), COLLECTIONS.PHOTOS, id), {
+      published,
+      updatedAt: serverTimestamp(),
+    });
   } catch {
     throw new Error("공개 상태 변경에 실패했습니다.");
   }

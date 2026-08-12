@@ -1,6 +1,6 @@
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
 
-import { auth } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 /** Firebase Auth 에러 코드 → 한국어 메시지 (로그인 폼 표시용). */
 const AUTH_ERRORS: Record<string, string> = {
@@ -31,7 +31,7 @@ const authErrorMessage = (code: string): string =>
  */
 const signIn = async (email: string, password: string): Promise<User> => {
   try {
-    const credential = await signInWithEmailAndPassword(auth, email, password);
+    const credential = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
     return credential.user;
   } catch (error) {
     const code = (error as { code?: string }).code ?? "";
@@ -40,7 +40,7 @@ const signIn = async (email: string, password: string): Promise<User> => {
 };
 
 /** @returns {Promise<void>} Firebase 관리자 로그아웃이 끝나면 완료된다. */
-const signOutAdmin = (): Promise<void> => signOut(auth);
+const signOutAdmin = (): Promise<void> => signOut(getFirebaseAuth());
 
 /**
  * 인증 상태 구독. 반환값은 구독 해제 함수.
@@ -49,6 +49,6 @@ const signOutAdmin = (): Promise<void> => signOut(auth);
  * @returns {(() => void)} 인증 상태 구독을 해제하는 함수.
  */
 const subscribeAuth = (callback: (user: User | null) => void): (() => void) =>
-  onAuthStateChanged(auth, callback);
+  onAuthStateChanged(getFirebaseAuth(), callback);
 
 export { signIn, signOutAdmin, subscribeAuth };

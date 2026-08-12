@@ -6,7 +6,7 @@ import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { SiteConfig } from "@/types/site";
@@ -20,7 +20,7 @@ import type { SiteConfig } from "@/types/site";
  */
 const getSiteConfig = async (): Promise<SiteConfig> => {
   try {
-    const snap = await getDoc(doc(db, COLLECTIONS.SITE, SITE_DOC));
+    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DOC));
     if (!snap.exists()) return EMPTY_SITE_CONFIG;
     const data = snap.data();
     return {
@@ -48,7 +48,7 @@ const getSiteConfig = async (): Promise<SiteConfig> => {
 const updateSiteConfigFields = async (fields: Partial<SiteConfig>): Promise<void> => {
   try {
     await setDoc(
-      doc(db, COLLECTIONS.SITE, SITE_DOC),
+      doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DOC),
       {
         ...fields,
         updatedAt: serverTimestamp(),
