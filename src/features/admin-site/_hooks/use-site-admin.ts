@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
+import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { LocalizedText } from "@/types/localized";
@@ -26,7 +26,8 @@ const useSiteAdmin = () => {
 
   useEffect(() => {
     let alive = true;
-    getSiteConfig()
+    getSiteConfigRepository()
+      .get()
       .then((loaded) => {
         if (!alive) return;
         setBio(loaded.bio);
@@ -52,7 +53,7 @@ const useSiteAdmin = () => {
     setError(null);
     setSaving(true);
     try {
-      await updateSiteConfigFields({ bio });
+      await getSiteConfigRepository().updateFields({ bio });
       setSaved(true);
     } catch (caught) {
       setError((caught as Error).message);

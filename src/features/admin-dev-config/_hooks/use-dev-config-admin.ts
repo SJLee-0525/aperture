@@ -7,7 +7,7 @@ import {
   type DevConfigEdit,
 } from "@/features/admin-dev-config/_lib/edit-dev-config";
 
-import { getDevConfigAdmin, updateDevConfig } from "@/lib/firebase/dev";
+import { getDevConfigRepository } from "@/lib/admin/dev-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { DevConfig } from "@/types/dev";
@@ -25,7 +25,7 @@ const EMPTY: DevConfig = {
 
 /**
  * 관리자 개발 설정(site/dev)의 로드·저장 lifecycle과 편집 상태 연결.
- * dev.ts 의 updateDevConfig 가 문서를 통째로 덮어쓰므로 필드 유실이 없다.
+ * 저장소의 set 이 문서를 통째로 덮어쓰므로 필드 유실이 없다.
  *
  * @returns {{ config: DevConfig; status: Status; error: string | null; saving: boolean; saved: boolean; edit: (command: DevConfigEdit) => void; save: () => Promise<void> }}
  */
@@ -38,7 +38,8 @@ const useDevConfigAdmin = () => {
 
   useEffect(() => {
     let alive = true;
-    getDevConfigAdmin()
+    getDevConfigRepository()
+      .get()
       .then((loaded) => {
         if (!alive) return;
         setConfig(loaded);
@@ -63,7 +64,7 @@ const useDevConfigAdmin = () => {
     setError(null);
     setSaving(true);
     try {
-      await updateDevConfig(config);
+      await getDevConfigRepository().set(config);
       setSaved(true);
     } catch (caught) {
       setError((caught as Error).message);
