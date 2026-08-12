@@ -4,6 +4,8 @@ const VISUAL_ROUTES = [
   { name: "landing", path: "/ko" },
   { name: "photo-work", path: "/ko/photo" },
   { name: "photo-albums", path: "/ko/photo/albums" },
+  // 앨범 상세는 공용 hero 프리미티브의 원본이라 hero 를 옮긴 뒤에도 같은 화면이어야 한다.
+  { name: "photo-album-detail", path: "/ko/photo/albums/city-night" },
   { name: "music-works", path: "/ko/music" },
   { name: "dev-projects", path: "/ko/dev/projects" },
   { name: "contact", path: "/ko/contact" },
