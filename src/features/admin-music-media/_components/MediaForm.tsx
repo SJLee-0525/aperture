@@ -5,7 +5,8 @@ import { useState, type FormEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
 
-import { musicMedia, type MusicMediaInput } from "@/lib/firebase/music";
+import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
+import type { MusicMediaInput } from "@/lib/firebase/music";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { MusicMedia } from "@/types/music";
@@ -69,10 +70,11 @@ const MediaForm = ({ mediaId, initial }: Props) => {
 
     setSaving(true);
     try {
+      const mediaRepository = getMusicMediaRepository();
       if (isEdit) {
-        await musicMedia.update(mediaId, form);
+        await mediaRepository.update(mediaId, form);
       } else {
-        await musicMedia.create(mediaId, form);
+        await mediaRepository.create(mediaId, form);
       }
       router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
     } catch (caught) {

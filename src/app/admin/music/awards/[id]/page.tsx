@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 
 import { AwardForm } from "@/features/admin-music-awards/_components/AwardForm";
-import { musicAwards } from "@/lib/firebase/music";
+import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
 import type { MusicAward } from "@/types/music";
 
 import styles from "./page.module.css";
@@ -27,7 +27,7 @@ const EditMusicAwardPage = ({ params }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    musicAwards
+    getMusicAwardRepository()
       .get(id)
       .then((loaded) => {
         if (!alive) return;

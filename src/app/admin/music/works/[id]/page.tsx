@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 
 import { WorkForm } from "@/features/admin-music-works/_components/WorkForm";
-import { musicWorks } from "@/lib/firebase/music";
+import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 import type { MusicWork } from "@/types/music";
 
 import styles from "./page.module.css";
@@ -27,7 +27,7 @@ const EditMusicWorkPage = ({ params }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    musicWorks
+    getMusicWorkRepository()
       .get(id)
       .then((loaded) => {
         if (!alive) return;

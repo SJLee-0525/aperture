@@ -6,7 +6,8 @@ import { useState, type FormEvent } from "react";
 import { ROUTES } from "@/constants/routes";
 import type { MusicAward } from "@/types/music";
 
-import { musicAwards, type MusicAwardInput } from "@/lib/firebase/music";
+import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
+import type { MusicAwardInput } from "@/lib/firebase/music";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import styles from "./AwardForm.module.css";
 
@@ -68,10 +69,11 @@ const AwardForm = ({ awardId, initial }: Props) => {
 
     setSaving(true);
     try {
+      const awardRepository = getMusicAwardRepository();
       if (isEdit) {
-        await musicAwards.update(awardId, form);
+        await awardRepository.update(awardId, form);
       } else {
-        await musicAwards.create(awardId, form);
+        await awardRepository.create(awardId, form);
       }
       router.replace(ROUTES.ADMIN_MUSIC_AWARDS);
     } catch (caught) {

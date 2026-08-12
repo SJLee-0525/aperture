@@ -1,18 +1,15 @@
 "use client";
 
 import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
-import type { OrderedAdminAdapter } from "@/hooks/use-ordered-admin";
-import { musicWorks } from "@/lib/firebase/music";
-import { listMusicWorkItemsAdmin } from "@/lib/firebase/admin-list-rest";
-import type { AdminMusicWorkListItem } from "@/types/admin";
+import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
-const musicWorksAdapter: OrderedAdminAdapter<AdminMusicWorkListItem> = {
-  ...musicWorks,
-  list: listMusicWorkItemsAdmin,
-};
-
+/**
+ * 관리자 연주 목록 상태 — 저장소는 mock/live 가 갈리는 repository 경계에서 받는다.
+ *
+ * @returns {{ works: AdminMusicWorkListItem[] } & ReturnType<typeof useOrderedAdmin>} 목록과 공용 상태 머신.
+ */
 const useMusicWorksAdmin = () => {
-  const { items: works, ...admin } = useOrderedAdmin(musicWorksAdapter);
+  const { items: works, ...admin } = useOrderedAdmin(getMusicWorkRepository());
   return { works, ...admin };
 };
 

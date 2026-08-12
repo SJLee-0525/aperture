@@ -16,7 +16,8 @@ import type { DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { SiteLink } from "@/types/site";
 
-import { devProjects, type DevProjectInput } from "@/lib/firebase/dev";
+import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
+import type { DevProjectInput } from "@/lib/firebase/dev";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type LocalizedArrayKey = "features" | "roles" | "achievements";
@@ -126,8 +127,9 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
     setSaving(true);
     try {
       const input = prepareProjectInput(form);
-      if (isEdit) await devProjects.update(projectId, input);
-      else await devProjects.create(projectId, input);
+      const projectRepository = getDevProjectRepository();
+      if (isEdit) await projectRepository.update(projectId, input);
+      else await projectRepository.create(projectId, input);
       await removeUnreferencedImages(
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.cover, ...input.images]),
