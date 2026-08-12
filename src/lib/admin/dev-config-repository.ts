@@ -1,3 +1,4 @@
+import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalDocRepository } from "@/lib/admin/mock/local-doc-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
@@ -29,6 +30,7 @@ const getDevConfigRepository = selectRepository<DevConfigRepository>(
       version: STORE_VERSION,
       label: "개발 설정",
       seed: async () => ({ ...(await import("@/mocks/dev")).MOCK_DEV_CONFIG }),
+      emptyDoc: EMPTY_DEV_CONFIG,
       getStorage: () => window.localStorage,
     });
     return { get: doc.get, set: doc.set };

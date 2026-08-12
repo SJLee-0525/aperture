@@ -1,5 +1,10 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
-import { isRecord, readLocalStore, writeLocalStore } from "@/lib/admin/mock/local-store";
+import {
+  isRecord,
+  readLocalStore,
+  warnOnDiscard,
+  writeLocalStore,
+} from "@/lib/admin/mock/local-store";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
@@ -141,12 +146,22 @@ const decodeStore = (value: unknown): DevArticleStore | null => {
 /**
  * 로컬 저장소를 읽는다.
  *
+ * 저장본이 있었는데 쓰지 못한 경우 사유를 콘솔에 남긴다 — 편집한 글이 mock 으로 되돌아간
+ * 사실은 화면만 봐서는 알 수 없다.
+ *
  * @param {Pick<Storage, "getItem">} storage 읽을 저장소.
  * @returns {DevArticleStore | null} 저장된 글과 태그. 값이 없거나 형이 어긋나면 null이며
  *   호출부는 mock 으로 다시 seed 한다.
+ * @throws {Error} 저장소 자체를 읽을 수 없을 때(차단·비활성).
  */
 const readDevArticleStore = (storage: Pick<Storage, "getItem">): DevArticleStore | null =>
-  readLocalStore(storage, STORAGE_KEYS.ADMIN_DEV_ARTICLES, STORE_VERSION, decodeStore);
+  readLocalStore(
+    storage,
+    STORAGE_KEYS.ADMIN_DEV_ARTICLES,
+    STORE_VERSION,
+    decodeStore,
+    warnOnDiscard("블로그 글"),
+  );
 
 /**
  * 로컬 저장소를 통째로 덮어쓴다. 용량 초과·차단은 저장 실패로 알린다.

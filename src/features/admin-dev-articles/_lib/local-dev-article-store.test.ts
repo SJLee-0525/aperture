@@ -126,7 +126,9 @@ describe("writeDevArticleStore · readDevArticleStore", () => {
     expect(readDevArticleStore(memoryStorage(broken))).toBeNull();
   });
 
-  it("저장소가 막혀 있으면 읽기는 null, 쓰기는 실패로 알린다", () => {
+  it("저장소가 막혀 있으면 읽기는 예외로, 쓰기는 실패로 알린다", () => {
+    // 읽기를 null 로 바꾸면 "처음 여는 빈 저장소" 와 구분되지 않아, 저장되지 않는 편집을
+    // 정상처럼 이어 가게 된다.
     const blocked = {
       getItem: () => {
         throw new Error("SecurityError");
@@ -136,7 +138,7 @@ describe("writeDevArticleStore · readDevArticleStore", () => {
       },
     };
 
-    expect(readDevArticleStore(blocked)).toBeNull();
+    expect(() => readDevArticleStore(blocked)).toThrow("브라우저 저장소를 읽지 못했습니다");
     expect(writeDevArticleStore(blocked, store())).toBe(false);
   });
 

@@ -20,25 +20,43 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
+ * 저장본이 있었지만 쓰지 못하고 버린 이유.
+ *
+ * "값이 없다" 와 "값이 있었는데 버렸다" 는 호출부에서 똑같이 null 로 보이지만 뜻이 다르다.
+ * 앞은 처음 여는 저장소고, 뒤는 관리자가 편집해 둔 내용이 사라진 상황이다.
+ */
+type LocalStoreDiscardReason = "parse-failed" | "version-mismatch" | "decode-failed";
+
+/**
  * 봉투를 열어 담긴 값을 되돌린다.
+ *
+ * `getItem` 이 던지면 삼키지 않는다. 저장소를 아예 읽을 수 없는 상태를 null 로 바꾸면
+ * 화면에는 "처음 여는 빈 저장소" 와 구분되지 않는 모습이 나오고, 그 위에서 한 편집은
+ * 저장도 되지 않는다. 정상으로 보이는 빈 저장소가 조용한 실패 중 가장 나쁘다.
  *
  * @param {Pick<Storage, "getItem">} storage 읽을 저장소.
  * @param {string} key localStorage 키.
  * @param {number} version 기대하는 저장 형식 버전. 다르면 통째로 버린다.
  * @param {(value: unknown) => T | null} decode 담긴 값의 형 검증. 어긋나면 null 을 돌려준다.
- * @returns {T | null} 검증을 통과한 값. 없거나 버렸으면 null 이며 호출부는 mock 으로 다시 seed 한다.
+ * @param {(reason: LocalStoreDiscardReason) => void} [onDiscard] 저장본을 버릴 때 사유를 알린다.
+ * @returns {T | null} 검증을 통과한 값. 저장본이 없거나 버렸으면 null 이며 호출부가 다시 seed 한다.
+ * @throws {Error} 저장소 자체를 읽을 수 없을 때(차단·비활성).
  */
 const readLocalStore = <T>(
   storage: Pick<Storage, "getItem">,
   key: string,
   version: number,
   decode: (value: unknown) => T | null,
+  onDiscard?: (reason: LocalStoreDiscardReason) => void,
 ): T | null => {
   let raw: string | null;
   try {
     raw = storage.getItem(key);
-  } catch {
-    return null;
+  } catch (caught) {
+    throw new Error(
+      "브라우저 저장소를 읽지 못했습니다. 시크릿 창이거나 저장소가 차단된 상태일 수 있습니다.",
+      { cause: caught },
+    );
   }
   if (raw === null) return null;
 
@@ -46,11 +64,17 @@ const readLocalStore = <T>(
   try {
     parsed = JSON.parse(raw);
   } catch {
+    onDiscard?.("parse-failed");
     return null;
   }
-  if (!isRecord(parsed) || parsed.version !== version) return null;
+  if (!isRecord(parsed) || parsed.version !== version) {
+    onDiscard?.("version-mismatch");
+    return null;
+  }
 
-  return decode(parsed.value);
+  const decoded = decode(parsed.value);
+  if (decoded === null) onDiscard?.("decode-failed");
+  return decoded;
 };
 
 /**
@@ -77,4 +101,22 @@ const writeLocalStore = (
   }
 };
 
-export { isRecord, readLocalStore, writeLocalStore };
+/**
+ * 저장본을 버릴 때 개발 콘솔에 사유를 남기는 기본 처리.
+ *
+ * mock 저장소는 개발·E2E 전용이라 관리자에게 배너를 띄우기보다, 편집분이 mock 으로
+ * 되돌아간 사실을 콘솔에서 바로 잇는 편이 낫다. 아무것도 남기지 않으면 화면만 보고는
+ * 되돌아갔다는 것 자체를 알 수 없다.
+ *
+ * @param {string} label 컬렉션·문서 이름.
+ * @returns {(reason: LocalStoreDiscardReason) => void} 사유를 받는 콜백.
+ */
+const warnOnDiscard =
+  (label: string) =>
+  (reason: LocalStoreDiscardReason): void => {
+    console.warn(
+      `[admin mock] 저장된 ${label} 을(를) 쓰지 못해 mock 으로 되돌립니다 (${reason}). 편집한 내용은 남지 않습니다.`,
+    );
+  };
+
+export { isRecord, readLocalStore, warnOnDiscard, writeLocalStore };

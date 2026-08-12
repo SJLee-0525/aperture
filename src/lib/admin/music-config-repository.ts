@@ -1,3 +1,4 @@
+import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalDocRepository } from "@/lib/admin/mock/local-doc-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
@@ -29,6 +30,7 @@ const getMusicConfigRepository = selectRepository<MusicConfigRepository>(
       version: STORE_VERSION,
       label: "음악 설정",
       seed: async () => ({ ...(await import("@/mocks/music")).MOCK_MUSIC_CONFIG }),
+      emptyDoc: EMPTY_MUSIC_CONFIG,
       getStorage: () => window.localStorage,
     });
     return { get: doc.get, set: doc.set };

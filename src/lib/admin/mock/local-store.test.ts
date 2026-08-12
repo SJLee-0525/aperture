@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { isRecord, readLocalStore, writeLocalStore } from "@/lib/admin/mock/local-store";
 
@@ -54,7 +54,9 @@ describe("readLocalStore / writeLocalStore", () => {
     expect(readLocalStore(storage, KEY, VERSION, decodeStrings)).toBeNull();
   });
 
-  it("storage 접근이 던져도 조용히 실패한다", () => {
+  it("읽기 자체가 막히면 드러낸다 — 정상으로 보이는 빈 저장소를 만들지 않는다", () => {
+    // null 로 바꾸면 "처음 여는 저장소" 와 구분되지 않는다. 그 상태에서 이어 간 편집은
+    // 저장도 되지 않으므로, 관리자가 알아채야 하는 실패다.
     const throwing = {
       getItem: () => {
         throw new Error("blocked");
@@ -63,8 +65,36 @@ describe("readLocalStore / writeLocalStore", () => {
         throw new Error("full");
       },
     };
-    expect(readLocalStore(throwing, KEY, VERSION, decodeStrings)).toBeNull();
+
+    expect(() => readLocalStore(throwing, KEY, VERSION, decodeStrings)).toThrow(
+      "브라우저 저장소를 읽지 못했습니다",
+    );
     expect(writeLocalStore(throwing, KEY, VERSION, [])).toBe(false);
+  });
+
+  it("저장본을 버릴 때 사유를 알린다", () => {
+    const reasons: string[] = [];
+    const collect = (reason: string) => reasons.push(reason);
+
+    readLocalStore(memoryStorage({ [KEY]: "{broken" }), KEY, VERSION, decodeStrings, collect);
+
+    const outdated = memoryStorage();
+    writeLocalStore(outdated, KEY, VERSION, ["a"]);
+    readLocalStore(outdated, KEY, VERSION + 1, decodeStrings, collect);
+
+    const wrongShape = memoryStorage();
+    writeLocalStore(wrongShape, KEY, VERSION, [1, 2]);
+    readLocalStore(wrongShape, KEY, VERSION, decodeStrings, collect);
+
+    expect(reasons).toEqual(["parse-failed", "version-mismatch", "decode-failed"]);
+  });
+
+  it("저장본이 없을 때는 버린 것이 아니므로 알리지 않는다", () => {
+    const onDiscard = vi.fn();
+
+    readLocalStore(memoryStorage(), KEY, VERSION, decodeStrings, onDiscard);
+
+    expect(onDiscard).not.toHaveBeenCalled();
   });
 });
 

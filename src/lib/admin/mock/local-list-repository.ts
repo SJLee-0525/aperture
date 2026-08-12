@@ -1,7 +1,24 @@
-import { isRecord, readLocalStore, writeLocalStore } from "@/lib/admin/mock/local-store";
+import {
+  isRecord,
+  readLocalStore,
+  warnOnDiscard,
+  writeLocalStore,
+} from "@/lib/admin/mock/local-store";
 
 /** 목록 컬렉션의 공통 필드 — 정렬·공개 토글이 기대는 최소 계약. */
 type ListEntity = { id: string; order: number; published: boolean };
+
+/**
+ * `order` 가 같을 때의 보조 정렬 — live 쿼리의 `__name__ ASCENDING` 자리다.
+ *
+ * Firestore 는 문서 경로를 코드 포인트 순으로 비교한다. `localeCompare` 는 로케일에 따라
+ * 대소문자·기호 순서가 달라져 같은 데이터가 브라우저마다 다른 순서로 보일 수 있다.
+ *
+ * @param {string} a 앞 문서 ID.
+ * @param {string} b 뒤 문서 ID.
+ * @returns {number} `Array.prototype.sort` 비교 결과.
+ */
+const compareDocumentId = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 type LocalListRepositoryConfig<TEntity extends ListEntity, TListItem> = {
   /** localStorage 키. `constants/storage-keys.ts` 의 값을 넘긴다. */
@@ -116,13 +133,17 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
    */
   const load = async (): Promise<TEntity[]> => {
     const storage = config.getStorage();
-    const existing = readLocalStore(storage, config.key, config.version, decode);
+    const discarded = warnOnDiscard(config.label);
+    const existing = readLocalStore(storage, config.key, config.version, decode, discarded);
     if (existing) return existing;
 
     const seeded = await config.seed();
-    writeLocalStore(storage, config.key, config.version, seeded);
+    // seed 쓰기 실패를 무시하면 매 호출 mock 을 다시 만들어 편집이 전혀 남지 않는다.
+    save(seeded);
     // 다시 읽어 저장 형식을 거친 사본을 쓴다 — mock 모듈의 객체를 그대로 들고 있지 않는다.
-    return readLocalStore(config.getStorage(), config.key, config.version, decode) ?? seeded;
+    return (
+      readLocalStore(config.getStorage(), config.key, config.version, decode, discarded) ?? seeded
+    );
   };
 
   /**
@@ -157,15 +178,21 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   return {
     newId: () => crypto.randomUUID(),
 
-    // live 목록(orderBy("order"))과 같은 순서로 돌려준다.
+    // live 목록(orderBy("order") + __name__ ASC)과 같은 순서로 돌려준다. `order` 가 겹칠 때
+    // 삽입 순서에 기대면 mock 에서 잡은 목록·스크린샷이 실데이터에서 재현되지 않는다 —
+    // 새 항목의 `order` 를 0 으로 두는 폼이 있어 동률이 예외가 아니라 기본값이다.
     list: async () =>
       (await load())
         .slice()
-        .sort((a, b) => a.order - b.order)
+        .sort((a, b) => a.order - b.order || compareDocumentId(a.id, b.id))
         .map(config.toListItem),
 
     get: async (id) => (await load()).find((entity) => entity.id === id) ?? null,
 
+    // ⚠️ live 와 다른 지점: Firestore 의 `setDoc` 은 같은 ID 를 조용히 덮어쓴다. mock 은 거부한다.
+    // ID 는 `newId()`(UUID)나 Firestore 자동 ID 라 충돌은 데이터가 아니라 코드의 버그이고,
+    // 덮어쓰면 먼저 있던 항목이 흔적 없이 사라진다. live 를 같은 계약으로 좁히려면 존재 확인
+    // 읽기나 트랜잭션이 필요해 쓰기 경로를 건드려야 하므로, 여기서는 mock 을 더 엄격하게 둔다.
     create: (id, input) =>
       enqueue(async () => {
         const entities = await load();

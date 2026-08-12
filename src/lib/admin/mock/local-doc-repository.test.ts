@@ -8,6 +8,9 @@ const KEY = "ap-admin-test-doc:v1";
 
 const SEED: Doc = { bio: "소개", tagline: "태그라인", links: ["https://a"] };
 
+/** live 의 `EMPTY_*` config 에 해당하는 값 — 저장본에 없는 필드는 여기서 채운다. */
+const EMPTY: Doc = { bio: "", tagline: "", links: [] };
+
 const memoryStorage = (initial: Record<string, string> = {}) => {
   const data = new Map(Object.entries(initial));
   return {
@@ -24,6 +27,7 @@ const repository = (storage: Storage) =>
     version: 1,
     label: "테스트 설정",
     seed: async () => SEED,
+    emptyDoc: EMPTY,
     getStorage: () => storage,
   });
 
@@ -52,17 +56,19 @@ describe("createLocalDocRepository", () => {
     expect(doc.links).toEqual(["https://a"]);
   });
 
-  it("저장본에 없는 필드는 seed 기본값으로 채운다", async () => {
-    // 문서 타입에 필드가 새로 생기면 이전 저장본에는 그 필드가 없다 — live 읽기의
-    // `?? EMPTY_*` 기본값 보강처럼 seed 가 빈 자리를 메워야 화면이 깨지지 않는다.
+  it("저장본에 없는 필드는 빈 기본값으로 채운다 — mock 문구를 끼워 넣지 않는다", async () => {
+    // 문서 타입에 필드가 새로 생기면 이전 저장본에는 그 필드가 없다. live 읽기는 그 자리를
+    // `?? EMPTY_*` 로 채운다. seed 로 채우면 관리자 화면이 mock 문구를 자기 값처럼 보여 주고,
+    // 그 상태로 저장하면 그대로 영속된다.
     const partial = memoryStorage({
       [KEY]: JSON.stringify({ version: 1, value: { bio: "저장된 소개" } }),
     });
 
     const doc = await repository(partial).get();
     expect(doc.bio).toBe("저장된 소개");
-    expect(doc.tagline).toBe(SEED.tagline);
-    expect(doc.links).toEqual(SEED.links);
+    expect(doc.tagline).toBe("");
+    expect(doc.links).toEqual([]);
+    expect(doc.tagline).not.toBe(SEED.tagline);
   });
 
   it("버전이 다르거나 형이 깨지면 다시 seed 한다", async () => {

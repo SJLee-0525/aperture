@@ -1,3 +1,4 @@
+import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalDocRepository } from "@/lib/admin/mock/local-doc-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
@@ -30,6 +31,7 @@ const getSiteConfigRepository = selectRepository<SiteConfigRepository>(
       version: STORE_VERSION,
       label: "사이트 설정",
       seed: async () => ({ ...(await import("@/mocks/site")).MOCK_SITE }),
+      emptyDoc: EMPTY_SITE_CONFIG,
       getStorage: () => window.localStorage,
     });
     return { get: doc.get, updateFields: doc.merge };
