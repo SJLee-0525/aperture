@@ -37,6 +37,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": new URL("./src", import.meta.url).pathname,
+      // `server-only` 는 react-server 조건이 없으면 import 하는 것만으로 throw 한다.
+      // 서버 전용 모듈을 단위 테스트에서 부르려면 조건 대신 이 한 곳만 빈 모듈로 바꾼다
+      // (전역 conditions 에 react-server 를 넣으면 React 해석까지 함께 바뀐다).
+      "server-only": new URL("./node_modules/server-only/empty.js", import.meta.url).pathname,
     },
   },
 });
