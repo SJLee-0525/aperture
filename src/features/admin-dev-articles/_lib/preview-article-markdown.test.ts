@@ -30,7 +30,7 @@ describe("previewArticleMarkdown", () => {
   });
 
   it("E2E 세션에서는 토큰 없이 통과한다", async () => {
-    vi.stubEnv("NEXT_PUBLIC_E2E_ADMIN_SESSION", "1");
+    vi.stubEnv("NEXT_PUBLIC_ADMIN_TEST_SESSION", "1");
     vi.stubEnv("NODE_ENV", "test");
     verifyAdminIdToken.mockResolvedValue(false);
 

@@ -20,7 +20,7 @@ const serverEnv = {
   NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
   NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
   // 관리자 E2E 전용 인증 우회. 프로덕션 모드 실행에서는 가드가 throw 하므로 켜지 않는다.
-  ...(production ? {} : { NEXT_PUBLIC_E2E_ADMIN_SESSION: "1" }),
+  ...(production ? {} : { NEXT_PUBLIC_ADMIN_TEST_SESSION: "1" }),
 };
 
 if (build) {

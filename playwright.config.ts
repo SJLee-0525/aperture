@@ -81,7 +81,7 @@ export default defineConfig({
           NEXT_PUBLIC_GA_ID: "G-E2ETEST",
           NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
           // 이 경로는 항상 next dev 다. 프로덕션 모드 실행은 e2e/run.cjs 가 맡고 거기서는 켜지 않는다.
-          NEXT_PUBLIC_E2E_ADMIN_SESSION: "1",
+          NEXT_PUBLIC_ADMIN_TEST_SESSION: "1",
         },
       },
 });
