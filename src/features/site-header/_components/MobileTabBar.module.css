@@ -5,7 +5,7 @@
   bottom: 0;
   z-index: 40;
   display: flex;
-  height: 62px;
+  height: var(--mobile-tab-bar-height);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--bg);
   border-top: 1px solid var(--line);

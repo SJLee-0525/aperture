@@ -45,6 +45,16 @@
   --s-16: 64px;
   --s-20: 80px;
 
+  /* --- 고정 UI 치수 ---
+     모바일 하단 탭바 높이와 챗봇 런처 크기는 두 컴포넌트만의 값이 아니다. 런처 offset,
+     지도 높이 계산, 블로그 목차 인디케이터가 같은 값을 기준으로 자리를 잡으므로 한곳에 둔다. */
+  --mobile-tab-bar-height: 62px;
+  --chat-launcher-size: 48px;
+  /* 글에서 "읽고 있는 줄"로 보는 화면 상단 offset. 고정 헤더(58·76px)보다 아래여야 제목이
+     가리지 않는다. 목차 이동 위치와 현재 위치 판정이 같은 값을 써야 해서 여기 한 번만 적는다
+     (`features/dev-blog/_lib/reading-line.ts` 의 READING_LINE_PX 와 같은 값). */
+  --reading-line-offset: 96px;
+
   /* --- Vivid accents (테마 무관, 절제 사용) --- */
   --accent: #0066cc;
   --accent-press: #004f9f;
