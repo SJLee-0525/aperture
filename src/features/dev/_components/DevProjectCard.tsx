@@ -66,7 +66,6 @@ const DevProjectCard = memo(function DevProjectCard({ project, lang, onSelect, o
         <div className={styles.year}>{project.year}</div>
         <div className={styles.pt}>{pickText(project.title, lang)}</div>
         <div className={styles.pc}>{pickText(project.category, lang)}</div>
-        <p className={styles.pd}>{pickText(project.summary, lang)}</p>
       </div>
     </button>
   );

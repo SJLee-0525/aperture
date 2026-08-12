@@ -98,7 +98,6 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel }: Props) =>
           {tagLabels.length > 0 ? (
             <div className={styles.tags}>{tagLabels.map((label) => `#${label}`).join(" ")}</div>
           ) : null}
-          <p className={styles.summary}>{pickText(article.summary, lang)}</p>
         </div>
       </Link>
     </li>

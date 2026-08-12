@@ -86,12 +86,6 @@
   font-size: var(--t-small);
   color: var(--accent);
 }
-.pd {
-  margin: 0;
-  font-size: var(--t-small);
-  line-height: 1.6;
-  color: var(--text-2);
-}
 /* ── modal — 위계는 크기·굵기·여백으로만. 장식선·장식색 없음(액센트는 인터랙티브 요소 전용) ── */
 .detail {
   display: flex;

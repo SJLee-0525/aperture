@@ -68,16 +68,7 @@
   color: var(--accent);
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.summary {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  margin: 0;
-  font-size: var(--t-small);
-  line-height: 1.6;
-  color: var(--text-2);
+  word-spacing: var(--s-1);
 }
 
 /* 목록 보기 — 커버를 왼쪽 고정 폭으로 눕힌다. */

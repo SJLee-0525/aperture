@@ -43,7 +43,7 @@ const ArticleTocRail = ({ items, activeId, label, expanded, panelId, onOpen }: P
       aria-label={label}
       aria-expanded={expanded}
       aria-controls={panelId}
-      // 커스텀 커서가 이 눈금에 달라붙지 않게 한다 — 반응은 커서가 아니라 눈금이 또렷해지는 것이다.
+      // 커스텀 커서가 이 눈금에 달라붙지 않게 한다
       data-cursor-passive
       onClick={onOpen}
     >
