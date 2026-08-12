@@ -1,0 +1,80 @@
+.section {
+  margin-top: var(--s-16);
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--line);
+}
+
+.heading {
+  margin-bottom: var(--s-4);
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.list {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* grid 항목은 기본이 min-width:auto 라 말줄임 대상 텍스트가 트랙을 밀어낸다 — 좁은 화면에서
+   지면 전체에 가로 스크롤이 생기는 원인이다. */
+.list > li {
+  min-width: 0;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  min-width: 0;
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: inherit;
+  transition: border-color var(--dur) var(--ease);
+}
+.card:hover {
+  border-color: var(--accent);
+}
+
+.thumb {
+  position: relative;
+  flex: none;
+  width: 72px;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.thumbImage {
+  object-fit: cover;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.title {
+  overflow: hidden;
+  font-weight: 600;
+  font-size: var(--t-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.summary {
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

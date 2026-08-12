@@ -1,0 +1,19 @@
+.main {
+  display: block;
+}
+
+.column {
+  /* 본문 글줄 폭. 720px 는 코드 블록과 표가 자주 넘쳐 가로 스크롤이 생겼다. */
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 var(--s-6) var(--s-16);
+}
+
+.notice {
+  margin-bottom: var(--s-6);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-1);
+  border-left: 2px solid var(--accent);
+  color: var(--text-2);
+  font-size: var(--t-small);
+}

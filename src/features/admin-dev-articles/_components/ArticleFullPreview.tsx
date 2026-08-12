@@ -11,7 +11,8 @@ import {
   previewArticleMarkdown,
   type ArticlePreviewResult,
 } from "@/features/admin-dev-articles/_lib/preview-article-markdown";
-import { ArticleDocumentView } from "@/features/dev-blog/_components/ArticleDocumentView";
+import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
+import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
 import { auth } from "@/lib/firebase/client";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -102,14 +103,19 @@ const ArticleFullPreview = ({ articleId }: Props) => {
       ) : null}
 
       {loaded ? (
-        <ArticleDocumentView
+        <ArticleDetailView
           title={pickText(loaded.article.title, "ko") || "제목 없음"}
           summary={pickText(loaded.article.summary, "ko")}
+          cover={loaded.article.cover}
+          coverAlt={loaded.article.coverAlt ? pickText(loaded.article.coverAlt, "ko") : ""}
           publishedAt={loaded.article.publishedAt}
-          updatedAt={loaded.article.updatedAt}
-          tags={loaded.article.tags.map((id) => loaded.tags.find((tag) => tag.id === id)?.ko ?? id)}
+          readingMinutes={articleReadingMinutes(loaded.preview.document)}
+          tagLabels={loaded.article.tags.map(
+            (id) => loaded.tags.find((tag) => tag.id === id)?.ko ?? id,
+          )}
           document={loaded.preview.document}
           highlights={loaded.preview.highlights}
+          // 관리자 UI 언어와 무관하게 한국어 지면을 보여 준다 — 본문 원문이 한국어 하나뿐이다.
           lang="ko"
         />
       ) : null}

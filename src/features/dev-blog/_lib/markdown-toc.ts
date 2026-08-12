@@ -31,3 +31,4 @@ const buildArticleToc = (document: ArticleDocument): ArticleTocItem[] => {
 };
 
 export { buildArticleToc };
+export type { ArticleTocItem };

@@ -1,0 +1,51 @@
+.nav {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.list,
+.children {
+  margin: 0;
+  padding: 0 var(--s-2);
+  list-style: none;
+}
+.children {
+  padding: 0 0 0 var(--s-2);
+}
+
+/* 항목은 커서 강조 상자가 글자보다 지나치게 커 보이지 않을 만큼의 높이를 갖는다. */
+.entry {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  width: 100%;
+  padding: 9px var(--s-3);
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font-size: var(--t-small);
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.entry:hover {
+  color: var(--text);
+}
+.child {
+  padding-left: var(--s-3);
+  font-size: 0.78rem;
+}
+
+/* 현재 위치 — 색과 함께 왼쪽 막대·굵기로도 알린다. */
+.entry[aria-current="location"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry {
+    transition: none;
+  }
+}

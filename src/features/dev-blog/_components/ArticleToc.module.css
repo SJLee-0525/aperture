@@ -1,0 +1,48 @@
+/* 챗봇 런처와 겹치지 않게 아래쪽에 비워 둘 높이 — 런처 크기 + 아래 여백 + 최소 간격. */
+.dock {
+  --article-toc-clearance: calc(var(--chat-launcher-size) + var(--s-6) + var(--s-4));
+
+  position: fixed;
+  top: 50%;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  max-height: calc(100dvh - var(--article-toc-clearance) * 2);
+  transform: translateY(-50%);
+  opacity: 0;
+  /* 보이지 않는 동안에는 Tab 순서에서도 빠져야 한다 — 투명한 버튼에 포커스가 가면
+     화면에는 아무것도 없는데 "목차 열기"가 읽힌다. */
+  visibility: hidden;
+  transition:
+    opacity var(--dur) var(--ease),
+    visibility var(--dur) var(--ease);
+}
+.dock[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+/* 펼친 동안에는 패널 둘레로 보이지 않는 여유를 둔다 — 항목을 고르려고 대각선으로 움직이다
+   경계를 살짝 벗어나도 닫히지 않는다. 접혀 있을 때는 이 여유가 본문 클릭을 가로막으므로 두지 않는다. */
+.dock[data-expanded="true"] {
+  padding: var(--s-5) 0 var(--s-5) var(--s-8);
+}
+
+/* 확장 패널은 눈금 왼쪽으로 자란다 — 본문 위를 덮되 폭을 빼앗지는 않는다. */
+.panel {
+  order: -1;
+  width: min(300px, 48vw);
+  max-height: calc(100dvh - var(--article-toc-clearance) * 2);
+  padding: var(--s-3) 0;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock {
+    transition: none;
+  }
+}

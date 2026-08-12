@@ -1,0 +1,65 @@
+.rail {
+  /* 선은 얇고 연하지만 누를 수 있는 면은 44px 을 넘긴다 — 손가락 표적 기준. */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 44px;
+  padding: var(--s-4) var(--s-5);
+  border: 0;
+  background: transparent;
+  /* 평소에는 배경처럼 물러나 있다가 포인터가 오면 또렷해진다. */
+  opacity: 0.65;
+  cursor: pointer;
+  transition: opacity var(--dur) var(--ease);
+}
+.rail:hover,
+.rail:focus-visible {
+  opacity: 1;
+}
+
+.tick {
+  display: block;
+  height: 1px;
+  background: var(--text-2);
+  transition:
+    width var(--dur) var(--ease),
+    height var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.tick[data-depth="2"] {
+  width: 14px;
+}
+.tick[data-depth="3"] {
+  width: 7px;
+}
+/* 현재 위치 — 색만이 아니라 길이와 굵기로도 구분한다. */
+.tick[data-active="true"] {
+  height: 2px;
+  background: var(--accent);
+}
+.tick[data-depth="2"][data-active="true"] {
+  width: 20px;
+}
+.tick[data-depth="3"][data-active="true"] {
+  width: 12px;
+}
+
+@media (forced-colors: active) {
+  .rail {
+    opacity: 1;
+  }
+  .tick {
+    background: CanvasText;
+  }
+  .tick[data-active="true"] {
+    background: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .tick {
+    transition: none;
+  }
+}

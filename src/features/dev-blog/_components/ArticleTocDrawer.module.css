@@ -1,0 +1,63 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  /* 상세 모달(100)보다 아래, 사이트 헤더보다 위 — 본문 위를 덮되 라이트박스는 가리지 않는다. */
+  z-index: 60;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--scrim);
+  cursor: default;
+}
+
+/* 화면을 다 덮지 않는다 — 목차는 지금 읽던 자리를 잃지 않고 옮겨 다니려고 여는 것이라,
+   본문이 뒤에 그대로 보이는 편이 낫다. 인디케이터가 있던 오른쪽 가운데에서 자란다. */
+.panel {
+  position: absolute;
+  top: 50%;
+  right: var(--s-3);
+  display: flex;
+  flex-direction: column;
+  width: min(78vw, 300px);
+  max-height: min(56dvh, 420px);
+  transform: translateY(-50%);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop);
+  padding-bottom: var(--s-2);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+.heading {
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  font-weight: 500;
+  margin: 0;
+  transform: translateY(3px);
+}
+.close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 0;
+  color: var(--text-2);
+  font-size: 16px;
+  cursor: pointer;
+}
+.close:hover {
+  color: var(--text);
+}
