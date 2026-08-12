@@ -41,6 +41,21 @@ test.describe("경로 기반 i18n", () => {
     expect(cookieWins.headers().location).toMatch(/\/en\?a=1&a=2$/);
   });
 
+  test("구 /dev/about 은 같은 언어의 /dev 로 308 한 번에 도착한다", async ({ request }) => {
+    const korean = await request.get("/ko/dev/about", { maxRedirects: 0 });
+    expect(korean.status()).toBe(308);
+    expect(korean.headers().location).toMatch(/\/ko\/dev$/);
+
+    const english = await request.get("/en/dev/about", { maxRedirects: 0 });
+    expect(english.status()).toBe(308);
+    expect(english.headers().location).toMatch(/\/en\/dev$/);
+
+    // 무-로케일 유입도 /ko/dev/about 을 경유하지 않고 한 번에 목적지로 간다.
+    const bare = await request.get("/dev/about", { maxRedirects: 0 });
+    expect(bare.status()).toBe(308);
+    expect(bare.headers().location).toMatch(/\/ko\/dev$/);
+  });
+
   test("지원하지 않는 언어 세그먼트는 404", async ({ page }) => {
     const response = await page.goto("/fr/dev");
     expect(response?.status()).toBe(404);

@@ -6,6 +6,8 @@ const ACCESSIBILITY_ROUTES = [
   "/ko/photo",
   "/ko/photo/albums",
   "/ko/music",
+  "/ko/dev",
+  "/ko/dev/career",
   "/ko/dev/projects",
   "/ko/contact",
   "/ko/privacy",
