@@ -1,0 +1,23 @@
+/* 코드 블록의 지면 배치(폭·여백·언어 라벨 위치)는 상세 화면을 만드는 단계에서 정한다.
+   여기서는 읽을 수 있는 최소한과 라이트·다크 색 전환만 둔다. */
+.pre {
+  overflow-x: auto;
+  padding: var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+.pre code {
+  font: inherit;
+}
+
+/* 토큰 색은 하이라이터가 심어 준 두 변수에서 온다. 테마 전환은 어느 변수를 읽을지의 문제다. */
+.pre code span {
+  color: var(--shiki-light);
+}
+[data-theme="dark"] .pre code span {
+  color: var(--shiki-dark);
+}

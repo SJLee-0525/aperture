@@ -1,0 +1,68 @@
+/* 긴 글의 지면 설계(본문 최대 폭·행간·heading 여백·목차 자리)는 상세 화면을 만드는
+   단계에서 정한다. 이 파일은 계약이 화면에서 읽히는지 확인할 최소한만 갖는다. */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  font-size: var(--t-body);
+  line-height: 1.8;
+}
+
+.heading {
+  /* 고정 헤더에 제목이 가리지 않게 한다. 목차·URL fragment 로 이동할 때 함께 쓰인다. */
+  scroll-margin-top: var(--s-16);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.inlineCode {
+  padding: 2px 5px;
+  background: var(--surface-1);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.quote {
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--accent);
+  color: var(--text-2);
+}
+
+.rule {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--t-small);
+}
+.table th,
+.table td {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.table th {
+  color: var(--text-2);
+}
+
+.figure {
+  margin: 0;
+}
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.figure figcaption {
+  margin-top: var(--s-2);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+}
