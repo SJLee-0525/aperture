@@ -23,6 +23,7 @@
 npm test
 npm run test:coverage
 npm run test:e2e
+npm run test:e2e:admin
 npm run test:a11y
 npm run test:visual
 npm run test:chat-eval

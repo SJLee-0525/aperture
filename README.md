@@ -211,7 +211,8 @@ npm run build           # 프로덕션 빌드
 npm run lint            # ESLint
 npm run check           # Next.js 타입 생성 및 TypeScript 검사
 npm test                # Vitest 단위 테스트
-npm run test:e2e        # Playwright E2E 테스트
+npm run test:e2e        # Playwright E2E — 프로덕션 빌드 + 시각 회귀
+npm run test:e2e:admin  # 관리자 E2E — dev 서버 (프로덕션 빌드는 인증 우회를 금지한다)
 npm run test:chat-eval  # mock 챗봇 응답·RAG·참조 평가
 npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
