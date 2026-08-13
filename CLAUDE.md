@@ -281,6 +281,7 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
 - **스타일 = CSS Modules** (컴포넌트별 `.module.css`, 짝 `.tsx`와 같은 폴더에 동거 — features에선 `_components/` 안). 색·간격은 `globals.css`의 `:root` 변수 경유
   (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
 - **features/ 내부 = 타입별 하위폴더**(`_components/`·`_hooks/`·`_lib/`) — 위 「디렉토리 구조」 섹션 참조.
+- **관리자 UI = 공용 프리미티브(AdminButton·AdminInput·AdminField) + 용어·치수 규칙** — [docs/admin-ui-conventions.md](docs/admin-ui-conventions.md)
 
 ### 코드 주석과 JSDoc 작성 규칙 ★
 
