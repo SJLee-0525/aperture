@@ -102,6 +102,47 @@ test.describe("Admin · 블로그", () => {
     await expect(page.getByText(/3번째 줄 — 링크는 https/)).toBeVisible();
   });
 
+  test("태그 사전에서 추가·수정하고 사용 중 태그는 지울 수 없다", async ({ page }) => {
+    await page.goto("/admin/dev/articles");
+    const panel = page.getByRole("region", { name: "태그 사전 관리" });
+    await expect(panel.getByRole("heading", { name: "태그 사전" })).toBeVisible();
+
+    // 영어 라벨로 태그 ID를 만든다.
+    await panel.getByLabel("새 태그 (한국어)").fill("웹엠시피");
+    await panel.getByLabel("새 태그 (English)").fill("WebMCP");
+    await expect(panel.getByText("저장할 id: webmcp")).toBeVisible();
+    await panel.getByRole("button", { name: "+ 태그 추가" }).click();
+
+    const row = panel.getByRole("listitem").filter({ hasText: "webmcp" });
+    await expect(row.getByText("0건 사용")).toBeVisible();
+
+    // 저장한 라벨은 새로고침 후에도 유지된다.
+    await row.getByLabel("한국어 라벨").fill("웹 MCP");
+    await row.getByRole("button", { name: "저장" }).click();
+    await expect(row.getByRole("button", { name: "저장" })).toBeDisabled();
+    await page.reload();
+    await expect(
+      panel.getByRole("listitem").filter({ hasText: "webmcp" }).getByLabel("한국어 라벨"),
+    ).toHaveValue("웹 MCP");
+
+    // 글에서 사용 중인 태그는 삭제할 수 없다.
+    await expect(
+      panel
+        .getByRole("listitem")
+        .filter({ hasText: "firebase" })
+        .getByRole("button", { name: "삭제" }),
+    ).toBeDisabled();
+
+    // 사용하지 않는 태그는 삭제할 수 있다.
+    page.once("dialog", (dialog) => void dialog.accept());
+    await panel
+      .getByRole("listitem")
+      .filter({ hasText: "webmcp" })
+      .getByRole("button", { name: "삭제" })
+      .click();
+    await expect(panel.getByRole("listitem").filter({ hasText: "webmcp" })).toHaveCount(0);
+  });
+
   test("초안은 목록 위에 오고 상태 필터로 나눌 수 있다", async ({ page }) => {
     await page.goto("/admin/dev/articles");
 
