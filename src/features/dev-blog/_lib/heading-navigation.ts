@@ -34,12 +34,20 @@ const navigateToHeading = (id: string): void => {
 /**
  * 뒤로가기로 돌아왔을 때 저장해 둔 스크롤 위치를 되살린다.
  *
+ * 되살린 값은 entry 에서 지운다. `replaceCurrentUrl`·`pushCurrentUrl` 이 App Router 동기화용으로
+ * 합성 popstate 를 쏘는데, 값을 남겨 두면 같은 entry 에서 도는 다른 조작(목록 표 페이지 넘김 등)이
+ * 그 이벤트를 타고 읽던 곳에서 옛 위치로 스크롤을 되감는다. 한 번 쓰고 비우는 값이다.
+ *
  * @param {PopStateEvent} event popstate 이벤트.
  * @returns {boolean} 복원했으면 true. 저장된 위치가 없으면 아무 일도 하지 않고 false.
  */
 const restoreScroll = (event: PopStateEvent): boolean => {
   const saved = (event.state as { scrollY?: unknown } | null)?.scrollY;
   if (typeof saved !== "number") return false;
+
+  const rest = { ...((window.history.state ?? {}) as Record<string, unknown>) };
+  delete rest.scrollY;
+  window.history.replaceState(rest, "");
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.scrollTo({ top: saved, behavior: reduced ? "auto" : "smooth" });

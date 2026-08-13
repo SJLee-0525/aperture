@@ -66,4 +66,11 @@ describe("restoreScroll", () => {
     expect(restoreScroll({ state: {} } as PopStateEvent)).toBe(false);
     expect(window.scrollTo).not.toHaveBeenCalled();
   });
+
+  it("복원한 위치는 entry 에서 지운다 — 합성 popstate 가 같은 값으로 되감지 못한다", () => {
+    window.history.replaceState({ scrollY: 640, routing: "keep" }, "");
+
+    expect(restoreScroll({ state: { scrollY: 640 } } as PopStateEvent)).toBe(true);
+    expect(window.history.state).toEqual({ routing: "keep" });
+  });
 });
