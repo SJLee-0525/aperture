@@ -74,7 +74,7 @@ const OPEN_TOOL: WebMcpToolDefinition = {
 };
 
 /**
- * 초점거리 인자 해석 — clampLimit 처럼 문자열 숫자("35")도 받고, 해석 불가면 null.
+ * 숫자 또는 숫자 문자열인 초점거리를 16~300mm 범위로 제한한다.
  * 유효 값은 슬라이더와 같은 16~300mm 로 클램프한다.
  *
  * @param {unknown} raw 에이전트가 넘긴 focalMin/focalMax 인자.
@@ -93,7 +93,7 @@ const parseFocalArg = (raw: unknown): number | null => {
 };
 
 /**
- * 필터 해제 값 판정 — 'all' 은 태그·카메라 필터를 푼다.
+ * 태그나 카메라 필터를 해제하는 'all' 값인지 확인한다.
  *
  * @param {string} raw
  * @returns {boolean}
@@ -165,14 +165,14 @@ const describeReset = (state: {
 };
 
 /**
- * /photo 작업 그리드의 WebMCP 도구 3종 — GalleryContent 안(필터 상태 곁)에서 마운트한다.
+ * 사진 목록의 필터와 상세 열기를 제공하는 WebMCP 도구.
  * 결과 건수는 화면과 같은 `filterPhotos` 를 동기 재호출해 계산하므로 setter 반영 시점과
  * 무관하게 도구 응답과 화면이 일치한다. `?q` 검색어는 execute 시점 URL 에서 읽는다.
  *
  * @param {GalleryPhoto[]} photos 서버가 내려준 공개 사진 투영.
  * @param {Tag[]} tags 통제 태그 사전.
- * @param {PhotoFilter} filter usePhotoFilter 반환값 — applyFilters 와 현재 필터 상태.
- * @param {string[]} cameras 뷰가 이미 memo 한 카메라 목록 — 도구에서 재파생하지 않는다.
+ * @param {PhotoFilter} filter 현재 필터 상태와 변경 함수.
+ * @param {string[]} cameras 선택 가능한 카메라 목록.
  * @returns {void}
  */
 const useGalleryTools = (
@@ -185,7 +185,7 @@ const useGalleryTools = (
 
   useModelContextTool(FILTER_TOOL, (args) => {
     // URL이 상태의 단일 출처이고 pushState는 동기라, 재렌더 전 연속 도구 호출도
-    // execute 시점 URL 파싱만으로 서로의 변경을 본다 — 별도 ref가 필요 없다.
+    // 실행할 때마다 URL에서 최신 필터를 읽는다.
     const applied = parsePhotoFilterQuery(new URLSearchParams(window.location.search), {
       tags,
       cameras,
@@ -225,7 +225,7 @@ const useGalleryTools = (
     // 역전된 범위(min > max)는 불가능한 상태를 슬라이더에 커밋하지 않도록 뒤집어 받는다.
     if (focalMin > focalMax) [focalMin, focalMax] = [focalMax, focalMin];
 
-    // 인자로 받은 차원만 병합해 1회 push — 도구 호출당 history entry 하나.
+    // 전달된 필터만 병합하고 URL 기록을 한 번 추가한다.
     if (tagProvided || cameraProvided || focalProvided) {
       filter.applyFilters(
         {
@@ -237,22 +237,22 @@ const useGalleryTools = (
       );
     }
 
-    // 화면과 같은 순수 함수로 즉시 재계산 — 상태 반영을 기다리지 않는다.
+    // 화면과 같은 함수로 결과를 즉시 계산한다.
     const query = new URLSearchParams(window.location.search).get("q") ?? "";
     const visible = filterPhotos(photos, { tag, query, camera, focalMin, focalMax });
 
-    // 필터는 누적된다 — 0건일 때 무엇이 걸려 있는지 말해주지 않으면 원인을 찾을 수 없다.
+    // 누적된 필터를 결과에 포함한다.
     const state = { tag, camera, focalMin, focalMax, query };
     const active = describeFilters(state, tags);
 
-    // 상위 몇 장은 항상 id 와 함께 돌려준다 — open_photo 가 쓸 수 있는 유일한 id 출처다.
+    // open_photo가 사용할 수 있도록 상위 결과의 ID를 포함한다.
     const preview =
       visible
         .slice(0, PREVIEW_COUNT)
         .map((photo) => `${pickText(photo.title, lang)} (${photo.id})`)
         .join(", ") + (visible.length > PREVIEW_COUNT ? ", …" : "");
 
-    // 인자가 하나도 없으면 어휘 조회다. 0건 분기보다 **먼저** 답해야 한다 —
+    // 인자가 없으면 현재 필터에 사용할 수 있는 값을 반환한다.
     // 결과가 0건일 때야말로 에이전트가 어휘를 가장 필요로 한다(W5 리뷰).
     if (!tagProvided && !cameraProvided && !focalProvided) {
       return [

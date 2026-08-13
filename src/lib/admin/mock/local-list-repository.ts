@@ -5,11 +5,11 @@ import {
   writeLocalStore,
 } from "@/lib/admin/mock/local-store";
 
-/** 목록 컬렉션의 공통 필드 — 정렬·공개 토글이 기대는 최소 계약. */
+/** 정렬과 공개 상태 변경에 필요한 공통 필드. */
 type ListEntity = { id: string; order: number; published: boolean };
 
 /**
- * `order` 가 같을 때의 보조 정렬 — live 쿼리의 `__name__ ASCENDING` 자리다.
+ * `order`가 같을 때 문서 ID로 정렬한다.
  *
  * Firestore 는 문서 경로를 코드 포인트 순으로 비교한다. `localeCompare` 는 로케일에 따라
  * 대소문자·기호 순서가 달라져 같은 데이터가 브라우저마다 다른 순서로 보일 수 있다.
@@ -25,18 +25,17 @@ type LocalListRepositoryConfig<TEntity extends ListEntity, TListItem> = {
   key: string;
   /** 저장 형식 버전. 컬렉션 타입이 바뀌면 올리고 과거 값은 버린다. */
   version: number;
-  /** 오류 문구에 넣을 항목 이름 — live 구현(listCrud)과 같은 톤을 쓴다. */
+  /** 오류 메시지에 넣을 항목 이름. */
   label: string;
   /** JSON 왕복에서 Date 로 되살릴 최상위 필드. 값이 유효한 시각이 아니면 저장소를 버린다. */
   dateFields?: readonly string[];
   /** 저장소가 비었을 때 채울 mock. `mocks/*` 를 동적 import 해 첫 사용까지 로드를 미룬다. */
   seed: () => Promise<TEntity[]>;
   /**
-   * 목록 행 투영. mock 도 본문·원본 이미지처럼 행에 필요 없는 필드를 빼야
-   * B5 의 REST projection 으로 바뀔 때 화면이 받는 모양이 그대로다.
+   * 목록에 필요 없는 본문과 원본 이미지 필드를 제외한다.
    */
   toListItem: (entity: TEntity) => TListItem;
-  /** 저장소를 여는 함수 — 모듈 로드 시점이 아니라 호출 시점에 `window` 를 만진다. */
+  /** 호출 시점에 브라우저 저장소를 연다. */
   getStorage: () => Storage;
 };
 
@@ -67,12 +66,12 @@ const toDate = (value: unknown): Date | null => {
 /**
  * Firestore 를 대신하는 목록 컬렉션 mock 저장소 팩토리.
  *
- * 컬렉션마다 키·seed·목록 투영만 다르고 CRUD 절차는 같아서 한 곳으로 모은다 —
- * live 쪽에서 `listCrud` 가 하는 역할의 mock 판이다. 검증은 최소 불변조건만 본다:
+ * 컬렉션마다 다른 키, seed, 목록 투영을 받아 공통 CRUD를 제공한다. 검증은
+ * 최소 불변조건만 확인한다.
  * `id`·`order`·`published` 와 선언한 Date 필드. 개발용 임시 저장소라 컬렉션별 전체
  * 디코더를 두지 않고, 어긋난 값을 만나면 전체를 버리고 mock 으로 다시 seed 한다.
  *
- * 저장 후처리(`requestPublicRevalidate`·`requestRagSync`)는 부르지 않는다 — mock 저장은
+ * mock 저장은 브라우저에만 남으므로 공개 캐시와 RAG 후처리를 호출하지 않는다.
  * 브라우저에만 남고 공개 화면·RAG 에 반영되지 않으며, 그 사실은 관리자 배지가 알린다.
  *
  * @param {LocalListRepositoryConfig<TEntity, TListItem>} config 컬렉션별 선언.
@@ -84,7 +83,7 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   /**
    * 쓰기 직렬화 큐. 이 저장소는 문서 단위가 아니라 배열 전체를 읽고 다시 쓰므로,
    * 동시 쓰기(드래그 정렬은 바뀐 항목마다 `updateOrder` 를 병렬로 부른다)가 서로의
-   * 변경을 덮어쓴다 — Firestore 의 per-document 쓰기에는 없는 mock 고유의 경합이다.
+   * 변경을 덮어쓸 수 있다. 큐는 쓰기를 차례로 실행해 이 경합을 막는다.
    * 앞선 쓰기가 실패해도 다음 쓰기는 이어 간다.
    */
   let writeQueue: Promise<unknown> = Promise.resolve();
@@ -140,15 +139,14 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
     const seeded = await config.seed();
     // seed 쓰기 실패를 무시하면 매 호출 mock 을 다시 만들어 편집이 전혀 남지 않는다.
     save(seeded);
-    // 다시 읽어 저장 형식을 거친 사본을 쓴다 — mock 모듈의 객체를 그대로 들고 있지 않는다.
+    // 저장 형식으로 다시 읽은 사본을 사용한다.
     return (
       readLocalStore(config.getStorage(), config.key, config.version, decode, discarded) ?? seeded
     );
   };
 
   /**
-   * 저장소를 덮어쓴다. 실패는 사용자에게 드러낸다 — 저장한 줄 알았는데 남지 않는
-   * 상황이 관리자에게 가장 나쁘다.
+   * 저장소를 덮어쓰고 실패하면 오류를 반환한다.
    *
    * @param {TEntity[]} entities 저장할 전체 항목.
    * @returns {void}
@@ -178,9 +176,7 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   return {
     newId: () => crypto.randomUUID(),
 
-    // live 목록(orderBy("order") + __name__ ASC)과 같은 순서로 돌려준다. `order` 가 겹칠 때
-    // 삽입 순서에 기대면 mock 에서 잡은 목록·스크린샷이 실데이터에서 재현되지 않는다 —
-    // 새 항목의 `order` 를 0 으로 두는 폼이 있어 동률이 예외가 아니라 기본값이다.
+    // live 목록과 같이 order, 문서 ID 순서로 정렬한다.
     list: async () =>
       (await load())
         .slice()
@@ -189,10 +185,7 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
 
     get: async (id) => (await load()).find((entity) => entity.id === id) ?? null,
 
-    // ⚠️ live 와 다른 지점: Firestore 의 `setDoc` 은 같은 ID 를 조용히 덮어쓴다. mock 은 거부한다.
-    // ID 는 `newId()`(UUID)나 Firestore 자동 ID 라 충돌은 데이터가 아니라 코드의 버그이고,
-    // 덮어쓰면 먼저 있던 항목이 흔적 없이 사라진다. live 를 같은 계약으로 좁히려면 존재 확인
-    // 읽기나 트랜잭션이 필요해 쓰기 경로를 건드려야 하므로, 여기서는 mock 을 더 엄격하게 둔다.
+    // ID 충돌은 기존 항목을 덮어쓰지 않고 오류로 처리한다.
     create: (id, input) =>
       enqueue(async () => {
         const entities = await load();

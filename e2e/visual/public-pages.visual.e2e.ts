@@ -8,7 +8,7 @@ const VISUAL_ROUTES = [
   { name: "photo-albums", path: "/ko/photo/albums" },
   // 앨범 상세는 공용 hero 프리미티브의 원본이라 hero 를 옮긴 뒤에도 같은 화면이어야 한다.
   { name: "photo-album-detail", path: "/ko/photo/albums/city-night" },
-  // 커버 없는 앨범 — plain variant 히어로의 글자색(B4.5 P1 수정)이 처음으로 기준선에 찍힌다.
+  // 커버 없는 앨범에서 plain 히어로의 글자색을 확인한다.
   { name: "photo-album-detail-plain", path: "/ko/photo/albums/unreleased" },
   { name: "music-works", path: "/ko/music" },
   { name: "dev-projects", path: "/ko/dev/projects" },
@@ -31,8 +31,7 @@ test.describe("핵심 공개 화면 시각 회귀", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(route.path);
       await page.locator("main").waitFor({ state: "visible" });
-      // 웹폰트는 display:swap — 스왑 전에 찍으면 폴백 폰트 상태가 기준선으로 굳는다.
-      // 폰트 캐시가 비어 있는 첫 라우트에서만 터져서 재현이 들쭉날쭉하다.
+      // 웹폰트 교체가 끝난 뒤 캡처해 폴백 폰트가 기준선에 남지 않게 한다.
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
       await settleImages(page);
 

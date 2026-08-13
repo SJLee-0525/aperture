@@ -22,21 +22,21 @@ import type { Lang } from "@/types/lang";
 
 import styles from "./ArticleBody.module.css";
 
-/** 확대 뷰는 처음 열 때 내려온다 — 읽기만 하는 방문자에게는 이 청크가 필요 없다. */
+/** 확대 뷰는 처음 열 때만 불러온다. */
 const ImageLightbox = dynamic(
   () => import("@/components/ImageLightbox").then((module) => module.ImageLightbox),
   { ssr: false },
 );
 
-/** 새 탭으로 여는 링크에 붙인다. `noopener` 는 원본 탭 조작을, `noreferrer` 는 유입 경로 노출을 막는다. */
+/** 새 탭 링크에 적용할 보안 rel 속성. */
 const EXTERNAL_LINK_REL = "noreferrer noopener";
 
-/** 아직 실려 오지 않아 크기를 모르는 이미지의 임시 비율. 흔한 가로 사진 비율을 쓴다. */
+/** 크기를 알기 전까지 사용할 기본 가로 이미지 비율. */
 const FALLBACK_IMAGE_SIZE = { w: 1600, h: 1000 } as const;
 
 /**
- * 주소가 죽었을 때 대신 세우는 워드마크. 표지 없는 카드가 쓰는 것과 같은 그림이라
- * 개발 섹션 안에서 낯설지 않다. 깨진 이미지 아이콘이나 빈 자리를 남기면 글이 잘린 것처럼 보인다.
+ * 이미지를 불러오지 못했을 때 표시하는 워드마크.
+ * 빈 영역 대신 개발 섹션에서 사용하는 이미지를 보여 준다.
  *
  * 라이트박스는 두 테마 모두 어두운 scrim 위에 뜨므로 그쪽은 항상 dark 를 쓴다.
  */
@@ -96,12 +96,12 @@ const renderInlines = (nodes: ArticleInline[], lang: Lang): ReactNode[] =>
 type RenderContext = {
   lang: Lang;
   highlights: ArticleCodeHighlights;
-  /** 이미지 주소 → 라이트박스 인덱스. 같은 주소가 두 번 나오면 먼저 나온 자리로 연다. */
+  /** 이미지 주소별 첫 번째 라이트박스 인덱스. */
   imageIndex: ReadonlyMap<string, number>;
   onOpenImage: (index: number) => void;
-  /** 원본 픽셀 크기를 알려 준다 — 라이트박스가 스테이지 비율을 잡는 데 쓴다. */
+  /** 라이트박스 비율 계산에 사용할 원본 픽셀 크기. */
   onMeasureImage: (src: string, width: number, height: number) => void;
-  /** 주소가 죽은 이미지. 본문과 라이트박스가 함께 폴백으로 갈아탄다. */
+  /** 로드에 실패해 본문과 라이트박스에서 대체 이미지를 사용할 주소. */
   brokenImages: Readonly<Record<string, true>>;
   onImageError: (src: string) => void;
 };
@@ -206,7 +206,7 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
               onClick={() => context.onOpenImage(context.imageIndex.get(block.src) ?? 0)}
             >
               {context.brokenImages[block.src] ? (
-                // 주소가 죽었다. 테마에 맞는 워드마크 하나만 보이고 나머지는 CSS 가 감춘다.
+                // 로드에 실패하면 테마에 맞는 워드마크를 표시한다.
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -279,7 +279,7 @@ type Props = { document: ArticleDocument; lang: Lang; highlights: ArticleCodeHig
  * 캐러셀과 같은 `ImageLightbox` 이고, 그 안에 들어가야 처음 열릴 때 내려온다.
  *
  * ⚠️ Markdown 은 주소를 하나만 담는다. 지금은 본문과 확대 뷰가 같은 파일을 쓰고, 960 프리뷰와
- * 2048 원본을 나누는 일은 Storage 업로더가 생기는 B5 에서 함께 정한다.
+ * 본문에는 2048px 메인 이미지 주소를 사용한다.
  *
  * 본문은 한국어 원문 하나뿐이라 컨테이너에 `lang="ko"` 를 못 박는다. 영어 경로에서도 같은
  * 원문을 보여 주므로, 이 표시가 없으면 보조 기술과 브라우저 번역이 문서 언어를 잘못 읽는다.
@@ -306,7 +306,7 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
   // 본문 이미지가 실려 온 뒤 알게 되는 원본 크기. 라이트박스는 이 비율로 스테이지를 잡는다.
   const [sizes, setSizes] = useState<Record<string, { w: number; h: number }>>({});
 
-  // 주소가 죽은 이미지. 본문과 확대 뷰가 같은 판단을 써야 둘이 어긋나지 않는다.
+  // 본문과 확대 뷰가 같은 이미지 오류 상태를 사용한다.
   const [brokenImages, setBrokenImages] = useState<Record<string, true>>({});
 
   const onMeasureImage = useCallback((src: string, width: number, height: number) => {
@@ -323,7 +323,7 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
   const lightboxImages = useMemo(
     () =>
       images.map(({ src }) =>
-        // 주소가 죽은 자리도 목록에서 빼지 않는다 — 빼면 `›` 로 넘길 때 인덱스가 어긋난다.
+        // 로드에 실패한 이미지도 목록에 남겨 탐색 인덱스를 유지한다.
         // 확대 뷰는 두 테마 모두 어두운 scrim 위라 워드마크도 dark 를 쓴다.
         brokenImages[src]
           ? { url: BROKEN_IMAGE_FALLBACK.dark, path: src, ...BROKEN_IMAGE_SIZE }
@@ -339,7 +339,7 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
   );
 
   // 본문 트리는 통째로 메모한다. 이미지 크기(`sizes`)·라이트박스 개폐는 본문 밖의 상태라
-  // 그때마다 수천 노드를 다시 만들 이유가 없다 — 죽은 이미지 표시(`brokenImages`)만 본문을 바꾼다.
+  // 이미지 오류 상태가 바뀔 때만 본문 노드를 다시 만든다.
   const blocks = useMemo(
     () =>
       renderBlocks(document.blocks, {

@@ -333,6 +333,8 @@ describe("migrateImageThumbnails", () => {
       }),
     );
 
-    await expect(migrateImageThumbnails(false)).rejects.toThrow("원본 이미지 다운로드 실패 (503)");
+    await expect(migrateImageThumbnails(false)).rejects.toThrow(
+      "원본 이미지를 불러오지 못했습니다. (503)",
+    );
   });
 });

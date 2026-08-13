@@ -22,8 +22,7 @@ import type {
 } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
 /**
- * 목록 행으로 줄이는 투영. 로컬 구현도 전체를 읽지만 **반환은 이 필드로 제한**한다 —
- * B5 에서 Firestore REST projection 으로 갈아 끼울 때 화면이 받는 모양이 그대로여야 한다.
+ * 글 전체에서 관리자 목록에 필요한 필드만 고른다.
  *
  * @param {DevArticle} article 저장된 글 전체.
  * @returns {AdminDevArticleListItem} 목록 행에 필요한 필드만.
@@ -55,10 +54,8 @@ const seedStore = async (): Promise<DevArticleStore> => {
 /**
  * 브라우저 로컬 저장소를 Firestore 대신 쓰는 관리자 저장소.
  *
- * 계획 §2의 mock 우선 원칙 — 데이터 계약과 화면이 굳기 전에는 Firebase 컬렉션을 만들지
- * 않는다 — 을 만족하는 자리다. 개발 편의용이며 운영 데이터가 아니다. 여기 저장한 글은
+ * 개발 중에는 Firebase 대신 브라우저 저장소를 사용한다. 여기 저장한 글은
  * 브라우저에만 남고 공개 페이지(서버가 `mocks/dev-articles.ts` 를 읽는다)에는 나타나지 않는다.
- * B5 에서 Firestore 구현이 같은 인터페이스로 들어오면 두 쪽이 하나가 된다.
  *
  * `firstPublishedAt` 스탬프를 여기서 찍는다. 발행은 폼 저장과 목록 토글 두 경로로 들어오는데,
  * 저장소가 모든 쓰기의 유일한 통로라 규칙을 한 번만 적으면 된다.
@@ -73,8 +70,7 @@ const createLocalDevArticleRepository = (
   now: () => Date = () => new Date(),
 ): DevArticleRepository => {
   /**
-   * 쓰기 직렬화 큐 — `local-list-repository` 와 같은 이유다. 저장소가 문서 단위가 아니라
-   * 배열 전체를 읽고 다시 쓰므로, 같은 태스크에서 겹쳐 시작한 쓰기가 서로의 변경을 덮어쓴다.
+   * 저장소가 배열 전체를 다시 쓰므로 큐에서 쓰기를 차례로 실행한다.
    * 앞선 쓰기가 실패해도 다음 쓰기는 이어 간다.
    */
   let writeQueue: Promise<unknown> = Promise.resolve();
@@ -97,7 +93,7 @@ const createLocalDevArticleRepository = (
     const seeded = await seedStore();
     // seed 쓰기 실패를 무시하면 매 호출 mock 을 다시 만들어 편집이 전혀 남지 않는다.
     save(seeded);
-    // 다시 읽어 저장 형식을 거친 사본을 쓴다 — mock 모듈의 객체를 그대로 들고 있지 않는다.
+    // 저장 형식으로 다시 읽은 사본을 사용한다.
     return readDevArticleStore(storage) ?? seeded;
   };
 
@@ -115,9 +111,8 @@ const createLocalDevArticleRepository = (
   /**
    * 이 저장소가 아는 데이터로 `assertArticlePublishable` 의 context 를 만든다.
    *
-   * 연관 프로젝트 공개 여부만은 여기서 보지 못한다 — mock 저장소가 프로젝트 목록을 모른다.
-   * 자기 참조를 그대로 넘겨 이 항목은 항상 통과시키고, 공개 상세가 렌더 단계에서 걸러 낸다
-   * (비공개 프로젝트 카드는 빠진다). live 구현은 프로젝트 projection 으로 실제 검사한다.
+   * mock 저장소에는 프로젝트 목록이 없으므로 연관 프로젝트 공개 여부는 검사하지 않는다.
+   * 공개 상세 화면은 비공개 프로젝트를 다시 걸러 낸다.
    *
    * @param {string} id 발행하려는 글의 문서 ID.
    * @param {DevArticleInput} input 발행하려는 저장 값.

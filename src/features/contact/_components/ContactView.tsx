@@ -23,11 +23,11 @@ import type { SiteConfig, SiteLink } from "@/types/site";
 
 import styles from "./ContactView.module.css";
 
-/** Web3Forms 키 미설정 시 mailto 폴백 대상 — site.links 에 mailto 가 없을 때의 최후 폴백. */
+/** Web3Forms 키와 연락처 링크가 없을 때 사용할 이메일 주소. */
 const FALLBACK_EMAIL = "hello@example.com";
 const MIN_TEXTAREA_HEIGHT = 132;
 const CAPTCHA_HINT_ID = "contact-captcha-hint";
-/** 키가 있어야 Web3Forms 로 실제 발송한다 — 없으면 mailto 폴백이라 캡차도 필요 없다. */
+/** Web3Forms를 사용할 수 있는지 나타낸다. */
 const WEB3FORMS_ENABLED = Boolean(process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY);
 
 const TextareaResizeHandle = memo(
@@ -107,9 +107,9 @@ const TextareaResizeHandle = memo(
 TextareaResizeHandle.displayName = "TextareaResizeHandle";
 
 /**
- * WebMCP 에이전트 조작 표시 — 에이전트가 폼을 도구로 활성화하면 브라우저가 적용하는
- * 비표준 의사클래스. CSS Modules 파이프라인(Turbopack)이 미지의 의사클래스에 경고를 내므로
- * 런타임 <style> 주입으로 우회한다(plan 04 §7 대안). 미지원 브라우저는 셀렉터만 무시한다.
+ * WebMCP 에이전트가 폼을 활성화했을 때 적용할 비표준 의사클래스 스타일.
+ * CSS Modules 파이프라인(Turbopack)이 미지의 의사클래스에 경고를 내므로
+ * 런타임 `<style>`로 주입한다. 미지원 브라우저는 선택자만 무시한다.
  */
 const TOOL_ACTIVE_STYLE = `
 form[toolname]:tool-form-active {
@@ -122,7 +122,7 @@ form[toolname] button[type="submit"]:tool-submit-active {
 }
 `;
 
-/** 렌더마다 __html 객체를 새로 만들지 않도록 엘리먼트째 끌어올린다. */
+/** 렌더마다 같은 스타일 객체를 다시 만들지 않도록 모듈에서 한 번 생성한다. */
 const ToolActiveStyle = <style dangerouslySetInnerHTML={{ __html: TOOL_ACTIVE_STYLE }} />;
 
 const ContactForm = ({ to }: { to: string }) => {
@@ -133,11 +133,10 @@ const ContactForm = ({ to }: { to: string }) => {
   const emailRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const captcha = useCaptchaState(formRef);
-  // 챗봇 연락 초안 프리필 — 마운트 1회, uncontrolled 구조 그대로. 발송은 여전히 방문자 몫.
+  // 챗봇 초안은 첫 마운트에서만 입력하고 자동으로 발송하지 않는다.
   useContactDraft({ nameRef, emailRef, messageRef: textareaRef });
-  // 위젯이 렌더되지 않은 동안(스크립트 로드 전·차단됨)에는 잠그지 않는다 —
-  // 잠그면 캡차가 끝내 안 뜨는 환경에서 폼이 영영 죽은 버튼이 된다.
-  // 그 경우는 제출 시 use-contact-form 이 "captcha-required" 안내로 막는다.
+  // 캡차 위젯이 표시되기 전에는 제출 버튼을 잠그지 않는다.
+  // 제출 시 use-contact-form이 captcha-required 안내를 표시한다.
   const blockedByCaptcha = captcha.rendered && !captcha.solved;
 
   return (
@@ -146,8 +145,7 @@ const ContactForm = ({ to }: { to: string }) => {
       className={styles.form}
       onSubmit={submit}
       onInput={status === "idle" ? undefined : resetStatus}
-      // WebMCP 선언형 도구 — 에이전트는 입력 채우기까지만. toolautosubmit 은 붙이지 않는다
-      // (발송은 hCaptcha + 사람의 확인 필수 — use-contact-form 의 agentInvoked 분기가 차단).
+      // WebMCP는 입력만 채운다. 제출에는 캡차와 사용자의 확인이 필요하다.
       toolname="prepare_contact_message"
       tooldescription="Fill the contact form with a name, email, and message. The visitor must solve the captcha and press Send."
     >
@@ -221,7 +219,7 @@ const ContactForm = ({ to }: { to: string }) => {
       <button
         type="submit"
         className={styles.send}
-        // 전송 중에만 진짜 disabled 로 잠근다. 캡차 대기는 aria-disabled 로 알린다 —
+        // 전송 중에만 disabled를 사용하고 캡차 대기는 aria-disabled로 알린다.
         // 브라우저는 disabled 버튼을 제출 버튼으로 세지 않아, 실제 disabled 로 두면
         // 선언형 WebMCP 도구가 "No submit button was found" 로 아예 실패한다(W5 평가).
         // 미해결 상태의 실제 차단은 use-contact-form 의 captcha-required 분기가 맡는다.
@@ -252,7 +250,7 @@ const ContactForm = ({ to }: { to: string }) => {
 };
 
 /**
- * 연락처 (/contact) — Web3Forms 발송 폼(키 미설정 시 mailto 폴백) + 직접 연락 버튼.
+ * 연락처 화면. Web3Forms 발송 폼과 직접 연락 버튼을 제공한다.
  *
  * @param {{ site: SiteConfig }} props
  * @param {SiteConfig} props.site

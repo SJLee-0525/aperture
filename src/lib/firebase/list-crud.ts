@@ -23,18 +23,17 @@ type WithId = { id: string };
 /**
  * 쓰기 후 RAG 동기화 여부를 정하는 정책.
  *
- * 작업 종류(kind)는 받지 않는다 — 정책은 쓰기 전후 문서 상태만으로 판단한다.
- * (도메인 저장소가 `setPublished` 를 `update` 경로로 우회해도 계약이 어긋나지 않는다.)
+ * 정책은 작업 이름 대신 쓰기 전후 문서 상태로 판단한다.
  * `before` 는 쓰기 직전 스냅샷(생성이면 `null`), `after` 는 쓰기 결과(삭제면 `null`)다.
  *
- * `"remove"` 는 별도 삭제 API 호출이 아니다 — `requestRagSync` 에는 작업 종류 인자가 없고,
+ * `"remove"`도 `requestRagSync`를 호출한다. 동기화 경로가 원본을 다시 읽고
  * embeddings route 가 원본을 다시 읽어 비공개·부재 문서의 청크를 비우므로 `"sync"` 와 같은
- * 요청으로 수렴한다. 세 값을 유지하는 이유는 §11 표 계약을 테스트가 그대로 읽게 하기 위해서다.
+ * 비공개 또는 삭제된 문서의 청크를 비운다.
  */
 type PostSyncPolicy<T> = (before: T | null, after: T | null) => "sync" | "remove" | "skip";
 
 /**
- * 리스트 컬렉션 공통 관리자 CRUD 팩토리 — 컬렉션명·매퍼·라벨만 다르다.
+ * 목록형 컬렉션의 공통 관리자 CRUD 팩토리.
  * albums.ts 의 개별 함수 패턴을 컬렉션마다 반복하지 않고 한 곳으로 압축(음악 works/awards/media·개발 projects 공용).
  * 목록은 초안 포함 전체를 order 순으로 반환(관리자 전용, Rules 의 isAdmin 로 허용).
  *
@@ -61,8 +60,7 @@ const listCrud = <T extends WithId>(
   const consultPolicy = Boolean(ragSourceType && syncPolicy);
 
   /**
-   * 정책 판단용 쓰기 직전 스냅샷. 정책을 쓰지 않으면 읽기 자체를 하지 않는다 —
-   * 정책 미주입 컬렉션의 읽기 횟수와 동작이 이 확장 전과 같아야 한다.
+   * 정책 판단에 사용할 쓰기 직전 스냅샷. 정책이 없으면 읽지 않는다.
    *
    * @param {string} id 스냅샷을 읽을 문서 ID.
    * @returns {Promise<BeforeSnapshot | null>} 정책 미사용이면 `null`. 조회 실패는 `failed` 로 표시하고 쓰기를 막지 않는다.
@@ -80,8 +78,7 @@ const listCrud = <T extends WithId>(
   /**
    * 쓰기 성공 뒤 RAG 동기화를 요청한다. `ragSourceType` 이 없으면 아무것도 하지 않는다.
    *
-   * 스냅샷 조회가 실패한 쓰기는 정책을 묻지 않고 동기화한다(보수적 fallback) —
-   * `skip` 오판으로 stale 청크가 남는 쪽보다 불필요한 동기화 한 번이 낫다.
+   * 스냅샷 조회가 실패하면 청크가 남지 않도록 동기화를 요청한다.
    *
    * @param {string} id 동기화할 문서 ID.
    * @param {BeforeSnapshot | null} snapshot `readBeforeWrite` 결과. 생성은 `{ before: null, failed: false }` 를 직접 만든다.
@@ -144,7 +141,7 @@ const listCrud = <T extends WithId>(
         throw new Error(`${label} 저장에 실패했습니다.`);
       }
       requestPublicRevalidate(cacheTag);
-      // 생성의 "쓰기 직전 상태" 는 정의상 문서 없음 — 스냅샷 조회 없이 만든다.
+      // 생성 전 상태는 문서 없음으로 처리한다.
       await syncAfterWrite(id, { before: null, failed: false }, { id, ...input } as T);
     },
     /**
@@ -191,7 +188,7 @@ const listCrud = <T extends WithId>(
         throw new Error("공개 상태 변경에 실패했습니다.");
       }
       requestPublicRevalidate(cacheTag);
-      // 쓰기 결과는 스냅샷에 published 만 얹은 모양이다. 스냅샷이 없으면(정책 미사용·조회 실패)
+      // 이전 스냅샷의 published 값만 바꿔 정책에 전달한다. 스냅샷이 없으면
       // syncAfterWrite 가 정책을 묻지 않으므로 after 는 쓰이지 않는다.
       const after = snapshot?.before ? ({ ...snapshot.before, published } as T) : null;
       await syncAfterWrite(id, snapshot, after);

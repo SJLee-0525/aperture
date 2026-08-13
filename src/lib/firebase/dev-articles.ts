@@ -27,7 +27,7 @@ import type { ImageMeta } from "@/types/image";
 /**
  * 클라이언트 SDK Timestamp 를 nullable `Date` 로 바꾼다.
  * `publishedAt`·`firstPublishedAt` 은 초안에서 비어 있는 것이 정상이라
- * epoch 폴백 대신 `null` 을 보존해야 한다(REST 디코더 `toNullableDate` 와 같은 계약).
+ * 값이 없으면 REST 디코더와 같이 `null`을 보존한다.
  *
  * @param {unknown} value Firestore Timestamp 또는 누락 값.
  * @returns {Date | null} 변환된 날짜. 값이 없으면 `null`.
@@ -39,7 +39,7 @@ const timestampToDate = (value: unknown): Date | null =>
 
 /**
  * 클라이언트 SDK 로 읽은 블로그 글 문서를 관리자 편집 모델로 정규화한다.
- * REST 경로의 `toDevArticle`(`public/dev-articles.ts`)과 같은 기본값 계약을 지킨다.
+ * REST 경로의 `toDevArticle`과 같은 기본값을 사용한다.
  *
  * @param {string} id Firestore 문서 ID.
  * @param {DocumentData} d Firestore에서 읽은 문서 필드.
@@ -64,11 +64,9 @@ const toDevArticleEntity = (id: string, d: DocumentData): DevArticle => ({
 
 /**
  * 블로그 글 CRUD. 발행 조건·firstPublishedAt 스탬프 같은 도메인 규칙은 여기 없고
- * `features/admin-dev-articles/_lib/live-dev-article-repository` 가 감싸서 얹는다.
+ * 도메인 검증은 live 저장소가 이 CRUD를 감싸서 적용한다.
  *
- * ⚠️ RAG 배선은 B6 몫이다 — `ragSourceType` 이 `undefined` 라 `devArticleRagPolicy` 의
- * 결정과 무관하게 동기화 요청이 0건이다. B6 에서 `RagSyncSourceType` 에 article 타입을
- * 등록하면서 4번째 인자를 채우면 정책이 그대로 켜진다.
+ * article RAG 타입을 연결하기 전까지는 동기화 요청을 보내지 않는다.
  */
 const devArticlesCrud = listCrud<DevArticle>(
   COLLECTIONS.DEV_ARTICLES,
@@ -98,7 +96,7 @@ const findArticleSlugOwner = async (slug: string, selfId: string): Promise<strin
 const TAGS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
 
 /**
- * 태그 사전 전체를 id 오름차순으로 읽는다. 순서 계약은 공개 getter 와 같다 —
+ * 태그 전체를 공개 getter와 같은 ID 오름차순으로 읽는다.
  * 문서 ID가 태그 id 이므로 클라이언트 정렬로 `__name__` 순서를 재현한다.
  *
  * @returns {Promise<DevArticleTag[]>} id 오름차순의 태그 사전.
@@ -119,7 +117,7 @@ const listDevArticleTagsAdmin = async (): Promise<DevArticleTag[]> => {
 };
 
 /**
- * 새 태그 문서를 만든다. 문서 ID = 태그 id — mock 저장소와 같은 중복 거부 계약을 지킨다
+ * 태그 ID를 문서 ID로 사용하며 기존 문서는 덮어쓰지 않는다.
  * (`setDoc` 은 기본이 덮어쓰기라 존재 검사를 먼저 한다).
  *
  * @param {DevArticleTag} tag 저장할 태그. id 는 문서 ID로 쓰고 필드에는 라벨만 남긴다.
@@ -138,7 +136,7 @@ const createDevArticleTag = async (tag: DevArticleTag): Promise<void> => {
 };
 
 /**
- * 태그 라벨을 수정한다. 태그 id 는 문서 ID이자 글 `tags[]` 의 외래키라 바꿀 수 없다 —
+ * 태그 라벨만 수정한다. 태그 ID는 글이 참조하므로 바꾸지 않는다.
  * id 변경이 필요하면 새 태그를 만들고 글을 옮긴 뒤 지운다.
  *
  * @param {DevArticleTag} tag 수정할 태그. id 로 문서를 찾고 ko/en 만 갱신한다.
@@ -158,7 +156,7 @@ const updateDevArticleTag = async (tag: DevArticleTag): Promise<void> => {
 
 /**
  * 태그 문서를 삭제한다. 사용 글 수 검증은 저장소(`live-dev-article-repository`)가
- * 글 목록을 읽어 먼저 수행한다 — 여기는 문서 삭제와 캐시 갱신만 담당한다.
+ * 사용 여부 검사는 저장소에서 먼저 수행하고 여기서는 문서와 캐시만 갱신한다.
  *
  * @param {string} id 삭제할 태그 id.
  * @returns {Promise<void>} 삭제와 공개 캐시 갱신이 끝나면 완료된다.

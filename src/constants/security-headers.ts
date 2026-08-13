@@ -1,12 +1,10 @@
 /**
- * 전역 HTTP 보안 응답 헤더 — `next.config.ts` 의 headers() 가 모든 경로에 적용한다.
+ * `next.config.ts`가 모든 경로에 적용하는 HTTP 보안 헤더.
  *
- * 이 저장소에는 백엔드가 없어 응답 헤더가 브라우저 측 방어의 전부다.
- * 특히 X-Frame-Options 는 `/admin/login` 이 iframe 에 실려 클릭재킹으로
- * 관리자 1명의 계정이 탈취되는 경로를 막는다 (뚫리면 전 섹션 쓰기 권한이 넘어간다).
+ * X-Frame-Options는 관리자 로그인 화면을 이용한 클릭재킹을 차단한다.
  */
 
-/** 외부 의존 호스트 — CSP 와 preconnect 가 같은 목록을 보도록 한곳에서 정의한다. */
+/** CSP와 preconnect가 공유하는 외부 호스트 목록. */
 const FIREBASE_HOSTS = [
   "https://firestore.googleapis.com",
   "https://identitytoolkit.googleapis.com",
@@ -17,18 +15,17 @@ const FIREBASE_HOSTS = [
 ] as const;
 
 /**
- * MapLibre 스타일(style.json)과 타일·sprite·glyphs — 키 없는 CARTO 무료 타일.
+ * MapLibre 스타일과 타일, sprite, glyph를 제공하는 CARTO 호스트.
  * style.json 은 `basemaps.cartocdn.com`, 실제 벡터 타일(.mvt)은 샤딩된
- * `tiles-a`~`tiles-d.basemaps.cartocdn.com` 에서 온다 — 와일드카드는 bare 도메인을
- * 포함하지 않으므로 둘 다 필요하다. 서브도메인이 빠지면 스타일·글리프만 로드돼
- * 클러스터 핀은 뜨는데 베이스맵이 백지가 된다.
+ * `tiles-a`~`tiles-d.basemaps.cartocdn.com`에서 온다. 와일드카드는 bare 도메인을
+ * 포함하지 않으므로 두 주소를 모두 등록한다.
  */
 const CARTO_HOSTS = ["https://basemaps.cartocdn.com", "https://*.basemaps.cartocdn.com"] as const;
 
 /**
  * 관리자가 올린 이미지가 실제로 저장되는 호스트.
  * 블로그 본문 Markdown 의 이미지 출처 정책(`features/dev-blog/_lib/markdown-url-policy.ts`)이
- * 같은 목록을 본다 — 두 곳에 따로 적으면 한쪽만 늘었을 때 CSP 나 렌더 중 하나가 조용히 막는다.
+ * 같은 목록을 사용해 CSP와 렌더 정책이 어긋나지 않게 한다.
  */
 const STORAGE_IMAGE_HOSTS = [
   "https://firebasestorage.googleapis.com",
@@ -43,9 +40,9 @@ const YOUTUBE_FRAME_HOSTS = [
 ] as const;
 
 /**
- * 연락 폼 스팸 차단 — Web3Forms 클라이언트 스크립트가 hCaptcha 위젯을 렌더한다.
+ * Web3Forms가 사용하는 hCaptcha 호스트.
  * hCaptcha 는 스크립트·프레임·스타일·XHR 을 모두 자기 호스트에서 가져오므로 네 지시어에 함께 넣는다.
- * 하나라도 빠지면 위젯이 안 뜨고, 토큰이 없으니 Web3Forms 가 제출을 거부한다(= 폼 전체가 죽는다).
+ * 하나라도 빠지면 위젯이 표시되지 않아 폼을 제출할 수 없다.
  */
 const CAPTCHA_HOSTS = [
   "https://web3forms.com",
@@ -54,9 +51,9 @@ const CAPTCHA_HOSTS = [
 ] as const;
 
 /**
- * GA4(gtag.js) — 로더는 googletagmanager, 수집 비콘은 google-analytics 로 나간다.
+ * GA4 로더와 이벤트 수집 호스트.
  * 지역 엔드포인트(`region1.google-analytics.com`)와 서버 사이드 리디렉션 대상
- * (`*.analytics.google.com`)까지 열지 않으면 이벤트가 조용히 유실된다.
+ * (`*.analytics.google.com`)도 허용해야 모든 이벤트를 전송할 수 있다.
  */
 const ANALYTICS_SCRIPT_HOSTS = ["https://www.googletagmanager.com"] as const;
 
@@ -72,11 +69,10 @@ const ANALYTICS_CONNECT_HOSTS = [
  * nonce 로 좁히려면 middleware 에서 요청마다 nonce 를 발급해 두 스크립트에 주입해야 한다.
  * style-src 'unsafe-inline' 은 React inline style prop(24곳)과 MapLibre 런타임 스타일 때문.
  *
- * 스크립트가 느슨해도 나머지는 실질 방어가 된다 —
- * connect-src 가 유출 통로를, base-uri·form-action 이 주입된 <base>·폼 하이재킹을 막는다.
+ * connect-src는 허용하지 않은 전송을 막고, base-uri와 form-action은 주입된
+ * `<base>` 및 폼 대상 변경을 차단한다.
  *
- * 'unsafe-eval' 은 개발에서만 연다 — Next dev(webpack HMR·React Refresh)가 모듈을 `eval` 로
- * 감싸기 때문이다. 빠뜨리면 dev 서버의 스크립트가 통째로 차단돼 하이드레이션이 죽는다.
+ * 'unsafe-eval'은 webpack HMR과 React Refresh 때문에 개발 환경에서만 허용한다.
  * 프로덕션 빌드는 eval 을 쓰지 않으므로 배포 정책에는 절대 들어가지 않아야 한다.
  *
  * @param {boolean} isDevelopment
@@ -101,7 +97,7 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) =>
     // data: 는 어느 경로도 fetch 하지 않아 넣지 않는다.
     `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...CARTO_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
     `frame-src ${[...YOUTUBE_FRAME_HOSTS, ...CAPTCHA_HOSTS].join(" ")}`,
-    // MapLibre 는 워커를 blob: URL 로 생성한다 — 빠지면 지도가 통째로 죽는다.
+    // MapLibre 워커가 사용하는 blob: URL을 허용한다.
     "worker-src 'self' blob:",
     "upgrade-insecure-requests",
   ].join("; ");
@@ -109,7 +105,7 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) =>
 const CONTENT_SECURITY_POLICY = buildContentSecurityPolicy(process.env.NODE_ENV !== "production");
 
 /**
- * 강제 모드 — 위반 리소스는 실제로 차단된다.
+ * 위반 리소스를 차단하는 CSP 강제 모드.
  * 외부 호스트를 새로 붙일 때(임베드·위젯·폰트 CDN 등)는 위 목록에 먼저 추가해야 한다.
  * 되돌려 관찰만 하려면 `Content-Security-Policy-Report-Only` 로 바꾼다
  * (그 경우 브라우저가 upgrade-insecure-requests 를 무시하며 콘솔 경고를 남긴다).

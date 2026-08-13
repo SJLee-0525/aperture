@@ -1,16 +1,14 @@
 /**
  * 블로그 본문의 렌더 계약.
  *
- * Markdown 원문은 관리자가 저장한 문자열이고 그대로 공개 페이지의 DOM 이 된다.
- * 이 저장소에는 백엔드가 없어 렌더 경계가 곧 방어선이므로, 파서가 만든 mdast 를
- * 그대로 렌더하지 않고 **여기 정의한 노드로만** 옮긴 뒤 화면에 넘긴다.
+ * 파서가 만든 mdast를 허용한 노드로 변환한 뒤 화면에 전달한다.
  * 목록에 없는 노드(임의 HTML, 각주, 참조 링크 등)는 옮겨지지 않고 issue 로 남는다.
  * 덕분에 HTML 문자열 단계와 sanitizer 계층이 없고 `dangerouslySetInnerHTML` 도 쓰지 않는다.
  */
 
 import type { ArticleCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
 
-/** 원문 위치 — 관리자 미리보기가 오류 줄을 짚어 준다. */
+/** 관리자 미리보기에 표시할 원문 위치. */
 type ArticleSourcePoint = { line: number; column: number };
 
 type ArticleInline =
@@ -24,11 +22,11 @@ type ArticleInline =
 /**
  * 링크를 어떻게 열지. 세 경우의 처리가 서로 달라 boolean 하나로 뭉뚱그리지 않는다.
  * `internal` 은 언어 프리픽스를 붙여 같은 탭에서, `external` 은 새 탭 + 안전한 `rel` 로,
- * `mail` 은 새 탭 없이 그대로 연다.
+ * `mail`은 현재 탭에서 연다.
  */
 type ArticleLinkTarget = "internal" | "external" | "mail";
 
-/** 표 열 정렬 — mdast 의 `null`(지정 없음)을 그대로 보존한다. */
+/** 표 열 정렬. 지정하지 않은 열은 `null`이다. */
 type ArticleTableAlign = "left" | "center" | "right" | null;
 
 type ArticleListItem = { children: ArticleBlock[] };
@@ -54,7 +52,7 @@ type ArticleBlock =
       align: ArticleTableAlign[];
       /** 첫 행의 셀. */
       header: ArticleInline[][];
-      /** 나머지 행 → 셀 순서. 열 수가 header 와 다를 수 있어 렌더가 보정한다. */
+      /** 나머지 행의 셀. 열 수가 header와 다르면 렌더러가 보정한다. */
       rows: ArticleInline[][][];
     }
   | {
@@ -77,8 +75,7 @@ type ArticleBlock =
 type ArticleDocument = { blocks: ArticleBlock[] };
 
 /**
- * 발행을 막는 사유. 문구가 아니라 코드로만 다룬다 —
- * 관리자에게 보여 줄 한국어·영어 문장은 화면이 생기는 단계에서 사전을 거쳐 붙인다.
+ * 발행을 막는 Markdown 오류 코드.
  */
 type ArticleMarkdownIssueCode =
   /** 허용 목록에 없는 Markdown 요소. `detail` 에 원래 노드 종류가 들어간다. */
@@ -95,13 +92,13 @@ type ArticleMarkdownIssueCode =
   | "link-not-allowed"
   /** 앞에 이미지가 없는 `::caption`. */
   | "caption-without-image"
-  /** 앞 이미지에 이미 캡션이 붙어 있는 `::caption` — 어느 쪽을 남길지 글쓴이만 안다. */
+  /** 앞 이미지에 이미 캡션이 있는 중복 `::caption`. */
   | "caption-duplicated"
-  /** 설명이 비어 있는 `::caption` — 지우려던 것인지 쓰다 만 것인지 구분할 수 없다. */
+  /** 설명이 비어 있는 `::caption`. */
   | "caption-empty"
   /** 영상 ID 를 뽑을 수 없는 `::youtube` 주소. */
   | "youtube-url-invalid"
-  /** `title` 없는 `::youtube` — facade 와 iframe 의 accessible name 이 비어 버린다. */
+  /** accessible name에 사용할 `title`이 없는 `::youtube`. */
   | "youtube-title-missing"
   /** 이름을 모르는 지시자. */
   | "unknown-directive"
@@ -113,7 +110,7 @@ type ArticleMarkdownIssueCode =
 type ArticleMarkdownIssue = {
   code: ArticleMarkdownIssueCode;
   point: ArticleSourcePoint;
-  /** 원인을 좁히는 값. 노드 종류, 거부된 주소처럼 그대로 화면에 보여 줘도 되는 것만 담는다. */
+  /** 노드 종류나 거부된 주소처럼 화면에 표시할 수 있는 오류 정보. */
   detail?: string;
 };
 

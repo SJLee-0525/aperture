@@ -58,9 +58,9 @@ const OPEN_TOOL: WebMcpToolDefinition = {
 };
 
 /**
- * 기술 태그 정규화 — 대소문자와 `.js` 접미사를 지운다.
+ * 기술 태그에서 대소문자와 `.js` 접미사 차이를 제거한다.
  * 에이전트는 "React" 라고 묻는데 데이터는 "React.js" 라 정확 일치만으로는 어긋난다(W5 평가).
- * 부분 일치는 쓰지 않는다 — "React" 가 "React Router"·"React Hook Form" 까지 걸어 결과를 희석한다.
+ * React와 React Router처럼 다른 기술이 섞이지 않도록 정확히 비교한다.
  *
  * @param {string} value
  * @returns {string}
@@ -68,7 +68,7 @@ const OPEN_TOOL: WebMcpToolDefinition = {
 const normalizeTech = (value: string): string => value.trim().toLowerCase().replace(/\.js$/, "");
 
 /**
- * 기술 태그 매칭 — 정규화 후 정확 일치.
+ * 정규화한 기술 태그가 정확히 일치하는지 확인한다.
  *
  * @param {DevProjectCardData} project
  * @param {string} tech 에이전트가 넘긴 기술 태그 인자.
@@ -80,11 +80,10 @@ const matchesTech = (project: DevProjectCardData, tech: string): boolean => {
 };
 
 /**
- * /dev/projects 의 WebMCP 도구 3종 — DevProjectsView 안(useQueryModal 곁)에서 마운트한다.
- * open_project 는 뷰의 `select` 를 그대로 호출해 화면 클릭과 같은 경로(?project= 딥링크)로 연다.
+ * 개발 프로젝트 조회와 상세 열기를 제공하는 WebMCP 도구.
  *
  * @param {DevProjectCardData[]} projects 서버 투영 프로젝트 카드(techTags 포함).
- * @param {(id: string | null) => void} select useQueryModal 의 select — 상세 모달 열기.
+ * @param {(id: string | null) => void} select 상세 모달을 여는 함수.
  * @returns {void}
  */
 const useDevTools = (projects: DevProjectCardData[], select: (id: string | null) => void): void => {
@@ -100,7 +99,7 @@ const useDevTools = (projects: DevProjectCardData[], select: (id: string | null)
         return `No projects use "${tech}". Known tech tags: ${known.join(", ")}.`;
       }
     }
-    // year 는 데이터상 문자열("2025") — 숫자·문자열 인자를 모두 받아 문자열로 비교한다.
+    // 연도 인자는 숫자와 문자열을 모두 문자열로 바꿔 비교한다.
     if (typeof args.year === "number" || (typeof args.year === "string" && args.year.trim())) {
       const year = String(args.year);
       matched = matched.filter((project) => project.year === year);
@@ -125,7 +124,7 @@ const useDevTools = (projects: DevProjectCardData[], select: (id: string | null)
       [
         `${pickText(project.title, lang)} (${project.year}) · ${pickText(project.category, lang)}`,
         pickText(project.summary, lang),
-        // 성과·수상은 "무슨 상 받았어" 류 질의의 유일한 출처다 — 빠지면 답할 길이 없다.
+        // 검색 결과에 프로젝트 성과와 수상 내역을 포함한다.
         ...project.achievements.map((item) => `- ${pickText(item, lang)}`),
         `Tech: ${project.techTags.join(", ")}`,
         localizePath(lang, devProjectRoute(project.id)),

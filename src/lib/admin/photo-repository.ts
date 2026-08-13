@@ -22,11 +22,11 @@ import type { Photo } from "@/types/photo";
 
 type PhotoRepository = AdminListRepository<Photo, AdminPhotoListItem>;
 
-/** 저장 형식 버전 — `Photo` 필드 계약이 바뀌면 올린다. */
+/** Photo 저장 형식 버전. */
 const STORE_VERSION = 1;
 
 /**
- * 목록 행 투영 — live REST projection(`listPhotoItemsAdmin`)과 같은 필드.
+ * 관리자 사진 목록에 필요한 필드만 고른다.
  * EXIF·좌표·본문 격의 큰 필드를 빼서 목록 화면이 받는 양을 live 와 맞춘다.
  *
  * @param {Photo} photo 저장된 사진 전체.
@@ -41,7 +41,7 @@ const toListItem = ({ id, title, image, order, published }: Photo): AdminPhotoLi
 });
 
 /**
- * 사진 삭제 후 모든 앨범의 사진·커버 참조를 정리한다 — live `deletePhoto` 의 batch 정리와
+ * 사진을 삭제한 뒤 앨범의 사진 및 커버 참조를 정리한다.
  * 같은 결과를 mock 앨범 저장소 위에서 만든다(같은 순수 함수 `removePhotoFromAlbum` 공유).
  * live 처럼 앨범의 `cover` snapshot 은 건드리지 않는다.
  *
@@ -63,8 +63,7 @@ const removePhotoReferencesFromAlbums = async (photoId: string): Promise<void> =
 };
 
 /**
- * mock 구현 — 삭제 시 live 의 batch·Storage 정리에 해당하는 두 후처리를 더한다:
- * 앨범 참조 정리와 `photos/{id}` objectURL 회수.
+ * 사진 삭제 시 앨범 참조와 해당 object URL을 함께 정리하는 mock 저장소.
  *
  * @returns {PhotoRepository} 브라우저 로컬 저장소에 붙은 사진 CRUD.
  */
@@ -101,8 +100,8 @@ const createMockPhotoRepository = (): PhotoRepository => {
 };
 
 /**
- * live 구현 — 지금까지 훅이 조립하던 함수를 같은 계약으로 모은 것. 함수 자체는 바꾸지 않는다.
- * 삭제 시 Storage 이미지 정리는 기존 훅 어댑터의 동작 그대로 best-effort 다.
+ * Firestore CRUD와 Storage 정리를 묶은 live 사진 저장소.
+ * Storage 정리에 실패해도 문서 삭제 결과는 유지한다.
  *
  * @returns {PhotoRepository} Firestore 에 붙은 사진 CRUD.
  */

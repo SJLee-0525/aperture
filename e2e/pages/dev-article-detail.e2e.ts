@@ -22,8 +22,7 @@ test.describe("개발 블로그 상세", () => {
     test.skip(testInfo.project.name !== "desktop", "hover 확장은 포인터가 있는 환경 전용");
 
     await page.goto(ARTICLE);
-    // 이동이 끝난 뒤 위쪽 이미지가 대체 이미지로 다시 그려지면 제목이 기대 위치 아래로
-    // 밀린다 — 위치를 단언하기 전에 본문 높이를 먼저 굳힌다.
+    // 이미지 로드로 제목 위치가 바뀌지 않도록 본문 높이를 먼저 고정한다.
     await settleImages(page);
     await page.evaluate(() => window.scrollTo(0, 1000));
 
@@ -68,8 +67,7 @@ test.describe("개발 블로그 상세", () => {
     test.skip(testInfo.project.name !== "mobile", "서랍은 손가락으로 쓰는 환경 전용");
 
     await page.goto(ARTICLE);
-    // "남은 일" 위에 본문 이미지 2장이 있다. 로드 실패 후 대체 이미지가 스크롤보다 늦게
-    // 그려지면 제목이 아래로 밀려 top 단언이 어긋난다 — 높이를 먼저 굳힌다.
+    // 대체 이미지가 늦게 표시돼도 제목 위치가 바뀌지 않도록 높이를 먼저 고정한다.
     await settleImages(page);
     await page.evaluate(() => window.scrollTo(0, 1000));
     await page.getByRole("button", { name: "목차 열기" }).click();
@@ -116,7 +114,7 @@ test.describe("개발 블로그 상세", () => {
     const href = await row.getAttribute("href");
     if (!href) throw new Error("다른 글 표의 행에 주소가 없다");
 
-    // 제목 글자가 아니라 날짜 쪽을 누른다 — 셀마다 링크를 두던 때는 죽은 영역이었다.
+    // 링크가 행 전체를 덮는지 확인하려고 제목 밖의 날짜 영역을 누른다.
     await row.scrollIntoViewIfNeeded();
     const box = await row.boundingBox();
     if (!box) throw new Error("다른 글 표의 행을 찾지 못했다");

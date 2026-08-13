@@ -104,8 +104,8 @@ test.describe("Admin · 블로그", () => {
 
   test("태그 사전에서 추가·수정하고 사용 중 태그는 지울 수 없다", async ({ page }) => {
     await page.goto("/admin/dev/articles");
-    const panel = page.getByRole("region", { name: "태그 사전 관리" });
-    await expect(panel.getByRole("heading", { name: "태그 사전" })).toBeVisible();
+    const panel = page.getByRole("region", { name: "태그 관리" });
+    await expect(panel.getByRole("heading", { name: "태그 관리" })).toBeVisible();
 
     // 영어 라벨로 태그 ID를 만든다.
     await panel.getByLabel("새 태그 (한국어)").fill("웹엠시피");

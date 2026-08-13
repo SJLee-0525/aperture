@@ -1,6 +1,6 @@
 import type { Album } from "@/types/album";
 
-/** P1 mock 앨범 — design/claude_design/portfolio.js 의 ALBUMS 이식. photoIds는 mocks/photos.ts id 참조. */
+/** 디자인 샘플에서 가져온 mock 앨범. photoIds는 mocks/photos.ts의 ID를 참조한다. */
 const MOCK_ALBUMS: Album[] = [
   {
     id: "city-night",
@@ -39,8 +39,7 @@ const MOCK_ALBUMS: Album[] = [
     published: true,
   },
   {
-    // 커버로 쓸 공개 사진이 없는 앨범 — 상세 히어로의 plain variant(글자색 전환)를
-    // mock 과 시각 기준선에서 확인하는 fixture 다. 사진을 지워 참조가 비는 실제 상황과 같다.
+    // 공개 커버가 없는 상세 화면을 mock과 시각 기준선에서 확인한다.
     id: "unreleased",
     title: { ko: "미공개 모음", en: "Unreleased" },
     subtitle: { ko: "2026 · 준비 중", en: "2026 · In progress" },

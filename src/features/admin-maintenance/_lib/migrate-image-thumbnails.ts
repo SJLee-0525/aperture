@@ -73,7 +73,7 @@ const createMissingVariants = async (
   });
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(payload?.error || `원본 이미지 다운로드 실패 (${response.status})`);
+    throw new Error(payload?.error || `원본 이미지를 불러오지 못했습니다. (${response.status})`);
   }
   const source = await response.blob();
   const file = new File([source], "migration-source", {

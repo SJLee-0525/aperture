@@ -1,7 +1,7 @@
 type ChatRateLimitResult = {
   allowed: boolean;
   retryAfterSeconds: number;
-  /** 전역 일일 예산 소진으로 막힌 경우 — IP 제한과 사용자 안내 문구가 다르다. */
+  /** 전역 일일 한도 초과 여부. */
   scope?: "client" | "daily";
 };
 
@@ -24,7 +24,7 @@ type UpstashRateLimitOptions = Pick<RateLimitOptions, "limit" | "windowMs"> & {
   timeoutMs: number;
   fetcher: typeof fetch;
   fallback: ChatRateLimiter;
-  /** 전역 일일 상한 — IP 로테이션으로 IP 제한을 우회해도 하루 총량은 넘지 못한다. */
+  /** 모든 IP를 합산한 일일 요청 상한. */
   dailyLimit: number;
   now: () => number;
 };
@@ -50,9 +50,7 @@ const DEFAULT_OPTIONS: RateLimitOptions = {
 };
 
 /**
- * 기본 전역 일일 상한 — 개인 포트폴리오의 정상 트래픽이 절대 닿지 않을 높이로 잡는다.
- * 전역 카운터는 그 자체가 self-DoS 표면이라(1명이 태우면 그날 전원 차단) 낮게 잡으면 안 된다.
- * 역할은 "지갑 방어"가 아니라 프로바이더 예산 상한에 닿기 전 조기 차단이다.
+ * 정상 트래픽은 허용하면서 제공자 예산에 닿기 전에 요청을 차단할 기본 일일 상한.
  */
 const DEFAULT_DAILY_LIMIT = 1_000;
 
@@ -62,8 +60,7 @@ const configuredDailyLimit = (): number => {
 };
 
 /**
- * IP 윈도우와 전역 일일 카운터를 한 번의 EVAL 로 처리한다 —
- * 왕복이 늘면 챗 응답 지연이 그대로 커지고, 두 카운터가 서로 다른 순간을 보게 된다.
+ * IP 윈도우와 전역 일일 카운터를 하나의 EVAL에서 갱신한다.
  * IP 제한에 걸린 요청은 LLM 을 호출하지 않으므로 일일 카운터도 올리지 않는다(daily = -1 반환).
  */
 const UPSTASH_SCRIPT = `
@@ -83,7 +80,7 @@ return { count, ttl, daily }
 `;
 
 /**
- * UTC 기준 하루 키 — 인스턴스마다 로컬 타임존이 달라도 같은 버킷을 가리킨다.
+ * 모든 인스턴스가 공유하는 UTC 날짜 키.
  *
  * @param {number} now
  * @returns {string}
@@ -91,7 +88,7 @@ return { count, ttl, daily }
 const dailyBucket = (now: number): string => new Date(now).toISOString().slice(0, 10);
 
 /**
- * 다음 UTC 자정까지 남은 초 — 일일 상한의 Retry-After 는 리셋 시각이어야 의미가 있다.
+ * Retry-After에 사용할 다음 UTC 자정까지의 초.
  *
  * @param {number} now
  * @returns {number}
@@ -113,7 +110,7 @@ const secondsUntilNextUtcDay = (now: number): number => {
 /**
  * Vercel 이 직접 채우는 `x-vercel-forwarded-for` 를 최우선으로 본다.
  * `x-forwarded-for` 는 클라이언트가 임의로 덧붙일 수 있어, 그 첫 항목을 키로 쓰면
- * 헤더만 바꿔가며 매 요청 새 버킷을 받아 IP 제한이 통째로 무력화된다.
+ * 임의 헤더로 새 제한 버킷을 만들지 못하게 한다.
  *
  * @param {Request} request
  * @returns {string}
@@ -206,12 +203,8 @@ const createUpstashChatRateLimiter = (options: Partial<UpstashRateLimitOptions> 
         cache: "no-store",
       });
     } catch {
-      // ★ 의도적 비대칭: 자격증명 자체가 없으면 챗을 닫지만(createConfiguredChatRateLimiter),
-      // 자격증명이 있는데 Upstash 가 일시 장애(네트워크·타임아웃·5xx)면 가용성을 택해
-      // 인스턴스 limiter 로 내려간다. 이 폴백은 서버리스에서 동시 요청으로 우회되므로
-      // 장애 시간 동안은 상한이 느슨해지는 것을 감수한다 — 설정 실수(영구)와 달리
-      // 블립(수초~수분)까지 챗을 닫으면 정상 방문자 손실이 더 크다고 봤다.
-      // 비용 방어의 최후 보루는 프로바이더 콘솔의 예산 상한이다.
+      // Upstash가 일시적으로 실패하면 인스턴스 제한기로 전환한다. 자격증명 자체가 없으면
+      // 배포 설정 오류로 보고 채팅을 비활성화한다.
       return config.fallback(request);
     }
 
@@ -278,8 +271,7 @@ const createConfiguredChatRateLimiter = (
         ? marketplace
         : null;
   if (!credentials) {
-    // 서버리스에서 인스턴스 limiter 는 인스턴스마다 별도 카운터라, 동시 요청을 늘리는 것만으로
-    // 우회된다. 배포 환경에서 조용히 강등하면 "제한이 있다"는 착각만 남으므로 챗을 닫는다.
+    // 배포 환경에는 모든 인스턴스가 공유하는 제한기가 필요하다.
     if (process.env.NODE_ENV === "production" && process.env.VERCEL) {
       console.error(
         "[chat-rate-limit] 공유 rate limiter(Upstash/KV) 자격증명이 없다 — 챗을 비활성화한다",

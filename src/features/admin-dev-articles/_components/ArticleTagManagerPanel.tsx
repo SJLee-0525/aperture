@@ -126,9 +126,9 @@ const ArticleTagManagerPanel = () => {
   };
 
   return (
-    <section className={styles.panel} aria-label="태그 사전 관리">
+    <section className={styles.panel} aria-label="태그 관리">
       <div>
-        <h2 className={styles.heading}>태그 사전</h2>
+        <h2 className={styles.heading}>태그 관리</h2>
         <p className={styles.hint}>
           라벨은 언제든 고칠 수 있고, 태그는 어떤 글도 쓰지 않을 때만 삭제됩니다.
         </p>
@@ -145,7 +145,7 @@ const ArticleTagManagerPanel = () => {
       {status === "ready" ? (
         <>
           {tags.length === 0 ? (
-            <p className={styles.note}>사전에 태그가 없습니다. 아래에서 추가하세요.</p>
+            <p className={styles.note}>등록된 태그가 없습니다. 아래에서 추가하세요.</p>
           ) : (
             <ul className={styles.rows}>
               {tags.map((tag) => (

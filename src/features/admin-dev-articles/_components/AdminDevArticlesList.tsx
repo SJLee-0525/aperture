@@ -43,7 +43,7 @@ const AdminDevArticlesPage = () => {
       <header className={styles.head}>
         <div className={styles.headText}>
           <h1 className={styles.title}>블로그</h1>
-          <p className={styles.hint}>초안이 위에 오고 공개 글은 발행일 내림차순입니다.</p>
+          <p className={styles.hint}>초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다.</p>
         </div>
         <Link href={NEW_ARTICLE_HREF} className={styles.newBtn}>
           + 새 글

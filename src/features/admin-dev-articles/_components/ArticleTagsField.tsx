@@ -62,7 +62,7 @@ const ArticleTagsField = ({ tags, selected, onChange, onCreate }: Props) => {
       <h2 className={styles.legend}>태그</h2>
 
       {tags.length === 0 ? (
-        <p className={styles.note}>사전에 태그가 없습니다. 아래에서 추가하세요.</p>
+        <p className={styles.note}>등록된 태그가 없습니다. 아래에서 추가하세요.</p>
       ) : (
         <div className={styles.chips}>
           {tags.map((tag) => (
