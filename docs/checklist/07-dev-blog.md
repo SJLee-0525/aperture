@@ -2,21 +2,21 @@
 
 > 원본 계획: [`docs/plan/07-dev-blog.md`](../plan/07-dev-blog.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(B1→B7)가 곧 의존 순서다. 요약표의 상태도 함께 갱신한다.
-> 마지막 갱신: 2026-08-13 (B4.5 완료 — 시각 기준선 갱신과 CI 실패 대응까지)
+> 마지막 갱신: 2026-08-13 (B5 코드 완료 — Rules·인덱스 배포와 실데이터 왕복 확인만 남음)
 
 ## 진행 요약
 
-| 단계 | 내용                            | 상태      |
-| ---- | ------------------------------- | --------- |
-| B1   | 개발 정보 구조 개편             | ✅ 완료   |
-| B2   | Mock 데이터와 Markdown renderer | ✅ 완료   |
-| B3   | Mock 기반 관리자 작성 환경      | ✅ 완료   |
-| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료   |
-| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료   |
-| B4.5 | B4 검수 후속 수정               | ✅ 완료   |
-| B5   | Firebase 전환과 배포            | ⬜ 미착수 |
-| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수 |
-| B7   | 검증과 마이그레이션             | ⬜ 미착수 |
+| 단계 | 내용                            | 상태       |
+| ---- | ------------------------------- | ---------- |
+| B1   | 개발 정보 구조 개편             | ✅ 완료    |
+| B2   | Mock 데이터와 Markdown renderer | ✅ 완료    |
+| B3   | Mock 기반 관리자 작성 환경      | ✅ 완료    |
+| B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료    |
+| B4   | Mock 기반 공개 목록과 상세      | ✅ 완료    |
+| B4.5 | B4 검수 후속 수정               | ✅ 완료    |
+| B5   | Firebase 전환과 배포            | 🔄 진행 중 |
+| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수  |
+| B7   | 검증과 마이그레이션             | ⬜ 미착수  |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
 
@@ -414,7 +414,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - [x] `e2e/admin/album-editor.e2e.ts` 가 드래그 직후 클릭이 삼켜져 실패했다 — **B4.5 이전부터 있던 결함**으로, 작업분을 stash 하고 HEAD 에서도 같은 실패를 확인했다. dnd-kit 의 `AbstractPointerSensor.detach()` 가 `setTimeout(removeAll, 50)` 으로 click 억제기를 늦게 떼는 설계라 제품 결함이 아니다(사람 손으로는 닿지 않는 창). 그 spec 안에 이유를 적은 상수를 두고 창이 닫히기를 기다린다
 - [x] `markdown-normalize.test.ts` 의 깊은 목록 테스트가 CI 에서 vitest 기본 타임아웃(5초)을 넘겨 `test:coverage` 잡을 떨어뜨렸다. 로컬 173ms 짜리 파싱이 커버리지를 켠 느린 러너에서 7.4초가 됐다 — 목록은 한 단계마다 들여쓰기가 길어져 micromark 가 줄마다 열린 컨테이너를 전부 다시 확인한다 → 반복 횟수를 200 에서 `MAX_NESTING_DEPTH` 의 두 배인 64 로 낮추고, 같은 문서를 `not.toThrow()` 와 `codes()` 로 두 번 파싱하던 것을 한 번으로 줄였다(던지면 그 자리에서 그대로 실패한다). 커버리지 포함 실행이 1.46초에서 55ms 가 됐고 깊이 상한은 여전히 두 배 여유로 넘긴다
 - [x] 관리자 E2E 전체가 CI 프로덕션 잡에서 떨어졌다. `/admin/*` 은 `AuthGuard` 의 `isAdmin || testSession` 을 지나야 하는데, `testSession` 을 여는 `NEXT_PUBLIC_ADMIN_TEST_SESSION` 은 번들에 박히는 빌드 시점 값이고 `test-admin-session.ts:22` 가 프로덕션 빌드에서 그 값을 금지한다(인증 우회가 배포에 섞이지 않게 둔 가드). Firebase 계정도 쓰지 않아 `isAdmin` 도 참이 될 수 없다 — 즉 **프로덕션 서버로는 처음부터 통과할 수 없는 조합**이었다. `npm run test:e2e` 가 로컬에서는 dev 서버로 돌아 플래그가 켜지는 바람에 이 브랜치의 첫 CI 실행에서야 드러났다(관리자 spec 은 `f7d9461`·`25f0a76`·`49537df` 로 이 브랜치에만 있다) → `playwright.config.ts` 가 `E2E_PRODUCTION=1` 일 때 `e2e/admin` 을 수집하지 않게 하고, dev 서버로 그 디렉터리만 도는 `Admin E2E` 잡을 CI 에 추가했다. 픽셀 비교가 없어 ubuntu 로 돌린다. 로컬에서 같은 명령으로 17개 통과(모바일 17개는 데스크톱 전용이라 skip)
-- [ ] **960 프리뷰 / 2048 원본 분리는 B5 로 미룬다**(사용자 확정) — Markdown 이 주소를 하나만 담고, 이 저장소의 3단 이미지는 하위 폴더에 각각 다른 UUID 로 올라가 프리뷰 주소를 원본에서 유도할 수 없다. Storage 업로더를 만들 때 마크다운이 두 주소를 담을지 함께 정한다
+- [x] **960 프리뷰 / 2048 원본 분리는 B5 로 미룬다**(사용자 확정) — Markdown 이 주소를 하나만 담고, 이 저장소의 3단 이미지는 하위 폴더에 각각 다른 UUID 로 올라가 프리뷰 주소를 원본에서 유도할 수 없다 → **B5 에서 확정(사용자 선택): 본문은 2048 메인 단일 주소.** Markdown 계약 무변경, 업로드는 기존 3단 유지. 본문 전용 이미지의 프리뷰·썸네일 파생본은 미참조로 남아 고아 정리 대상이 되며(지워도 렌더는 깨지지 않는 의도된 GC), 고아 패널 문구에 명시했다
 
 ### 사용자가 직접 넣은 변경 — 되돌리지 말 것 ★
 
@@ -430,7 +430,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### B5 진입 전 확인
 
-- [ ] `lib/content/dev-articles.ts:32`의 live 분기는 아직 빈 목록을 반환하지만 메가메뉴·모바일 탭·sitemap은 이미 `/dev/articles`를 노출한다. B5 연결 전에 배포하면 블로그 메뉴가 빈 목록으로 열린다 → Firestore reader 연결과 노출 변경을 같은 배포에 묶거나, 연결 전까지 메뉴와 sitemap에서 숨긴다
+- [x] `lib/content/dev-articles.ts:32`의 live 분기는 아직 빈 목록을 반환하지만 메가메뉴·모바일 탭·sitemap은 이미 `/dev/articles`를 노출한다. B5 연결 전에 배포하면 블로그 메뉴가 빈 목록으로 열린다 → **B5 에서 Firestore reader 를 연결해 해소** — 같은 브랜치가 통째로 머지되므로 노출과 연결이 같은 배포에 묶인다. B5 코드 머지 전에 main 을 단독 배포하지 않는다
 
 ### B4.5 검증
 
@@ -449,33 +449,39 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### 쿼리·인덱스·Rules
 
-- [ ] REST transport 범용 query builder — 다중 정렬 방향 + document id 보조 정렬, query·index 모두 `__name__ ASCENDING` 명시, 기존 `order asc` 호출 무회귀 (§2)
-- [ ] `published + publishedAt desc + id asc` 복합 인덱스 배포 (`tags array-contains` 인덱스는 규모 임계치 확인 전까지 유예 — 태그는 projection 서버 필터) (§2)
-- [ ] 태그 저장 위치 확정 — 기본안 `devArticleTags` 컬렉션. 채택 시 collection 상수·관리자 write Rules·cache tag 추가, config 문서 선택 시 근거 기록 (§2)
-- [ ] `firestore.rules`에 `devArticles`(+ 태그 컬렉션) — `published == true` 공개 읽기 / 관리자만 쓰기
-- [ ] `test/security-rules.test.mjs`의 `PUBLIC_COLLECTIONS` 배열에 신규 컬렉션 추가
+- [x] REST transport 범용 query builder — 다중 정렬 방향 + document id 보조 정렬, query·index 모두 `__name__ ASCENDING` 명시, 기존 `order asc` 호출 무회귀 (§2) → `publishedQuery(collectionId, orderBy[], select?)` 신설, 기존 두 함수는 thin wrapper(산출 JSON deep-equal 테스트로 고정). `__name__` 명시는 신규 devArticles 쿼리·인덱스에만 — 기존 6개는 마지막 필드가 ASC 라 암묵 순서와 같고, 인덱스 정의를 건드리면 재생성 취급 위험만 생긴다
+- [x] `published + publishedAt desc + id asc` 복합 인덱스 정의 추가 (`tags array-contains` 인덱스는 규모 임계치 확인 전까지 유예 — 태그는 projection 서버 필터) (§2) → `firestore.indexes.json` 에 커밋. **실제 배포는 아래 검증 단계**
+- [x] 태그 저장 위치 확정 — **기본안 `devArticleTags` 컬렉션 채택**. collection 상수·관리자 write Rules·cache tag(`firestore:devArticleTags`) 추가 (§2) → 순서 계약은 **id 사전순**(`__name__ ASC`) — `DevArticleTag` 에 `order` 필드가 없고 재정렬 UI 요구도 없어 필드를 새로 만들지 않았다. mock 사전 배열도 같은 순서로 재정렬
+- [x] `firestore.rules`에 `devArticles`(표준 패턴) + `devArticleTags`(`read: if true` — 발행 개념 없는 공개 사전, site 패턴) — 관리자만 쓰기
+- [x] `test/security-rules.test.mjs`의 `PUBLIC_COLLECTIONS` 배열에 `devArticles` 추가 + **실제 공개 쿼리 형태 테스트**(published 필터 쿼리 성공·초안 미포함 / 무필터 전체 쿼리 거부 / 태그 무인증 목록 읽기 / 두 컬렉션 무인증·비관리자 쓰기 거부). ⚠️ emulator 는 복합 인덱스를 운영처럼 강제하지 않는다 — 인덱스 빌드 확인은 배포 단계의 별도 관문
 
 ### CRUD·RAG 정책·Storage
 
-- [ ] `devArticles` getter·CRUD를 repository 경계에 연결 (mock/live 화면 코드 무변경)
-- [ ] 관리자 목록 — `admin-list-rest.ts` projection 패턴으로 body 제외 조회
-- [ ] `listCrud` 후처리 정책 — 저장 전후 entity·작업 종류를 받아 `sync`/`remove`/`skip` 반환하는 선택적 정책 주입, 미주입 컬렉션 기존 동작 유지 (§11)
-- [ ] 블로그 RAG 정책 — 초안 제외, 발행일·이미지·연관 프로젝트만 변경 시 skip, §11 표 계약 구현, article 문서 ID 기준 멱등 (§11)
-- [ ] 기존 컬렉션 CRUD·RAG 동작 회귀 테스트 (§12-B5)
-- [ ] Storage — `dev-blog/{articleId}/` 업로드 3종(메인·프리뷰·썸네일) + 글 삭제 시 폴더 정리, 실제 uploader를 폼에 연결 (§4)
+- [x] `devArticles` getter·CRUD를 repository 경계에 연결 (mock/live 화면 코드 무변경) → 공개는 `lib/firebase/public/dev-articles.ts`(decoder `toDevArticle` export — B6 RAG 증분이 재사용) + `lib/content/dev-articles.ts` 의 `cache()` 래퍼 유지(렌더당 읽기 1회). 관리자는 `live-dev-article-repository.ts` — 발행 조건·최초 발행 스탬프를 mock 과 같은 `dev-article-domain.ts` 로 공유하고, **slug 서버 유일성 검사**(`where("slug","==")`, 관리자 1명이라 race 허용)가 폼 참조 로딩 창 결함을 닫는다. 연관 프로젝트 공개 여부도 live 는 projection 으로 실제 검증(mock 은 자기 전달 유지 — 렌더 필터가 이중 방어)
+- [x] 관리자 목록 — `admin-list-rest.ts` projection 패턴으로 body 제외 조회 → `listProjected` 에 orderBy 인자(기본값 `order ASC` 무회귀), 블로그는 **`__name__ ASC` 정렬**(⚠️ `publishedAt` 정렬은 필드 없는 초안을 결과에서 떨어뜨린다) + 화면 훅 순수 함수 정렬 유지
+- [x] `listCrud` 후처리 정책 — 선택적 정책 주입, 미주입 컬렉션 기존 동작 유지(pre-read 0회 포함) (§11) → 계약은 `(before, after) => sync|remove|skip` — **작업 종류(kind)는 받지 않는다**(setPublished 가 스탬프 때문에 update 경로로 우회해도 계약이 어긋나지 않게). `remove` 는 별도 삭제 API 가 아니라 원본 재조회로 청크가 비워지는 sync 요청과 수렴함을 타입·JSDoc 에 명시. **pre-read 실패는 정책을 건너뛰고 강제 sync**(skip 오판으로 stale 청크가 남는 쪽보다 낫다)
+- [x] 블로그 RAG 정책 — 초안 제외, 발행일·이미지·연관 프로젝트만 변경 시 skip, §11 표 계약 구현 (§11) → `lib/firebase/dev-article-rag-policy.ts`, §11 표 5행을 테스트 케이스로 그대로 열거. ⚠️ **B5 에서는 `ragSourceType` 미전달로 호출 0건**(4개 작업 모두 테스트로 고정) — B6 이 article 타입을 등록하며 `lib/firebase/dev-articles.ts` 의 listCrud 4번째 인자를 채우면 켜진다
+- [x] 기존 컬렉션 CRUD·RAG 동작 회귀 테스트 (§12-B5) → `list-crud.test.ts` — 정책 미주입이면 4개 쓰기 모두 sync 호출 + 스냅샷 조회 0회
+- [x] Storage — `dev-blog/{articleId}/` 업로드 3종(메인·프리뷰·썸네일) + 글 삭제 시 폴더 정리, 실제 uploader를 폼에 연결 (§4) → `article-image-uploader.ts` 의 live reject 분기만 교체(폼·mock 무변경). 삭제 시 이미지 정리 실패는 삭제를 되돌리지 않되 목록 화면에 경고로 표시(`DevArticleRemoveResult.imageCleanupWarning`)
 
-### 고아 이미지 관리 (`/admin/maintenance`)
+### 미사용 이미지 관리 (`/admin/maintenance`)
 
-- [ ] `dev-blog/` 파일 목록 ↔ 전체 글(cover + 본문 URL) 참조 비교 (§4)
-- [ ] 미참조 + 업로드 24시간 경과 파일만 후보 표시 (§4)
-- [ ] 기본 dry run — 경로·크기·업로드 시각·예상 절감 용량 (§4)
-- [ ] 확인 삭제 — 실행 직전 참조 재계산, 개별 실패 격리·성공/실패 결과 기록 (§4)
+- [x] `dev-blog/` 파일 목록 ↔ 전체 글(cover + 본문 URL) 참조 비교 (§4) → cover 는 `imagePaths()` 3경로, 본문은 순수 함수 `articleBodyStoragePaths`(percent-encoding·한글 파일명·비허용 호스트·`dev-blog/` 밖 경로 케이스 테스트). 초안 포함 전량 projection
+- [x] 미참조 + 업로드 24시간 경과 파일만 후보 표시 (§4) → `ORPHAN_MIN_AGE_MS`, `getMetadata` 의 timeCreated 기준·now 주입 테스트
+- [x] 기본 dry run — 경로·크기·업로드 시각·예상 절감 용량 (§4) → `ArticleOrphanImagePanel`, mock 모드 잠금 + 안내(기존 패널 패턴)
+- [x] 확인 삭제 — 실행 직전 참조 재계산, 개별 실패 격리·성공/실패 결과 기록 (§4) → 삭제는 **관리자가 확인한 후보 ∩ 재검증 후보**만 — 재검증에서 새로 후보가 된 파일은 확인 없이 지우지 않고, 그 사이 참조된 파일은 `skipped` 로 보고
+
+### B5 에서 함께 처리한 것
+
+- 커버 없는 앨범 mock fixture(`unreleased`) + 시각 회귀 라우트 `photo-album-detail-plain` 추가 — B4.5 가 미룬 plain variant 히어로 글자색 기준선. ⚠️ 앨범 목록 기준선도 카드가 늘어 바뀐다 — Actions `update-visual-snapshots` 로 갱신 필요
+- 태그 관리자 CRUD 확장 — `updateTag`(ko/en 만 — **id 는 문서 ID이자 글 `tags[]` 외래키라 수정 불가**)·`removeTag`(공유 헬퍼 `countTagUsage` 로 사용 글 수 검증 후 거부, transaction 아님 — 관리자 1명 전제, 삭제된 태그의 신규 참조는 발행 검사 `tag-unknown` 이 차단). 목록 화면 하단 `ArticleTagManagerPanel` + mock E2E(추가→수정→사용 중 삭제 거부→미사용 삭제)
+- B4.5 가 미룬 `ArticleDetailView` 의 `"use client"` 경계 판단은 **B7 로 넘긴다** — 판단 기준이 "실데이터 본문 크기"인데 실제 글은 B7 마이그레이션에서 들어온다. B7 의 대표 글 점검 때 RSC 페이로드를 재고 기록한다
 
 ### B5 검증
 
-- [ ] Rules·index emulator 검증 후 배포 (§12-B5)
-- [ ] 실제 초안 1건 — 작성·전체 미리보기·발행·발행 취소·삭제·이미지 정리 왕복 확인 (§12-B5)
-- [ ] mock/live 소스가 섞이지 않고 mock 자동화 테스트가 계속 동작한다 (§12-B5)
+- [ ] Rules·index emulator 검증 후 배포 (§12-B5) → Rules 테스트는 CI(Java 21)가 실행. **`firebase deploy --only firestore:rules,firestore:indexes` + 인덱스 빌드 완료 확인은 사용자와 함께**
+- [ ] 실제 초안 1건 — 작성·전체 미리보기·발행·발행 취소·삭제·이미지 정리 왕복 확인 (§12-B5) → Vercel 배포 또는 `NEXT_PUBLIC_USE_MOCK=0` 로컬 실행으로 사용자와 함께
+- [x] mock/live 소스가 섞이지 않고 mock 자동화 테스트가 계속 동작한다 (§12-B5) → 분기 교체는 `dev-article-repository`·`article-image-uploader` 의 기존 단일 지점만, E2E 는 전부 `NEXT_PUBLIC_USE_MOCK=1` 유지, 신규 live 모듈은 모듈 평가 시 Firebase 미접촉(회귀 테스트에 등록)
 
 ---
 
@@ -489,7 +495,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 ### RAG
 
 - [ ] source type `article` — 글 ID·slug 기록, 제목·요약 + heading 단위 평문 청크, 코드 블록 예산 제한 (§9)
-- [ ] 증분 동기화 경로 — `rag-source.ts` target 맵·decoder, embeddings route 허용 타입, 비공개 시 빈 결과로 자동 청크 제거
+- [ ] 증분 동기화 경로 — `rag-source.ts` target 맵·decoder, embeddings route 허용 타입, 비공개 시 빈 결과로 자동 청크 제거 — **활성화 지점: `lib/firebase/dev-articles.ts` 의 `devArticlesCrud` 4번째 인자(`ragSourceType`)를 새 article 타입으로 채운다.** 정책(`dev-article-rag-policy`)과 배관은 B5 에서 완성·검증됐고 지금은 호출 0건이다. decoder 는 `lib/firebase/public/dev-articles.ts` 의 `toDevArticle` 재사용
 - [ ] `/admin/maintenance` 일괄 재생성에 블로그 포함 (§9)
 - [ ] `searchRagChunks`에 `sourceType/sourceId` 선택 scope 추가 — 기존 section-only 호출 무파괴 (§9)
 
