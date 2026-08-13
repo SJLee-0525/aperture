@@ -41,6 +41,14 @@ service cloud.firestore {
       allow read:  if resource.data.published == true || isAdmin();
       allow write: if isAdmin();
     }
+    match /devArticles/{id} {
+      allow read:  if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /devArticleTags/{id} {
+      allow read:  if true;      // 발행 개념이 없는 공개 태그 사전 — site 와 같은 패턴
+      allow write: if isAdmin();
+    }
 
     match /ragDocuments/{id} {
       allow read:  if resource.data.published == true || isAdmin();
