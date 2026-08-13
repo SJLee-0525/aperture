@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { settleImages } from "../utils/settle-images";
+
 const ARTICLE = "/ko/dev/articles/serverless-portfolio";
 
 test.describe("개발 블로그 상세", () => {
@@ -20,6 +22,9 @@ test.describe("개발 블로그 상세", () => {
     test.skip(testInfo.project.name !== "desktop", "hover 확장은 포인터가 있는 환경 전용");
 
     await page.goto(ARTICLE);
+    // 이동이 끝난 뒤 위쪽 이미지가 대체 이미지로 다시 그려지면 제목이 기대 위치 아래로
+    // 밀린다 — 위치를 단언하기 전에 본문 높이를 먼저 굳힌다.
+    await settleImages(page);
     await page.evaluate(() => window.scrollTo(0, 1000));
 
     const rail = page.getByRole("button", { name: "목차 열기" });
@@ -63,6 +68,9 @@ test.describe("개발 블로그 상세", () => {
     test.skip(testInfo.project.name !== "mobile", "서랍은 손가락으로 쓰는 환경 전용");
 
     await page.goto(ARTICLE);
+    // "남은 일" 위에 본문 이미지 2장이 있다. 로드 실패 후 대체 이미지가 스크롤보다 늦게
+    // 그려지면 제목이 아래로 밀려 top 단언이 어긋난다 — 높이를 먼저 굳힌다.
+    await settleImages(page);
     await page.evaluate(() => window.scrollTo(0, 1000));
     await page.getByRole("button", { name: "목차 열기" }).click();
 
