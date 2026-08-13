@@ -7,6 +7,8 @@ import {
   tagInUseMessage,
 } from "@/features/admin-dev-articles/_lib/dev-article-tag-usage";
 
+import { devArticleRoute } from "@/constants/routes";
+import { requestPublicPathRevalidate } from "@/lib/cache/request-revalidate";
 import { listDevArticleItemsAdmin, listDevProjectItemsAdmin } from "@/lib/firebase/admin-list-rest";
 import {
   createDevArticleTag,
@@ -17,6 +19,7 @@ import {
   updateDevArticleTag,
 } from "@/lib/firebase/dev-articles";
 import { deleteArticleImages } from "@/lib/firebase/storage";
+import { localizePath } from "@/lib/i18n/locale-path";
 
 import type {
   DevArticleInput,
@@ -26,6 +29,34 @@ import type { DevArticle } from "@/types/dev-article";
 
 const IMAGE_CLEANUP_WARNING =
   "글은 삭제했지만 일부 이미지 파일은 남아 있습니다. 유지보수 페이지의 '사용되지 않는 블로그 이미지'에서 정리할 수 있습니다.";
+
+/**
+ * 공개 상세 경로의 존재 여부가 이 쓰기로 바뀌는지 판정한다.
+ * 발행 상태가 그대로면 경로는 이전과 같이 200 또는 404다.
+ *
+ * @param {DevArticle | undefined} previous 쓰기 직전 저장본. 새 글이면 없다.
+ * @param {DevArticleInput} next 저장할 값.
+ * @returns {boolean} 경로의 존재 여부가 바뀌면 true.
+ */
+const didPublishedPathExistenceChange = (
+  previous: DevArticle | undefined,
+  next: DevArticleInput,
+): boolean => Boolean(previous?.published) !== next.published;
+
+/**
+ * 글 상세 경로 두 언어를 라우트 캐시에서 지우도록 요청한다.
+ * 발행 전에 열려 캐시로 남은 상세 404는 태그 무효화로 갱신되지 않기 때문이다.
+ *
+ * @param {string} slug 대상 글의 slug. 비어 있으면 아무것도 하지 않는다.
+ * @returns {void}
+ */
+const revalidateArticlePaths = (slug: string): void => {
+  if (!slug) return;
+  requestPublicPathRevalidate(
+    localizePath("ko", devArticleRoute(slug)),
+    localizePath("en", devArticleRoute(slug)),
+  );
+};
 
 /**
  * `DevArticleInput` 을 `listCrud` 가 받는 입력으로 좁힌다. `createdAt`/`updatedAt` 은
@@ -103,6 +134,7 @@ const createLiveDevArticleRepository = (
     const stamped = stampFirstPublished(input, undefined, now);
     if (stamped.published) await assertPublishableLive(id, stamped);
     await devArticlesCrud.create(id, asCrudInput(stamped));
+    if (stamped.published) revalidateArticlePaths(stamped.slug);
   },
 
   update: async (id, input) => {
@@ -114,6 +146,7 @@ const createLiveDevArticleRepository = (
     const stamped = stampFirstPublished(guarded, previous, now);
     if (stamped.published) await assertPublishableLive(id, stamped);
     await devArticlesCrud.update(id, asCrudInput(stamped));
+    if (didPublishedPathExistenceChange(previous, stamped)) revalidateArticlePaths(stamped.slug);
   },
 
   setPublished: async (id, published) => {
@@ -133,13 +166,23 @@ const createLiveDevArticleRepository = (
       firstPublishedAt: previous.firstPublishedAt,
     };
     if (published) await assertPublishableLive(id, input);
-    // listCrud.setPublished 는 published 만 뒤집어 최초 발행 스탬프를 못 찍는다 —
-    // update 경로로 우회한다. RAG 정책은 kind 없이 before/after 만 보므로 계약이 같다.
+    // listCrud.setPublished 는 published 만 바꾸므로 최초 발행 스탬프를 위해 update 경로를 쓴다.
+    // RAG 정책은 작업 이름 없이 전후 상태만 보므로 계약이 같다.
     await devArticlesCrud.update(id, asCrudInput(stampFirstPublished(input, previous, now)));
+    if (previous.published !== published) revalidateArticlePaths(previous.slug);
   },
 
   remove: async (id) => {
+    // slug 조회는 경로 재검증에만 쓴다. 조회가 실패하면 경로를 알 수 없지만 삭제는 진행하고,
+    // 남은 상세 경로는 컬렉션 태그 무효화와 ISR 주기가 갱신한다.
+    let previous: DevArticle | null = null;
+    try {
+      previous = await devArticlesCrud.get(id);
+    } catch {
+      previous = null;
+    }
     await devArticlesCrud.remove(id);
+    if (previous?.published) revalidateArticlePaths(previous.slug);
     try {
       await deleteArticleImages(id);
       return { imageCleanupWarning: null };
