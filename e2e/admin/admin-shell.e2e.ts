@@ -25,6 +25,8 @@ test.describe("Admin · mock 표시", () => {
     await expect(page.getByRole("button", { name: "변경 대상 확인" })).toBeDisabled();
     await expect(page.getByRole("button", { name: "마이그레이션 실행" })).toBeDisabled();
     await expect(page.getByRole("button", { name: "전체 임베딩 생성·갱신" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "삭제 대상 다시 확인" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "확인 후 삭제" })).toBeDisabled();
     await expect(page.getByText("mock 모드에서는 실행할 수 없습니다.").first()).toBeVisible();
   });
 });
