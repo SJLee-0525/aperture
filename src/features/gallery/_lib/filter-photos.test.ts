@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ALL, filterPhotos } from "@/features/gallery/_lib/filter-photos";
+
 import type { Photo } from "@/types/photo";
 
 const photo = (overrides: Partial<Photo> = {}): Photo => ({

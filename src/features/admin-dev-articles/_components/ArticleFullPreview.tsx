@@ -3,24 +3,24 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { adminDevArticleRoute } from "@/constants/routes";
+import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 
-import { getDevArticleRepository } from "@/features/admin-dev-articles/_lib/dev-article-repository";
+import { useMounted } from "@/hooks/use-mounted";
+
+import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
 import { readArticleRecovery } from "@/features/admin-dev-articles/_lib/dev-article-recovery";
+import { getDevArticleRepository } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 import {
   previewArticleMarkdown,
   type ArticlePreviewResult,
 } from "@/features/admin-dev-articles/_lib/preview-article-markdown";
-import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
-import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
+import { adminDevArticleRoute } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
-
-import { useMounted } from "@/hooks/use-mounted";
 
 import styles from "./ArticleFullPreview.module.css";
 

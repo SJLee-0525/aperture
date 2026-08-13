@@ -1,7 +1,7 @@
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { DevConfig, DevStackItem } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
-
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type Lang = keyof LocalizedText;
 type MoveOffset = -1 | 1;

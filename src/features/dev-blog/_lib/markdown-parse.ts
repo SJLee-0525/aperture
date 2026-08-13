@@ -5,6 +5,7 @@ import { directive } from "micromark-extension-directive";
 import { gfmTable } from "micromark-extension-gfm-table";
 
 import { normalizeArticleTree } from "@/features/dev-blog/_lib/markdown-normalize";
+
 import type {
   ArticleDocument,
   ArticleMarkdownIssue,

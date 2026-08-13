@@ -3,9 +3,11 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { SearchSuggestion } from "@/lib/search/suggest-documents";
 import { SearchBox } from "@/features/site-header/_components/SearchBox";
+
 import { useSearchSuggestions } from "@/features/site-header/_hooks/use-search-suggestions";
+
+import type { SearchSuggestion } from "@/lib/search/suggest-documents";
 
 const push = vi.fn();
 

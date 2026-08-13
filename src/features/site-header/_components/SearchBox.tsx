@@ -1,18 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { FormEvent, KeyboardEvent } from "react";
 import { useId, useState } from "react";
 
 import { Icon } from "@/components/Icon";
-import { ROUTES } from "@/constants/routes";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { localizePath } from "@/lib/i18n/locale-path";
-import type { SearchSuggestion } from "@/lib/search/suggest-documents";
 import { useSearchSuggestions } from "@/features/site-header/_hooks/use-search-suggestions";
 
-import { SearchSuggestions, optionId } from "./SearchSuggestions";
+import { ROUTES } from "@/constants/routes";
+import { localizePath } from "@/lib/i18n/locale-path";
+
+import type { SearchSuggestion } from "@/lib/search/suggest-documents";
+import type { FormEvent, KeyboardEvent } from "react";
+
 import styles from "./SearchBox.module.css";
+import { SearchSuggestions, optionId } from "./SearchSuggestions";
 
 /**
  * 데스크톱 헤더 검색 (모바일은 CSS로 숨김 — 모바일 검색은 버거 메뉴 안). 제출 시 통합 검색

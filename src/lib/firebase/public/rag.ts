@@ -1,5 +1,6 @@
 import { COLLECTIONS } from "@/constants/collections";
 import { runQuery } from "@/lib/firebase/public/transport";
+
 import type { RagSection, StoredRagChunk } from "@/types/rag";
 
 /**

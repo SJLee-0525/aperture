@@ -4,10 +4,12 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ArticleBody } from "@/features/dev-blog/_components/ArticleBody";
+
 import { highlightArticleDocument } from "@/features/dev-blog/_lib/markdown-highlight";
-import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 import { buildArticleToc } from "@/features/dev-blog/_lib/markdown-toc";
+
+import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 
 const STORAGE_IMAGE =
   "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";

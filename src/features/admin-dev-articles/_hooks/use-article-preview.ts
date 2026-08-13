@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
 import {
   previewArticleMarkdown,
   type ArticlePreviewResult,
 } from "@/features/admin-dev-articles/_lib/preview-article-markdown";
-
-import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
 
 /** 입력이 멈춘 뒤 미리보기를 다시 요청하기까지 기다리는 시간. 타자마다 서버를 부르지 않기 위한 값이다. */
 const PREVIEW_DEBOUNCE_MS = 600;

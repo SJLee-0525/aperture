@@ -5,30 +5,30 @@ import {
   resolveReferencesWithRefresh,
   type ProfileSnapshot,
 } from "@/features/chat/_lib/build-profile-context";
-import { ROUTES } from "@/constants/routes";
 import { getChatErrorMessage, type ChatErrorCode } from "@/features/chat/_lib/chat-errors";
-import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
-import {
-  buildScreenContextLookup,
-  resolveScreenContext,
-} from "@/features/chat/_lib/resolve-chat-screen-context";
 import {
   buildRagQueryText,
   selectChatIntentWithClassifier,
   type ChatIntent,
   type ProfileSection,
 } from "@/features/chat/_lib/chat-intent";
-import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
-import {
-  ChatRateLimitConfigurationError,
-  type ChatRateLimiter,
-} from "@/features/chat/_lib/chat-rate-limit";
+import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
 import {
   ChatProviderUnavailableError,
   type ChatProvider,
 } from "@/features/chat/_lib/chat-provider";
-import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
+import {
+  ChatRateLimitConfigurationError,
+  type ChatRateLimiter,
+} from "@/features/chat/_lib/chat-rate-limit";
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
+import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
+import {
+  buildScreenContextLookup,
+  resolveScreenContext,
+} from "@/features/chat/_lib/resolve-chat-screen-context";
+
+import { ROUTES } from "@/constants/routes";
 import { getChatProfileData, type ChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import {
@@ -36,9 +36,11 @@ import {
   parsePhotoFilterQueryStrict,
   type PhotoFilterVocabulary,
 } from "@/lib/photo-filter-query";
-import type { Lang } from "@/types/lang";
+
+import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
+import type { Lang } from "@/types/lang";
 import type { RagQuery } from "@/types/rag";
 
 // route.ts의 maxDuration(60초)보다 5초 먼저 요청을 끝낸다. Vercel이 함수를 먼저

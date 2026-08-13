@@ -1,5 +1,6 @@
 import { tokensFor } from "@/lib/text/korean-tokenize";
 import { matchedTokenRatio } from "@/lib/text/token-match";
+
 import type { SearchIndex } from "@/types/search";
 
 // 제목 매치는 본문 매치보다 강한 신호 — "피아노" 검색에서 제목이 "피아노 소나타"인

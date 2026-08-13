@@ -1,5 +1,4 @@
 import { COLLECTIONS } from "@/constants/collections";
-
 import {
   projectedPublishedOrderedQuery,
   publishedOrderedQuery,

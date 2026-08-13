@@ -3,16 +3,20 @@
 import { m, useReducedMotion } from "motion/react";
 import { type CSSProperties, memo, type RefObject, useEffect, useMemo, useRef } from "react";
 
-import type { UIDict } from "@/constants/dictionary";
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
-import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { useIntroDelay } from "@/features/landing/_hooks/use-intro-delay";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
 import { useSectionGlow } from "@/features/landing/_hooks/use-section-glow";
-import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
+import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useTyping } from "@/hooks/use-typing";
+
+import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
+
+import { ROUTES } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
+
+import type { UIDict } from "@/constants/dictionary";
 import type { LocalizedText } from "@/types/localized";
 
 import { AnimatedWordmark } from "./AnimatedWordmark";

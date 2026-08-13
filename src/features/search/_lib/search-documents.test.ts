@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createSearchDocuments } from "@/features/search/_lib/search-documents";
+
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch, tokensFor } from "@/lib/text/korean-tokenize";
 import { matchedTokenRatio } from "@/lib/text/token-match";
+
 import { MOCK_ALBUMS } from "@/mocks/albums";
 import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
 import { MOCK_MUSIC_AWARDS, MOCK_MUSIC_MEDIA, MOCK_MUSIC_WORKS } from "@/mocks/music";

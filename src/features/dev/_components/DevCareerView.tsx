@@ -2,12 +2,15 @@
 
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
-import { devProjectRoute } from "@/constants/routes";
 import { DevStackSection } from "@/features/dev/_components/DevStackSection";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
+
+import { devProjectRoute } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { DevConfig } from "@/types/dev";
 
 import styles from "./DevCareerView.module.css";

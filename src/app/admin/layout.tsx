@@ -1,7 +1,7 @@
+import { DocumentLang } from "@/features/lang/_components/DocumentLang";
+
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-
-import { DocumentLang } from "@/features/lang/_components/DocumentLang";
 
 import { AdminLayoutClient } from "./_components/AdminLayoutClient";
 

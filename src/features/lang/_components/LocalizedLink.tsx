@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { ComponentProps } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { localizePath } from "@/lib/i18n/locale-path";
+
+import type { ComponentProps } from "react";
 
 type LocalizedLinkProps = ComponentProps<typeof Link>;
 

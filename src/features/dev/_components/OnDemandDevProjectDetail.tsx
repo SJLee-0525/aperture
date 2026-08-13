@@ -5,10 +5,14 @@ import { useEffect, useRef, useState } from "react";
 
 import { Modal } from "@/components/Modal";
 import { Skeleton } from "@/components/Skeleton";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { pickText } from "@/lib/i18n/pick-text";
-import type { DevProject, DevProjectCardData } from "@/types/dev";
+
 import { setCursorLoading } from "@/utils/custom-cursor-events";
+
+import type { DevProject, DevProjectCardData } from "@/types/dev";
 
 import detailStyles from "./DevProjectsView.module.css";
 import styles from "./OnDemandDevProjectDetail.module.css";

@@ -11,9 +11,11 @@ import {
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
 import { PhotoRow } from "@/features/admin-photos/_components/PhotoRow";
+
 import { usePhotosAdmin } from "@/features/admin-photos/_hooks/use-photos-admin";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminPhotosList.module.css";
 

@@ -1,5 +1,6 @@
 import { createDocumentScorer } from "@/lib/search/score-documents";
 import { tokensFor } from "@/lib/text/korean-tokenize";
+
 import type { SearchDocument } from "@/types/search";
 
 /**

@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Suspense, useCallback, useState } from "react";
 
 import { PageViewTracker } from "@/features/analytics/_components/PageViewTracker";
+
 import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
 import { configureGoogleAnalytics } from "@/features/analytics/_lib/gtag";
 

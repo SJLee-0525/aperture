@@ -1,6 +1,5 @@
-import type { CSSProperties } from "react";
-
 import type { ArticleCodeLines } from "@/features/dev-blog/_lib/markdown-highlight-map";
+import type { CSSProperties } from "react";
 
 import styles from "./ArticleCodeBlock.module.css";
 

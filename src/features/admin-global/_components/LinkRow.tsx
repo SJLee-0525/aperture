@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+
 import type { SiteLink } from "@/types/site";
 
 import styles from "./LinkRow.module.css";

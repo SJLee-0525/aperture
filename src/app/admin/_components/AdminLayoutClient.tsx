@@ -1,14 +1,16 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
 
-import { ROUTES } from "@/constants/routes";
 import { RagStaleBanner } from "@/features/admin-maintenance/_components/RagStaleBanner";
 import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
 import { AdminMonitoring } from "@/features/monitoring/_components/AdminMonitoring";
+
+import { ROUTES } from "@/constants/routes";
 import { shouldUseMockContent } from "@/lib/content/content-source";
+
+import type { ReactNode } from "react";
 
 /**
  * 관리자 클라이언트 셸. 서버 레이아웃은 noindex 메타데이터를 내보내고,

@@ -3,8 +3,9 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { SESSION_STORAGE_KEYS } from "@/constants/storage-keys";
 import { ChatContactDraftButton } from "@/features/chat/_components/ChatContactDraftButton";
+
+import { SESSION_STORAGE_KEYS } from "@/constants/storage-keys";
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({
   useLang: () => ({ lang: "ko", dict: {}, setLang: vi.fn() }),

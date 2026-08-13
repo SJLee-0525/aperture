@@ -1,4 +1,5 @@
 import { getAdminImageStore } from "@/lib/admin/image-store";
+
 import { imagePaths as imageMetaPaths, type ImageMeta } from "@/types/image";
 
 const imagePaths = (images: Array<ImageMeta | null | undefined>): string[] =>

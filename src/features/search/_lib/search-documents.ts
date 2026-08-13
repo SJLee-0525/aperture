@@ -1,9 +1,11 @@
 import { ROUTES } from "@/constants/routes";
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
+
+import { imageThumbnailUrl } from "@/types/image";
+
 import type { Album } from "@/types/album";
 import type { DevProject } from "@/types/dev";
-import { imageThumbnailUrl } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicMedia, MusicWork } from "@/types/music";
 import type { Photo } from "@/types/photo";

@@ -1,8 +1,12 @@
-import { ImageCarousel } from "@/components/ImageCarousel";
 import { useMemo } from "react";
+
+import { ImageCarousel } from "@/components/ImageCarousel";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { hasText } from "@/lib/i18n/has-text";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { DevProject } from "@/types/dev";
 
 import styles from "./DevProjectsView.module.css";

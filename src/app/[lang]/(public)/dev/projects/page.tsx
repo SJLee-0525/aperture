@@ -1,13 +1,15 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
+
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
+
 import { getDevProjects } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

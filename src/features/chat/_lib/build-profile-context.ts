@@ -1,23 +1,21 @@
 import { unstable_cache } from "next/cache";
 
-import { CHAT_PROFILE_CACHE_TAG, PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/constants/cache";
-import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
-
 import { buildScreenContextLookup } from "@/features/chat/_lib/resolve-chat-screen-context";
 
-import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
-
+import { CHAT_PROFILE_CACHE_TAG, PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/constants/cache";
+import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
 import { searchRagChunks } from "@/lib/ai/rag-search";
 import { getChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import { pickText } from "@/lib/i18n/pick-text";
+
+import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
 import type { ChatProfileData } from "@/lib/content/chat";
 import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
-
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
-import type { RagQuery, StoredRagChunkMeta } from "@/types/rag";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";
+import type { RagQuery, StoredRagChunkMeta } from "@/types/rag";
 
 const byOrder = <T extends { order: number }>(items: T[]) =>
   items

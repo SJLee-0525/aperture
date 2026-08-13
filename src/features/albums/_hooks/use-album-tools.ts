@@ -1,12 +1,13 @@
 "use client";
 
-import { albumRoute } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useModelContextTool } from "@/hooks/use-model-context-tool";
-import { limitProperty, objectSchema } from "@/lib/webmcp/tool-schemas";
+
+import { albumRoute } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { countLabel, formatToolItems } from "@/lib/webmcp/tool-output";
+import { limitProperty, objectSchema } from "@/lib/webmcp/tool-schemas";
 
 import type { AlbumCard } from "@/features/albums/_lib/album-cards";
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";

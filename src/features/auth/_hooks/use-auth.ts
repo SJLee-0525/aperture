@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { User } from "firebase/auth";
 
 import { isTestAdminSessionEnabled } from "@/lib/auth/test-admin-session";
 import { subscribeAuth } from "@/lib/firebase/auth";
+
+import type { User } from "firebase/auth";
 
 /** 관리자 UID (UI 가드용). 실제 데이터 권한은 Firestore/Storage Rules가 판별한다. */
 const ADMIN_UID = process.env.NEXT_PUBLIC_ADMIN_UID;

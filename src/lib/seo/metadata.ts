@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { DEFAULT_LANG, LANGS } from "@/constants/langs";
 import { ROUTES } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
@@ -15,6 +13,7 @@ import {
 
 import type { Lang } from "@/types/lang";
 import type { LocalizedText } from "@/types/localized";
+import type { Metadata } from "next";
 
 /** OpenGraph locale 표기 — 언어 코드의 유일한 지역 매핑 */
 const OG_LOCALE: Record<Lang, string> = { ko: "ko_KR", en: "en_US" };

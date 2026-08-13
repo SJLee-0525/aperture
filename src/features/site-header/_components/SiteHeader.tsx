@@ -1,13 +1,15 @@
 "use client";
 
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { DesktopMegaMenu } from "@/features/site-header/_components/DesktopMegaMenu";
 import { LangMenu } from "@/features/site-header/_components/LangMenu";
 import { MobileMenu } from "@/features/site-header/_components/MobileMenu";
 import { SearchBox } from "@/features/site-header/_components/SearchBox";
 import { ThemeToggleButton } from "@/features/site-header/_components/ThemeToggleButton";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./SiteHeader.module.css";
 

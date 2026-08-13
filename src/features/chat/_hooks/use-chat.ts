@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { DICTIONARY } from "@/constants/dictionary";
-
 import { buildChatContext } from "@/features/chat/_lib/chat-context";
 import { createInitialMessage } from "@/features/chat/_lib/chat-welcome";
 
-import type { ChatMessage } from "@/types/chat";
+import { DICTIONARY } from "@/constants/dictionary";
+
 import type { ChatScreenTarget } from "@/lib/chat-screen-target-context";
+import type { ChatMessage } from "@/types/chat";
 import type { Lang } from "@/types/lang";
 
 type ChatSuccessResponse = { message: Omit<ChatMessage, "id"> };

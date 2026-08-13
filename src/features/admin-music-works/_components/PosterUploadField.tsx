@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { usePosterUpload } from "@/features/image-upload/_hooks/use-poster-upload";
+
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import styles from "./PosterUploadField.module.css";

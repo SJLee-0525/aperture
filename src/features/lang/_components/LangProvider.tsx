@@ -2,10 +2,11 @@
 
 import { createContext, useMemo, useSyncExternalStore } from "react";
 
+import { writeLocalePreferenceCookie } from "@/features/lang/_lib/locale-preference-cookie";
+
 import { DICTIONARY, type UIDict } from "@/constants/dictionary";
 import { DEFAULT_LANG, LANGS } from "@/constants/langs";
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
-import { writeLocalePreferenceCookie } from "@/features/lang/_lib/locale-preference-cookie";
 
 import type { Lang } from "@/types/lang";
 

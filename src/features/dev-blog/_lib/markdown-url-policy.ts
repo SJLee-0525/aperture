@@ -1,6 +1,7 @@
 import { STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
-import type { ArticleLinkTarget } from "@/features/dev-blog/_lib/markdown-nodes";
 import { normalizePublicHref } from "@/lib/security/public-url";
+
+import type { ArticleLinkTarget } from "@/features/dev-blog/_lib/markdown-nodes";
 
 /**
  * 본문 링크를 실행 가능한 스킴에서 걸러 낸다.

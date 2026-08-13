@@ -3,19 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
-import { ROUTES } from "@/constants/routes";
-import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
-import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
-import { getPhotoRepository } from "@/lib/admin/photo-repository";
-import type { PhotoInput } from "@/lib/firebase/firestore";
-import type { Photo } from "@/types/photo";
-
 import {
   applyUploadResult,
   createPhotoInput,
   parseCoords,
   validatePhotoInput,
 } from "@/features/admin-photos/_lib/photo-draft";
+import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
+
+import { ROUTES } from "@/constants/routes";
+import { getPhotoRepository } from "@/lib/admin/photo-repository";
+
+import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
+import type { PhotoInput } from "@/lib/firebase/firestore";
+import type { Photo } from "@/types/photo";
 
 const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const router = useRouter();

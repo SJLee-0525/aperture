@@ -4,11 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
-
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
-import type { MusicMediaInput } from "@/lib/firebase/music";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
+import type { MusicMediaInput } from "@/lib/firebase/music";
 import type { MusicMedia } from "@/types/music";
 
 import styles from "./MediaForm.module.css";

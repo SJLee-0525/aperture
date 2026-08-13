@@ -3,12 +3,15 @@
 import { m } from "motion/react";
 
 import { AlbumCard } from "@/components/AlbumCard";
-import { albumRoute } from "@/constants/routes";
-import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { AlbumCard as AlbumCardData } from "@/features/albums/_lib/album-cards";
+
 import { useAlbumTools } from "@/features/albums/_hooks/use-album-tools";
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { albumRoute } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
+
+import type { AlbumCard as AlbumCardData } from "@/features/albums/_lib/album-cards";
 
 import styles from "./AlbumsView.module.css";
 

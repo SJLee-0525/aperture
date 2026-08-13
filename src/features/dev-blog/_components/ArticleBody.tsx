@@ -4,20 +4,23 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
-import { DICTIONARY } from "@/constants/dictionary";
 import { ArticleCodeBlock } from "@/features/dev-blog/_components/ArticleCodeBlock";
-import { collectArticleImages } from "@/features/dev-blog/_lib/article-images";
 import { ArticleYouTube } from "@/features/dev-blog/_components/ArticleYouTube";
+
+import { collectArticleImages } from "@/features/dev-blog/_lib/article-images";
 import {
   articleCodeHighlightKey,
   type ArticleCodeHighlights,
 } from "@/features/dev-blog/_lib/markdown-highlight-map";
+
+import { DICTIONARY } from "@/constants/dictionary";
+import { localizePath } from "@/lib/i18n/locale-path";
+
 import type {
   ArticleBlock,
   ArticleDocument,
   ArticleInline,
 } from "@/features/dev-blog/_lib/markdown-nodes";
-import { localizePath } from "@/lib/i18n/locale-path";
 import type { Lang } from "@/types/lang";
 
 import styles from "./ArticleBody.module.css";

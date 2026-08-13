@@ -1,10 +1,13 @@
 "use client";
 
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { ShareButton } from "@/components/ShareButton";
 import { DetailMiniMap } from "@/features/photo-detail/_components/DetailMiniMap";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { formatShotAt } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { Photo } from "@/types/photo";
 
 import styles from "./ExifPanel.module.css";

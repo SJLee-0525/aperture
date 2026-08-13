@@ -2,14 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { useMounted } from "@/hooks/use-mounted";
+
 import {
   clearArticleRecovery,
   readArticleRecovery,
   writeArticleRecovery,
 } from "@/features/admin-dev-articles/_lib/dev-article-recovery";
-import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
-import { useMounted } from "@/hooks/use-mounted";
+import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
 /** 입력이 멈춘 뒤 복구본을 뜨기까지 기다리는 시간(계획 §5). 타자 중에 매번 쓰지 않기 위한 값이다. */
 const ARTICLE_RECOVERY_DEBOUNCE_MS = 5_000;

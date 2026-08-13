@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildContentSecurityPolicy, STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
 import {
   resolveArticleImageSource,
   resolveArticleLink,
 } from "@/features/dev-blog/_lib/markdown-url-policy";
+
+import { buildContentSecurityPolicy, STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
 
 describe("resolveArticleLink", () => {
   it("내부 경로와 fragment 는 같은 탭으로 연다", () => {

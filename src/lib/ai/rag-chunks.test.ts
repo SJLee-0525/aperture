@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildRagChunks } from "@/lib/ai/rag-chunks";
+
 import type { RagSourceData } from "@/lib/content/rag-source";
 
 describe("buildRagChunks", () => {

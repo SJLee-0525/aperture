@@ -1,5 +1,4 @@
 import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
-
 import { fetchDocument } from "@/lib/firebase/public/transport";
 import { asText } from "@/lib/i18n/as-text";
 import { sanitizePublicLinks } from "@/lib/security/public-url";

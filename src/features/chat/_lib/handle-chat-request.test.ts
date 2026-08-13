@@ -5,8 +5,8 @@ import { ChatRateLimitConfigurationError } from "@/features/chat/_lib/chat-rate-
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import { handleChatRequest, MAX_BODY_BYTES } from "@/features/chat/_lib/handle-chat-request";
 
-import type { ChatReference } from "@/types/chat";
 import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
+import type { ChatReference } from "@/types/chat";
 
 const createRequest = (body: unknown, headers?: HeadersInit) =>
   new Request("http://localhost/api/chat", {

@@ -1,7 +1,9 @@
 "use client";
 
 import { CloseIcon } from "@/components/CloseIcon";
+
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
+
 import type { DevProject } from "@/types/dev";
 
 import { DevImageField } from "./DevImageField";

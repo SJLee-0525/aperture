@@ -1,8 +1,8 @@
-import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 import { normalizeArticleSlug } from "@/features/admin-dev-articles/_lib/dev-article-slug";
 
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
+import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 import type { DevArticle } from "@/types/dev-article";
 import type { LocalizedText } from "@/types/localized";
 

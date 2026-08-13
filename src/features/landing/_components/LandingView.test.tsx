@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 
 import { render } from "@testing-library/react";
-import type { AnchorHTMLAttributes } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DICTIONARY } from "@/constants/dictionary";
 import { LandingNav } from "@/features/landing/_components/LandingView";
 import { LangProvider } from "@/features/lang/_components/LangProvider";
+
+import { DICTIONARY } from "@/constants/dictionary";
+
+import type { AnchorHTMLAttributes } from "react";
 
 const linkRender = vi.fn();
 

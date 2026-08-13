@@ -1,8 +1,11 @@
-import type { PhrasingContent, Root, RootContent } from "mdast";
-
 import { normalizeCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
 import { resolveArticleDirective } from "@/features/dev-blog/_lib/markdown-directives";
 import { createHeadingIdFactory } from "@/features/dev-blog/_lib/markdown-heading-id";
+import {
+  resolveArticleImageSource,
+  resolveArticleLink,
+} from "@/features/dev-blog/_lib/markdown-url-policy";
+
 import type {
   ArticleBlock,
   ArticleDocument,
@@ -11,10 +14,7 @@ import type {
   ArticleMarkdownIssueCode,
   ArticleSourcePoint,
 } from "@/features/dev-blog/_lib/markdown-nodes";
-import {
-  resolveArticleImageSource,
-  resolveArticleLink,
-} from "@/features/dev-blog/_lib/markdown-url-policy";
+import type { PhrasingContent, Root, RootContent } from "mdast";
 
 /** 본문 heading 의 허용 범위. 글 제목이 페이지 h1 이라 본문은 h2 부터 시작한다. */
 const MIN_HEADING_DEPTH = 2;

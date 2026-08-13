@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 
-import { adminDevArticleRoute, ROUTES } from "@/constants/routes";
-
 import {
   articleToInput,
   emptyArticleInput,
@@ -19,9 +17,10 @@ import { suggestArticleSlug } from "@/features/admin-dev-articles/_lib/dev-artic
 import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-article-id";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
-import type { DevArticle } from "@/types/dev-article";
+import { adminDevArticleRoute, ROUTES } from "@/constants/routes";
 
 import type { useArticleReferences } from "@/features/admin-dev-articles/_hooks/use-article-references";
+import type { DevArticle } from "@/types/dev-article";
 
 type References = ReturnType<typeof useArticleReferences>;
 

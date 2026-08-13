@@ -6,14 +6,14 @@ import { Modal } from "@/components/Modal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useMusicWorkTools } from "@/features/music/_hooks/use-music-tools";
-
 import { useQueryModal } from "@/hooks/use-query-modal";
+import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
 import { formatYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
-import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
 import { imagePreviewUrl } from "@/types/image";
+
 import type { MusicWork } from "@/types/music";
 
 import styles from "./MusicWorksView.module.css";

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/features/auth/_hooks/use-auth";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./page.module.css";
 

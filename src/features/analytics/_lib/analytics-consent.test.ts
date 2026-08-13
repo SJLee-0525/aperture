@@ -2,7 +2,6 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 import {
   ANALYTICS_CONSENT_MAX_AGE_MS,
   getAnalyticsConsentSnapshot,
@@ -12,6 +11,8 @@ import {
   setBrowserAnalyticsConsent,
   writeAnalyticsConsent,
 } from "@/features/analytics/_lib/analytics-consent";
+
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 const NOW = Date.UTC(2026, 7, 9);
 const CHOICE = { analytics: "granted", monitoring: "denied" } as const;

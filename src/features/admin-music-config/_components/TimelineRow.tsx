@@ -1,9 +1,10 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
-import type { TimelineEntry } from "@/types/timeline";
 
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
+import type { TimelineEntry } from "@/types/timeline";
+
 import styles from "./TimelineRow.module.css";
 
 type Props = {

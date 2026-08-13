@@ -1,9 +1,10 @@
-import { getMockReplyForMessages } from "@/features/chat/_lib/mock-chat";
 import { createGeminiChatProvider } from "@/features/chat/_lib/gemini-chat-provider";
+import { getMockReplyForMessages } from "@/features/chat/_lib/mock-chat";
 import { createOpenAIChatProvider } from "@/features/chat/_lib/openai-chat-provider";
+
 import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
-import type { Lang } from "@/types/lang";
 import type { ChatLink, ChatReferenceRequest, ContactDraft } from "@/types/chat";
+import type { Lang } from "@/types/lang";
 
 type ChatProviderInput = {
   instructions: string;

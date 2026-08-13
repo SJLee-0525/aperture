@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
 import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminSiteEditor.module.css";
 

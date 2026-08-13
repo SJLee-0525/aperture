@@ -1,6 +1,7 @@
+import { ROUTES } from "@/constants/routes";
+
 import type { IconName } from "@/components/Icon";
 import type { UIDict } from "@/constants/dictionary";
-import { ROUTES } from "@/constants/routes";
 import type { SectionId } from "@/constants/sections";
 
 /** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 등록된 Icon 이름 */

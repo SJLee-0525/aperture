@@ -5,13 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { Fragment, useMemo } from "react";
 
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { TitleSegment } from "@/lib/search/highlight-title";
+
+import { pickText } from "@/lib/i18n/pick-text";
 import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
 import { createDocumentScorer } from "@/lib/search/score-documents";
-import type { SearchDocument, SearchSection } from "@/types/search";
-import { pickText } from "@/lib/i18n/pick-text";
 import { tokensFor } from "@/lib/text/korean-tokenize";
+
+import type { TitleSegment } from "@/lib/search/highlight-title";
+import type { SearchDocument, SearchSection } from "@/types/search";
 
 import styles from "./SearchResults.module.css";
 

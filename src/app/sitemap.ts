@@ -1,5 +1,3 @@
-import type { MetadataRoute } from "next";
-
 import { LANGS } from "@/constants/langs";
 import { ROUTES, albumRoute, devArticleRoute } from "@/constants/routes";
 import { getDevArticles } from "@/lib/content/dev-articles";
@@ -7,6 +5,8 @@ import { getAlbums } from "@/lib/content/photo";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { languageAlternates } from "@/lib/seo/metadata";
 import { absoluteUrl } from "@/lib/seo/site-url";
+
+import type { MetadataRoute } from "next";
 
 const PUBLIC_ROUTES = [
   ROUTES.LANDING,

@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 
 import { CHAT_PROFILE_CACHE_TAG, PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/constants/cache";
 import { fetchRagChunks } from "@/lib/firebase/public/rag";
+
 import type { StoredRagChunk, StoredRagChunkMeta } from "@/types/rag";
 
 /**

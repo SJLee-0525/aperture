@@ -1,10 +1,12 @@
 "use client";
 
-import { DICTIONARY } from "@/constants/dictionary";
 import { ArticleBody } from "@/features/dev-blog/_components/ArticleBody";
 import { ArticleHero } from "@/features/dev-blog/_components/ArticleHero";
 import { ArticleToc } from "@/features/dev-blog/_components/ArticleToc";
+
 import { buildArticleToc } from "@/features/dev-blog/_lib/markdown-toc";
+
+import { DICTIONARY } from "@/constants/dictionary";
 
 import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 import type { ArticleDocument } from "@/features/dev-blog/_lib/markdown-nodes";

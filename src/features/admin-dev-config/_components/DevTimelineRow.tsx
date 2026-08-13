@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+
 import type { DevTimelineEntry } from "@/types/dev";
 
 import styles from "./DevTimelineRow.module.css";

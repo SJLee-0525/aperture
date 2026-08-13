@@ -6,8 +6,10 @@ import { useCallback, useMemo, useState } from "react";
 
 import { LocationList } from "@/features/map/_components/LocationList";
 import { MapPhotoModal } from "@/features/map/_components/MapPhotoModal";
-import type { MapLocation } from "@/features/map/_types/map-location";
+
 import { useMapTools } from "@/features/map/_hooks/use-map-tools";
+
+import type { MapLocation } from "@/features/map/_types/map-location";
 
 import styles from "./MapView.module.css";
 

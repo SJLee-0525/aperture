@@ -2,9 +2,6 @@
 
 import { useCallback, useState } from "react";
 
-import { getAdminImageStore } from "@/lib/admin/image-store";
-import type { ImageMeta } from "@/types/image";
-
 import {
   compressPreviewToWebp,
   compressThumbnailToWebp,
@@ -12,6 +9,10 @@ import {
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 import { runLimited } from "@/features/image-upload/_lib/run-limited";
+
+import { getAdminImageStore } from "@/lib/admin/image-store";
+
+import type { ImageMeta } from "@/types/image";
 
 const DEV_UPLOAD_CONCURRENCY = 3;
 

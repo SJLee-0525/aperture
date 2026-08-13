@@ -5,6 +5,7 @@ import Link from "next/link";
 import { type ReactNode, useId, useState } from "react";
 
 import { CountUp } from "@/components/CountUp";
+
 import { ROUTES } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
 

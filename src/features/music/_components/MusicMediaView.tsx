@@ -3,8 +3,11 @@
 import { useState } from "react";
 
 import { YouTubeFacade } from "@/components/YouTubeFacade";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { MusicMedia } from "@/types/music";
 
 import styles from "./MusicMediaView.module.css";

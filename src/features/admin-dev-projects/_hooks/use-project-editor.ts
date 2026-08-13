@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
-import { ROUTES } from "@/constants/routes";
-
 import {
   emptyProjectInput,
   prepareProjectInput,
@@ -12,13 +10,14 @@ import {
 } from "@/features/admin-dev-projects/_lib/project-form-data";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
+import { ROUTES } from "@/constants/routes";
+import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
+import type { DevProjectInput } from "@/lib/firebase/dev";
 import type { DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
 import type { SiteLink } from "@/types/site";
-
-import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
-import type { DevProjectInput } from "@/lib/firebase/dev";
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type LocalizedArrayKey = "features" | "roles" | "achievements";
 

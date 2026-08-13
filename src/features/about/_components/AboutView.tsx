@@ -3,8 +3,11 @@
 import { useMemo } from "react";
 
 import { AboutSection } from "@/components/AboutSection";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { LocalizedText } from "@/types/localized";
 import type { Photo } from "@/types/photo";
 

@@ -2,14 +2,17 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-import { DICTIONARY } from "@/constants/dictionary";
 import { ArticleTocDrawer } from "@/features/dev-blog/_components/ArticleTocDrawer";
 import { ArticleTocList } from "@/features/dev-blog/_components/ArticleTocList";
 import { ArticleTocRail } from "@/features/dev-blog/_components/ArticleTocRail";
+
 import { useActiveHeading } from "@/features/dev-blog/_hooks/use-active-heading";
 import { useHoverGrace } from "@/features/dev-blog/_hooks/use-hover-grace";
 import { useTocZone } from "@/features/dev-blog/_hooks/use-toc-zone";
+
 import { navigateToHeading, restoreScroll } from "@/features/dev-blog/_lib/heading-navigation";
+
+import { DICTIONARY } from "@/constants/dictionary";
 
 import type { ArticleTocItem } from "@/features/dev-blog/_lib/markdown-toc";
 import type { Lang } from "@/types/lang";

@@ -11,8 +11,8 @@ import {
 
 import { shouldUseMockContent } from "@/lib/content/content-source";
 
-import base from "./ImageMigrationPanel.module.css";
 import styles from "./ArticleOrphanImagePanel.module.css";
+import base from "./ImageMigrationPanel.module.css";
 
 /**
  * 바이트 수를 관리자 표에 읽기 좋은 단위로 줄인다.

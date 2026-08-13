@@ -1,5 +1,6 @@
-import type { Coords } from "@/types/coords";
 import { imageThumbnailUrl } from "@/types/image";
+
+import type { Coords } from "@/types/coords";
 import type { LocalizedText } from "@/types/localized";
 import type { Photo } from "@/types/photo";
 

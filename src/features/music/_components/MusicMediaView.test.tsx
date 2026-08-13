@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MusicMediaView } from "@/features/music/_components/MusicMediaView";
+
 import type { MusicMedia } from "@/types/music";
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({

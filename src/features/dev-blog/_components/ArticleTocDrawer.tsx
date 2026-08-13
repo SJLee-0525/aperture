@@ -4,13 +4,15 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
-import { DICTIONARY } from "@/constants/dictionary";
 import { ArticleTocList } from "@/features/dev-blog/_components/ArticleTocList";
+
 import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+
+import { DICTIONARY } from "@/constants/dictionary";
 
 import type { ArticleTocItem } from "@/features/dev-blog/_lib/markdown-toc";
 import type { Lang } from "@/types/lang";

@@ -5,11 +5,12 @@ import {
   compressThumbnailToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+
 import { listAlbumsAdmin, updateAlbum } from "@/lib/firebase/albums";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 import { devProjects } from "@/lib/firebase/dev";
 import { listPhotosAdmin, updatePhoto } from "@/lib/firebase/firestore";
 import { musicWorks } from "@/lib/firebase/music";
-import { getFirebaseAuth } from "@/lib/firebase/client";
 import {
   uploadDevThumbnail,
   uploadDevPreview,
@@ -18,6 +19,7 @@ import {
   uploadPhotoPreview,
   uploadPhotoThumbnail,
 } from "@/lib/firebase/storage";
+
 import type { ImageMeta, ImageVariant } from "@/types/image";
 
 type MigrationProgress = {

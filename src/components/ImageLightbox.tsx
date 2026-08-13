@@ -5,12 +5,14 @@ import Image from "next/image";
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { Icon } from "@/components/Icon";
 import { CloseIcon } from "@/components/CloseIcon";
+import { Icon } from "@/components/Icon";
+
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
+
 import type { ImageMeta } from "@/types/image";
 
 import styles from "./ImageLightbox.module.css";

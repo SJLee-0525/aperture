@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { ROUTES } from "@/constants/routes";
+import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
+import type { MusicAwardInput } from "@/lib/firebase/music";
 import type { MusicAward } from "@/types/music";
 
-import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
-import type { MusicAwardInput } from "@/lib/firebase/music";
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import styles from "./AwardForm.module.css";
 
 type Props = {

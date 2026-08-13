@@ -5,6 +5,7 @@ import { DICTIONARY } from "@/constants/dictionary";
 import { devProjectRoute } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import { imageThumbnailUrl } from "@/types/image";
 
 import type { DevProjectCardData } from "@/types/dev";

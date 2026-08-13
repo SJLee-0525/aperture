@@ -1,8 +1,11 @@
 "use client";
 
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
+
 import type { DevStackGroup } from "@/types/dev";
 
 import styles from "./DevStackSection.module.css";

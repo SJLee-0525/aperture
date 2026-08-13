@@ -6,18 +6,20 @@ import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
-import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
-import { ROUTES } from "@/constants/routes";
-import { sectionFromPath } from "@/constants/sections";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import {
   MOBILE_MENU_OPEN_ATTRIBUTE,
   MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE,
 } from "@/features/site-header/_components/MobileNavigationVisibility";
-import { localizePath } from "@/lib/i18n/locale-path";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+
+import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
+import { ROUTES } from "@/constants/routes";
+import { sectionFromPath } from "@/constants/sections";
+import { localizePath } from "@/lib/i18n/locale-path";
 
 import styles from "./MobileMenu.module.css";
 

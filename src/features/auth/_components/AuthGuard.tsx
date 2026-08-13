@@ -3,8 +3,9 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
-import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/features/auth/_hooks/use-auth";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./AuthGuard.module.css";
 

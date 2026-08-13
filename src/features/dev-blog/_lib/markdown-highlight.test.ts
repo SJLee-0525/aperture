@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import type { ArticleCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
 import {
   highlightArticleCode,
   highlightArticleDocument,
 } from "@/features/dev-blog/_lib/markdown-highlight";
 import { articleCodeHighlightKey } from "@/features/dev-blog/_lib/markdown-highlight-map";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
+
+import type { ArticleCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
 
 /** 문법 로더는 언어마다 한 줄씩 손으로 적어 둔다 — 주소를 잘못 적으면 그 언어에서만 색이 사라진다. */
 const ALL_LANGUAGES: ArticleCodeLanguage[] = [

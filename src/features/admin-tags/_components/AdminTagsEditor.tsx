@@ -11,10 +11,12 @@ import {
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
 import { TagAddForm } from "@/features/admin-tags/_components/TagAddForm";
 import { TagRow } from "@/features/admin-tags/_components/TagRow";
+
 import { useTagsAdmin } from "@/features/admin-tags/_hooks/use-tags-admin";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminTagsEditor.module.css";
 

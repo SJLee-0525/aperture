@@ -1,5 +1,5 @@
-import type { LocalizedText } from "@/types/localized";
 import type { ImageMeta } from "@/types/image";
+import type { LocalizedText } from "@/types/localized";
 
 /** 앨범 = 사진 묶음. 사진은 top-level, 앨범은 id로 참조만 한다. */
 type Album = {

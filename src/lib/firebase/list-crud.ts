@@ -12,10 +12,11 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { firestoreCollectionCacheTag } from "@/constants/cache";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { getFirebaseDb } from "@/lib/firebase/client";
+
 import type { RagSyncSourceType } from "@/types/rag";
 
 type WithId = { id: string };

@@ -7,15 +7,18 @@ import { PageToolbar } from "@/components/PageToolbar";
 import { PhotoGrid } from "@/components/PhotoGrid";
 import { ViewToggle } from "@/components/ViewToggle";
 import { FilterBar } from "@/features/gallery/_components/FilterBar";
-import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
-import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import {
   OnDemandPhotoModal,
   preloadPhotoModal,
 } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+
 import { useGalleryTools } from "@/features/gallery/_hooks/use-gallery-tools";
+import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
+import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { parsePhotoFilterQuery } from "@/lib/photo-filter-query";
+
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 

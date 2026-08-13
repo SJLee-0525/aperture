@@ -2,8 +2,10 @@ import Image from "next/image";
 import { memo } from "react";
 
 import { pickText } from "@/lib/i18n/pick-text";
-import type { DevProjectCardData } from "@/types/dev";
+
 import { imagePreviewUrl } from "@/types/image";
+
+import type { DevProjectCardData } from "@/types/dev";
 import type { Lang } from "@/types/lang";
 
 import styles from "./DevProjectsView.module.css";

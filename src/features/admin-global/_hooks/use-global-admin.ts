@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import type { LocalizedText } from "@/types/localized";
-import type { SiteLink } from "@/types/site";
-
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
+
+import type { LocalizedText } from "@/types/localized";
+import type { SiteLink } from "@/types/site";
 
 type Status = "loading" | "ready" | "error";
 

@@ -1,11 +1,12 @@
 "use client";
 
-import type { FeatureCollection } from "geojson";
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "react";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
 import { setMapCursorHover } from "@/utils/custom-cursor-events";
+
+import type { MapLocation } from "@/features/map/_types/map-location";
+import type { FeatureCollection } from "geojson";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import styles from "./MapCanvas.module.css";

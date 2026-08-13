@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 import {
   checkArticlePublishable,
   type PublishCheckContext,
 } from "@/features/admin-dev-articles/_lib/dev-article-publish-check";
+
+import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
 const COVER = { url: "https://example.test/a.webp", path: "dev-blog/a/1.webp", w: 2048, h: 1365 };
 

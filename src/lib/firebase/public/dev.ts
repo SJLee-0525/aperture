@@ -1,5 +1,4 @@
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
-
 import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import {

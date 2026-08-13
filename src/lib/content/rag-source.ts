@@ -1,5 +1,4 @@
 import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
-
 import {
   fetchDevConfig,
   fetchPublishedDevProjects,

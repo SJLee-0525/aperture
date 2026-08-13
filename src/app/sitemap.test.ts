@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import sitemap from "@/app/sitemap";
 import { ROUTES } from "@/constants/routes";
+
+import sitemap from "@/app/sitemap";
 
 /**
  * sitemap 은 라우트 목록을 수동으로 관리하므로(전 ROUTES 순회가 아님) 재배치 때 갱신을 빠뜨리기 쉽다.

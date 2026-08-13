@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { isLang, LANGS } from "@/constants/langs";
 import { DocumentLang } from "@/features/lang/_components/DocumentLang";
 import { LangProvider } from "@/features/lang/_components/LangProvider";
+
 import { langInitScript } from "@/features/lang/_lib/lang-script";
+
+import { isLang, LANGS } from "@/constants/langs";
 
 /**
  * ko·en 두 언어를 빌드 타임에 프리렌더 — 하위 전 공개 페이지에 lang 파라미터를 공급한다

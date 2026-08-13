@@ -1,10 +1,11 @@
 "use client";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
+
 import type { Album } from "@/types/album";
 
-import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
 import styles from "./AlbumForm.module.css";
+import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
 
 type Props = {
   albumId: string;

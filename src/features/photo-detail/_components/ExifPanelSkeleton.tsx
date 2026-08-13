@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/Skeleton";
+
 import type { Photo } from "@/types/photo";
 
 import styles from "./ExifPanelSkeleton.module.css";

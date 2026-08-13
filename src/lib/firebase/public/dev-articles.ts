@@ -1,5 +1,4 @@
 import { COLLECTIONS } from "@/constants/collections";
-
 import { publishedQuery, runQuery, toDate } from "@/lib/firebase/public/transport";
 import { asText } from "@/lib/i18n/as-text";
 

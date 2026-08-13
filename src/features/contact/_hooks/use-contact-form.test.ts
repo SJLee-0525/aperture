@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
-import type { FormEvent } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { FormEvent } from "react";
 
 const fetchMock = vi.fn<typeof fetch>();
 const submitEvent = (

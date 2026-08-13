@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Icon } from "@/components/Icon";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import styles from "./ChatLauncher.module.css";

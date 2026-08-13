@@ -9,11 +9,12 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-import { setLoadedSentry } from "@/instrumentation-client";
 import { MINIMAL_DATA_COLLECTION } from "@/lib/monitoring/data-collection";
-import { resolveMonitoringEnvironment } from "@/lib/monitoring/monitoring-environment";
 import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
+import { resolveMonitoringEnvironment } from "@/lib/monitoring/monitoring-environment";
 import { scrubBreadcrumb, scrubEvent, scrubReplayEvent } from "@/lib/monitoring/scrub-event";
+
+import { setLoadedSentry } from "@/instrumentation-client";
 
 import type { BrowserMonitoringMode } from "@/lib/monitoring/browser-monitoring";
 

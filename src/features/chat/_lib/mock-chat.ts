@@ -1,9 +1,11 @@
 import { devProjectRoute, ROUTES } from "@/constants/routes";
-import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
 import { MOCK_MUSIC_WORKS } from "@/mocks/music";
 import { MOCK_PHOTOS } from "@/mocks/photos";
+
+import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import type { ChatLink, ChatReference } from "@/types/chat";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";

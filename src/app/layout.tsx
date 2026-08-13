@@ -1,14 +1,17 @@
-import type { Metadata, Viewport } from "next";
 import { Newsreader, Noto_Serif_KR, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
 import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
 import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomScrollbar";
 import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { MotionProvider } from "@/features/motion/_components/MotionProvider";
+
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
+
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/seo/site-meta";
-import { WEBMCP_ORIGIN_TRIAL_TOKEN } from "@/lib/webmcp/origin-trial-token";
 import { SITE_URL } from "@/lib/seo/site-url";
+import { WEBMCP_ORIGIN_TRIAL_TOKEN } from "@/lib/webmcp/origin-trial-token";
+
+import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
 

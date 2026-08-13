@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { PUBLIC_CACHE_CONTROL } from "@/constants/cache";
 import { adjacentPhotos, serializePhoto } from "@/features/photo-detail/_lib/photo-detail-payload";
+
+import { PUBLIC_CACHE_CONTROL } from "@/constants/cache";
 import { getPhotos, getTags } from "@/lib/content/photo";
 
 type Context = {

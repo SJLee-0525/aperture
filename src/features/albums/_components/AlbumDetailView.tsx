@@ -4,11 +4,14 @@ import { m } from "motion/react";
 
 import { DetailHero } from "@/components/DetailHero";
 import { PhotoGrid } from "@/components/PhotoGrid";
-import { ROUTES } from "@/constants/routes";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 import type { Tag } from "@/types/tag";

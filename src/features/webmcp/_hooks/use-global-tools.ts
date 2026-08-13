@@ -1,19 +1,20 @@
 "use client";
 
-import { ROUTES } from "@/constants/routes";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useModelContextTool } from "@/hooks/use-model-context-tool";
+
+import { ROUTES } from "@/constants/routes";
+import { localizePath } from "@/lib/i18n/locale-path";
+import { pickText } from "@/lib/i18n/pick-text";
+import { loadSearchIndex } from "@/lib/search/load-search-index";
+import { rankDocuments } from "@/lib/search/rank-documents";
+import { clampToolText, formatToolItems } from "@/lib/webmcp/tool-output";
 import {
   enumProperty,
   limitProperty,
   objectSchema,
   stringProperty,
 } from "@/lib/webmcp/tool-schemas";
-import { localizePath } from "@/lib/i18n/locale-path";
-import { pickText } from "@/lib/i18n/pick-text";
-import { loadSearchIndex } from "@/lib/search/load-search-index";
-import { rankDocuments } from "@/lib/search/rank-documents";
-import { clampToolText, formatToolItems } from "@/lib/webmcp/tool-output";
 
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
 import type { SearchSection } from "@/types/search";

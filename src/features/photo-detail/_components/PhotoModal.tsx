@@ -7,9 +7,10 @@ import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { ExifStrip } from "@/components/ExifStrip";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { ExifPanel } from "@/features/photo-detail/_components/ExifPanel";
 import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanelSkeleton";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
@@ -17,7 +18,9 @@ import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { Photo } from "@/types/photo";
 import type { Tag } from "@/types/tag";
 

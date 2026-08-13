@@ -2,12 +2,13 @@
 
 import { deleteObject, ref } from "firebase/storage";
 
+import { articleBodyStoragePaths } from "@/features/admin-maintenance/_lib/article-body-storage-paths";
+
 import { listDevArticleImageRefsAdmin } from "@/lib/firebase/admin-list-rest";
 import { getFirebaseStorage } from "@/lib/firebase/client";
 import { listFolderFiles } from "@/lib/firebase/storage";
-import { imagePaths } from "@/types/image";
 
-import { articleBodyStoragePaths } from "@/features/admin-maintenance/_lib/article-body-storage-paths";
+import { imagePaths } from "@/types/image";
 
 /** 작성 중인 파일이 정리 대상에 포함되지 않도록 기다리는 시간. */
 const ORPHAN_MIN_AGE_MS = 24 * 60 * 60 * 1000;

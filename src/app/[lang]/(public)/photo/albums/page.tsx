@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-
 import { AlbumsView } from "@/features/albums/_components/AlbumsView";
+
 import { toAlbumCards } from "@/features/albums/_lib/album-cards";
+
 import { getAlbums, getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

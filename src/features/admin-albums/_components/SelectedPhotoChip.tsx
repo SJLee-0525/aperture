@@ -4,8 +4,9 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 
-import type { AdminPhotoListItem } from "@/types/admin";
 import { imageThumbnailUrl } from "@/types/image";
+
+import type { AdminPhotoListItem } from "@/types/admin";
 
 import styles from "./SelectedPhotoChip.module.css";
 

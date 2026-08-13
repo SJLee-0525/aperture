@@ -1,15 +1,17 @@
 "use client";
 
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useDevTools } from "@/features/dev/_hooks/use-dev-tools";
+import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
-import { pickText } from "@/lib/i18n/pick-text";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
+
+import { pickText } from "@/lib/i18n/pick-text";
+
 import type { DevProjectCardData } from "@/types/dev";
 
 import { DevProjectCard } from "./DevProjectCard";
-import { OnDemandDevProjectDetail, preloadDevProjectDetail } from "./OnDemandDevProjectDetail";
 import styles from "./DevProjectsView.module.css";
+import { OnDemandDevProjectDetail, preloadDevProjectDetail } from "./OnDemandDevProjectDetail";
 
 /**
  * 프로젝트 목록과 URL 기반 상세 선택을 조율한다.

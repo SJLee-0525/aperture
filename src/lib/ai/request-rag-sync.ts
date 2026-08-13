@@ -1,6 +1,7 @@
 "use client";
 
 import { getFirebaseAuth } from "@/lib/firebase/client";
+
 import type { RagSyncSourceType } from "@/types/rag";
 
 const requestRagSync = async (sourceType: RagSyncSourceType, sourceId: string) => {

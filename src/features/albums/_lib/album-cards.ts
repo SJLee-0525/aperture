@@ -1,5 +1,6 @@
-import type { Album } from "@/types/album";
 import { imagePreviewUrl } from "@/types/image";
+
+import type { Album } from "@/types/album";
 import type { LocalizedText } from "@/types/localized";
 import type { Photo } from "@/types/photo";
 

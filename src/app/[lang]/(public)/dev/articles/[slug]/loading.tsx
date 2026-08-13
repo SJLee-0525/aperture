@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/Skeleton";
+
 import { ARTICLE_HERO_MIN_HEIGHT } from "@/features/dev-blog/_lib/article-hero-height";
 
 import styles from "./loading.module.css";

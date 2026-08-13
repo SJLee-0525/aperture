@@ -1,6 +1,7 @@
-import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
-import { DEFAULT_SECTION, SECTION_BY_PREFIX } from "@/constants/sections";
 import { BROWSER_THEME_COLORS } from "@/features/theme/_lib/browser-theme-color";
+
+import { DEFAULT_SECTION, SECTION_BY_PREFIX } from "@/constants/sections";
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 /**
  * 다크모드 no-flash 스크립트.

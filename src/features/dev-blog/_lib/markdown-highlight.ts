@@ -3,12 +3,13 @@ import "server-only";
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createOnigurumaEngine } from "shiki/engine/oniguruma";
 
-import type { ArticleCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
 import {
   articleCodeHighlightKey,
   type ArticleCodeHighlights,
   type ArticleCodeLines,
 } from "@/features/dev-blog/_lib/markdown-highlight-map";
+
+import type { ArticleCodeLanguage } from "@/features/dev-blog/_lib/markdown-code-language";
 import type { ArticleBlock, ArticleDocument } from "@/features/dev-blog/_lib/markdown-nodes";
 
 /**

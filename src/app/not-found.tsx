@@ -1,8 +1,10 @@
 "use client";
 
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./status.module.css";
 

@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ExifPanel } from "@/features/photo-detail/_components/ExifPanel";
+
 import type { Photo } from "@/types/photo";
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({

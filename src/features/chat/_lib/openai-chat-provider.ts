@@ -9,6 +9,7 @@ import {
   ChatUpstreamError,
 } from "@/features/chat/_lib/chat-upstream-error";
 import { readSseStream } from "@/features/chat/_lib/sse-stream";
+
 import type { ChatProvider } from "@/features/chat/_lib/chat-provider";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";

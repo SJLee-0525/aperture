@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createLocalDevArticleRepository } from "@/features/admin-dev-articles/_lib/local-dev-article-repository";
-import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
+
 import { MOCK_DEV_ARTICLES } from "@/mocks/dev-articles";
+
+import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
 /** 테스트마다 새로 만드는 메모리 저장소. 실제 localStorage 를 건드리지 않는다. */
 const createMemoryStorage = (): Storage => {

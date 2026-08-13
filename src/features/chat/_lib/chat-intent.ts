@@ -1,5 +1,6 @@
-import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import { expandRagQuery } from "@/lib/ai/rag-query";
+
+import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import type { RagSection } from "@/types/rag";
 
 type ProfileSection = RagSection;

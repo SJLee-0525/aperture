@@ -5,6 +5,7 @@ import Image from "next/image";
 import { memo, useEffect, useRef, useState, type SyntheticEvent } from "react";
 
 import { Icon } from "@/components/Icon";
+
 import type { ImageMeta } from "@/types/image";
 
 import styles from "./ImageCarousel.module.css";

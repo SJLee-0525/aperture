@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+
 import type { DevAward } from "@/types/dev";
 
 import styles from "./DevTimelineRow.module.css";

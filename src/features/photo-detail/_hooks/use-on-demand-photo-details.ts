@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { mergePhotoCache } from "@/features/photo-detail/_lib/photo-cache";
-import type { PhotoDetailPayload } from "@/features/photo-detail/_lib/photo-detail-payload";
 import { revivePhoto } from "@/features/photo-detail/_lib/photo-detail-payload";
+
+import type { PhotoDetailPayload } from "@/features/photo-detail/_lib/photo-detail-payload";
 import type { Photo } from "@/types/photo";
 import type { Tag } from "@/types/tag";
 

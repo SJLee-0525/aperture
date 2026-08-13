@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { getMusicConfigRepository } from "@/lib/admin/music-config-repository";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 import type { LocalizedText } from "@/types/localized";
 import type { MusicConfig } from "@/types/music";
 import type { TimelineEntry } from "@/types/timeline";
-
-import { getMusicConfigRepository } from "@/lib/admin/music-config-repository";
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 type Status = "loading" | "ready" | "error";
 /** career/education 두 타임라인 배열을 같은 로직으로 편집하기 위한 키. */

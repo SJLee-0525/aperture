@@ -3,8 +3,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { FilterBar } from "@/features/gallery/_components/FilterBar";
+import { LangProvider } from "@/features/lang/_components/LangProvider";
 
 // jsdom 에는 ResizeObserver 가 없다. 태그 칩 줄(TagFilterBar)이 넘침 감시에 쓴다.
 beforeAll(() => {

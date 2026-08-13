@@ -3,6 +3,7 @@
 import { useState, type KeyboardEvent } from "react";
 
 import { fetchPlaceEnglish, searchPlaces, type GeoResult } from "@/lib/geo/geocode";
+
 import type { LocalizedText } from "@/types/localized";
 
 import styles from "./PlaceField.module.css";

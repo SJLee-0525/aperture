@@ -2,16 +2,17 @@
 
 import { useCallback, useState } from "react";
 
-import { extractExif, type ExtractedExif } from "@/lib/exif/extract";
-import { getAdminImageStore } from "@/lib/admin/image-store";
-import type { ImageMeta } from "@/types/image";
-
 import {
   compressPreviewToWebp,
   compressThumbnailToWebp,
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+
+import { getAdminImageStore } from "@/lib/admin/image-store";
+import { extractExif, type ExtractedExif } from "@/lib/exif/extract";
+
+import type { ImageMeta } from "@/types/image";
 
 /** 업로드 파이프라인 산출물 — 관리자 폼 자동 채움에 필요한 값 일체. */
 type UploadResult = {

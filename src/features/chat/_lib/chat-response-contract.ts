@@ -1,5 +1,6 @@
-import { parseContactDraft } from "@/features/chat/_lib/contact-draft";
 import { MAX_RESPONSE_CHARS } from "@/features/chat/_lib/chat-tuning";
+import { parseContactDraft } from "@/features/chat/_lib/contact-draft";
+
 import type { ChatProviderResult } from "@/features/chat/_lib/chat-provider";
 import type { ChatLink, ChatReferenceRequest } from "@/types/chat";
 

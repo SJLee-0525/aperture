@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { signOutAdmin } from "@/lib/firebase/auth";
 
-import { MockModeBadge } from "./MockModeBadge";
+import type { ReactNode } from "react";
+
 import styles from "./AdminChrome.module.css";
+import { MockModeBadge } from "./MockModeBadge";
 
 /**
  * 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + mock 안내 + 컨텐츠 영역.

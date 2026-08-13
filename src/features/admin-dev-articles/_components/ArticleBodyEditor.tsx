@@ -5,11 +5,13 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { ArticleMarkdownHelp } from "@/features/admin-dev-articles/_components/ArticleMarkdownHelp";
 import { ArticlePreviewPanel } from "@/features/admin-dev-articles/_components/ArticlePreviewPanel";
 import { ArticleYouTubeDialog } from "@/features/admin-dev-articles/_components/ArticleYouTubeDialog";
+
 import {
   imageMarkdown,
   insertAtSelection,
   youtubeMarkdown,
 } from "@/features/admin-dev-articles/_lib/markdown-insert";
+
 import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
 
 import styles from "./ArticleBodyEditor.module.css";

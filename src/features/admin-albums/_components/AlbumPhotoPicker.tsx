@@ -13,8 +13,10 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import { Icon } from "@/components/Icon";
-import type { AdminPhotoListItem } from "@/types/admin";
+
 import { imageThumbnailUrl } from "@/types/image";
+
+import type { AdminPhotoListItem } from "@/types/admin";
 
 import styles from "./AlbumPhotoPicker.module.css";
 import { SelectedPhotoChip } from "./SelectedPhotoChip";

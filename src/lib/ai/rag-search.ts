@@ -1,6 +1,7 @@
 import { embeddingModelKey, generateEmbedding } from "@/lib/ai/embedding";
 import { getRagIndex } from "@/lib/ai/rag-index";
 import { createKeywordScorer, expandRagQuery } from "@/lib/ai/rag-query";
+
 import type { RagQuery, RagSection, StoredRagChunkMeta } from "@/types/rag";
 
 const cosineSimilarity = (a: ArrayLike<number>, b: ArrayLike<number>) => {

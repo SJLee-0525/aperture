@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { langFromPath, switchLangPath } from "@/lib/i18n/locale-path";
+
 import type { Lang } from "@/types/lang";
 
 import styles from "./LangMenu.module.css";

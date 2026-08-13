@@ -12,9 +12,8 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { COLLECTIONS } from "@/constants/collections";
 import { firestoreCollectionCacheTag } from "@/constants/cache";
-
+import { COLLECTIONS } from "@/constants/collections";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { getFirebaseDb } from "@/lib/firebase/client";

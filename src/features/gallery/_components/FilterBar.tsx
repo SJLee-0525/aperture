@@ -6,9 +6,12 @@ import { Icon } from "@/components/Icon";
 import { RangeSlider } from "@/components/RangeSlider";
 import { Select } from "@/components/Select";
 import { TagFilterBar } from "@/components/TagFilterBar";
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { pickText } from "@/lib/i18n/pick-text";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
+
 import type { Tag } from "@/types/tag";
 
 import styles from "./FilterBar.module.css";

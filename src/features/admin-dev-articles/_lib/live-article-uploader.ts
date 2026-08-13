@@ -1,19 +1,18 @@
 import {
-  uploadArticleImage,
-  uploadArticlePreview,
-  uploadArticleThumbnail,
-} from "@/lib/firebase/storage";
-
-import type { ImageMeta } from "@/types/image";
-
-import {
   compressPreviewToWebp,
   compressThumbnailToWebp,
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
+import {
+  uploadArticleImage,
+  uploadArticlePreview,
+  uploadArticleThumbnail,
+} from "@/lib/firebase/storage";
+
 import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
+import type { ImageMeta } from "@/types/image";
 
 /**
  * 블로그 이미지를 세 가지 크기의 WebP로 Storage에 올린다.

@@ -3,8 +3,9 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DICTIONARY } from "@/constants/dictionary";
 import { ArticlesView } from "@/features/dev-blog/_components/ArticlesView";
+
+import { DICTIONARY } from "@/constants/dictionary";
 
 import type { DevArticleSummary } from "@/features/dev-blog/_lib/article-projection";
 import type { DevArticleTag } from "@/types/dev-article-tag";

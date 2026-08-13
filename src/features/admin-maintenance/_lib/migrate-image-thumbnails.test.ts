@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { migrateImageThumbnails } from "@/features/admin-maintenance/_lib/migrate-image-thumbnails";
+
 import type { ImageMeta } from "@/types/image";
 
 const mocks = vi.hoisted(() => ({

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 
 import { formatCoords } from "@/lib/format/format-coords";
+
 import type { Coords } from "@/types/coords";
 
 import styles from "./DetailMiniMap.module.css";

@@ -1,5 +1,5 @@
-import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
+import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { ImageMeta } from "@/types/image";

@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import type { ChatReference } from "@/types/chat";
 
 import styles from "./ChatPanel.module.css";

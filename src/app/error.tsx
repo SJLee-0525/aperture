@@ -2,9 +2,12 @@
 
 import { useEffect } from "react";
 
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
+
 import { captureExceptionIfLoaded } from "@/instrumentation-client";
 
 import styles from "./status.module.css";

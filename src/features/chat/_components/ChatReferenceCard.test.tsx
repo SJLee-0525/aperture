@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
+import { LangProvider } from "@/features/lang/_components/LangProvider";
+
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 vi.mock("next/link", () => ({
   default: (
@@ -28,9 +32,6 @@ vi.mock("next/link", () => ({
     );
   },
 }));
-
-import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
-import { LangProvider } from "@/features/lang/_components/LangProvider";
 
 afterEach(cleanup);
 

@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache, Suspense } from "react";
 
 import { AlbumDetailView } from "@/features/albums/_components/AlbumDetailView";
+
 import {
   resolveAlbumCover,
   resolveAlbumCoverPreview,
@@ -14,6 +14,7 @@ import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
 import type { Photo } from "@/types/photo";
+import type { Metadata } from "next";
 
 import AlbumDetailLoading from "./loading";
 

@@ -2,15 +2,16 @@
 
 import { useCallback, useState } from "react";
 
-import { getAdminImageStore } from "@/lib/admin/image-store";
-import type { ImageMeta } from "@/types/image";
-
 import {
   compressPreviewToWebp,
   compressThumbnailToWebp,
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+
+import { getAdminImageStore } from "@/lib/admin/image-store";
+
+import type { ImageMeta } from "@/types/image";
 
 /**
  * 음악 포스터 업로드 — webp 압축 → Storage(music/{workId}/) → ImageMeta 반환.

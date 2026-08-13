@@ -3,12 +3,13 @@
 import { memo } from "react";
 
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 
-import styles from "./ChatPanel.module.css";
+import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import type { UIDict } from "@/constants/dictionary";
 import type { ChatSentContext as SentContext } from "@/types/chat";
+
+import styles from "./ChatPanel.module.css";
 
 type Props = { context: SentContext; onNavigate: () => void };
 

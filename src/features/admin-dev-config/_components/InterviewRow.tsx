@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+
 import type { DevInterview } from "@/types/dev";
 
 import styles from "./InterviewRow.module.css";

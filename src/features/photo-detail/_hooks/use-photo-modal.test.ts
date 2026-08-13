@@ -4,6 +4,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
+
 import type { Photo } from "@/types/photo";
 
 const navigation = vi.hoisted(() => ({

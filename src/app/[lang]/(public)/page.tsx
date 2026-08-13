@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-
 import { LandingView } from "@/features/landing/_components/LandingView";
+
 import { getSite } from "@/lib/content/site";
 import { siteMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

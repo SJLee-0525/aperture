@@ -1,31 +1,33 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache, Suspense } from "react";
 
-import { devArticleRoute } from "@/constants/routes";
 import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 import { ArticleNavigationTable } from "@/features/dev-blog/_components/ArticleNavigationTable";
 import { ArticleRelatedProjects } from "@/features/dev-blog/_components/ArticleRelatedProjects";
-import {
-  toDevArticleSummaries,
-  toDevArticleSummary,
-} from "@/features/dev-blog/_lib/article-projection";
+
+import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
 import {
   buildArticleJsonLd,
   serializeJsonLdScript,
 } from "@/features/dev-blog/_lib/article-json-ld";
-import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
+import {
+  toDevArticleSummaries,
+  toDevArticleSummary,
+} from "@/features/dev-blog/_lib/article-projection";
 import { highlightArticleDocument } from "@/features/dev-blog/_lib/markdown-highlight";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
-import { getDevArticleBySlug, getDevArticles, getDevArticleTags } from "@/lib/content/dev-articles";
+
+import { devArticleRoute } from "@/constants/routes";
 import { getDevProjects } from "@/lib/content/dev";
+import { getDevArticleBySlug, getDevArticles, getDevArticleTags } from "@/lib/content/dev-articles";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { absoluteUrl } from "@/lib/seo/site-url";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 import DevArticleLoading from "./loading";
 

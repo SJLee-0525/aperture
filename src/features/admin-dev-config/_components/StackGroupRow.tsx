@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+
 import type { DevStackGroup, DevStackItem } from "@/types/dev";
 
 import styles from "./StackGroupRow.module.css";

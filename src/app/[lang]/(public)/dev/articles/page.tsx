@@ -1,13 +1,15 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ArticlesListSkeleton } from "@/features/dev-blog/_components/ArticlesListSkeleton";
 import { ArticlesView } from "@/features/dev-blog/_components/ArticlesView";
+
 import { toDevArticleSummaries } from "@/features/dev-blog/_lib/article-projection";
+
 import { getDevArticles, getDevArticleTags } from "@/lib/content/dev-articles";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

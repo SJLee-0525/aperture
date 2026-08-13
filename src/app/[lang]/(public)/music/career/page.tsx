@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
 import { MusicCareerView } from "@/features/music/_components/MusicCareerView";
+
 import { getMusicAwards, getMusicConfig } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

@@ -11,14 +11,17 @@ import {
 } from "react";
 
 import { SocialGlyph } from "@/components/SocialGlyph";
-import { ROUTES } from "@/constants/routes";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useCaptchaState } from "@/features/contact/_hooks/use-captcha-state";
 import { useContactDraft } from "@/features/contact/_hooks/use-contact-draft";
 import { useContactForm } from "@/features/contact/_hooks/use-contact-form";
-import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 import { mailtoAddress } from "@/lib/security/public-url";
+
 import type { SiteConfig, SiteLink } from "@/types/site";
 
 import styles from "./ContactView.module.css";
