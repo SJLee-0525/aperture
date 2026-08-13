@@ -1,5 +1,7 @@
-import { markdownIssueMessage } from "@/features/admin-dev-articles/_lib/dev-article-issue-message";
-import { publishIssueMessage } from "@/features/admin-dev-articles/_lib/dev-article-issue-message";
+import {
+  markdownIssueMessage,
+  publishIssueMessage,
+} from "@/features/admin-dev-articles/_lib/dev-article-issue-message";
 import { checkArticlePublishable } from "@/features/admin-dev-articles/_lib/dev-article-publish-check";
 import {
   readDevArticleStore,
@@ -69,6 +71,18 @@ const createLocalDevArticleRepository = (
   now: () => Date = () => new Date(),
 ): DevArticleRepository => {
   /**
+   * 쓰기 직렬화 큐 — `local-list-repository` 와 같은 이유다. 저장소가 문서 단위가 아니라
+   * 배열 전체를 읽고 다시 쓰므로, 같은 태스크에서 겹쳐 시작한 쓰기가 서로의 변경을 덮어쓴다.
+   * 앞선 쓰기가 실패해도 다음 쓰기는 이어 간다.
+   */
+  let writeQueue: Promise<unknown> = Promise.resolve();
+  const enqueue = <T>(operation: () => Promise<T>): Promise<T> => {
+    const result = writeQueue.then(operation, operation);
+    writeQueue = result.catch(() => undefined);
+    return result;
+  };
+
+  /**
    * 저장소를 읽고, 비어 있거나 형이 깨졌으면 mock 으로 다시 채운다.
    *
    * @returns {Promise<DevArticleStore>} 현재 글과 태그.
@@ -110,7 +124,9 @@ const createLocalDevArticleRepository = (
   };
 
   /**
-   * 목록에서 바로 발행할 때도 폼과 같은 조건을 건다.
+   * 발행 상태로 저장되는 모든 경로(폼 저장 `create`/`update` · 목록 토글 `setPublished`)에
+   * 같은 조건을 건다. 폼의 검사는 참조 데이터(다른 글 목록)가 아직 로드 중이면 slug 중복을
+   * 놓칠 수 있으므로, 저장소가 자기 데이터로 한 번 더 확인하는 것이 최종 방어선이다.
    *
    * 이 검사가 없으면 발행일 없는 초안이 `published: true` · `publishedAt: null` 로 넘어간다.
    * 폼에서는 막히는 상태이고, 공개 목록은 그 글의 날짜를 작성일로 대신 보여 주게 된다.
@@ -119,21 +135,22 @@ const createLocalDevArticleRepository = (
    * 그 항목은 공개 상세가 렌더 단계에서 걸러 내므로(비공개 프로젝트 카드는 빠진다)
    * 잘못된 저장 상태로 남지는 않는다.
    *
-   * @param {DevArticle} article 발행하려는 글.
+   * @param {string} id 발행하려는 글의 문서 ID. 자기 slug 를 중복으로 세지 않기 위해 쓴다.
+   * @param {DevArticleInput} input 발행하려는 저장 값.
    * @param {DevArticleStore} store 중복 slug·태그 사전을 볼 현재 저장소.
    * @returns {void}
    * @throws {Error} 조건을 만족하지 않을 때. 문구는 폼과 같은 출처를 쓴다.
    */
-  const assertPublishable = (article: DevArticle, store: DevArticleStore): void => {
-    const markdownIssues = parseArticleMarkdown(article.body).issues;
+  const assertPublishable = (id: string, input: DevArticleInput, store: DevArticleStore): void => {
+    const markdownIssues = parseArticleMarkdown(input.body).issues;
     const issues = checkArticlePublishable(
-      { ...article, published: true },
+      { ...input, published: true },
       {
         articles: store.articles,
-        selfId: article.id,
+        selfId: id,
         markdownIssues,
         knownTagIds: store.tags.map((tag) => tag.id),
-        publishableProjectIds: article.relatedProjectIds,
+        publishableProjectIds: input.relatedProjectIds,
       },
     );
     if (issues.length === 0) return;
@@ -155,74 +172,81 @@ const createLocalDevArticleRepository = (
 
     get: async (id) => (await load()).articles.find((article) => article.id === id) ?? null,
 
-    create: async (id, input) => {
-      const store = await load();
-      if (store.articles.some((article) => article.id === id)) {
-        throw new Error("같은 ID의 글이 이미 있습니다.");
-      }
-      const stamped = now();
-      save({
-        ...store,
-        articles: [
-          ...store.articles,
-          { id, ...stampFirstPublished(input), createdAt: stamped, updatedAt: stamped },
-        ],
-      });
-    },
+    create: (id, input) =>
+      enqueue(async () => {
+        const store = await load();
+        if (store.articles.some((article) => article.id === id)) {
+          throw new Error("같은 ID의 글이 이미 있습니다.");
+        }
+        if (input.published) assertPublishable(id, input, store);
+        const stamped = now();
+        save({
+          ...store,
+          articles: [
+            ...store.articles,
+            { id, ...stampFirstPublished(input), createdAt: stamped, updatedAt: stamped },
+          ],
+        });
+      }),
 
-    update: async (id, input) => {
-      const store = await load();
-      const previous = store.articles.find((article) => article.id === id);
-      if (!previous) throw new Error("수정할 글을 찾지 못했습니다.");
-      save({
-        ...store,
-        articles: store.articles.map((article) =>
-          article.id === id
-            ? {
-                ...article,
-                ...stampFirstPublished(input, previous),
-                updatedAt: now(),
-              }
-            : article,
-        ),
-      });
-    },
+    update: (id, input) =>
+      enqueue(async () => {
+        const store = await load();
+        const previous = store.articles.find((article) => article.id === id);
+        if (!previous) throw new Error("수정할 글을 찾지 못했습니다.");
+        if (input.published) assertPublishable(id, input, store);
+        save({
+          ...store,
+          articles: store.articles.map((article) =>
+            article.id === id
+              ? {
+                  ...article,
+                  ...stampFirstPublished(input, previous),
+                  updatedAt: now(),
+                }
+              : article,
+          ),
+        });
+      }),
 
-    setPublished: async (id, published) => {
-      const store = await load();
-      const previous = store.articles.find((article) => article.id === id);
-      if (!previous) throw new Error("상태를 바꿀 글을 찾지 못했습니다.");
-      if (published) assertPublishable(previous, store);
-      save({
-        ...store,
-        articles: store.articles.map((article) =>
-          article.id === id
-            ? {
-                ...article,
-                published,
-                firstPublishedAt:
-                  article.firstPublishedAt ?? (published ? now() : article.firstPublishedAt),
-                updatedAt: now(),
-              }
-            : article,
-        ),
-      });
-    },
+    setPublished: (id, published) =>
+      enqueue(async () => {
+        const store = await load();
+        const previous = store.articles.find((article) => article.id === id);
+        if (!previous) throw new Error("상태를 바꿀 글을 찾지 못했습니다.");
+        if (published) assertPublishable(previous.id, previous, store);
+        save({
+          ...store,
+          articles: store.articles.map((article) =>
+            article.id === id
+              ? {
+                  ...article,
+                  published,
+                  firstPublishedAt:
+                    article.firstPublishedAt ?? (published ? now() : article.firstPublishedAt),
+                  updatedAt: now(),
+                }
+              : article,
+          ),
+        });
+      }),
 
-    remove: async (id) => {
-      const store = await load();
-      save({ ...store, articles: store.articles.filter((article) => article.id !== id) });
-    },
+    remove: (id) =>
+      enqueue(async () => {
+        const store = await load();
+        save({ ...store, articles: store.articles.filter((article) => article.id !== id) });
+      }),
 
     listTags: async () => (await load()).tags,
 
-    createTag: async (tag: DevArticleTag) => {
-      const store = await load();
-      if (store.tags.some((existing) => existing.id === tag.id)) {
-        throw new Error("같은 id의 태그가 이미 있습니다.");
-      }
-      save({ ...store, tags: [...store.tags, tag] });
-    },
+    createTag: (tag: DevArticleTag) =>
+      enqueue(async () => {
+        const store = await load();
+        if (store.tags.some((existing) => existing.id === tag.id)) {
+          throw new Error("같은 id의 태그가 이미 있습니다.");
+        }
+        save({ ...store, tags: [...store.tags, tag] });
+      }),
   };
 };
 

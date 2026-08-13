@@ -39,8 +39,12 @@ const fromDateTimeLocalValue = (value: string): Date | null => {
 
   const [, year, month, day, hour, minute] = match.map(Number);
   const date = new Date(year, month - 1, day, hour, minute);
+  // 생성자는 0–99년을 1900년대로 옮긴다. 적힌 연도를 그대로 쓰도록 되돌린다.
+  date.setFullYear(year);
   // 2026-02-30 처럼 존재하지 않는 날짜는 다른 달로 넘어간다. 되돌려 확인한다.
-  if (date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
   return date;
 };
 

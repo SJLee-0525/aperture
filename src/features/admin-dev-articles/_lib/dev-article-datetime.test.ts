@@ -46,6 +46,11 @@ describe("fromDateTimeLocalValue", () => {
     expect(fromDateTimeLocalValue("2026-02-28T09:00")).not.toBeNull();
   });
 
+  it("두 자리 연도를 1900년대로 옮기지 않는다", () => {
+    expect(fromDateTimeLocalValue("0050-03-01T09:00")?.getFullYear()).toBe(50);
+    expect(fromDateTimeLocalValue("0050-02-29T09:00")).toBeNull();
+  });
+
   it("입력 형식과 왕복한다", () => {
     const value = "2026-12-31T23:59";
 

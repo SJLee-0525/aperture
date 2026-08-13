@@ -139,6 +139,31 @@ describe("createLocalDevArticleRepository", () => {
     expect((await repo.get("fresh"))?.published).toBe(false);
   });
 
+  it("발행 상태의 저장도 폼을 거치지 않은 slug 중복을 거부한다", async () => {
+    // 폼의 중복 검사는 다른 글 목록이 아직 로드 중이면 지나칠 수 있다. 저장소가 최종 방어선이다.
+    const repo = repository();
+    const [existing] = await repo.list();
+
+    await expect(
+      repo.create("fresh", input({ slug: existing.slug, published: true, publishedAt: NOW })),
+    ).rejects.toThrow("발행 조건을 만족하지 않습니다");
+    await repo.create("fresh", input());
+    await expect(
+      repo.update("fresh", input({ slug: existing.slug, published: true, publishedAt: NOW })),
+    ).rejects.toThrow("발행 조건을 만족하지 않습니다");
+  });
+
+  it("겹쳐 시작한 쓰기도 서로의 변경을 덮어쓰지 않는다", async () => {
+    const repo = repository();
+    await repo.create("a", input({ slug: "a-note", publishedAt: NOW }));
+    await repo.create("b", input({ slug: "b-note", publishedAt: NOW }));
+
+    await Promise.all([repo.setPublished("a", true), repo.setPublished("b", true)]);
+
+    expect((await repo.get("a"))?.published).toBe(true);
+    expect((await repo.get("b"))?.published).toBe(true);
+  });
+
   it("발행 취소는 조건을 보지 않는다", async () => {
     const repo = repository();
     await repo.create("fresh", input({ published: true, publishedAt: NOW }));
