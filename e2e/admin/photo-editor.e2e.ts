@@ -42,7 +42,7 @@ test.describe("Admin · 사진 편집", () => {
     const tagChip = page.getByRole("button", { name: "야경", exact: true });
     await tagChip.click();
 
-    await page.getByRole("button", { name: "사진 저장" }).click();
+    await page.getByRole("button", { name: "저장" }).click();
     await expect(page).toHaveURL(/\/admin\/photos$/);
     await expect(page.locator("li").filter({ hasText: "E2E 업로드 사진" })).toBeVisible({
       timeout: 30_000,

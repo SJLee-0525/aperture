@@ -70,7 +70,7 @@ test.describe("Admin · 앨범 편집", () => {
       strip.locator("li").first().getByRole("button", { name: "커버", exact: true }),
     ).toBeDisabled();
 
-    await page.getByRole("button", { name: "앨범 저장" }).click();
+    await page.getByRole("button", { name: "저장" }).click();
     await expect(page).toHaveURL(/\/admin\/albums$/);
     const albumRow = page.locator("li").filter({ hasText: "E2E 앨범" });
     await expect(albumRow).toBeVisible();

@@ -76,7 +76,7 @@ test.describe("Admin · 블로그", () => {
     await page.getByRole("button", { name: "저장" }).click();
     await expect(page.getByText("저장하지 않은 변경")).toBeHidden();
 
-    await page.getByRole("link", { name: "목록" }).click();
+    await page.getByRole("link", { name: "취소" }).click();
     const row = page.getByRole("listitem").filter({ hasText: "E2E 작성 흐름" });
     await expect(row.getByRole("button", { name: "공개" })).toBeVisible();
   });
@@ -91,6 +91,32 @@ test.describe("Admin · 블로그", () => {
     await expect(page.getByText("한국어와 영어 제목을 모두 입력하세요.")).toBeVisible();
     await expect(page.getByText("발행일을 지정하세요. 목록 정렬 기준입니다.")).toBeVisible();
     await expect(page.getByRole("button", { name: "저장" })).toBeDisabled();
+  });
+
+  test("이미지는 인라인 입력에서 대체 텍스트를 받아 본문에 들어간다", async ({ page }) => {
+    await page.goto("/admin/dev/articles/new");
+
+    // window.prompt 는 iOS Safari 가 사진 선택기 이후에 표시하지 않아 쓸 수 없다.
+    // 파일을 고르면 인라인 입력이 열리고, 대체 텍스트 없이는 삽입 버튼이 잠긴다.
+    // 폼에는 대표 이미지 파일 입력도 있어 본문 편집기 영역으로 좁힌다.
+    const editor = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "본문 (한국어 원문)" }) });
+    await editor.locator('input[type="file"]').setInputFiles({
+      name: "diagram.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("89504e470d0a1a0a", "hex"),
+    });
+
+    const altInput = page.getByPlaceholder("이미지에 무엇이 있는지 적습니다");
+    await expect(altInput).toBeVisible();
+    await expect(page.getByRole("button", { name: "본문에 넣기" })).toBeDisabled();
+
+    await altInput.fill("구조 다이어그램");
+    await page.getByRole("button", { name: "본문에 넣기" }).click();
+
+    await expect(page.getByLabel("본문 Markdown")).toHaveValue(/!\[구조 다이어그램\]\(https:\/\//);
+    await expect(altInput).toBeHidden();
   });
 
   test("허용하지 않은 본문은 미리보기가 위치와 함께 알려 준다", async ({ page }) => {

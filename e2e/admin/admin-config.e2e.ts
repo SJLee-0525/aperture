@@ -25,7 +25,7 @@ test.describe("Admin · 설정", () => {
     await addForm.getByLabel("id (영문 슬러그) *").fill("e2e");
     await addForm.getByLabel("한국어", { exact: true }).fill("이투이");
     await addForm.getByLabel("English", { exact: true }).fill("E2E");
-    await addForm.getByRole("button", { name: "+ 추가" }).click();
+    await addForm.getByRole("button", { name: "+ 태그 추가" }).click();
 
     // 라벨 수정(night)과 삭제(tokyo) — id 는 행의 code 로 표시된다.
     const nightRow = page.locator("li").filter({ hasText: "night" });
