@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
 import { ArticleMarkdownHelp } from "@/features/admin-dev-articles/_components/ArticleMarkdownHelp";
 import { ArticlePreviewPanel } from "@/features/admin-dev-articles/_components/ArticlePreviewPanel";
 import { ArticleYouTubeDialog } from "@/features/admin-dev-articles/_components/ArticleYouTubeDialog";
@@ -15,6 +18,7 @@ import {
 import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
 
 import styles from "./ArticleBodyEditor.module.css";
+import formStyles from "./ArticleForm.module.css";
 
 type Props = {
   value: string;
@@ -28,8 +32,8 @@ type Props = {
  * 편집과 미리보기를 동시에 렌더하지 않는다(계획 §3). 넓은 화면에서도 두 패널을 나란히 두면
  * 입력 영역이 절반으로 줄고, 미리보기는 서버 요청이라 보지 않는 동안 계속 부를 이유도 없다.
  *
- * 이미지는 업로드가 끝난 뒤 커서 자리에 대체 텍스트를 포함한 문법으로 들어간다(계획 §4).
- * 업로더는 주입받는다 — mock 단계에서는 fixture 주소를, B5 에서는 Storage 업로드를 준다.
+ * 이미지는 파일 선택 뒤 인라인 입력에서 대체 텍스트를 받아 업로드하고 커서 자리에 삽입한다.
+ * 업로더는 주입받으므로 이 컴포넌트는 저장 위치를 모른다.
  *
  * @param {Props} props
  * @param {string} props.value 본문 원문.
@@ -44,6 +48,10 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
   const [youtubeOpen, setYoutubeOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 대체 텍스트는 인라인 입력으로 받는다. window.prompt 는 iOS Safari 가 사진 선택기
+  // 이후의 change 이벤트에서 표시하지 않아 업로드가 시작조차 되지 않았다.
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
+  const [pendingAlt, setPendingAlt] = useState("");
 
   // 삽입은 업로드가 끝난 뒤에도 일어난다. 그때 `props.value` 는 업로드를 시작하던 시점의
   // 값이라, 그 값으로 본문을 통째로 바꾸면 올리는 동안 입력한 글이 사라진다. textarea 는
@@ -69,23 +77,27 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
     });
   };
 
-  const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
 
-    const alt = window.prompt("이미지 대체 텍스트를 입력하세요. 이미지에 무엇이 있는지 적습니다.");
-    if (alt === null) return;
-    if (!alt.trim()) {
-      setError("대체 텍스트 없이는 이미지를 넣을 수 없습니다.");
-      return;
-    }
+    setError(null);
+    setPendingAlt("");
+    setPendingImage(file);
+  };
+
+  const insertPendingImage = async () => {
+    const alt = pendingAlt.trim();
+    if (!pendingImage || !alt) return;
 
     setUploading(true);
     setError(null);
     try {
-      const image = await upload(file);
-      insert(imageMarkdown(image.url, alt.trim()));
+      const image = await upload(pendingImage);
+      insert(imageMarkdown(image.url, alt));
+      setPendingImage(null);
+      setPendingAlt("");
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
@@ -102,7 +114,7 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
           <button
             type="button"
             className={styles.tool}
-            disabled={uploading || preview}
+            disabled={uploading || preview || pendingImage !== null}
             onClick={() => fileRef.current?.click()}
           >
             {uploading ? "올리는 중…" : "이미지"}
@@ -130,6 +142,14 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
               type="button"
               className={styles.tab}
               aria-pressed={preview}
+              // 대체 텍스트를 기다리는 동안은 textarea 를 유지한다. 미리보기로 바꾸면
+              // 삽입 시점에 커서 위치를 알 수 없어 본문 끝에 붙는다.
+              disabled={pendingImage !== null}
+              title={
+                pendingImage
+                  ? "이미지 대체 텍스트를 입력하거나 취소한 뒤 볼 수 있습니다."
+                  : undefined
+              }
               onClick={() => setPreview(true)}
             >
               미리보기
@@ -148,6 +168,43 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
         />
       ) : null}
 
+      {pendingImage ? (
+        <div className={formStyles.section}>
+          <div className={formStyles.inlineForm}>
+            <AdminField
+              label={`대체 텍스트 — ${pendingImage.name}`}
+              className={formStyles.inlineField}
+            >
+              <AdminInput
+                value={pendingAlt}
+                placeholder="이미지에 무엇이 있는지 적습니다"
+                autoFocus
+                onChange={(event) => setPendingAlt(event.target.value)}
+              />
+            </AdminField>
+            <AdminButton
+              variant="secondary"
+              disabled={!pendingAlt.trim() || uploading}
+              onClick={insertPendingImage}
+            >
+              {uploading ? "업로드 중…" : "본문에 넣기"}
+            </AdminButton>
+            <button
+              type="button"
+              className={formStyles.remove}
+              disabled={uploading}
+              onClick={() => {
+                setPendingImage(null);
+                setPendingAlt("");
+                setError(null);
+              }}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {error ? (
         <p className={styles.error} role="alert">
           {error}
@@ -157,7 +214,8 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
       {preview ? (
         <ArticlePreviewPanel markdown={value} />
       ) : (
-        <textarea
+        <AdminInput
+          multiline
           ref={textareaRef}
           className={styles.textarea}
           value={value}

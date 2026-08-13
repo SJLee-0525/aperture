@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useMounted } from "@/hooks/use-mounted";
 
@@ -28,12 +28,17 @@ const ARTICLE_RECOVERY_DEBOUNCE_MS = 5_000;
  * @param {string} articleId 편집 중인 글의 문서 ID.
  * @param {DevArticleInput} form 현재 폼 값.
  * @param {boolean} dirty 저장 이후 바뀐 것이 있는지. false 면 뜨지도 경고하지도 않는다.
- * @returns {{ pending: { savedAt: number; input: DevArticleInput } | null; restore: () => DevArticleInput | null; discard: () => void; clear: () => void }}
+ * @returns {{ pending: { savedAt: number; input: DevArticleInput } | null; restore: () => DevArticleInput | null; discard: () => void; clear: () => void; abandon: () => void }}
  *   `pending` 은 아직 처리하지 않은 복구본, `restore` 는 그 값을 돌려주고 복구본을 지운다.
+ *   `abandon` 은 편집을 버릴 때 쓰며 예약된 자동 저장까지 취소한다.
  */
 const useArticleRecovery = (articleId: string, form: DevArticleInput, dirty: boolean) => {
   const mounted = useMounted();
   const [handled, setHandled] = useState(false);
+  const timerRef = useRef<number | null>(null);
+  // 편집을 버린 뒤에는 예약도 다시 잡지 않는다. `clear` 는 저장 성공 때도 불리므로
+  // 그쪽 경로에서 자동 저장이 멈추지 않도록 종료 신호를 따로 둔다.
+  const stoppedRef = useRef(false);
 
   const stored = useMemo(
     () => (mounted ? readArticleRecovery(window.localStorage, articleId) : null),
@@ -41,11 +46,15 @@ const useArticleRecovery = (articleId: string, form: DevArticleInput, dirty: boo
   );
 
   useEffect(() => {
-    if (!dirty) return;
-    const timer = window.setTimeout(() => {
+    if (!dirty || stoppedRef.current) return;
+    timerRef.current = window.setTimeout(() => {
+      timerRef.current = null;
       writeArticleRecovery(window.localStorage, articleId, form);
     }, ARTICLE_RECOVERY_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
+    return () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
   }, [articleId, dirty, form]);
 
   useEffect(() => {
@@ -69,7 +78,18 @@ const useArticleRecovery = (articleId: string, form: DevArticleInput, dirty: boo
     return stored.input;
   }, [clear, stored]);
 
-  return { pending: handled ? null : stored, restore, discard: clear, clear };
+  /**
+   * 편집을 버릴 때 부른다. 복구본을 지우고 예약된 저장도 취소해 다시 쓰이지 않게 한다.
+   * 화면을 떠나기 전에 부르므로 언마운트 정리보다 먼저 예약을 끊는다.
+   */
+  const abandon = useCallback(() => {
+    stoppedRef.current = true;
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+    clear();
+  }, [clear]);
+
+  return { pending: handled ? null : stored, restore, discard: clear, clear, abandon };
 };
 
 export { useArticleRecovery };

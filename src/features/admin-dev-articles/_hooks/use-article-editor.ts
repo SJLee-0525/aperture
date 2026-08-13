@@ -17,7 +17,7 @@ import { suggestArticleSlug } from "@/features/admin-dev-articles/_lib/dev-artic
 import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-article-id";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
-import { adminDevArticleRoute, ROUTES } from "@/constants/routes";
+import { adminDevArticleRoute } from "@/constants/routes";
 
 import type { useArticleReferences } from "@/features/admin-dev-articles/_hooks/use-article-references";
 import type { DevArticle } from "@/types/dev-article";
@@ -45,7 +45,7 @@ const fingerprint = (input: DevArticleInput): string => JSON.stringify(input);
  * @param {string} articleId 새 글이면 미리 발급한 ID, 편집이면 기존 문서 ID.
  * @param {References} references 태그·프로젝트·다른 글 주소.
  * @param {DevArticle} [initial] 편집 중인 글의 저장본. 새 글이면 없다.
- * @returns {{ form: DevArticleInput; patch: (next: Partial<DevArticleInput>) => void; isEdit: boolean; slugLocked: boolean; onSlugChange: (value: string) => void; markdownIssues: ReturnType<typeof parseArticleMarkdown>["issues"]; publishIssues: ReturnType<typeof checkArticlePublishable>; dirty: boolean; saving: boolean; savedAt: Date | null; error: string | null; save: () => Promise<boolean>; cancel: () => void; markSaved: (input: DevArticleInput) => void }}
+ * @returns {{ form: DevArticleInput; patch: (next: Partial<DevArticleInput>) => void; isEdit: boolean; slugLocked: boolean; onSlugChange: (value: string) => void; markdownIssues: ReturnType<typeof parseArticleMarkdown>["issues"]; publishIssues: ReturnType<typeof checkArticlePublishable>; dirty: boolean; saving: boolean; savedAt: Date | null; error: string | null; save: () => Promise<boolean>; markSaved: (input: DevArticleInput) => void }}
  */
 const useArticleEditor = (articleId: string, references: References, initial?: DevArticle) => {
   const router = useRouter();
@@ -161,8 +161,6 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
     saving,
   ]);
 
-  const cancel = useCallback(() => router.replace(ROUTES.ADMIN_DEV_ARTICLES), [router]);
-
   return {
     form,
     applyForm,
@@ -177,7 +175,6 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
     savedAt,
     error,
     save,
-    cancel,
     markSaved,
   };
 };

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
+import { AdminButton } from "@/components/AdminButton";
+import { AdminInput } from "@/components/AdminInput";
 import { ArticleRow } from "@/features/admin-dev-articles/_components/ArticleRow";
 
 import { useDevArticlesAdmin } from "@/features/admin-dev-articles/_hooks/use-dev-articles-admin";
@@ -48,15 +48,16 @@ const AdminDevArticlesPage = () => {
           <h1 className={styles.title}>블로그</h1>
           <p className={styles.hint}>초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다.</p>
         </div>
-        <Link href={NEW_ARTICLE_HREF} className={styles.newBtn}>
+        <AdminButton variant="primary" size="sm" href={NEW_ARTICLE_HREF} className={styles.newBtn}>
           + 새 글
-        </Link>
+        </AdminButton>
       </header>
 
       {status === "ready" ? (
         <div className={styles.toolbar}>
-          <input
+          <AdminInput
             type="search"
+            size="sm"
             className={styles.searchInput}
             aria-label="검색"
             value={keyword}
@@ -97,9 +98,14 @@ const AdminDevArticlesPage = () => {
       {status === "ready" && total === 0 ? (
         <div className={styles.empty}>
           <p>아직 쓴 글이 없습니다.</p>
-          <Link href={NEW_ARTICLE_HREF} className={styles.newBtn}>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            href={NEW_ARTICLE_HREF}
+            className={styles.newBtn}
+          >
             + 첫 글 쓰기
-          </Link>
+          </AdminButton>
         </div>
       ) : null}
 

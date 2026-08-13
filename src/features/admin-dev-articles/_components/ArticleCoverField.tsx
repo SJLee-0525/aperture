@@ -3,6 +3,10 @@
 import Image from "next/image";
 import { useRef, useState, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -72,14 +76,13 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
 
         <div className={styles.coverSide}>
           <div className={styles.inlineForm}>
-            <button
-              type="button"
-              className={styles.add}
+            <AdminButton
+              variant="secondary"
               disabled={uploading}
               onClick={() => inputRef.current?.click()}
             >
-              {uploading ? "올리는 중…" : form.cover ? "이미지 교체" : "+ 이미지 선택"}
-            </button>
+              {uploading ? "업로드 중…" : form.cover ? "이미지 교체" : "+ 이미지 선택"}
+            </AdminButton>
             {form.cover ? (
               <button
                 type="button"
@@ -93,24 +96,20 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
           </div>
 
           <div className={styles.grid2}>
-            <label className={styles.field}>
-              <span className={styles.label}>대체 텍스트 (한국어)</span>
-              <input
-                className={styles.input}
+            <AdminField label="대체 텍스트 (한국어)">
+              <AdminInput
                 value={coverAlt.ko}
                 disabled={!form.cover}
                 onChange={(event) => onPatch({ coverAlt: { ...coverAlt, ko: event.target.value } })}
               />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>대체 텍스트 (English)</span>
-              <input
-                className={styles.input}
+            </AdminField>
+            <AdminField label="대체 텍스트 (English)">
+              <AdminInput
                 value={coverAlt.en}
                 disabled={!form.cover}
                 onChange={(event) => onPatch({ coverAlt: { ...coverAlt, en: event.target.value } })}
               />
-            </label>
+            </AdminField>
           </div>
 
           <p className={styles.note}>제목을 되풀이하지 말고 이미지에 무엇이 있는지 적습니다.</p>

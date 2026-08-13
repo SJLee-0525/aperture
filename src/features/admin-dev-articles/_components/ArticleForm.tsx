@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, type FormEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
 import { ArticleBodyEditor } from "@/features/admin-dev-articles/_components/ArticleBodyEditor";
 import { ArticleCoverField } from "@/features/admin-dev-articles/_components/ArticleCoverField";
 import { ArticleIssueList } from "@/features/admin-dev-articles/_components/ArticleIssueList";
@@ -15,6 +16,7 @@ import { useArticleRecovery } from "@/features/admin-dev-articles/_hooks/use-art
 import { useArticleReferences } from "@/features/admin-dev-articles/_hooks/use-article-references";
 
 import { createArticleImageUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
+import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-article-id";
 
 import { adminDevArticlePreviewRoute, ROUTES } from "@/constants/routes";
 import { formatShotAt } from "@/lib/format/format-date";
@@ -42,6 +44,7 @@ type Props = {
  * @returns {JSX.Element}
  */
 const ArticleForm = ({ articleId, initial }: Props) => {
+  const router = useRouter();
   const references = useArticleReferences();
   const editor = useArticleEditor(articleId, references, initial);
   const recovery = useArticleRecovery(articleId, editor.form, editor.dirty);
@@ -52,6 +55,15 @@ const ArticleForm = ({ articleId, initial }: Props) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (await editor.save()) recovery.clear();
+  };
+
+  // 취소는 편집을 버리는 동작이다. 링크로 두면 복구본과 이 탭이 잡아 둔 새 글 ID가 남아
+  // 다음에 새 글을 열 때 버린 편집본이 다시 제안된다.
+  const cancelEditing = () => {
+    if (editor.dirty && !window.confirm("저장하지 않은 변경을 버릴까요?")) return;
+    recovery.abandon();
+    if (!editor.isEdit) clearNewArticleId(window.sessionStorage);
+    router.replace(ROUTES.ADMIN_DEV_ARTICLES);
   };
 
   return (
@@ -69,16 +81,15 @@ const ArticleForm = ({ articleId, initial }: Props) => {
           <p className={styles.note}>
             저장하지 않은 편집본이 있습니다 ({formatShotAt(new Date(recovery.pending.savedAt))}).
           </p>
-          <button
-            type="button"
-            className={styles.add}
+          <AdminButton
+            variant="secondary"
             onClick={() => {
               const restored = recovery.restore();
               if (restored) editor.applyForm(restored);
             }}
           >
             복구하기
-          </button>
+          </AdminButton>
           <button type="button" className={styles.remove} onClick={recovery.discard}>
             버리기
           </button>
@@ -138,20 +149,16 @@ const ArticleForm = ({ articleId, initial }: Props) => {
         <span className={styles.spacer} />
 
         {editor.isEdit ? (
-          <Link href={adminDevArticlePreviewRoute(articleId)} className={styles.secondary}>
+          <AdminButton variant="secondary" href={adminDevArticlePreviewRoute(articleId)}>
             전체 미리보기
-          </Link>
+          </AdminButton>
         ) : null}
-        <Link href={ROUTES.ADMIN_DEV_ARTICLES} className={styles.secondary}>
-          목록
-        </Link>
-        <button
-          type="submit"
-          className={styles.primary}
-          disabled={editor.saving || blockedByPublish}
-        >
+        <AdminButton variant="secondary" disabled={editor.saving} onClick={cancelEditing}>
+          취소
+        </AdminButton>
+        <AdminButton variant="primary" type="submit" disabled={editor.saving || blockedByPublish}>
           {editor.saving ? "저장 중…" : "저장"}
-        </button>
+        </AdminButton>
       </div>
 
       {editor.error ? (

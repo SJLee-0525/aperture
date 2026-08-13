@@ -1,5 +1,8 @@
 "use client";
 
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import {
   fromDateTimeLocalValue,
   toDateTimeLocalValue,
@@ -35,54 +38,49 @@ const ArticleMetaFields = ({ form, slugLocked, onPatch, onSlugChange }: Props) =
     <section className={styles.section}>
       <h2 className={styles.legend}>제목</h2>
       <div className={styles.grid2}>
-        <label className={styles.field}>
-          <span className={styles.label}>제목 (한국어)</span>
-          <input
-            className={styles.input}
+        <AdminField label="제목 (한국어)">
+          <AdminInput
             value={form.title.ko}
             onChange={(event) => onPatch({ title: { ...form.title, ko: event.target.value } })}
           />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>제목 (English)</span>
-          <input
-            className={styles.input}
+        </AdminField>
+        <AdminField label="제목 (English)">
+          <AdminInput
             value={form.title.en}
             onChange={(event) => onPatch({ title: { ...form.title, en: event.target.value } })}
           />
-        </label>
+        </AdminField>
       </div>
     </section>
 
     <section className={styles.section}>
       <h2 className={styles.legend}>요약</h2>
       <div className={styles.grid2}>
-        <label className={styles.field}>
-          <span className={styles.label}>요약 (한국어)</span>
-          <textarea
-            className={styles.textarea}
+        <AdminField label="요약 (한국어)">
+          <AdminInput
+            multiline
+            rows={4}
             value={form.summary.ko}
             onChange={(event) => onPatch({ summary: { ...form.summary, ko: event.target.value } })}
           />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>요약 (English)</span>
-          <textarea
-            className={styles.textarea}
+        </AdminField>
+        <AdminField label="요약 (English)">
+          <AdminInput
+            multiline
+            rows={4}
             value={form.summary.en}
             onChange={(event) => onPatch({ summary: { ...form.summary, en: event.target.value } })}
           />
-        </label>
+        </AdminField>
       </div>
     </section>
 
     <section className={styles.section}>
       <h2 className={styles.legend}>주소와 발행일</h2>
       <div className={styles.grid2}>
-        <label className={styles.field}>
-          <span className={styles.label}>주소 (slug)</span>
-          <input
-            className={`${styles.input} ${styles.mono}`}
+        <AdminField label="주소 (slug)">
+          <AdminInput
+            className={styles.mono}
             value={form.slug}
             disabled={slugLocked}
             onChange={(event) => onSlugChange(event.target.value)}
@@ -92,19 +90,18 @@ const ArticleMetaFields = ({ form, slugLocked, onPatch, onSlugChange }: Props) =
               ? "발행한 글의 주소는 바꿀 수 없습니다. 공유된 링크가 끊어집니다."
               : "제목을 적으면 자동으로 제안하고, 직접 고치면 그 값을 씁니다."}
           </span>
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>발행일</span>
-          <input
+        </AdminField>
+        <AdminField label="발행일">
+          <AdminInput
             type="datetime-local"
-            className={`${styles.input} ${styles.mono}`}
+            className={styles.mono}
             value={toDateTimeLocalValue(form.publishedAt)}
             onChange={(event) =>
               onPatch({ publishedAt: fromDateTimeLocalValue(event.target.value) })
             }
           />
           <span className={styles.note}>목록 정렬 기준입니다. 발행하려면 채워야 합니다.</span>
-        </label>
+        </AdminField>
       </div>
     </section>
   </>

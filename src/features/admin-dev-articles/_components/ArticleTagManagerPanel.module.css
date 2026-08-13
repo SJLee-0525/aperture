@@ -38,6 +38,18 @@
   gap: var(--s-2);
 }
 
+/* 행의 입력은 보이는 라벨이 없다. sr-only 라벨만 담으므로 gap 없이 열을 채운다. */
+.rowField {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+}
+
 .id {
   font-family: var(--font-mono);
   font-size: var(--t-micro);
@@ -45,21 +57,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.input {
-  min-width: 0;
-  height: 36px;
-  padding: 0 var(--s-3);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-size: var(--t-small);
-}
-.input:focus-visible {
-  border-color: var(--accent);
-  outline: none;
 }
 
 .usage {

@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { normalizeArticleSlug } from "@/features/admin-dev-articles/_lib/dev-article-slug";
 
 import type { DevArticleTag } from "@/types/dev-article-tag";
@@ -80,25 +84,15 @@ const ArticleTagsField = ({ tags, selected, onChange, onCreate }: Props) => {
       )}
 
       <div className={styles.inlineForm}>
-        <label className={styles.field}>
-          <span className={styles.label}>새 태그 (한국어)</span>
-          <input
-            className={styles.input}
-            value={ko}
-            onChange={(event) => setKo(event.target.value)}
-          />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>새 태그 (English)</span>
-          <input
-            className={styles.input}
-            value={en}
-            onChange={(event) => setEn(event.target.value)}
-          />
-        </label>
-        <button type="button" className={styles.add} disabled={!canAdd} onClick={add}>
+        <AdminField label="새 태그 (한국어)" className={styles.inlineField}>
+          <AdminInput value={ko} onChange={(event) => setKo(event.target.value)} />
+        </AdminField>
+        <AdminField label="새 태그 (English)" className={styles.inlineField}>
+          <AdminInput value={en} onChange={(event) => setEn(event.target.value)} />
+        </AdminField>
+        <AdminButton variant="secondary" disabled={!canAdd} onClick={add}>
           + 태그 추가
-        </button>
+        </AdminButton>
       </div>
 
       {nextId ? <p className={styles.note}>저장할 id: {nextId}</p> : null}

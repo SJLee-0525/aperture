@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { AdminInput } from "@/components/AdminInput";
+
 import { useArticleTagsAdmin } from "@/features/admin-dev-articles/_hooks/use-article-tags-admin";
 
 import { normalizeArticleSlug } from "@/features/admin-dev-articles/_lib/dev-article-slug";
@@ -58,19 +60,23 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
       <code className={styles.id} title="글이 참조하는 키 — 수정 불가">
         {tag.id}
       </code>
-      <label>
+      <label className={styles.rowField}>
         <span className={styles.srLabel}>한국어 라벨</span>
-        <input
+        <AdminInput
           className={styles.input}
+          size="sm"
+          tone="raised"
           value={ko}
           placeholder="한국어"
           onChange={(event) => setKo(event.target.value)}
         />
       </label>
-      <label>
+      <label className={styles.rowField}>
         <span className={styles.srLabel}>영어 라벨</span>
-        <input
+        <AdminInput
           className={styles.input}
+          size="sm"
+          tone="raised"
           value={en}
           placeholder="English"
           onChange={(event) => setEn(event.target.value)}
@@ -170,16 +176,20 @@ const ArticleTagManagerPanel = () => {
           <div className={styles.inlineForm}>
             <label className={styles.field}>
               <span className={styles.label}>새 태그 (한국어)</span>
-              <input
+              <AdminInput
                 className={styles.input}
+                size="sm"
+                tone="raised"
                 value={ko}
                 onChange={(event) => setKo(event.target.value)}
               />
             </label>
             <label className={styles.field}>
               <span className={styles.label}>새 태그 (English)</span>
-              <input
+              <AdminInput
                 className={styles.input}
+                size="sm"
+                tone="raised"
                 value={en}
                 onChange={(event) => setEn(event.target.value)}
               />

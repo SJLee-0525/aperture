@@ -29,21 +29,7 @@
 
 .newBtn {
   flex: none;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--s-4);
-  background: var(--accent);
-  color: var(--text-inverse);
-  border-radius: var(--r-sm);
-  font-size: var(--t-small);
-  font-weight: 500;
-  transition: background var(--dur) var(--ease);
 }
-.newBtn:hover {
-  background: var(--accent-press);
-}
-
 .toolbar {
   display: flex;
   align-items: center;
@@ -54,17 +40,6 @@
 .searchInput {
   flex: 1;
   min-width: 0;
-  height: 36px;
-  padding: 0 var(--s-3);
-  background: var(--surface-1);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-size: var(--t-small);
-}
-.searchInput:focus-visible {
-  border-color: var(--accent);
-  outline: none;
 }
 
 .filters {

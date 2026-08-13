@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { extractYouTubeVideoId } from "@/features/dev-blog/_lib/markdown-directives";
 
 import styles from "./ArticleForm.module.css";
@@ -35,39 +39,26 @@ const ArticleYouTubeDialog = ({ onInsert, onClose }: Props) => {
   return (
     <div className={styles.section}>
       <div className={styles.inlineForm}>
-        <label className={styles.field}>
-          <span className={styles.label}>영상 주소</span>
-          <input
-            className={styles.input}
+        <AdminField label="영상 주소" className={styles.inlineField}>
+          <AdminInput
             value={url}
-            placeholder="https://youtu.be/..."
+            placeholder="https://youtu.be/…"
             onChange={(event) => setUrl(event.target.value)}
           />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>영상 제목</span>
-          <input
-            className={styles.input}
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>출처 (선택)</span>
-          <input
-            className={styles.input}
-            value={source}
-            onChange={(event) => setSource(event.target.value)}
-          />
-        </label>
-        <button
-          type="button"
-          className={styles.add}
+        </AdminField>
+        <AdminField label="영상 제목" className={styles.inlineField}>
+          <AdminInput value={title} onChange={(event) => setTitle(event.target.value)} />
+        </AdminField>
+        <AdminField label="출처 (선택)" className={styles.inlineField}>
+          <AdminInput value={source} onChange={(event) => setSource(event.target.value)} />
+        </AdminField>
+        <AdminButton
+          variant="secondary"
           disabled={!canInsert}
           onClick={() => onInsert(url.trim(), title.trim(), source.trim())}
         >
           본문에 넣기
-        </button>
+        </AdminButton>
         <button type="button" className={styles.remove} onClick={onClose}>
           닫기
         </button>
