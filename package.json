@@ -76,6 +76,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "eslint-plugin-boundaries": "^7.1.0",
+    "eslint-plugin-import": "^2.32.0",
     "firebase-tools": "^15.24.0",
     "jscpd": "^5.0.14",
     "jsdom": "^29.1.1",

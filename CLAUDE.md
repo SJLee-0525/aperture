@@ -274,6 +274,9 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
 - 브랜치: `main` + `feature/{요약}` 단순 전략 — [git-branch-strategy](.claude/skills/git-branch-strategy/SKILL.md)
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](.claude/memory/feedback_srp_per_file.md))
 - 상대경로 import(`../`) 금지 → `@/` alias (hook이 경고)
+- **import는 그룹별로 빈 줄로 나눈다**: Node 내장 → 외부 패키지 → (`@/components` + `@/features/*/_components`) →
+  (`@/hooks` + `@/features/*/_hooks`) → `@/features/*/_lib` → (`@/lib` + `@/constants`) → `import type`(경로 무관 전체 알파벳순) →
+  상대경로/CSS 모듈. `eslint.config.mjs`의 `import/order`가 강제 + `eslint --fix`로 자동 정렬.
 - UI 표시 문자열은 ko/en 사전 경유 / 영어 코드·변수명. **전 섹션 콘텐츠 이중언어**(음악·개발 포함)
 - **스타일 = CSS Modules** (컴포넌트별 `.module.css`, 짝 `.tsx`와 같은 폴더에 동거 — features에선 `_components/` 안). 색·간격은 `globals.css`의 `:root` 변수 경유
   (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
