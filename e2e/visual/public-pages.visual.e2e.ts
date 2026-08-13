@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const VISUAL_ROUTES = [
   { name: "landing", path: "/ko" },
@@ -13,6 +13,43 @@ const VISUAL_ROUTES = [
   { name: "dev-article-detail", path: "/ko/dev/articles/serverless-portfolio" },
   { name: "contact", path: "/ko/contact" },
 ] as const;
+
+/**
+ * 모든 이미지가 결판날 때까지 기다린 뒤 페이지 높이가 멎는 것을 확인한다.
+ *
+ * 본문 이미지는 마크다운이 크기를 담지 않아 width/height 없는 `<img>` 로 그려진다
+ * (`ArticleBody.tsx`). 로드 전에는 높이가 0이라, 뷰포트 밖 lazy 이미지가 fullPage 캡처
+ * 도중에 로드되거나 실패하면 그 순간 페이지가 자란다. 실제로 dev-article-detail 기준선이
+ * 3736px(이미지 pending)과 4639px(실패 후 대체 이미지 렌더) 사이에서 흔들렸다.
+ *
+ * lazy 를 eager 로 바꿔 전부 지금 요청시키고, 실패한 이미지는 대체 이미지를 새로 렌더하므로
+ * 높이가 두 번 연속 같을 때까지 반복한다.
+ *
+ * @param {Page} page
+ * @returns {Promise<void>}
+ */
+const settleImages = async (page: Page): Promise<void> => {
+  let previousHeight = -1;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await page.locator("img").evaluateAll((images) =>
+      Promise.all(
+        images.map((element) => {
+          const image = element as HTMLImageElement;
+          image.loading = "eager";
+          if (image.complete) return Promise.resolve(undefined);
+          return new Promise((resolve) => {
+            image.addEventListener("load", () => resolve(undefined), { once: true });
+            image.addEventListener("error", () => resolve(undefined), { once: true });
+          });
+        }),
+      ),
+    );
+
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    if (height === previousHeight) return;
+    previousHeight = height;
+  }
+};
 
 test.describe("핵심 공개 화면 시각 회귀", () => {
   test.skip(process.platform !== "win32", "시각 기준선은 GitHub Actions Windows 환경에서 관리");
@@ -30,16 +67,7 @@ test.describe("핵심 공개 화면 시각 회귀", () => {
       // 웹폰트는 display:swap — 스왑 전에 찍으면 폴백 폰트 상태가 기준선으로 굳는다.
       // 폰트 캐시가 비어 있는 첫 라우트에서만 터져서 재현이 들쭉날쭉하다.
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
-      await page.locator("img").evaluateAll((images) =>
-        Promise.all(
-          images
-            .map((element) => element as HTMLImageElement)
-            .filter((image) => image.loading !== "lazy" || image.complete)
-            .map((image) =>
-              image.complete ? Promise.resolve() : image.decode().catch(() => undefined),
-            ),
-        ),
-      );
+      await settleImages(page);
 
       await expect(page).toHaveScreenshot(`${route.name}-${testInfo.project.name}.png`, {
         fullPage: true,
