@@ -6,6 +6,8 @@ const VISUAL_ROUTES = [
   { name: "photo-albums", path: "/ko/photo/albums" },
   // 앨범 상세는 공용 hero 프리미티브의 원본이라 hero 를 옮긴 뒤에도 같은 화면이어야 한다.
   { name: "photo-album-detail", path: "/ko/photo/albums/city-night" },
+  // 커버 없는 앨범 — plain variant 히어로의 글자색(B4.5 P1 수정)이 처음으로 기준선에 찍힌다.
+  { name: "photo-album-detail-plain", path: "/ko/photo/albums/unreleased" },
   { name: "music-works", path: "/ko/music" },
   { name: "dev-projects", path: "/ko/dev/projects" },
   // 블로그 두 지면은 기준선 png 만 있고 라우트가 빠져 있어 아무 테스트도 소비하지 않았다.

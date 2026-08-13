@@ -38,6 +38,17 @@ const MOCK_ALBUMS: Album[] = [
     order: 3,
     published: true,
   },
+  {
+    // 커버로 쓸 공개 사진이 없는 앨범 — 상세 히어로의 plain variant(글자색 전환)를
+    // mock 과 시각 기준선에서 확인하는 fixture 다. 사진을 지워 참조가 비는 실제 상황과 같다.
+    id: "unreleased",
+    title: { ko: "미공개 모음", en: "Unreleased" },
+    subtitle: { ko: "2026 · 준비 중", en: "2026 · In progress" },
+    coverPhotoId: "p90",
+    photoIds: ["p90"],
+    order: 4,
+    published: true,
+  },
 ];
 
 export { MOCK_ALBUMS };
