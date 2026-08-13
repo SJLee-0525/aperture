@@ -65,9 +65,9 @@ const TagFilterBar = ({ items, activeId, allLabel, onSelect, trailing }: Props) 
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
-    syncOverflow();
     scroller.addEventListener("scroll", syncOverflow, { passive: true });
-    // 폭이 바뀌면 넘침 여부도 바뀐다 — 창 크기와 칩 줄 자체의 변화를 모두 본다.
+    // 폭이 바뀌면 넘침 여부도 바뀐다 — 창 크기 변화는 observer 가 본다. `items` 에는 걸지
+    // 않는다 — 부모가 렌더될 때마다 observer 를 다시 만들면 필터 조작 내내 강제 레이아웃이 돈다.
     const observer = new ResizeObserver(syncOverflow);
     observer.observe(scroller);
 
@@ -75,6 +75,12 @@ const TagFilterBar = ({ items, activeId, allLabel, onSelect, trailing }: Props) 
       scroller.removeEventListener("scroll", syncOverflow);
       observer.disconnect();
     };
+  }, [syncOverflow]);
+
+  // 칩이 늘거나 줄면 내용 폭이 바뀌지만 스크롤 컨테이너 자체의 크기는 그대로라 observer 가
+  // 못 본다. 목록이 바뀔 때만 한 번 다시 잰다.
+  useEffect(() => {
+    syncOverflow();
   }, [syncOverflow, items]);
 
   const scrollStep = (direction: 1 | -1) => {

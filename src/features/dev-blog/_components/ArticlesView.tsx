@@ -50,6 +50,11 @@ const ArticlesView = ({ articles, tags }: Props) => {
   const searchParams = useSearchParams();
 
   const state = useMemo(() => parseArticleListQuery(searchParams, tags), [searchParams, tags]);
+  // `TagFilterBar` 가 목록 변경을 감지해 넘침을 다시 재므로, 렌더마다 새 배열을 주지 않는다.
+  const tagItems = useMemo(
+    () => tags.map((tag) => ({ id: tag.id, label: pickText(tag, lang) })),
+    [tags, lang],
+  );
   const filtered = useMemo(
     () => (state.tag ? articles.filter((article) => article.tags.includes(state.tag!)) : articles),
     [articles, state.tag],
@@ -91,7 +96,7 @@ const ArticlesView = ({ articles, tags }: Props) => {
       </PageToolbar>
 
       <TagFilterBar
-        items={tags.map((tag) => ({ id: tag.id, label: pickText(tag, lang) }))}
+        items={tagItems}
         activeId={state.tag}
         allLabel={dict.allTag}
         // 태그를 바꾸면 이전 페이지 번호는 의미가 없다.

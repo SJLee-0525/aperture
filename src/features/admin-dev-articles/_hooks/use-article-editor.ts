@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 
 import { adminDevArticleRoute, ROUTES } from "@/constants/routes";
 
@@ -95,7 +95,10 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   );
 
   // 본문이 바뀔 때만 다시 파싱한다. 발행 조건과 편집기 오류 목록이 같은 결과를 본다.
-  const markdownIssues = useMemo(() => parseArticleMarkdown(form.body).issues, [form.body]);
+  // 파싱은 본문 길이에 비례해 무거우므로 입력을 막지 않게 한 박자 늦춘다 — 잠깐 이전 결과가
+  // 보일 수 있지만, 발행 저장은 저장소가 같은 검사를 다시 하므로 어긋난 채 저장되지 않는다.
+  const deferredBody = useDeferredValue(form.body);
+  const markdownIssues = useMemo(() => parseArticleMarkdown(deferredBody).issues, [deferredBody]);
 
   const publishIssues = useMemo(
     () =>

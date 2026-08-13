@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Icon } from "@/components/Icon";
 import { RangeSlider } from "@/components/RangeSlider";
@@ -42,6 +42,12 @@ const FilterBar = (props: Props) => {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
+  // 슬라이더 드래그마다 이 컴포넌트가 다시 렌더된다 — 칩 목록까지 매번 새로 만들지 않는다.
+  const tagItems = useMemo(
+    () => props.tags.map((tag) => ({ id: tag.id, label: pickText(tag, lang) })),
+    [props.tags, lang],
+  );
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -55,7 +61,7 @@ const FilterBar = (props: Props) => {
 
   return (
     <TagFilterBar
-      items={props.tags.map((tag) => ({ id: tag.id, label: pickText(tag, lang) }))}
+      items={tagItems}
       activeId={props.tag === ALL ? null : props.tag}
       allLabel={dict.allTag}
       onSelect={(id) => props.onTag(id ?? ALL)}

@@ -338,9 +338,11 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
     [images, sizes, brokenImages],
   );
 
-  return (
-    <div className={styles.body} lang="ko">
-      {renderBlocks(document.blocks, {
+  // 본문 트리는 통째로 메모한다. 이미지 크기(`sizes`)·라이트박스 개폐는 본문 밖의 상태라
+  // 그때마다 수천 노드를 다시 만들 이유가 없다 — 죽은 이미지 표시(`brokenImages`)만 본문을 바꾼다.
+  const blocks = useMemo(
+    () =>
+      renderBlocks(document.blocks, {
         lang,
         highlights,
         imageIndex,
@@ -348,7 +350,13 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
         onMeasureImage,
         brokenImages,
         onImageError,
-      })}
+      }),
+    [document, lang, highlights, imageIndex, onMeasureImage, brokenImages, onImageError],
+  );
+
+  return (
+    <div className={styles.body} lang="ko">
+      {blocks}
 
       {openIndex !== null && lightboxImages.length > 0 ? (
         <ImageLightbox

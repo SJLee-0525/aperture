@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { shouldUseMockContent } from "@/lib/content/content-source";
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
@@ -26,13 +28,16 @@ const compareByPublishedAtDesc = (a: DevArticle, b: DevArticle): number => {
  * `fetchPublishedDevArticles` 가 생기면 이 분기만 교체한다. 여기서 throw 하면
  * mock 없이 도는 production build 가 공개 페이지 생성 단계에서 통째로 실패한다.
  *
+ * 한 렌더에서 여러 번 불린다(`generateStaticParams`·metadata·페이지 본문) — `cache` 로 감싸
+ * 같은 요청 안에서는 한 번만 만든다. B5 에서 Firestore 를 붙여도 읽기가 늘지 않는 장치다.
+ *
  * @returns {Promise<DevArticle[]>} 발행일 내림차순 정렬된 공개 글.
  */
-const getDevArticles = async (): Promise<DevArticle[]> => {
+const getDevArticles = cache(async (): Promise<DevArticle[]> => {
   if (!shouldUseMockContent()) return [];
   const { MOCK_DEV_ARTICLES } = await import("@/mocks/dev-articles");
   return MOCK_DEV_ARTICLES.filter((article) => article.published).sort(compareByPublishedAtDesc);
-};
+});
 
 /**
  * slug 로 공개 글 한 건을 찾는다. 초안과 없는 slug 는 모두 `null` 이다.
@@ -50,9 +55,9 @@ const getDevArticleBySlug = async (slug: string): Promise<DevArticle | null> =>
  *
  * @returns {Promise<DevArticleTag[]>} 사전에 정의된 순서 그대로의 태그 목록.
  */
-const getDevArticleTags = async (): Promise<DevArticleTag[]> => {
+const getDevArticleTags = cache(async (): Promise<DevArticleTag[]> => {
   if (!shouldUseMockContent()) return [];
   return (await import("@/mocks/dev-article-tags")).MOCK_DEV_ARTICLE_TAGS;
-};
+});
 
 export { getDevArticleBySlug, getDevArticles, getDevArticleTags };
