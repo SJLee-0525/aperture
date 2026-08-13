@@ -62,13 +62,27 @@ const toDate = (value: unknown): Date => {
   return new Date(0);
 };
 
+type QueryDirection = "ASCENDING" | "DESCENDING";
+type QueryOrder = { fieldPath: string; direction: QueryDirection };
+
 /**
- * 공개 문서를 `order` 순으로 읽는 구조화 쿼리를 만든다.
+ * `published == true` 문서를 지정한 정렬로 읽는 구조화 쿼리를 만든다.
+ *
+ * 마지막 정렬 필드가 DESCENDING 이면 Firestore 가 암묵적으로 붙이는 `__name__` 정렬도
+ * DESCENDING 이 된다. 문서 ID 오름차순 계약이 필요한 쿼리(블로그 `publishedAt desc`)는
+ * `{ fieldPath: "__name__", direction: "ASCENDING" }` 을 호출부가 직접 명시해야 하며,
+ * 배포하는 복합 인덱스에도 같은 `__name__` 방향이 있어야 한다.
  *
  * @param {string} collectionId 조회할 Firestore 컬렉션 ID.
+ * @param {QueryOrder[]} orderBy 적용 순서대로 나열한 정렬 조건.
+ * @param {string[] | undefined} [select] 응답에 포함할 필드 경로. 생략하면 전체 문서를 받는다.
  * @returns {Record<string, unknown>} Firestore `runQuery`에 전달할 구조화 쿼리.
  */
-const publishedOrderedQuery = (collectionId: string) => ({
+const publishedQuery = (
+  collectionId: string,
+  orderBy: QueryOrder[],
+  select?: string[],
+): Record<string, unknown> => ({
   from: [{ collectionId }],
   where: {
     fieldFilter: {
@@ -77,20 +91,30 @@ const publishedOrderedQuery = (collectionId: string) => ({
       value: { booleanValue: true },
     },
   },
-  orderBy: [{ field: { fieldPath: "order" }, direction: "ASCENDING" }],
+  orderBy: orderBy.map(({ fieldPath, direction }) => ({ field: { fieldPath }, direction })),
+  ...(select ? { select: { fields: select.map((fieldPath) => ({ fieldPath })) } } : {}),
 });
 
+/** 기존 6개 컬렉션이 공유하는 수동 정렬 조건 — 마지막 필드가 ASC 라 `__name__` 명시가 필요 없다. */
+const ORDER_ASC: QueryOrder[] = [{ fieldPath: "order", direction: "ASCENDING" }];
+
 /**
- * 공개 문서에서 지정한 필드만 읽는 구조화 쿼리를 만든다.
+ * 공개 문서를 `order` 순으로 읽는 구조화 쿼리를 만든다.
+ *
+ * @param {string} collectionId 조회할 Firestore 컬렉션 ID.
+ * @returns {Record<string, unknown>} Firestore `runQuery`에 전달할 구조화 쿼리.
+ */
+const publishedOrderedQuery = (collectionId: string) => publishedQuery(collectionId, ORDER_ASC);
+
+/**
+ * 공개 문서에서 지정한 필드만 `order` 순으로 읽는 구조화 쿼리를 만든다.
  *
  * @param {string} collectionId 조회할 Firestore 컬렉션 ID.
  * @param {string[]} fieldPaths 응답에 포함할 필드 경로.
  * @returns {Record<string, unknown>} 필드 선택 조건이 포함된 구조화 쿼리.
  */
-const projectedPublishedOrderedQuery = (collectionId: string, fieldPaths: string[]) => ({
-  ...publishedOrderedQuery(collectionId),
-  select: { fields: fieldPaths.map((fieldPath) => ({ fieldPath })) },
-});
+const projectedPublishedOrderedQuery = (collectionId: string, fieldPaths: string[]) =>
+  publishedQuery(collectionId, ORDER_ASC, fieldPaths);
 
 /**
  * Firestore REST `runQuery`를 호출하고 문서를 일반 객체로 디코딩한다.
@@ -171,6 +195,7 @@ export {
   fetchDocument,
   projectedPublishedOrderedQuery,
   publishedOrderedQuery,
+  publishedQuery,
   runQuery,
   toDate,
 };
