@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { spawn, spawnSync } = require("node:child_process");
+const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
@@ -59,10 +60,34 @@ const serverArgs = [
   String(port),
 ];
 
+// 서버 출력을 버리면 런 도중 크래시의 단서가 함께 사라진다 — 테스트는 전부
+// ERR_CONNECTION_REFUSED 로만 보이고 이유는 어디에도 안 남는다. 파일로 받아 둔다.
+// Playwright 가 시작할 때 비우는 test-results/ 안에 두면 지워지므로 저장소 루트에 쓴다.
+const serverLogPath = path.join(root, "e2e-server.log");
+const serverLog = fs.openSync(serverLogPath, "w");
+
 const server = spawn(process.execPath, serverArgs, {
   cwd: root,
   env: serverEnv,
-  stdio: "ignore",
+  stdio: ["ignore", serverLog, serverLog],
+});
+
+/** 테스트가 끝난 뒤의 서버 종료는 정상(stopServer)이라 아래 감시에서 제외한다. */
+let testsFinished = false;
+let playwright = null;
+
+server.on("exit", (code, signal) => {
+  if (testsFinished) return;
+  console.error("");
+  console.error(`E2E Next 서버가 테스트 도중 종료됐다 (code=${code} signal=${signal}).`);
+  console.error(`서버 로그: ${serverLogPath}`);
+  try {
+    // 꼬리만 보여 준다 — 스택 하나면 충분하고, 로그 전체를 콘솔에 쏟지 않는다.
+    const log = fs.readFileSync(serverLogPath, "utf8").trimEnd();
+    if (log) console.error(log.slice(-2000));
+  } catch {}
+  // 죽은 서버에 남은 스펙을 계속 던지면 실패 200여 개가 원인을 덮는다. 즉시 멈춘다.
+  if (playwright && playwright.exitCode === null) playwright.kill();
 });
 
 function stopServer() {
@@ -96,7 +121,7 @@ async function waitUntilReady() {
 async function run() {
   try {
     await waitUntilReady();
-    const playwright = spawn(
+    playwright = spawn(
       process.execPath,
       ["node_modules/@playwright/test/cli.js", "test", ...playwrightArgs],
       {
@@ -111,8 +136,10 @@ async function run() {
       },
     );
     const exitCode = await new Promise((resolve) => playwright.on("exit", resolve));
+    testsFinished = true;
     process.exitCode = exitCode ?? 1;
   } finally {
+    testsFinished = true;
     stopServer();
   }
 }
