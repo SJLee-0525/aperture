@@ -1,14 +1,16 @@
 import {
-  markdownIssueMessage,
-  publishIssueMessage,
-} from "@/features/admin-dev-articles/_lib/dev-article-issue-message";
-import { checkArticlePublishable } from "@/features/admin-dev-articles/_lib/dev-article-publish-check";
+  assertArticlePublishable,
+  stampFirstPublished,
+} from "@/features/admin-dev-articles/_lib/dev-article-domain";
+import {
+  countTagUsage,
+  tagInUseMessage,
+} from "@/features/admin-dev-articles/_lib/dev-article-tag-usage";
 import {
   readDevArticleStore,
   writeDevArticleStore,
   type DevArticleStore,
 } from "@/features/admin-dev-articles/_lib/local-dev-article-store";
-import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 import type { AdminDevArticleListItem } from "@/types/admin";
 import type { DevArticle } from "@/types/dev-article";
@@ -111,59 +113,24 @@ const createLocalDevArticleRepository = (
   };
 
   /**
-   * 입력을 저장 형태로 맞춘다. 최초 발행이면 그 시각을 한 번만 남긴다.
+   * 이 저장소가 아는 데이터로 `assertArticlePublishable` 의 context 를 만든다.
    *
-   * @param {DevArticleInput} input 폼이 만든 저장 필드.
-   * @param {DevArticle | undefined} previous 이전 저장본. 새 글이면 undefined.
-   * @returns {DevArticleInput} 발행 시각을 정리한 저장 필드.
-   */
-  const stampFirstPublished = (input: DevArticleInput, previous?: DevArticle): DevArticleInput => {
-    const firstPublishedAt = previous?.firstPublishedAt ?? input.firstPublishedAt;
-    if (firstPublishedAt || !input.published) return { ...input, firstPublishedAt };
-    return { ...input, firstPublishedAt: now() };
-  };
-
-  /**
-   * 발행 상태로 저장되는 모든 경로(폼 저장 `create`/`update` · 목록 토글 `setPublished`)에
-   * 같은 조건을 건다. 폼의 검사는 참조 데이터(다른 글 목록)가 아직 로드 중이면 slug 중복을
-   * 놓칠 수 있으므로, 저장소가 자기 데이터로 한 번 더 확인하는 것이 최종 방어선이다.
+   * 연관 프로젝트 공개 여부만은 여기서 보지 못한다 — mock 저장소가 프로젝트 목록을 모른다.
+   * 자기 참조를 그대로 넘겨 이 항목은 항상 통과시키고, 공개 상세가 렌더 단계에서 걸러 낸다
+   * (비공개 프로젝트 카드는 빠진다). live 구현은 프로젝트 projection 으로 실제 검사한다.
    *
-   * 이 검사가 없으면 발행일 없는 초안이 `published: true` · `publishedAt: null` 로 넘어간다.
-   * 폼에서는 막히는 상태이고, 공개 목록은 그 글의 날짜를 작성일로 대신 보여 주게 된다.
-   *
-   * 연관 프로젝트 공개 여부만은 여기서 보지 못한다 — 저장소가 프로젝트 목록을 모른다.
-   * 그 항목은 공개 상세가 렌더 단계에서 걸러 내므로(비공개 프로젝트 카드는 빠진다)
-   * 잘못된 저장 상태로 남지는 않는다.
-   *
-   * @param {string} id 발행하려는 글의 문서 ID. 자기 slug 를 중복으로 세지 않기 위해 쓴다.
+   * @param {string} id 발행하려는 글의 문서 ID.
    * @param {DevArticleInput} input 발행하려는 저장 값.
    * @param {DevArticleStore} store 중복 slug·태그 사전을 볼 현재 저장소.
    * @returns {void}
-   * @throws {Error} 조건을 만족하지 않을 때. 문구는 폼과 같은 출처를 쓴다.
+   * @throws {Error} 발행 조건을 만족하지 않을 때.
    */
-  const assertPublishable = (id: string, input: DevArticleInput, store: DevArticleStore): void => {
-    const markdownIssues = parseArticleMarkdown(input.body).issues;
-    const issues = checkArticlePublishable(
-      { ...input, published: true },
-      {
-        articles: store.articles,
-        selfId: id,
-        markdownIssues,
-        knownTagIds: store.tags.map((tag) => tag.id),
-        publishableProjectIds: input.relatedProjectIds,
-      },
-    );
-    if (issues.length === 0) return;
-
-    const reasons = issues
-      .map((issue) =>
-        issue.code === "markdown-blocked" && markdownIssues[0]
-          ? markdownIssueMessage(markdownIssues[0])
-          : publishIssueMessage(issue),
-      )
-      .join(" ");
-    throw new Error(`발행 조건을 만족하지 않습니다. ${reasons}`);
-  };
+  const assertPublishable = (id: string, input: DevArticleInput, store: DevArticleStore): void =>
+    assertArticlePublishable(id, input, {
+      articles: store.articles,
+      knownTagIds: store.tags.map((tag) => tag.id),
+      publishableProjectIds: input.relatedProjectIds,
+    });
 
   return {
     newId: () => crypto.randomUUID(),
@@ -184,7 +151,12 @@ const createLocalDevArticleRepository = (
           ...store,
           articles: [
             ...store.articles,
-            { id, ...stampFirstPublished(input), createdAt: stamped, updatedAt: stamped },
+            {
+              id,
+              ...stampFirstPublished(input, undefined, now),
+              createdAt: stamped,
+              updatedAt: stamped,
+            },
           ],
         });
       }),
@@ -201,7 +173,7 @@ const createLocalDevArticleRepository = (
             article.id === id
               ? {
                   ...article,
-                  ...stampFirstPublished(input, previous),
+                  ...stampFirstPublished(input, previous, now),
                   updatedAt: now(),
                 }
               : article,
@@ -235,6 +207,8 @@ const createLocalDevArticleRepository = (
       enqueue(async () => {
         const store = await load();
         save({ ...store, articles: store.articles.filter((article) => article.id !== id) });
+        // mock 업로더는 실제 파일을 만들지 않으므로 정리할 이미지가 없다.
+        return { imageCleanupWarning: null };
       }),
 
     listTags: async () => (await load()).tags,
@@ -246,6 +220,28 @@ const createLocalDevArticleRepository = (
           throw new Error("같은 id의 태그가 이미 있습니다.");
         }
         save({ ...store, tags: [...store.tags, tag] });
+      }),
+
+    updateTag: (tag: DevArticleTag) =>
+      enqueue(async () => {
+        const store = await load();
+        if (!store.tags.some((existing) => existing.id === tag.id)) {
+          throw new Error("수정할 태그를 찾지 못했습니다.");
+        }
+        save({
+          ...store,
+          tags: store.tags.map((existing) =>
+            existing.id === tag.id ? { ...existing, ko: tag.ko, en: tag.en } : existing,
+          ),
+        });
+      }),
+
+    removeTag: (id: string) =>
+      enqueue(async () => {
+        const store = await load();
+        const used = countTagUsage(store.articles, id);
+        if (used > 0) throw new Error(tagInUseMessage(used));
+        save({ ...store, tags: store.tags.filter((existing) => existing.id !== id) });
       }),
   };
 };

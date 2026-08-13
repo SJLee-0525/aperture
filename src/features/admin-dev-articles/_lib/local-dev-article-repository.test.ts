@@ -195,6 +195,31 @@ describe("createLocalDevArticleRepository", () => {
     await expect(repo.createTag({ id: "webmcp", ko: "다른 이름", en: "Other" })).rejects.toThrow();
   });
 
+  it("태그 라벨만 고치고 id 와 글의 참조는 그대로 둔다", async () => {
+    const repo = repository();
+    await repo.updateTag({ id: "firebase", ko: "파이어베이스", en: "Firebase BaaS" });
+
+    const updated = (await repo.listTags()).find((tag) => tag.id === "firebase");
+    expect(updated).toEqual({ id: "firebase", ko: "파이어베이스", en: "Firebase BaaS" });
+    await expect(repo.updateTag({ id: "없는-태그", ko: "x", en: "x" })).rejects.toThrow();
+  });
+
+  it("사용 중인 태그 삭제는 글 수를 담아 거부한다", async () => {
+    // mock 사전에서 `firebase` 는 글이 참조하고 `accessibility` 는 어떤 글도 쓰지 않는다.
+    const repo = repository();
+
+    await expect(repo.removeTag("firebase")).rejects.toThrow(/글이 \d+건 있습니다/);
+    await repo.removeTag("accessibility");
+    expect((await repo.listTags()).map((tag) => tag.id)).not.toContain("accessibility");
+  });
+
+  it("삭제 결과에 이미지 정리 경고 자리를 돌려준다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input());
+
+    await expect(repo.remove("fresh")).resolves.toEqual({ imageCleanupWarning: null });
+  });
+
   it("저장한 값은 다른 인스턴스에서도 보인다", async () => {
     await repository().create("fresh", input());
 

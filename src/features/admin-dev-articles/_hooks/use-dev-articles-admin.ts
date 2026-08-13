@@ -81,8 +81,10 @@ const useDevArticlesAdmin = () => {
     async (id: string) => {
       setError(null);
       try {
-        await repository.remove(id);
+        const { imageCleanupWarning } = await repository.remove(id);
         replaceItems(itemsRef.current.filter((item) => item.id !== id));
+        // 삭제는 끝났고 이미지 정리만 실패한 상태 — 행은 지우되 안내는 남긴다.
+        if (imageCleanupWarning) setError(imageCleanupWarning);
       } catch (caught) {
         setError((caught as Error).message);
       }

@@ -28,6 +28,10 @@ describe("firebase client — 지연 초기화", () => {
     await import("@/lib/firebase/client");
     await import("@/lib/firebase/auth");
     await import("@/lib/firebase/admin-list-rest");
+    // 블로그 live 저장소 계열 — listCrud 조립이 최상위에서 돌지만 Firebase 는 호출 시점에만 연다.
+    await import("@/lib/firebase/dev-articles");
+    await import("@/features/admin-dev-articles/_lib/live-dev-article-repository");
+    await import("@/features/admin-dev-articles/_lib/dev-article-repository");
 
     expect(getApps()).toHaveLength(0);
   });

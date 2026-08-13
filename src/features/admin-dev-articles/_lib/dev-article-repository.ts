@@ -4,10 +4,17 @@ import type { AdminDevArticleListItem } from "@/types/admin";
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
+import { createLiveDevArticleRepository } from "@/features/admin-dev-articles/_lib/live-dev-article-repository";
 import { createLocalDevArticleRepository } from "@/features/admin-dev-articles/_lib/local-dev-article-repository";
 
 /** 저장하는 필드. 문서 ID와 시스템 시각은 저장소가 채운다. */
 type DevArticleInput = Omit<DevArticle, "id" | "createdAt" | "updatedAt">;
+
+/**
+ * 삭제 결과. 글 삭제가 실패하면 reject한다. 이미지만 일부 남은 경우에는 글 삭제를
+ * 되돌리지 않고 관리자가 나중에 정리할 수 있도록 경고를 남긴다.
+ */
+type DevArticleRemoveResult = { imageCleanupWarning: string | null };
 
 /**
  * 관리자 화면이 보는 저장소 경계.
@@ -28,30 +35,13 @@ type DevArticleRepository = {
   create: (id: string, input: DevArticleInput) => Promise<void>;
   update: (id: string, input: DevArticleInput) => Promise<void>;
   setPublished: (id: string, published: boolean) => Promise<void>;
-  remove: (id: string) => Promise<void>;
+  remove: (id: string) => Promise<DevArticleRemoveResult>;
   listTags: () => Promise<DevArticleTag[]>;
   createTag: (tag: DevArticleTag) => Promise<void>;
-};
-
-const UNAVAILABLE_MESSAGE =
-  "블로그 글 저장소가 아직 실데이터에 연결되지 않았습니다. mock 콘텐츠로 실행한 개발 서버에서 작성하세요.";
-
-/**
- * 실데이터 저장소가 붙기 전까지의 자리. 조용히 빈 목록을 주는 대신 실패를 드러낸다 —
- * 저장한 줄 알았는데 아무 데도 남지 않는 상황이 관리자에게 가장 나쁘다.
- */
-const unavailableRepository: DevArticleRepository = {
-  newId: () => {
-    throw new Error(UNAVAILABLE_MESSAGE);
-  },
-  list: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  get: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  create: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  update: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  setPublished: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  remove: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  listTags: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
-  createTag: () => Promise.reject(new Error(UNAVAILABLE_MESSAGE)),
+  /** 라벨(ko/en)만 고친다. id 는 문서 ID이자 글 `tags[]` 의 외래키라 바꿀 수 없다. */
+  updateTag: (tag: DevArticleTag) => Promise<void>;
+  /** 어떤 글도 참조하지 않을 때만 지운다. 사용 중이면 글 수를 담아 거부한다. */
+  removeTag: (id: string) => Promise<void>;
 };
 
 let cached: DevArticleRepository | null = null;
@@ -60,17 +50,18 @@ let cached: DevArticleRepository | null = null;
  * 지금 쓸 저장소를 고른다. 첫 호출 결과를 재사용하므로 hook 의 의존성 배열에 그대로 넣어도
  * 매 렌더마다 새 어댑터가 생기지 않는다.
  *
- * mock 소스면 브라우저 로컬 저장소를, 실데이터면 아직 연결되지 않았다고 알리는 자리를 준다.
- * ⚠️ B5 에서 실데이터 분기를 Firestore 구현으로 교체한다.
+ * mock 소스면 브라우저 로컬 저장소를, 실데이터면 Firestore 구현을 준다. 두 구현 모두
+ * 도메인 규칙(`dev-article-domain`)을 공유하고, 팩토리는 호출 시점까지 Firebase 를
+ * 건드리지 않는 closure 조립만 한다.
  *
  * @returns {DevArticleRepository} 현재 콘텐츠 소스에 맞는 저장소.
  */
 const getDevArticleRepository = (): DevArticleRepository => {
   cached ??= shouldUseMockContent()
     ? createLocalDevArticleRepository(() => window.localStorage)
-    : unavailableRepository;
+    : createLiveDevArticleRepository();
   return cached;
 };
 
 export { getDevArticleRepository };
-export type { DevArticleInput, DevArticleRepository };
+export type { DevArticleInput, DevArticleRemoveResult, DevArticleRepository };

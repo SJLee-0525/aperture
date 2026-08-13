@@ -1,6 +1,16 @@
-import { deleteObject, getDownloadURL, listAll, ref, uploadBytes } from "firebase/storage";
+import {
+  deleteObject,
+  getDownloadURL,
+  getMetadata,
+  listAll,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
 
 import { getFirebaseStorage } from "@/lib/firebase/client";
+
+/** Storage 객체 하나의 정리 판단용 정보 — 경로·크기·업로드 시각. */
+type StorageFileInfo = { path: string; size: number; createdAt: Date };
 
 /**
  * WebP 이미지를 UUID 파일명으로 업로드한다.
@@ -158,11 +168,80 @@ const uploadDevThumbnail = (projectId: string, blob: Blob) =>
  */
 const deleteDevProjectImages = (projectId: string) => deleteFolder(`dev/${projectId}`);
 
+/**
+ * 블로그 본문·대표 이미지 원본을 `dev-blog/{articleId}` 폴더에 업로드한다.
+ *
+ * @param {string} articleId 글 문서 ID. 저장 전에 발급한 ID를 그대로 쓴다.
+ * @param {Blob} blob 업로드할 WebP 원본.
+ * @returns {Promise<{ url: string; path: string }>} 다운로드 URL과 Storage 객체 경로.
+ */
+const uploadArticleImage = (articleId: string, blob: Blob) =>
+  uploadWebp(`dev-blog/${articleId}`, blob);
+/**
+ * 블로그 이미지 미리보기를 전용 하위 폴더에 업로드한다.
+ *
+ * @param {string} articleId 글 문서 ID.
+ * @param {Blob} blob 업로드할 WebP 미리보기.
+ * @returns {Promise<{ url: string; path: string }>} 다운로드 URL과 Storage 객체 경로.
+ */
+const uploadArticlePreview = (articleId: string, blob: Blob) =>
+  uploadWebp(`dev-blog/${articleId}/previews`, blob);
+/**
+ * 블로그 이미지 썸네일을 전용 하위 폴더에 업로드한다.
+ *
+ * @param {string} articleId 글 문서 ID.
+ * @param {Blob} blob 업로드할 WebP 썸네일.
+ * @returns {Promise<{ url: string; path: string }>} 다운로드 URL과 Storage 객체 경로.
+ */
+const uploadArticleThumbnail = (articleId: string, blob: Blob) =>
+  uploadWebp(`dev-blog/${articleId}/thumbnails`, blob);
+/**
+ * 글 문서에 속한 모든 Storage 이미지를 삭제한다.
+ *
+ * @param {string} articleId 글 문서 ID.
+ * @returns {Promise<void>} 글 이미지 폴더 삭제가 끝나면 완료된다.
+ */
+const deleteArticleImages = (articleId: string) => deleteFolder(`dev-blog/${articleId}`);
+
+/**
+ * Storage 폴더 아래의 모든 객체를 재귀로 나열하고 크기·업로드 시각을 함께 읽는다.
+ * 미사용 이미지 검사에서 참조 여부와 업로드 시각을 확인할 때 쓴다.
+ *
+ * `list` 권한은 Rules 에서 관리자 전용이라 방문자 세션에서는 실패한다.
+ * 객체 수만큼 `getMetadata` 요청이 나가므로 대량 폴더에는 쓰지 않는다 — 블로그 이미지
+ * 규모(글당 수 장)를 전제로 한 함수다.
+ *
+ * @param {string} folder 나열할 Storage 폴더 경로.
+ * @returns {Promise<StorageFileInfo[]>} 하위 전체 객체의 경로·크기·업로드 시각.
+ */
+const listFolderFiles = async (folder: string): Promise<StorageFileInfo[]> => {
+  const listing = await listAll(ref(getFirebaseStorage(), folder));
+  const nested = await Promise.all(
+    listing.prefixes.map((prefix) => listFolderFiles(prefix.fullPath)),
+  );
+  const files = await Promise.all(
+    listing.items.map(async (item) => {
+      const metadata = await getMetadata(item);
+      return {
+        path: item.fullPath,
+        size: Number(metadata.size) || 0,
+        createdAt: new Date(metadata.timeCreated),
+      };
+    }),
+  );
+  return [...files, ...nested.flat()];
+};
+
 export {
+  deleteArticleImages,
   deleteDevProjectImages,
   deleteImages,
   deleteMusicWorkImages,
   deletePhotoImages,
+  listFolderFiles,
+  uploadArticleImage,
+  uploadArticlePreview,
+  uploadArticleThumbnail,
   uploadDevImage,
   uploadDevPreview,
   uploadDevThumbnail,
