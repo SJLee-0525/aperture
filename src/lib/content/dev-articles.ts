@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { shouldUseMockContent } from "@/lib/content/content-source";
+import { fetchDevArticleTags, fetchPublishedDevArticles } from "@/lib/firebase/public/dev-articles";
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
@@ -24,17 +25,16 @@ const compareByPublishedAtDesc = (a: DevArticle, b: DevArticle): number => {
 /**
  * 공개 글 목록. 초안은 제외한다.
  *
- * ⚠️ Firestore 연동은 B5 다. 그때까지 live 소스는 빈 목록을 돌려주고,
- * `fetchPublishedDevArticles` 가 생기면 이 분기만 교체한다. 여기서 throw 하면
- * mock 없이 도는 production build 가 공개 페이지 생성 단계에서 통째로 실패한다.
+ * live 소스는 Firestore REST 쿼리가 정렬(`publishedAt desc + __name__ asc`)까지 마친
+ * 결과를 그대로 쓰고, mock 만 같은 계약의 `compareByPublishedAtDesc` 로 정렬한다.
  *
  * 한 렌더에서 여러 번 불린다(`generateStaticParams`·metadata·페이지 본문) — `cache` 로 감싸
- * 같은 요청 안에서는 한 번만 만든다. B5 에서 Firestore 를 붙여도 읽기가 늘지 않는 장치다.
+ * 같은 요청 안에서는 한 번만 만든다. Firestore 읽기가 렌더당 1회로 억제되는 장치다.
  *
  * @returns {Promise<DevArticle[]>} 발행일 내림차순 정렬된 공개 글.
  */
 const getDevArticles = cache(async (): Promise<DevArticle[]> => {
-  if (!shouldUseMockContent()) return [];
+  if (!shouldUseMockContent()) return fetchPublishedDevArticles();
   const { MOCK_DEV_ARTICLES } = await import("@/mocks/dev-articles");
   return MOCK_DEV_ARTICLES.filter((article) => article.published).sort(compareByPublishedAtDesc);
 });
@@ -51,12 +51,13 @@ const getDevArticleBySlug = async (slug: string): Promise<DevArticle | null> =>
 /**
  * 블로그 태그 사전. 글에는 id 만 저장하므로 라벨은 여기서 찾는다.
  *
- * ⚠️ 저장 위치(별도 컬렉션 여부)는 B5 에서 확정한다.
+ * 저장 위치는 `devArticleTags` 컬렉션이다. 순서 계약은 id 사전순 —
+ * live 는 문서 ID(`__name__`) 오름차순 쿼리, mock 은 같은 순서로 정의된 배열이다.
  *
- * @returns {Promise<DevArticleTag[]>} 사전에 정의된 순서 그대로의 태그 목록.
+ * @returns {Promise<DevArticleTag[]>} id 오름차순의 태그 목록.
  */
 const getDevArticleTags = cache(async (): Promise<DevArticleTag[]> => {
-  if (!shouldUseMockContent()) return [];
+  if (!shouldUseMockContent()) return fetchDevArticleTags();
   return (await import("@/mocks/dev-article-tags")).MOCK_DEV_ARTICLE_TAGS;
 });
 
