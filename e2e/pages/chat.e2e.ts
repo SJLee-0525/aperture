@@ -164,16 +164,28 @@ test.describe("Chat", () => {
   }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "모바일 viewport에서만 검증");
     await page.goto("/ko/dev/projects");
-    const projectButton = page.getByRole("button", { name: /개인 포트폴리오/ });
-    await expect(projectButton).toBeVisible();
+    // 인트로 스플래시(1.4s CSS 애니메이션)가 떠 있는 동안의 클릭은 스플래시에 가로막혀 재시도되고,
+    // 그 사이 스크롤 위치가 흐트러진다(모드에 따라 -18px·-269px 처럼 제각각). 사람이 하는 순서대로
+    // 화면이 자리 잡은 뒤에 스크롤한다.
+    await expect(page.locator("[data-intro-splash]")).toBeHidden();
     await page.evaluate(() => window.scrollTo(0, 500));
+    // 첫 카드는 이 스크롤 위치에서 화면 밖이라 클릭 대상으로 쓸 수 없다 — Playwright 가 클릭 전
+    // 대상을 뷰포트로 끌어오면서 페이지를 되감아, 정작 검증하려던 스크롤 오프셋을 지운다.
+    // 그 자리에서 이미 온전히 보이는 카드를 눌러야 사람이 하는 조작과 같아진다.
+    const projectButton = page.getByRole("button", { name: /사진 포트폴리오/ });
+    await expect(projectButton).toBeInViewport({ ratio: 1 });
+    const scrolledY = await page.evaluate(() => window.scrollY);
+    expect(scrolledY).toBeGreaterThan(0);
+
     // hydration 전 합성 popstate가 유실되지 않도록 실제 사용자 경로로 모달을 연다.
     await projectButton.click();
-    await expect(page.getByRole("dialog", { name: "개인 포트폴리오" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "사진 포트폴리오" })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.body.style.position)).toBe("fixed");
-    await expect.poll(() => page.evaluate(() => document.body.style.top)).toMatch(/^-\d+px$/);
+    // 잠금이 "아무 음수"가 아니라 잠글 당시의 스크롤 위치 그대로를 붙잡아야 닫은 뒤 제자리로 돌아온다.
+    await expect
+      .poll(() => page.evaluate(() => Number.parseFloat(document.body.style.top)))
+      .toBeCloseTo(-scrolledY, 0);
     const projectScrollLockTop = await page.evaluate(() => document.body.style.top);
-    expect(Number.parseFloat(projectScrollLockTop)).toBeLessThan(0);
 
     await openChat(page);
     const chat = page.getByRole("dialog", { name: "Ask Sungjoon." });
@@ -189,7 +201,7 @@ test.describe("Chat", () => {
     await expect
       .poll(() => page.evaluate(() => document.body.style.top))
       .toBe(projectScrollLockTop);
-    await expect(page.getByRole("dialog", { name: "개인 포트폴리오" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "사진 포트폴리오" })).toBeVisible();
   });
 
   test("사진 모달 위 챗봇이 열린 동안 방향키와 Escape는 챗봇만 처리한다", async ({
