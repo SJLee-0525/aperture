@@ -30,7 +30,7 @@ const AdminChrome = ({ children }: { children: ReactNode }) => {
     <div className={styles.shell}>
       <header className={styles.bar}>
         <Link href={ROUTES.ADMIN} className={styles.brand}>
-          Aperture.<span className={styles.tag}>관리자</span>
+          Sungjoon Lee.<span className={styles.tag}>관리자</span>
         </Link>
         <div className={styles.right}>
           <Link href={ROUTES.LANDING} className={styles.link}>

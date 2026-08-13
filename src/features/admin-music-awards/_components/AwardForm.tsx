@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { ROUTES } from "@/constants/routes";
 import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -92,70 +96,61 @@ const AwardForm = ({ awardId, initial }: Props) => {
       <section className={styles.section}>
         <h2 className={styles.legend}>연도 · 장소</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>연도</span>
-            <input
+          <AdminField label="연도">
+            <AdminInput
               type="number"
-              className={styles.input}
               value={form.year}
               onChange={(e) => patch({ year: Number(e.target.value) })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>장소 (예: Geneva, CH)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="장소">
+            <AdminInput
               value={form.place}
+              placeholder="Geneva, CH"
               onChange={(e) => patch({ place: e.target.value })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>수상명</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>수상명 (한국어) *</span>
-            <input
-              className={styles.input}
+          <AdminField label="수상명 (한국어)" required>
+            <AdminInput
               value={form.name.ko}
               onChange={(e) => patch({ name: { ...form.name, ko: e.target.value } })}
               required
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>수상명 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="수상명 (English)">
+            <AdminInput
               value={form.name.en}
               onChange={(e) => patch({ name: { ...form.name, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>설명</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>설명 (한국어)</span>
-            <textarea
-              className={styles.textarea}
+          <AdminField label="설명 (한국어)">
+            <AdminInput
+              multiline
               rows={4}
               value={form.description.ko}
               onChange={(e) => patch({ description: { ...form.description, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>설명 (English)</span>
-            <textarea
-              className={styles.textarea}
+          </AdminField>
+          <AdminField label="설명 (English)">
+            <AdminInput
+              multiline
               rows={4}
               value={form.description.en}
               onChange={(e) => patch({ description: { ...form.description, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
@@ -177,17 +172,16 @@ const AwardForm = ({ awardId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving}>
-          {saving ? "저장 중…" : isEdit ? "수정 저장" : "수상 저장"}
-        </button>
-        <button
-          type="button"
-          className={styles.cancel}
+        <AdminButton variant="primary" type="submit" disabled={saving}>
+          {saving ? "저장 중…" : "저장"}
+        </AdminButton>
+        <AdminButton
+          variant="secondary"
           onClick={() => router.replace(ROUTES.ADMIN_MUSIC_AWARDS)}
           disabled={saving}
         >
           취소
-        </button>
+        </AdminButton>
       </div>
     </form>
   );

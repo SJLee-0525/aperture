@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
 import { DevAwardRow } from "@/features/admin-dev-config/_components/DevAwardRow";
 import { DevEducationRow } from "@/features/admin-dev-config/_components/DevEducationRow";
 import { DevTimelineRow } from "@/features/admin-dev-config/_components/DevTimelineRow";
@@ -41,41 +42,39 @@ const DevConfigEditor = () => {
           <section className={styles.section}>
             <h2 className={styles.legend}>소개 리드 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>
-              <label className={styles.field}>
-                <span className={styles.label}>리드 (한국어)</span>
-                <textarea
-                  className={styles.textarea}
+              <AdminField label="리드 (한국어)">
+                <AdminInput
+                  multiline
                   rows={3}
                   value={config.heroLead.ko}
                   onChange={(event) =>
                     edit({ type: "heroLead.edit", lang: "ko", value: event.target.value })
                   }
                 />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>리드 (English)</span>
-                <textarea
-                  className={styles.textarea}
+              </AdminField>
+              <AdminField label="리드 (English)">
+                <AdminInput
+                  multiline
                   rows={3}
                   value={config.heroLead.en}
                   onChange={(event) =>
                     edit({ type: "heroLead.edit", lang: "en", value: event.target.value })
                   }
                 />
-              </label>
+              </AdminField>
             </div>
           </section>
 
           <section className={styles.section}>
             <div className={styles.arrayHead}>
               <h2 className={styles.legend}>학력</h2>
-              <button
-                type="button"
-                className={styles.add}
+              <AdminButton
+                variant="secondary"
+                size="xs"
                 onClick={() => edit({ type: "education.add" })}
               >
                 + 항목 추가
-              </button>
+              </AdminButton>
             </div>
             {config.education.length === 0 ? (
               <p className={styles.state}>아직 항목이 없습니다.</p>
@@ -107,13 +106,13 @@ const DevConfigEditor = () => {
           <section className={styles.section}>
             <div className={styles.arrayHead}>
               <h2 className={styles.legend}>인터뷰 (Q&A)</h2>
-              <button
-                type="button"
-                className={styles.add}
+              <AdminButton
+                variant="secondary"
+                size="xs"
                 onClick={() => edit({ type: "interview.add" })}
               >
                 + 문답 추가
-              </button>
+              </AdminButton>
             </div>
             {config.interview.length === 0 ? (
               <p className={styles.state}>아직 문답이 없습니다.</p>
@@ -148,13 +147,13 @@ const DevConfigEditor = () => {
           <section className={styles.section}>
             <div className={styles.arrayHead}>
               <h2 className={styles.legend}>수상</h2>
-              <button
-                type="button"
-                className={styles.add}
+              <AdminButton
+                variant="secondary"
+                size="xs"
                 onClick={() => edit({ type: "award.add", id: crypto.randomUUID() })}
               >
                 + 수상 추가
-              </button>
+              </AdminButton>
             </div>
             {config.awards.length === 0 ? (
               <p className={styles.state}>아직 수상이 없습니다.</p>
@@ -189,13 +188,13 @@ const DevConfigEditor = () => {
           <section className={styles.section}>
             <div className={styles.arrayHead}>
               <h2 className={styles.legend}>기술 스택</h2>
-              <button
-                type="button"
-                className={styles.add}
+              <AdminButton
+                variant="secondary"
+                size="xs"
                 onClick={() => edit({ type: "stack.group.add" })}
               >
                 + 그룹 추가
-              </button>
+              </AdminButton>
             </div>
             {config.stack.length === 0 ? (
               <p className={styles.state}>아직 그룹이 없습니다.</p>
@@ -243,13 +242,13 @@ const DevConfigEditor = () => {
           <section className={styles.section}>
             <div className={styles.arrayHead}>
               <h2 className={styles.legend}>경력 타임라인</h2>
-              <button
-                type="button"
-                className={styles.add}
+              <AdminButton
+                variant="secondary"
+                size="xs"
                 onClick={() => edit({ type: "timeline.add" })}
               >
                 + 항목 추가
-              </button>
+              </AdminButton>
             </div>
             {config.timeline.length === 0 ? (
               <p className={styles.state}>아직 항목이 없습니다.</p>
@@ -293,12 +292,12 @@ const DevConfigEditor = () => {
           {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.save} onClick={save} disabled={saving}>
+            <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
-            </button>
-            <Link href={ROUTES.ADMIN_DEV} className={styles.cancel}>
+            </AdminButton>
+            <AdminButton variant="secondary" href={ROUTES.ADMIN_DEV} disabled={saving}>
               취소
-            </Link>
+            </AdminButton>
           </div>
         </>
       ) : null}

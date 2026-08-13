@@ -9,8 +9,8 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import Link from "next/link";
 
+import { AdminButton } from "@/components/AdminButton";
 import { AwardRow } from "@/features/admin-music-awards/_components/AwardRow";
 
 import { useMusicAwardsAdmin } from "@/features/admin-music-awards/_hooks/use-music-awards-admin";
@@ -42,9 +42,14 @@ const AdminMusicAwardsPage = () => {
             드래그로 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다.
           </p>
         </div>
-        <Link href={`${ROUTES.ADMIN_MUSIC_AWARDS}/new`} className={styles.newBtn}>
+        <AdminButton
+          variant="primary"
+          size="sm"
+          href={`${ROUTES.ADMIN_MUSIC_AWARDS}/new`}
+          className={styles.newBtn}
+        >
           + 새 수상
-        </Link>
+        </AdminButton>
       </header>
 
       {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
@@ -58,9 +63,14 @@ const AdminMusicAwardsPage = () => {
       {status === "ready" && awards.length === 0 ? (
         <div className={styles.empty}>
           <p>아직 수상이 없습니다.</p>
-          <Link href={`${ROUTES.ADMIN_MUSIC_AWARDS}/new`} className={styles.newBtn}>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            href={`${ROUTES.ADMIN_MUSIC_AWARDS}/new`}
+            className={styles.newBtn}
+          >
             + 첫 수상 만들기
-          </Link>
+          </AdminButton>
         </div>
       ) : null}
 

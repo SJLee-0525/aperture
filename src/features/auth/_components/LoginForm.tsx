@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { ROUTES } from "@/constants/routes";
 import { signIn } from "@/lib/firebase/auth";
 
@@ -10,8 +14,6 @@ import styles from "./LoginForm.module.css";
 
 /**
  * 관리자 로그인 폼. 성공 시 /admin 으로 이동. (관리자 UI 는 소유자 전용 → 한국어 고정)
- *
- * @returns {JSX.Element}
  */
 const LoginForm = () => {
   const router = useRouter();
@@ -36,14 +38,12 @@ const LoginForm = () => {
   return (
     <form className={styles.form} onSubmit={onSubmit} noValidate>
       <div className={styles.head}>
-        <h1 className={styles.brand}>Aperture.</h1>
+        <h1 className={styles.brand}>Sungjoon Lee.</h1>
         <p className={styles.subtitle}>관리자 로그인</p>
       </div>
 
-      <label className={styles.field}>
-        <span className={styles.label}>이메일</span>
-        <input
-          className={styles.input}
+      <AdminField label="이메일">
+        <AdminInput
           type="email"
           autoComplete="username"
           value={email}
@@ -51,19 +51,17 @@ const LoginForm = () => {
           required
           autoFocus
         />
-      </label>
+      </AdminField>
 
-      <label className={styles.field}>
-        <span className={styles.label}>비밀번호</span>
-        <input
-          className={styles.input}
+      <AdminField label="비밀번호">
+        <AdminInput
           type="password"
           autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
         />
-      </label>
+      </AdminField>
 
       {error && (
         <p className={styles.error} role="alert">
@@ -71,9 +69,9 @@ const LoginForm = () => {
         </p>
       )}
 
-      <button className={styles.submit} type="submit" disabled={pending}>
+      <AdminButton variant="primary" type="submit" className={styles.submit} disabled={pending}>
         {pending ? "로그인 중…" : "로그인"}
-      </button>
+      </AdminButton>
     </form>
   );
 };

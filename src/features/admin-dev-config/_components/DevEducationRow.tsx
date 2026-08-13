@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
 
 import type { TimelineEntry } from "@/types/timeline";
@@ -43,32 +44,32 @@ const DevEducationRow = ({
 }: Props) => (
   <li className={styles.row}>
     <div className={styles.inputs}>
-      <input
-        className={styles.input}
+      <AdminInput
+        size="sm"
         aria-label="학력 기간"
         name={`education.${index}.period`}
         autoComplete="off"
         value={entry.period}
-        placeholder="예: 2024 — 2025…"
+        placeholder="2024 — 2025"
         onChange={(event) => onEditPeriod(index, event.target.value)}
       />
       <div className={styles.grid2}>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           aria-label="학력 (한국어)"
           name={`education.${index}.title.ko`}
           autoComplete="off"
           value={entry.title.ko}
-          placeholder="학력 (한국어)…"
+          placeholder="학력 (한국어)"
           onChange={(event) => onEditTitle(index, "ko", event.target.value)}
         />
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           aria-label="Education (English)"
           name={`education.${index}.title.en`}
           autoComplete="off"
           value={entry.title.en}
-          placeholder="Education (English)…"
+          placeholder="Education (English)"
           onChange={(event) => onEditTitle(index, "en", event.target.value)}
         />
       </div>

@@ -9,8 +9,8 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import Link from "next/link";
 
+import { AdminButton } from "@/components/AdminButton";
 import { ProjectRow } from "@/features/admin-dev-projects/_components/ProjectRow";
 
 import { useDevProjectsAdmin } from "@/features/admin-dev-projects/_hooks/use-dev-projects-admin";
@@ -42,9 +42,14 @@ const AdminDevProjectsPage = () => {
             드래그로 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다.
           </p>
         </div>
-        <Link href={`${ROUTES.ADMIN_DEV_PROJECTS}/new`} className={styles.newBtn}>
+        <AdminButton
+          variant="primary"
+          size="sm"
+          href={`${ROUTES.ADMIN_DEV_PROJECTS}/new`}
+          className={styles.newBtn}
+        >
           + 새 프로젝트
-        </Link>
+        </AdminButton>
       </header>
 
       {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
@@ -58,9 +63,14 @@ const AdminDevProjectsPage = () => {
       {status === "ready" && projects.length === 0 ? (
         <div className={styles.empty}>
           <p>아직 프로젝트가 없습니다.</p>
-          <Link href={`${ROUTES.ADMIN_DEV_PROJECTS}/new`} className={styles.newBtn}>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            href={`${ROUTES.ADMIN_DEV_PROJECTS}/new`}
+            className={styles.newBtn}
+          >
             + 첫 프로젝트 만들기
-          </Link>
+          </AdminButton>
         </div>
       ) : null}
 

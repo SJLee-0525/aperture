@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { ROUTES } from "@/constants/routes";
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -91,59 +95,51 @@ const MediaForm = ({ mediaId, initial }: Props) => {
       <section className={styles.section}>
         <h2 className={styles.legend}>제목</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (한국어) *</span>
-            <input
-              className={styles.input}
+          <AdminField label="제목 (한국어)" required>
+            <AdminInput
               value={form.title.ko}
               onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
               required
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="제목 (English)">
+            <AdminInput
               value={form.title.en}
               onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.legend}>출처 (예: Live at 예술의전당 · 2025)</h2>
+        <h2 className={styles.legend}>출처</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>출처 (한국어)</span>
-            <input
-              className={styles.input}
+          <AdminField label="출처 (한국어)">
+            <AdminInput
               value={form.source.ko}
+              placeholder="예술의전당 실황 · 2025"
               onChange={(e) => patch({ source: { ...form.source, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>출처 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="출처 (English)">
+            <AdminInput
               value={form.source.en}
+              placeholder="Live at Seoul Arts Center · 2025"
               onChange={(e) => patch({ source: { ...form.source, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>YouTube</h2>
-        <label className={styles.field}>
-          <span className={styles.label}>YouTube 영상 ID (예: dQw4w9WgXcQ)</span>
-          <input
-            className={styles.input}
+        <AdminField label="YouTube 영상 ID">
+          <AdminInput
             value={form.youtubeId}
             placeholder="dQw4w9WgXcQ"
             onChange={(e) => patch({ youtubeId: e.target.value })}
           />
-        </label>
+        </AdminField>
       </section>
 
       <section className={styles.section}>
@@ -164,17 +160,16 @@ const MediaForm = ({ mediaId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving}>
-          {saving ? "저장 중…" : isEdit ? "수정 저장" : "영상 저장"}
-        </button>
-        <button
-          type="button"
-          className={styles.cancel}
+        <AdminButton variant="primary" type="submit" disabled={saving}>
+          {saving ? "저장 중…" : "저장"}
+        </AdminButton>
+        <AdminButton
+          variant="secondary"
           onClick={() => router.replace(ROUTES.ADMIN_MUSIC_MEDIA)}
           disabled={saving}
         >
           취소
-        </button>
+        </AdminButton>
       </div>
     </form>
   );

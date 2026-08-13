@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
 import { LinkRow } from "@/features/admin-global/_components/LinkRow";
 
 import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin";
@@ -63,70 +64,62 @@ const AdminGlobalPage = () => {
               표기를 권장합니다.
             </p>
             <div className={styles.grid2}>
-              <label className={styles.field}>
-                <span className={styles.label}>타이핑 (한국어)</span>
-                <input
-                  className={styles.input}
+              <AdminField label="타이핑 (한국어)">
+                <AdminInput
                   value={tagline.ko}
                   onChange={(e) => editTagline("ko", e.target.value)}
                 />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>타이핑 (English)</span>
-                <input
-                  className={styles.input}
+              </AdminField>
+              <AdminField label="타이핑 (English)">
+                <AdminInput
                   value={tagline.en}
                   onChange={(e) => editTagline("en", e.target.value)}
                 />
-              </label>
+              </AdminField>
             </div>
           </section>
 
           <section className={styles.section}>
             <h2 className={styles.legend}>랜딩 리드 (메인 소개 문단)</h2>
             <div className={styles.grid2}>
-              <label className={styles.field}>
-                <span className={styles.label}>리드 (한국어)</span>
-                <textarea
-                  className={styles.textarea}
+              <AdminField label="리드 (한국어)">
+                <AdminInput
+                  multiline
                   rows={3}
                   value={landingLead.ko}
                   onChange={(e) => editLandingLead("ko", e.target.value)}
                 />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>리드 (English)</span>
-                <textarea
-                  className={styles.textarea}
+              </AdminField>
+              <AdminField label="리드 (English)">
+                <AdminInput
+                  multiline
                   rows={3}
                   value={landingLead.en}
                   onChange={(e) => editLandingLead("en", e.target.value)}
                 />
-              </label>
+              </AdminField>
             </div>
           </section>
 
           <section className={styles.section}>
             <h2 className={styles.legend}>문의 리드 (문의 페이지 상단 문단)</h2>
             <div className={styles.grid2}>
-              <label className={styles.field}>
-                <span className={styles.label}>리드 (한국어)</span>
-                <textarea
-                  className={styles.textarea}
+              <AdminField label="리드 (한국어)">
+                <AdminInput
+                  multiline
                   rows={3}
                   value={contactLead.ko}
                   onChange={(e) => editContactLead("ko", e.target.value)}
                 />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>리드 (English)</span>
-                <textarea
-                  className={styles.textarea}
+              </AdminField>
+              <AdminField label="리드 (English)">
+                <AdminInput
+                  multiline
                   rows={3}
                   value={contactLead.en}
                   onChange={(e) => editContactLead("en", e.target.value)}
                 />
-              </label>
+              </AdminField>
             </div>
           </section>
 
@@ -135,9 +128,9 @@ const AdminGlobalPage = () => {
               <h2 className={styles.legend}>
                 문의 버튼 링크 (문의 페이지 · 헤더 · mailto 폼 대상)
               </h2>
-              <button type="button" className={styles.add} onClick={addLink}>
+              <AdminButton variant="secondary" size="xs" onClick={addLink}>
                 + 링크 추가
-              </button>
+              </AdminButton>
             </div>
             {links.length === 0 ? (
               <p className={styles.state}>아직 링크가 없습니다.</p>
@@ -168,12 +161,12 @@ const AdminGlobalPage = () => {
           {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.save} onClick={save} disabled={saving}>
+            <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
-            </button>
-            <Link href={ROUTES.ADMIN} className={styles.cancel}>
+            </AdminButton>
+            <AdminButton variant="secondary" href={ROUTES.ADMIN} disabled={saving}>
               취소
-            </Link>
+            </AdminButton>
           </div>
         </>
       ) : null}

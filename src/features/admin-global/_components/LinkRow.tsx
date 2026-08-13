@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
 
 import type { SiteLink } from "@/types/site";
@@ -33,8 +34,8 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
   <li className={styles.row}>
     <label className={styles.field}>
       <span className={styles.srLabel}>라벨</span>
-      <input
-        className={styles.input}
+      <AdminInput
+        size="sm"
         value={link.label}
         placeholder="Instagram"
         onChange={(e) => onEdit(index, "label", e.target.value)}
@@ -43,8 +44,8 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
 
     <label className={styles.field}>
       <span className={styles.srLabel}>주소</span>
-      <input
-        className={styles.input}
+      <AdminInput
+        size="sm"
         value={link.href}
         placeholder="https://… 또는 mailto:…"
         onChange={(e) => onEdit(index, "href", e.target.value)}

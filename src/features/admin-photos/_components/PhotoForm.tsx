@@ -1,5 +1,9 @@
 "use client";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor";
 
 import { fromDatetimeLocal, toDatetimeLocal } from "@/features/admin-photos/_lib/datetime-local";
@@ -75,54 +79,38 @@ const PhotoForm = ({ photoId, initial }: Props) => {
       <section className={styles.section}>
         <h2 className={styles.legend}>제목</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (한국어) *</span>
-            <input
-              className={styles.input}
+          <AdminField label="제목 (한국어)" required>
+            <AdminInput
               value={form.title.ko}
               onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
               required
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="제목 (English)">
+            <AdminInput
               value={form.title.en}
               onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>장비 · 촬영</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>카메라</span>
-            <input
-              className={styles.input}
-              value={form.camera}
-              onChange={(e) => patch({ camera: e.target.value })}
-            />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>렌즈</span>
-            <input
-              className={styles.input}
-              value={form.lens}
-              onChange={(e) => patch({ lens: e.target.value })}
-            />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>촬영일시</span>
-            <input
-              className={styles.input}
+          <AdminField label="카메라">
+            <AdminInput value={form.camera} onChange={(e) => patch({ camera: e.target.value })} />
+          </AdminField>
+          <AdminField label="렌즈">
+            <AdminInput value={form.lens} onChange={(e) => patch({ lens: e.target.value })} />
+          </AdminField>
+          <AdminField label="촬영일시">
+            <AdminInput
               type="datetime-local"
               value={toDatetimeLocal(form.shotAt)}
               onChange={(e) => patch({ shotAt: fromDatetimeLocal(e.target.value) })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
@@ -130,15 +118,13 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         <h2 className={styles.legend}>EXIF</h2>
         <div className={styles.grid3}>
           {EXIF_FIELDS.map(({ key, label, placeholder }) => (
-            <label key={key} className={styles.field}>
-              <span className={styles.label}>{label}</span>
-              <input
-                className={styles.input}
+            <AdminField key={key} label={label}>
+              <AdminInput
                 value={form.exif[key]}
                 placeholder={placeholder}
                 onChange={(e) => patchExif(key, e.target.value)}
               />
-            </label>
+            </AdminField>
           ))}
         </div>
       </section>
@@ -183,17 +169,12 @@ const PhotoForm = ({ photoId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving || uploading}>
-          {saving ? "저장 중…" : isEdit ? "수정 저장" : "사진 저장"}
-        </button>
-        <button
-          type="button"
-          className={styles.cancel}
-          onClick={cancel}
-          disabled={saving || uploading}
-        >
+        <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
+          {saving ? "저장 중…" : "저장"}
+        </AdminButton>
+        <AdminButton variant="secondary" onClick={cancel} disabled={saving || uploading}>
           취소
-        </button>
+        </AdminButton>
       </div>
     </form>
   );

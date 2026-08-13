@@ -2,6 +2,10 @@
 
 import { useState, type KeyboardEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { fetchPlaceEnglish, searchPlaces, type GeoResult } from "@/lib/geo/geocode";
 
 import type { LocalizedText } from "@/types/localized";
@@ -111,21 +115,24 @@ const PlaceField = ({
       {mode === "search" ? (
         <div className={styles.panel}>
           <div className={styles.searchRow}>
-            <input
-              className={styles.input}
+            <AdminInput
+              size="sm"
+              className={styles.searchInput}
               value={query}
-              placeholder="장소 검색 (예: 도쿄 미나토구, Jeju)"
+              aria-label="장소 검색"
+              placeholder="도쿄 미나토구, Jeju"
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={onSearchKeyDown}
             />
-            <button
-              type="button"
+            <AdminButton
+              variant="primary"
+              size="sm"
               className={styles.searchBtn}
               onClick={runSearch}
               disabled={searching || !query.trim()}
             >
               {searching ? "검색 중…" : "검색"}
-            </button>
+            </AdminButton>
           </div>
           {error ? <p className={styles.hint}>{error}</p> : null}
           {results.length > 0 ? (
@@ -152,45 +159,40 @@ const PlaceField = ({
       ) : (
         <div className={styles.panel}>
           <div className={styles.grid2}>
-            <label className={styles.field}>
-              <span className={styles.label}>장소 (한국어)</span>
-              <input
-                className={styles.input}
+            <AdminField label="장소 (한국어)">
+              <AdminInput
+                size="sm"
                 value={place.ko}
                 onChange={(event) => onPlaceChange({ ...place, ko: event.target.value })}
               />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>장소 (English)</span>
-              <input
-                className={styles.input}
+            </AdminField>
+            <AdminField label="장소 (English)">
+              <AdminInput
+                size="sm"
                 value={place.en}
                 onChange={(event) => onPlaceChange({ ...place, en: event.target.value })}
               />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>위도 (lat)</span>
-              <input
-                className={styles.input}
+            </AdminField>
+            <AdminField label="위도 (lat)">
+              <AdminInput
+                size="sm"
                 type="number"
                 step="any"
                 value={latStr}
-                placeholder="비우면 지도 핀 없음"
                 onChange={(event) => onLatChange(event.target.value)}
               />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>경도 (lng)</span>
-              <input
-                className={styles.input}
+            </AdminField>
+            <AdminField label="경도 (lng)">
+              <AdminInput
+                size="sm"
                 type="number"
                 step="any"
                 value={lngStr}
-                placeholder="비우면 지도 핀 없음"
                 onChange={(event) => onLngChange(event.target.value)}
               />
-            </label>
+            </AdminField>
           </div>
+          <p className={styles.hint}>좌표를 비우면 지도에 핀이 표시되지 않습니다.</p>
         </div>
       )}
 

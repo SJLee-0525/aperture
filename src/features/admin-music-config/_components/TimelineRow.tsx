@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
 
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
@@ -49,17 +50,17 @@ const TimelineRow = ({
     <div className={styles.inputs}>
       <label className={styles.field}>
         <span className={styles.srLabel}>기간</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.period}
-          placeholder="2020 – 2024"
+          placeholder="2020 — 2024"
           onChange={(e) => onEditPeriod(groupKey, index, e.target.value)}
         />
       </label>
       <label className={styles.field}>
         <span className={styles.srLabel}>제목 (한국어)</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.title.ko}
           placeholder="제목 (한국어)"
           onChange={(e) => onEditTitle(groupKey, index, "ko", e.target.value)}
@@ -67,8 +68,8 @@ const TimelineRow = ({
       </label>
       <label className={styles.field}>
         <span className={styles.srLabel}>제목 (English)</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.title.en}
           placeholder="Title (English)"
           onChange={(e) => onEditTitle(groupKey, index, "en", e.target.value)}

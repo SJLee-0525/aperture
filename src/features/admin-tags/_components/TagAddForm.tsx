@@ -2,6 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import type { Tag } from "@/types/tag";
 
 import styles from "./TagAddForm.module.css";
@@ -38,36 +42,33 @@ const TagAddForm = ({ onAdd }: Props) => {
   return (
     <form className={styles.form} onSubmit={onSubmit} noValidate>
       <div className={styles.fields}>
-        <label className={styles.field}>
-          <span className={styles.label}>id (영문 슬러그) *</span>
-          <input
-            className={styles.input}
+        <AdminField label="id (영문 슬러그)" required className={styles.fieldId}>
+          <AdminInput
+            size="sm"
             value={draft.id}
             placeholder="street"
             onChange={(e) => setDraft((d) => ({ ...d, id: e.target.value }))}
           />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>한국어</span>
-          <input
-            className={styles.input}
+        </AdminField>
+        <AdminField label="한국어" className={styles.fieldText}>
+          <AdminInput
+            size="sm"
             value={draft.ko}
             placeholder="거리"
             onChange={(e) => setDraft((d) => ({ ...d, ko: e.target.value }))}
           />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>English</span>
-          <input
-            className={styles.input}
+        </AdminField>
+        <AdminField label="English" className={styles.fieldText}>
+          <AdminInput
+            size="sm"
             value={draft.en}
             placeholder="Street"
             onChange={(e) => setDraft((d) => ({ ...d, en: e.target.value }))}
           />
-        </label>
-        <button type="submit" className={styles.add}>
-          + 추가
-        </button>
+        </AdminField>
+        <AdminButton variant="secondary" size="sm" type="submit" className={styles.add}>
+          + 태그 추가
+        </AdminButton>
       </div>
 
       {error ? (

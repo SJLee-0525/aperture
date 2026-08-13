@@ -17,7 +17,7 @@
   color: var(--text);
 }
 .hint {
-  max-width: 640px;
+  max-width: 720px;
   font-size: var(--t-small);
   color: var(--text-3);
   line-height: 1.5;
@@ -56,44 +56,4 @@
 .actions {
   display: flex;
   gap: var(--s-3);
-}
-.save {
-  height: 44px;
-  padding: 0 var(--s-6);
-  background: var(--accent);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: var(--r-sm);
-  font-size: var(--t-body);
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background var(--dur) var(--ease),
-    opacity var(--dur) var(--ease);
-}
-.save:hover:not(:disabled) {
-  background: var(--accent-press);
-}
-.save:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.cancel {
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--s-5);
-  background: transparent;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text-2);
-  font-size: var(--t-body);
-  cursor: pointer;
-  transition:
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-.cancel:hover {
-  border-color: var(--text-3);
-  color: var(--text);
 }

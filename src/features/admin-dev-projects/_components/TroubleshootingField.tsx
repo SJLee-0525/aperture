@@ -1,5 +1,8 @@
 "use client";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminInput } from "@/components/AdminInput";
+
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { DevTroubleshooting } from "@/types/dev";
@@ -57,9 +60,9 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
   return (
     <div className={styles.wrap}>
       <div className={styles.head}>
-        <button type="button" className={styles.add} onClick={add}>
+        <AdminButton variant="secondary" size="xs" onClick={add}>
           + 항목 추가
-        </button>
+        </AdminButton>
       </div>
 
       {entries.length === 0 ? (
@@ -80,18 +83,19 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
                   <div className={styles.grid2}>
                     {(["ko", "en"] as const).map((langKey) =>
                       multiline ? (
-                        <textarea
+                        <AdminInput
                           key={langKey}
-                          className={styles.textarea}
+                          multiline
+                          tone="raised"
                           rows={2}
                           value={entry[key]?.[langKey] ?? ""}
                           placeholder={langKey === "ko" ? "한국어" : "English"}
                           onChange={(e) => edit(index, key, langKey, e.target.value)}
                         />
                       ) : (
-                        <input
+                        <AdminInput
                           key={langKey}
-                          className={styles.input}
+                          tone="raised"
                           value={entry[key]?.[langKey] ?? ""}
                           placeholder={langKey === "ko" ? "한국어" : "English"}
                           onChange={(e) => edit(index, key, langKey, e.target.value)}

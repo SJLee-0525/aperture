@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
 
 import type { DevTimelineEntry } from "@/types/dev";
@@ -52,22 +53,22 @@ const DevTimelineRow = ({
 }: Props) => (
   <li className={styles.row}>
     <div className={styles.inputs}>
-      <input
-        className={styles.input}
+      <AdminInput
+        size="sm"
         value={entry.period}
         placeholder="2025 — 현재"
         onChange={(e) => onEditPeriod(index, e.target.value)}
       />
       {FIELDS.map(({ key, label }) => (
         <div key={key} className={styles.grid2}>
-          <input
-            className={styles.input}
+          <AdminInput
+            size="sm"
             value={entry[key].ko}
             placeholder={`${label} (한국어)`}
             onChange={(e) => onEditField(index, key, "ko", e.target.value)}
           />
-          <input
-            className={styles.input}
+          <AdminInput
+            size="sm"
             value={entry[key].en}
             placeholder={`${label} (English)`}
             onChange={(e) => onEditField(index, key, "en", e.target.value)}
