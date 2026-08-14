@@ -387,7 +387,8 @@
   box-shadow: none;
 }
 
-.cursor[data-mode="loading"] .loadingOrbit {
+/* 스냅·프레임 모드에서도 같은 표식을 쓴다 — 클릭한 대상 위에서 그대로 대기가 보여야 한다. */
+.cursor[data-loading="true"] .loadingOrbit {
   opacity: 1;
   animation: loadingOrbit 0.72s linear infinite;
 }
@@ -514,7 +515,7 @@
     animation: none;
   }
 
-  .cursor[data-mode="loading"] .loadingOrbit {
+  .cursor[data-loading="true"] .loadingOrbit {
     animation: none;
   }
 
