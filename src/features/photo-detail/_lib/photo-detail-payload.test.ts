@@ -5,6 +5,7 @@ import {
   revivePhoto,
   serializePhoto,
 } from "@/features/photo-detail/_lib/photo-detail-payload";
+
 import type { Photo } from "@/types/photo";
 
 const photos = [

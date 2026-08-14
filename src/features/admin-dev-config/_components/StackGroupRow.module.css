@@ -18,20 +18,7 @@
 .categoryInput {
   flex: 1;
   min-width: 0;
-  height: 40px;
-  padding: 0 var(--s-3);
-  background: var(--surface-1);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-size: var(--t-body);
-  font-family: var(--font-sans);
   font-weight: 500;
-  transition: border-color var(--dur) var(--ease);
-}
-.categoryInput:focus-visible {
-  outline: none;
-  border-color: var(--accent);
 }
 
 .controls {
@@ -111,19 +98,6 @@
 .nameInput {
   flex: 1;
   min-width: 0;
-  height: 36px;
-  padding: 0 var(--s-3);
-  background: var(--surface-1);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-size: var(--t-body);
-  font-family: var(--font-sans);
-  transition: border-color var(--dur) var(--ease);
-}
-.nameInput:focus-visible {
-  outline: none;
-  border-color: var(--accent);
 }
 
 .colorField {
@@ -161,21 +135,6 @@
 
 .addItem {
   align-self: flex-start;
-  height: 32px;
-  padding: 0 var(--s-3);
-  background: transparent;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text-2);
-  font-size: var(--t-small);
-  cursor: pointer;
-  transition:
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-.addItem:hover {
-  border-color: var(--accent);
-  color: var(--accent);
 }
 
 .note {

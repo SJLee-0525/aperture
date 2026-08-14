@@ -52,7 +52,19 @@ const jsonResponse = (body: unknown, status = 200): Response =>
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
+
+/**
+ * 재시도 대기를 실제로 기다리지 않고 결과를 받는다.
+ *
+ * @param {Promise<T>} assertion 재시도가 끝나야 확정되는 단언.
+ * @returns {Promise<T>} 단언 결과.
+ */
+const withRetryDelays = async <T>(assertion: Promise<T>): Promise<T> => {
+  await vi.runAllTimersAsync();
+  return assertion;
+};
 
 describe("Firestore REST decoding", () => {
   it("챗봇 조회는 카드 대표 이미지 외의 무거운 필드를 projection에서 제외한다", async () => {
@@ -217,20 +229,36 @@ describe("Firestore REST decoding", () => {
     });
   });
 
-  it("404 설정 문서는 null, 다른 HTTP 오류는 throw한다", async () => {
+  it("404 설정 문서는 null, 서버 오류는 재시도한 뒤 throw한다", async () => {
+    vi.useFakeTimers();
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse({ error: "missing" }, 404))
-      .mockResolvedValueOnce(jsonResponse({ error: "quota" }, 429));
+      .mockResolvedValue(jsonResponse({ error: "unavailable" }, 503));
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(fetchSiteConfig()).resolves.toBeNull();
+    await withRetryDelays(
+      expect(fetchSiteConfig()).rejects.toThrow("Firestore site 읽기 실패 (503)"),
+    );
+    // 404 는 한 번, 503 은 세 번 — 문서가 없는 것과 서버가 잠시 막힌 것을 다르게 다룬다.
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it("429 는 한도 소진이라 재시도 없이 바로 throw한다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ error: "quota" }, 429));
+    vi.stubGlobal("fetch", fetchMock);
+
     await expect(fetchSiteConfig()).rejects.toThrow("Firestore site 읽기 실패 (429)");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("runQuery HTTP 오류를 빈 콘텐츠로 삼키지 않는다", async () => {
+    vi.useFakeTimers();
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ error: "unavailable" }, 503)));
 
-    await expect(fetchPublishedPhotos()).rejects.toThrow("Firestore runQuery 실패 (503)");
+    await withRetryDelays(
+      expect(fetchPublishedPhotos()).rejects.toThrow("Firestore runQuery 실패 (503)"),
+    );
   });
 });

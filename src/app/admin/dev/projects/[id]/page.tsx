@@ -3,7 +3,9 @@
 import { use, useEffect, useState } from "react";
 
 import { ProjectForm } from "@/features/admin-dev-projects/_components/ProjectForm";
-import { devProjects } from "@/lib/firebase/dev";
+
+import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
+
 import type { DevProject } from "@/types/dev";
 
 import styles from "./page.module.css";
@@ -27,7 +29,7 @@ const EditDevProjectPage = ({ params }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    devProjects
+    getDevProjectRepository()
       .get(id)
       .then((loaded) => {
         if (!alive) return;

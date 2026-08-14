@@ -1,8 +1,8 @@
 import { parseChatContext } from "@/features/chat/_lib/chat-context";
 
-import type { Lang } from "@/types/lang";
 import type { ChatContext } from "@/features/chat/_lib/chat-context";
 import type { ChatErrorCode } from "@/features/chat/_lib/chat-errors";
+import type { Lang } from "@/types/lang";
 
 type ChatRequestRole = "assistant" | "user";
 

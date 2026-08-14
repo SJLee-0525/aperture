@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { mergePhotoCache } from "@/features/photo-detail/_lib/photo-cache";
+
 import type { Photo } from "@/types/photo";
 
 describe("mergePhotoCache", () => {

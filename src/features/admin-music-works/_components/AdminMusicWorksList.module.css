@@ -29,21 +29,7 @@
 
 .newBtn {
   flex: none;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--s-4);
-  background: var(--accent);
-  color: var(--text-inverse);
-  border-radius: var(--r-sm);
-  font-size: var(--t-small);
-  font-weight: 500;
-  transition: background var(--dur) var(--ease);
 }
-.newBtn:hover {
-  background: var(--accent-press);
-}
-
 .state {
   font-size: var(--t-small);
   color: var(--text-3);

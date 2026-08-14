@@ -5,11 +5,12 @@ import {
   compressThumbnailToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+
 import { listAlbumsAdmin, updateAlbum } from "@/lib/firebase/albums";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 import { devProjects } from "@/lib/firebase/dev";
 import { listPhotosAdmin, updatePhoto } from "@/lib/firebase/firestore";
 import { musicWorks } from "@/lib/firebase/music";
-import { auth } from "@/lib/firebase/client";
 import {
   uploadDevThumbnail,
   uploadDevPreview,
@@ -18,6 +19,7 @@ import {
   uploadPhotoPreview,
   uploadPhotoThumbnail,
 } from "@/lib/firebase/storage";
+
 import type { ImageMeta, ImageVariant } from "@/types/image";
 
 type MigrationProgress = {
@@ -60,7 +62,7 @@ const createMissingVariants = async (
   const needsThumbnail = !image.thumbnail?.url;
   if (!needsPreview && !needsThumbnail) return image;
 
-  const user = auth.currentUser;
+  const user = getFirebaseAuth().currentUser;
   if (!user) throw new Error("관리자 로그인이 필요합니다.");
   const idToken = await user.getIdToken();
   const response = await fetch("/api/admin/image-source", {
@@ -73,7 +75,7 @@ const createMissingVariants = async (
   });
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(payload?.error || `원본 이미지 다운로드 실패 (${response.status})`);
+    throw new Error(payload?.error || `원본 이미지를 불러오지 못했습니다. (${response.status})`);
   }
   const source = await response.blob();
   const file = new File([source], "migration-source", {

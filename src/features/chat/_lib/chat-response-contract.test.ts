@@ -8,6 +8,8 @@ import {
   parseOrSalvageChatResult,
 } from "@/features/chat/_lib/chat-response-contract";
 
+import { CHAT_REFERENCE_TYPES } from "@/types/chat";
+
 describe("chat response contract", () => {
   it("구조가 잘못된 모델 출력을 거부한다", () => {
     expect(() => parseChatResult('{"content":""}')).toThrow();
@@ -109,5 +111,24 @@ describe("chat response contract", () => {
       email: null,
       message: "문의드립니다.",
     });
+  });
+});
+
+describe("참조 종류", () => {
+  // 종류를 다시 나열하지 않는다. 파서만 빠뜨려도 이 목록이 즉시 실패해야 한다.
+  it.each([...CHAT_REFERENCE_TYPES])("%s 참조를 받아들인다", (type) => {
+    const parsed = parseChatResult(
+      JSON.stringify({ content: "본문", references: [{ type, id: "a1" }] }),
+    );
+
+    expect(parsed?.references).toEqual([{ type, id: "a1" }]);
+  });
+
+  it("알 수 없는 종류는 버린다", () => {
+    const parsed = parseChatResult(
+      JSON.stringify({ content: "본문", references: [{ type: "album", id: "a1" }] }),
+    );
+
+    expect(parsed?.references).toBeUndefined();
   });
 });

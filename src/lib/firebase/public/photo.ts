@@ -1,5 +1,4 @@
 import { COLLECTIONS } from "@/constants/collections";
-
 import {
   projectedPublishedOrderedQuery,
   publishedOrderedQuery,
@@ -188,3 +187,4 @@ export {
   toAlbum,
   toPhoto,
 };
+export type { ChatAlbum, ChatPhoto };

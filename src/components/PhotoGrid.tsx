@@ -4,6 +4,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { PhotoTile } from "@/components/PhotoTile";
+
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Lang } from "@/types/lang";
 

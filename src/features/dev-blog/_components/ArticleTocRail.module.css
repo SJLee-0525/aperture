@@ -1,0 +1,86 @@
+.rail {
+  /* 눈금 길이 네 가지. 좁은 화면은 이 값만 줄여 규칙을 다시 쓰지 않는다. */
+  --tick-h2: 14px;
+  --tick-h3: 7px;
+  --tick-h2-active: 20px;
+  --tick-h3-active: 12px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  min-width: 44px;
+  padding: var(--s-4) var(--s-6) var(--s-4) var(--s-4);
+  border: 0;
+  background: transparent;
+  /* 평소에는 배경처럼 물러나 있다가 포인터가 오면 또렷해진다. */
+  opacity: 0.7;
+  cursor: pointer;
+  transition:
+    opacity var(--dur) var(--ease),
+    scale var(--dur) var(--ease);
+}
+.rail:hover,
+.rail:focus-visible {
+  opacity: 1;
+  scale: 1.04;
+}
+
+.tick {
+  display: block;
+  height: 1.5px;
+  background: var(--text-2);
+  transition:
+    width var(--dur) var(--ease),
+    height var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.tick[data-depth="2"] {
+  width: var(--tick-h2);
+}
+.tick[data-depth="3"] {
+  width: var(--tick-h3);
+}
+/* 현재 위치 — 색만이 아니라 길이와 굵기로도 구분한다. */
+.tick[data-active="true"] {
+  height: 2.5px;
+  background: var(--accent);
+}
+.tick[data-depth="2"][data-active="true"] {
+  width: var(--tick-h2-active);
+}
+.tick[data-depth="3"][data-active="true"] {
+  width: var(--tick-h3-active);
+}
+
+@media (max-width: 900px) {
+  .rail {
+    --tick-h2: 7px;
+    --tick-h3: 4px;
+    --tick-h2-active: 10px;
+    --tick-h3-active: 7px;
+
+    /* 목차 서랍을 여는 유일한 버튼이라 표적을 이보다 더 줄이지 않는다. */
+    min-width: 36px;
+    padding: var(--s-4) 10px;
+  }
+}
+
+@media (forced-colors: active) {
+  .rail {
+    opacity: 1;
+  }
+  .tick {
+    background: CanvasText;
+  }
+  .tick[data-active="true"] {
+    background: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .tick {
+    transition: none;
+  }
+}

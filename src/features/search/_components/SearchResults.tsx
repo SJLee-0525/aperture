@@ -5,13 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { Fragment, useMemo } from "react";
 
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { TitleSegment } from "@/lib/search/highlight-title";
+
+import { pickText } from "@/lib/i18n/pick-text";
 import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
 import { createDocumentScorer } from "@/lib/search/score-documents";
-import type { SearchDocument, SearchSection } from "@/types/search";
-import { pickText } from "@/lib/i18n/pick-text";
 import { tokensFor } from "@/lib/text/korean-tokenize";
+
+import type { TitleSegment } from "@/lib/search/highlight-title";
+import type { SearchDocument, SearchSection } from "@/types/search";
 
 import styles from "./SearchResults.module.css";
 
@@ -27,11 +30,14 @@ type Hit = {
   imageUrl?: string;
   score: number;
 };
-type Group = { section: SearchSection; label: string; hits: Hit[] };
+/** 렌더 순서를 가진 결과 묶음 키. 개발 섹션만 프로젝트와 블로그로 나뉜다. */
+type GroupKey = SearchSection | "blog";
+type Group = { key: GroupKey; section: SearchSection; label: string; hits: Hit[] };
 
 /** 통합 검색 결과 (/search?q=) — 서버가 정규화까지 마친 검색 인덱스를 q(useSearchParams)로 클라 대조.
  *  데이터는 ISR 캐시(q 무관), 대조만 클라라 타이핑/언어 전환에 즉시 반응.
- *  그룹 순서는 사진→음악→개발 고정, 그룹 안은 점수순(제목 매치 가중) + 매치 구간 하이라이트.
+ *  그룹 순서는 개발→블로그→사진→음악 고정, 그룹 안은 점수순(제목 매치 가중) + 매치 구간 하이라이트.
+ *  블로그는 개발 섹션의 콘텐츠라 액센트는 개발을 따르고 목록만 따로 묶는다.
  *
  * @param {Props} props
  * @param {SearchDocument[]} props.documents
@@ -46,12 +52,12 @@ const SearchResults = ({ documents }: Props) => {
     const queryTokens = tokensFor(q); // 채점·하이라이트가 공유 — 질의 토큰화는 한 번만
     const highlightTokens = highlightTokensFor(q, queryTokens);
     const scoreDocument = createDocumentScorer(q, queryTokens);
-    const hits: Record<SearchSection, Hit[]> = { photo: [], music: [], dev: [] };
+    const hits: Record<GroupKey, Hit[]> = { dev: [], blog: [], photo: [], music: [] };
 
     for (const document of documents) {
       const score = scoreDocument(document.index);
       if (score <= 0) continue;
-      hits[document.section].push({
+      hits[document.subsection ?? document.section].push({
         key: document.key,
         titleSegments: splitTitleByMatches(pickText(document.title, lang), highlightTokens),
         meta:
@@ -66,15 +72,18 @@ const SearchResults = ({ documents }: Props) => {
       });
     }
     // 그룹 내부만 점수순 — sort는 안정 정렬이라 동점은 문서 배열 순서(관리자 큐레이션) 유지.
-    for (const section of Object.keys(hits) as SearchSection[]) {
-      hits[section].sort((a, b) => b.score - a.score);
+    for (const key of Object.keys(hits) as GroupKey[]) {
+      hits[key].sort((a, b) => b.score - a.score);
     }
 
-    return [
-      { section: "photo", label: dict.sectionPhoto, hits: hits.photo },
-      { section: "music", label: dict.sectionMusic, hits: hits.music },
-      { section: "dev", label: dict.sectionDev, hits: hits.dev },
-    ].filter((group) => group.hits.length > 0) as Group[];
+    return (
+      [
+        { key: "dev", section: "dev", label: dict.sectionDev, hits: hits.dev },
+        { key: "blog", section: "dev", label: dict.devArticlesNav, hits: hits.blog },
+        { key: "photo", section: "photo", label: dict.sectionPhoto, hits: hits.photo },
+        { key: "music", section: "music", label: dict.sectionMusic, hits: hits.music },
+      ] as Group[]
+    ).filter((group) => group.hits.length > 0);
   }, [q, lang, dict, documents]);
 
   const total = groups.reduce((n, g) => n + g.hits.length, 0);
@@ -95,7 +104,7 @@ const SearchResults = ({ documents }: Props) => {
         </div>
       ) : (
         groups.map((group) => (
-          <section key={group.section} className={styles.group} data-section={group.section}>
+          <section key={group.key} className={styles.group} data-section={group.section}>
             <div className={styles.groupHead}>
               <span className="u-label">{group.label}</span>
               <span className={styles.gcount}>{group.hits.length}</span>

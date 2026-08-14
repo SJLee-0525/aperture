@@ -1,10 +1,10 @@
-import type { ReactNode } from "react";
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 
 import { ROUTES } from "@/constants/routes";
-import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { SENTRY_DSN, SENTRY_TRANSFER_COUNTRY } from "@/lib/monitoring/monitoring-dsn";
 
 import type { Lang } from "@/types/lang";
+import type { ReactNode } from "react";
 
 /** 법적·운영 문서 안의 제목 있는 본문 단위. */
 type LegalSection = { title: string; content: ReactNode };

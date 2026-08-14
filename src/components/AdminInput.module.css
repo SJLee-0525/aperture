@@ -1,0 +1,37 @@
+.control {
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--t-body);
+  font-family: var(--font-sans);
+  transition: border-color var(--dur) var(--ease);
+}
+.control:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+.control:disabled {
+  background: var(--surface-2);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+
+.md {
+  height: 44px;
+  padding: 0 var(--s-3);
+}
+.sm {
+  height: 40px;
+  padding: 0 var(--s-3);
+}
+
+.multiline {
+  padding: var(--s-3);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.raised {
+  background: var(--surface-2);
+}

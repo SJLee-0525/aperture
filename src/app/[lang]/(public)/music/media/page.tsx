@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-
 import { MusicMediaView } from "@/features/music/_components/MusicMediaView";
+
 import { getMusicMedia } from "@/lib/content/music";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

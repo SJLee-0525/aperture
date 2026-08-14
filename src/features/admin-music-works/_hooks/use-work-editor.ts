@@ -3,14 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
-import { ROUTES } from "@/constants/routes";
 import {
   emptyWorkInput,
   prepareWorkInput,
   workToInput,
 } from "@/features/admin-music-works/_lib/work-form-data";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
-import { musicWorks, type MusicWorkInput } from "@/lib/firebase/music";
+
+import { ROUTES } from "@/constants/routes";
+import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
+
+import type { MusicWorkInput } from "@/lib/firebase/music";
 import type { ImageMeta } from "@/types/image";
 import type { MusicWork } from "@/types/music";
 
@@ -62,8 +65,9 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
     setSaving(true);
     try {
       const input = prepareWorkInput(form);
-      if (isEdit) await musicWorks.update(workId, input);
-      else await musicWorks.create(workId, input);
+      const workRepository = getMusicWorkRepository();
+      if (isEdit) await workRepository.update(workId, input);
+      else await workRepository.create(workId, input);
       await removeUnreferencedImages(
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.poster]),

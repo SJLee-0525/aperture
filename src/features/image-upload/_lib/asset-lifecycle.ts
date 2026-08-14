@@ -1,4 +1,5 @@
-import { deleteImages } from "@/lib/firebase/storage";
+import { getAdminImageStore } from "@/lib/admin/image-store";
+
 import { imagePaths as imageMetaPaths, type ImageMeta } from "@/types/image";
 
 const imagePaths = (images: Array<ImageMeta | null | undefined>): string[] =>
@@ -17,7 +18,9 @@ const removeUnreferencedImages = (
   retained: Iterable<string>,
 ): Promise<void> => {
   const retainedPaths = new Set(retained);
-  return deleteImages([...candidates].filter((path) => !retainedPaths.has(path)));
+  return getAdminImageStore().deleteImages(
+    [...candidates].filter((path) => !retainedPaths.has(path)),
+  );
 };
 
 export { imagePaths, removeUnreferencedImages };

@@ -1,15 +1,18 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen } from "@testing-library/react";
+import { useSearchParams } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DICTIONARY } from "@/constants/dictionary";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { SearchResults } from "@/features/search/_components/SearchResults";
-import type { SearchDocument } from "@/types/search";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { DICTIONARY } from "@/constants/dictionary";
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
-import { useSearchParams } from "next/navigation";
+
+import type { SearchDocument } from "@/types/search";
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({
   useLang: vi.fn(),
@@ -87,6 +90,15 @@ const documents: SearchDocument[] = [
     href: "/photo?photo=lake",
   },
   {
+    key: "article-1",
+    section: "dev",
+    subsection: "blog",
+    title: { ko: "포트폴리오를 서버 없이", en: "Portfolio without a server" },
+    index: indexFor("포트폴리오를 서버 없이 Portfolio without a server", "firebase Firebase"),
+    meta: { ko: "Firebase · 아키텍처", en: "Firebase · Architecture" },
+    href: "/dev/articles/serverless",
+  },
+  {
     key: "work-piano",
     section: "music",
     title: { ko: "겨울 독주회", en: "" },
@@ -130,6 +142,41 @@ describe("SearchResults", () => {
     expect(screen.getByText(DICTIONARY.ko.sectionPhoto)).toBeTruthy();
     expect(document.querySelector("img")?.getAttribute("src")).toContain("photo-thumb.webp");
     expect(screen.queryByText("포트폴리오")).toBeNull();
+  });
+
+  it("그룹 순서는 개발·블로그·사진·음악으로 고정된다", () => {
+    useSearchParamsMock.mockReturnValue(
+      // 두 토큰 질의 — 각 문서가 한쪽만 맞혀도 일치율 0.5 라 임계값을 넘어 네 그룹이 모두 나온다.
+      new URLSearchParams("q=겨울 포트폴리오") as ReturnType<typeof useSearchParams>,
+    );
+
+    render(<SearchResults documents={documents} />);
+
+    const labels = [...document.querySelectorAll("section .u-label")].map(
+      (node) => node.textContent,
+    );
+    expect(labels).toEqual([
+      DICTIONARY.ko.sectionDev,
+      DICTIONARY.ko.devArticlesNav,
+      DICTIONARY.ko.sectionPhoto,
+      DICTIONARY.ko.sectionMusic,
+    ]);
+  });
+
+  it("블로그 결과는 개발 액센트를 쓰되 목록은 따로 묶는다", () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("q=%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4") as ReturnType<
+        typeof useSearchParams
+      >,
+    );
+
+    render(<SearchResults documents={documents} />);
+
+    const blogGroup = [...document.querySelectorAll("section")].find((node) =>
+      node.textContent?.includes(DICTIONARY.ko.devArticlesNav),
+    );
+    expect(blogGroup?.getAttribute("data-section")).toBe("dev");
+    expect(blogGroup?.textContent).toContain("Firebase · 아키텍처");
   });
 
   it("그룹 안에서 제목 매치가 본문 매치보다 위에 온다", () => {

@@ -1,8 +1,11 @@
 "use client";
 
-import type { TimelineEntry } from "@/types/timeline";
+import { AdminInput } from "@/components/AdminInput";
+import { Icon } from "@/components/Icon";
 
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
+import type { TimelineEntry } from "@/types/timeline";
+
 import styles from "./TimelineRow.module.css";
 
 type Props = {
@@ -47,17 +50,17 @@ const TimelineRow = ({
     <div className={styles.inputs}>
       <label className={styles.field}>
         <span className={styles.srLabel}>기간</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.period}
-          placeholder="2020 – 2024"
+          placeholder="2020 — 2024"
           onChange={(e) => onEditPeriod(groupKey, index, e.target.value)}
         />
       </label>
       <label className={styles.field}>
         <span className={styles.srLabel}>제목 (한국어)</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.title.ko}
           placeholder="제목 (한국어)"
           onChange={(e) => onEditTitle(groupKey, index, "ko", e.target.value)}
@@ -65,8 +68,8 @@ const TimelineRow = ({
       </label>
       <label className={styles.field}>
         <span className={styles.srLabel}>제목 (English)</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.title.en}
           placeholder="Title (English)"
           onChange={(e) => onEditTitle(groupKey, index, "en", e.target.value)}
@@ -82,7 +85,7 @@ const TimelineRow = ({
         disabled={isFirst}
         onClick={() => onMove(groupKey, index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -91,7 +94,7 @@ const TimelineRow = ({
         disabled={isLast}
         onClick={() => onMove(groupKey, index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(groupKey, index)}>
         삭제

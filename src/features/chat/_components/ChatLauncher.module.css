@@ -8,8 +8,8 @@
   z-index: 105;
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: var(--chat-launcher-size);
+  height: var(--chat-launcher-size);
   padding: 0;
   border: 1px solid transparent;
   background: var(--chat-launcher-bg, var(--accent));
@@ -63,7 +63,7 @@
         )
     )
     .launcher {
-    bottom: calc(62px + env(safe-area-inset-bottom, 0px) + var(--s-4));
+    bottom: calc(var(--mobile-tab-bar-height) + env(safe-area-inset-bottom, 0px) + var(--s-4));
   }
 }
 

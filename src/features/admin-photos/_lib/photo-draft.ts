@@ -1,10 +1,9 @@
-import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
+import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
+import type { PhotoInput } from "@/lib/firebase/firestore";
 import type { Coords } from "@/types/coords";
 import type { Photo } from "@/types/photo";
-
-import type { PhotoInput } from "@/lib/firebase/firestore";
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 const createEmptyPhotoInput = (): PhotoInput => ({
   title: EMPTY_TEXT,

@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["test/**/*.test.mjs", "lighthouserc.cjs"],
+  "entry": ["test/**/*.test.mjs", "lighthouserc.cjs", "e2e/fixtures/generate-exif-sample.mjs"],
   "ignore": ["design/**", "e2e/fixtures/google-font-responses.cjs"],
   "ignoreDependencies": ["@opentelemetry/core"],
   "playwright": {

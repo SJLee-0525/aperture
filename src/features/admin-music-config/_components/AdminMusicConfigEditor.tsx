@@ -1,10 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+import { TimelineRow } from "@/features/admin-music-config/_components/TimelineRow";
+
+import { useMusicConfigAdmin } from "@/features/admin-music-config/_hooks/use-music-config-admin";
 
 import { ROUTES } from "@/constants/routes";
-import { TimelineRow } from "@/features/admin-music-config/_components/TimelineRow";
-import { useMusicConfigAdmin } from "@/features/admin-music-config/_hooks/use-music-config-admin";
+
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
 import type { TimelineEntry } from "@/types/timeline";
 
@@ -45,9 +49,9 @@ const AdminMusicConfigPage = () => {
     <section className={styles.section}>
       <div className={styles.arrayHead}>
         <h2 className={styles.legend}>{label}</h2>
-        <button type="button" className={styles.add} onClick={() => addEntry(groupKey)}>
+        <AdminButton variant="secondary" size="xs" onClick={() => addEntry(groupKey)}>
           + 항목 추가
-        </button>
+        </AdminButton>
       </div>
 
       {entries.length === 0 ? (
@@ -76,7 +80,7 @@ const AdminMusicConfigPage = () => {
   return (
     <div className={styles.page}>
       <header className={styles.head}>
-        <h1 className={styles.title}>음악 소개 설정</h1>
+        <h1 className={styles.title}>소개</h1>
         <p className={styles.hint}>소개글과 경력·학력 타임라인을 편집합니다.</p>
       </header>
 
@@ -93,24 +97,22 @@ const AdminMusicConfigPage = () => {
           <section className={styles.section}>
             <h2 className={styles.legend}>소개글 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>
-              <label className={styles.field}>
-                <span className={styles.label}>소개 (한국어)</span>
-                <textarea
-                  className={styles.textarea}
+              <AdminField label="소개 (한국어)">
+                <AdminInput
+                  multiline
                   rows={6}
                   value={intro.ko}
                   onChange={(e) => editIntro("ko", e.target.value)}
                 />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>소개 (English)</span>
-                <textarea
-                  className={styles.textarea}
+              </AdminField>
+              <AdminField label="소개 (English)">
+                <AdminInput
+                  multiline
                   rows={6}
                   value={intro.en}
                   onChange={(e) => editIntro("en", e.target.value)}
                 />
-              </label>
+              </AdminField>
             </div>
           </section>
 
@@ -126,12 +128,12 @@ const AdminMusicConfigPage = () => {
           {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.save} onClick={save} disabled={saving}>
+            <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
-            </button>
-            <Link href={ROUTES.ADMIN_MUSIC} className={styles.cancel}>
+            </AdminButton>
+            <AdminButton variant="secondary" href={ROUTES.ADMIN_MUSIC} disabled={saving}>
               취소
-            </Link>
+            </AdminButton>
           </div>
         </>
       ) : null}

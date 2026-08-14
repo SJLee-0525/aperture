@@ -6,8 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminPhotoRoute } from "@/constants/routes";
-import type { AdminPhotoListItem } from "@/types/admin";
+
 import { imageThumbnailUrl } from "@/types/image";
+
+import type { AdminPhotoListItem } from "@/types/admin";
 
 import styles from "./PhotoRow.module.css";
 

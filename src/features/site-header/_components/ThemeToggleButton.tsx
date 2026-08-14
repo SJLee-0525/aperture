@@ -1,7 +1,7 @@
 "use client";
 
-import { useThemeToggle } from "@/features/theme/_hooks/use-theme-toggle";
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useThemeToggle } from "@/features/theme/_hooks/use-theme-toggle";
 
 import styles from "./ThemeToggleButton.module.css";
 

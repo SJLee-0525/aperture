@@ -1,12 +1,17 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { articleRagChunks } from "@/features/dev-blog/_lib/article-rag-chunks";
+import { articleTagTokens } from "@/features/dev-blog/_lib/article-tag-tokens";
+
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { COLLECTIONS } from "@/constants/collections";
 import { embeddingModelKey, generateEmbeddings } from "@/lib/ai/embedding";
 import { buildRagChunks } from "@/lib/ai/rag-chunks";
 import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
 import { getRagSourceData, getRagSourceDataForTarget } from "@/lib/content/rag-source";
+
+import type { RagSourceData } from "@/lib/content/rag-source";
 import type { RagChunk, RagSyncTarget } from "@/types/rag";
 
 export const runtime = "nodejs";
@@ -35,7 +40,27 @@ const ALLOWED_SOURCE_TYPES = new Set([
   "devConfig",
   "musicConfig",
   "photoTags",
+  "article",
 ]);
+
+/**
+ * 전 섹션 청크와 블로그 글 청크를 합친다.
+ *
+ * 블로그 청크 빌더는 Markdown 파서를 쓰므로 feature 안에 있고 `lib/ai/rag-chunks` 는 그쪽을
+ * import 하지 않는다. 두 결과를 잇는 지점이 여기 하나여야 전체 생성과 상태 조회가 같은 집합을 본다.
+ *
+ * @param {RagSourceData} data 조회를 마친 공개 원본.
+ * @returns {RagChunk[]} 임베딩 대상 전체 청크.
+ */
+const buildAllRagChunks = (data: RagSourceData): RagChunk[] => [
+  ...buildRagChunks(data),
+  ...data.devArticles.flatMap((article) =>
+    articleRagChunks(
+      article,
+      articleTagTokens(article.tags, data.devArticleTags, { includeId: true }),
+    ),
+  ),
+];
 
 const stringField = (value: unknown) =>
   typeof value === "object" && value !== null && "stringValue" in value
@@ -241,7 +266,7 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json({ error: "지원하지 않는 RAG 갱신 대상입니다." }, { status: 400 });
     }
-    const allChunks = buildRagChunks(
+    const allChunks = buildAllRagChunks(
       target ? await getRagSourceDataForTarget(target, idToken) : await getRagSourceData(),
     );
     const chunks = target
@@ -288,7 +313,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const chunks = buildRagChunks(await getRagSourceData());
+    const chunks = buildAllRagChunks(await getRagSourceData());
     const existing = await listExistingDocuments(idToken);
     const { database } = firebaseConfig();
     const model = embeddingModelKey();

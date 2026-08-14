@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-
 import { ContactView } from "@/features/contact/_components/ContactView";
+
 import { getSite } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

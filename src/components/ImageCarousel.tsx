@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { memo, useEffect, useRef, useState, type SyntheticEvent } from "react";
 
+import { Icon } from "@/components/Icon";
+
 import type { ImageMeta } from "@/types/image";
 
 import styles from "./ImageCarousel.module.css";
@@ -18,33 +20,6 @@ const hideImageLoader = (event: SyntheticEvent<HTMLImageElement>) => {
     ?.querySelector<HTMLElement>("[data-image-loader]")
     ?.setAttribute("hidden", "");
 };
-
-const chevLeft = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
-const chevRight = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
 
 type Props = {
   images: ImageMeta[];
@@ -206,7 +181,7 @@ const ImageCarousel = memo(function ImageCarousel({
               disabled={index === 0}
               onClick={() => goTo(index - 1)}
             >
-              {chevLeft}
+              <Icon name="chevronLeft" size={17} />
             </button>
             <button
               type="button"
@@ -215,7 +190,7 @@ const ImageCarousel = memo(function ImageCarousel({
               disabled={index === count - 1}
               onClick={() => goTo(index + 1)}
             >
-              {chevRight}
+              <Icon name="chevronRight" size={17} />
             </button>
           </>
         ) : null}

@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
+import { Icon } from "@/components/Icon";
+
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
+
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import styles from "./DevImageField.module.css";
@@ -157,7 +160,7 @@ const DevImageField = ({
                     disabled={pending || index === 0}
                     onClick={() => moveImage(index, -1)}
                   >
-                    ↑
+                    <Icon name="arrowUp" size={14} />
                   </button>
                   <button
                     type="button"
@@ -166,7 +169,7 @@ const DevImageField = ({
                     disabled={pending || index === images.length - 1}
                     onClick={() => moveImage(index, 1)}
                   >
-                    ↓
+                    <Icon name="arrowDown" size={14} />
                   </button>
                   <button
                     type="button"

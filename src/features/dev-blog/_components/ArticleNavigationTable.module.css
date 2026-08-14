@@ -1,0 +1,108 @@
+.section {
+  margin-top: var(--s-12);
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--line);
+}
+
+.heading {
+  margin-bottom: var(--s-4);
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+/* 행 전체가 하나의 셀이다 — 안쪽 링크가 제목과 날짜를 함께 덮어 클릭 영역이 행이 된다. */
+.table td {
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* 수상·경력 행과 같은 반응 — 배경이 깔리며 오른쪽으로 밀린다.
+   커서가 요소 크기로 스냅한 동안에는 커서 면칠과 겹치지 않게 배경을 끈다(저장소 공통 규약). */
+.row,
+.currentRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-2);
+}
+.row {
+  color: var(--text-2);
+  transition:
+    background 0.2s,
+    padding-left 0.2s;
+}
+.row:hover:not([data-cursor-snapped]) {
+  padding-left: var(--s-4);
+  background: var(--surface-1);
+}
+
+.title {
+  /* 긴 제목이 표를 밀어 지면 전체에 가로 스크롤을 만들지 않게 한다. */
+  overflow-wrap: anywhere;
+}
+
+.date {
+  flex: none;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 현재 글 — 배경색과 함께 굵기·왼쪽 막대로도 구분해 색만으로 상태를 전하지 않는다.
+   링크가 아니므로 hover 대상도 아니다. hover 배경과 같은 --surface-1 을 쓰지만 서로
+   겹치지 않는 이유가 이것이다. */
+.current {
+  background: var(--surface-1);
+}
+.currentTitle {
+  padding-left: var(--s-3);
+  border-left: 2px solid var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s-4);
+  margin-top: var(--s-4);
+  color: var(--text-3);
+  font-size: var(--t-small);
+}
+.pager button {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.pager button:hover:not(:disabled) {
+  color: var(--text);
+}
+.pager button:disabled {
+  color: var(--text-4);
+  cursor: default;
+}
+.pageState {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

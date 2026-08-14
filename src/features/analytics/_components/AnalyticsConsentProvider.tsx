@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { AnalyticsConsentBanner } from "@/features/analytics/_components/AnalyticsConsentBanner";
+
 import {
   type TrackingConsent,
   getAnalyticsConsentSnapshot,
@@ -18,6 +19,7 @@ import {
   subscribeAnalyticsConsent,
 } from "@/features/analytics/_lib/analytics-consent";
 import { disableGoogleAnalytics } from "@/features/analytics/_lib/gtag";
+
 import { startBrowserMonitoring, stopBrowserMonitoring } from "@/lib/monitoring/browser-monitoring";
 
 /** 동의 UI와 현재 선택을 자식 컴포넌트에 제공하는 Context 계약. */

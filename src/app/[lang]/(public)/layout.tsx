@@ -1,18 +1,20 @@
+import { ChatScreenTargetProvider } from "@/components/ChatScreenTargetProvider";
 import { IntroSplash } from "@/components/IntroSplash";
 import { PublicImageProtection } from "@/components/PublicImageProtection";
 import { AnalyticsConsentProvider } from "@/features/analytics/_components/AnalyticsConsentProvider";
 import { AnalyticsSettingsButton } from "@/features/analytics/_components/AnalyticsSettingsButton";
-import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
-import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
 import { ChatLauncher } from "@/features/chat/_components/ChatLauncher";
 import { SiteFooter } from "@/features/site-footer/_components/SiteFooter";
-import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
 import { MobileNavigationVisibility } from "@/features/site-header/_components/MobileNavigationVisibility";
+import { MobileTabBar } from "@/features/site-header/_components/MobileTabBar";
 import { SectionAccent } from "@/features/site-header/_components/SectionAccent";
 import { SiteHeader } from "@/features/site-header/_components/SiteHeader";
 import { WebMcpTools } from "@/features/webmcp/_components/WebMcpTools";
+
+import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
+
 import { getSite } from "@/lib/content/site";
-import { ChatScreenTargetProvider } from "@/components/ChatScreenTargetProvider";
+import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
 
 import styles from "./layout.module.css";
 

@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { OnDemandPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+
 import type { Photo } from "@/types/photo";
 
 const photoModalRender = vi.hoisted(() => vi.fn());

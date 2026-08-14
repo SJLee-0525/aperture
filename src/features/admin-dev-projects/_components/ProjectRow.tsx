@@ -6,8 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminDevProjectRoute } from "@/constants/routes";
-import type { AdminDevProjectListItem } from "@/types/admin";
+
 import { imageThumbnailUrl } from "@/types/image";
+
+import type { AdminDevProjectListItem } from "@/types/admin";
 
 import styles from "./ProjectRow.module.css";
 

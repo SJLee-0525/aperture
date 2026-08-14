@@ -1,0 +1,92 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.legend {
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.tool {
+  height: 32px;
+  padding: 0 var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.tool:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+/* 삽입 패널이 열려 있는 동안의 상태. 탭과 같은 표시를 쓴다.
+   이 상태의 이미지 버튼은 잠기지만 흐려지는 대신 눌린 것으로 보여야 한다. */
+.tool[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+.tool:disabled:not([aria-pressed="true"]) {
+  color: var(--text-4);
+  cursor: not-allowed;
+}
+.tool[aria-pressed="true"]:disabled {
+  cursor: default;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--s-1);
+  margin-left: var(--s-2);
+}
+.tab {
+  height: 32px;
+  padding: 0 var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.tab[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+/* 공용 .control 의 sans·본문 크기 선언과 같은 특이성이라 클래스를 겹쳐 올린다. */
+.textarea.textarea {
+  width: 100%;
+  min-height: 420px;
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  line-height: 1.8;
+  tab-size: 2;
+}
+
+.error {
+  color: var(--danger);
+  font-size: var(--t-small);
+}

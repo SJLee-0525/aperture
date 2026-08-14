@@ -9,11 +9,13 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import Link from "next/link";
+
+import { AdminButton } from "@/components/AdminButton";
+import { WorkRow } from "@/features/admin-music-works/_components/WorkRow";
+
+import { useMusicWorksAdmin } from "@/features/admin-music-works/_hooks/use-music-works-admin";
 
 import { ROUTES } from "@/constants/routes";
-import { WorkRow } from "@/features/admin-music-works/_components/WorkRow";
-import { useMusicWorksAdmin } from "@/features/admin-music-works/_hooks/use-music-works-admin";
 
 import styles from "./AdminMusicWorksList.module.css";
 
@@ -40,9 +42,14 @@ const AdminMusicWorksPage = () => {
             드래그로 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다.
           </p>
         </div>
-        <Link href={`${ROUTES.ADMIN_MUSIC_WORKS}/new`} className={styles.newBtn}>
+        <AdminButton
+          variant="primary"
+          size="sm"
+          href={`${ROUTES.ADMIN_MUSIC_WORKS}/new`}
+          className={styles.newBtn}
+        >
           + 새 연주
-        </Link>
+        </AdminButton>
       </header>
 
       {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
@@ -56,9 +63,14 @@ const AdminMusicWorksPage = () => {
       {status === "ready" && works.length === 0 ? (
         <div className={styles.empty}>
           <p>아직 연주가 없습니다.</p>
-          <Link href={`${ROUTES.ADMIN_MUSIC_WORKS}/new`} className={styles.newBtn}>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            href={`${ROUTES.ADMIN_MUSIC_WORKS}/new`}
+            className={styles.newBtn}
+          >
             + 첫 연주 만들기
-          </Link>
+          </AdminButton>
         </div>
       ) : null}
 

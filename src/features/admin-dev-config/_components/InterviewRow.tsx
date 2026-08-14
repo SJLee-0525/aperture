@@ -1,5 +1,8 @@
 "use client";
 
+import { AdminInput } from "@/components/AdminInput";
+import { Icon } from "@/components/Icon";
+
 import type { DevInterview } from "@/types/dev";
 
 import styles from "./InterviewRow.module.css";
@@ -31,29 +34,29 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
   <li className={styles.row}>
     <div className={styles.inputs}>
       <div className={styles.grid2}>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.q.ko}
           placeholder="질문 (한국어)"
           onChange={(e) => onEdit(index, "q", "ko", e.target.value)}
         />
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={entry.q.en}
           placeholder="Question (English)"
           onChange={(e) => onEdit(index, "q", "en", e.target.value)}
         />
       </div>
       <div className={styles.grid2}>
-        <textarea
-          className={styles.textarea}
+        <AdminInput
+          multiline
           rows={3}
           value={entry.a.ko}
           placeholder="답변 (한국어)"
           onChange={(e) => onEdit(index, "a", "ko", e.target.value)}
         />
-        <textarea
-          className={styles.textarea}
+        <AdminInput
+          multiline
           rows={3}
           value={entry.a.en}
           placeholder="Answer (English)"
@@ -70,7 +73,7 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -79,7 +82,7 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
         삭제

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { toGalleryPhotos } from "@/types/gallery-photo";
+
 import type { Photo } from "@/types/photo";
 
 describe("toGalleryPhotos", () => {

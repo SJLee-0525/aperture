@@ -1,8 +1,9 @@
 import { pickText } from "@/lib/i18n/pick-text";
-import type { TitleSegment } from "@/lib/search/highlight-title";
 import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
 import { rankDocuments } from "@/lib/search/rank-documents";
 import { tokensFor } from "@/lib/text/korean-tokenize";
+
+import type { TitleSegment } from "@/lib/search/highlight-title";
 import type { Lang } from "@/types/lang";
 import type { SearchDocument, SearchSection } from "@/types/search";
 

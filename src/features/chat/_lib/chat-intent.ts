@@ -1,5 +1,6 @@
-import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import { expandRagQuery } from "@/lib/ai/rag-query";
+
+import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import type { RagSection } from "@/types/rag";
 
 type ProfileSection = RagSection;
@@ -13,8 +14,8 @@ type ChatIntent = {
 
 const SECTION_TERMS: Record<Exclude<ProfileSection, "profile">, RegExp[]> = {
   development: [
-    /개발|프로젝트|기술|스택|코드|프론트|앱|웹|이력서/i,
-    /\b(?:developer|projects?|tech(?:nology)?|stack|code|front[ -]?end|apps?|web|resume)\b/i,
+    /개발|프로젝트|기술|스택|코드|프론트|앱|웹|이력서|블로그|아티클|포스트/i,
+    /\b(?:developer|projects?|tech(?:nology)?|stack|code|front[ -]?end|apps?|web|resume|blogs?|articles?|posts?)\b/i,
   ],
   music: [
     /음악|피아노|연주|공연|리사이틀|협연|곡/i,
@@ -137,6 +138,7 @@ const selectChatIntentWithClassifier = async (
 
 export {
   buildRagQueryText,
+  isStandaloneNonLookupInput,
   needsProfileContext,
   selectChatIntentWithClassifier,
   selectProfileSections,

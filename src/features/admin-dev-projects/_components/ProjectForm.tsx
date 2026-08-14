@@ -1,6 +1,12 @@
 "use client";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+import { CloseIcon } from "@/components/CloseIcon";
+
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
+
 import type { DevProject } from "@/types/dev";
 
 import { DevImageField } from "./DevImageField";
@@ -57,145 +63,123 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       <section className={styles.section}>
         <h2 className={styles.legend}>제목</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (한국어) *</span>
-            <input
-              className={styles.input}
+          <AdminField label="제목 (한국어)" required>
+            <AdminInput
               value={form.title.ko}
               onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
               required
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="제목 (English)">
+            <AdminInput
               value={form.title.en}
               onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>분류 · 연도</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>분류 (한국어)</span>
-            <input
-              className={styles.input}
+          <AdminField label="분류 (한국어)">
+            <AdminInput
               value={form.category.ko}
               placeholder="SSAFY 관통 프로젝트"
               onChange={(e) => patch({ category: { ...form.category, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>분류 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="분류 (English)">
+            <AdminInput
               value={form.category.en}
               onChange={(e) => patch({ category: { ...form.category, en: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>연도</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="연도">
+            <AdminInput
               value={form.year}
               placeholder="2025"
               onChange={(e) => patch({ year: e.target.value })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>기간 · 포지션</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>기간 (한국어)</span>
-            <input
-              className={styles.input}
+          <AdminField label="기간 (한국어)">
+            <AdminInput
               value={form.period.ko}
               placeholder="2025. 12. — 현재"
               onChange={(e) => patch({ period: { ...form.period, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>기간 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="기간 (English)">
+            <AdminInput
               value={form.period.en}
               placeholder="Dec 2025 — Present"
               onChange={(e) => patch({ period: { ...form.period, en: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>포지션 (한국어)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="포지션 (한국어)">
+            <AdminInput
               value={form.position.ko}
               placeholder="Frontend 전체 · 6인 팀 (FE 1 · BE 2 · AI 3)"
               onChange={(e) => patch({ position: { ...form.position, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>포지션 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="포지션 (English)">
+            <AdminInput
               value={form.position.en}
               placeholder="Sole frontend engineer · team of 6"
               onChange={(e) => patch({ position: { ...form.position, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>요약 (카드 한 줄)</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>요약 (한국어)</span>
-            <textarea
-              className={styles.textarea}
+          <AdminField label="요약 (한국어)">
+            <AdminInput
+              multiline
               rows={2}
               value={form.summary.ko}
               onChange={(e) => patch({ summary: { ...form.summary, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>요약 (English)</span>
-            <textarea
-              className={styles.textarea}
+          </AdminField>
+          <AdminField label="요약 (English)">
+            <AdminInput
+              multiline
               rows={2}
               value={form.summary.en}
               onChange={(e) => patch({ summary: { ...form.summary, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>개요</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>개요 (한국어)</span>
-            <textarea
-              className={styles.textarea}
+          <AdminField label="개요 (한국어)">
+            <AdminInput
+              multiline
               rows={5}
               value={form.overview.ko}
               onChange={(e) => patch({ overview: { ...form.overview, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>개요 (English)</span>
-            <textarea
-              className={styles.textarea}
+          </AdminField>
+          <AdminField label="개요 (English)">
+            <AdminInput
+              multiline
               rows={5}
               value={form.overview.en}
               onChange={(e) => patch({ overview: { ...form.overview, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
@@ -238,17 +222,19 @@ const ProjectForm = ({ projectId, initial }: Props) => {
           <h2 className={styles.legend}>기술 스택 (태그)</h2>
         </div>
         <div className={styles.tagInputRow}>
-          <input
-            className={styles.input}
+          <AdminInput
+            className={styles.tagInput}
+            aria-label="기술명"
             value={tagDraft}
-            placeholder="기술명 입력 후 Enter (예: React)"
+            placeholder="React"
             onChange={(e) => setTagDraft(e.target.value)}
             onKeyDown={onTagKeyDown}
           />
-          <button type="button" className={styles.add} onClick={addTag}>
-            + 추가
-          </button>
+          <AdminButton variant="secondary" onClick={addTag}>
+            + 태그 추가
+          </AdminButton>
         </div>
+        <p className={styles.inputHint}>Enter로도 추가할 수 있습니다.</p>
         {form.techTags.length > 0 ? (
           <ul className={styles.chips}>
             {form.techTags.map((tag) => (
@@ -260,7 +246,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
                   aria-label={`${tag} 삭제`}
                   onClick={() => removeTag(tag)}
                 >
-                  ×
+                  <CloseIcon size={13} />
                 </button>
               </li>
             ))}
@@ -273,9 +259,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       <section className={styles.section}>
         <div className={styles.arrayHead}>
           <h2 className={styles.legend}>링크 (GitHub · Live 등)</h2>
-          <button type="button" className={styles.add} onClick={addLink}>
+          <AdminButton variant="secondary" size="xs" onClick={addLink}>
             + 링크 추가
-          </button>
+          </AdminButton>
         </div>
         {form.links.length === 0 ? (
           <p className={styles.note}>아직 링크가 없습니다.</p>
@@ -283,14 +269,16 @@ const ProjectForm = ({ projectId, initial }: Props) => {
           <ul className={styles.arrayList}>
             {form.links.map((link, index) => (
               <li key={index} className={styles.linkRow}>
-                <input
+                <AdminInput
                   className={styles.linkLabel}
+                  aria-label="링크 라벨"
                   value={link.label}
                   placeholder="GitHub"
                   onChange={(e) => editLink(index, "label", e.target.value)}
                 />
-                <input
-                  className={styles.input}
+                <AdminInput
+                  className={styles.linkHref}
+                  aria-label="링크 주소"
                   value={link.href}
                   placeholder="https://…"
                   onChange={(e) => editLink(index, "href", e.target.value)}
@@ -334,17 +322,12 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving || uploading}>
-          {saving ? "저장 중…" : isEdit ? "수정 저장" : "프로젝트 저장"}
-        </button>
-        <button
-          type="button"
-          className={styles.cancel}
-          onClick={cancel}
-          disabled={saving || uploading}
-        >
+        <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
+          {saving ? "저장 중…" : "저장"}
+        </AdminButton>
+        <AdminButton variant="secondary" onClick={cancel} disabled={saving || uploading}>
           취소
-        </button>
+        </AdminButton>
       </div>
     </form>
   );

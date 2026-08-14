@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { Chip } from "@/components/Chip";
-import { getSiteConfig } from "@/lib/firebase/site";
+
+import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
+
 import type { Tag } from "@/types/tag";
 
 import styles from "./TagMultiSelect.module.css";
@@ -26,7 +28,8 @@ const TagMultiSelect = ({ selected, onChange }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    getSiteConfig()
+    getSiteConfigRepository()
+      .get()
       .then((config) => {
         if (alive) setTags(config.tags);
       })

@@ -9,12 +9,14 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
+import { AdminButton } from "@/components/AdminButton";
 import { TagAddForm } from "@/features/admin-tags/_components/TagAddForm";
 import { TagRow } from "@/features/admin-tags/_components/TagRow";
+
 import { useTagsAdmin } from "@/features/admin-tags/_hooks/use-tags-admin";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminTagsEditor.module.css";
 
@@ -80,12 +82,12 @@ const AdminTagsPage = () => {
           {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.save} onClick={save} disabled={saving}>
+            <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
-            </button>
-            <Link href={ROUTES.ADMIN} className={styles.cancel}>
+            </AdminButton>
+            <AdminButton variant="secondary" href={ROUTES.ADMIN} disabled={saving}>
               취소
-            </Link>
+            </AdminButton>
           </div>
         </>
       ) : null}

@@ -1,6 +1,6 @@
-import type { MetadataRoute } from "next";
-
 import { absoluteUrl } from "@/lib/seo/site-url";
+
+import type { MetadataRoute } from "next";
 
 /**
  * 검색 엔진에 공개 경로와 차단 경로를 알린다.

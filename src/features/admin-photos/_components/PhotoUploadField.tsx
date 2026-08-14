@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { useImageUpload, type UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
+
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import styles from "./PhotoUploadField.module.css";

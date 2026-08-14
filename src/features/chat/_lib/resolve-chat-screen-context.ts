@@ -1,13 +1,14 @@
+import { devArticleRoute } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { ChatContextOpenTarget, ChatContextTarget } from "@/features/chat/_lib/chat-context";
-import type { ChatProfileData } from "@/lib/content/chat";
+import type { ChatDevArticle, ChatProfileData } from "@/lib/content/chat";
 import type { Lang } from "@/types/lang";
 
-/** 화면 문맥에 필요한 네 종류의 공개 콘텐츠. */
+/** 화면 문맥에 필요한 다섯 종류의 공개 콘텐츠. */
 type ScreenContextSource = Pick<
   ChatProfileData,
-  "photos" | "musicWorks" | "musicAwards" | "devProjects"
+  "photos" | "musicWorks" | "musicAwards" | "devProjects" | "articles"
 >;
 
 /** target 종류별 `id -> 프롬프트 한 줄` 매핑. 언어별 스냅샷에 저장한다. */
@@ -57,7 +58,23 @@ const part = (label: string, value: string | null | undefined): string | null =>
   value ? `${label}: ${value}` : null;
 
 /**
- * 공개된 사진, 연주, 수상, 프로젝트의 화면 문맥 lookup을 만든다.
+ * 글 한 건의 화면 문맥 한 줄.
+ * 목록 lookup 과 문서 한 건 검증이 같은 문장을 쓰도록 분리한다.
+ *
+ * @param {ChatDevArticle} article 공개된 글.
+ * @param {Lang} lang 표시 언어.
+ * @returns {string} 프롬프트에 실을 한 줄.
+ */
+const articleScreenEntry = (article: ChatDevArticle, lang: Lang): string =>
+  joinParts([
+    `Article: ${pickText(article.title, lang)}`,
+    part("summary", pickText(article.summary, lang)),
+    part("published", article.publishedAt ? isoDate(article.publishedAt) : null),
+    part("path", devArticleRoute(article.slug)),
+  ]);
+
+/**
+ * 공개된 사진, 연주, 수상, 프로젝트, 글의 화면 문맥 lookup을 만든다.
  *
  * @param {ScreenContextSource} data
  * @param {Lang} lang
@@ -101,6 +118,10 @@ const buildScreenContextLookup = (data: ScreenContextSource, lang: Lang): Screen
       ]),
     ]),
   ),
+  // 글은 공개 getter 가 이미 초안을 걸러 온다(`published` 필드를 투영하지 않는 이유).
+  article: Object.fromEntries(
+    data.articles.map((article) => [article.id, articleScreenEntry(article, lang)]),
+  ),
   project: Object.fromEntries(
     published(data.devProjects).map((project) => [
       project.id,
@@ -128,6 +149,7 @@ const formatScreenContextBlock = (entry: string): string =>
 
 /**
  * lookup의 own property에 저장된 문자열 항목만 읽는다.
+ * 항목이 없으면 그 id 는 공개 데이터에 존재하지 않으므로, 호출부가 target 검증에도 쓴다.
  *
  * @param {ScreenContextLookup} lookup 화면 문맥 lookup.
  * @param {ChatContextOpenTarget} openTarget 찾을 target과 id.
@@ -172,4 +194,11 @@ const resolveScreenContext = async (
   return entry ? formatScreenContextBlock(entry) : undefined;
 };
 
-export { buildScreenContextLookup, MAX_SCREEN_CONTEXT_CHARS, resolveScreenContext };
+export {
+  articleScreenEntry,
+  buildScreenContextLookup,
+  entryOf,
+  formatScreenContextBlock,
+  MAX_SCREEN_CONTEXT_CHARS,
+  resolveScreenContext,
+};

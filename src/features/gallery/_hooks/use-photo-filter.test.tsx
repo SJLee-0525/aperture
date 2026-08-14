@@ -4,6 +4,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
+
 import { ALL, FOCAL_MAX, FOCAL_MIN, parsePhotoFilterQuery } from "@/lib/photo-filter-query";
 
 import type { PhotoFilterState } from "@/lib/photo-filter-query";

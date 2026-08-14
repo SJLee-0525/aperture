@@ -19,9 +19,10 @@
 - 사진, 앨범, 촬영 정보와 위치 기반 지도
 - 연주, 음악 경력, 수상 및 영상 아카이브
 - 기술 스택, 개발 프로젝트와 경력 소개
+- 코드 하이라이트, 목차와 태그 필터를 제공하는 Markdown 기반 개발 블로그
 - 공개 콘텐츠를 관리하는 개인용 Firebase CMS
 - 일반 검색, 현재 화면 문맥과 포트폴리오 RAG를 연결한 챗봇
-- 외부 브라우저 에이전트용 WebMCP 도구 13종과 선언형 연락 폼
+- 외부 브라우저 에이전트용 WebMCP 도구 15종과 선언형 연락 폼
 - 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
 - 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
 - 개인정보처리방침, 사이트 이용 및 콘텐츠 정책, 접근성 안내
@@ -35,7 +36,8 @@
 | Landing | `/ko`, `/en`                           | Photo, Music, Dev로 이어지는 허브                   |
 | Photo   | `/photo`                               | 사진, 앨범, 지도와 촬영 정보                        |
 | Music   | `/music`                               | 연주, 음악 경력과 영상                              |
-| Dev     | `/dev/projects`                        | 개발 프로젝트와 상세 기록                           |
+| Dev     | `/dev`, `/dev/projects`                | 개발자 소개, 프로젝트와 상세 기록                   |
+| Blog    | `/dev/articles`                        | 개발 블로그 목록과 글 본문                          |
 | Search  | `/search`                              | 전체 공개 콘텐츠 검색                               |
 | Legal   | `/privacy`, `/terms`, `/accessibility` | 개인정보·이용 정책과 접근성 안내                    |
 | Admin   | `/admin`                               | 개인용 콘텐츠 관리                                  |
@@ -61,6 +63,8 @@
 - MapLibre GL
 - OpenAI 또는 Gemini 기반 채팅
 - OpenAI 임베딩을 사용하는 포트폴리오 RAG 검색
+- mdast 기반 Markdown 파싱과 서버 전용 Shiki 코드 하이라이트
+- Sentry 오류 모니터링
 - Vitest, Playwright, Storybook, Lighthouse CI
 
 ## 프로젝트 구조
@@ -111,10 +115,11 @@ src/
 │   │       │   ├── media/page.tsx  # YouTube 연주 영상
 │   │       │   └── about/page.tsx  # 피아니스트 소개
 │   │       ├── dev/
-│   │       │   ├── page.tsx       # 기술 스택
+│   │       │   ├── page.tsx       # 개발자 소개
+│   │       │   ├── career/page.tsx # 개발 경력과 기술 스택
 │   │       │   ├── projects/page.tsx # 프로젝트 목록, ?project= 상세 모달
-│   │       │   ├── career/page.tsx # 개발 경력
-│   │       │   └── about/page.tsx  # 개발자 소개
+│   │       │   ├── articles/page.tsx # 블로그 목록, 태그 필터와 페이지 이동
+│   │       │   └── articles/[slug]/page.tsx # 블로그 본문, 목차와 연관 프로젝트
 │   │       ├── search/page.tsx     # 공개 콘텐츠 통합 검색
 │   │       ├── contact/page.tsx    # 문의 폼과 외부 연락 링크
 │   │       └── privacy/ · terms/ · accessibility/ # 공용 legal 문서 화면
@@ -125,8 +130,8 @@ src/
 │   │   ├── login/page.tsx
 │   │   ├── photos/ · albums/ · tags/ · site/ # 사진·앨범·태그·사이트 CMS
 │   │   ├── music/                  # works · awards · media · config
-│   │   ├── dev/                    # projects · config
-│   │   └── maintenance/            # 임베딩·이미지 마이그레이션
+│   │   ├── dev/                    # projects · articles · config
+│   │   └── maintenance/            # 임베딩·이미지 마이그레이션, 미참조 블로그 이미지 정리
 │   └── api/
 │       ├── chat/route.ts           # 스트리밍 포트폴리오 챗봇
 │       ├── search-index/route.ts   # 공개 검색 문서
@@ -141,12 +146,14 @@ src/
 │   ├── photo-detail/               # 사진 모달, EXIF, 미니맵, 상세 캐시
 │   ├── albums/ · map/ · about/     # 사진 앨범, 지도, 소개 화면
 │   ├── music/                      # 연주·경력·영상·소개 화면
-│   ├── dev/                        # 스택·프로젝트·경력·소개 화면
+│   ├── dev/                        # 소개·경력·프로젝트 화면
+│   ├── dev-blog/                   # Markdown 파싱·목차·코드 하이라이트와 블로그 본문
 │   ├── search/ · chat/ · contact/  # 검색, RAG 챗봇, 문의
 │   ├── analytics/ · legal/          # 분석 동의·GA 로딩 경계와 정책 문서
 │   ├── site-header/ · site-footer/ # 데스크톱 mega-menu와 모바일 내비게이션
 │   ├── lang/ · theme/ · motion/    # 언어, 테마, 애니메이션 상태
 │   ├── auth/ · image-upload/       # 관리자 인증과 이미지 처리
+│   ├── admin-dev-articles/         # 블로그 작성·미리보기·발행 조건과 로컬 복구본
 │   └── admin-*/                    # 도메인별 CMS 목록·폼·정렬·저장 로직
 ├── components/                     # props 기반 공용 UI
 │   ├── Modal · PhotoTile · PhotoGrid · AlbumCard
@@ -211,7 +218,8 @@ npm run build           # 프로덕션 빌드
 npm run lint            # ESLint
 npm run check           # Next.js 타입 생성 및 TypeScript 검사
 npm test                # Vitest 단위 테스트
-npm run test:e2e        # Playwright E2E 테스트
+npm run test:e2e        # Playwright E2E — 프로덕션 빌드 + 시각 회귀
+npm run test:e2e:admin  # 관리자 E2E — dev 서버 (프로덕션 빌드는 인증 우회를 금지한다)
 npm run test:chat-eval  # mock 챗봇 응답·RAG·참조 평가
 npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
@@ -240,8 +248,9 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [도메인 컨텍스트](./CONTEXT.md)                                              | 공개 영역, 아키텍처 경계와 E2E 계약         |
 | [언어 진입·동의 운영 문서](./docs/plan/03-browser-language-entry-routing.md) | 위험 분석, 테스트 사례, 배포와 트러블슈팅   |
 | [WebMCP 에이전트 도구](./docs/plan/04-webmcp-agent-tools.md)                 | 브라우저 에이전트용 도구 설계, 보안과 평가  |
-| [WebMCP 도구 평가 기록](./docs/troubleshooting/webmcp-tool-eval.md)          | 명령형 도구 13종과 선언형 연락 폼 평가      |
+| [WebMCP 도구 평가 기록](./docs/troubleshooting/webmcp-tool-eval.md)          | 명령형 도구와 선언형 연락 폼 평가           |
 | [챗봇 화면 문맥 인식 계획](./docs/plan/06-chat-screen-context.md)            | URL 화면 문맥, 사진 필터와 연락 초안 전달   |
+| [개발 블로그 개편 계획](./docs/plan/07-dev-blog.md)                          | 블로그 정보 구조, Markdown 계약과 발행 흐름 |
 | [UI 품질 테스트](./docs/testing.md)                                          | 시각 회귀, 접근성, 언어·분석 동의 검증 방법 |
 
 ## 제작 및 AI 활용

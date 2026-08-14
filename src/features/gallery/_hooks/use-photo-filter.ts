@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { buildSearchIndex, filterPhotos } from "@/features/gallery/_lib/filter-photos";
+
 import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 import {
   ALL,

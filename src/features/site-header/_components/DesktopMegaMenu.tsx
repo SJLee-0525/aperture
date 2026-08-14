@@ -3,13 +3,16 @@
 import { usePathname } from "next/navigation";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
+import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
-import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
-import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
+
+import type { UIDict } from "@/constants/dictionary";
 
 import styles from "./SiteHeader.module.css";
 

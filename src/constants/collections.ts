@@ -8,6 +8,8 @@ const COLLECTIONS = {
   MUSIC_MEDIA: "musicMedia",
   // 개발 섹션
   DEV_PROJECTS: "devProjects",
+  DEV_ARTICLES: "devArticles",
+  DEV_ARTICLE_TAGS: "devArticleTags",
   RAG_DOCUMENTS: "ragDocuments",
   SITE: "site",
 } as const;

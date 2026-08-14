@@ -7,12 +7,22 @@ describe("getMockReply", () => {
     ["사진 보여줘", "photo", "/photo?photo="],
     ["연주를 소개해 줘", "music", "/music?work="],
     ["개발 프로젝트 알려줘", "project", "/dev/projects?project="],
+    ["블로그 글 있어?", "article", "/dev/articles/"],
   ] as const)("%s 질문에 모달 딥링크 참조 카드를 제공한다", (question, type, href) => {
     const references = getMockReply(question, "ko").references;
 
     expect(references?.length).toBeGreaterThan(0);
     expect(references?.[0]).toMatchObject({ type });
     expect(references?.[0]?.href).toContain(href);
+  });
+
+  it.each([
+    ["한글 폰트는 뭘 쓰세요?", "ko"],
+    ["한글을 지원하나요", "ko"],
+    ["do you use postgres?", "en"],
+    ["what particle library is that?", "en"],
+  ] as const)("%s 는 블로그 규칙에 걸리지 않는다", (question, lang) => {
+    expect(getMockReply(question, lang).link?.href).not.toBe("/dev/articles");
   });
 
   it("영어 응답 카드에는 영어 제목과 설명을 사용한다", () => {

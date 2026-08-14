@@ -1,0 +1,46 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-12);
+}
+
+.page,
+.step {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--s-2);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-2);
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.page:hover:not([aria-current]),
+.step:hover:not(:disabled) {
+  color: var(--text);
+}
+.page[aria-current="page"] {
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+  cursor: default;
+}
+.step:disabled {
+  color: var(--text-4);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .step {
+    transition: none;
+  }
+}

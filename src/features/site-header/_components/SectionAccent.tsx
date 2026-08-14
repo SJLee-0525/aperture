@@ -3,8 +3,9 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-import { sectionFromPath } from "@/constants/sections";
 import { syncBrowserThemeColor } from "@/features/theme/_lib/browser-theme-color";
+
+import { sectionFromPath } from "@/constants/sections";
 
 /**
  * 라우트 → `html[data-section]` 세팅. globals.css 의 `html[data-section]` 규칙이 `--accent` 를 오버라이드한다.

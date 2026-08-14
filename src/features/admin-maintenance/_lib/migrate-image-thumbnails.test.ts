@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { migrateImageThumbnails } from "@/features/admin-maintenance/_lib/migrate-image-thumbnails";
+
 import type { ImageMeta } from "@/types/image";
 
 const mocks = vi.hoisted(() => ({
@@ -48,11 +49,11 @@ vi.mock("@/lib/firebase/music", () => ({
   musicWorks: { list: mocks.musicList, update: mocks.musicUpdate },
 }));
 vi.mock("@/lib/firebase/client", () => ({
-  auth: {
+  getFirebaseAuth: () => ({
     get currentUser() {
       return mocks.currentUser;
     },
-  },
+  }),
 }));
 vi.mock("@/lib/firebase/storage", () => ({
   uploadDevPreview: mocks.uploadDevPreview,
@@ -333,6 +334,8 @@ describe("migrateImageThumbnails", () => {
       }),
     );
 
-    await expect(migrateImageThumbnails(false)).rejects.toThrow("원본 이미지 다운로드 실패 (503)");
+    await expect(migrateImageThumbnails(false)).rejects.toThrow(
+      "원본 이미지를 불러오지 못했습니다. (503)",
+    );
   });
 });

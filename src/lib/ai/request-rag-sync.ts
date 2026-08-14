@@ -1,11 +1,12 @@
 "use client";
 
-import { auth } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
+
 import type { RagSyncSourceType } from "@/types/rag";
 
 const requestRagSync = async (sourceType: RagSyncSourceType, sourceId: string) => {
   try {
-    const user = auth.currentUser;
+    const user = getFirebaseAuth().currentUser;
     if (!user) return;
     const idToken = await user.getIdToken();
     const init = {

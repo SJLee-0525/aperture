@@ -2,7 +2,7 @@ import { createContext } from "react";
 
 import type { Dispatch, SetStateAction } from "react";
 
-type ChatScreenTargetType = "photo" | "work" | "award" | "project";
+type ChatScreenTargetType = "photo" | "work" | "award" | "project" | "article";
 
 /** 챗봇 입력창에 표시하는 상세 항목. 서버 요청에는 `type`과 `id`만 사용한다. */
 type ChatScreenTarget = {

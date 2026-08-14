@@ -12,8 +12,11 @@ import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortabl
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
-import type { AdminPhotoListItem } from "@/types/admin";
+import { Icon } from "@/components/Icon";
+
 import { imageThumbnailUrl } from "@/types/image";
+
+import type { AdminPhotoListItem } from "@/types/admin";
 
 import styles from "./AlbumPhotoPicker.module.css";
 import { SelectedPhotoChip } from "./SelectedPhotoChip";
@@ -172,7 +175,11 @@ const AlbumPhotoPicker = ({
                           className={styles.tileImg}
                         />
                       ) : null}
-                      {on ? <span className={styles.check}>✓</span> : null}
+                      {on ? (
+                        <span className={styles.check}>
+                          <Icon name="check" size={14} />
+                        </span>
+                      ) : null}
                     </button>
                   </li>
                 );

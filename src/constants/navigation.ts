@@ -1,9 +1,11 @@
-import type { UIDict } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
+
+import type { IconName } from "@/components/Icon";
+import type { UIDict } from "@/constants/dictionary";
 import type { SectionId } from "@/constants/sections";
 
-/** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 Icon name */
-type NavItem = { labelKey: keyof UIDict; href: string; icon: string };
+/** 네비 항목 — 라벨은 사전 키(ko/en 자동), icon은 등록된 Icon 이름 */
+type NavItem = { labelKey: keyof UIDict; href: string; icon: IconName };
 
 /** 섹션 탭 세트를 갖는 섹션(사진·음악·개발) */
 type NavSection = Extract<SectionId, "photo" | "music" | "dev">;
@@ -24,10 +26,10 @@ const MEGA_MENU: MegaSection[] = [
     labelKey: "sectionDev",
     href: ROUTES.DEV,
     links: [
-      { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT },
-      { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER },
-      { labelKey: "devStackNav", href: ROUTES.DEV },
+      { labelKey: "aboutNav", href: ROUTES.DEV },
+      { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER },
       { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS },
+      { labelKey: "devArticlesNav", href: ROUTES.DEV_ARTICLES },
     ],
   },
   {
@@ -63,10 +65,10 @@ const CONTACT_NAV: MegaLink = { labelKey: "contactNav", href: ROUTES.CONTACT };
 /** 모바일 섹션별 하단 탭 — 섹션에 따라 탭 세트가 다름 (A2 MobileTabBar 소비) */
 const MOBILE_TABS: Record<NavSection, NavItem[]> = {
   dev: [
-    { labelKey: "aboutNav", href: ROUTES.DEV_ABOUT, icon: "user" },
-    { labelKey: "devCareerNav", href: ROUTES.DEV_CAREER, icon: "cal" },
-    { labelKey: "devStackNav", href: ROUTES.DEV, icon: "code" },
+    { labelKey: "aboutNav", href: ROUTES.DEV, icon: "user" },
+    { labelKey: "devCareerStackNav", href: ROUTES.DEV_CAREER, icon: "cal" },
     { labelKey: "devProjectsNav", href: ROUTES.DEV_PROJECTS, icon: "folder" },
+    { labelKey: "devArticlesNav", href: ROUTES.DEV_ARTICLES, icon: "article" },
   ],
   photo: [
     { labelKey: "aboutNav", href: ROUTES.PHOTO_ABOUT, icon: "user" },

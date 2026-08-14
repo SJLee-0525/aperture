@@ -1,9 +1,12 @@
-import { ROUTES } from "@/constants/routes";
+import { devArticleRoute, ROUTES } from "@/constants/routes";
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
+
+import { imageThumbnailUrl } from "@/types/image";
+
+import type { ArticleSearchSource } from "@/features/dev-blog/_lib/article-search-source";
 import type { Album } from "@/types/album";
 import type { DevProject } from "@/types/dev";
-import { imageThumbnailUrl } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 import type { MusicAward, MusicMedia, MusicWork } from "@/types/music";
 import type { Photo } from "@/types/photo";
@@ -16,6 +19,7 @@ type SearchSources = {
   awards: MusicAward[];
   media: MusicMedia[];
   projects: DevProject[];
+  articles: ArticleSearchSource[];
 };
 
 const indexText = (localized: LocalizedText[], common: string[] = []): string =>
@@ -44,6 +48,7 @@ const searchIndexFor = (
  * @param {MusicAward[]} options.awards
  * @param {MusicMedia[]} options.media
  * @param {DevProject[]} options.projects
+ * @param {ArticleSearchSource[]} options.articles
  * @returns {SearchDocument[]}
  */
 const createSearchDocuments = ({
@@ -53,6 +58,7 @@ const createSearchDocuments = ({
   awards,
   media,
   projects,
+  articles,
 }: SearchSources): SearchDocument[] => {
   const photoById = new Map(photos.map((photo) => [photo.id, photo]));
   const albumImageUrl = (album: Album): string => {
@@ -124,6 +130,24 @@ const createSearchDocuments = ({
       meta: project.category,
       imageUrl: imageThumbnailUrl(project.cover),
       href: `${ROUTES.DEV_PROJECTS}?project=${project.id}`,
+    })),
+    ...articles.map((article) => ({
+      key: `article-${article.id}`,
+      section: "dev" as const,
+      subsection: "blog" as const,
+      title: article.title,
+      // 태그 라벨과 본문 소제목까지 색인한다: 제목·요약만으로는 어떤 주제를 다뤘는지 묻는 질의가 닿지 않는다.
+      // 둘을 같은 자리에 두어 가중치가 같아지는 것은 SearchIndex 를 늘리지 않으려는 선택이다.
+      index: searchIndexFor(
+        article.title,
+        [article.summary],
+        [...article.tagLabels, ...article.headings],
+      ),
+      // 행 오른쪽에는 요약 대신 태그를 둔다. 제목 옆에서 한 줄로 잘리는 자리라
+      // 문장보다 분류가 더 읽힌다.
+      meta: article.tagText,
+      imageUrl: imageThumbnailUrl(article.cover),
+      href: devArticleRoute(article.slug),
     })),
   ];
 };

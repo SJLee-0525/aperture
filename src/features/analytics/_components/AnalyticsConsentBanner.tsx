@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { ROUTES } from "@/constants/routes";
 import { SENTRY_TRANSFER_COUNTRY } from "@/lib/monitoring/monitoring-dsn";
 
 import type { TrackingConsent } from "@/features/analytics/_lib/analytics-consent";

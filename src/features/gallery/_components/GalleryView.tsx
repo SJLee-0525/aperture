@@ -3,18 +3,22 @@
 import { useSearchParams } from "next/navigation";
 import { memo, useMemo, useState } from "react";
 
+import { PageToolbar } from "@/components/PageToolbar";
 import { PhotoGrid } from "@/components/PhotoGrid";
 import { ViewToggle } from "@/components/ViewToggle";
 import { FilterBar } from "@/features/gallery/_components/FilterBar";
-import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
-import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import {
   OnDemandPhotoModal,
   preloadPhotoModal,
 } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+
 import { useGalleryTools } from "@/features/gallery/_hooks/use-gallery-tools";
+import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll";
+import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { parsePhotoFilterQuery } from "@/lib/photo-filter-query";
+
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 
@@ -61,18 +65,16 @@ const GalleryContent = memo(function GalleryContent({
 
   return (
     <main className={styles.main}>
-      <div className={styles.toolbar}>
-        <h1 className={styles.title}>{dict.workNav}</h1>
-        <div className={styles.tools}>
-          <span className={styles.count}>{filter.visible.length} photos</span>
-          <ViewToggle
-            square={square}
-            onChange={setSquare}
-            masonryLabel={dict.viewMasonry}
-            squareLabel={dict.viewSquare}
-          />
-        </div>
-      </div>
+      <PageToolbar title={dict.workNav} count={`${filter.visible.length} photos`}>
+        <ViewToggle
+          options={[
+            { id: "mason", label: dict.viewMasonry, icon: "mason" },
+            { id: "square", label: dict.viewSquare, icon: "square" },
+          ]}
+          value={square ? "square" : "mason"}
+          onChange={(id) => setSquare(id === "square")}
+        />
+      </PageToolbar>
 
       <FilterBar
         tags={tags}

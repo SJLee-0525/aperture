@@ -12,23 +12,37 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { firestoreCollectionCacheTag } from "@/constants/cache";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
+
 import type { RagSyncSourceType } from "@/types/rag";
 
 type WithId = { id: string };
 
 /**
- * 리스트 컬렉션 공통 관리자 CRUD 팩토리 — 컬렉션명·매퍼·라벨만 다르다.
+ * 쓰기 후 RAG 동기화 여부를 정하는 정책.
+ *
+ * 정책은 작업 이름 대신 쓰기 전후 문서 상태로 판단한다.
+ * `before` 는 쓰기 직전 스냅샷(생성이면 `null`), `after` 는 쓰기 결과(삭제면 `null`)다.
+ *
+ * `"remove"`도 `requestRagSync`를 호출한다. 동기화 경로가 원본을 다시 읽고
+ * embeddings route 가 원본을 다시 읽어 비공개·부재 문서의 청크를 비우므로 `"sync"` 와 같은
+ * 비공개 또는 삭제된 문서의 청크를 비운다.
+ */
+type PostSyncPolicy<T> = (before: T | null, after: T | null) => "sync" | "remove" | "skip";
+
+/**
+ * 목록형 컬렉션의 공통 관리자 CRUD 팩토리.
  * albums.ts 의 개별 함수 패턴을 컬렉션마다 반복하지 않고 한 곳으로 압축(음악 works/awards/media·개발 projects 공용).
  * 목록은 초안 포함 전체를 order 순으로 반환(관리자 전용, Rules 의 isAdmin 로 허용).
  *
  * @param {string} name 대상 Firestore 컬렉션 이름.
  * @param {(id: string, d: DocumentData) => T} toEntity 문서 ID와 필드를 도메인 모델로 바꾸는 함수.
  * @param {string} label 오류 메시지에 표시할 항목 이름.
- * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류.
+ * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류. 없으면 정책과 무관하게 동기화 요청이 없다.
+ * @param {PostSyncPolicy<T>} [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책. 없으면 지금까지처럼 모든 쓰기가 동기화를 요청하고, 쓰기 직전 스냅샷도 읽지 않는다.
  * @returns {{ newId: () => string; list: () => Promise<T[]>; get: (id: string) => Promise<T | null>; create: (id: string, input: Omit<T, 'id'>) => Promise<void>; update: (id: string, input: Omit<T, 'id'>) => Promise<void>; updateOrder: (id: string, order: number) => Promise<void>; setPublished: (id: string, published: boolean) => Promise<void>; remove: (id: string) => Promise<void> }} 해당 컬렉션에 묶인 관리자 CRUD 함수.
  */
 const listCrud = <T extends WithId>(
@@ -36,11 +50,54 @@ const listCrud = <T extends WithId>(
   toEntity: (id: string, d: DocumentData) => T,
   label: string,
   ragSourceType?: RagSyncSourceType,
+  syncPolicy?: PostSyncPolicy<T>,
 ) => {
   type Input = Omit<T, "id">;
+  /** 쓰기 직전 스냅샷과 조회 성공 여부. 실패와 "문서 없음"을 구분해야 fallback 이 성립한다. */
+  type BeforeSnapshot = { before: T | null; failed: boolean };
   /** @returns {ReturnType<typeof collection>} 현재 CRUD가 사용하는 컬렉션 참조. */
-  const col = () => collection(db, name);
+  const col = () => collection(getFirebaseDb(), name);
   const cacheTag = firestoreCollectionCacheTag(name);
+  const consultPolicy = Boolean(ragSourceType && syncPolicy);
+
+  /**
+   * 정책 판단에 사용할 쓰기 직전 스냅샷. 정책이 없으면 읽지 않는다.
+   *
+   * @param {string} id 스냅샷을 읽을 문서 ID.
+   * @returns {Promise<BeforeSnapshot | null>} 정책 미사용이면 `null`. 조회 실패는 `failed` 로 표시하고 쓰기를 막지 않는다.
+   */
+  const readBeforeWrite = async (id: string): Promise<BeforeSnapshot | null> => {
+    if (!consultPolicy) return null;
+    try {
+      const snap = await getDoc(doc(getFirebaseDb(), name, id));
+      return { before: snap.exists() ? toEntity(snap.id, snap.data()) : null, failed: false };
+    } catch {
+      return { before: null, failed: true };
+    }
+  };
+
+  /**
+   * 쓰기 성공 뒤 RAG 동기화를 요청한다. `ragSourceType` 이 없으면 아무것도 하지 않는다.
+   *
+   * 스냅샷 조회가 실패하면 청크가 남지 않도록 동기화를 요청한다.
+   *
+   * @param {string} id 동기화할 문서 ID.
+   * @param {BeforeSnapshot | null} snapshot `readBeforeWrite` 결과. 생성은 `{ before: null, failed: false }` 를 직접 만든다.
+   * @param {T | null} after 쓰기 결과 문서. 삭제는 `null`.
+   * @returns {Promise<void>} 동기화 요청이 끝나면 완료된다.
+   */
+  const syncAfterWrite = async (
+    id: string,
+    snapshot: BeforeSnapshot | null,
+    after: T | null,
+  ): Promise<void> => {
+    if (!ragSourceType) return;
+    const decision =
+      !syncPolicy || !snapshot || snapshot.failed ? "sync" : syncPolicy(snapshot.before, after);
+    if (decision === "skip") return;
+    await requestRagSync(ragSourceType, id);
+  };
+
   return {
     /** 새 문서 ID를 미리 발급한다. Storage 경로를 먼저 정할 때 사용한다. */
     newId: (): string => doc(col()).id,
@@ -61,7 +118,7 @@ const listCrud = <T extends WithId>(
      */
     get: async (id: string): Promise<T | null> => {
       try {
-        const snap = await getDoc(doc(db, name, id));
+        const snap = await getDoc(doc(getFirebaseDb(), name, id));
         return snap.exists() ? toEntity(snap.id, snap.data()) : null;
       } catch {
         throw new Error(`${label}을(를) 불러오지 못했습니다.`);
@@ -76,7 +133,7 @@ const listCrud = <T extends WithId>(
      */
     create: async (id: string, input: Input): Promise<void> => {
       try {
-        await setDoc(doc(db, name, id), {
+        await setDoc(doc(getFirebaseDb(), name, id), {
           ...input,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -85,7 +142,8 @@ const listCrud = <T extends WithId>(
         throw new Error(`${label} 저장에 실패했습니다.`);
       }
       requestPublicRevalidate(cacheTag);
-      if (ragSourceType) await requestRagSync(ragSourceType, id);
+      // 생성 전 상태는 문서 없음으로 처리한다.
+      await syncAfterWrite(id, { before: null, failed: false }, { id, ...input } as T);
     },
     /**
      * 기존 문서의 도메인 필드를 수정한다.
@@ -95,18 +153,19 @@ const listCrud = <T extends WithId>(
      * @returns {Promise<void>} 수정과 후속 갱신이 끝나면 완료된다.
      */
     update: async (id: string, input: Input): Promise<void> => {
+      const snapshot = await readBeforeWrite(id);
       try {
-        await updateDoc(doc(db, name, id), { ...input, updatedAt: serverTimestamp() });
+        await updateDoc(doc(getFirebaseDb(), name, id), { ...input, updatedAt: serverTimestamp() });
       } catch {
         throw new Error(`${label} 수정에 실패했습니다.`);
       }
       requestPublicRevalidate(cacheTag);
-      if (ragSourceType) await requestRagSync(ragSourceType, id);
+      await syncAfterWrite(id, snapshot, { id, ...input } as T);
     },
     /** 드래그 정렬 결과에 맞춰 `order` 필드만 갱신한다. */
     updateOrder: async (id: string, order: number): Promise<void> => {
       try {
-        await updateDoc(doc(db, name, id), { order, updatedAt: serverTimestamp() });
+        await updateDoc(doc(getFirebaseDb(), name, id), { order, updatedAt: serverTimestamp() });
       } catch {
         throw new Error("순서 저장에 실패했습니다.");
       }
@@ -120,13 +179,20 @@ const listCrud = <T extends WithId>(
      * @returns {Promise<void>} 상태 저장과 후속 갱신이 끝나면 완료된다.
      */
     setPublished: async (id: string, published: boolean): Promise<void> => {
+      const snapshot = await readBeforeWrite(id);
       try {
-        await updateDoc(doc(db, name, id), { published, updatedAt: serverTimestamp() });
+        await updateDoc(doc(getFirebaseDb(), name, id), {
+          published,
+          updatedAt: serverTimestamp(),
+        });
       } catch {
         throw new Error("공개 상태 변경에 실패했습니다.");
       }
       requestPublicRevalidate(cacheTag);
-      if (ragSourceType) await requestRagSync(ragSourceType, id);
+      // 이전 스냅샷의 published 값만 바꿔 정책에 전달한다. 스냅샷이 없으면
+      // syncAfterWrite 가 정책을 묻지 않으므로 after 는 쓰이지 않는다.
+      const after = snapshot?.before ? ({ ...snapshot.before, published } as T) : null;
+      await syncAfterWrite(id, snapshot, after);
     },
     /**
      * 문서를 삭제하고 공개 캐시와 RAG 문서를 갱신한다.
@@ -135,15 +201,17 @@ const listCrud = <T extends WithId>(
      * @returns {Promise<void>} 삭제와 후속 갱신이 끝나면 완료된다.
      */
     remove: async (id: string): Promise<void> => {
+      const snapshot = await readBeforeWrite(id);
       try {
-        await deleteDoc(doc(db, name, id));
+        await deleteDoc(doc(getFirebaseDb(), name, id));
       } catch {
         throw new Error(`${label} 삭제에 실패했습니다.`);
       }
       requestPublicRevalidate(cacheTag);
-      if (ragSourceType) await requestRagSync(ragSourceType, id);
+      await syncAfterWrite(id, snapshot, null);
     },
   };
 };
 
 export { listCrud };
+export type { PostSyncPolicy };

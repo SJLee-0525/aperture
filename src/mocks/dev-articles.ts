@@ -1,0 +1,488 @@
+import type { DevArticle } from "@/types/dev-article";
+
+/**
+ * Markdown 본문을 줄 단위로 조립한다.
+ * 본문에 fenced code block 이 들어가서 template literal 로 쓰면 backtick 을 전부 이스케이프해야 한다.
+ *
+ * @param {...string} rows 본문 한 줄씩. 빈 문자열이 빈 줄이다.
+ * @returns {string} 줄바꿈으로 이은 Markdown 원문.
+ */
+const body = (...rows: string[]): string => rows.join("\n");
+
+/**
+ * 본문 이미지 주소 — 실제 파일은 없지만 CSP·이미지 출처 정책이 허용하는 형태를 그대로 쓴다.
+ * 본문 이미지는 관리자 Storage origin 만 통과하므로(`markdown-url-policy`) 로컬 파일로 바꿀 수 없다.
+ */
+const storageImage = (articleId: string, name: string) =>
+  `https://firebasestorage.googleapis.com/v0/b/aperture-demo.appspot.com/o/dev-blog%2F${articleId}%2F${name}.webp?alt=media`;
+
+/**
+ * 본문 이미지 한 줄. title 자리의 크기는 실제 업로드가 적어 주는 값과 같은 형식이라,
+ * mock 으로도 이미지 도착 전 자리 예약을 확인할 수 있다.
+ *
+ * @param {string} alt 대체 텍스트.
+ * @param {string} articleId 글 ID.
+ * @param {string} name 파일 이름.
+ * @param {[number, number]} [size] 원본 픽셀 크기. 생략하면 크기를 모르는 옛 글이 된다.
+ * @returns {string} Markdown 한 줄.
+ */
+const bodyImage = (alt: string, articleId: string, name: string, size?: [number, number]): string =>
+  `![${alt}](${storageImage(articleId, name)}${size ? ` "${size[0]}x${size[1]}"` : ""})`;
+
+/**
+ * 대표 이미지는 저장소에 있는 샘플 파일을 쓴다. 목록 카드와 상세 hero 가 실제로 그려져야
+ * 레이아웃과 시각 회귀를 확인할 수 있다 — 본문 이미지와 달리 출처 정책을 지나지 않는다.
+ */
+const coverImage = (file: string, path: string) => ({
+  url: `/design-samples/${file}`,
+  path: `dev-blog/${path}/cover.webp`,
+  w: 1600,
+  h: 900,
+});
+
+/**
+ * 개발 블로그 mock — Firebase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
+ *
+ * 글 목록은 Markdown 계약의 경계 사례를 나눠 담는다. 한 글에 몰아넣으면
+ * 어느 규칙이 깨졌는지 실패 메시지에서 구분되지 않는다.
+ * - `serverless-portfolio` 긴 목차 · 같은 이름 heading · 표 · 본문 이미지와 caption · YouTube · 연관 프로젝트 여러 개
+ * - `code-block-themes` 주요 6개 언어 코드 블록 + 별칭·미지 언어 폴백
+ * - `first-note` 대표 이미지 없음 · 연관 프로젝트 없음 · 짧은 본문(읽기 시간 하한)
+ * - `css-modules-tokens` · `testing-boundary` 발행일이 같아 id 보조 정렬을 확인한다
+ * - `rag-chunking-draft` 초안 — 공개 getter 에서 빠져야 한다
+ *
+ * 공개 글은 목록 한 페이지 정원(8)을 넘겨 두 페이지가 되게 둔다. pagination 이 한 페이지에서만
+ * 돌면 페이지 이동과 URL 복원을 확인할 수 없다. 사전의 `accessibility` 태그는 어느 글도 쓰지
+ * 않는다 — 결과가 빈 태그 필터의 안내 화면을 확인하려는 것이다.
+ */
+const MOCK_DEV_ARTICLES: DevArticle[] = [
+  {
+    id: "serverless-portfolio",
+    slug: "serverless-portfolio",
+    title: {
+      ko: "서버 없이 포트폴리오를 운영한다",
+      en: "Running a portfolio without a server",
+    },
+    summary: {
+      ko: "관리자 한 명과 불특정 방문자만 있는 사이트에서 상시 가동 백엔드를 없앤 기록.",
+      en: "How a site with one admin and anonymous visitors dropped its always-on backend.",
+    },
+    body: body(
+      "개인 포트폴리오를 서버 없이 운영하기로 정하면서 세운 원칙과 그 결과를 정리했다.",
+      "",
+      "## 왜 서버를 두지 않았나",
+      "",
+      "방문자는 불특정 다수지만 쓰기를 하는 사람은 **한 명**이다.",
+      "이 비대칭이 크면 상시 가동 백엔드는 대부분의 시간을 대기로 보낸다.",
+      "",
+      "### 비용 구조",
+      "",
+      "| 항목 | 선택 | 월 비용 |",
+      "| --- | --- | --- |",
+      "| 호스팅 | Vercel Hobby | $0 |",
+      "| 데이터베이스 | Firestore | $0 |",
+      "| 이미지 | Firebase Storage | $0 |",
+      "",
+      "### 대신 포기한 것",
+      "",
+      "- 요청마다 달라지는 응답",
+      "  - 정적 우선 렌더와 ISR 재검증으로 대체했다",
+      "  - 캐시 태그를 콘텐츠 종류마다 나눴다",
+      "- 서버에서만 돌릴 수 있는 배치 작업",
+      "",
+      "## 보안 경계는 Rules 하나",
+      "",
+      "> 클라이언트의 인증 가드는 UX 편의일 뿐 보안이 아니다.",
+      "",
+      "`firebase-admin` 은 쓰지 않는다. 서비스 계정 키가 필요해지는 순간 *서버 없음* 이라는 전제가 깨진다.",
+      "",
+      bodyImage(
+        "Firestore 규칙 편집 화면과 관리자 UID 비교 함수",
+        "serverless-portfolio",
+        "rules",
+        [2048, 1152],
+      ),
+      "::caption[규칙을 바꾼 뒤에는 항상 emulator 로 먼저 확인한다]",
+      "",
+      "## 이미지 파이프라인",
+      "",
+      "브라우저에서 EXIF 를 먼저 읽고, 압축하고, Storage 에 직접 올린다.",
+      "순서를 바꾸면 압축 과정에서 촬영 정보가 사라진다.",
+      "",
+      "1. `exifr` 로 촬영 정보와 좌표 추출",
+      "2. 원본 크기 측정",
+      "3. WebP 3단 압축",
+      "4. Storage 업로드 후 주소를 Firestore 에 기록",
+      "",
+      // 크기를 적지 않은 옛 글의 이미지 — 임시 비율 폴백이 걸리는 쪽을 함께 남긴다.
+      bodyImage("업로드 전 3단 WebP 압축 결과 비교", "serverless-portfolio", "compression"),
+      "::caption[2048px 메인 · 960px 프리뷰 · 320px 썸네일]",
+      "",
+      "## 정리",
+      "",
+      "여기까지가 구조에 대한 결정이다.",
+      "",
+      "## 남은 일",
+      "",
+      "재검증 실패를 관리자에게 알리는 경로가 아직 없다.",
+      "",
+      "## 정리",
+      "",
+      "같은 제목을 한 번 더 뒀다. 목차와 본문 fragment 가 어떻게 갈라지는지 확인하려는 것이다.",
+      "",
+      '::youtube[https://www.youtube.com/watch?v=kX3nB7dQ2Ls]{title="배포 흐름 데모" source="직접 녹화"}',
+      "",
+      "---",
+      "",
+      "결정 기록은 [프로젝트 목록](/dev/projects)과 [Next.js 문서](https://nextjs.org/docs)에 나눠 뒀다.",
+    ),
+    cover: coverImage("wide1.png", "serverless-portfolio"),
+    coverAlt: {
+      ko: "Vercel 배포 로그와 Firestore 콘솔을 나란히 띄운 화면",
+      en: "A Vercel deployment log next to the Firestore console",
+    },
+    tags: ["nextjs", "firebase", "architecture"],
+    relatedProjectIds: ["portfolio", "photo-portfolio"],
+    published: true,
+    publishedAt: new Date("2026-05-18T09:00:00+09:00"),
+    firstPublishedAt: new Date("2026-05-18T09:00:00+09:00"),
+    createdAt: new Date("2026-05-10T21:12:00+09:00"),
+    updatedAt: new Date("2026-05-22T11:40:00+09:00"),
+  },
+  {
+    id: "code-block-themes",
+    slug: "code-block-themes",
+    title: {
+      ko: "코드 블록을 라이트·다크 양쪽에서 읽히게",
+      en: "Making code blocks readable in both themes",
+    },
+    summary: {
+      ko: "서버에서만 색을 입히고 브라우저에는 문법을 보내지 않는 방법.",
+      en: "Colouring code on the server so the browser never downloads a grammar.",
+    },
+    body: body(
+      "하이라이팅을 브라우저에서 하면 언어 문법이 전부 번들에 들어간다.",
+      "서버에서 토큰을 만들고 색만 넘기면 그 비용이 사라진다.",
+      "",
+      "## 지원하는 언어",
+      "",
+      "```javascript",
+      "const slugify = (text) => text.trim().toLowerCase().replace(/\\s+/g, '-');",
+      "```",
+      "",
+      "```typescript",
+      "type Heading = { id: string; depth: 2 | 3; text: string };",
+      "",
+      "const toc = (headings: Heading[]) => headings.filter((item) => item.depth <= 3);",
+      "```",
+      "",
+      "```java",
+      "public record Heading(String id, int depth, String text) {",
+      "    boolean inToc() {",
+      "        return depth <= 3;",
+      "    }",
+      "}",
+      "```",
+      "",
+      "```c",
+      "#include <stdio.h>",
+      "",
+      "int main(void) {",
+      '    printf("%s\\n", "heading");',
+      "    return 0;",
+      "}",
+      "```",
+      "",
+      "```cpp",
+      "#include <string>",
+      "#include <vector>",
+      "",
+      "std::vector<std::string> ids(const std::vector<std::string>& headings);",
+      "```",
+      "",
+      "```python",
+      "def reading_minutes(cjk: int, words: int, code_lines: int) -> int:",
+      "    return max(1, ceil(cjk / 500 + words / 265 + code_lines / 20))",
+      "```",
+      "",
+      "## 별칭과 폴백",
+      "",
+      "`js`, `ts`, `py` 처럼 흔한 별칭은 한 곳에서 정규화한다.",
+      "표에 없는 언어는 색 없이 그대로 보여준다.",
+      "",
+      "```brainfuck",
+      "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]",
+      "```",
+      "",
+      "언어를 적지 않은 블록도 같은 취급이다.",
+      "",
+      "```",
+      "npm run build",
+      "```",
+    ),
+    cover: coverImage("wide3.png", "code-block-themes"),
+    coverAlt: {
+      ko: "같은 코드 블록을 라이트 테마와 다크 테마로 나란히 띄운 화면",
+      en: "The same code block shown side by side in light and dark themes",
+    },
+    tags: ["typescript", "css"],
+    relatedProjectIds: ["portfolio"],
+    published: true,
+    publishedAt: new Date("2026-04-02T20:30:00+09:00"),
+    firstPublishedAt: new Date("2026-04-02T20:30:00+09:00"),
+    createdAt: new Date("2026-03-28T22:05:00+09:00"),
+    updatedAt: new Date("2026-04-02T20:30:00+09:00"),
+  },
+  {
+    id: "css-modules-tokens",
+    slug: "css-modules-tokens",
+    title: {
+      ko: "섹션 액센트를 변수 하나로 바꾼다",
+      en: "Switching section accents with a single variable",
+    },
+    summary: {
+      ko: "사진·음악·개발이 색을 하드코딩하지 않고 같은 컴포넌트를 쓰는 방법.",
+      en: "How photo, music and dev share components without hard-coded colours.",
+    },
+    body: body(
+      "컴포넌트는 `--accent` 만 읽는다. 어떤 색인지는 최상위 `html[data-section]` 이 정한다.",
+      "",
+      "## 규칙",
+      "",
+      "- 섹션별 색을 컴포넌트에 적지 않는다",
+      "- 다크 모드는 `[data-theme]` 에서만 다시 정의한다",
+      "- 새 색이 필요하면 토큰을 먼저 만든다",
+      "",
+      "라우트가 바뀔 때 속성 하나만 갈아 끼우면 화면 전체의 강조색이 따라온다.",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["css", "architecture"],
+    relatedProjectIds: ["design-system"],
+    published: true,
+    publishedAt: new Date("2026-01-20T10:00:00+09:00"),
+    firstPublishedAt: new Date("2026-01-20T10:00:00+09:00"),
+    createdAt: new Date("2026-01-18T09:30:00+09:00"),
+    updatedAt: new Date("2026-01-20T10:00:00+09:00"),
+  },
+  {
+    id: "testing-boundary",
+    slug: "testing-boundary",
+    title: {
+      ko: "무엇을 단위 테스트로 고정할지 정한다",
+      en: "Deciding what to pin down with unit tests",
+    },
+    summary: {
+      ko: "순수 함수는 단위 테스트로, 화면 계약은 E2E 로 나눈 기준.",
+      en: "Pure functions go to unit tests, screen contracts go to E2E.",
+    },
+    body: body(
+      "테스트를 늘리는 것보다 **무엇을 어디서 고정할지** 정하는 편이 오래 간다.",
+      "",
+      "## 나눈 기준",
+      "",
+      "1. 입력과 출력이 값으로 끝나면 단위 테스트",
+      "2. 브라우저 동작이 걸리면 E2E",
+      "3. 둘 다 아니면 테스트 대신 타입으로 막는다",
+      "",
+      "> 화면을 열어야만 알 수 있는 것을 단위 테스트로 흉내 내지 않는다.",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["testing"],
+    relatedProjectIds: [],
+    published: true,
+    publishedAt: new Date("2026-01-20T10:00:00+09:00"),
+    firstPublishedAt: new Date("2026-01-20T10:00:00+09:00"),
+    createdAt: new Date("2026-01-19T14:00:00+09:00"),
+    updatedAt: new Date("2026-01-21T08:15:00+09:00"),
+  },
+  {
+    id: "first-note",
+    slug: "first-note",
+    title: { ko: "블로그를 여는 짧은 기록", en: "A short note to open the blog" },
+    summary: {
+      ko: "무엇을 쓸지, 무엇을 쓰지 않을지 먼저 적어 둔다.",
+      en: "Writing down what belongs here, and what does not.",
+    },
+    body: body(
+      "여기에는 만들면서 실제로 막혔던 지점만 적는다.",
+      "",
+      "## 쓰지 않는 것",
+      "",
+      "- 읽은 문서를 그대로 옮긴 요약",
+      "- 실행해 보지 않은 결론",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["retrospective"],
+    relatedProjectIds: [],
+    published: true,
+    publishedAt: new Date("2026-02-11T18:45:00+09:00"),
+    firstPublishedAt: new Date("2026-02-11T18:45:00+09:00"),
+    createdAt: new Date("2026-02-11T18:20:00+09:00"),
+    updatedAt: new Date("2026-02-11T18:45:00+09:00"),
+  },
+  {
+    id: "isr-revalidate-tags",
+    slug: "isr-revalidate-tags",
+    title: {
+      ko: "캐시 태그를 콘텐츠 종류로 나눈다",
+      en: "Splitting cache tags by content type",
+    },
+    summary: {
+      ko: "한 번의 저장이 사이트 전체를 다시 만들지 않게 한 기준.",
+      en: "Keeping one save from rebuilding the whole site.",
+    },
+    body: body(
+      "저장할 때마다 전체를 재검증하면 무료 한도가 먼저 바닥난다.",
+      "",
+      "## 나눈 단위",
+      "",
+      "- 목록과 상세를 다른 태그로 둔다",
+      "- 설정 문서는 그 화면만 무효화한다",
+      "",
+      "재검증이 실패해도 저장은 되돌리지 않는다. 실패는 관리자에게 알린다.",
+    ),
+    cover: coverImage("wide2.png", "isr-revalidate-tags"),
+    coverAlt: {
+      ko: "재검증 요청과 응답을 나열한 네트워크 탭",
+      en: "A network tab listing revalidation requests and responses",
+    },
+    tags: ["nextjs", "architecture"],
+    relatedProjectIds: ["portfolio"],
+    published: true,
+    publishedAt: new Date("2026-06-20T21:00:00+09:00"),
+    firstPublishedAt: new Date("2026-06-20T21:00:00+09:00"),
+    createdAt: new Date("2026-06-18T20:10:00+09:00"),
+    updatedAt: new Date("2026-06-20T21:00:00+09:00"),
+  },
+  {
+    id: "firestore-composite-index",
+    slug: "firestore-composite-index",
+    title: {
+      ko: "정렬을 바꾸면 인덱스도 함께 바뀐다",
+      en: "Changing a sort order changes the index too",
+    },
+    summary: {
+      ko: "발행일 내림차순에 id 보조 정렬을 붙이며 배운 것.",
+      en: "What a secondary id sort taught me about composite indexes.",
+    },
+    body: body(
+      "발행일만으로 정렬하면 같은 시각의 글이 요청마다 다른 순서로 나온다.",
+      "",
+      "## 보조 정렬이 필요한 이유",
+      "",
+      "페이지 경계가 흔들리면 2페이지에서 이미 본 글이 다시 나온다.",
+      "쿼리와 인덱스 양쪽에 문서 id 정렬을 함께 적었다.",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["firebase"],
+    relatedProjectIds: [],
+    published: true,
+    publishedAt: new Date("2026-03-15T19:20:00+09:00"),
+    firstPublishedAt: new Date("2026-03-15T19:20:00+09:00"),
+    createdAt: new Date("2026-03-14T22:40:00+09:00"),
+    updatedAt: new Date("2026-03-15T19:20:00+09:00"),
+  },
+  {
+    id: "mock-first-admin",
+    slug: "mock-first-admin",
+    title: {
+      ko: "Firebase 계정 없이 관리자 화면을 만든다",
+      en: "Building the admin screens without a Firebase account",
+    },
+    summary: {
+      ko: "저장소 경계를 하나 두고 로컬 저장소 구현을 끼운 기록.",
+      en: "Adding one repository boundary and plugging in local storage behind it.",
+    },
+    body: body(
+      "화면은 지금 저장이 어디로 가는지 몰라야 한다.",
+      "",
+      "## 경계를 어디에 뒀나",
+      "",
+      "컬렉션마다 저장소 모듈을 두고 mock 과 실제 구현 중 하나를 고른다.",
+      "화면과 훅은 그 결과만 받는다.",
+      "",
+      "## 남는 문제",
+      "",
+      "업로드한 이미지는 새로고침하면 사라진다. objectURL 이라 그렇다.",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["architecture", "testing"],
+    relatedProjectIds: ["portfolio"],
+    published: true,
+    publishedAt: new Date("2026-02-28T13:05:00+09:00"),
+    firstPublishedAt: new Date("2026-02-28T13:05:00+09:00"),
+    createdAt: new Date("2026-02-26T09:15:00+09:00"),
+    updatedAt: new Date("2026-03-01T10:30:00+09:00"),
+  },
+  {
+    id: "webp-three-sizes",
+    slug: "webp-three-sizes",
+    title: {
+      ko: "이미지를 세 벌로 저장하는 이유",
+      en: "Why every image is stored three times",
+    },
+    summary: {
+      ko: "목록·상세·썸네일이 같은 파일을 쓰면 대역폭이 먼저 소진된다.",
+      en: "Serving one file everywhere burns the bandwidth quota first.",
+    },
+    body: body(
+      "그리드 한 화면에 2048px 원본을 스무 장 내려보내면 무료 한도가 하루를 못 간다.",
+      "",
+      "## 세 벌의 쓰임",
+      "",
+      "1. 메인 2048px — 상세와 내보내기",
+      "2. 프리뷰 960px — 목록 카드",
+      "3. 썸네일 320px — 관리자 목록",
+      "",
+      "압축은 업로드 전에 브라우저에서 끝낸다.",
+    ),
+    cover: coverImage("wide4.png", "webp-three-sizes"),
+    coverAlt: {
+      ko: "같은 사진을 세 가지 크기로 저장한 Storage 폴더",
+      en: "A storage folder holding the same photo in three sizes",
+    },
+    tags: ["firebase", "css"],
+    relatedProjectIds: ["photo-portfolio"],
+    published: true,
+    publishedAt: new Date("2025-12-05T11:50:00+09:00"),
+    firstPublishedAt: new Date("2025-12-05T11:50:00+09:00"),
+    createdAt: new Date("2025-12-03T20:00:00+09:00"),
+    updatedAt: new Date("2025-12-05T11:50:00+09:00"),
+  },
+  {
+    id: "rag-chunking-draft",
+    slug: "rag-chunking-draft",
+    title: {
+      ko: "긴 글을 어떤 단위로 잘라 임베딩할까",
+      en: "Choosing a chunk size for long articles",
+    },
+    summary: {
+      ko: "제목 단위로 자를 때와 문단 단위로 자를 때의 검색 품질 차이.",
+      en: "Search quality when chunking by heading versus by paragraph.",
+    },
+    body: body(
+      "아직 정리 중인 초안이다.",
+      "",
+      "## 지금까지 확인한 것",
+      "",
+      "- heading 단위는 문맥이 살지만 청크가 길어진다",
+      "- 코드 블록은 그대로 넣으면 예산을 금방 쓴다",
+    ),
+    cover: null,
+    coverAlt: null,
+    tags: ["architecture"],
+    relatedProjectIds: ["aidap"],
+    published: false,
+    publishedAt: null,
+    firstPublishedAt: null,
+    createdAt: new Date("2026-06-02T23:10:00+09:00"),
+    updatedAt: new Date("2026-06-04T00:25:00+09:00"),
+  },
+];
+
+export { MOCK_DEV_ARTICLES };

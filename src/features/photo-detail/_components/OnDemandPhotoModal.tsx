@@ -5,15 +5,18 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
-import { useLang } from "@/features/lang/_hooks/use-lang";
 import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanelSkeleton";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useOnDemandPhotoDetails } from "@/features/photo-detail/_hooks/use-on-demand-photo-details";
 import { usePhotoDetailSession } from "@/features/photo-detail/_hooks/use-photo-detail-session";
-import { useMounted } from "@/hooks/use-mounted";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useMounted } from "@/hooks/use-mounted";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
-import type { Tag } from "@/types/tag";
+
 import { setCursorLoading } from "@/utils/custom-cursor-events";
+
+import type { Tag } from "@/types/tag";
 
 import styles from "./OnDemandPhotoModal.module.css";
 

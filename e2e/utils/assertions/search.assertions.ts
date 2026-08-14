@@ -12,7 +12,11 @@ const searchAssertions = {
     await search.getByRole(mobile ? "textbox" : "combobox").fill("포트폴리오");
     await search.getByRole("button", { name: /검색/ }).click();
 
-    await expect(page).toHaveURL(/\/ko\/search\?q=%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4$/);
+    // dev 서버가 다른 라우트를 컴파일 중이면 클라이언트 내비게이션의 RSC 응답이 그 뒤에 줄 선다.
+    // admin 스펙과 같은 여유값 — 사전 빌드된 프로덕션 실행에서는 그대로 즉시 통과한다.
+    await expect(page).toHaveURL(/\/ko\/search\?q=%ED%8F%AC%ED%8A%B8%ED%8F%B4%EB%A6%AC%EC%98%A4$/, {
+      timeout: 30_000,
+    });
     await expect(page.getByRole("heading", { name: "“포트폴리오”" })).toBeVisible();
     await expect(page.getByRole("link", { name: /개인 포트폴리오/ })).toBeVisible();
 

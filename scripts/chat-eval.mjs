@@ -93,6 +93,26 @@ const CASES = [
     expectsLookup: true,
     extended: true,
   },
+  {
+    id: "blog-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "블로그에 어떤 글을 썼어?" }],
+    expectsLookup: true,
+    referenceType: "article",
+  },
+  {
+    // 열린 글의 화면 문맥. 우선 검색(prioritize)까지는 mock 으로 증명할 수 없다 —
+    // 그 계약은 rag-search 단위 테스트와 live 로그의 prioritize 표기가 맡는다.
+    id: "screen-article-ko",
+    lang: "ko",
+    messages: [{ role: "user", content: "이 글 요약해 줘" }],
+    context: {
+      pathname: "/ko/dev/articles/serverless-portfolio",
+      openTarget: { type: "article", id: "serverless-portfolio" },
+    },
+    expectsLookup: true,
+    extended: true,
+  },
   // 사진 필터 링크(§2) — 조건 질문에 모델이 검증 가능한 필터 URL을 생성해야 한다.
   {
     id: "filter-link-focal-ko",

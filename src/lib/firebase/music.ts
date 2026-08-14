@@ -7,13 +7,12 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
 import { firestoreDocumentCacheTag } from "@/constants/cache";
+import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
-
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { db } from "@/lib/firebase/client";
+import { getFirebaseDb } from "@/lib/firebase/client";
 import { listCrud } from "@/lib/firebase/list-crud";
 import { deleteMusicWorkImages } from "@/lib/firebase/storage";
 import { asText } from "@/lib/i18n/as-text";
@@ -124,7 +123,7 @@ const musicMedia = listCrud<MusicMedia>(
  */
 const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
   try {
-    const snap = await getDoc(doc(db, COLLECTIONS.SITE, SITE_MUSIC_DOC));
+    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_MUSIC_DOC));
     if (!snap.exists()) return EMPTY_MUSIC_CONFIG;
     const d = snap.data();
     return { intro: asText(d.intro), career: d.career ?? [], education: d.education ?? [] };
@@ -141,7 +140,7 @@ const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
  */
 const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
   try {
-    await setDoc(doc(db, COLLECTIONS.SITE, SITE_MUSIC_DOC), {
+    await setDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_MUSIC_DOC), {
       ...config,
       updatedAt: serverTimestamp(),
     });

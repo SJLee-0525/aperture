@@ -1,7 +1,8 @@
 "use client";
 
-import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 import { syncBrowserThemeColor } from "@/features/theme/_lib/browser-theme-color";
+
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 /**
  * 테마 상태의 단일 원천은 React state가 아니라 html[data-theme] 속성.

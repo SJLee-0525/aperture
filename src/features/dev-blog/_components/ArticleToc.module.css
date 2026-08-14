@@ -1,0 +1,82 @@
+/* 챗봇 런처와 겹치지 않게 아래쪽에 비워 둘 높이 — 런처 크기 + 아래 여백 + 최소 간격. */
+.dock {
+  --article-toc-clearance: calc(var(--chat-launcher-size) + var(--s-6) + var(--s-4));
+
+  position: fixed;
+  top: 50%;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  max-height: calc(100dvh - var(--article-toc-clearance) * 2);
+  transform: translateY(-50%);
+  opacity: 0;
+  /* 보이지 않는 동안에는 Tab 순서에서도 빠져야 한다 — 투명한 버튼에 포커스가 가면
+     화면에는 아무것도 없는데 "목차 열기"가 읽힌다. */
+  visibility: hidden;
+  transition:
+    opacity var(--dur) var(--ease),
+    visibility var(--dur) var(--ease);
+}
+.dock[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+/* 펼친 동안에는 패널 둘레로 보이지 않는 여유를 둔다 — 항목을 고르려고 대각선으로 움직이다
+   경계를 살짝 벗어나도 닫히지 않는다. 접혀 있을 때는 이 여유가 본문 클릭을 가로막으므로 두지 않는다. */
+.dock[data-expanded="true"] {
+  padding: var(--s-5) 0 var(--s-5) var(--s-8);
+}
+
+/* 확장 패널은 눈금 왼쪽으로 자란다 — 본문 위를 덮되 폭을 빼앗지는 않는다.
+   여닫힘은 `hidden`(= display:none)이 아니라 data 속성으로 가른다. display 는 전환할 수 없어
+   `hidden` 으로는 패널이 그 자리에서 튀어나왔다 사라진다. `allow-discrete` 로 display 를
+   전환 목록에 넣으면 열 때는 곧바로 자리를 잡고 닫을 때는 페이드가 끝난 뒤 빠진다.
+   닫힌 동안 display:none 인 것은 그대로라 Tab 순서와 낭독기 트리에서도 빠진다.
+
+   ⚠️ `allow-discrete` 와 `@starting-style` 은 Chrome 117 · Safari 17.4 · Firefox 129 이상이다.
+   그 아래에서는 애니메이션만 생략되고 여닫힘 자체는 그대로 동작한다(진행형 향상). 
+   더 넓은 지원이 필요해지면 `motion` 으로 옮긴다 — 지금은 이 정도 움직임에 라이브러리를 붙이지 않는다. */
+.panel {
+  order: -1;
+  display: none;
+  width: min(280px, 48vw);
+  max-height: calc(100dvh - var(--article-toc-clearance) * 2);
+  padding: var(--s-3) 0;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop);
+  opacity: 0;
+  /* 눈금이 있는 오른쪽에서 밀려 나온다 — 어디서 자란 패널인지 방향으로 읽힌다. */
+  transform: translateX(6px);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    display var(--dur) allow-discrete;
+}
+.panel[data-open="true"] {
+  /* 세로 flex 라야 안쪽 목록이 패널 높이에 맞춰 줄고 스크롤한다. */
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transform: none;
+}
+/* 막 나타나는 프레임의 시작값. 없으면 전환 없이 완성 상태가 그대로 그려진다. */
+@starting-style {
+  .panel[data-open="true"] {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock,
+  .panel {
+    transition: none;
+  }
+  .panel {
+    transform: none;
+  }
+}

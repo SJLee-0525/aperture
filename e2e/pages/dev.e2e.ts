@@ -13,6 +13,24 @@ test.describe("Dev", () => {
     await commonAssertions.dialogOpened(page, "개인 포트폴리오");
   });
 
+  test("프로젝트 모달에서 이 프로젝트를 지목한 글로 이동한다", async ({ page }) => {
+    await page.goto("/ko/dev/projects?project=portfolio");
+    const dialog = page.getByRole("dialog", { name: "개인 포트폴리오" });
+    await expect(dialog.getByText("연관 글")).toBeVisible();
+
+    await dialog.getByRole("link", { name: "서버 없이 포트폴리오를 운영한다" }).click();
+
+    await expect(page).toHaveURL(/\/ko\/dev\/articles\/serverless-portfolio$/);
+  });
+
+  test("연관 글이 없는 프로젝트 모달에는 그 영역이 없다", async ({ page }) => {
+    await page.goto("/ko/dev/projects?project=realtime-dashboard");
+    const dialog = page.getByRole("dialog", { name: "실시간 협업 대시보드" });
+    await expect(dialog.getByText("기술 스택")).toBeVisible();
+
+    await expect(dialog.getByText("연관 글")).toHaveCount(0);
+  });
+
   test("직접 진입한 프로젝트 모달을 닫아도 프로젝트 페이지에 머문다", async ({ page }) => {
     await page.goto("/ko/dev/projects?project=portfolio");
     await commonAssertions.dialogOpened(page, "개인 포트폴리오");

@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import type { LocalizedText } from "@/types/localized";
-import type { SiteLink } from "@/types/site";
-
-import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
+import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
+
+import type { LocalizedText } from "@/types/localized";
+import type { SiteLink } from "@/types/site";
 
 type Status = "loading" | "ready" | "error";
 
@@ -32,7 +32,8 @@ const useGlobalAdmin = () => {
 
   useEffect(() => {
     let alive = true;
-    getSiteConfig()
+    getSiteConfigRepository()
+      .get()
       .then((loaded) => {
         if (!alive) return;
         setTagline(loaded.tagline);
@@ -94,7 +95,12 @@ const useGlobalAdmin = () => {
     setSaving(true);
     try {
       const preparedLinks = preparePublicLinks(links, { allowMailto: true });
-      await updateSiteConfigFields({ tagline, landingLead, contactLead, links: preparedLinks });
+      await getSiteConfigRepository().updateFields({
+        tagline,
+        landingLead,
+        contactLead,
+        links: preparedLinks,
+      });
       setLinks(preparedLinks);
       setSaved(true);
     } catch (caught) {

@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
+import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
 
 import { ROUTES } from "@/constants/routes";
-import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
 
 import styles from "./AdminSiteEditor.module.css";
 
@@ -36,24 +39,22 @@ const AdminSitePage = () => {
           <section className={styles.section}>
             <h2 className={styles.legend}>바이오 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>
-              <label className={styles.field}>
-                <span className={styles.label}>바이오 (한국어)</span>
-                <textarea
-                  className={styles.textarea}
+              <AdminField label="바이오 (한국어)">
+                <AdminInput
+                  multiline
                   rows={6}
                   value={bio.ko}
                   onChange={(e) => editBio("ko", e.target.value)}
                 />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>바이오 (English)</span>
-                <textarea
-                  className={styles.textarea}
+              </AdminField>
+              <AdminField label="바이오 (English)">
+                <AdminInput
+                  multiline
                   rows={6}
                   value={bio.en}
                   onChange={(e) => editBio("en", e.target.value)}
                 />
-              </label>
+              </AdminField>
             </div>
           </section>
 
@@ -66,12 +67,12 @@ const AdminSitePage = () => {
           {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.save} onClick={save} disabled={saving}>
+            <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
-            </button>
-            <Link href={ROUTES.ADMIN_PHOTO} className={styles.cancel}>
+            </AdminButton>
+            <AdminButton variant="secondary" href={ROUTES.ADMIN_PHOTO} disabled={saving}>
               취소
-            </Link>
+            </AdminButton>
           </div>
         </>
       ) : null}

@@ -1,5 +1,6 @@
-import type { Album } from "@/types/album";
 import { imagePreviewUrl, type ImageMeta } from "@/types/image";
+
+import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 
 /**

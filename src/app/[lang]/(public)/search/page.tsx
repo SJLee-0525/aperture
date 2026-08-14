@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { SearchPageSkeleton } from "@/components/PublicPageSkeletons";
 import { SearchResults } from "@/features/search/_components/SearchResults";
+
 import { fetchSearchDocuments } from "@/features/search/_lib/fetch-search-documents";
+
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 type Props = { params: Promise<{ lang: Lang }> };
 

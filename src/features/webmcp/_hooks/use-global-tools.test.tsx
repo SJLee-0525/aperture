@@ -96,6 +96,19 @@ describe("useGlobalTools", () => {
     expect(result).toBe("Recipedia · dev · /ko/dev/projects?project=1");
   });
 
+  it("블로그 글은 subsection 까지 붙여 프로젝트와 구분한다", async () => {
+    search.loadSearchIndex.mockResolvedValue([
+      {
+        ...documentOf("article-1", "dev", "Chunking", "/dev/articles/chunking"),
+        subsection: "blog",
+      },
+    ]);
+    renderHook(() => useGlobalTools(PROFILE));
+
+    const result = await executeOf("search_portfolio")({ query: "chunking" });
+    expect(result).toBe("Chunking · dev/blog · /ko/dev/articles/chunking");
+  });
+
   it("section 인자로 결과를 제한한다", async () => {
     search.loadSearchIndex.mockResolvedValue([
       documentOf("photo-1", "photo", "Seoul", "/photo?photo=1"),
@@ -132,6 +145,8 @@ describe("useGlobalTools", () => {
     expect(full).toContain("photos: /ko/photo");
     expect(full).toContain("performances: /ko/music");
     expect(full).toContain("projects: /ko/dev/projects");
+    // 블로그 도구는 /dev/articles 에서만 등록되므로 전역 사이트 지도가 그 경로를 알려야 한다.
+    expect(full).toContain("blog: /ko/dev/articles");
     // 하위 페이지까지 알려야 에이전트가 어디로 가야 할지 안다(수상 경력은 career 페이지).
     expect(full).toContain("career and awards: /ko/music/career");
     expect(full).toContain("albums: /ko/photo/albums");

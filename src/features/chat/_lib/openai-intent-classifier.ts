@@ -1,5 +1,5 @@
-import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 import type { ChatIntent, ProfileSection } from "@/features/chat/_lib/chat-intent";
+import type { ChatRequestMessage } from "@/features/chat/_lib/chat-schema";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const CLASSIFIER_HISTORY_LIMIT = 6;

@@ -88,18 +88,16 @@ jobs:
           # E2E와 Lighthouse가 동일한 프로덕션 빌드를 재사용한다.
           NEXT_DIST_DIR: .next-playwright-v7
           NEXT_PUBLIC_USE_MOCK: "1"
+          # 프로덕션 + mock 조합은 next.config.ts 가 막는다. 재현 가능한 화면이 필요한 이 빌드만
+          # 서버 전용 탈출구를 켠다 — NEXT_PUBLIC_ 이 아니라 브라우저 번들에는 들어가지 않는다.
+          APERTURE_E2E_ALLOW_PRODUCTION_MOCK: "1"
           # NEXT_PUBLIC 값은 빌드 시 고정된다. 일반 E2E는 저장된 거부 상태로 배너를
           # 숨기고, 분석 동의 전용 스펙만 저장값을 제거해 이 테스트 ID를 사용한다.
           NEXT_PUBLIC_GA_ID: G-E2ETEST
           NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0"
-          # 사전 렌더링 중 Client Component도 평가되므로, E2E 콘텐츠가 mock을 사용하더라도
-          # Firebase Auth에는 문법적으로 유효한 공개 웹 설정이 필요하다.
-          NEXT_PUBLIC_FIREBASE_API_KEY: ci-mock-api-key
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-mock.firebaseapp.com
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-mock
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ci-mock.appspot.com
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
-          NEXT_PUBLIC_FIREBASE_APP_ID: "1:000000000000:web:0000000000000000000000"
+          # Firebase 공개 설정은 넣지 않는다. lib/firebase/client 가 Auth·Firestore·Storage 를
+          # 호출 시점에 만들어, 사전 렌더링이 Client Component 를 평가해도 설정을 요구하지 않는다.
+          # 이 잡이 더미 키 없이 통과하는 것이 그 지연이 살아 있다는 증거다.
 
       - name: Upload production build
         uses: actions/upload-artifact@v4
@@ -170,7 +168,9 @@ jobs:
           path: .next-playwright-v7
 
       - name: Run production E2E
-        run: npm run test:e2e
+        # 이 잡은 build 잡의 산출물을 내려받아 쓴다 — 다시 빌드하지 않는 :ci 변형을 쓴다.
+        # (로컬 기본 test:e2e 는 --production --build 라 산출물을 새로 만든다.)
+        run: npm run test:e2e:ci
         env:
           CI: "1"
           E2E_PRODUCTION: "1"
@@ -183,6 +183,50 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-reports
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # 관리자 화면은 위 프로덕션 잡에서 돌 수 없다. AuthGuard 를 여는
+  # NEXT_PUBLIC_ADMIN_TEST_SESSION 은 번들에 박히는 빌드 시점 값인데
+  # lib/auth/test-admin-session.ts 가 프로덕션 빌드에서 그 값을 금지한다 — 인증 우회가
+  # 배포에 섞이지 않게 하려고 둔 가드다. 그래서 dev 서버로 이 디렉터리만 따로 돌린다.
+  admin-e2e:
+    name: Admin E2E
+    # 픽셀 비교가 없는 스펙이라 기준 이미지 OS 를 맞출 필요가 없다.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run admin E2E on the dev server
+        # --production 을 주지 않는다. e2e/run.cjs 가 dev 서버를 띄우고
+        # NEXT_PUBLIC_ADMIN_TEST_SESSION=1 을 켠다.
+        run: node e2e/run.cjs e2e/admin
+        env:
+          CI: "1"
+
+      - name: Upload Playwright reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reports-admin
           path: |
             playwright-report
             test-results
@@ -227,6 +271,8 @@ jobs:
         env:
           NEXT_DIST_DIR: .next-playwright-v7
           NEXT_PUBLIC_USE_MOCK: "1"
+          # next start 도 next.config.ts 를 읽으므로 서버 실행에도 탈출구가 필요하다.
+          APERTURE_E2E_ALLOW_PRODUCTION_MOCK: "1"
 
       - name: Upload Lighthouse reports
         # 기준 미달로 실패하더라도 분석할 수 있도록 결과를 업로드한다.

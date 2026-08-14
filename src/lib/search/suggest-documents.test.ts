@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import type { SearchDocument, SearchSection } from "@/types/search";
 import { SUGGESTION_LIMIT, suggestDocuments } from "@/lib/search/suggest-documents";
 import { choseongOf } from "@/lib/text/choseong";
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
+
+import type { SearchDocument, SearchSection } from "@/types/search";
 
 /**
  * 서버(search-documents)와 같은 정규화 경로로 픽스처 문서를 만든다.

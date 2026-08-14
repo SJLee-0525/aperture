@@ -1,0 +1,48 @@
+.list {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* grid 항목은 기본이 min-width:auto 라 말줄임 대상 텍스트가 트랙을 밀어낸다. */
+.list > li {
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  min-width: 0;
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: inherit;
+  transition: border-color var(--dur) var(--ease);
+}
+.row:hover {
+  border-color: var(--accent);
+}
+
+.title {
+  flex: 1;
+  overflow: hidden;
+  font-size: var(--t-small);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  flex: none;
+  color: var(--text-3);
+  font-size: var(--t-micro);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

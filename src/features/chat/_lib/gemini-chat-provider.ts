@@ -9,6 +9,7 @@ import {
   ChatUpstreamError,
 } from "@/features/chat/_lib/chat-upstream-error";
 import { readSseStream } from "@/features/chat/_lib/sse-stream";
+
 import type { ChatProvider } from "@/features/chat/_lib/chat-provider";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";

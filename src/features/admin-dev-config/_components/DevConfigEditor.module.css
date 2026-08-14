@@ -51,34 +51,6 @@
   gap: var(--s-4);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-}
-.label {
-  font-size: var(--t-label);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: var(--text-3);
-}
-.textarea {
-  padding: var(--s-3);
-  background: var(--surface-1);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-size: var(--t-body);
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  resize: vertical;
-  transition: border-color var(--dur) var(--ease);
-}
-.textarea:focus-visible {
-  outline: none;
-  border-color: var(--accent);
-}
-
 .list {
   display: flex;
   flex-direction: column;
@@ -86,26 +58,6 @@
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.add {
-  flex: none;
-  height: 36px;
-  padding: 0 var(--s-4);
-  background: transparent;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text-2);
-  font-size: var(--t-small);
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-.add:hover {
-  border-color: var(--accent);
-  color: var(--accent);
 }
 
 .state {
@@ -120,46 +72,6 @@
 .actions {
   display: flex;
   gap: var(--s-3);
-}
-.save {
-  height: 44px;
-  padding: 0 var(--s-6);
-  background: var(--accent);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: var(--r-sm);
-  font-size: var(--t-body);
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background var(--dur) var(--ease),
-    opacity var(--dur) var(--ease);
-}
-.save:hover:not(:disabled) {
-  background: var(--accent-press);
-}
-.save:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.cancel {
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--s-5);
-  background: transparent;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text-2);
-  font-size: var(--t-body);
-  cursor: pointer;
-  transition:
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-.cancel:hover {
-  border-color: var(--text-3);
-  color: var(--text);
 }
 
 @media (max-width: 640px) {

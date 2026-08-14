@@ -9,11 +9,13 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import Link from "next/link";
+
+import { AdminButton } from "@/components/AdminButton";
+import { PhotoRow } from "@/features/admin-photos/_components/PhotoRow";
+
+import { usePhotosAdmin } from "@/features/admin-photos/_hooks/use-photos-admin";
 
 import { ROUTES } from "@/constants/routes";
-import { PhotoRow } from "@/features/admin-photos/_components/PhotoRow";
-import { usePhotosAdmin } from "@/features/admin-photos/_hooks/use-photos-admin";
 
 import styles from "./AdminPhotosList.module.css";
 
@@ -40,9 +42,14 @@ const AdminPhotosPage = () => {
             드래그로 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다.
           </p>
         </div>
-        <Link href={ROUTES.ADMIN_PHOTO_NEW} className={styles.newBtn}>
+        <AdminButton
+          variant="primary"
+          size="sm"
+          href={ROUTES.ADMIN_PHOTO_NEW}
+          className={styles.newBtn}
+        >
           + 새 사진
-        </Link>
+        </AdminButton>
       </header>
 
       {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
@@ -56,9 +63,14 @@ const AdminPhotosPage = () => {
       {status === "ready" && photos.length === 0 ? (
         <div className={styles.empty}>
           <p>아직 사진이 없습니다.</p>
-          <Link href={ROUTES.ADMIN_PHOTO_NEW} className={styles.newBtn}>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            href={ROUTES.ADMIN_PHOTO_NEW}
+            className={styles.newBtn}
+          >
             + 첫 사진 추가
-          </Link>
+          </AdminButton>
         </div>
       ) : null}
 

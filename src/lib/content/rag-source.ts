@@ -1,11 +1,15 @@
 import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
-
 import {
   fetchDevConfig,
   fetchPublishedDevProjects,
   toDevConfig,
   toDevProject,
 } from "@/lib/firebase/public/dev";
+import {
+  fetchDevArticleTags,
+  fetchPublishedDevArticles,
+  toDevArticle,
+} from "@/lib/firebase/public/dev-articles";
 import {
   fetchMusicConfig,
   fetchPublishedMusicAwards,
@@ -44,6 +48,7 @@ const targetCollection: Partial<Record<RagSyncTarget["sourceType"], string>> = {
   siteConfig: "site",
   devConfig: "site",
   musicConfig: "site",
+  article: "devArticles",
 };
 
 const fetchAdminTarget = async (target: RagSyncTarget, idToken: string) => {
@@ -74,6 +79,8 @@ const getRagSourceData = async () => {
     musicMedia,
     photos,
     albums,
+    devArticles,
+    devArticleTags,
   ] = await Promise.all([
     fetchSiteConfig(FRESH),
     fetchDevConfig(FRESH),
@@ -84,6 +91,8 @@ const getRagSourceData = async () => {
     fetchPublishedMusicMedia(FRESH),
     fetchPublishedPhotos(FRESH),
     fetchPublishedAlbums(FRESH),
+    fetchPublishedDevArticles(FRESH),
+    fetchDevArticleTags(FRESH),
   ]);
   if (!site || !devConfig || !musicConfig)
     throw new Error("공개 포트폴리오 설정을 불러오지 못했습니다.");
@@ -97,6 +106,8 @@ const getRagSourceData = async () => {
     musicMedia,
     photos,
     albums,
+    devArticles,
+    devArticleTags,
   };
 };
 
@@ -126,6 +137,8 @@ const getRagSourceDataForTarget = async (
       musicMedia: [],
       photos,
       albums: [],
+      devArticles: [],
+      devArticleTags: [],
     };
   }
   const [raw, site] = await Promise.all([
@@ -142,6 +155,8 @@ const getRagSourceDataForTarget = async (
     musicMedia: [],
     photos: [],
     albums: [],
+    devArticles: [],
+    devArticleTags: [],
   };
   if (!raw) return base;
   if (target.sourceType === "siteConfig") return { ...base, site: toSiteConfig(raw) };
@@ -154,6 +169,14 @@ const getRagSourceDataForTarget = async (
   if (target.sourceType === "musicAward") return { ...base, musicAwards: [toMusicAward(id, raw)] };
   if (target.sourceType === "musicMedia") return { ...base, musicMedia: [toMusicMedia(id, raw)] };
   if (target.sourceType === "photo") return { ...base, photos: [toPhoto(id, raw)] };
+  // 태그 라벨은 글 문서에 없다. 청크 텍스트에 라벨을 넣으려면 사전을 함께 읽어야 한다.
+  if (target.sourceType === "article") {
+    return {
+      ...base,
+      devArticles: [toDevArticle(id, raw)],
+      devArticleTags: await fetchDevArticleTags(FRESH),
+    };
+  }
   return { ...base, albums: [toAlbum(id, raw)] };
 };
 

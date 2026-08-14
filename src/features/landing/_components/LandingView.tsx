@@ -3,40 +3,44 @@
 import { m, useReducedMotion } from "motion/react";
 import { type CSSProperties, memo, type RefObject, useEffect, useMemo, useRef } from "react";
 
-import type { UIDict } from "@/constants/dictionary";
-import { ROUTES } from "@/constants/routes";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
-import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { useIntroDelay } from "@/features/landing/_hooks/use-intro-delay";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
 import { useSectionGlow } from "@/features/landing/_hooks/use-section-glow";
-import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
+import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useTyping } from "@/hooks/use-typing";
+
+import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
+
+import { ROUTES } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
+
+import type { UIDict } from "@/constants/dictionary";
 import type { LocalizedText } from "@/types/localized";
 
 import { AnimatedWordmark } from "./AnimatedWordmark";
 import styles from "./LandingView.module.css";
 import { RevealWords } from "./RevealWords";
 
-/** 랜딩 진입 행 — 각 섹션의 액센트를 미리 보여준다(hover 채움). */
+/** 사진, 음악, 개발 섹션으로 이동하는 행. */
 const SECTIONS = [
   { key: "dev", href: ROUTES.DEV_PROJECTS, labelKey: "sectionDev" },
   { key: "photo", href: ROUTES.PHOTO, labelKey: "sectionPhoto" },
   { key: "music", href: ROUTES.MUSIC, labelKey: "sectionMusic" },
 ] as const;
 
-/** 타이핑 중인 역할 → 섹션 액센트(다크 변형은 --accent-* 변수가 자동 처리). 이름 매칭이라 순서 무관. */
+/** 타이핑 중인 역할에 적용할 섹션 액센트. */
 const ROLE_ACCENT: Record<string, string> = {
   Developer: "var(--accent-dev)",
   Photographer: "var(--accent-photo)",
   Pianist: "var(--accent-music)",
 };
 
-/** 진입 전(started=false)엔 타이핑을 멈춰 둔다 — 안정 참조여야 effect 재시작 안 함. */
+/** 진입 애니메이션 전에는 타이핑을 멈춘다. */
 const NO_ROLES: string[] = [];
 
-/* 진입 타임라인(초) — started 시점 기준: 글자 캐스케이드 → 마침표 낙하·바운스 → 소개·행 순차. */
+/* 진입 애니메이션의 단계별 시작 시각. */
 const ROLE_DELAY = 0.55;
 const ROW_STAGGER = 0.09;
 
@@ -83,7 +87,7 @@ const LandingTyping = ({
   );
 };
 
-/** 타이핑 프레임과 무관한 정적 탐색 영역. started가 바뀔 때 한 번만 갱신한다. */
+/** 역할 타이핑과 분리된 정적 탐색 영역. */
 const LandingNav = memo(
   ({
     dict,
@@ -126,15 +130,11 @@ const LandingNav = memo(
 LandingNav.displayName = "LandingNav";
 
 /**
- * 랜딩 허브(/) — 이름(언어 무관 항상 "Sungjoon Lee") + 역할 타이핑(Photographer/Pianist/Developer)
- * + 소개 + 사진/음악/개발 진입. 타이핑 단어는 tagline 을 '·' 로 분해해 파생.
- * 진입 애니메이션은 스플래시가 걷힌 뒤 시작: 글자가 블러에서 선명해지며 액센트색으로 떠올랐다 본문색으로 안착 →
- * 마침표가 공처럼 튀어들어와(역할 색을 따라 변색) → 역할·소개(어절 리빌)·섹션 행이 순차로 등장.
- * 배경 글로우는 평소 우상단에서 역할 색으로 느리게 부유하다가, 섹션 행에 포인터·포커스가 닿으면
- * 그 행 한가운데로 옮겨가며 섹션 액센트로 물든다(위치는 실측, 색·세기는 CSS `:has()`).
+ * 이름과 역할 타이핑, 소개, 섹션 링크를 보여 주는 랜딩 화면.
+ * 역할은 tagline을 가운뎃점으로 나눠 만들며 스플래시가 끝난 뒤 애니메이션을 시작한다.
  *
  * @param {{ tagline: LocalizedText; landingLead: LocalizedText }} props
- * @param {LocalizedText} props.tagline - site/config 중 랜딩이 소비하는 두 필드만 — 전체 SiteConfig(태그 사전·bio·links)를 직렬화하지 않는다.
+ * @param {LocalizedText} props.tagline 역할 목록을 만드는 다국어 문구.
  * @param {LocalizedText} props.landingLead
  * @returns {JSX.Element}
  */
@@ -142,7 +142,7 @@ const LandingView = ({
   tagline,
   landingLead,
 }: {
-  /** site/config 중 랜딩이 소비하는 두 필드만 — 전체 SiteConfig(태그 사전·bio·links)를 직렬화하지 않는다. */
+  /** 랜딩에 필요한 site/config 필드만 받는다. */
   tagline: LocalizedText;
   landingLead: LocalizedText;
 }) => {
@@ -152,7 +152,7 @@ const LandingView = ({
   const leadDelay = useIntroDelay(started, LANDING_REVEAL_DELAY);
   const accentRef = useRef<HTMLElement>(null);
   const { onRowEnter, onRowLeave } = useSectionGlow(accentRef);
-  // useTyping 이 매 렌더 setText → 재렌더하므로, roles 배열 참조를 안정화(useMemo)해야 effect 가 재시작되지 않는다.
+  // roles 참조를 유지해 useTyping effect가 불필요하게 다시 시작되지 않게 한다.
   const roles = useMemo(
     () =>
       pickText(tagline, lang)

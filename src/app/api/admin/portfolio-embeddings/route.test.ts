@@ -24,12 +24,17 @@ vi.mock("@/lib/ai/embedding", () => ({
 }));
 
 import { GET, POST } from "@/app/api/admin/portfolio-embeddings/route";
+import { MOCK_DEV_ARTICLE_TAGS } from "@/mocks/dev-article-tags";
+import { MOCK_DEV_ARTICLES } from "@/mocks/dev-articles";
 
 const request = () =>
   new Request("http://localhost/api/admin/portfolio-embeddings", {
     method: "POST",
     headers: { Authorization: "Bearer admin-token" },
   });
+
+/** 청크 조립은 mock 이 대신하지만 route 가 블로그 글을 직접 훑으므로 두 배열은 실제로 필요하다. */
+const EMPTY_SOURCE = { source: true, devArticles: [], devArticleTags: [] };
 
 describe("POST /api/admin/portfolio-embeddings", () => {
   beforeEach(() => {
@@ -67,7 +72,7 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       },
     ];
     mocks.verifyAdminIdToken.mockResolvedValue(true);
-    mocks.getRagSourceData.mockResolvedValue({ source: true });
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue(chunks);
     mocks.generateEmbeddings.mockResolvedValue([
       [0.1, 0.2],
@@ -125,7 +130,7 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       text: "Canon EOS R6 사진",
     };
     mocks.verifyAdminIdToken.mockResolvedValue(true);
-    mocks.getRagSourceDataForTarget.mockResolvedValue({ source: true });
+    mocks.getRagSourceDataForTarget.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue([
       targetChunk,
       { ...targetChunk, id: "other", sourceId: "photo-2", text: "다른 사진" },
@@ -173,9 +178,113 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     expect(fetchMock.mock.calls[0]?.[1]?.body).toContain('"stringValue":"photo-1"');
   });
 
+  it("지원하지 않는 소스 타입은 거부한다", async () => {
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+
+    const response = await POST(
+      new Request("http://localhost/api/admin/portfolio-embeddings", {
+        method: "POST",
+        headers: { Authorization: "Bearer admin-token", "Content-Type": "application/json" },
+        body: JSON.stringify({ target: { sourceType: "unknown", sourceId: "x" } }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(mocks.generateEmbeddings).not.toHaveBeenCalled();
+  });
+
+  it("블로그 글 청크를 전체 생성 대상에 함께 넣는다", async () => {
+    const article = MOCK_DEV_ARTICLES.find(({ published }) => published)!;
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue({
+      devArticles: [article],
+      devArticleTags: MOCK_DEV_ARTICLE_TAGS,
+    });
+    mocks.buildRagChunks.mockReturnValue([]);
+    mocks.generateEmbeddings.mockImplementation(async (texts: string[]) => texts.map(() => [0.1]));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ documents: [] }) })
+      .mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = (await (await POST(request())).json()) as { count: number };
+
+    expect(result.count).toBeGreaterThan(0);
+    const [texts] = mocks.generateEmbeddings.mock.calls[0] as [string[]];
+    expect(texts.some((text) => text.includes(`/dev/articles/${article.slug}`))).toBe(true);
+  });
+
+  it("블로그 글 타깃은 같은 글의 이전 청크만 지운다", async () => {
+    const article = MOCK_DEV_ARTICLES.find(({ published }) => published)!;
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceDataForTarget.mockResolvedValue({
+      devArticles: [article],
+      devArticleTags: MOCK_DEV_ARTICLE_TAGS,
+    });
+    mocks.buildRagChunks.mockReturnValue([]);
+    mocks.generateEmbeddings.mockImplementation(async (texts: string[]) => texts.map(() => [0.1]));
+    const field = (stringValue: string) => ({ stringValue });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [
+          {
+            document: {
+              name: "projects/test-project/databases/(default)/documents/ragDocuments/stale-article",
+              fields: { sourceType: field("article"), sourceId: field(article.id) },
+            },
+          },
+          {
+            document: {
+              name: "projects/test-project/databases/(default)/documents/ragDocuments/other-photo",
+              fields: { sourceType: field("photo"), sourceId: field("photo-1") },
+            },
+          },
+        ],
+      })
+      .mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await POST(
+      new Request("http://localhost/api/admin/portfolio-embeddings", {
+        method: "POST",
+        headers: { Authorization: "Bearer admin-token", "Content-Type": "application/json" },
+        body: JSON.stringify({ target: { sourceType: "article", sourceId: article.id } }),
+      }),
+    );
+
+    const commit = JSON.stringify(
+      fetchMock.mock.calls.slice(1).map(([, init]) => (init as { body: string }).body),
+    );
+    expect(commit).toContain("stale-article");
+    expect(commit).not.toContain("other-photo");
+  });
+
+  it("상태 조회의 전체 개수에도 블로그 글 청크가 들어간다", async () => {
+    const article = MOCK_DEV_ARTICLES.find(({ published }) => published)!;
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue({
+      devArticles: [article],
+      devArticleTags: MOCK_DEV_ARTICLE_TAGS,
+    });
+    mocks.buildRagChunks.mockReturnValue([]);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ documents: [] }) }),
+    );
+
+    const status = (await (await GET(request())).json()) as { total: number };
+
+    // 조립을 POST 한쪽에만 넣으면 생성은 되는데 진행률이 계속 100%에 닿지 않는다.
+    expect(status.total).toBeGreaterThan(0);
+  });
+
   it("OpenAI 호출 없이 현재 임베딩 완료 비율을 계산한다", async () => {
     mocks.verifyAdminIdToken.mockResolvedValue(true);
-    mocks.getRagSourceData.mockResolvedValue({ source: true });
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue([
       {
         id: "ready",
@@ -246,7 +355,7 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       text: `사진 ${index}`,
     }));
     mocks.verifyAdminIdToken.mockResolvedValue(true);
-    mocks.getRagSourceData.mockResolvedValue({ source: true });
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue(chunks);
     mocks.generateEmbeddings.mockResolvedValue(chunks.map(() => [0.1, 0.2]));
     const fetchMock = vi

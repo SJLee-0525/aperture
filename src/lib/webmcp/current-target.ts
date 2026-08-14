@@ -1,3 +1,6 @@
+import { matchDevArticleSlug } from "@/constants/routes";
+import { stripLangPrefix, stripTrailingSlash } from "@/lib/i18n/locale-path";
+
 /**
  * 상세 도구의 대상 해석 — 에이전트가 id 를 생략하면 현재 열린 모달을 대상으로 삼는다.
  *
@@ -15,4 +18,18 @@ const resolveTargetId = (raw: unknown, queryKey: string): string | null => {
   return new URLSearchParams(window.location.search).get(queryKey);
 };
 
-export { resolveTargetId };
+/**
+ * 지금 열려 있는 블로그 글의 slug. 상세가 아니면 `null` 이다.
+ *
+ * 글 상세는 모달이 아니라 독립 지면이라 식별자가 query 가 아니라 경로에 있다.
+ * 경로 정규화(`stripTrailingSlash`)와 판정(`matchDevArticleSlug`) 모두 챗봇 화면 문맥과 같은
+ * 함수를 쓴다 — 규칙을 두 벌 들면 한쪽만 고쳤을 때 두 표면의 "현재 글" 이 갈라진다.
+ *
+ * @returns {string | null} 상세 지면이면 slug, 아니면 null.
+ */
+const resolveCurrentArticleSlug = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return matchDevArticleSlug(stripLangPrefix(stripTrailingSlash(window.location.pathname)));
+};
+
+export { resolveCurrentArticleSlug, resolveTargetId };

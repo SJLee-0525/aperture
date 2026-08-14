@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-
 import { LegalDocumentView } from "@/features/legal/_components/LegalDocumentView";
+
 import { getLegalDocument } from "@/features/legal/_lib/legal-documents";
+
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 /** Next.js가 언어 세그먼트를 비동기로 전달하는 이용 안내 라우트 props. */
 type Props = { params: Promise<{ lang: Lang }> };

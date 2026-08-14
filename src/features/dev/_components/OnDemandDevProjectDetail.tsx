@@ -5,10 +5,15 @@ import { useEffect, useRef, useState } from "react";
 
 import { Modal } from "@/components/Modal";
 import { Skeleton } from "@/components/Skeleton";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { pickText } from "@/lib/i18n/pick-text";
-import type { DevProject, DevProjectCardData } from "@/types/dev";
+
 import { setCursorLoading } from "@/utils/custom-cursor-events";
+
+import type { DevProject, DevProjectCardData } from "@/types/dev";
+import type { DevArticleProjectLink } from "@/types/dev-article";
 
 import detailStyles from "./DevProjectsView.module.css";
 import styles from "./OnDemandDevProjectDetail.module.css";
@@ -71,6 +76,8 @@ const preloadDevProjectDetail = () => {
 
 type Props = {
   project: DevProjectCardData | null;
+  /** 선택된 프로젝트를 지목한 공개 글. 상세 데이터와 달리 목록 지면이 이미 갖고 있다. */
+  articles: DevArticleProjectLink[];
   open: boolean;
   onClose: () => void;
   endpoint: string;
@@ -81,12 +88,13 @@ type Props = {
  *
  * @param {Props} props
  * @param {DevProjectCardData | null} props.project
+ * @param {DevArticleProjectLink[]} props.articles
  * @param {boolean} props.open
  * @param {() => void} props.onClose
  * @param {string} props.endpoint
  * @returns {JSX.Element | null}
  */
-const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) => {
+const OnDemandDevProjectDetail = ({ project, articles, open, onClose, endpoint }: Props) => {
   const { dict, lang } = useLang();
   const [projectsById, setProjectsById] = useState<Map<string, DevProject>>(() => new Map());
   const projectsByIdRef = useRef(projectsById);
@@ -151,7 +159,7 @@ const OnDemandDevProjectDetail = ({ project, open, onClose, endpoint }: Props) =
       shareLabel={dict.shareLabel}
     >
       {detail ? (
-        <DevProjectDetailContent project={detail} />
+        <DevProjectDetailContent project={detail} articles={articles} />
       ) : !failed ? (
         <DetailSkeleton hasMedia={Boolean(project.cover)} label={dict.devProjectLoadingLabel} />
       ) : (

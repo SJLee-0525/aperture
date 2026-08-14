@@ -1,8 +1,8 @@
-import { ROUTES } from "@/constants/routes";
-import { langFromPath, stripLangPrefix } from "@/lib/i18n/locale-path";
+import { matchDevArticleSlug, ROUTES } from "@/constants/routes";
+import { langFromPath, stripLangPrefix, stripTrailingSlash } from "@/lib/i18n/locale-path";
 
 /** 화면 문맥이 가리킬 수 있는 상세 모달 종류 */
-type ChatContextTarget = "photo" | "work" | "award" | "project";
+type ChatContextTarget = "photo" | "work" | "award" | "project" | "article";
 
 type ChatContextOpenTarget = {
   type: ChatContextTarget;
@@ -19,9 +19,12 @@ type ChatContext = {
   // photoFilters는 후속 단계에서 추가한다. 현재 파서는 이 키를 무시한다.
 };
 
-/** 로케일을 제외한 상세 모달 경로와 target/query key의 대응표. */
+/**
+ * 로케일을 제외한 상세 모달 경로와 target/query key의 대응표.
+ * `queryKey`가 null이면 id가 URL에 없다는 뜻이고, 화면이 등록한 target에서 읽는다.
+ */
 const CONTEXT_TARGET_BY_PATH: Readonly<
-  Partial<Record<string, { type: ChatContextTarget; queryKey: string }>>
+  Partial<Record<string, { type: ChatContextTarget; queryKey: string | null }>>
 > = {
   [ROUTES.PHOTO]: { type: "photo", queryKey: "photo" },
   [ROUTES.MUSIC]: { type: "work", queryKey: "work" },
@@ -41,9 +44,9 @@ const ALLOWED_CONTEXT_PATHS: ReadonlySet<string> = new Set([
   ROUTES.MUSIC_MEDIA,
   ROUTES.MUSIC_ABOUT,
   ROUTES.DEV,
+  ROUTES.DEV_ARTICLES,
   ROUTES.DEV_PROJECTS,
   ROUTES.DEV_CAREER,
-  ROUTES.DEV_ABOUT,
   ROUTES.CONTACT,
   ROUTES.SEARCH,
   ROUTES.PRIVACY,
@@ -56,6 +59,9 @@ const ALBUM_DETAIL_PATH_PATTERN = /^\/photo\/albums\/[A-Za-z0-9-]+$/;
 
 const MAX_PATHNAME_CHARS = 128;
 const MAX_TARGET_ID_CHARS = 64;
+
+/** Firestore 문서 ID에 허용하는 문자. */
+const TARGET_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const MAX_CONTEXT_BYTES = 600;
 
 /**
@@ -82,10 +88,15 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const normalizeContextPathname = (raw: string): string | null => {
   if (raw.length === 0 || raw.length > MAX_PATHNAME_CHARS) return null;
   if (!PATHNAME_PATTERN.test(raw) || raw.includes("//")) return null;
-  const pathname = raw.length > 1 && raw.endsWith("/") ? raw.slice(0, -1) : raw;
+  const pathname = stripTrailingSlash(raw);
   if (!langFromPath(pathname)) return null;
   const localPathname = stripLangPrefix(pathname);
-  if (!ALLOWED_CONTEXT_PATHS.has(localPathname) && !ALBUM_DETAIL_PATH_PATTERN.test(localPathname)) {
+  // 목록 경로를 allowlist 에 넣는 것만으로는 `/dev/articles/<slug>` 가 통과하지 못한다.
+  if (
+    !ALLOWED_CONTEXT_PATHS.has(localPathname) &&
+    !ALBUM_DETAIL_PATH_PATTERN.test(localPathname) &&
+    !matchDevArticleSlug(localPathname)
+  ) {
     return null;
   }
   return pathname;
@@ -99,16 +110,21 @@ const normalizeContextPathname = (raw: string): string | null => {
  */
 const contextTargetForPath = (
   pathname: string,
-): { type: ChatContextTarget; queryKey: string } | null => {
+): { type: ChatContextTarget; queryKey: string | null } | null => {
   const localPathname = stripLangPrefix(pathname);
   if (ALBUM_DETAIL_PATH_PATTERN.test(localPathname)) {
     return { type: "photo", queryKey: "photo" };
   }
+  // 글 상세는 URL 에 문서 ID 가 없다. slug 는 화면 문맥의 식별자가 아니라 서버 검증용이다.
+  if (matchDevArticleSlug(localPathname)) return { type: "article", queryKey: null };
   return CONTEXT_TARGET_BY_PATH[localPathname] ?? null;
 };
 
 /**
- * target id의 공백과 길이를 검사한다.
+ * target id의 형식과 길이를 검사한다.
+ *
+ * 서버가 이 값으로 Firestore 문서를 직접 읽으므로 경로 구분자와 query 문자를 허용하지 않는다.
+ * Firestore 자동 ID와 이 저장소가 쓰는 수동 ID가 모두 이 문자 집합 안에 있다.
  *
  * @param {unknown} raw 요청 또는 query에서 읽은 값.
  * @returns {string | null} 정리한 id. 유효하지 않으면 null.
@@ -117,7 +133,7 @@ const parseTargetId = (raw: unknown): string | null => {
   if (typeof raw !== "string") return null;
   const id = raw.trim();
   if (!id || id.length > MAX_TARGET_ID_CHARS) return null;
-  return id;
+  return TARGET_ID_PATTERN.test(id) ? id : null;
 };
 
 /**
@@ -133,13 +149,18 @@ const withinByteBudget = (context: ChatContext): boolean =>
  * 질문을 보내는 시점의 URL로 클라이언트 화면 문맥을 만든다.
  * 여러 modal key가 있어도 현재 경로에 해당하는 key만 읽는다.
  *
+ * 글 상세처럼 id가 URL에 없는 경로는 화면이 등록해 둔 target에서 문서 ID를 읽는다.
+ * slug를 대신 쓰지 않는 이유는 문서 ID가 바뀌지 않는 식별자이기 때문이다.
+ *
  * @param {string} pathname window.location.pathname (로케일 포함)
  * @param {URLSearchParams} searchParams
+ * @param {{ type: string; id: string } | null} [screenTarget] 화면이 등록한 상세 항목.
  * @returns {ChatContext | undefined}
  */
 const buildChatContext = (
   pathname: string,
   searchParams: URLSearchParams,
+  screenTarget?: { type: string; id: string } | null,
 ): ChatContext | undefined => {
   const normalized = normalizeContextPathname(pathname);
   if (!normalized) return undefined;
@@ -147,7 +168,12 @@ const buildChatContext = (
   const context: ChatContext = { pathname: normalized };
   const target = contextTargetForPath(normalized);
   if (target) {
-    const id = parseTargetId(searchParams.get(target.queryKey));
+    const raw = target.queryKey
+      ? searchParams.get(target.queryKey)
+      : screenTarget?.type === target.type
+        ? screenTarget.id
+        : null;
+    const id = parseTargetId(raw);
     if (id) context.openTarget = { type: target.type, id };
   }
   return withinByteBudget(context) ? context : undefined;

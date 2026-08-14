@@ -1,10 +1,15 @@
 "use client";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminField } from "@/components/AdminField";
+import { AdminInput } from "@/components/AdminInput";
+
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
+
 import type { Album } from "@/types/album";
 
-import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
 import styles from "./AlbumForm.module.css";
+import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
 
 type Props = {
   albumId: string;
@@ -47,45 +52,37 @@ const AlbumForm = ({ albumId, initial }: Props) => {
       <section className={styles.section}>
         <h2 className={styles.legend}>제목</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (한국어) *</span>
-            <input
-              className={styles.input}
+          <AdminField label="제목 (한국어)" required>
+            <AdminInput
               value={form.title.ko}
               onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
               required
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>제목 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="제목 (English)">
+            <AdminInput
               value={form.title.en}
               onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>부제</h2>
         <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span className={styles.label}>부제 (한국어)</span>
-            <input
-              className={styles.input}
+          <AdminField label="부제 (한국어)">
+            <AdminInput
               value={form.subtitle.ko}
               onChange={(e) => patch({ subtitle: { ...form.subtitle, ko: e.target.value } })}
             />
-          </label>
-          <label className={styles.field}>
-            <span className={styles.label}>부제 (English)</span>
-            <input
-              className={styles.input}
+          </AdminField>
+          <AdminField label="부제 (English)">
+            <AdminInput
               value={form.subtitle.en}
               onChange={(e) => patch({ subtitle: { ...form.subtitle, en: e.target.value } })}
             />
-          </label>
+          </AdminField>
         </div>
       </section>
 
@@ -121,12 +118,12 @@ const AlbumForm = ({ albumId, initial }: Props) => {
       ) : null}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit} disabled={saving}>
-          {saving ? "저장 중…" : isEdit ? "수정 저장" : "앨범 저장"}
-        </button>
-        <button type="button" className={styles.cancel} onClick={cancel} disabled={saving}>
+        <AdminButton variant="primary" type="submit" disabled={saving}>
+          {saving ? "저장 중…" : "저장"}
+        </AdminButton>
+        <AdminButton variant="secondary" onClick={cancel} disabled={saving}>
           취소
-        </button>
+        </AdminButton>
       </div>
     </form>
   );

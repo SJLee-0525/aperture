@@ -3,12 +3,12 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DICTIONARY } from "@/constants/dictionary";
-
 import {
   MESSAGE_INTERVAL_MS,
   PortfolioSearchStatus,
 } from "@/features/chat/_components/PortfolioSearchStatus";
+
+import { DICTIONARY } from "@/constants/dictionary";
 
 afterEach(() => vi.useRealTimers());
 

@@ -2,11 +2,12 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { writeLocalePreferenceCookie } from "@/features/lang/_lib/locale-preference-cookie";
+
 import {
   LOCALE_PREFERENCE_COOKIE,
   LOCALE_PREFERENCE_MAX_AGE_SECONDS,
 } from "@/constants/locale-preference";
-import { writeLocalePreferenceCookie } from "@/features/lang/_lib/locale-preference-cookie";
 
 describe("writeLocalePreferenceCookie", () => {
   beforeEach(() => {

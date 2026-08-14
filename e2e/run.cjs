@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { spawn, spawnSync } = require("node:child_process");
+const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
@@ -19,6 +20,12 @@ const serverEnv = {
   NEXT_PUBLIC_GA_ID: "G-E2ETEST",
   NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
   NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
+  // 관리자 E2E 전용 인증 우회. 프로덕션 모드에서는 가드가 throw 하므로 명시적으로 끈다 —
+  // 개발자가 .env.local 에 이 플래그를 두고 쓰더라도 프로덕션 실행이 그 값을 물려받지 않게 한다.
+  NEXT_PUBLIC_ADMIN_TEST_SESSION: production ? "0" : "1",
+  // next.config.ts 가 프로덕션 + mock 조합을 막는다. next start 도 설정을 읽으므로
+  // 빌드뿐 아니라 서버 실행에도 탈출구가 필요하다. NEXT_PUBLIC_ 이 아니라 번들에는 안 들어간다.
+  APERTURE_E2E_ALLOW_PRODUCTION_MOCK: "1",
 };
 
 if (build) {
@@ -31,6 +38,8 @@ if (build) {
     NEXT_PUBLIC_GA_ID: "G-E2ETEST",
     NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0",
     NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: "",
+    NEXT_PUBLIC_ADMIN_TEST_SESSION: "0",
+    APERTURE_E2E_ALLOW_PRODUCTION_MOCK: "1",
   };
   delete buildEnv.NEXT_FONT_GOOGLE_MOCKED_RESPONSES;
   const buildResult = spawnSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {
@@ -51,10 +60,34 @@ const serverArgs = [
   String(port),
 ];
 
+// 서버 출력을 버리면 런 도중 크래시의 단서가 함께 사라진다 — 테스트는 전부
+// ERR_CONNECTION_REFUSED 로만 보이고 이유는 어디에도 안 남는다. 파일로 받아 둔다.
+// Playwright 가 시작할 때 비우는 test-results/ 안에 두면 지워지므로 저장소 루트에 쓴다.
+const serverLogPath = path.join(root, "e2e-server.log");
+const serverLog = fs.openSync(serverLogPath, "w");
+
 const server = spawn(process.execPath, serverArgs, {
   cwd: root,
   env: serverEnv,
-  stdio: "ignore",
+  stdio: ["ignore", serverLog, serverLog],
+});
+
+/** 테스트가 끝난 뒤의 서버 종료는 정상(stopServer)이라 아래 감시에서 제외한다. */
+let testsFinished = false;
+let playwright = null;
+
+server.on("exit", (code, signal) => {
+  if (testsFinished) return;
+  console.error("");
+  console.error(`E2E Next 서버가 테스트 도중 종료됐다 (code=${code} signal=${signal}).`);
+  console.error(`서버 로그: ${serverLogPath}`);
+  try {
+    // 꼬리만 보여 준다 — 스택 하나면 충분하고, 로그 전체를 콘솔에 쏟지 않는다.
+    const log = fs.readFileSync(serverLogPath, "utf8").trimEnd();
+    if (log) console.error(log.slice(-2000));
+  } catch {}
+  // 죽은 서버에 남은 스펙을 계속 던지면 실패 200여 개가 원인을 덮는다. 즉시 멈춘다.
+  if (playwright && playwright.exitCode === null) playwright.kill();
 });
 
 function stopServer() {
@@ -88,7 +121,7 @@ async function waitUntilReady() {
 async function run() {
   try {
     await waitUntilReady();
-    const playwright = spawn(
+    playwright = spawn(
       process.execPath,
       ["node_modules/@playwright/test/cli.js", "test", ...playwrightArgs],
       {
@@ -103,8 +136,10 @@ async function run() {
       },
     );
     const exitCode = await new Promise((resolve) => playwright.on("exit", resolve));
+    testsFinished = true;
     process.exitCode = exitCode ?? 1;
   } finally {
+    testsFinished = true;
     stopServer();
   }
 }

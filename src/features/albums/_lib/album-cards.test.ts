@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { toAlbumCards } from "@/features/albums/_lib/album-cards";
+
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 

@@ -6,25 +6,27 @@ import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
-import { ROUTES } from "@/constants/routes";
 import { ChatComposer } from "@/features/chat/_components/ChatComposer";
 import { ChatContactDraftButton } from "@/features/chat/_components/ChatContactDraftButton";
-import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { ChatReferenceCard } from "@/features/chat/_components/ChatReferenceCard";
 import { ChatSentContext } from "@/features/chat/_components/ChatSentContext";
-import { useChat } from "@/features/chat/_hooks/use-chat";
-import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
-import type { ChatScreenTargetType } from "@/lib/chat-screen-target-context";
+import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSearchStatus";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+
+import { useChat } from "@/features/chat/_hooks/use-chat";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
 import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
-import styles from "./ChatPanel.module.css";
+import { ROUTES } from "@/constants/routes";
 
 import type { UIDict } from "@/constants/dictionary";
+import type { ChatScreenTargetType } from "@/lib/chat-screen-target-context";
+
+import styles from "./ChatPanel.module.css";
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -48,6 +50,10 @@ const SCREEN_NOTICES: Record<
   project: (dict) => ({
     notice: dict.chatScreenNoticeProject,
     placeholder: dict.chatScreenPlaceholderProject,
+  }),
+  article: (dict) => ({
+    notice: dict.chatScreenNoticeArticle,
+    placeholder: dict.chatScreenPlaceholderArticle,
   }),
 };
 

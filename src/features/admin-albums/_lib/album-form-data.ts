@@ -1,7 +1,7 @@
-import type { Album } from "@/types/album";
+import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { AlbumInput } from "@/lib/firebase/albums";
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+import type { Album } from "@/types/album";
 
 const emptyAlbumInput = (): AlbumInput => ({
   title: EMPTY_TEXT,

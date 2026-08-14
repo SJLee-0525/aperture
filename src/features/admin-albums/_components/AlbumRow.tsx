@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminAlbumRoute } from "@/constants/routes";
+
 import type { AdminAlbumListItem } from "@/types/admin";
 
 import styles from "./AlbumRow.module.css";

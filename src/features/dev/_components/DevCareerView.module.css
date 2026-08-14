@@ -13,6 +13,9 @@
 .stacked {
   margin-top: clamp(30px, 4vw, 46px);
 }
+.stackSection {
+  margin-top: clamp(56px, 7vw, 88px);
+}
 .sectionLabel {
   margin-bottom: 2px;
   font-size: 11px;

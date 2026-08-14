@@ -76,14 +76,16 @@ src/
 │   ├── albums/  map/  about/    # _components/: AlbumsView·AlbumDetailView / MapView·MapCanvas·LocationList / AboutView
 │   ├── export/                  # _components/ExportModal · _hooks/use-export · _lib/framePreview
 │   ├── music/                   # _components/: MusicWorksView·MusicCareerView·MusicMediaView·MusicAboutView (+ 연주/수상 모달)
-│   ├── dev/                     # _components/: DevStackView·DevProjectsView·DevCareerView·DevAboutView (+ 프로젝트 모달, reveal·타이핑)
+│   ├── dev/                     # _components/: DevAboutView(/dev)·DevCareerView+DevStackSection(/dev/career)·DevProjectsView (+ 프로젝트 모달, reveal·타이핑)
+│   ├── dev-blog/                # ★ 횡단(platform, 공개+관리자 공용) — _lib/markdown-*(파서·검증·목차·읽기 시간·서버 색칠) · _components/{ArticleDocumentView,ArticleBody,ArticleCodeBlock,ArticleYouTube}
 │   ├── site-header/             # _components/: SiteHeader(mega-menu), MobileTabBar/MobileMenu, ThemeToggleButton, LangMenu, SearchBox, SectionAccent
 │   ├── theme/  lang/            # _hooks/use-theme-toggle·_lib/theme-script / _components/LangProvider·_hooks/use-lang (useSyncExternalStore)
 │   ├── auth/                    # _components/{LoginForm,AuthGuard} · _hooks/use-auth
 │   ├── image-upload/            # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
+│   ├── admin-dev-articles/      # 블로그 CMS — _lib/(저장소 경계·slug·발행 조건·복구본·미리보기 action) · _hooks/ · _components/
 │   └── admin-*/                 # _components/*Form·*Row + _hooks/use-*-admin (dnd-kit 정렬) — 사진·음악·개발
 ├── components/                  # ★ 순수 재사용 UI — props 만. + 각 컴포넌트 .module.css
-│   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock, SectionHeading, WorkPoster, ScheduleRow, ProjectCard …
+│   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock, SectionHeading, WorkPoster, ScheduleRow, ProjectCard, YouTubeFacade …
 ├── lib/firebase/                # firebase agent 소관
 ├── lib/content/                 # 공개 getter — mock↔Firestore 교체 지점 ★ (photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                     # pick-text.ts (ko/en 폴백)
@@ -115,6 +117,7 @@ import은 **같은 하위폴더면 `./`**(컴포넌트↔짝 CSS↔형제 컴포
 
 - **chrome(헤더/탭바)은 `(public)/layout.tsx`에서만 마운트.** page.tsx 직접 import 금지.
 - **AuthGuard 는 `admin/layout.tsx`에서만.** 비로그인 → `/admin/login` 리다이렉트.
+- **관리자 데이터 접근은 `lib/admin/*-repository.ts` 경유(B3.5).** 훅·페이지가 `lib/firebase/*` 를 직접 import 하지 않는다 — repository 가 mock(브라우저 로컬)/live(Firestore)를 고르고, mock 모드는 상단 MOCK 배지로 표시된다.
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](../memory/feedback_srp_per_file.md)). `utils.ts`/`helpers.ts` 잡탕 파일 금지.
 
 ## 80% 작업 규칙

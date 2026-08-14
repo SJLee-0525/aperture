@@ -3,6 +3,7 @@
 import { Fragment } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import type { SearchSuggestion } from "@/lib/search/suggest-documents";
 
 import styles from "./SearchSuggestions.module.css";

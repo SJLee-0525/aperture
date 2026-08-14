@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
 import { useRagStaleAlert } from "@/features/admin-maintenance/_hooks/use-rag-stale-alert";
+
+import { ROUTES } from "@/constants/routes";
 
 import styles from "./RagStaleBanner.module.css";
 

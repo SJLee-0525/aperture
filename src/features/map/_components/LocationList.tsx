@@ -4,11 +4,14 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
-import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { MapLocation } from "@/features/map/_types/map-location";
 import { preloadPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { formatCoords } from "@/lib/format/format-coords";
 import { pickText } from "@/lib/i18n/pick-text";
+
+import type { MapLocation } from "@/features/map/_types/map-location";
 
 import styles from "./LocationList.module.css";
 

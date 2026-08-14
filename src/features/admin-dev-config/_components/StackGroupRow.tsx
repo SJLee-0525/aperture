@@ -1,5 +1,9 @@
 "use client";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminInput } from "@/components/AdminInput";
+import { Icon } from "@/components/Icon";
+
 import type { DevStackGroup, DevStackItem } from "@/types/dev";
 
 import styles from "./StackGroupRow.module.css";
@@ -57,10 +61,12 @@ const StackGroupRow = ({
 }: Props) => (
   <li className={styles.group}>
     <div className={styles.groupHead}>
-      <input
+      <AdminInput
+        size="sm"
         className={styles.categoryInput}
+        aria-label="분류"
         value={group.category}
-        placeholder="카테고리 (예: Frontend)"
+        placeholder="Frontend"
         onChange={(e) => onEditCategory(index, e.target.value)}
       />
       <div className={styles.controls}>
@@ -71,7 +77,7 @@ const StackGroupRow = ({
           disabled={isFirst}
           onClick={() => onMove(index, -1)}
         >
-          ↑
+          <Icon name="arrowUp" size={14} />
         </button>
         <button
           type="button"
@@ -80,7 +86,7 @@ const StackGroupRow = ({
           disabled={isLast}
           onClick={() => onMove(index, 1)}
         >
-          ↓
+          <Icon name="arrowDown" size={14} />
         </button>
         <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
           그룹 삭제
@@ -103,10 +109,12 @@ const StackGroupRow = ({
             >
               {item.name || "기술"}
             </span>
-            <input
+            <AdminInput
+              size="sm"
               className={styles.nameInput}
+              aria-label="기술명"
               value={item.name}
-              placeholder="기술명 (예: React)"
+              placeholder="React"
               onChange={(e) => onEditItem(index, itemIndex, "name", e.target.value)}
             />
             <label className={styles.colorField}>
@@ -139,9 +147,14 @@ const StackGroupRow = ({
       </ul>
     )}
 
-    <button type="button" className={styles.addItem} onClick={() => onAddItem(index)}>
+    <AdminButton
+      variant="secondary"
+      size="xs"
+      className={styles.addItem}
+      onClick={() => onAddItem(index)}
+    >
       + 기술 추가
-    </button>
+    </AdminButton>
   </li>
 );
 

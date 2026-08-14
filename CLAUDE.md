@@ -19,7 +19,7 @@
 | **랜딩** | `/`        | 블루               | 3섹션 진입 허브 — 개발 행은 프로젝트(`/dev/projects`), 사진·음악 행은 각 섹션 루트로 이동 |
 | **사진** | `/photo/*` | **블루** `#0a84ff` | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달 + 프레임 내보내기                |
 | **음악** | `/music/*` | **레드** `#e5484d` | 피아니스트 — 연주·경력(학력·경력·수상)·영상·소개 (개별 페이지 + 연주/수상 모달)           |
-| **개발** | `/dev/*`   | **그린** `#16a34a` | 프론트엔드 개발자 — 기술 스택·프로젝트·경력·소개 (개별 페이지, Phase C)                   |
+| **개발** | `/dev/*`   | **그린** `#16a34a` | 프론트엔드 개발자 — 소개·경력(기술 스택 포함)·프로젝트 (개별 페이지, Phase C)             |
 | **연락** | `/contact` | **주황** `#f5820d` | 전역 연락 페이지 — mailto 폼 + 인스타·깃헙·메일 링크 (섹션 아니지만 자체 액센트)          |
 
 - **방문자**: 로그인 없음, **ko/en 토글**, 다크모드. 각 섹션을 자유 열람.
@@ -30,19 +30,21 @@
 
 ## 확정 스택 & 결정 기록
 
-| 레이어     | 선택                       | 왜 (결정 사유)                                                                                                                         |
-| ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 프레임워크 | Next.js (App Router)       | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                                                                          |
-| 호스팅     | Vercel Hobby               | 무료, git push 자동 배포                                                                                                               |
-| 인증       | Firebase Auth              | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                                                                            |
-| DB         | Firestore                  | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)                                                              |
-| 이미지     | Firebase Storage           | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
-| 스타일     | **CSS Modules + CSS 변수** | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**                                                 |
-| i18n       | 자체 구현 (라이브러리 X)   | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
-| 지도       | **MapLibre GL + CARTO**    | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
-| EXIF       | `exifr`                    | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)                                                        |
-| 내보내기   | 클라이언트 canvas          | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                                                                       |
-| 애니메이션 | CSS + `motion`             | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
+| 레이어      | 선택                                              | 왜 (결정 사유)                                                                                                                         |
+| ----------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 프레임워크  | Next.js (App Router)                              | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                                                                          |
+| 호스팅      | Vercel Hobby                                      | 무료, git push 자동 배포                                                                                                               |
+| 인증        | Firebase Auth                                     | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                                                                            |
+| DB          | Firestore                                         | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)                                                              |
+| 이미지      | Firebase Storage                                  | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
+| 스타일      | **CSS Modules + CSS 변수**                        | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**                                                 |
+| i18n        | 자체 구현 (라이브러리 X)                          | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
+| 지도        | **MapLibre GL + CARTO**                           | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
+| EXIF        | `exifr`                                           | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)                                                        |
+| 내보내기    | 클라이언트 canvas                                 | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                                                                       |
+| 애니메이션  | CSS + `motion`                                    | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
+| 블로그 본문 | `mdast-util-from-markdown` (+gfm-table·directive) | 파싱만 라이브러리, 렌더는 **허용 노드 → React element 직접 매핑**. HTML 문자열 단계가 없어 sanitizer·`dangerouslySetInnerHTML` 불필요  |
+| 코드 색칠   | `shiki` **서버 전용**                             | 문법·테마를 브라우저에 보내지 않는다. 토큰만 넘기고 라이트·다크는 CSS 변수 한 쌍(`--shiki-light`/`--shiki-dark`)                       |
 
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
 > **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **카드 등록 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
@@ -138,7 +140,7 @@ src/
 │   │   │   ├── map/page.tsx    # 지도 (MapLibre+CARTO — next/dynamic ssr:false)
 │   │   │   └── about/page.tsx  # 소개 (통계 파생)
 │   │   ├── music/              # 음악 — 연주·경력·영상·소개 개별 페이지
-│   │   ├── dev/                # 개발 — 스택(/dev)·프로젝트·경력·소개 개별 페이지
+│   │   ├── dev/                # 개발 — 소개(/dev)·경력+기술 스택(/dev/career)·프로젝트 개별 페이지
 │   │   └── layout.tsx          # chrome(SiteHeader) 마운트는 여기서만 + 섹션 액센트 세팅
 │   ├── admin/                  # 관리자 — 전부 client, AuthGuard 마운트는 admin/layout.tsx
 │   │   ├── login/
@@ -157,22 +159,25 @@ src/
 │   ├── analytics/              # 분석 동의 상태·배너·GA 동적 로딩과 철회 처리
 │   ├── legal/                  # _components/LegalDocumentView 공용 레이아웃 · _lib/legal-documents.tsx 한·영 정책 원문
 │   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
-│   ├── dev/                    # 개발 섹션: 스택·프로젝트·경력·소개 (Phase C — 현재 ComingSoon) (_components/)
+│   ├── dev/                    # 개발 섹션: 소개·경력(+기술 스택)·프로젝트 뷰 + 프로젝트 모달 (_components/)
+│   ├── dev-blog/               # ★ 횡단(platform) — 공개 상세와 관리자 편집기가 공유. _lib/markdown-*(파서·검증·목차·읽기 시간·서버 색칠) · _components/{ArticleDocumentView,ArticleBody,ArticleCodeBlock,ArticleYouTube}
 │   ├── site-header/            # _components/: SiteHeader(mega-menu + 연락 링크), 모바일 탭/메뉴, ThemeToggleButton, LangMenu, SearchBox(사진 한정)
 │   ├── theme/  lang/           # 다크모드(html[data-theme]) · ko/en Context — _hooks/·_lib/·_components/
 │   ├── auth/                   # _components/{LoginForm,AuthGuard} · _hooks/use-auth
 │   ├── image-upload/           # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
+│   ├── admin-dev-articles/     # 블로그 CMS: _lib/(저장소 경계·slug·발행 조건·복구본·미리보기 action) · _hooks/ · _components/
 │   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
-│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard …) + 각 .module.css
+│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css
 ├── lib/firebase/               # client.ts, auth.ts, firestore.ts, firestore-rest.ts, storage.ts
+├── lib/admin/                  # 관리자 저장소 경계 — 컬렉션별 *-repository.ts 가 mock(로컬)↔live(Firestore) 선택 ★ + mock/(로컬 저장 구현)
 ├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
 ├── lib/exif/                   # exifr 래퍼 (사진 전용)
 ├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
 ├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES, STORAGE_KEYS, FRAME_STYLES, SECTIONS(액센트)
 ├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-scroll-lock)
-└── types/                      # photo, album, music(work/award/media/config), dev(project), site, tag, localized, timeline, lang, image, coords
+└── types/                      # photo, album, music(work/award/media/config), dev(project), dev-article(+tag), site, tag, localized, timeline, lang, image, coords
 ```
 
 의존 방향: `app → features → components` (역방향 금지). barrel export(index.ts) 금지 — 직접 경로 import.
@@ -186,7 +191,7 @@ import는 **같은 하위폴더면 `./`**(예: `_components/` 안의 컴포넌�
 - **공개 URL은 전부 `/ko/*`·`/en/*` 로케일 프리픽스**(`app/[lang]/(public)/*`). URL 세그먼트가 언어의 단일 출처 — `LangProvider` 경로 모드가 SSR부터 해당 언어로 렌더한다. `/ko/` = 랜딩(ko), 랜딩의 개발 행은 대표 콘텐츠인 `/dev/projects`로 바로 진입한다.
 - **언어가 없는 루트 `/`만 `src/proxy.ts`에서 조건부 307**: 명시적 언어 쿠키(`ap-lang-pref-v1`) → `Accept-Language` → `ko` 기본값 순서로 `/ko` 또는 `/en`을 고르고 query를 보존한다. 응답은 `private, no-store`이며 수동 선택 전에는 쿠키를 쓰지 않는다. 그 밖의 무-로케일·구 URL은 `next.config` redirects로 `/ko/*`에 308 직행(체인 금지): `/photo/* → /ko/photo/*`(음악·개발·연락·검색 동일), v1 URL `/albums → /ko/photo/albums`, `/map → /ko/photo/map`, `/about → /ko/photo/about`. 명시적인 `/ko/*`·`/en/*`는 자동 전환하지 않고 언어 메뉴만 같은 페이지의 반대 언어 경로로 이동한다.
 - 공개 내부 링크는 `LocalizedLink`(현재 언어 프리픽스 자동 부착), 경로 유틸은 `lib/i18n/locale-path.ts` 단일 출처. pathname 소비 코드는 `stripLangPrefix` 경유(섹션 판별·활성 링크). hreflang은 ko·en 상호 참조 + x-default(ko)를 `pageMetadata`·sitemap이 공유한다.
-- 음악·개발은 **개별 페이지**로 구성한다. 개발은 `/dev`=기술 스택, `/dev/projects`=프로젝트, `/dev/career`=경력이며 프로젝트 상세는 `?project=` 딥링크 모달이다.
+- 음악·개발은 **개별 페이지**로 구성한다. 개발은 `/dev`=소개, `/dev/career`=학력·경력·수상 + 기술 스택, `/dev/projects`=프로젝트이며 프로젝트 상세는 `?project=` 딥링크 모달이다. 구 `/dev/about`은 같은 언어의 `/dev`로 308 리다이렉트한다.
 - `/admin/*` 는 **로케일 밖**(프리픽스 없음) — 세 섹션 CMS를 모두 포함(사진·음악·개발). 관리자 UI 언어는 기존 localStorage 스토어 모드 유지.
 
 ## 환경변수 (`.env.local` — hook이 자동 수정 차단, 직접 편집)
@@ -204,7 +209,9 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 # NEXT_PUBLIC_SENTRY_DATA_REGION=US|DE # 필수 짝. 실제 Sentry 저장 지역과 일치하지 않으면 수집 금지
 # SENTRY_AUTH_TOKEN=                  # (빌드 전용 시크릿) 소스맵 업로드용. .env.sentry-build-plugin·Vercel에만 저장
 # NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER=0|1 # (개발 전용) 저장 상태와 무관하게 동의 배너 미리보기
-# NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션에 '1' 금지
+# NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션 빌드에 '1'이면 next.config가 즉시 throw
+# NEXT_PUBLIC_ADMIN_TEST_SESSION=0|1  # (개발·E2E 전용) AuthGuard 우회 — 프로덕션 빌드에서 '1'이면 즉시 throw. mock 여부와 무관한 별도 플래그
+# APERTURE_E2E_ALLOW_PRODUCTION_MOCK=1 # (E2E·시각 회귀 전용) 위 mock 금지 가드의 탈출구. NEXT_PUBLIC_ 아님 → 브라우저 번들 미포함. 배포 환경에 넣지 않는다
 ```
 
 > GA4와 Sentry 브라우저 수집은 방문자가 각 항목을 허용한 뒤에만 해당 클라이언트 청크를 로드한다(세분화 동의 배너,
@@ -216,6 +223,13 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 
 > **콘텐츠 소스(개발 편의)**: getter는 **개발(`npm run dev`)에선 mock 우선**(음악·개발 미완성 중 UI 테스트),
 > **프로덕션 빌드는 실데이터**(배포 안전). `NEXT_PUBLIC_USE_MOCK` 로 강제 override(`0`=실데이터, `1`=mock). — `lib/content/content-source.ts`
+> **관리자 화면도 같은 스위치를 따른다(B3.5)**: mock 모드의 관리자 저장은 Firestore 가 아니라 브라우저 로컬 저장소로
+> 간다(`lib/admin/*-repository.ts` 가 mock/live 선택, 상단 MOCK 배지로 표시). **실데이터를 만지려면 `NEXT_PUBLIC_USE_MOCK=0`.**
+>
+> **프로덕션 빌드 + mock 은 `next.config.ts` 가 막는다**(`lib/content/assert-deployable-content-source.ts`).
+> Vercel 여부를 보지 않으므로 self-host 배포에도 걸리고, `next build` 와 `next start` 양쪽에서 실행된다.
+> 재현 가능한 화면이 필요한 E2E·시각 회귀만 서버 전용 `APERTURE_E2E_ALLOW_PRODUCTION_MOCK=1` 로 연다
+> (`e2e/run.cjs` 가 build·server 환경 모두에 주입). **로컬에서 mock 프로덕션 빌드를 점검할 때도 이 플래그가 필요하다.**
 
 > 지도(MapLibre+CARTO)는 **키가 없다** — CARTO 무료 타일 사용.
 > Firebase 웹 키(`AIza…`)는 공개돼도 보안 위험이 아니다 — 보안은 Rules가 담당.
@@ -260,10 +274,117 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
 - 브랜치: `main` + `feature/{요약}` 단순 전략 — [git-branch-strategy](.claude/skills/git-branch-strategy/SKILL.md)
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](.claude/memory/feedback_srp_per_file.md))
 - 상대경로 import(`../`) 금지 → `@/` alias (hook이 경고)
+- **import는 그룹별로 빈 줄로 나눈다**: Node 내장 → 외부 패키지 → (`@/components` + `@/features/*/_components`) →
+  (`@/hooks` + `@/features/*/_hooks`) → `@/features/*/_lib` → (`@/lib` + `@/constants`) → `import type`(경로 무관 전체 알파벳순) →
+  상대경로/CSS 모듈. `eslint.config.mjs`의 `import/order`가 강제 + `eslint --fix`로 자동 정렬.
 - UI 표시 문자열은 ko/en 사전 경유 / 영어 코드·변수명. **전 섹션 콘텐츠 이중언어**(음악·개발 포함)
 - **스타일 = CSS Modules** (컴포넌트별 `.module.css`, 짝 `.tsx`와 같은 폴더에 동거 — features에선 `_components/` 안). 색·간격은 `globals.css`의 `:root` 변수 경유
   (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
 - **features/ 내부 = 타입별 하위폴더**(`_components/`·`_hooks/`·`_lib/`) — 위 「디렉토리 구조」 섹션 참조.
+- **관리자 UI = 공용 프리미티브(AdminButton·AdminInput·AdminField) + 용어·치수 규칙** — [docs/admin-ui-conventions.md](docs/admin-ui-conventions.md)
+
+### 코드 주석과 JSDoc 작성 규칙 ★
+
+주석은 코드를 한국어로 다시 읽어 주는 문장이 아니다. 코드만으로 알 수 없는 **이유, 제약, 실패 조건, 외부 계약**만 기록한다.
+
+#### 반드시 지킬 원칙
+
+1. **현재 코드만 설명한다.** “이번에 추가했다”, “기존 방식을 대체한다”, “B5에서 연결한다”처럼 diff나 작업 단계를 서술하지 않는다. 변경 이력은 커밋과 문서에 남긴다.
+2. **한 주석에는 한 가지 이유만 적는다.** 두 문장을 넘기기 시작하면 코드 구조나 별도 문서가 필요한지 먼저 확인한다.
+3. **코드에서 보이는 사실은 반복하지 않는다.** 함수명, 타입, 조건문을 그대로 번역한 주석은 삭제한다.
+4. **비유와 과장된 표현을 쓰지 않는다.** “죽는다”, “조용히 삼킨다”, “붙들어 둔다”, “회수한다”, “최후의 보루”, “의도된 GC” 대신 실제 상태와 결과를 적는다.
+5. **대시(`—`)로 문장을 길게 잇지 않는다.** 문장을 나누거나 원인과 결과만 남긴다. 화살표(`→`)로 절차를 꾸미지 않는다.
+6. **판단을 변호하지 않는다.** “이쪽이 더 낫다”, “가장 나쁜 상황이다” 대신 어떤 오류나 데이터 손실을 막는지 적는다.
+7. **보안·호환성 근거는 구체적으로 남긴다.** 허용하는 호스트, 브라우저 API 차이, 캐시·인덱스 조건처럼 코드를 바꿀 때 필요한 정보는 지우지 않는다.
+8. **TODO에는 완료 조건이나 추적 대상을 적는다.** 막연한 `TODO: 개선 필요`는 금지한다.
+
+#### JSDoc을 쓰는 경우
+
+- 공개되거나 여러 모듈에서 재사용하는 함수·타입
+- 이름만으로 알기 어려운 입력 제약이나 반환 의미가 있는 함수
+- 예외, 부작용, 캐시, 보안 경계를 설명해야 하는 함수
+- 테스트가 고정하는 도메인 규칙
+
+단순 컴포넌트, 짧은 내부 헬퍼, 타입이 이미 설명하는 함수에는 JSDoc을 의무적으로 붙이지 않는다. `@param`, `@returns`도 타입을 그대로 반복한다면 생략한다.
+
+#### 좋은 JSDoc 형식
+
+```ts
+/**
+ * 참조가 없고 업로드한 지 24시간이 지난 블로그 이미지를 찾는다.
+ * 이 함수는 파일을 삭제하지 않는다.
+ *
+ * @param now 보존 시간을 계산할 기준 시각.
+ * @returns 삭제 대상 파일과 전체 크기.
+ */
+const scanUnusedArticleImages = async (now: () => Date): Promise<ScanResult> => {
+  // ...
+};
+```
+
+```ts
+/**
+ * 정책 판단에 사용할 쓰기 직전 문서를 읽는다.
+ * 정책이 없으면 추가 읽기를 하지 않는다.
+ */
+const readBeforeWrite = async (id: string): Promise<Snapshot | null> => {
+  // ...
+};
+```
+
+#### 나쁜 예시와 수정
+
+```ts
+// 나쁨: 변경 이력, 단계 번호, 장황한 변호
+// B5에서 새 저장소 경계를 얹는다 — 기존 흐름을 그대로 유지하면서도
+// mock/live 계약이 조용히 깨지는 것을 막기 위한 의도된 방어선이다.
+
+// 좋음: 현재 제약과 결과만 설명
+// mock과 live 저장소는 같은 반환 타입과 오류 조건을 사용한다.
+```
+
+```ts
+// 나쁨: 코드를 그대로 번역
+// published가 true면 글을 반환한다.
+if (article.published) return article;
+
+// 좋음: 주석이 필요 없으므로 삭제
+if (article.published) return article;
+```
+
+```ts
+// 나쁨: 비유와 감정적 판단
+// 스냅샷 조회 실패를 조용히 삼키면 stale 청크가 살아남는다 — 불필요한
+// 동기화 한 번이 이쪽보다 훨씬 낫다.
+
+// 좋음: 실패 시 동작을 구체적으로 기록
+// 스냅샷 조회가 실패하면 남은 청크를 제거할 수 있도록 동기화를 요청한다.
+```
+
+```ts
+// 나쁨: 타입을 반복하는 JSDoc
+/**
+ * 사용자를 가져온다.
+ * @param id 사용자 ID.
+ * @returns 사용자 또는 null.
+ */
+const getUser = (id: string): User | null => users.get(id) ?? null;
+
+// 좋음: 추가 정보가 없으므로 JSDoc 생략
+const getUser = (id: string): User | null => users.get(id) ?? null;
+```
+
+#### 완료 전 주석 점검
+
+코드를 수정한 뒤 함께 추가·수정한 주석을 다시 읽고 아래를 확인한다.
+
+- 이 주석이 없으면 코드에서 알 수 없는 정보가 사라지는가?
+- 현재 구현을 설명하는가, 방금 만든 diff를 설명하는가?
+- 함수명과 타입을 한국어로 반복하고 있지 않은가?
+- `—`, `→`, 단계 번호, 과한 강조, 비유를 걷어낼 수 있는가?
+- 두 문장 이하로 줄여도 의미가 유지되는가?
+
+의미가 사라지지 않는다면 주석을 줄이거나 삭제한다.
 
 ## .claude 구성
 

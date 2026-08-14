@@ -3,15 +3,12 @@
 import { useCallback, useState, type FormEvent } from "react";
 
 /**
- * 연락 폼 제출 — Web3Forms(https://web3forms.com) 로 사이트 안에서 실제 발송.
- * access key 는 수신 메일 주소로만 매핑되는 공개용 키라 브라우저 노출이 안전하다
- * (원칙 #8 위반 아님 — 진짜 시크릿 아님). 서버 0대·월 $0 유지(무료 티어).
- * 키 미설정(로컬 dev 등) 시엔 기존 mailto 폴백 — 방문자 메일 앱을 연다.
+ * Web3Forms로 연락 폼을 제출한다. 키가 없으면 방문자의 메일 앱을 연다.
  */
 const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
 const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
-/** hCaptcha 위젯이 폼에 심는 토큰 필드 — Web3Forms 가 대시보드에서 캡차를 켜면 필수로 요구한다. */
+/** hCaptcha 위젯이 폼에 추가하는 토큰 필드. */
 const CAPTCHA_FIELD = "h-captcha-response";
 
 /**
@@ -35,12 +32,10 @@ const useContactForm = (mailtoTo: string) => {
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      // WebMCP 에이전트 발 제출은 발송 없이 전면 차단 — 에이전트의 역할은 입력 채우기까지다.
-      // hCaptcha 토큰은 사람만 만들 수 있어 자동 발송은 어차피 실패하지만, 여기서 먼저 끊어
-      // 에이전트에게 다음 행동(사람이 캡차·전송)을 문장으로 알린다 (ADR-0003).
+      // WebMCP는 입력만 채울 수 있으며 실제 전송은 사용자가 수행한다.
       const native = event.nativeEvent as SubmitEvent | undefined;
       if (native?.agentInvoked) {
-        // 스펙 계약은 Promise<any> — 문자열을 직접 넘기면 브라우저에서 타입 오류가 난다.
+        // WebMCP 호출에는 Promise 결과를 반환한다.
         // mailto 폴백(키 미설정) 환경에는 캡차가 없으므로 안내와 상태를 나눈다.
         native.respondWith?.(
           Promise.resolve(
@@ -59,7 +54,7 @@ const useContactForm = (mailtoTo: string) => {
       const email = String(formData.get("email") ?? "").trim();
       const message = String(formData.get("message") ?? "").trim();
       const subject = `[Portfolio] ${name || "Contact"}`;
-      // 허니팟 — 사람에겐 보이지 않는 체크박스라 값이 있으면 봇이다. 조용히 성공한 척 끝낸다.
+      // 보이지 않는 허니팟 필드에 값이 있으면 요청을 보내지 않는다.
       const botcheck = formData.get("botcheck") !== null;
       if (botcheck) {
         setStatus("sent");
@@ -67,7 +62,7 @@ const useContactForm = (mailtoTo: string) => {
         return;
       }
 
-      // 키 미설정 → mailto 폴백 (dev·미구성 환경에서도 폼이 죽지 않게).
+      // 키가 없으면 mailto 링크를 연다.
       if (!ACCESS_KEY) {
         const body = `${message}\n\n— ${name} (${email})`;
         window.location.href = `mailto:${mailtoTo}?subject=${encodeURIComponent(
@@ -76,7 +71,7 @@ const useContactForm = (mailtoTo: string) => {
         return;
       }
 
-      // 캡차 미해결 상태로 보내면 Web3Forms 가 거부한다 — 실패 대신 무엇을 해야 하는지 알린다.
+      // 캡차가 끝나지 않았으면 제출 방법을 안내한다.
       const captchaToken = String(formData.get(CAPTCHA_FIELD) ?? "");
       if (!captchaToken) {
         setStatus("captcha-required");
@@ -94,7 +89,7 @@ const useContactForm = (mailtoTo: string) => {
             name,
             email,
             message,
-            // Web3Forms 서버 측 허니팟 판정 — 클라이언트 차단을 우회해도 여기서 한 번 더 걸린다.
+            // Web3Forms에도 허니팟 필드 값을 전달한다.
             botcheck,
             [CAPTCHA_FIELD]: captchaToken,
           }),

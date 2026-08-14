@@ -32,9 +32,11 @@ type UIDict = {
   contactSendError: string;
   contactCaptchaRequired: string;
   contactPrivacyNotice: string;
-  devStackNav: string;
   devProjectsNav: string;
   devCareerNav: string;
+  devCareerStackNav: string;
+  devStackHeading: string;
+  devArticlesNav: string;
   devEducationLabel: string;
   devAwardsLabel: string;
   devAwardProjectLink: string;
@@ -49,6 +51,7 @@ type UIDict = {
   devTroubleResultLabel: string;
   devAchievementsLabel: string;
   devStackLabel: string;
+  devRelatedArticlesLabel: string;
   devTechLabel: string;
   devFieldLabel: string;
   devProjectLoadingLabel: string;
@@ -122,15 +125,22 @@ type UIDict = {
   chatScreenNoticeWork: string;
   chatScreenNoticeAward: string;
   chatScreenNoticeProject: string;
+  chatScreenNoticeArticle: string;
   chatScreenPlaceholderPhoto: string;
   chatScreenPlaceholderWork: string;
   chatScreenPlaceholderAward: string;
   chatScreenPlaceholderProject: string;
+  chatScreenPlaceholderArticle: string;
   chatScreenNoticeDismiss: string;
   chatSentContextPhoto: string;
   chatSentContextWork: string;
   chatSentContextAward: string;
   chatSentContextProject: string;
+  chatSentContextArticle: string;
+  chatReferenceTypePhoto: string;
+  chatReferenceTypeMusic: string;
+  chatReferenceTypeProject: string;
+  chatReferenceTypeArticle: string;
   chatPrivacyNote: string;
   chatSuggestionsLabel: string;
   chatSuggestions: string[];
@@ -151,6 +161,24 @@ type UIDict = {
   emptyAlbums: string;
   viewMasonry: string;
   viewSquare: string;
+  viewGrid: string;
+  viewList: string;
+  // 블로그 목록
+  articlesEmptyTag: string;
+  articlesEmptyAll: string;
+  articleReadingMinutes: string;
+  articleKoreanOnlyNotice: string;
+  articleDraftLabel: string;
+  articleRelatedProjects: string;
+  articleListNav: string;
+  articleTableLabel: string;
+  articleImageZoomLabel: string;
+  tocLabel: string;
+  tocOpenLabel: string;
+  paginationLabel: string;
+  paginationPrev: string;
+  paginationNext: string;
+  paginationPage: string;
   // EXIF 라벨 (상세 패널)
   exifAperture: string;
   exifShutter: string;
@@ -209,9 +237,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactSendError: "전송에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     contactCaptchaRequired: "스팸 방지 확인을 완료해 주세요.",
     contactPrivacyNotice: "입력한 이름, 이메일과 메시지는 문의 전달과 회신에 사용됩니다.",
-    devStackNav: "기술 스택",
     devProjectsNav: "프로젝트",
     devCareerNav: "경력",
+    devCareerStackNav: "경력·기술",
+    devStackHeading: "기술",
+    devArticlesNav: "블로그",
     devEducationLabel: "학력",
     devAwardsLabel: "수상",
     devAwardProjectLink: "프로젝트 보기",
@@ -226,6 +256,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devTroubleResultLabel: "결과",
     devAchievementsLabel: "성과",
     devStackLabel: "기술 스택",
+    devRelatedArticlesLabel: "연관 글",
     devTechLabel: "사용 기술",
     devFieldLabel: "분야",
     devProjectLoadingLabel: "프로젝트 불러오는 중",
@@ -299,15 +330,22 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatScreenNoticeWork: "보고 있는 연주",
     chatScreenNoticeAward: "보고 있는 수상 내역",
     chatScreenNoticeProject: "보고 있는 프로젝트",
+    chatScreenNoticeArticle: "보고 있는 글",
     chatScreenPlaceholderPhoto: "이 사진에 대해 물어보세요…",
     chatScreenPlaceholderWork: "이 연주에 대해 물어보세요…",
     chatScreenPlaceholderAward: "이 수상에 대해 물어보세요…",
     chatScreenPlaceholderProject: "이 프로젝트에 대해 물어보세요…",
+    chatScreenPlaceholderArticle: "이 글에 대해 물어보세요…",
     chatScreenNoticeDismiss: "이 항목을 답변에서 제외",
     chatSentContextPhoto: "함께 보낸 사진",
     chatSentContextWork: "함께 보낸 연주",
     chatSentContextAward: "함께 보낸 수상 내역",
     chatSentContextProject: "함께 보낸 프로젝트",
+    chatSentContextArticle: "함께 보낸 글",
+    chatReferenceTypePhoto: "사진",
+    chatReferenceTypeMusic: "연주",
+    chatReferenceTypeProject: "프로젝트",
+    chatReferenceTypeArticle: "글",
     chatPrivacyNote: "민감한 개인정보는 입력하지 마세요.",
     chatSuggestionsLabel: "추천 질문",
     chatSuggestions: [
@@ -337,6 +375,23 @@ const DICTIONARY: Record<Lang, UIDict> = {
     emptyAlbums: "아직 등록된 앨범이 없습니다",
     viewMasonry: "메이슨리",
     viewSquare: "정사각",
+    viewGrid: "그리드",
+    viewList: "목록",
+    articlesEmptyTag: "이 태그로 발행한 글이 아직 없습니다",
+    articlesEmptyAll: "아직 발행한 글이 없습니다",
+    articleReadingMinutes: "{n}분",
+    articleKoreanOnlyNotice: "This article is available in Korean only.",
+    articleDraftLabel: "초안",
+    articleRelatedProjects: "연관 프로젝트",
+    articleListNav: "다른 글",
+    articleTableLabel: "표",
+    articleImageZoomLabel: "크게 보기",
+    tocLabel: "목차",
+    tocOpenLabel: "목차 열기",
+    paginationLabel: "페이지 이동",
+    paginationPrev: "이전 페이지",
+    paginationNext: "다음 페이지",
+    paginationPage: "{n}페이지",
     exifAperture: "조리개",
     exifShutter: "셔터",
     exifIso: "감도",
@@ -391,9 +446,11 @@ const DICTIONARY: Record<Lang, UIDict> = {
     contactCaptchaRequired: "Please complete the spam check.",
     contactPrivacyNotice:
       "Your name, email address, and message are used to deliver and answer your enquiry.",
-    devStackNav: "Stack",
     devProjectsNav: "Projects",
     devCareerNav: "Career",
+    devCareerStackNav: "Career & Stack",
+    devStackHeading: "Stack",
+    devArticlesNav: "Blog",
     devEducationLabel: "Education",
     devAwardsLabel: "Awards",
     devAwardProjectLink: "View project",
@@ -408,6 +465,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devTroubleResultLabel: "Result",
     devAchievementsLabel: "Achievements",
     devStackLabel: "Stack",
+    devRelatedArticlesLabel: "Related posts",
     devTechLabel: "Tech Used",
     devFieldLabel: "Fields",
     devProjectLoadingLabel: "Loading project",
@@ -481,15 +539,22 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatScreenNoticeWork: "Viewing performance",
     chatScreenNoticeAward: "Viewing award",
     chatScreenNoticeProject: "Viewing project",
+    chatScreenNoticeArticle: "Viewing article",
     chatScreenPlaceholderPhoto: "Ask about this photo…",
     chatScreenPlaceholderWork: "Ask about this performance…",
     chatScreenPlaceholderAward: "Ask about this award…",
     chatScreenPlaceholderProject: "Ask about this project…",
+    chatScreenPlaceholderArticle: "Ask about this article…",
     chatScreenNoticeDismiss: "Exclude this item from the answer",
     chatSentContextPhoto: "Sent with photo",
     chatSentContextWork: "Sent with performance",
     chatSentContextAward: "Sent with award",
     chatSentContextProject: "Sent with project",
+    chatSentContextArticle: "Sent with article",
+    chatReferenceTypePhoto: "Photo",
+    chatReferenceTypeMusic: "Performance",
+    chatReferenceTypeProject: "Project",
+    chatReferenceTypeArticle: "Article",
     chatPrivacyNote: "Please don’t share sensitive personal information.",
     chatSuggestionsLabel: "Suggested questions",
     chatSuggestions: [
@@ -519,6 +584,23 @@ const DICTIONARY: Record<Lang, UIDict> = {
     emptyAlbums: "No albums yet",
     viewMasonry: "Masonry",
     viewSquare: "Square",
+    viewGrid: "Grid",
+    viewList: "List",
+    articlesEmptyTag: "No published articles with this tag yet",
+    articlesEmptyAll: "No published articles yet",
+    articleReadingMinutes: "{n} min",
+    articleKoreanOnlyNotice: "This article is available in Korean only.",
+    articleDraftLabel: "Draft",
+    articleRelatedProjects: "Related projects",
+    articleListNav: "More articles",
+    articleTableLabel: "Table",
+    articleImageZoomLabel: "View larger",
+    tocLabel: "Contents",
+    tocOpenLabel: "Open table of contents",
+    paginationLabel: "Pagination",
+    paginationPrev: "Previous page",
+    paginationNext: "Next page",
+    paginationPage: "Page {n}",
     exifAperture: "Aperture",
     exifShutter: "Shutter",
     exifIso: "ISO",

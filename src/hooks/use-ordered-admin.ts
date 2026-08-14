@@ -146,4 +146,3 @@ const useOrderedAdmin = <T extends OrderedAdminItem>(adapter: OrderedAdminAdapte
 };
 
 export { useOrderedAdmin };
-export type { OrderedAdminAdapter };

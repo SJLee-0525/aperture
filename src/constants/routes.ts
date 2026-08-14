@@ -13,10 +13,10 @@ const ROUTES = {
   MUSIC_MEDIA: "/music/media",
   MUSIC_ABOUT: "/music/about", // 소개
   // 개발 섹션 (/dev/*) — Phase C
-  DEV: "/dev", // 기술 스택(개발 섹션 내부 루트)
+  DEV: "/dev", // 소개(개발 섹션 내부 루트). 구 /dev/about 은 next.config 가 여기로 308.
   DEV_PROJECTS: "/dev/projects", // 랜딩의 개발 진입 목적지
-  DEV_CAREER: "/dev/career",
-  DEV_ABOUT: "/dev/about", // 소개
+  DEV_CAREER: "/dev/career", // 학력·경력·수상 + 기술 스택
+  DEV_ARTICLES: "/dev/articles", // 블로그 목록 (B4 에서 화면 구현)
   // 연락처 (섹션 아님 — 전역 페이지)
   CONTACT: "/contact",
   PRIVACY: "/privacy",
@@ -43,6 +43,7 @@ const ROUTES = {
   ADMIN_DEV: "/admin/dev",
   ADMIN_DEV_PROJECTS: "/admin/dev/projects",
   ADMIN_DEV_CONFIG: "/admin/dev/config",
+  ADMIN_DEV_ARTICLES: "/admin/dev/articles",
   ADMIN_MAINTENANCE: "/admin/maintenance",
 } as const;
 
@@ -103,6 +104,22 @@ const adminMusicMediaRoute = (id: string) => `${ROUTES.ADMIN_MUSIC_MEDIA}/${id}`
 const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}`;
 
 /**
+ * 관리자 블로그 글 수정 경로
+ *
+ * @param {string} id
+ * @returns {string}
+ */
+const adminDevArticleRoute = (id: string) => `${ROUTES.ADMIN_DEV_ARTICLES}/${id}`;
+
+/**
+ * 관리자 전용 블로그 전체 페이지 미리보기 경로. 공개 상세와 같은 화면을 관리자 인증 안에서만 연다.
+ *
+ * @param {string} id
+ * @returns {string}
+ */
+const adminDevArticlePreviewRoute = (id: string) => `${adminDevArticleRoute(id)}/preview`;
+
+/**
  * 개발 프로젝트 상세 모달 딥링크
  *
  * @param {string} id
@@ -110,14 +127,45 @@ const adminDevProjectRoute = (id: string) => `${ROUTES.ADMIN_DEV_PROJECTS}/${id}
  */
 const devProjectRoute = (id: string) => `${ROUTES.DEV_PROJECTS}?project=${encodeURIComponent(id)}`;
 
+/**
+ * 블로그 글 상세 경로 (/dev/articles/[slug]) — 식별자는 문서 ID 가 아니라 slug 다.
+ *
+ * @param {string} slug 발행 후에는 바뀌지 않는 글 slug.
+ * @returns {string}
+ */
+const devArticleRoute = (slug: string) => `${ROUTES.DEV_ARTICLES}/${slug}`;
+
+/**
+ * slug 는 영어 제목이나 한글 로마자에서 만들어 소문자·숫자·하이픈만 남는다
+ * (`admin-dev-articles/_lib/dev-article-slug`). 대문자·밑줄·percent-encoding 은 slug 가 아니다.
+ */
+const DEV_ARTICLE_PATH_PATTERN = new RegExp(`^${ROUTES.DEV_ARTICLES}/([a-z0-9-]+)$`);
+
+/**
+ * 로케일을 뗀 경로가 블로그 상세인지 보고 slug 를 돌려준다.
+ *
+ * 챗봇의 화면 문맥 판정과 WebMCP 의 현재 글 해석이 같은 계약을 써야 해서 여기 둔다.
+ * 두 곳이 각자 정규식을 들면 한쪽만 고쳤을 때 조용히 갈라진다.
+ * 끝의 슬래시는 호출부가 미리 정리한다.
+ *
+ * @param {string} localPathname 로케일 프리픽스를 뗀 경로.
+ * @returns {string | null} 상세 경로면 slug, 아니면 null.
+ */
+const matchDevArticleSlug = (localPathname: string): string | null =>
+  DEV_ARTICLE_PATH_PATTERN.exec(localPathname)?.[1] ?? null;
+
 export {
   ROUTES,
   albumRoute,
+  matchDevArticleSlug,
   adminAlbumRoute,
+  adminDevArticlePreviewRoute,
+  adminDevArticleRoute,
   adminMusicWorkRoute,
   adminMusicAwardRoute,
   adminMusicMediaRoute,
   adminDevProjectRoute,
   adminPhotoRoute,
+  devArticleRoute,
   devProjectRoute,
 };

@@ -1,5 +1,5 @@
-import { StackPageSkeleton } from "@/components/PublicPageSkeletons";
+import { AboutPageSkeleton } from "@/components/PublicPageSkeletons";
 
 export default function DevLoading() {
-  return <StackPageSkeleton />;
+  return <AboutPageSkeleton extended />;
 }

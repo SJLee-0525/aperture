@@ -7,11 +7,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/firebase/client", () => ({
-  auth: {
+  getFirebaseAuth: () => ({
     get currentUser() {
       return mocks.currentUser;
     },
-  },
+  }),
 }));
 
 import { generatePortfolioEmbeddings } from "@/features/admin-maintenance/_lib/generate-portfolio-embeddings";

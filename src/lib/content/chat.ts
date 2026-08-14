@@ -1,54 +1,28 @@
+import { compareByPublishedAtDesc } from "@/lib/content/article-order";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import { getDevConfig } from "@/lib/content/dev";
+import { getDevArticleTags } from "@/lib/content/dev-articles";
 import { getMusicConfig } from "@/lib/content/music";
 import { getSite } from "@/lib/content/site";
 import { fetchChatDevProjects } from "@/lib/firebase/public/dev";
+import { fetchChatDevArticles } from "@/lib/firebase/public/dev-articles";
 import {
   fetchChatMusicAwards,
   fetchChatMusicMedia,
   fetchChatMusicWorks,
 } from "@/lib/firebase/public/music";
 import { fetchChatAlbums, fetchChatPhotos } from "@/lib/firebase/public/photo";
-import type { Album } from "@/types/album";
-import type { DevConfig, DevProject } from "@/types/dev";
-import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
-import type { Photo } from "@/types/photo";
+
+import type { ChatDevProject } from "@/lib/firebase/public/dev";
+import type { ChatDevArticle } from "@/lib/firebase/public/dev-articles";
+import type { ChatMusicAward, ChatMusicMedia, ChatMusicWork } from "@/lib/firebase/public/music";
+import type { ChatAlbum, ChatPhoto } from "@/lib/firebase/public/photo";
+import type { DevConfig } from "@/types/dev";
+import type { DevArticleTag } from "@/types/dev-article-tag";
+import type { MusicConfig } from "@/types/music";
 import type { SiteConfig } from "@/types/site";
 
-type ChatPhoto = Pick<
-  Photo,
-  | "id"
-  | "title"
-  | "shotAt"
-  | "camera"
-  | "lens"
-  | "exif"
-  | "place"
-  | "tags"
-  | "image"
-  | "order"
-  | "published"
->;
-type ChatAlbum = Pick<Album, "id" | "title" | "subtitle" | "cover" | "order" | "published">;
-type ChatDevProject = Pick<
-  DevProject,
-  | "id"
-  | "title"
-  | "summary"
-  | "position"
-  | "techTags"
-  | "achievements"
-  | "cover"
-  | "order"
-  | "published"
->;
-type ChatMusicWork = Pick<
-  MusicWork,
-  "id" | "title" | "performedAt" | "venue" | "program" | "poster" | "order" | "published"
->;
-type ChatMusicAward = Pick<MusicAward, "id" | "year" | "name" | "place" | "order" | "published">;
-type ChatMusicMedia = Pick<MusicMedia, "id" | "title" | "source" | "order" | "published">;
-
+// 투영 타입은 디코더와 같은 층(`lib/firebase/public/*`)에서 한 번만 선언한다.
 type ChatProfileData = {
   site: SiteConfig;
   devConfig: DevConfig;
@@ -59,20 +33,25 @@ type ChatProfileData = {
   musicMedia: ChatMusicMedia[];
   photos: ChatPhoto[];
   albums: ChatAlbum[];
+  articles: ChatDevArticle[];
+  /** 글에는 태그 id 만 저장된다. 라벨은 여기서 찾는다. */
+  articleTags: DevArticleTag[];
 };
 
 const pickPublicFields = async (): Promise<
   Pick<
     ChatProfileData,
-    "devProjects" | "musicWorks" | "musicAwards" | "musicMedia" | "photos" | "albums"
+    "devProjects" | "musicWorks" | "musicAwards" | "musicMedia" | "photos" | "albums" | "articles"
   >
 > => {
-  const [{ MOCK_DEV_PROJECTS }, music, { MOCK_PHOTOS }, { MOCK_ALBUMS }] = await Promise.all([
-    import("@/mocks/dev"),
-    import("@/mocks/music"),
-    import("@/mocks/photos"),
-    import("@/mocks/albums"),
-  ]);
+  const [{ MOCK_DEV_PROJECTS }, music, { MOCK_PHOTOS }, { MOCK_ALBUMS }, { MOCK_DEV_ARTICLES }] =
+    await Promise.all([
+      import("@/mocks/dev"),
+      import("@/mocks/music"),
+      import("@/mocks/photos"),
+      import("@/mocks/albums"),
+      import("@/mocks/dev-articles"),
+    ]);
 
   return {
     devProjects: MOCK_DEV_PROJECTS,
@@ -81,6 +60,17 @@ const pickPublicFields = async (): Promise<
     musicMedia: music.MOCK_MUSIC_MEDIA,
     photos: MOCK_PHOTOS,
     albums: MOCK_ALBUMS,
+    articles: MOCK_DEV_ARTICLES.filter(({ published }) => published)
+      .map(({ id, slug, title, summary, cover, tags, publishedAt }) => ({
+        id,
+        slug,
+        title,
+        summary,
+        cover,
+        tags,
+        publishedAt,
+      }))
+      .sort(compareByPublishedAtDesc),
   };
 };
 
@@ -90,10 +80,11 @@ const getChatProfileData = async (options?: {
 }): Promise<ChatProfileData> => {
   const queryOptions = options?.freshPublicFields ? { fresh: true } : undefined;
   const source = options?.source ?? getContentSource();
-  const [site, devConfig, musicConfig, publicFields] = await Promise.all([
+  const [site, devConfig, musicConfig, articleTags, publicFields] = await Promise.all([
     getSite(),
     getDevConfig(),
     getMusicConfig(),
+    getDevArticleTags(),
     source === "mock"
       ? pickPublicFields()
       : Promise.all([
@@ -103,18 +94,21 @@ const getChatProfileData = async (options?: {
           fetchChatMusicMedia(queryOptions),
           fetchChatPhotos(queryOptions),
           fetchChatAlbums(queryOptions),
-        ]).then(([devProjects, musicWorks, musicAwards, musicMedia, photos, albums]) => ({
+          fetchChatDevArticles(queryOptions),
+        ]).then(([devProjects, musicWorks, musicAwards, musicMedia, photos, albums, articles]) => ({
           devProjects,
           musicWorks,
           musicAwards,
           musicMedia,
           photos,
           albums,
+          // live 는 Firestore 쿼리(`publishedAt desc` + `__name__ asc`)가 순서를 마쳐 온다.
+          articles,
         })),
   ]);
 
-  return { site, devConfig, musicConfig, ...publicFields };
+  return { site, devConfig, musicConfig, articleTags, ...publicFields };
 };
 
 export { getChatProfileData };
-export type { ChatProfileData };
+export type { ChatDevArticle, ChatProfileData };

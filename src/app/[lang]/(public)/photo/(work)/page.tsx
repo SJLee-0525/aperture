@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { GalleryView } from "@/features/gallery/_components/GalleryView";
+
 import { getPhotos, getTags } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
+
 import { toGalleryPhotos } from "@/types/gallery-photo";
 
 import type { Lang } from "@/types/lang";
+import type { Metadata } from "next";
 
 import WorkLoading from "./loading";
 

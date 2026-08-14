@@ -3,10 +3,13 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 import { AnalyticsConsentProvider } from "@/features/analytics/_components/AnalyticsConsentProvider";
+
 import { useAnalyticsConsent } from "@/features/analytics/_hooks/use-analytics-consent";
+
 import { resetAnalyticsConsentCache } from "@/features/analytics/_lib/analytics-consent";
+
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 const { disableGoogleAnalytics, startBrowserMonitoring, stopBrowserMonitoring } = vi.hoisted(
   () => ({

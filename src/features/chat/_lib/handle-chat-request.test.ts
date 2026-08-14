@@ -5,8 +5,9 @@ import { ChatRateLimitConfigurationError } from "@/features/chat/_lib/chat-rate-
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import { handleChatRequest, MAX_BODY_BYTES } from "@/features/chat/_lib/handle-chat-request";
 
-import type { ChatReference } from "@/types/chat";
 import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
+import type { ChatReference } from "@/types/chat";
+import type { DevArticle } from "@/types/dev-article";
 
 const createRequest = (body: unknown, headers?: HeadersInit) =>
   new Request("http://localhost/api/chat", {
@@ -15,7 +16,7 @@ const createRequest = (body: unknown, headers?: HeadersInit) =>
     body: JSON.stringify(body),
   });
 
-const EMPTY_LOOKUP = { photo: {}, work: {}, award: {}, project: {} };
+const EMPTY_LOOKUP = { photo: {}, work: {}, award: {}, project: {}, article: {} };
 const createSnapshot = (overrides?: Partial<ReturnType<typeof baseSnapshot>>) => ({
   ...baseSnapshot(),
   ...overrides,
@@ -24,6 +25,7 @@ const baseSnapshot = () => ({
   context: "# PROFILE_CONTEXT\ncontext",
   references: [] as ChatReference[],
   screenLookup: EMPTY_LOOKUP,
+  articleSlugById: {} as Record<string, string>,
   linkVocabulary: { tags: [], cameras: [], photoIds: [] } as PhotoFilterVocabulary,
 });
 
@@ -106,6 +108,7 @@ describe("handleChatRequest", () => {
       ["profile", "development"],
       { text: "development project" },
       expect.anything(),
+      undefined,
     );
     expect(provider).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -144,6 +147,7 @@ describe("handleChatRequest", () => {
       ["profile", "development"],
       { text: "개발 수상 내역", keywords: ["수상", "우수상"] },
       expect.anything(),
+      undefined,
     );
   });
 
@@ -169,6 +173,7 @@ describe("handleChatRequest", () => {
       ["profile", "development"],
       { text: "개발 프로젝트를 알려줘\n그건 언제 했어?" },
       expect.anything(),
+      undefined,
     );
   });
 
@@ -569,6 +574,54 @@ describe("handleChatRequest", () => {
     });
   });
 
+  it("존재하지 않는 id의 열린 항목은 프로필 조회를 열지 못한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "무엇을 도와드릴까요?" });
+    const buildContext = vi.fn(async () => "context");
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        // 분야 단어가 없어 인텐트가 비는 입력이다. 열린 항목만이 섹션을 열 수 있다.
+        messages: [{ role: "user", content: "asdf" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "no-such" } },
+      }),
+      { provider, loadSnapshot: async () => createSnapshot(), buildContext },
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildContext).not.toHaveBeenCalled();
+  });
+
+  it("스냅샷에서 찾은 열린 항목은 그 섹션으로 조회한다", async () => {
+    const provider = vi.fn().mockResolvedValue({ content: "이 사진 이야기예요." });
+    const buildContext = vi.fn(async () => "context");
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "asdf" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p01" } },
+      }),
+      {
+        provider,
+        loadSnapshot: async () =>
+          createSnapshot({
+            screenLookup: { ...EMPTY_LOOKUP, photo: { p01: "Photo: 새벽의 항구" } },
+          }),
+        buildContext,
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildContext).toHaveBeenCalledWith(
+      expect.any(Function),
+      ["profile", "photography"],
+      expect.anything(),
+      expect.anything(),
+      undefined,
+    );
+  });
+
   const linksOf = async (links: Array<{ href: string; label: string }>) => {
     const loadSnapshot = vi.fn(async () => createSnapshot({ linkVocabulary: PHOTO_VOCABULARY }));
     const response = await handleChatRequest(
@@ -682,5 +735,215 @@ describe("handleChatRequest", () => {
     const body = (await response.json()) as { message: { links?: unknown; content: string } };
     expect(body.message.content).toBe("확인해 보세요.");
     expect(body.message.links).toEqual([{ href: "/contact", label: "연락" }]);
+  });
+
+  it("블로그 목록 링크는 허용 경로라 통과한다", async () => {
+    const { links } = await linksOf([{ href: "/dev/articles", label: "블로그 보기" }]);
+
+    expect(links).toEqual([{ href: "/dev/articles", label: "블로그 보기" }]);
+  });
+
+  it("모델이 지어낸 /article 경로는 버린다", async () => {
+    const { links } = await linksOf([{ href: "/article", label: "글" }]);
+
+    expect(links).toBeUndefined();
+  });
+
+  it("article 카드가 있으면 블로그 목록 링크도 중복 표면으로 제거한다", async () => {
+    const reference = {
+      type: "article" as const,
+      id: "a1",
+      title: "서버 없이 운영한다",
+      subtitle: "2026.05.18 · 기록",
+      href: "/dev/articles/serverless",
+      image: null,
+    };
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "블로그 보여줘" }] }),
+      {
+        provider: async () => ({
+          content: "이 글이에요.",
+          links: [
+            { href: "/dev/articles", label: "블로그 목록" },
+            { href: "/contact", label: "연락" },
+          ],
+          references: [{ type: "article", id: "a1" }],
+          contactDraft: null,
+        }),
+        loadSnapshot: async () => createSnapshot({ references: [reference] }),
+        buildContext: async () => "context",
+        resolveReferences: async () => [reference],
+      },
+    );
+
+    const body = (await response.json()) as { message: { links?: unknown } };
+    // 프로젝트 카드와 같은 정책이다. 목록 링크를 살리고 싶어지면 이 계약부터 바꾼다.
+    expect(body.message.links).toEqual([{ href: "/contact", label: "연락" }]);
+  });
+
+  describe("열린 블로그 글 검증", () => {
+    const ARTICLE_CONTEXT = {
+      pathname: "/ko/dev/articles/serverless-portfolio",
+      openTarget: { type: "article" as const, id: "a1" },
+    };
+    const LIVE_ARTICLE: DevArticle = {
+      id: "a1",
+      slug: "serverless-portfolio",
+      title: { ko: "서버 없이 운영한다", en: "Running without a server" },
+      summary: { ko: "요약", en: "Summary" },
+      body: "본문",
+      cover: null,
+      coverAlt: null,
+      tags: [],
+      relatedProjectIds: [],
+      published: true,
+      publishedAt: new Date("2026-05-18T00:00:00Z"),
+      firstPublishedAt: new Date("2026-05-18T00:00:00Z"),
+      createdAt: new Date("2026-05-01T00:00:00Z"),
+      updatedAt: new Date("2026-05-18T00:00:00Z"),
+    };
+    const snapshotWith = (slugById: Record<string, string>) =>
+      createSnapshot({
+        articleSlugById: slugById,
+        screenLookup: { ...EMPTY_LOOKUP, article: { a1: "Article: 서버 없이 운영한다" } },
+      });
+
+    const runWith = async (
+      snapshot: ReturnType<typeof createSnapshot>,
+      overrides?: { message?: string; loadArticle?: (id: string) => Promise<DevArticle | null> },
+    ) => {
+      // 인자 위치로 sections·prioritize 를 읽어야 해서 가변 인자 시그니처로 둔다.
+      const buildContext = vi.fn<(...args: unknown[]) => Promise<string>>(async () => "context");
+      const provider = vi.fn<
+        (...args: Array<{ instructions: string }>) => Promise<{
+          content: string;
+          contactDraft: null;
+        }>
+      >(async () => ({ content: "요약입니다.", contactDraft: null }));
+      await handleChatRequest(
+        createRequest({
+          lang: "ko",
+          messages: [{ role: "user", content: overrides?.message ?? "이 글 요약해 줘" }],
+          context: ARTICLE_CONTEXT,
+        }),
+        {
+          provider,
+          loadSnapshot: async () => snapshot,
+          buildContext,
+          ...(overrides?.loadArticle ? { loadArticle: overrides.loadArticle } : {}),
+        },
+      );
+      return {
+        sections: buildContext.mock.calls[0]?.[1],
+        prioritize: buildContext.mock.calls[0]?.[4],
+        contextCalls: buildContext.mock.calls.length,
+        instructions: provider.mock.calls[0]?.[0]?.instructions,
+      };
+    };
+
+    it("slug 가 맞으면 화면 문맥과 우선 검색에 같은 target 을 넘긴다", async () => {
+      const { prioritize, instructions } = await runWith(
+        snapshotWith({ a1: "serverless-portfolio" }),
+      );
+
+      expect(prioritize).toEqual({
+        sourceType: "article",
+        sourceId: "a1",
+        ignoreScoreFloor: true,
+      });
+      expect(instructions).toContain("# SCREEN_CONTEXT");
+    });
+
+    it("slug 가 다르면 화면 문맥과 우선 검색을 함께 버린다", async () => {
+      const { prioritize, instructions } = await runWith(snapshotWith({ a1: "another-article" }));
+
+      expect(prioritize).toBeUndefined();
+      expect(instructions).not.toContain("# SCREEN_CONTEXT");
+    });
+
+    it("발행이 취소돼 목록에서 사라진 글도 함께 버린다", async () => {
+      const { prioritize, instructions } = await runWith(snapshotWith({}));
+
+      expect(prioritize).toBeUndefined();
+      expect(instructions).not.toContain("# SCREEN_CONTEXT");
+    });
+
+    it("검증에 실패한 target 으로는 포트폴리오 조회를 시작하지 않는다", async () => {
+      const { contextCalls } = await runWith(snapshotWith({ a1: "another-article" }));
+
+      expect(contextCalls).toBe(0);
+    });
+
+    it("열린 글로 섹션을 고를 때도 profile 을 함께 넣는다", async () => {
+      const { sections } = await runWith(snapshotWith({ a1: "serverless-portfolio" }), {
+        message: "작성자는?",
+      });
+
+      expect(sections).toEqual(["profile", "development"]);
+    });
+
+    it("질문이 스스로 섹션을 고르면 우선 대상에 점수 면제를 주지 않는다", async () => {
+      const { sections, prioritize } = await runWith(snapshotWith({ a1: "serverless-portfolio" }), {
+        message: "무슨 프로젝트 했어?",
+      });
+
+      expect(sections).toEqual(["profile", "development"]);
+      expect(prioritize).toEqual({
+        sourceType: "article",
+        sourceId: "a1",
+        ignoreScoreFloor: false,
+      });
+    });
+
+    it("live 에서는 글 한 건만 읽어 검증하고 목록 전체를 다시 읽지 않는다", async () => {
+      vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
+      vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
+      vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+      const loadFreshData = vi.fn();
+      const loadArticle = vi.fn(async () => LIVE_ARTICLE);
+      const buildContext = vi.fn<(...args: unknown[]) => Promise<string>>(async () => "context");
+      const provider = vi.fn<
+        (...args: Array<{ instructions: string }>) => Promise<{
+          content: string;
+          contactDraft: null;
+        }>
+      >(async () => ({ content: "요약입니다.", contactDraft: null }));
+
+      await handleChatRequest(
+        createRequest({
+          lang: "ko",
+          messages: [{ role: "user", content: "이 글 요약해 줘" }],
+          context: ARTICLE_CONTEXT,
+        }),
+        {
+          provider,
+          loadSnapshot: async () => snapshotWith({}),
+          buildContext,
+          loadArticle,
+          loadFreshData,
+        },
+      );
+
+      // 요청이 끊기거나 제한 시간을 넘기면 진행 중인 Firestore 조회도 함께 끝나야 한다.
+      expect(loadArticle).toHaveBeenCalledWith("a1", expect.any(AbortSignal));
+      expect(loadFreshData).not.toHaveBeenCalled();
+      expect(provider.mock.calls[0]?.[0]?.instructions).toContain("서버 없이 운영한다");
+      vi.unstubAllEnvs();
+    });
+
+    it("live 조회가 막히면 문맥 없이 답한다", async () => {
+      vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
+      vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
+      vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+      const { prioritize, instructions } = await runWith(snapshotWith({}), {
+        loadArticle: async () => {
+          throw new Error("Firestore 블로그 글 읽기 실패 (403)");
+        },
+      });
+
+      expect(prioritize).toBeUndefined();
+      expect(instructions).not.toContain("# SCREEN_CONTEXT");
+      vi.unstubAllEnvs();
+    });
   });
 });

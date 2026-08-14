@@ -1,5 +1,4 @@
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
-
 import {
   fetchDocument,
   projectedPublishedOrderedQuery,
@@ -235,3 +234,4 @@ export {
   toMusicMedia,
   toMusicWork,
 };
+export type { ChatMusicAward, ChatMusicMedia, ChatMusicWork };

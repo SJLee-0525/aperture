@@ -3,18 +3,15 @@
 import { useCallback, useState } from "react";
 
 import {
-  uploadMusicPoster,
-  uploadMusicPosterPreview,
-  uploadMusicPosterThumbnail,
-} from "@/lib/firebase/storage";
-import type { ImageMeta } from "@/types/image";
-
-import {
   compressPreviewToWebp,
   compressThumbnailToWebp,
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+
+import { getAdminImageStore } from "@/lib/admin/image-store";
+
+import type { ImageMeta } from "@/types/image";
 
 /**
  * 음악 포스터 업로드 — webp 압축 → Storage(music/{workId}/) → ImageMeta 반환.
@@ -33,6 +30,7 @@ const usePosterUpload = (workId: string) => {
       setPending(true);
       setError(null);
       try {
+        const imageStore = getAdminImageStore();
         const [compressed, preview, thumbnail] = await Promise.all([
           compressToWebp(file),
           compressPreviewToWebp(file),
@@ -43,9 +41,9 @@ const usePosterUpload = (workId: string) => {
             readDimensions(compressed),
             readDimensions(preview),
             readDimensions(thumbnail),
-            uploadMusicPoster(workId, compressed),
-            uploadMusicPosterPreview(workId, preview),
-            uploadMusicPosterThumbnail(workId, thumbnail),
+            imageStore.uploadMusicPoster(workId, compressed),
+            imageStore.uploadMusicPosterPreview(workId, preview),
+            imageStore.uploadMusicPosterThumbnail(workId, thumbnail),
           ]);
         return {
           ...mainUpload,

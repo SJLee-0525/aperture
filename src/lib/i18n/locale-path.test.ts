@@ -4,6 +4,7 @@ import {
   langFromPath,
   localizePath,
   stripLangPrefix,
+  stripTrailingSlash,
   switchLangPath,
 } from "@/lib/i18n/locale-path";
 
@@ -48,6 +49,14 @@ describe("stripLangPrefix", () => {
   it("프리픽스가 없으면 그대로", () => {
     expect(stripLangPrefix("/photo")).toBe("/photo");
     expect(stripLangPrefix("/")).toBe("/");
+  });
+});
+
+describe("stripTrailingSlash", () => {
+  it("마지막 slash 하나만 지우고 루트는 그대로 둔다", () => {
+    expect(stripTrailingSlash("/ko/dev/articles/")).toBe("/ko/dev/articles");
+    expect(stripTrailingSlash("/ko/dev/articles")).toBe("/ko/dev/articles");
+    expect(stripTrailingSlash("/")).toBe("/");
   });
 });
 

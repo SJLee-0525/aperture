@@ -1,6 +1,7 @@
 // Firestore·Storage Security Rules 회귀 테스트.
 // 실행: npm run test:rules (firebase emulators:exec가 두 에뮬레이터를 띄운다)
 // firebase-tools는 JDK 21+가 필요하다.
+import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { after, before, beforeEach, describe, it } from "node:test";
 
@@ -9,7 +10,20 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { deleteDoc, doc, getDoc, setDoc, setLogLevel, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  documentId,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  setLogLevel,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { deleteObject, getBytes, listAll, ref, uploadBytes } from "firebase/storage";
 
 const ADMIN_UID = "KBBvgyMIssPngwx9n0OXaL2THwy1";
@@ -19,6 +33,7 @@ const PUBLIC_COLLECTIONS = [
   "musicAwards",
   "musicMedia",
   "devProjects",
+  "devArticles",
   "ragDocuments",
 ];
 
@@ -61,9 +76,16 @@ beforeEach(async () => {
       setDoc(doc(db, "site", "music"), { intro: { ko: "", en: "" } }),
       setDoc(doc(db, "site", "dev"), { heroLead: { ko: "", en: "" } }),
       setDoc(doc(db, "secret", "x"), { any: true }),
-      ...PUBLIC_COLLECTIONS.flatMap((collection) => [
-        setDoc(doc(db, collection, "pub"), { published: true, order: 0 }),
-        setDoc(doc(db, collection, "draft"), { published: false, order: 1 }),
+      // 블로그 공개 쿼리는 publishedAt 정렬을 쓰므로 그 필드를 가진 발행 글을 따로 둔다
+      // (orderBy 는 필드 없는 문서를 결과에서 뺀다 — 공통 seed 의 pub 은 publishedAt 이 없다).
+      setDoc(doc(db, "devArticles", "dated"), {
+        published: true,
+        publishedAt: new Date("2026-01-05T09:00:00Z"),
+      }),
+      setDoc(doc(db, "devArticleTags", "firebase"), { ko: "파이어베이스", en: "Firebase" }),
+      ...PUBLIC_COLLECTIONS.flatMap((name) => [
+        setDoc(doc(db, name, "pub"), { published: true, order: 0 }),
+        setDoc(doc(db, name, "draft"), { published: false, order: 1 }),
       ]),
     ]);
     await uploadBytes(ref(ctx.storage(), "seed/public.webp"), new Uint8Array([1]), {
@@ -94,6 +116,46 @@ describe("Firestore 방문자 읽기", () => {
     for (const id of ["config", "music", "dev"]) {
       await assertSucceeds(getDoc(doc(db, "site", id)));
     }
+  });
+});
+
+describe("Firestore 공개 쿼리 (블로그)", () => {
+  it("published 필터를 건 발행일 정렬 쿼리는 성공하고 초안이 없다", async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    const snapshot = await assertSucceeds(
+      getDocs(
+        query(
+          collection(db, "devArticles"),
+          where("published", "==", true),
+          orderBy("publishedAt", "desc"),
+          orderBy(documentId(), "asc"),
+        ),
+      ),
+    );
+    const ids = snapshot.docs.map((snap) => snap.id);
+    assert.ok(ids.includes("dated"));
+    assert.ok(!ids.includes("draft"));
+  });
+
+  it("필터 없는 전체 컬렉션 쿼리는 비로그인에게 거부된다", async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertFails(getDocs(collection(db, "devArticles")));
+  });
+
+  it("태그 사전은 비로그인이 전체 목록을 읽을 수 있다", async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    const snapshot = await assertSucceeds(getDocs(collection(db, "devArticleTags")));
+    assert.ok(snapshot.docs.some((snap) => snap.id === "firebase"));
+  });
+
+  it("태그 사전은 비로그인·비관리자 쓰기가 거부되고 관리자만 쓸 수 있다", async () => {
+    const anonymous = testEnv.unauthenticatedContext().firestore();
+    const other = testEnv.authenticatedContext(OTHER_UID).firestore();
+    const admin = testEnv.authenticatedContext(ADMIN_UID).firestore();
+    await assertFails(setDoc(doc(anonymous, "devArticleTags", "new"), { ko: "ㄱ", en: "a" }));
+    await assertFails(setDoc(doc(other, "devArticleTags", "new"), { ko: "ㄱ", en: "a" }));
+    await assertSucceeds(setDoc(doc(admin, "devArticleTags", "new"), { ko: "ㄱ", en: "a" }));
+    await assertSucceeds(deleteDoc(doc(admin, "devArticleTags", "new")));
   });
 });
 

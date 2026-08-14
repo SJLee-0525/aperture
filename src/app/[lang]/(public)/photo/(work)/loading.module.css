@@ -1,4 +1,4 @@
-/* 작업(홈) 로딩 셸 — GalleryView.module.css .main/.toolbar + FilterBar.module.css .bar/.tagbar + 메이슨리 흉내. */
+/* 작업(홈) 로딩 셸 — GalleryView.module.css .main/.toolbar + TagFilterBar.module.css .bar/.tagbar + 메이슨리 흉내. */
 .main {
   max-width: 1180px;
   height: var(--public-content-height);
@@ -26,7 +26,9 @@
   align-items: center;
   gap: var(--s-4);
 }
-/* FilterBar 모바일 기본값 미러 — 한 줄, 필터 버튼 고정 */
+/* TagFilterBar 미러 — 어느 폭에서든 한 줄, 필터 버튼 고정.
+   실제 바에는 데스크톱 wrap 규칙이 없으므로 여기에도 두지 않는다. 규격이 어긋나면
+   로딩 셸이 본문으로 바뀔 때 태그 행 높이가 달라져 메이슨리 시작 위치가 튄다. */
 .bar {
   display: flex;
   align-items: center;
@@ -65,18 +67,5 @@
 @media (max-width: 767px) {
   .tagbar > :nth-child(n + 3) {
     display: none;
-  }
-}
-@media (min-width: 768px) {
-  .bar {
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--s-5);
-    flex-wrap: wrap;
-  }
-  .tagbar {
-    min-width: 200px;
-    flex-wrap: wrap;
-    overflow: visible;
   }
 }

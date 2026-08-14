@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { LOCALE_PREFERENCE_COOKIE } from "@/constants/locale-preference";
 import { decideLocale } from "@/features/lang/_lib/locale-negotiation";
+
+import { LOCALE_PREFERENCE_COOKIE } from "@/constants/locale-preference";
 
 /** 루트 언어 이동을 허용하는 읽기 전용 HTTP 메서드. */
 const ROUTABLE_METHODS = new Set(["GET", "HEAD"]);

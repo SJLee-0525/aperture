@@ -4,6 +4,7 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { normalizeForSearch } from "@/lib/text/korean-tokenize";
+
 import type { SearchDocument } from "@/types/search";
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({

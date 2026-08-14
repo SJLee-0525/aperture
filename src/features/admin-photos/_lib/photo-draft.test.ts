@@ -6,8 +6,10 @@ import {
   parseCoords,
   validatePhotoInput,
 } from "@/features/admin-photos/_lib/photo-draft";
-import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
+
 import { MOCK_PHOTOS } from "@/mocks/photos";
+
+import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 
 const uploadResult = (): UploadResult => ({
   image: { url: "/uploaded.webp", path: "photos/id/uploaded.webp", w: 2048, h: 1365 },

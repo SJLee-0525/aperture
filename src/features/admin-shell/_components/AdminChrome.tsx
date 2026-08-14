@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
 
 import { ROUTES } from "@/constants/routes";
 import { signOutAdmin } from "@/lib/firebase/auth";
 
+import type { ReactNode } from "react";
+
 import styles from "./AdminChrome.module.css";
+import { MockModeBadge } from "./MockModeBadge";
 
 /**
- * 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + 컨텐츠 영역.
+ * 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + mock 안내 + 컨텐츠 영역.
  *
  * @param {{ children: ReactNode }} props
  * @param {ReactNode} props.children
@@ -28,7 +30,7 @@ const AdminChrome = ({ children }: { children: ReactNode }) => {
     <div className={styles.shell}>
       <header className={styles.bar}>
         <Link href={ROUTES.ADMIN} className={styles.brand}>
-          Aperture.<span className={styles.tag}>관리자</span>
+          Sungjoon Lee.<span className={styles.tag}>관리자</span>
         </Link>
         <div className={styles.right}>
           <Link href={ROUTES.LANDING} className={styles.link}>
@@ -39,6 +41,7 @@ const AdminChrome = ({ children }: { children: ReactNode }) => {
           </button>
         </div>
       </header>
+      <MockModeBadge />
       <main className={styles.content}>{children}</main>
     </div>
   );

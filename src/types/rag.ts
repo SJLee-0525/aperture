@@ -9,7 +9,8 @@ type RagSyncSourceType =
   | "siteConfig"
   | "devConfig"
   | "musicConfig"
-  | "photoTags";
+  | "photoTags"
+  | "article";
 
 type RagSyncTarget = { sourceType: RagSyncSourceType; sourceId: string };
 
@@ -34,8 +35,15 @@ type StoredRagChunkMeta = Omit<StoredRagChunk, "embedding">;
 /** RAG 검색 입력 — text는 임베딩·로컬 토큰화용, keywords는 인텐트 분류기가 추출한 검색 키워드. */
 type RagQuery = { text: string; keywords?: string[] };
 
+/**
+ * 방문자가 열어 둔 원본. 그 청크가 상위 자리를 먼저 채운다.
+ * `ignoreScoreFloor`는 질문이 스스로 검색 대상을 고르지 못했을 때만 켠다.
+ */
+type RagPrioritize = { sourceType: string; sourceId: string; ignoreScoreFloor?: boolean };
+
 export type {
   RagChunk,
+  RagPrioritize,
   RagQuery,
   RagSection,
   RagSyncSourceType,

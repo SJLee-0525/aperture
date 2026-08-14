@@ -1,6 +1,7 @@
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import boundaries from "eslint-plugin-boundaries";
+import importPlugin from "eslint-plugin-import";
 
 const config = [
   // 제외 패턴 (빌드 결과물, 의존성, 자동 생성 파일)
@@ -34,7 +35,7 @@ const config = [
   // 레이어 경계 규칙 (CLAUDE.md 배치 규칙 강제)
   {
     files: ["src/**/*.{ts,tsx}"],
-    plugins: { boundaries },
+    plugins: { boundaries, import: importPlugin },
     settings: {
       "import/resolver": {
         typescript: { project: "./tsconfig.json" },
@@ -44,8 +45,9 @@ const config = [
         { type: "app", pattern: "src/app" },
         {
           // 여러 feature가 소비하는 횡단 기능. 일반 feature와 달리 다른 feature를 참조할 수 없다.
+          // dev-blog: 공개 상세와 관리자 편집기가 같은 Markdown 계약·본문 렌더러를 쓴다.
           type: "platform",
-          pattern: "src/features/(lang|theme|image-upload|photo-detail)",
+          pattern: "src/features/(lang|theme|image-upload|photo-detail|dev-blog)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {
@@ -82,6 +84,38 @@ const config = [
               message: "공유/플랫폼 레이어({{ from.type }})는 feature/app을 import할 수 없습니다.",
             },
           ],
+        },
+      ],
+      // import 그룹 순서: Node 내장 → 외부 패키지 → (components + features/_components) →
+      // (hooks) → features/_lib → (lib + constants) → type → 상대경로/css. 그룹 사이 빈 줄 강제.
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            "type",
+            "parent",
+            "sibling",
+            "index",
+            "object",
+          ],
+          pathGroups: [
+            {
+              pattern: "@/{components,features/**/_components}/**",
+              group: "internal",
+              position: "after",
+            },
+            { pattern: "@/{hooks,features/**/_hooks}/**", group: "internal", position: "after" },
+            { pattern: "@/features/**/_lib/**", group: "internal", position: "after" },
+            { pattern: "@/{lib,constants}/**", group: "internal", position: "after" },
+            { pattern: "@/**", group: "internal", position: "after" },
+          ],
+          // type-only import은 경로와 무관하게 항상 마지막 type 그룹 하나로 모은다
+          pathGroupsExcludedImportTypes: ["builtin", "external", "object", "type"],
+          "newlines-between": "always",
+          alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
     },

@@ -5,6 +5,7 @@ import { Profiler, StrictMode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ContactView } from "@/features/contact/_components/ContactView";
+
 import { MOCK_SITE } from "@/mocks/site";
 
 vi.mock("@/features/lang/_hooks/use-lang", () => ({

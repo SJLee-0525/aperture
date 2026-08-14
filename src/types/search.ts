@@ -16,6 +16,11 @@ type SearchIndex = {
 type SearchDocument = {
   key: string;
   section: SearchSection;
+  /**
+   * 같은 섹션 안에서 결과를 따로 묶어 보여줄 때 쓴다. 섹션 자체를 나누지 않는 이유는
+   * 블로그가 개발 섹션의 콘텐츠이고 액센트·경로도 개발을 따르기 때문이다.
+   */
+  subsection?: "blog";
   title: LocalizedText;
   index: SearchIndex;
   meta?: LocalizedText;

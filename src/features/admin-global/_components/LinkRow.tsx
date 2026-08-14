@@ -1,5 +1,8 @@
 "use client";
 
+import { AdminInput } from "@/components/AdminInput";
+import { Icon } from "@/components/Icon";
+
 import type { SiteLink } from "@/types/site";
 
 import styles from "./LinkRow.module.css";
@@ -31,8 +34,8 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
   <li className={styles.row}>
     <label className={styles.field}>
       <span className={styles.srLabel}>라벨</span>
-      <input
-        className={styles.input}
+      <AdminInput
+        size="sm"
         value={link.label}
         placeholder="Instagram"
         onChange={(e) => onEdit(index, "label", e.target.value)}
@@ -41,8 +44,8 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
 
     <label className={styles.field}>
       <span className={styles.srLabel}>주소</span>
-      <input
-        className={styles.input}
+      <AdminInput
+        size="sm"
         value={link.href}
         placeholder="https://… 또는 mailto:…"
         onChange={(e) => onEdit(index, "href", e.target.value)}
@@ -57,7 +60,7 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
       >
-        ↑
+        <Icon name="arrowUp" size={14} />
       </button>
       <button
         type="button"
@@ -66,7 +69,7 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
-        ↓
+        <Icon name="arrowDown" size={14} />
       </button>
       <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
         삭제

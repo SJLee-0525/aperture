@@ -5,41 +5,51 @@ import {
   resolveReferencesWithRefresh,
   type ProfileSnapshot,
 } from "@/features/chat/_lib/build-profile-context";
-import { ROUTES } from "@/constants/routes";
 import { getChatErrorMessage, type ChatErrorCode } from "@/features/chat/_lib/chat-errors";
-import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
-import {
-  buildScreenContextLookup,
-  resolveScreenContext,
-} from "@/features/chat/_lib/resolve-chat-screen-context";
 import {
   buildRagQueryText,
+  isStandaloneNonLookupInput,
   selectChatIntentWithClassifier,
   type ChatIntent,
   type ProfileSection,
 } from "@/features/chat/_lib/chat-intent";
-import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
-import {
-  ChatRateLimitConfigurationError,
-  type ChatRateLimiter,
-} from "@/features/chat/_lib/chat-rate-limit";
+import { buildChatInstructions } from "@/features/chat/_lib/chat-prompt";
 import {
   ChatProviderUnavailableError,
   type ChatProvider,
 } from "@/features/chat/_lib/chat-provider";
-import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
+import {
+  ChatRateLimitConfigurationError,
+  type ChatRateLimiter,
+} from "@/features/chat/_lib/chat-rate-limit";
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
+import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
+import {
+  articleScreenEntry,
+  buildScreenContextLookup,
+  entryOf,
+  formatScreenContextBlock,
+  resolveScreenContext,
+} from "@/features/chat/_lib/resolve-chat-screen-context";
+
+import { matchDevArticleSlug, ROUTES } from "@/constants/routes";
 import { getChatProfileData, type ChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
+import { fetchDevArticleById } from "@/lib/firebase/public/dev-articles";
+import { stripLangPrefix } from "@/lib/i18n/locale-path";
 import {
   buildPhotoFilterHref,
   parsePhotoFilterQueryStrict,
   type PhotoFilterVocabulary,
 } from "@/lib/photo-filter-query";
-import type { Lang } from "@/types/lang";
-import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
+
+import type { ChatContext, ChatContextOpenTarget } from "@/features/chat/_lib/chat-context";
+import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
+import type { ChatReference, ChatReferenceRequest, ChatReferenceType } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
-import type { RagQuery } from "@/types/rag";
+import type { DevArticle } from "@/types/dev-article";
+import type { Lang } from "@/types/lang";
+import type { RagPrioritize, RagQuery } from "@/types/rag";
 
 // route.ts의 maxDuration(60초)보다 5초 먼저 요청을 끝낸다. Vercel이 함수를 먼저
 // 종료하면 TIMEOUT 이벤트를 보낼 수 없다.
@@ -51,7 +61,7 @@ const STREAM_MEDIA_TYPE = "application/x-ndjson";
 const ALLOWED_ACTION_ROUTES = new Set<string>([
   ROUTES.CONTACT,
   ROUTES.DEV,
-  ROUTES.DEV_ABOUT,
+  ROUTES.DEV_ARTICLES,
   ROUTES.DEV_CAREER,
   ROUTES.DEV_PROJECTS,
   ROUTES.MUSIC,
@@ -64,17 +74,43 @@ const ALLOWED_ACTION_ROUTES = new Set<string>([
   ROUTES.PHOTO_MAP,
 ]);
 
+/** 열린 상세 항목이 속한 프로필 섹션. */
+const TARGET_PROFILE_SECTIONS: Record<ChatContextOpenTarget["type"], ProfileSection> = {
+  photo: "photography",
+  work: "music",
+  award: "music",
+  project: "development",
+  article: "development",
+};
+
+/**
+ * 화면 target 해석 결과. 프로필 섹션 선택, 화면 문맥, RAG 우선 검색이 같은 값을 쓴다.
+ * `verified` 만이 공개 데이터에서 항목을 실제로 찾았다는 뜻이며, 조회를 유발하는 섹션 선택은
+ * 이 플래그로만 열린다.
+ */
+type ResolvedChatTarget = {
+  openTarget?: ChatContextOpenTarget;
+  /** 공개 데이터에서 이 target 을 찾았는지 여부. */
+  verified?: boolean;
+  prioritize?: { sourceType: string; sourceId: string };
+  /** 검증에 읽은 문서로 만든 화면 문맥. 있으면 추가 조회 없이 그대로 쓴다. */
+  screenContext?: string;
+};
+
 type ChatHandlerDependencies = {
   provider: ChatProvider;
   /** 캐시된 프로필 스냅샷 로더. 요청 안에서는 하나의 promise를 공유한다. */
   loadSnapshot?: (lang: Lang, source: ContentSource) => Promise<ProfileSnapshot>;
   /** live 캐시에서 항목을 찾지 못했을 때 사용할 최신 데이터 로더. */
   loadFreshData?: (source: ContentSource) => Promise<ChatProfileData>;
+  /** 열린 글을 검증할 live 단건 로더. 목록 전체를 읽지 않는다. */
+  loadArticle?: (id: string, signal?: AbortSignal) => Promise<DevArticle | null>;
   buildContext?: (
     getSnapshot: () => Promise<ProfileSnapshot>,
     sections?: ProfileSection[],
     query?: RagQuery,
     signal?: AbortSignal,
+    prioritize?: RagPrioritize,
   ) => Promise<string>;
   resolveReferences?: (
     requested: ChatReferenceRequest[],
@@ -157,6 +193,86 @@ const isPhotoQueryRoute = (parsed: { pathname: string; searchParams: URLSearchPa
   parsed.pathname === ROUTES.PHOTO && !parsed.searchParams.keys().next().done;
 
 /**
+ * 요청 화면 문맥을 해석해 세 소비처(섹션 선택·화면 문맥·RAG 우선 검색)가 함께 쓸 값으로 만든다.
+ *
+ * 글은 URL 의 slug 와 문서 ID 가 따로 오므로 서버가 문서 한 건을 읽어 두 값을 맞춰 본다.
+ * live 에서는 캐시된 스냅샷으로 물러나지 않는다. 방금 발행을 취소한 글이 캐시에 남아 있으면
+ * 되살아나기 때문이다. 조회 자체가 실패하면 글 target 과 우선 검색을 함께 버리고
+ * 채팅은 그대로 이어 간다(글은 fail-closed, 채팅은 fail-open).
+ * 검증에 읽은 문서로 화면 문맥까지 만들어 돌려준다. 같은 글을 두 번 읽지 않는다.
+ *
+ * 나머지 종류는 캐시된 스냅샷의 화면 문맥 lookup 에 그 id 가 있는지로 확인한다.
+ * 스냅샷에 없어도 target 을 버리지는 않는다. 방금 공개한 항목이 캐시에 아직 없을 수 있고
+ * `resolveScreenContext` 의 최신 조회가 그 경우를 처리한다. 확인되지 않은 target 은
+ * `verified` 가 거짓이라 프로필 섹션을 열지 못한다.
+ *
+ * @param {ChatContext | undefined} context 파싱을 마친 요청 문맥.
+ * @param {Lang} lang 화면 문맥을 표시할 언어.
+ * @param {((id: string, signal?: AbortSignal) => Promise<DevArticle | null>) | undefined} loadArticle live 단건 로더. mock 이면 undefined.
+ * @param {() => Promise<ProfileSnapshot>} getSnapshot 캐시된 스냅샷 로더.
+ * @param {AbortSignal} signal 요청 취소 신호.
+ * @returns {Promise<ResolvedChatTarget>} 해석한 target, 확인 여부, 우선 검색 대상, 화면 문맥.
+ */
+const resolveContextTarget = async (
+  context: ChatContext | undefined,
+  lang: Lang,
+  loadArticle: ((id: string, signal?: AbortSignal) => Promise<DevArticle | null>) | undefined,
+  getSnapshot: () => Promise<ProfileSnapshot>,
+  signal: AbortSignal,
+): Promise<ResolvedChatTarget> => {
+  const openTarget = context?.openTarget;
+  if (!openTarget) return {};
+
+  if (openTarget.type !== "article") {
+    try {
+      return {
+        openTarget,
+        verified: entryOf((await getSnapshot()).screenLookup, openTarget) !== undefined,
+      };
+    } catch {
+      // 스냅샷을 읽지 못하면 이 항목이 공개인지 확인할 수 없다. 조회를 열지 않고 답변은 이어 간다.
+      return { openTarget };
+    }
+  }
+
+  const slug = matchDevArticleSlug(stripLangPrefix(context.pathname));
+  if (!slug) return {};
+  const resolved: ResolvedChatTarget = {
+    openTarget,
+    verified: true,
+    prioritize: { sourceType: "article", sourceId: openTarget.id },
+  };
+
+  try {
+    if (!loadArticle) {
+      return (await getSnapshot()).articleSlugById[openTarget.id] === slug ? resolved : {};
+    }
+    const article = await loadArticle(openTarget.id, signal);
+    // Rules 가 초안 read 를 거부하므로 여기 도달한 문서도 published 를 다시 확인한다.
+    if (!article || !article.published || article.slug !== slug) return {};
+    return {
+      ...resolved,
+      screenContext: formatScreenContextBlock(articleScreenEntry(article, lang)),
+    };
+  } catch {
+    // 조회가 막히면 이 글이 아직 공개인지 확인할 수 없다. 문맥 없이 답한다.
+    return {};
+  }
+};
+
+/**
+ * 참조 카드 종류별로 카드가 대신하는 목록 경로.
+ * 개발은 `/dev`(소개)가 아니라 각 목록을 가린다. 소개까지 넣으면 카드가 붙은 답변에서
+ * 소개 링크가 함께 사라진다.
+ */
+const REFERENCE_SECTION_ROUTES: Record<ChatReferenceType, string> = {
+  article: ROUTES.DEV_ARTICLES,
+  music: ROUTES.MUSIC,
+  photo: ROUTES.PHOTO,
+  project: ROUTES.DEV_PROJECTS,
+};
+
+/**
  * 모델이 반환한 링크를 공개 내부 경로로 제한하고 사진 query를 canonical URL로 바꾼다.
  *
  * @param {ChatLink[] | undefined} links provider가 반환한 링크 후보.
@@ -169,8 +285,9 @@ const sanitizeLinks = (
   references: ChatReference[] | undefined,
   photoVocabulary?: PhotoFilterVocabulary,
 ): ChatLink[] | undefined => {
+  // 참조 카드가 이미 대신하는 목록 경로는 링크에서 뺀다.
   const referencedSections = [
-    ...new Set(references?.map(({ type }) => (type === "project" ? ROUTES.DEV : `/${type}`))),
+    ...new Set(references?.map(({ type }) => REFERENCE_SECTION_ROUTES[type])),
   ];
   const safe = links
     ?.flatMap((link) => {
@@ -240,6 +357,7 @@ const handleChatRequest = async (
     provider,
     loadSnapshot = loadProfileSnapshot,
     loadFreshData = (source) => getChatProfileData({ freshPublicFields: true, source }),
+    loadArticle = (id, signal) => fetchDevArticleById(id, { fresh: true, signal }),
     buildContext = buildProfileContextFromSnapshot,
     resolveReferences = resolveReferencesWithRefresh,
     rateLimiter,
@@ -329,8 +447,14 @@ const handleChatRequest = async (
     const { status, code } = publicErrorFor(error, timedOut);
     return jsonError(status, code, responseLang);
   }
-  const profileSections = chatIntent.sections;
-  const shouldLoadProfile = profileSections.length > 0;
+  // "이 글 요약해 줘" 처럼 분야 단어가 없는 지시어 질문은 정규식 분류가 비워 두고 내려보낸다.
+  // 열어 둔 항목이 있으면 그 섹션으로 조회한다. 인사말은 여기서 제외한다.
+  // 상세 화면에서 인사만 해도 매번 벡터 검색이 돌면 비용이 는다.
+  const canUseOpenTarget =
+    chatIntent.sections.length === 0 && !isStandaloneNonLookupInput(chatRequest.messages);
+  // 스트림 상태 이벤트는 target 검증 전에 나가야 해서 조회 가능성만 본다.
+  const mayLoadProfile =
+    chatIntent.sections.length > 0 || Boolean(canUseOpenTarget && chatRequest.context?.openTarget);
   // 분류기가 만든 독립 검색어·키워드를 우선 사용하고, 없으면 후속 질문 맥락을 복원한 휴리스틱 쿼리.
   const ragQuery: RagQuery = {
     text: chatIntent.searchQuery ?? buildRagQueryText(chatRequest.messages),
@@ -347,21 +471,48 @@ const handleChatRequest = async (
     contentSource === "live"
       ? () => (freshDataPromise ??= loadFreshData(contentSource))
       : undefined;
+  // 열린 글 검증은 문서 한 건만 읽는다. mock 은 캐시된 스냅샷의 대조표를 쓴다.
+  const getArticle = contentSource === "live" ? loadArticle : undefined;
 
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
+    // 해석은 섹션 선택, 화면 문맥, RAG 우선 검색 앞의 공통 단계다. 세 곳이 각자 판단하면
+    // 확인되지 않은 target 이 한쪽으로 샌다.
+    const resolved = await resolveContextTarget(
+      chatRequest.context,
+      chatRequest.lang,
+      getArticle,
+      getSnapshot,
+      controller.signal,
+    );
+    // 공개 데이터에서 찾은 target 만 섹션을 연다. 없는 id 로 조회를 유발할 수 없다.
+    const openTargetSection =
+      canUseOpenTarget && resolved.verified && resolved.openTarget
+        ? TARGET_PROFILE_SECTIONS[resolved.openTarget.type]
+        : null;
+    // `profile` 은 섹션이 하나라도 잡히면 늘 함께 본다(`chat-intent` 의 `sectionsForText` 규약).
+    const profileSections: ProfileSection[] = openTargetSection
+      ? ["profile", openTargetSection]
+      : chatIntent.sections;
+    // 질문이 스스로 섹션을 고른 경우에는 열어 둔 원본도 최소 점수를 넘어야 자리를 차지한다.
+    const prioritize: RagPrioritize | undefined = resolved.prioritize
+      ? { ...resolved.prioritize, ignoreScoreFloor: openTargetSection !== null }
+      : undefined;
+
     const [profileContext, screenContext] = await Promise.all([
-      shouldLoadProfile
-        ? buildContext(getSnapshot, profileSections, ragQuery, controller.signal)
+      profileSections.length > 0
+        ? buildContext(getSnapshot, profileSections, ragQuery, controller.signal, prioritize)
         : Promise.resolve(
             "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.",
           ),
       // 화면 문맥 조회에 실패해도 답변은 계속하며 원문과 오류는 기록하지 않는다.
-      resolveScreenContext(chatRequest.context?.openTarget, {
-        getScreenLookup: async () => (await getSnapshot()).screenLookup,
-        getFreshScreenLookup: getFreshData
-          ? async () => buildScreenContextLookup(await getFreshData(), chatRequest.lang)
-          : undefined,
-      }).catch(() => undefined),
+      resolved.screenContext !== undefined
+        ? Promise.resolve(resolved.screenContext)
+        : resolveScreenContext(resolved.openTarget, {
+            getScreenLookup: async () => (await getSnapshot()).screenLookup,
+            getFreshScreenLookup: getFreshData
+              ? async () => buildScreenContextLookup(await getFreshData(), chatRequest.lang)
+              : undefined,
+          }).catch(() => undefined),
     ]);
     const result = await provider({
       instructions: buildChatInstructions(chatRequest.lang, profileContext, screenContext),
@@ -427,7 +578,7 @@ const handleChatRequest = async (
           streamController.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
         };
 
-        if (shouldLoadProfile) send({ type: "status", status: "portfolio-search" });
+        if (mayLoadProfile) send({ type: "status", status: "portfolio-search" });
 
         void run((delta) => send({ type: "delta", content: delta }))
           .then((message) => send({ type: "done", message }))

@@ -2,9 +2,6 @@
 
 import { useCallback, useState } from "react";
 
-import { uploadDevImage, uploadDevPreview, uploadDevThumbnail } from "@/lib/firebase/storage";
-import type { ImageMeta } from "@/types/image";
-
 import {
   compressPreviewToWebp,
   compressThumbnailToWebp,
@@ -12,6 +9,10 @@ import {
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 import { runLimited } from "@/features/image-upload/_lib/run-limited";
+
+import { getAdminImageStore } from "@/lib/admin/image-store";
+
+import type { ImageMeta } from "@/types/image";
 
 const DEV_UPLOAD_CONCURRENCY = 3;
 
@@ -29,6 +30,7 @@ const useDevImageUpload = (projectId: string) => {
 
   const upload = useCallback(
     async (file: File): Promise<ImageMeta> => {
+      const imageStore = getAdminImageStore();
       const [compressed, preview, thumbnail] = await Promise.all([
         compressToWebp(file),
         compressPreviewToWebp(file),
@@ -39,9 +41,9 @@ const useDevImageUpload = (projectId: string) => {
           readDimensions(compressed),
           readDimensions(preview),
           readDimensions(thumbnail),
-          uploadDevImage(projectId, compressed),
-          uploadDevPreview(projectId, preview),
-          uploadDevThumbnail(projectId, thumbnail),
+          imageStore.uploadDevImage(projectId, compressed),
+          imageStore.uploadDevPreview(projectId, preview),
+          imageStore.uploadDevThumbnail(projectId, thumbnail),
         ]);
       return {
         ...mainUpload,

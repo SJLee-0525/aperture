@@ -6,8 +6,9 @@ const { deleteImagesMock } = vi.hoisted(() => ({
   deleteImagesMock: vi.fn<(paths: Iterable<string>) => Promise<void>>(),
 }));
 
-vi.mock("@/lib/firebase/storage", () => ({
-  deleteImages: deleteImagesMock,
+// 삭제는 mock/live 를 가르는 이미지 저장 경계(getAdminImageStore)를 거친다 — 그 경계를 스텁한다.
+vi.mock("@/lib/admin/image-store", () => ({
+  getAdminImageStore: () => ({ deleteImages: deleteImagesMock }),
 }));
 
 describe("imagePaths", () => {

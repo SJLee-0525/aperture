@@ -4,9 +4,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { autoScrollDirection, autoScrollVelocity } from "@/features/custom-cursor/_lib/auto-scroll";
-import { stripLangPrefix } from "@/lib/i18n/locale-path";
 import { applyCursorGeometry, type CursorMode } from "@/features/custom-cursor/_lib/cursor-mode";
 import { resolveCursorTarget } from "@/features/custom-cursor/_lib/cursor-target";
+
+import { stripLangPrefix } from "@/lib/i18n/locale-path";
+
 import {
   CUSTOM_CURSOR_LOADING_EVENT,
   CUSTOM_CURSOR_MAP_HOVER_EVENT,

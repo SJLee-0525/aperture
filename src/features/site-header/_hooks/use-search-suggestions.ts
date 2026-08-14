@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import type { SearchDocument } from "@/types/search";
+
 import { loadSearchIndex } from "@/lib/search/load-search-index";
 import { suggestDocuments } from "@/lib/search/suggest-documents";
+
+import type { SearchDocument } from "@/types/search";
 
 /** 추천 갱신 디바운스 — 대조는 in-memory 라 비용 문제가 아니라, 타이핑 중 리스트가 매 타마다 바뀌는 시각 소음을 줄이는 용도. */
 const SUGGEST_DEBOUNCE_MS = 120;

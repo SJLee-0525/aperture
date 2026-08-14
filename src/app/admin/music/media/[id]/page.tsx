@@ -3,7 +3,9 @@
 import { use, useEffect, useState } from "react";
 
 import { MediaForm } from "@/features/admin-music-media/_components/MediaForm";
-import { musicMedia } from "@/lib/firebase/music";
+
+import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
+
 import type { MusicMedia } from "@/types/music";
 
 import styles from "./page.module.css";
@@ -27,7 +29,7 @@ const EditMusicMediaPage = ({ params }: Props) => {
 
   useEffect(() => {
     let alive = true;
-    musicMedia
+    getMusicMediaRepository()
       .get(id)
       .then((loaded) => {
         if (!alive) return;

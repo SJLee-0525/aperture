@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createGeminiChatProvider } from "@/features/chat/_lib/gemini-chat-provider";
 import { createOpenAIChatProvider } from "@/features/chat/_lib/openai-chat-provider";
+
 import type { ChatProvider } from "@/features/chat/_lib/chat-provider";
 
 /**

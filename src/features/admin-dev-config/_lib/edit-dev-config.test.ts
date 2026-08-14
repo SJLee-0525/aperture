@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { editDevConfig } from "@/features/admin-dev-config/_lib/edit-dev-config";
+
 import type { DevConfig } from "@/types/dev";
 
 const config = (): DevConfig => ({

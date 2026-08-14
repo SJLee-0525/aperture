@@ -1,22 +1,22 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
+import { YouTubeFacade } from "@/components/YouTubeFacade";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
+
 import { pickText } from "@/lib/i18n/pick-text";
+
 import type { MusicMedia } from "@/types/music";
 
 import styles from "./MusicMediaView.module.css";
 
-const PLAY_ICON = (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M8 5v14l11-7z" />
-  </svg>
-);
-
 /**
- * 영상 (/music/media) — facade 클릭 시 YouTube iframe 재생. id 없는 항목(mock)은 "곧 공개" 안내.
+ * 영상 (/music/media) — facade 클릭 시 YouTube iframe 재생.
+ *
+ * 재생 상태를 목록이 들고 있어 한 번에 하나만 재생된다. facade 가 각자 상태를 가지면
+ * 두 영상의 소리가 겹친다. 아직 영상 ID 가 없는 항목은 눌렀을 때 출처 자리에 "곧 공개"를 보여 준다.
  *
  * @param {{ media: MusicMedia[] }} props
  * @param {MusicMedia[]} props.media
@@ -34,50 +34,16 @@ const MusicMediaView = ({ media }: { media: MusicMedia[] }) => {
       ) : (
         <div className={styles.vid}>
           {media.map((item) => {
-            const isPlaying = playing === item.id;
-            if (isPlaying && item.youtubeId) {
-              return (
-                <div key={item.id} className={styles.v}>
-                  <iframe
-                    className={styles.frame}
-                    src={`https://www.youtube.com/embed/${item.youtubeId}?autoplay=1`}
-                    title={pickText(item.title, lang)}
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                  />
-                </div>
-              );
-            }
-            const thumbnailSrc = item.youtubeId
-              ? `https://i.ytimg.com/vi/${item.youtubeId}/hqdefault.jpg`
-              : "/opengraph-image";
-
+            const pending = playing === item.id && !item.youtubeId;
             return (
-              <div key={item.id} className={styles.v}>
-                <button
-                  type="button"
-                  className={styles.trigger}
-                  onClick={() => setPlaying(item.id)}
-                  aria-label={pickText(item.title, lang)}
-                >
-                  <Image
-                    src={thumbnailSrc}
-                    alt=""
-                    fill
-                    sizes="(max-width: 720px) 100vw, 590px"
-                    className={styles.thumbnail}
-                    draggable={false}
-                    unoptimized={!item.youtubeId}
-                  />
-                  <div className={styles.facade}>
-                    <div className={styles.vt}>{pickText(item.title, lang)}</div>
-                    <div className={styles.vs}>
-                      {isPlaying && !item.youtubeId ? dict.comingSoon : pickText(item.source, lang)}
-                    </div>
-                  </div>
-                  <div className={styles.play}>{PLAY_ICON}</div>
-                </button>
-              </div>
+              <YouTubeFacade
+                key={item.id}
+                videoId={item.youtubeId}
+                title={pickText(item.title, lang)}
+                source={pending ? dict.comingSoon : pickText(item.source, lang)}
+                playing={playing === item.id}
+                onPlay={() => setPlaying(item.id)}
+              />
             );
           })}
         </div>

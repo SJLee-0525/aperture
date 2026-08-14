@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { toMapLocations } from "@/features/map/_types/map-location";
+
 import type { Photo } from "@/types/photo";
 
 describe("toMapLocations", () => {

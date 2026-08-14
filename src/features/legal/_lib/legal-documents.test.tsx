@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/lang/_components/LocalizedLink", () => ({
   LocalizedLink: ({ children, href }: { children: React.ReactNode; href: string }) => (

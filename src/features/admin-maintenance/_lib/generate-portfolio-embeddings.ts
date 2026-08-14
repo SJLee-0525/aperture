@@ -1,6 +1,6 @@
 "use client";
 
-import { auth } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 type PortfolioEmbeddingResult = {
   count: number;
@@ -10,7 +10,7 @@ type PortfolioEmbeddingResult = {
 };
 
 const generatePortfolioEmbeddings = async (): Promise<PortfolioEmbeddingResult> => {
-  const user = auth.currentUser;
+  const user = getFirebaseAuth().currentUser;
   if (!user) throw new Error("관리자 로그인이 필요합니다.");
   const idToken = await user.getIdToken();
   const response = await fetch("/api/admin/portfolio-embeddings", {

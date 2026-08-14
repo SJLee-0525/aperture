@@ -3,7 +3,8 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import { useCallback, useEffect, useState } from "react";
 
-import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
+import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
+
 import type { Tag } from "@/types/tag";
 
 type Status = "loading" | "ready" | "error";
@@ -24,7 +25,8 @@ const useTagsAdmin = () => {
 
   useEffect(() => {
     let alive = true;
-    getSiteConfig()
+    getSiteConfigRepository()
+      .get()
       .then((loaded) => {
         if (!alive) return;
         setTags(loaded.tags);
@@ -85,7 +87,7 @@ const useTagsAdmin = () => {
     setError(null);
     setSaving(true);
     try {
-      await updateSiteConfigFields({ tags });
+      await getSiteConfigRepository().updateFields({ tags });
       setSaved(true);
     } catch (caught) {
       setError((caught as Error).message);

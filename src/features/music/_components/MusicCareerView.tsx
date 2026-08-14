@@ -2,11 +2,14 @@
 
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useMusicAwardTools } from "@/features/music/_hooks/use-music-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
-import { pickText } from "@/lib/i18n/pick-text";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
+
+import { pickText } from "@/lib/i18n/pick-text";
+
 import type { MusicAward, MusicConfig } from "@/types/music";
 import type { TimelineEntry } from "@/types/timeline";
 

@@ -4,8 +4,11 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { OnDemandDevProjectDetail } from "@/features/dev/_components/OnDemandDevProjectDetail";
+
 import { toDevProjectCard } from "@/features/dev/_lib/dev-project-card";
+
 import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
+
 import type { DevProject } from "@/types/dev";
 
 vi.mock("next/dynamic", () => ({
@@ -52,6 +55,7 @@ describe("OnDemandDevProjectDetail", () => {
     render(
       <OnDemandDevProjectDetail
         project={toDevProjectCard(project)}
+        articles={[]}
         open
         onClose={vi.fn()}
         endpoint="/api/dev-projects"

@@ -6,17 +6,20 @@ import { Modal } from "@/components/Modal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useMusicWorkTools } from "@/features/music/_hooks/use-music-tools";
-
 import { useQueryModal } from "@/hooks/use-query-modal";
+import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
 import { formatYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
-import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
 import { imagePreviewUrl } from "@/types/image";
+
 import type { MusicWork } from "@/types/music";
 
 import styles from "./MusicWorksView.module.css";
+
+/** 가장 좁은 화면의 첫 행 포스터 수. 560px 이하가 1열이라 더 주면 화면 밖 이미지를 preload 한다. */
+const FIRST_ROW_POSTERS = 1;
 
 /**
  * 프로그램 곡 순번 2자리 표기 (01, 02, …)
@@ -50,7 +53,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
         <p className={styles.empty}>{dict.comingSoon}</p>
       ) : (
         <div className={styles.works}>
-          {works.map((work) => (
+          {works.map((work, index) => (
             <button
               type="button"
               key={work.id}
@@ -67,6 +70,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                     sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
                     className={styles.posterImg}
                     draggable={false}
+                    priority={index < FIRST_ROW_POSTERS}
                   />
                 ) : (
                   "POSTER"

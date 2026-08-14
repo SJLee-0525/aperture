@@ -1,3 +1,6 @@
+import { AdminButton } from "@/components/AdminButton";
+import { AdminInput } from "@/components/AdminInput";
+
 import type { LocalizedArrayKey } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 import type { DevProjectInput } from "@/lib/firebase/dev";
 
@@ -35,9 +38,9 @@ const LocalizedProjectListField = ({ field, legend, items, onAdd, onEdit, onRemo
   <section className={styles.section}>
     <div className={styles.arrayHead}>
       <h2 className={styles.legend}>{legend}</h2>
-      <button type="button" className={styles.add} onClick={() => onAdd(field)}>
+      <AdminButton variant="secondary" size="xs" onClick={() => onAdd(field)}>
         + 항목 추가
-      </button>
+      </AdminButton>
     </div>
     {items.length === 0 ? (
       <p className={styles.note}>아직 항목이 없습니다.</p>
@@ -46,14 +49,14 @@ const LocalizedProjectListField = ({ field, legend, items, onAdd, onEdit, onRemo
         {items.map((item, index) => (
           <li key={index} className={styles.arrayRow}>
             <div className={styles.grid2}>
-              <input
-                className={styles.input}
+              <AdminInput
+                aria-label="한국어"
                 value={item.ko}
                 placeholder="한국어"
                 onChange={(event) => onEdit(field, index, "ko", event.target.value)}
               />
-              <input
-                className={styles.input}
+              <AdminInput
+                aria-label="English"
                 value={item.en}
                 placeholder="English"
                 onChange={(event) => onEdit(field, index, "en", event.target.value)}

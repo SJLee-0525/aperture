@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { packRagIndex, unpackRagIndex } from "@/lib/ai/rag-index";
 import { cosineSimilarity } from "@/lib/ai/rag-search";
+
 import type { StoredRagChunk } from "@/types/rag";
 
 const chunk = (id: string, embedding: number[]): StoredRagChunk => ({

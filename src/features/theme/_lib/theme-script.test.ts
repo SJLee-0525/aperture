@@ -2,8 +2,9 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
+
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 const runThemeScript = (storage: Storage | Pick<Storage, "getItem"> = localStorage) => {
   new Function("localStorage", "document", "location", THEME_INIT_SCRIPT)(

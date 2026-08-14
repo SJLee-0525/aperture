@@ -3,6 +3,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { AdminInput } from "@/components/AdminInput";
+
 import type { Tag } from "@/types/tag";
 
 import styles from "./TagRow.module.css";
@@ -62,8 +64,8 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
 
       <label className={styles.field}>
         <span className={styles.srLabel}>한국어</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={tag.ko}
           placeholder="한국어"
           onChange={(e) => onEditLabel(tag.id, "ko", e.target.value)}
@@ -72,8 +74,8 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
 
       <label className={styles.field}>
         <span className={styles.srLabel}>English</span>
-        <input
-          className={styles.input}
+        <AdminInput
+          size="sm"
           value={tag.en}
           placeholder="English"
           onChange={(e) => onEditLabel(tag.id, "en", e.target.value)}
