@@ -2,7 +2,7 @@
 
 > 원본 계획: [`docs/plan/07-dev-blog.md`](../plan/07-dev-blog.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(B1→B7)가 곧 의존 순서다. 요약표의 상태도 함께 갱신한다.
-> 마지막 갱신: 2026-08-13 (B5 코드 완료 — Rules·인덱스 배포와 실데이터 왕복 확인만 남음)
+> 마지막 갱신: 2026-08-14 (B6 코드리뷰 2회차 반영 — Tool Inspector 평가와 재검증 실패 경로만 남음)
 
 ## 진행 요약
 
@@ -14,8 +14,8 @@
 | B3.5 | 관리자 mock 모드 전면 대응      | ✅ 완료    |
 | B4   | Mock 기반 공개 목록과 상세      | ✅ 완료    |
 | B4.5 | B4 검수 후속 수정               | ✅ 완료    |
-| B5   | Firebase 전환과 배포            | 🔄 진행 중 |
-| B6   | 검색·RAG·챗봇·WebMCP            | ⬜ 미착수  |
+| B5   | Firebase 전환과 배포            | ✅ 완료    |
+| B6   | 검색·RAG·챗봇·WebMCP            | 🔄 진행 중 |
 | B7   | 검증과 마이그레이션             | ⬜ 미착수  |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
@@ -460,7 +460,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - [x] `devArticles` getter·CRUD를 repository 경계에 연결 (mock/live 화면 코드 무변경) → 공개는 `lib/firebase/public/dev-articles.ts`(decoder `toDevArticle` export — B6 RAG 증분이 재사용) + `lib/content/dev-articles.ts` 의 `cache()` 래퍼 유지(렌더당 읽기 1회). 관리자는 `live-dev-article-repository.ts` — 발행 조건·최초 발행 스탬프를 mock 과 같은 `dev-article-domain.ts` 로 공유하고, **slug 서버 유일성 검사**(`where("slug","==")`, 관리자 1명이라 race 허용)가 폼 참조 로딩 창 결함을 닫는다. 연관 프로젝트 공개 여부도 live 는 projection 으로 실제 검증(mock 은 자기 전달 유지 — 렌더 필터가 이중 방어)
 - [x] 관리자 목록 — `admin-list-rest.ts` projection 패턴으로 body 제외 조회 → `listProjected` 에 orderBy 인자(기본값 `order ASC` 무회귀), 블로그는 **`__name__ ASC` 정렬**(⚠️ `publishedAt` 정렬은 필드 없는 초안을 결과에서 떨어뜨린다) + 화면 훅 순수 함수 정렬 유지
 - [x] `listCrud` 후처리 정책 — 선택적 정책 주입, 미주입 컬렉션 기존 동작 유지(pre-read 0회 포함) (§11) → 계약은 `(before, after) => sync|remove|skip` — **작업 종류(kind)는 받지 않는다**(setPublished 가 스탬프 때문에 update 경로로 우회해도 계약이 어긋나지 않게). `remove` 는 별도 삭제 API 가 아니라 원본 재조회로 청크가 비워지는 sync 요청과 수렴함을 타입·JSDoc 에 명시. **pre-read 실패는 정책을 건너뛰고 강제 sync**(skip 오판으로 stale 청크가 남는 쪽보다 낫다)
-- [x] 블로그 RAG 정책 — 초안 제외, 발행일·이미지·연관 프로젝트만 변경 시 skip, §11 표 계약 구현 (§11) → `lib/firebase/dev-article-rag-policy.ts`, §11 표 5행을 테스트 케이스로 그대로 열거. ⚠️ **B5 에서는 `ragSourceType` 미전달로 호출 0건**(4개 작업 모두 테스트로 고정) — B6 이 article 타입을 등록하며 `lib/firebase/dev-articles.ts` 의 listCrud 4번째 인자를 채우면 켜진다
+- [x] 블로그 RAG 정책 — 초안 제외, 발행일·이미지·연관 프로젝트만 변경 시 skip, §11 표 계약 구현 (§11) → `lib/firebase/dev-article-rag-policy.ts`, §11 표 5행을 테스트 케이스로 그대로 열거. B6 이 `lib/firebase/dev-articles.ts` 의 listCrud 4번째 인자에 `"article"` 을 채워 실제로 켰다
 - [x] 기존 컬렉션 CRUD·RAG 동작 회귀 테스트 (§12-B5) → `list-crud.test.ts` — 정책 미주입이면 4개 쓰기 모두 sync 호출 + 스냅샷 조회 0회
 - [x] Storage — `dev-blog/{articleId}/` 업로드 3종(메인·프리뷰·썸네일) + 글 삭제 시 폴더 정리, 실제 uploader를 폼에 연결 (§4) → `article-image-uploader.ts` 의 live reject 분기만 교체(폼·mock 무변경). 삭제 시 이미지 정리 실패는 삭제를 되돌리지 않되 목록 화면에 경고로 표시(`DevArticleRemoveResult.imageCleanupWarning`)
 
@@ -489,33 +489,83 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### 통합검색
 
-- [ ] `SearchDocument`에 article 투영 — `key: article-{id}`, `section: dev`, `LocalizedText` metadata 그대로, 상세 경로 href, 초안 제외 (§9)
-- [ ] `/search`·헤더 자동완성·`search_portfolio` 3개 표면에서 블로그 결과 확인
+- [x] `SearchDocument`에 article 투영 — `key: article-{id}`, `section: dev`, `LocalizedText` metadata 그대로, 상세 경로 href, 초안 제외 (§9) → `_lib/article-search-source.ts` 가 태그 id·ko·en 세 표기와 본문 h2·h3 를 `index.body` 에 담는다(사용자 확정). 본문 전문은 넣지 않는다 — `/api/search-index` 가 브라우저로 통째로 내려가기 때문이다
+- [x] `/search`·헤더 자동완성·`search_portfolio` 3개 표면에서 블로그 결과 확인 → 세 표면이 `fetchSearchDocuments` 하나를 공유해 투영 추가만으로 동작한다. 데스크톱·모바일 실화면 확인
+- [x] **결과 화면 구분**(계획 밖 · 사용자 요청) — 블로그를 개발 목록과 섞지 않고 `블로그` 그룹으로 나누고, 그룹 순서를 `개발 → 블로그 → 사진 → 음악` 으로 바꿨다. 행 오른쪽 메타는 요약 대신 태그다. `SearchSection` 대신 `SearchDocument.subsection` 을 둔 이유는 액센트(`data-section="dev"`)와 `search_portfolio` 의 `section` enum 을 쪼개지 않기 위해서다
 
 ### RAG
 
-- [ ] source type `article` — 글 ID·slug 기록, 제목·요약 + heading 단위 평문 청크, 코드 블록 예산 제한 (§9)
-- [ ] 증분 동기화 경로 — `rag-source.ts` target 맵·decoder, embeddings route 허용 타입, 비공개 시 빈 결과로 자동 청크 제거 — **활성화 지점: `lib/firebase/dev-articles.ts` 의 `devArticlesCrud` 4번째 인자(`ragSourceType`)를 새 article 타입으로 채운다.** 정책(`dev-article-rag-policy`)과 배관은 B5 에서 완성·검증됐고 지금은 호출 0건이다. decoder 는 `lib/firebase/public/dev-articles.ts` 의 `toDevArticle` 재사용
-- [ ] `/admin/maintenance` 일괄 재생성에 블로그 포함 (§9)
-- [ ] `searchRagChunks`에 `sourceType/sourceId` 선택 scope 추가 — 기존 section-only 호출 무파괴 (§9)
+- [x] source type `article` — 글 ID·slug 기록, 제목·요약 + heading 단위 평문 청크, 코드 블록 예산 제한 (§9) → `_lib/article-rag-chunks.ts`. h2 구간을 논리 단위로 삼되 **1,200자에서 자르지 않고 블록 경계로 여러 part 로 나눈다**(`h-{구간}-{part}`) — 단순 truncate 는 긴 글의 뒤쪽을 영구히 검색에서 지운다. 코드 블록은 별도 400자 예산(`article-plain-text.ts`). `meta` 청크에 slug 와 상세 경로를 담아 프롬프트에서 챗봇이 주소를 안다
+- [x] 증분 동기화 경로 — `rag-source.ts` target 맵·decoder, embeddings route 허용 타입, 비공개 시 빈 결과로 자동 청크 제거 → `listCrud` 4번째 인자에 `"article"` 을 넣어 `devArticleRagPolicy` 가 켜졌다. ⚠️ **조립 지점이 핵심** — `portfolio-embeddings/route.ts` 의 `buildAllRagChunks` 를 POST·GET 양쪽에서 쓴다. 한쪽만 바꾸면 생성은 되는데 진행률이 100%에 닿지 않는다
+- [x] `/admin/maintenance` 일괄 재생성에 블로그 포함 (§9) → 조립 함수 공유 + `EmbeddingMigrationPanel` 안내 문구
+- [x] `searchRagChunks`에 `sourceType/sourceId` 선택 scope 추가 — 기존 section-only 호출 무파괴 (§9) → `options.prioritize`. **분할은 `slice(0, 8)` 앞에서 한다** — 뒤에 두면 해당 글 청크가 전체 상위 8개 밖일 때 아무 효과가 없다. 우선 대상 상위 3개는 최소 점수 기준을 면제한다(짧은 지시어 질의 대응). 임베딩 모델 불일치는 우선 대상에도 그대로 적용
 
 ### 챗봇
 
-- [ ] 화면 문맥 — `/dev/articles/[slug]` 경로 정규식 분기, `{ type: "article", id: 문서 ID }` 전송, 서버가 slug 일치·공개 여부 재검증 후 제목·요약·slug만 `SCREEN_CONTEXT` (§9)
-- [ ] 열린 글 질문 — 해당 article 청크 우선 검색 → 부족 시 전체 dev RAG 확장 (§9)
-- [ ] 참조 카드 — `ChatReferenceType`에 article 추가(응답 스키마 enum·검증·서버 재확인 포함), 제목·발행일·요약·경로 카드 (§9)
-- [ ] mock·live 평가 — 블로그 검색 사례 + 열린 글 화면 문맥 사례 추가 (§9)
+- [x] 화면 문맥 — `/dev/articles/[slug]` 경로 분기, `{ type: "article", id: 문서 ID }` 전송, 서버가 slug 일치·공개 여부 재검증 후 제목·요약·slug만 `SCREEN_CONTEXT` (§9) → 문서 ID 는 URL 에 없으므로 `ArticleScreenTarget` 이 등록하고 `buildChatContext` 가 읽는다. 경로 판정은 `constants/routes.ts` 의 `matchDevArticleSlug` 를 챗봇과 WebMCP 가 공유한다(정규식 두 벌이 갈라지지 않게)
+- [x] 열린 글 질문 — 해당 article 청크 우선 검색 → 부족 시 전체 dev RAG 확장 (§9) → **검증을 `Promise.all` 앞의 공통 단계로 올렸다**(`validateContextTarget`). 화면 문맥 안에서 판정하면 검증되지 않은 target 이 RAG 우선순위로 샌다. live 는 fresh 조회만 믿고 **cached fallback 을 쓰지 않는다** — 방금 발행을 취소한 글이 캐시에 남아 되살아나기 때문이다. 조회 자체가 실패하면 글 target 과 우선 검색을 함께 버리고 채팅은 이어 간다(글은 fail-closed, 채팅은 fail-open)
+- [x] 참조 카드 — `ChatReferenceType`에 article 추가(응답 스키마 enum·검증·서버 재확인 포함), 제목·발행일·요약·경로 카드 (§9) → 타입 열거가 세 곳(타입·JSON Schema enum·파서 리터럴)에 중복돼 있어 함께 고쳤다. `subtitle` 은 `formatYMD` 로 만든 `YYYY.MM.DD · 요약`. 스냅샷 캐시 키를 **v6 → v7** 로 올렸다
+- [x] mock·live 평가 — 블로그 검색 사례 + 열린 글 화면 문맥 사례 추가 (§9) → `blog-ko`·`screen-article-ko`. mock 은 벡터 RAG 를 타지 않으므로 우선 검색은 `rag-search` 단위 테스트와 live 로그의 `prioritize=article:<id>` 표기가 증명한다
+
+### B6 에서 함께 고친 것
+
+- 정규식 인텐트 분류에 블로그 용어(`블로그`·`아티클`·`포스트`·`blog`·`article`·`post`)를 넣었다. 없으면 블로그 질문에 RAG 검색이 아예 돌지 않는다
+- 열린 상세가 있고 분류가 비었으며 인사말도 아니면 그 항목의 섹션으로 조회한다. "이 글 요약해 줘" 처럼 분야 단어가 없는 지시어 질문이 조회 없이 답해 버리던 구멍이다. **인사말은 제외한다** — 상세 화면에서 인사만 해도 매번 벡터 검색이 돌면 비용이 는다
+- `PROFILE_CONTEXT` 의 Development 블록에 글 목록(제목·요약·태그·발행일·경로)을 넣었다. mock 모드에는 벡터 RAG 가 없고, 모델이 참조 카드용 ID 를 고르려면 경로를 볼 수 있어야 한다
+- `handle-chat-request` 의 참조↔링크 중복 제거가 `/${type}` 로 없는 경로(`/article`)를 만들던 것을 `REFERENCE_SECTION_ROUTES` 표로 바꿨다
+- `ChatReferenceCard` 가 `reference.type` 원문을 그대로 그리던 것을 언어별 라벨로 바꿨다
 
 ### WebMCP
 
-- [ ] `list_blog_posts` — `tag?`·`limit?` → 제목·발행일·요약·slug·경로 (§10)
-- [ ] `get_blog_post` — `articleId?`/`slug?` 택일(둘 다 오면 오류, 상세 페이지면 현재 글) → 요약·목차·경로 (§10)
-- [ ] `/dev/articles`·상세에만 등록, 관리자·초안 미등록, 페이지당 도구 수(전역 2 + 블로그 2 = 4) 재검증 (§10)
+- [x] `list_blog_posts` — `tag?`·`limit?` → 제목·발행일·읽기 시간·**id·slug**·경로 (§10) → 태그는 id·ko·en 셋 다 대소문자 무시 정확 일치(W5 3-4 의 `"바다" → Sea`). 부분 일치는 한두 글자 인자가 거의 모든 태그에 걸려 쓰지 않는다. 0건이면 `Known tags:` 로 사전 전체를 안내한다
+- [x] `get_blog_post` — `articleId?`/`slug?` 택일(둘 다 오면 오류, 상세 페이지면 현재 글) → 요약·목차·경로 (§10) → 공백 문자열은 미지정 취급. 상세·목록 모두 id 와 slug 를 함께 돌려준다(2-5 회귀 방지)
+- [x] `/dev/articles`·상세에만 등록, 관리자·초안 미등록, 페이지당 도구 수(전역 2 + 블로그 2 = 4) 재검증 (§10) → `BlogTools` 를 두 지면에서만 마운트하고, `WebMcpTools` 와 같은 `isWebMcpSupported` 게이트 뒤에서 등록 청크를 dynamic import 한다. 관리자 차단은 어댑터의 `/admin` 가드가, 초안 제외는 공개 getter 가 맡는다. 도구 데이터는 서버 투영만 쓴다(ADR-0003: 새 데이터 소스 금지)
+- [x] `get_profile` 사이트 지도에 `blog: /dev/articles` 추가 — 페이지 스코프 도구를 찾으려면 전역 도구가 경로를 알려 줘야 한다(W5 3-10)
+
+### B6 코드리뷰 후속
+
+리뷰·2차 검증에서 확정된 결함과 실데이터 확인 중 드러난 결함을 고쳤다. 각 항목은 회귀 테스트를 함께 둔다.
+
+- 1,199자를 넘는 h2 소제목이 청크 분할 루프를 끝내지 못해 임베딩 API 가 응답하지 않던 것을 고쳤다. 다시 붙이는 구간 제목에 120자 상한을 두고, `splitOversized` 가 상한 1 미만을 1로 올려 루프 종료를 보장한다
+- 열린 글 검증이 목록 전체(`getChatProfileData`) 대신 **문서 한 건**(`fetchDevArticleById`)만 읽는다. 검증에 읽은 문서로 `SCREEN_CONTEXT` 까지 만들어 같은 글을 두 번 읽지 않으며, 글 target 은 fresh 목록 조회를 타지 않는다
+- 프로필 섹션 선택이 검증 **뒤로** 옮겨졌다. 검증 전 target 으로 고르면 위조 target 이 조회를 유발한다. 열린 항목으로 섹션을 고를 때도 `profile` 을 함께 넣어 `sectionsForText` 규약(`["profile", ...matched]`)과 맞춘다
+- `openTarget.id` 에 문서 ID 문자 집합(`[A-Za-z0-9_-]`)을 강제하고 `fetchDocument` 가 문서 ID 를 인코딩한다. 서버가 이 값으로 REST 경로를 만들기 때문이다
+- RAG 점수 하한 면제를 **지시어 질의**(질문이 스스로 섹션을 고르지 못한 경우)로 좁혔다. "무슨 프로젝트 했어?" 가 열린 글의 저점수 청크에 3자리를 내주던 문제다
+- RAG 정렬을 하한 통과 청크로 되돌렸다. 색인 전체를 정렬하면 상위 8개를 고르는 비용이 색인 크기를 따라간다
+- `PROFILE_CONTEXT` 의 글 목록에 최근 12건 상한을 뒀다. 참조 카드 lookup 은 상한 없이 전체를 유지한다
+- 라이트박스가 원문에 적힌 이미지 크기를 쓴다(`ArticleImageRef.dimensions`). 본문 트리 메모에서 측정 크기를 빼 이미지 로드마다 전체가 다시 그려지던 것도 함께 고쳤다
+- 챗봇 투영 타입(`ChatPhoto`·`ChatAlbum`·`ChatDevProject`·`ChatMusic*`·`ChatDevArticle`)을 디코더와 같은 층(`lib/firebase/public/*`)에서 한 번만 선언한다. 여섯 개가 중복 선언이었고 하나는 방향이 뒤집혀 있었다
+- 글 참조 카드가 붙지 않던 문제 — `PROFILE_CONTEXT` 의 글 줄에 문서 ID 가 없었다. 사진·연주·프로젝트는 `url` 안에 ID 가 들어 있지만 글 주소는 slug 기반이라 ID 가 어디에도 없었고, `resolveReferencesWithRefresh` 는 못 찾은 요청을 조용히 버린다. RAG 청크 머리말(`[article:<id>]`)을 본 질문만 카드가 붙고 "글 몇 개 추천해줘" 같은 일반 질의는 산문만 나왔다. 글 줄에 `id:` 를 넣고 스냅샷 캐시 키를 **v8** 로 올렸다
+- RAG 스냅샷 크기를 문자 수가 아니라 **UTF-8 바이트**로 잰다(`Buffer.byteLength`). 한글 본문을 글자당 1로 세어 과소 측정했고, 그 결과 경고선(1.5MB)이 실제 2MB 절벽보다 **뒤에서** 울렸다. 캐시를 채울 때마다 `[rag-index] chunks=… bytes=…` 를 남겨 남은 여유를 확인할 통로도 뒀다
+- 목록 첫 행 커버에 `priority` 를 준다. 상세 히어로(`DetailHero`)에는 이미 있었다. `aspect-ratio` 자리 확보는 CLS 만 막고 LCP 는 요청 시작 시점이 정한다 (장수는 2회차에서 다시 잡았다 — 아래)
+
+### B6 코드리뷰 2회차
+
+리뷰 결과를 코드와 대조해 재검증한 뒤, 사실로 확인된 것만 고쳤다.
+
+- 확인되지 않은 화면 target 이 RAG 검색을 켜던 경로를 닫았다. 글만 문서 조회로 검증하고 사진·연주·수상·프로젝트는 그대로 통과시켜, 없는 ID 로도 임베딩 생성과 벡터 검색이 돌았다. 이제 캐시 스냅샷의 화면 문맥 lookup 에서 항목을 찾은 target(`verified`)만 프로필 섹션을 연다. target 자체는 버리지 않는다 — 방금 공개한 항목이 캐시에 없을 수 있고 `resolveScreenContext` 의 최신 조회가 그 경우를 처리한다. 스냅샷을 읽지 못하면 확인 실패로 보고 답변은 이어 간다
+- 타입명과 JSDoc 을 실제 보장에 맞췄다(`ValidatedChatTarget` → `ResolvedChatTarget`). 이름이 "검증을 통과한" 이라고 말하는 동안 네 종류가 검증 없이 지나갔다
+- 글 검증 조회가 `AbortSignal` 을 받는다. `fetchDocument` 가 신호를 `fetch` 에 넘기지 않아 제한 시간(55초)과 방문자 연결 종료가 진행 중인 Firestore 요청을 끊지 못했다. **병렬화는 하지 않는다** — RAG 검색 범위가 검증 결과에 달려 있어 순서를 바꾸려면 임베딩을 투기적으로 먼저 만들어야 한다
+- 인사말 턴에서도 화면 문맥은 그대로 만든다. 글 target 의 단건 조회가 곧 `SCREEN_CONTEXT` 의 출처라 건너뛰면 live 에서 목록 조회로 물러나 오히려 비싸진다(테스트가 이 계약을 고정하고 있다)
+- `priority` 를 **가장 좁은 화면의 첫 행** 기준으로 낮췄다 — `/dev/articles` 1·`/photo/albums` 2·`/dev/projects` 1·`/music` 1. 데스크톱 열 수로 정하면 모바일에서 화면 밖 이미지까지 preload 한다. `PhotoGrid`(`index < 4`)는 이번 범위 밖이라 그대로 두어 규칙이 갈린다
+- 대표 이미지가 없는 카드의 라이트·다크 자리표시자 두 장이 모두 `priority` 를 받던 것을 없앴다. CSS 가 테마당 한 장만 그리므로 나머지 한 장의 preload 는 항상 낭비였고, 워드마크 자리표시자는 LCP 후보도 아니다
+- 참조 카드의 종류 라벨을 `constants/dictionary.ts` 로 옮겼다. 컴포넌트에는 `Record<ChatReferenceType, keyof UIDict>` 매핑만 남아 종류가 늘면 컴파일이 막는다
+- 참조 카드 표기를 다시 잡았다(사용자 확정). 종류 라벨의 mono·uppercase·자간을 뺐다 — 라벨이 영어 원문이던 시절의 스타일이라 한글에는 글리프가 없고 uppercase 도 적용되지 않는다(이 저장소의 mono 는 날짜·숫자 전용). 종류 라벨은 항목이 속한 섹션 색을 쓴다. 카드가 현재 지면과 다른 섹션을 가리킬 수 있어 지면 액센트로는 구분되지 않기 때문이며, 색은 랜딩 진입 행과 같은 `--accent-photo/music/dev` 를 로컬 `--accent` 로 덮어 쓴다(섹션 색 하드코딩 없음). 위계는 장식 없이 크기와 여백으로 만든다 — 제목을 `--t-body` 로 올리고, 종류·제목은 붙이고 부제목만 띄우며, 텍스트 블록을 썸네일 윗변에 맞춘다
+- mock 챗봇의 블로그 규칙이 "한글 폰트"·"한글을"·"postgres" 를 블로그 질문으로 보던 것을 고쳤다. 한글은 앞 글자가 한글이면 제외하고(`(?<![가-힣])글`), 영어는 단어 경계를 요구한다. mock 은 `npm run dev` 와 E2E·시각 회귀가 쓰는 경로다
+- `search_portfolio` 설명에 블로그를 넣고 결과 줄이 `dev/blog` 로 종류를 밝힌다. `subsection` 을 출력에 쓰지 않아 글과 프로젝트가 같은 모양이었다
+- `searchRagChunks` 의 `@returns` 를 실제 반환에 맞췄다. 우선 대상 최대 3개 뒤에 나머지가 붙으므로 전역 점수순이 아니며, `ignoreScoreFloor` 에서는 저점수 우선 청크가 앞에 온다(의도된 정책)
+- 구간 제목 예산이 **첫 part** 까지 깎던 것을 고쳤다. 제목은 두 번째 part 부터 붙는데 상한은 모든 part 에서 줄어 한 청크에 들어갈 구간이 둘로 나뉘었다. `packParts` 가 첫 part 상한을 따로 받는다. ⚠️ **청크 경계가 바뀌므로 배포 후 `/admin/maintenance` 일괄 재생성이 필요하다** — 밀린 `chunkKey` 의 옛 청크는 같은 글 범위의 stale 삭제가 정리한다
+- 중복 계약 네 건을 정리했다. 태그 토큰 생성기(`article-tag-tokens.ts`)를 RAG·검색·WebMCP 세 곳이 공유한다(RAG 는 dedupe 가 없어 `firebase / Firebase / Firebase` 로 들어가고 있었다). 발행일 비교자(`lib/content/article-order.ts`)를 공개 목록과 챗봇 투영이 공유하고, live 결과 재정렬은 뺐다 — Firestore 쿼리가 이미 같은 순서를 낸다. 끝 슬래시 정규화는 `stripTrailingSlash` 로 모았다. 참조 종류는 `types/chat.ts` 의 `CHAT_REFERENCE_TYPES` 하나에서 JSON Schema enum·파서·라벨·경로표가 파생한다
+- 상세 페이지 화면 라벨(`[slug]/page.tsx` 의 현재 로케일 태그 라벨)은 그대로 뒀다. 색인용 토큰과 목적도 출력도 다르다
+- 리뷰가 지적한 `current-target.ts` 의 slug matcher 재구현은 사실이 아니었다. `matchDevArticleSlug` 를 이미 공유하고 있었고 중복은 끝 슬래시 처리뿐이라 그것만 합쳤다
 
 ### B6 검증
 
-- [ ] 초안이 검색·RAG·챗봇 참조·WebMCP 어디에도 노출되지 않는다 (§14)
+- [x] 초안이 검색·RAG·챗봇 참조·WebMCP 어디에도 노출되지 않는다 (§14) → 검색·WebMCP 는 `getDevArticles()`(published만), RAG 는 `raw.published !== true` 게이트 **+ `articleRagChunks` 자체 방어**, 챗봇은 공개 projection + fresh 검증. 각 경로에 테스트를 뒀다
 - [ ] 재검증 실패 시 관리자 표시 + maintenance 복구 경로 동작 (§11)
+- [x] 실데이터 스냅샷 용량 — **285청크 / 457,098바이트**(한도 2MB 의 22.9%, 청크당 평균 1,604B). 내역은 벡터 43%·메타 18%·본문 39%. 경고선(1.5MB)까지 약 650청크, 절벽(2MB)까지 약 960청크 남았고 글 하나가 15청크 안팎이라 **40편쯤 더 쓰면 경고**가 뜬다. 개별 텍스트 상한은 한 청크의 폭주만 막고 스냅샷 용량은 **청크 수 × 임베딩 차원**이 지배한다 — 좁혀야 하면 `EMBEDDING_PROVIDER_DIMENSIONS` 를 낮추는 쪽이 벡터 몫을 비례해서 줄인다
+- [ ] 상세 페이지 payload — 탐색 테이블과 WebMCP 도구가 전 글을 각각 투영한다. `BlogTools` 의 지원 여부 게이트는 **등록 청크만** 막고, `articles`·`tags` 는 client component 의 prop 이라 미지원 브라우저에도 RSC payload 로 직렬화된다. **공개 글이 30건을 넘으면** 도구 투영 축소(전 글 `headings` 제외)를 검토한다
+- [ ] **Tool Inspector 평가 (남음)** — `/ko/dev/articles`·상세에서 도구 4개 노출과 두 도구 실행 확인 후 `docs/troubleshooting/webmcp-tool-eval.md` 에 회차 기록
 
 ---
 
