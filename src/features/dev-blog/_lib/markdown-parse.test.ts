@@ -91,7 +91,13 @@ describe("parseArticleMarkdown — 이미지와 캡션", () => {
 
     expect(issues).toEqual([]);
     expect(document.blocks).toEqual([
-      { type: "image", src: STORAGE_IMAGE, alt: "압축 결과", caption: "2048px 메인" },
+      {
+        type: "image",
+        src: STORAGE_IMAGE,
+        alt: "압축 결과",
+        caption: "2048px 메인",
+        dimensions: null,
+      },
     ]);
   });
 
@@ -112,6 +118,47 @@ describe("parseArticleMarkdown — 이미지와 캡션", () => {
 
   it("문장 중간의 이미지는 배치가 깨지므로 issue 다", () => {
     expect(codes(`앞 ![설명](${STORAGE_IMAGE}) 뒤`)).toEqual(["inline-image"]);
+  });
+
+  it("title 자리의 너비x높이를 원본 크기로 읽는다", () => {
+    const { issues, document } = parseArticleMarkdown(`![압축 결과](${STORAGE_IMAGE} "2048x1365")`);
+
+    expect(issues).toEqual([]);
+    expect(document.blocks[0]).toMatchObject({ dimensions: { width: 2048, height: 1365 } });
+  });
+
+  it("title 이 없으면 크기를 모르는 이미지다", () => {
+    const { document } = parseArticleMarkdown(`![압축 결과](${STORAGE_IMAGE})`);
+
+    expect(document.blocks[0]).toMatchObject({ dimensions: null });
+  });
+
+  it.each([
+    ["설명용 title", "압축 결과 비교"],
+    ["0 은 크기가 아니다", "0x100"],
+    ["공백이 섞인 표기", "2048 x 1365"],
+    ["곱셈 기호", "2048×1365"],
+    ["한쪽만 있음", "2048x"],
+    ["음수", "-10x20"],
+    ["다른 문법", "width=2048"],
+    ["상한 초과", "20000x20000"],
+  ])("%s 는 크기로 읽지 않고 발행도 막지 않는다", (_label, title) => {
+    const { issues, document } = parseArticleMarkdown(`![압축 결과](${STORAGE_IMAGE} "${title}")`);
+
+    // title 은 원래 표준 Markdown 의 설명 자리다. 형식이 달라도 오류가 아니다.
+    expect(issues).toEqual([]);
+    expect(document.blocks[0]).toMatchObject({ dimensions: null });
+  });
+
+  it("캡션을 붙여도 크기는 남는다", () => {
+    const { document } = parseArticleMarkdown(
+      [`![압축 결과](${STORAGE_IMAGE} "800x600")`, "::caption[세 벌]"].join("\n"),
+    );
+
+    expect(document.blocks[0]).toMatchObject({
+      caption: "세 벌",
+      dimensions: { width: 800, height: 600 },
+    });
   });
 });
 

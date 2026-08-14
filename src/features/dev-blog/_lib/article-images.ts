@@ -1,7 +1,14 @@
 import type { ArticleBlock, ArticleDocument } from "@/features/dev-blog/_lib/markdown-nodes";
 
-/** 본문 이미지 한 장 — 라이트박스가 순회하는 단위. */
-type ArticleImageRef = { src: string; alt: string };
+/**
+ * 본문 이미지 한 장. 라이트박스가 순회하는 단위다.
+ * `dimensions` 는 원문에 크기를 적은 이미지에만 있고, 확대 뷰가 로드 전에 비율을 잡는 데 쓴다.
+ */
+type ArticleImageRef = {
+  src: string;
+  alt: string;
+  dimensions: { width: number; height: number } | null;
+};
 
 /**
  * 블록을 훑어 이미지를 문서 순서로 모은다. 목록·인용 안에 들어간 이미지도 빠뜨리지 않는다.
@@ -13,7 +20,7 @@ type ArticleImageRef = { src: string; alt: string };
 const collect = (blocks: readonly ArticleBlock[], found: ArticleImageRef[]): void => {
   blocks.forEach((block) => {
     if (block.type === "image") {
-      found.push({ src: block.src, alt: block.alt });
+      found.push({ src: block.src, alt: block.alt, dimensions: block.dimensions });
       return;
     }
     if (block.type === "blockquote") collect(block.children, found);

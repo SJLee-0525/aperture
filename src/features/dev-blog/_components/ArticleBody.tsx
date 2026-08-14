@@ -15,6 +15,7 @@ import {
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { localizePath } from "@/lib/i18n/locale-path";
+import { SITE_IMAGE_SIZE } from "@/lib/seo/site-meta";
 
 import type {
   ArticleBlock,
@@ -48,8 +49,8 @@ const BROKEN_IMAGE_FALLBACK = {
   dark: "/dev-project-image-dark",
 } as const;
 
-/** 위 워드마크의 실제 크기(`SITE_IMAGE_SIZE`). 라이트박스 스테이지 비율에 쓴다. */
-const BROKEN_IMAGE_SIZE = { w: 1200, h: 630 } as const;
+/** 위 워드마크의 실제 크기. 라이트박스 스테이지 비율과 본문 자리 예약에 함께 쓴다. */
+const BROKEN_IMAGE_SIZE = { w: SITE_IMAGE_SIZE.width, h: SITE_IMAGE_SIZE.height } as const;
 
 const renderInlines = (nodes: ArticleInline[], lang: Lang): ReactNode[] =>
   nodes.map((node, index) => {
@@ -107,6 +108,21 @@ type RenderContext = {
   /** 로드에 실패해 본문과 라이트박스에서 대체 이미지를 사용할 주소. */
   brokenImages: Readonly<Record<string, true>>;
   onImageError: (src: string) => void;
+};
+
+/**
+ * 실려 온 이미지의 원본 크기를 올려 보내고 자리표시 비율을 걷는다.
+ * 클래스를 DOM 에서 직접 떼는 이유는 크기를 알게 될 때마다 본문 트리를 다시 만들지 않기 위해서다.
+ *
+ * @param {HTMLImageElement} node 크기를 읽을 이미지 요소.
+ * @param {string} src 라이트박스가 쓰는 이미지 주소.
+ * @param {RenderContext} context 본문 렌더 문맥.
+ * @returns {void}
+ */
+const measureImage = (node: HTMLImageElement, src: string, context: RenderContext): void => {
+  if (!node.naturalWidth || !node.naturalHeight) return;
+  node.classList.remove(styles.unknownImageSize);
+  context.onMeasureImage(src, node.naturalWidth, node.naturalHeight);
 };
 
 const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode[] => {
@@ -215,34 +231,39 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
                   <img
                     src={BROKEN_IMAGE_FALLBACK.light}
                     alt={block.alt}
+                    width={BROKEN_IMAGE_SIZE.w}
+                    height={BROKEN_IMAGE_SIZE.h}
                     className={styles.fallbackLight}
                   />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={BROKEN_IMAGE_FALLBACK.dark}
                     alt={block.alt}
+                    width={BROKEN_IMAGE_SIZE.w}
+                    height={BROKEN_IMAGE_SIZE.h}
                     className={styles.fallbackDark}
                   />
                 </>
               ) : (
                 <>
-                  {/* Markdown 은 이미지 크기를 담지 않아 next/image 에 넘길 비율이 없다.
-                      전역 설정이 이미 Vercel 최적화를 끄고 Storage 파일을 그대로 보내므로
-                      크기를 지어내기보다 브라우저에 맡긴다. 대신 실려 온 뒤 원본 픽셀 크기를
-                      올려 보내 라이트박스가 스테이지 비율을 잡게 한다. */}
+                  {/* 전역 설정이 Vercel 최적화를 끄고 Storage 파일을 그대로 보내므로 next/image
+                      대신 img 를 쓴다. 원문에 크기를 적은 이미지는 그 값으로 자리를 잡고,
+                      적지 않은 이미지는 실려 온 뒤 원본 픽셀 크기를 올려 보낸다. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={block.src}
                     alt={block.alt}
+                    width={block.dimensions?.width}
+                    height={block.dimensions?.height}
+                    className={block.dimensions ? undefined : styles.unknownImageSize}
+                    // 캐시에 있는 이미지는 hydration 전에 load 가 끝나 onLoad 가 잡히지 않는다.
+                    // 마운트 시점에 이미 완료됐으면 여기서 크기를 읽는다.
+                    ref={(node) => {
+                      if (node?.complete) measureImage(node, block.src, context);
+                    }}
                     loading="lazy"
                     decoding="async"
-                    onLoad={(event) =>
-                      context.onMeasureImage(
-                        block.src,
-                        event.currentTarget.naturalWidth,
-                        event.currentTarget.naturalHeight,
-                      )
-                    }
+                    onLoad={(event) => measureImage(event.currentTarget, block.src, context)}
                     onError={() => context.onImageError(block.src)}
                   />
                 </>
@@ -325,7 +346,7 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
 
   const lightboxImages = useMemo(
     () =>
-      images.map(({ src }) =>
+      images.map(({ src, dimensions }) =>
         // 로드에 실패한 이미지도 목록에 남겨 탐색 인덱스를 유지한다.
         // 확대 뷰는 두 테마 모두 어두운 scrim 위라 워드마크도 dark 를 쓴다.
         brokenImages[src]
@@ -333,16 +354,17 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
           : {
               url: src,
               path: src,
-              // 아직 화면에 안 나온 이미지는 크기를 모른다. 스테이지는 `object-fit: contain` 이라
-              // 비율이 어긋나도 잘리지 않고 여백만 생긴다.
-              ...(sizes[src] ?? FALLBACK_IMAGE_SIZE),
+              // 실려 온 크기가 가장 정확하고, 없으면 원문에 적힌 크기를 쓴다. 둘 다 없는 옛 글은
+              // 임시 비율로 연다. 스테이지는 `object-fit: contain` 이라 잘리지 않고 여백만 생긴다.
+              ...(sizes[src] ??
+                (dimensions ? { w: dimensions.width, h: dimensions.height } : FALLBACK_IMAGE_SIZE)),
             },
       ),
     [images, sizes, brokenImages],
   );
 
-  // 본문 트리는 통째로 메모한다. 이미지 크기(`sizes`)·라이트박스 개폐는 본문 밖의 상태라
-  // 이미지 오류 상태가 바뀔 때만 본문 노드를 다시 만든다.
+  // 본문 트리는 통째로 메모한다. 이미지 크기와 라이트박스 개폐는 본문 밖의 상태이며,
+  // 크기를 처음 알게 될 때의 자리표시 클래스 제거는 DOM 노드에서 직접 한다.
   const blocks = useMemo(
     () =>
       renderBlocks(document.blocks, {

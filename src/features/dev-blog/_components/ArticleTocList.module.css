@@ -1,6 +1,11 @@
+/* 목차가 길면 여기서 스크롤한다. 데스크톱 패널과 모바일 드로어가 모두 세로 flex 라
+   `min-height: 0` 이 없으면 목록이 줄어들지 않아 부모 밖으로 밀려 나가고 아래가 잘린다.
+   `overscroll-behavior` 는 목차 끝에서 본문까지 함께 밀리는 것을 막는다. */
 .nav {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  max-height: 100%;
+  overscroll-behavior: contain;
 }
 
 .list,

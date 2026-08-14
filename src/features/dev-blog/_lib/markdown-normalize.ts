@@ -29,6 +29,39 @@ const MAX_HEADING_DEPTH = 4;
  */
 const MAX_NESTING_DEPTH = 32;
 
+/**
+ * 이미지 title 자리는 이 저장소에서 원본 픽셀 크기를 적는 곳이다(`![alt](url "2048x1365")`).
+ * 관리자가 이미지를 올리면 삽입 코드가 압축본의 실제 크기를 여기 적고, 렌더가 그 값으로
+ * 도착 전에 자리를 잡는다. 형식이 다른 title 은 크기로 읽지 않고 그냥 버린다.
+ */
+const IMAGE_SIZE_TITLE_PATTERN = /^([1-9]\d*)x([1-9]\d*)$/;
+
+/** 브라우저가 다루지 못하는 크기는 자리 예약에 쓸 수 없다. */
+const MAX_ARTICLE_IMAGE_DIMENSION = 16_384;
+
+/**
+ * 이미지 title 에서 원본 크기를 읽는다.
+ *
+ * 형식이 맞지 않는 title 은 issue 로 보고하지 않는다. 이 자리는 원래 표준 Markdown 의
+ * 설명 title 이고 지금까지 버려졌으므로, 임의 title 이 든 기존 글의 발행을 막으면 안 된다.
+ *
+ * @param {string | null | undefined} title mdast image 노드의 title.
+ * @returns {{ width: number; height: number } | null} 크기. 읽을 수 없으면 `null`.
+ */
+const parseImageDimensions = (
+  title: string | null | undefined,
+): { width: number; height: number } | null => {
+  const match = IMAGE_SIZE_TITLE_PATTERN.exec(title ?? "");
+  if (!match) return null;
+
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  const withinRange = (value: number) =>
+    Number.isSafeInteger(value) && value <= MAX_ARTICLE_IMAGE_DIMENSION;
+
+  return withinRange(width) && withinRange(height) ? { width, height } : null;
+};
+
 type NormalizeContext = {
   issues: ArticleMarkdownIssue[];
   headingId: (text: string) => string;
@@ -237,7 +270,13 @@ const toBlocks = (
           }
           const alt = (image.alt ?? "").trim();
           if (!alt) report(context, "image-alt-missing", image, image.url);
-          blocks.push({ type: "image", src, alt, caption: null });
+          blocks.push({
+            type: "image",
+            src,
+            alt,
+            caption: null,
+            dimensions: parseImageDimensions(image.title),
+          });
           return;
         }
         const children = toInlines(node.children, context, depth + 1);

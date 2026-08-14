@@ -18,6 +18,9 @@ type Props = {
  * 제목이 길면 두 줄까지만 보이지만 잘린 뒷부분도 이름에는 남긴다 — 화면 낭독기는 말줄임된
  * 글자가 아니라 전체 제목을 읽어야 한다.
  *
+ * 항목이 많아 부모 높이를 넘으면 이 목록이 스크롤한다. 스크롤 막대는 저장소 공용
+ * `CustomScrollbar` 가 그린다 — 표식만 붙이면 지면에 이미 떠 있는 그 컴포넌트가 집어 간다.
+ *
  * @param {Props} props
  * @param {ArticleTocItem[]} props.items h2 와 그 아래 h3 로 묶은 목차.
  * @param {string | null} props.activeId 현재 읽는 heading id.
@@ -26,7 +29,13 @@ type Props = {
  * @returns {JSX.Element}
  */
 const ArticleTocList = ({ items, activeId, label, onSelect }: Props) => (
-  <nav className={styles.nav} aria-label={label}>
+  <nav
+    className={styles.nav}
+    aria-label={label}
+    data-accent-scrollbar
+    data-custom-scroll-container
+    data-custom-scroll-scope="local"
+  >
     <ol className={styles.list}>
       {items.map((item) => (
         <li key={item.id}>

@@ -95,7 +95,8 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
     setError(null);
     try {
       const image = await upload(pendingImage);
-      insert(imageMarkdown(image.url, alt));
+      // 크기를 함께 적어 두면 공개 지면이 이미지 도착 전에 자리를 잡는다.
+      insert(imageMarkdown(image.url, alt, { width: image.w, height: image.h }));
       setPendingImage(null);
       setPendingAlt("");
     } catch (caught) {

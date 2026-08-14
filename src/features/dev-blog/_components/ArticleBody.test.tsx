@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ArticleBody } from "@/features/dev-blog/_components/ArticleBody";
@@ -52,6 +52,79 @@ describe("ArticleBody", () => {
     expect(image.getAttribute("src")).toBe(STORAGE_IMAGE);
     expect(image.getAttribute("loading")).toBe("lazy");
     expect(container.querySelector("figcaption")?.textContent).toBe("3단 WebP");
+  });
+
+  it("크기를 아는 이미지는 도착 전에 자리를 잡을 수 있게 속성으로 크기를 넘긴다", () => {
+    renderMarkdown(`![구조도](${STORAGE_IMAGE} "2048x1365")`);
+
+    const image = screen.getByAltText("구조도");
+    expect(image.getAttribute("width")).toBe("2048");
+    expect(image.getAttribute("height")).toBe("1365");
+    // CSS 임시 비율이 붙으면 속성으로 잡은 실제 비율을 덮는다.
+    expect(image.className).toBe("");
+  });
+
+  it("크기를 모르는 이미지에는 임시 비율 class 를 붙인다", () => {
+    renderMarkdown(`![구조도](${STORAGE_IMAGE})`);
+
+    const image = screen.getByAltText("구조도");
+    expect(image.getAttribute("width")).toBeNull();
+    expect(image.className).not.toBe("");
+  });
+
+  it("크기를 모르는 이미지도 실려 오면 임시 비율을 걷는다", () => {
+    renderMarkdown(`![구조도](${STORAGE_IMAGE})`);
+    const image = screen.getByAltText("구조도") as HTMLImageElement;
+
+    Object.defineProperty(image, "naturalWidth", { value: 800, configurable: true });
+    Object.defineProperty(image, "naturalHeight", { value: 600, configurable: true });
+    fireEvent.load(image);
+
+    expect(screen.getByAltText("구조도").className).toBe("");
+  });
+
+  it("캐시로 이미 실려 온 이미지는 load 이벤트 없이도 임시 비율을 걷는다", () => {
+    // 마운트 시점에 이미 complete 인 이미지는 React onLoad 가 잡히지 않는다.
+    Object.defineProperty(HTMLImageElement.prototype, "complete", {
+      configurable: true,
+      get: () => true,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
+      configurable: true,
+      get: () => 800,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalHeight", {
+      configurable: true,
+      get: () => 600,
+    });
+
+    try {
+      renderMarkdown(`![구조도](${STORAGE_IMAGE})`);
+
+      expect(screen.getByAltText("구조도").className).toBe("");
+    } finally {
+      // prototype 을 되돌리지 않으면 뒤따르는 테스트의 이미지도 실려 온 것으로 보인다.
+      for (const key of ["complete", "naturalWidth", "naturalHeight"]) {
+        Reflect.deleteProperty(HTMLImageElement.prototype, key);
+      }
+    }
+  });
+
+  it("원문에 크기를 적은 이미지는 실려 오기 전에도 확대 뷰가 그 비율을 쓴다", async () => {
+    renderMarkdown(`![구조도](${STORAGE_IMAGE} "2048x1365")`);
+
+    fireEvent.click(screen.getByRole("button", { name: /구조도/ }));
+
+    // 확대 뷰는 dynamic import 라 기본 1초 제한으로는 부하가 걸린 실행에서 흔들린다.
+    const stage = await waitFor(
+      () => {
+        const node = window.document.querySelector<HTMLElement>("[style*='aspect-ratio']");
+        expect(node).not.toBeNull();
+        return node as HTMLElement;
+      },
+      { timeout: 5_000 },
+    );
+    expect(stage.style.aspectRatio).toBe("2048 / 1365");
   });
 
   it("외부 링크에만 새 탭과 rel 을 붙이고 내부 링크에는 언어 프리픽스를 붙인다", () => {

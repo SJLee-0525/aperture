@@ -57,7 +57,9 @@
     display var(--dur) allow-discrete;
 }
 .panel[data-open="true"] {
-  display: block;
+  /* 세로 flex 라야 안쪽 목록이 패널 높이에 맞춰 줄고 스크롤한다. */
+  display: flex;
+  flex-direction: column;
   opacity: 1;
   transform: none;
 }

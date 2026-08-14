@@ -48,17 +48,46 @@ const inline = (text: string): string =>
     .replace(/[[\]]/g, "")
     .trim();
 
+type ImageMarkdownOptions = {
+  /** 비어 있으면 `::caption` 줄 자체를 넣지 않는다. */
+  caption?: string;
+  /** 업로드한 이미지의 실제 픽셀 크기. 둘 다 있어야 title 에 적는다. */
+  width?: number;
+  height?: number;
+};
+
+/**
+ * 크기를 title 에 적을 수 있는 값인지 본다. 렌더가 자리 예약에 그대로 쓰는 값이라
+ * 0·음수·소수·NaN 이 들어가면 비율이 어긋나거나 브라우저가 무시한다.
+ *
+ * @param {number} [width]
+ * @param {number} [height]
+ * @returns {boolean}
+ */
+const usableDimensions = (width?: number, height?: number): boolean =>
+  typeof width === "number" &&
+  typeof height === "number" &&
+  Number.isSafeInteger(width) &&
+  Number.isSafeInteger(height) &&
+  width > 0 &&
+  height > 0;
+
 /**
  * 본문 이미지 조각을 만든다. 캡션이 있으면 바로 다음 줄에 붙인다 —
  * `::caption` 은 바로 앞 이미지에만 연결된다(계획 §3).
  *
+ * 크기를 알면 title 자리에 `너비x높이` 로 적는다. 렌더가 이 값을 `<img width height>` 로
+ * 넘겨 이미지가 도착하기 전에 자리를 잡는다(`markdown-normalize` 의 title 계약).
+ *
  * @param {string} url 업로드한 이미지 주소.
  * @param {string} alt 대체 텍스트.
- * @param {string} [caption] 캡션. 비어 있으면 줄 자체를 넣지 않는다.
+ * @param {ImageMarkdownOptions} [options] 캡션과 원본 크기.
  * @returns {string} 삽입할 Markdown.
  */
-const imageMarkdown = (url: string, alt: string, caption?: string): string => {
-  const image = `![${inline(alt)}](${url})`;
+const imageMarkdown = (url: string, alt: string, options: ImageMarkdownOptions = {}): string => {
+  const { caption, width, height } = options;
+  const size = usableDimensions(width, height) ? ` "${width}x${height}"` : "";
+  const image = `![${inline(alt)}](${url}${size})`;
   const text = caption ? inline(caption) : "";
   return text ? `${image}\n::caption[${text}]` : image;
 };

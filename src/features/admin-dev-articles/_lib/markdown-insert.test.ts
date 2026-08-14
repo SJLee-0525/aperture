@@ -61,18 +61,44 @@ describe("imageMarkdown", () => {
   });
 
   it("캡션은 바로 다음 줄에 붙인다", () => {
-    expect(imageMarkdown(STORAGE_IMAGE, "설명", "3단 WebP")).toBe(
+    expect(imageMarkdown(STORAGE_IMAGE, "설명", { caption: "3단 WebP" })).toBe(
       `![설명](${STORAGE_IMAGE})\n::caption[3단 WebP]`,
     );
   });
 
   it("캡션이 공백뿐이면 줄을 넣지 않는다", () => {
-    expect(imageMarkdown(STORAGE_IMAGE, "설명", "   ")).toBe(`![설명](${STORAGE_IMAGE})`);
+    expect(imageMarkdown(STORAGE_IMAGE, "설명", { caption: "   " })).toBe(
+      `![설명](${STORAGE_IMAGE})`,
+    );
   });
 
   it("대괄호와 줄바꿈이 문법을 깨지 않는다", () => {
     expect(imageMarkdown(STORAGE_IMAGE, "대[괄호]\n두 줄")).toBe(
       `![대괄호 두 줄](${STORAGE_IMAGE})`,
+    );
+  });
+
+  it("크기를 알면 title 자리에 너비x높이를 적는다", () => {
+    expect(imageMarkdown(STORAGE_IMAGE, "설명", { width: 2048, height: 1365 })).toBe(
+      `![설명](${STORAGE_IMAGE} "2048x1365")`,
+    );
+  });
+
+  it("캡션과 크기를 함께 받으면 두 문법을 모두 유지한다", () => {
+    expect(
+      imageMarkdown(STORAGE_IMAGE, "설명", { caption: "3단 WebP", width: 960, height: 640 }),
+    ).toBe(`![설명](${STORAGE_IMAGE} "960x640")\n::caption[3단 WebP]`);
+  });
+
+  it.each([
+    ["0", 0, 100],
+    ["음수", -10, 20],
+    ["소수", 100.5, 200],
+    ["NaN", Number.NaN, 200],
+    ["한쪽만 있음", 100, undefined],
+  ])("%s 는 크기로 적지 않는다", (_label, width, height) => {
+    expect(imageMarkdown(STORAGE_IMAGE, "설명", { width, height })).toBe(
+      `![설명](${STORAGE_IMAGE})`,
     );
   });
 });
@@ -100,12 +126,18 @@ describe("youtubeMarkdown", () => {
 describe("삽입한 조각의 렌더", () => {
   it("이미지·캡션 조각이 검증을 통과한다", () => {
     const { document, issues } = parseArticleMarkdown(
-      imageMarkdown(STORAGE_IMAGE, "압축 결과 비교", "3단 WebP"),
+      imageMarkdown(STORAGE_IMAGE, "압축 결과 비교", { caption: "3단 WebP" }),
     );
 
     expect(issues).toEqual([]);
     expect(document.blocks).toEqual([
-      { type: "image", src: STORAGE_IMAGE, alt: "압축 결과 비교", caption: "3단 WebP" },
+      {
+        type: "image",
+        src: STORAGE_IMAGE,
+        alt: "압축 결과 비교",
+        caption: "3단 WebP",
+        dimensions: null,
+      },
     ]);
   });
 

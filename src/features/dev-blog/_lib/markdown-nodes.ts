@@ -69,6 +69,13 @@ type ArticleBlock =
       alt: string;
       /** 바로 뒤 `::caption` 지시자가 있을 때만 채워진다. */
       caption: string | null;
+      /**
+       * 원본 픽셀 크기. Markdown 이미지의 title 자리(`![alt](url "2048x1365")`)에서 읽는다.
+       * 렌더가 `<img width height>` 로 넘겨 이미지가 도착하기 전에 자리를 잡게 하는 값이다.
+       * 크기를 적지 않은 옛 글은 `null` 이고 화면이 임시 비율로 대신한다.
+       * 한쪽만 아는 상태는 만들지 않으려고 두 값을 묶는다.
+       */
+      dimensions: { width: number; height: number } | null;
     }
   | { type: "youtube"; videoId: string; title: string; source: string | null };
 
@@ -119,6 +126,7 @@ export type {
   ArticleDocument,
   ArticleInline,
   ArticleLinkTarget,
+  ArticleListItem,
   ArticleMarkdownIssue,
   ArticleMarkdownIssueCode,
   ArticleSourcePoint,
