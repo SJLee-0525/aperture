@@ -65,13 +65,14 @@ const toDevArticleEntity = (id: string, d: DocumentData): DevArticle => ({
  * 블로그 글 CRUD. 발행 조건·firstPublishedAt 스탬프 같은 도메인 규칙은 여기 없고
  * 도메인 검증은 live 저장소가 이 CRUD를 감싸서 적용한다.
  *
- * article RAG 타입을 연결하기 전까지는 동기화 요청을 보내지 않는다.
+ * RAG 동기화는 `devArticleRagPolicy` 가 판정한다. 초안 저장과 발행일·이미지·연관 프로젝트만
+ * 바뀐 저장은 요청을 보내지 않는다.
  */
 const devArticlesCrud = listCrud<DevArticle>(
   COLLECTIONS.DEV_ARTICLES,
   toDevArticleEntity,
   "블로그 글",
-  undefined,
+  "article",
   devArticleRagPolicy,
 );
 

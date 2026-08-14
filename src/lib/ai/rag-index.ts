@@ -72,7 +72,10 @@ const unpackRagIndex = (packed: PackedRagIndex): RagIndexEntry[] => {
 const loadPackedRagIndex = unstable_cache(
   async () => {
     const packed = packRagIndex(await fetchRagChunks());
-    const serializedBytes = JSON.stringify(packed).length;
+    // 한도는 UTF-8 바이트 기준이다. 문자열 길이로 재면 한글 본문을 글자당 1로 세어 과소 측정한다.
+    const serializedBytes = Buffer.byteLength(JSON.stringify(packed), "utf8");
+    // 캐시를 채울 때만 남는다. 남은 여유를 확인할 다른 통로가 없다.
+    console.info(`[rag-index] chunks=${packed.chunks.length} bytes=${serializedBytes}`);
     if (serializedBytes > PACKED_SIZE_WARN_BYTES) {
       console.warn(
         `RAG 스냅샷이 Data Cache 항목 한도에 근접했습니다 (${serializedBytes} bytes) — Firestore findNearest 이전을 검토하세요.`,

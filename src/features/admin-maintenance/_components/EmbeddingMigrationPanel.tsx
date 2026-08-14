@@ -57,8 +57,8 @@ const EmbeddingMigrationPanel = () => {
     <section className={styles.panel}>
       <h2 className={styles.title}>데이터 임베딩 관리</h2>
       <p className={styles.description}>
-        프로필·개발 프로젝트·트러블슈팅·연주·수상·사진·앨범을 의미 단위로 나눠 OpenAI 임베딩으로
-        저장합니다. 공개 콘텐츠나 임베딩 모델을 변경한 뒤 다시 실행하세요.
+        프로필·개발 프로젝트·트러블슈팅·블로그 글·연주·수상·사진·앨범을 의미 단위로 나눠 OpenAI
+        임베딩으로 저장합니다. 공개 콘텐츠나 임베딩 모델을 변경한 뒤 다시 실행하세요.
       </p>
       <div className={styles.actions}>
         <button type="button" disabled={pending || mock} onClick={run}>

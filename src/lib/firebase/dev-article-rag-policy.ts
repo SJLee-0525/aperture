@@ -24,10 +24,6 @@ const ragFingerprint = (article: DevArticle): string =>
  * - 최초 발행·재발행: `sync`
  * - 발행 유지 수정: 제목·요약·본문·태그가 바뀐 경우만 `sync`, 그 외(발행일·대표 이미지·연관 프로젝트) `skip`
  *
- * ⚠️ B5 에서는 `devArticles` CRUD 에 `ragSourceType` 을 주지 않아 이 정책의 결정과 무관하게
- * 동기화 요청이 0건이다. B6 이 `RagSyncSourceType` 에 article 타입을 등록하면서
- * `lib/firebase/dev-articles.ts` 의 listCrud 4번째 인자를 채우면 그대로 켜진다.
- *
  * @param {DevArticle | null} before 쓰기 직전 문서. 생성이면 `null`.
  * @param {DevArticle | null} after 쓰기 결과 문서. 삭제면 `null`.
  * @returns {"sync" | "remove" | "skip"} 동기화 작업 종류.

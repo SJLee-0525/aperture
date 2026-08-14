@@ -19,12 +19,14 @@ const entry = (overrides: {
   text?: string;
   embeddingModel?: string;
   vector?: number[];
+  sourceType?: string;
+  sourceId?: string;
 }) => ({
   chunk: {
     id: overrides.id,
     section: overrides.section ?? "photography",
-    sourceType: "photo",
-    sourceId: overrides.id,
+    sourceType: overrides.sourceType ?? "photo",
+    sourceId: overrides.sourceId ?? overrides.id,
     chunkKey: "photo",
     text: overrides.text ?? "사진",
     embeddingModel: overrides.embeddingModel ?? "text-embedding-3-small@512",
@@ -96,5 +98,95 @@ describe("searchRagChunks", () => {
     ]);
 
     expect(result.map(({ id }) => id)).toEqual(["keyword-hit"]);
+  });
+});
+
+describe("searchRagChunks — 열린 항목 우선 검색", () => {
+  const article = (id: string, vector: number[]) =>
+    entry({ id, section: "development", sourceType: "article", sourceId: "a1", vector });
+  // 질의 벡터와 직교라 최소 점수 기준을 넘지 못하는 청크들.
+  const weakArticles = [article("a1-0", [0, 1]), article("a1-1", [0, 1]), article("a1-2", [0, 1])];
+  const strong = Array.from({ length: 8 }, (_, index) =>
+    entry({ id: `p${index}`, section: "development", sourceType: "project", vector: [1, 0] }),
+  );
+
+  it("우선 대상이 없으면 기존 결과와 같다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    mocks.getRagIndex.mockResolvedValue([...weakArticles, ...strong]);
+
+    const chunks = await searchRagChunks({ text: "질문" }, ["development"]);
+
+    expect(chunks).toHaveLength(8);
+    expect(chunks.every(({ sourceType }) => sourceType === "project")).toBe(true);
+  });
+
+  it("지시어 질의는 최소 점수 기준을 넘지 못한 우선 대상도 앞자리를 받는다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    mocks.getRagIndex.mockResolvedValue([...weakArticles, ...strong]);
+
+    const chunks = await searchRagChunks({ text: "이 글 요약해 줘" }, ["development"], undefined, {
+      prioritize: { sourceType: "article", sourceId: "a1", ignoreScoreFloor: true },
+    });
+
+    // 자르기 전에 나누지 않으면 전체 상위 8개가 프로젝트로 채워져 글이 한 건도 남지 않는다.
+    expect(chunks.slice(0, 3).map(({ id }) => id)).toEqual(["a1-0", "a1-1", "a1-2"]);
+    expect(chunks).toHaveLength(8);
+    expect(chunks.slice(3).every(({ sourceType }) => sourceType === "project")).toBe(true);
+  });
+
+  it("질문이 대상을 직접 말하면 우선 대상도 최소 점수 기준을 넘어야 한다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    mocks.getRagIndex.mockResolvedValue([...weakArticles, ...strong]);
+
+    const chunks = await searchRagChunks(
+      { text: "무슨 프로젝트 했어?" },
+      ["development"],
+      undefined,
+      {
+        prioritize: { sourceType: "article", sourceId: "a1" },
+      },
+    );
+
+    expect(chunks).toHaveLength(8);
+    expect(chunks.every(({ sourceType }) => sourceType === "project")).toBe(true);
+  });
+
+  it("기준을 넘긴 우선 대상은 면제 없이도 앞자리를 받는다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    const weakerProjects = Array.from({ length: 8 }, (_, index) =>
+      entry({ id: `p${index}`, section: "development", sourceType: "project", vector: [0.9, 0.1] }),
+    );
+    mocks.getRagIndex.mockResolvedValue([article("a1-strong", [1, 0]), ...weakerProjects]);
+
+    const chunks = await searchRagChunks(
+      { text: "무슨 프로젝트 했어?" },
+      ["development"],
+      undefined,
+      {
+        prioritize: { sourceType: "article", sourceId: "a1" },
+      },
+    );
+
+    expect(chunks[0].id).toBe("a1-strong");
+  });
+
+  it("우선 대상이라도 임베딩 모델이 다르면 제외한다", async () => {
+    mocks.generateEmbedding.mockResolvedValue([1, 0]);
+    mocks.getRagIndex.mockResolvedValue([
+      entry({
+        id: "old",
+        section: "development",
+        sourceType: "article",
+        sourceId: "a1",
+        embeddingModel: "text-embedding-3-small@1536",
+        vector: [1, 0],
+      }),
+    ]);
+
+    const chunks = await searchRagChunks({ text: "질문" }, ["development"], undefined, {
+      prioritize: { sourceType: "article", sourceId: "a1" },
+    });
+
+    expect(chunks).toEqual([]);
   });
 });
