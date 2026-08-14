@@ -63,8 +63,11 @@ const SEARCH_TOOL: WebMcpToolDefinition = {
   name: "search_portfolio",
   description:
     "Search all published portfolio content (photography, music performances, dev projects, " +
-    "blog posts) by keyword. Returns matching items with the page path to visit. Blog posts " +
-    "are part of the dev section and appear as 'dev/blog'.",
+    "blog posts) by free-text keyword. Returns matching items with the page path to visit. " +
+    "Blog posts are part of the dev section and appear as 'dev/blog'. " +
+    "This tool has no tag index: when the request names a tag or a tech stack, use the " +
+    "dedicated tool instead — list_blog_posts for blog tags, list_projects for tech stacks, " +
+    "filter_photos for photo tags. Only those know which tags exist and can answer that none match.",
   inputSchema: objectSchema(
     {
       query: stringProperty("Keyword to search for. Korean and English both work."),

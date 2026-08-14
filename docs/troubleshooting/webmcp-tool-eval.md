@@ -1083,9 +1083,142 @@ curl -s https://sungjoon.works/api/search-index   | jq '.[] | select(.key|starts
 
 이 건은 코드가 아니라 데이터 과제로 옮긴다.
 
+## 6차 평가 · 2026-08-15 (블로그 배포 후)
+
+블로그 지면에 도구 두 개가 새로 붙었다. 목록과 상세 양쪽에서 노출 4종(`list_blog_posts`,
+`get_blog_post`, `get_profile`, `search_portfolio`)을 확인했고, 화면 문맥 계약은 의도대로
+갈렸다. 태그로 묻는 발화에서 도구 선택 결함 1건을 찾았다.
+
+### 6-1. `/ko/dev/articles` — 통과
+
+```
+발화: 블로그 글 목록 보여줘
+list_blog_posts {} →
+  JWT는 나를 힘들게 해 · 2026.08.15 · 13 min read · z01lb3WCKcJLJGkZQlG8 · jwt-gives-me-a-hard-time · /ko/dev/articles/jwt-gives-me-a-hard-time
+  검색엔진 등록 절차 · 2026.08.14 · 7 min read · G7F6UmflkSZPbUz4d74O · search-engine-registration-process-google-naver · /ko/dev/articles/search-engine-registration-process-google-naver
+  나만의 챗봇 설계 · 2026.08.14 · 24 min read · E1yw6eHO4AiAiVIFoemB · chaetbotgwa-tonghap-gyeongheom-seolgye · /ko/dev/articles/chaetbotgwa-tonghap-gyeongheom-seolgye
+```
+
+판정: 통과. 발행일 내림차순 3건이 그대로 나왔고 답변도 목록을 옮겨 적었다.
+조치: 없음.
+
+### 6-2. `/ko/dev/articles` — 통과 (열린 글 없음 안내)
+
+```
+발화: 지금 보고 있는 글 요약해줘
+get_blog_post {} → No post is open. Pass articleId or slug from list_blog_posts.
+```
+
+판정: 통과. 목록에는 열린 글이 없다는 것을 도구가 알렸고, 에이전트는 앞서 받은 목록에서
+고르라고 되물었다. 임의의 글을 골라 답하지 않았다.
+조치: 없음.
+
+### 6-3. `/ko/dev/articles/jwt-gives-me-a-hard-time` — 통과 (화면 문맥)
+
+```
+발화: 지금 보고 있는 글 요약해줘
+get_blog_post {} →
+  JWT는 나를 힘들게 해
+  z01lb3WCKcJLJGkZQlG8 · jwt-gives-me-a-hard-time · 2026.08.15 · 13 min read
+  멀티 탭 환경에서 발생하는 리프레시 토큰 레이스 컨디션 해결기
+  Tags: JWT
+  Outline: 1. 문제 개요 및 증상 / … / 8. 얻은 인사이트 / 참고 자료
+  /ko/dev/articles/jwt-gives-me-a-hard-time
+```
+
+판정: 통과. 6-2 와 같은 발화·같은 빈 인자인데 지면에 따라 갈렸다. 인자 없이 현재 글을
+해석하는 계약이 배포본에서 확인됐다. 답변은 목차를 근거로 구성했고 본문 전문은 받지 않았다.
+조치: 없음.
+
+### 6-4. 블로그 글의 검색 노출 — 통과
+
+```
+발화: JWT 관련해서 쓴 글 있어?
+search_portfolio {"query":"JWT","section":"dev"} →
+  JWT는 나를 힘들게 해 · dev/blog · /ko/dev/articles/jwt-gives-me-a-hard-time
+```
+
+판정: 통과. 블로그 글이 `dev/blog` 유형과 상세 경로로 검색에 잡힌다.
+조치: 없음.
+
+### 6-5. 사이트 지도의 블로그 — 통과
+
+```
+발화: 이 사이트에 개발 관련해서 어떤 페이지들이 있어?
+get_profile {"section":"dev"} →
+  dev — projects: /ko/dev/projects, career and tech stack: /ko/dev/career,
+        blog: /ko/dev/articles, about: /ko/dev
+```
+
+판정: 통과. 블로그가 dev 하위 페이지로 들어갔고 `/dev` 가 소개라는 것도 맞게 나온다.
+조치: 없음.
+
+### 6-6. 태그로 블로그를 묻는 발화 — 결함 (도구 선택)
+
+```
+발화: 리액트 태그 글 보여줘
+search_portfolio {"section":"dev","query":"리액트"} → 프로젝트 6건
+search_portfolio {"section":"dev","query":"React"}  → 같은 프로젝트 6건
+```
+
+판정: 결함. `list_blog_posts` 를 한 번도 부르지 않았다. `list_blog_posts {"tag":"리액트"}`
+였다면 `No posts use "리액트". Known tags: chatbot (챗봇 / Chatbot), jwt (JWT / JWT),
+seo (SEO / SEO).` 로 끝났을 질문이다. 대신 프로젝트 목록을 받아 "리액트 관련 개발
+프로젝트" 를 답했다. 글을 물었는데 프로젝트로 답한 것이고, 태그 사전 안내도 닿지 못했다.
+
+원인은 두 도구의 설명이 겹치는 데 있다. `search_portfolio` 는 "blog posts" 를 검색 대상으로
+명시하고 키워드를 받는다. `list_blog_posts` 는 태그 필터를 "optionally" 로 적어 부수 기능처럼
+읽힌다. 사용자가 "태그" 라고 말해도 키워드 검색 쪽이 먼저 선택된다.
+조치: `search_portfolio` 설명에 태그 색인이 없다는 사실과 전용 도구 세 개를 적었다.
+`list_blog_posts` 는 태그를 설명 앞으로 꺼내고, 인자 없는 호출이 태그 사전을 함께 돌려준다.
+어휘를 모르는 상태를 없애는 방식은 `filter_photos` 가 2-9 에서 쓴 것과 같다. `list_projects`
+의 `tech` 에는 블로그 태그가 아니라고 적었다. 배포본 재검증이 남았다.
+
+### 6-7. 같은 결함의 반복 — 결함
+
+```
+발화: e2e 태그 글 보여줘
+search_portfolio {"query":"e2e","section":"dev"} → AlphaBat 1건
+get_profile {"section":"dev"}                    → 사이트 지도
+search_portfolio {"query":"E2E"}                 → AlphaBat 1건
+search_portfolio {"query":"테스트"}              → 통합 포트폴리오 · AlphaBat ·
+                                                   JWT는 나를 힘들게 해 (dev/blog)
+```
+
+판정: 결함. 6-6 과 같은 원인이다. 네 번을 호출하는 동안에도 `list_blog_posts` 는 없었고,
+질의어를 바꿔 가며 우회하다 `"테스트"` 에서 블로그 글 하나를 우연히 만났다. 태그 사전에
+`e2e` 가 없다는 사실은 끝까지 알리지 못했다.
+조치: 6-6 과 같다.
+
+### 6-8. 블로그를 명시해도 같은 결함 — 결함 (범위 확정)
+
+```
+발화: e2e 태그 가진 블로그 글 보여줘
+search_portfolio {"query":"e2e","section":"dev"} → AlphaBat 1건 (프로젝트)
+get_profile {"section":"dev"}                    → 사이트 지도
+search_portfolio {"query":"e2e"}                 → AlphaBat 1건 (프로젝트)
+```
+
+판정: 결함. 발화에 "블로그 글" 이 들어 있어도 `list_blog_posts` 를 부르지 않았다. 6-6 을
+"태그라는 단어가 세 공간에 겹쳐서" 로 읽었는데, 이 회차가 그 해석을 좁힌다. 대상을 블로그로
+못 박아도 검색 도구가 선택된다.
+
+`search_portfolio` 설명이 "blog posts" 를 검색 대상으로 명시하는 것이 직접 원인으로 보인다.
+블로그를 지정한 요청에도 그 도구가 자신을 정답으로 광고한다. 반면 `list_blog_posts` 는
+"optionally filtered by tag" 라 조건이 붙은 요청에는 덜 맞아 보인다.
+
+`e2e` 태그를 쓰는 글은 없다. 정답은 "그런 태그의 글이 없다" 인데, 그 답을 낼 수 있는 도구는
+태그 사전을 들고 있는 `list_blog_posts` 뿐이다. 지금은 그 경로에 닿지 못해 프로젝트를
+답으로 내놓는다.
+조치: 6-6 과 같다.
+
 ## 재검증 대기
 
-없다. 5차 조치까지 배포본에서 모두 확인했다(5-5). 남은 항목은 아래 코드 밖 과제뿐이다.
+- 태그가 걸린 블로그 질의의 도구 선택(6-6, 6-7, 6-8). 설명 세 개와 무인자 응답을 고쳤고
+  배포본에서 세 발화를 다시 돌려야 한다. 기대값은 `list_blog_posts {"tag":"리액트"}` 호출과
+  `No posts use "리액트". Known tags: …` 응답이다.
+
+5차 조치까지는 배포본에서 모두 확인했다(5-5).
 
 ## 콘텐츠 과제
 
@@ -1126,12 +1259,14 @@ curl -s https://sungjoon.works/api/search-index   | jq '.[] | select(.key|starts
 | `list_photo_locations`    | 3-9 · 4-2                                      |
 | `prepare_contact_message` | 3-6 (폼 채움까지 확인)                         |
 | `list_music_awards`       | 5-3 · 5-5                                      |
+| `list_blog_posts`         | 6-1                                            |
+| `get_blog_post`           | 6-2 · 6-3                                      |
 
 ### 배포 후 재검증 대기
 
-없다. 코드 변경은 5-5 에서 모두 확인했다.
+6-6 의 도구 선택 조치를 적용했고 배포본 재실행이 남았다. 그 밖의 코드 변경은 5-5 에서 확인했다.
 
 ### 아직 못 해본 것
 
-없다. 표면 14종을 모두 에이전트가 한 번 이상 사용했다(`list_music_awards` 가 5-3 에서 마지막으로
-채워졌다).
+없다. 표면 16종을 모두 에이전트가 한 번 이상 사용했다(블로그 도구 두 종이 6-1·6-3 에서
+마지막으로 채워졌다).
