@@ -23,8 +23,8 @@ const RevalidateFailureBanner = () => {
   return (
     <div className={styles.banner} role="alert">
       <p className={styles.message}>
-        공개 페이지 재검증이 실패해 <strong>{targetCount}곳</strong>이 아직 옛 내용입니다 — 저장은
-        끝났고, 다시 시도하지 않아도 최대 1시간 뒤 자동으로 갱신됩니다.
+        공개 페이지 재검증이 실패해 <strong>{targetCount}곳</strong>이 아직 옛 내용입니다. 저장은
+        끝났습니다. 다시 시도하지 않아도 최대 1시간 뒤 갱신됩니다.
         {error ? <span className={styles.error}> 재시도 실패: {error}</span> : null}
       </p>
       <div className={styles.actions}>
