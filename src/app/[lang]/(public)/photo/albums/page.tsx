@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+
+import { AlbumsSkeleton } from "@/features/albums/_components/AlbumsSkeleton";
 import { AlbumsView } from "@/features/albums/_components/AlbumsView";
 
 import { toAlbumCards } from "@/features/albums/_lib/album-cards";
@@ -23,12 +26,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-/**
- * 앨범 목록 — 커버 해석·장수 집계는 서버 투영으로 끝내고 카드 데이터만 직렬화.
- *
- * @returns {Promise<JSX.Element>}
- */
-export default async function AlbumsPage() {
+/** 커버 해석·장수 집계는 서버 투영으로 끝내고 카드 데이터만 직렬화. */
+const AlbumsContent = async () => {
   const [albums, photos] = await Promise.all([getAlbums(), getPhotos()]);
   return <AlbumsView albums={toAlbumCards(albums, photos)} />;
+};
+
+/**
+ * 앨범 목록 (/photo/albums).
+ *
+ * 셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `albums/loading.tsx` 경계는 `[id]` 상세
+ * 전환에도 함께 쓰여 목록 모양을 그릴 수 없다.
+ *
+ * @returns {JSX.Element}
+ */
+export default function AlbumsPage() {
+  return (
+    <Suspense fallback={<AlbumsSkeleton />}>
+      <AlbumsContent />
+    </Suspense>
+  );
 }

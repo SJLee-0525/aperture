@@ -1,5 +1,5 @@
-import { ArticlesListSkeleton } from "@/features/dev-blog/_components/ArticlesListSkeleton";
+import { PageLoadingPlaceholder } from "@/components/PageLoadingPlaceholder";
 
 export default function DevArticlesLoading() {
-  return <ArticlesListSkeleton />;
+  return <PageLoadingPlaceholder />;
 }

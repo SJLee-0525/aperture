@@ -24,16 +24,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
+const MusicWorksContent = async () => {
+  const works = await getMusicWorks();
+  return <MusicWorksView works={works} />;
+};
+
 /**
  * 음악 — 연주 목록 (/music). MusicWorksView 가 ?work= 딥링크(useSearchParams)를 읽어 Suspense.
  *
- * @returns {Promise<JSX.Element>}
+ * 셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `music/loading.tsx` 경계는 about·career·
+ * media 전환에도 함께 쓰여 이 지면 모양을 그릴 수 없다.
+ *
+ * @returns {JSX.Element}
  */
-export default async function MusicPage() {
-  const works = await getMusicWorks();
+export default function MusicPage() {
   return (
     <Suspense fallback={<CardGridPageSkeleton kind="poster" />}>
-      <MusicWorksView works={works} />
+      <MusicWorksContent />
     </Suspense>
   );
 }
