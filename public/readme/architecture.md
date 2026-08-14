@@ -32,14 +32,28 @@ page.tsx
 
 ## Admin CMS
 
-[`src/app/admin`](../../src/app/admin)은 로그인, 사진, 앨범, 음악, 개발 프로젝트와 사이트 설정을 관리합니다. 서버 레이아웃은 검색엔진 제외 메타데이터를 제공하고, [`AdminLayoutClient`](../../src/app/admin/_components/AdminLayoutClient.tsx)가 인증 확인과 관리자 화면을 담당합니다.
+[`src/app/admin`](../../src/app/admin)은 로그인, 사진, 앨범, 음악, 개발 프로젝트, 블로그 글과 사이트 설정을 관리합니다. 서버 레이아웃은 검색엔진 제외 메타데이터를 제공하고, [`AdminLayoutClient`](../../src/app/admin/_components/AdminLayoutClient.tsx)가 인증 확인과 관리자 화면을 담당합니다.
 
 관리 기능은 Firebase client SDK를 사용합니다.
 
 - Authentication: 관리자 한 명의 로그인 상태 확인
 - Firestore: 콘텐츠 생성, 수정, 공개 상태와 정렬 순서 저장
-- Storage: 사진, 포스터와 프로젝트 이미지 저장
+- Storage: 사진, 포스터, 프로젝트와 블로그 본문 이미지 저장
 - RAG 동기화: 변경된 콘텐츠의 임베딩 갱신 요청
+
+## 개발 블로그 본문
+
+블로그 본문은 한국어 Markdown 원문 하나만 저장합니다. 제목, 요약과 태그는 다른 콘텐츠처럼
+한국어와 영어를 함께 저장하지만, 본문 번역은 제공하지 않습니다.
+
+렌더 경로에는 HTML 문자열 단계가 없습니다. `mdast`가 만든 트리에서 허용한 노드만 React
+요소로 직접 매핑하므로 sanitizer나 `dangerouslySetInnerHTML`이 필요하지 않습니다. 코드
+하이라이트는 서버에서만 실행하고 토큰만 내려보내, 문법 정의와 테마를 브라우저 번들에
+포함하지 않습니다. 라이트와 다크 테마는 CSS 변수 한 쌍으로 갈립니다.
+
+목록과 상세는 정적 생성 후 재검증하며, 글을 발행하면 해당 상세 경로의 캐시를 함께
+무효화합니다. 초안은 공개 getter가 걸러내므로 검색, RAG, 챗봇, sitemap 어디에도
+나타나지 않습니다.
 
 ## UI 계층
 
