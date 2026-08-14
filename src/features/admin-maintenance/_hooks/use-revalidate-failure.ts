@@ -59,4 +59,3 @@ const useRevalidateFailure = (): RevalidateFailureAlert => {
 };
 
 export { useRevalidateFailure };
-export type { RevalidateFailureAlert };

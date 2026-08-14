@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { RevalidateFailureBanner } from "@/features/admin-maintenance/_components/RevalidateFailureBanner";
@@ -42,12 +41,14 @@ describe("RevalidateFailureBanner", () => {
 
     expect(screen.getByRole("alert").textContent).toContain("3곳");
 
-    await userEvent.click(screen.getByRole("button", { name: "지금 다시 시도" }));
+    fireEvent.click(screen.getByRole("button", { name: "지금 다시 시도" }));
 
-    expect(mocks.revalidatePublicPages).toHaveBeenCalledWith(
-      "id-token",
-      ["firestore:devArticles"],
-      ["/ko/dev/articles/a", "/en/dev/articles/a"],
+    await waitFor(() =>
+      expect(mocks.revalidatePublicPages).toHaveBeenCalledWith(
+        "id-token",
+        ["firestore:devArticles"],
+        ["/ko/dev/articles/a", "/en/dev/articles/a"],
+      ),
     );
     await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
   });
@@ -57,7 +58,7 @@ describe("RevalidateFailureBanner", () => {
     recordRevalidateFailure({ tags: ["firestore:photos"], paths: [], reason: "네트워크" });
     render(<RevalidateFailureBanner />);
 
-    await userEvent.click(screen.getByRole("button", { name: "지금 다시 시도" }));
+    fireEvent.click(screen.getByRole("button", { name: "지금 다시 시도" }));
 
     await waitFor(() =>
       expect(screen.getByRole("alert").textContent).toContain("Unauthorized cache revalidation"),
