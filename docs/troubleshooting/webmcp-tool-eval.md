@@ -1,6 +1,6 @@
 # WebMCP 도구 평가 트러블슈팅
 
-> 범위: 프로덕션(sungjoon.works)의 WebMCP 표면 평가와 반복 개선. 명령형 도구 13종과 선언형 연락 폼 1종을 다룬다.
+> 범위: 프로덕션(sungjoon.works)의 WebMCP 표면 평가와 반복 개선. 명령형 도구 15종과 선언형 연락 폼 1종을 다룬다.
 > 상태: **14개 표면 검증 완료 / 코드 재검증 대기 없음** (2026-08-11, 5차 평가)
 > 관련 결정: [ADR-0003: 공개 페이지의 WebMCP 도구 노출](../adr/0003-webmcp-agent-tools.md)
 > 구현 계획: [WebMCP 에이전트 도구 구현 계획](../plan/04-webmcp-agent-tools.md)
@@ -27,16 +27,18 @@
 에이전트는 해당 도구를 볼 수 없고 전역 검색으로 우회한다. 페이지당 노출 도구를 5개 이하로
 제한한 결과이며, ADR-0003에서 정한 동작이다.
 
-| 페이지             | 등록되는 도구 (전역 2종 + 섹션)                    |
-| ------------------ | -------------------------------------------------- |
-| 모든 공개 페이지   | `search_portfolio` `get_profile`                   |
-| `/ko/photo`        | + `filter_photos` `get_photo_details` `open_photo` |
-| `/ko/photo/albums` | + `list_albums`                                    |
-| `/ko/photo/map`    | + `list_photo_locations`                           |
-| `/ko/dev/projects` | + `list_projects` `get_project` `open_project`     |
-| `/ko/music`        | + `list_music_works` `get_music_work`              |
-| `/ko/music/career` | + `list_music_awards`                              |
-| `/ko/contact`      | + `prepare_contact_message` (선언형 폼)            |
+| 페이지               | 등록되는 도구 (전역 2종 + 섹션)                    |
+| -------------------- | -------------------------------------------------- |
+| 모든 공개 페이지     | `search_portfolio` `get_profile`                   |
+| `/ko/photo`          | + `filter_photos` `get_photo_details` `open_photo` |
+| `/ko/photo/albums`   | + `list_albums`                                    |
+| `/ko/photo/map`      | + `list_photo_locations`                           |
+| `/ko/dev/projects`   | + `list_projects` `get_project` `open_project`     |
+| `/ko/dev/articles`   | + `list_blog_posts` `get_blog_post`                |
+| `/ko/dev/articles/*` | + `list_blog_posts` `get_blog_post`                |
+| `/ko/music`          | + `list_music_works` `get_music_work`              |
+| `/ko/music/career`   | + `list_music_awards`                              |
+| `/ko/contact`        | + `prepare_contact_message` (선언형 폼)            |
 
 ## 콘솔로 직접 확인하기
 

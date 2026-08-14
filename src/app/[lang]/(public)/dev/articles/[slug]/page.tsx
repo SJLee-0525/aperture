@@ -4,8 +4,11 @@ import { cache, Suspense } from "react";
 import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 import { ArticleNavigationTable } from "@/features/dev-blog/_components/ArticleNavigationTable";
 import { ArticleRelatedProjects } from "@/features/dev-blog/_components/ArticleRelatedProjects";
+import { ArticleScreenTarget } from "@/features/dev-blog/_components/ArticleScreenTarget";
+import { BlogTools } from "@/features/dev-blog/_components/BlogTools";
 
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
+import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
 import {
   buildArticleJsonLd,
   serializeJsonLdScript,
@@ -14,9 +17,8 @@ import {
   toDevArticleSummaries,
   toDevArticleSummary,
 } from "@/features/dev-blog/_lib/article-projection";
+import { toArticleToolData } from "@/features/dev-blog/_lib/article-tool-data";
 import { highlightArticleDocument } from "@/features/dev-blog/_lib/markdown-highlight";
-import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
-import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
 import { devArticleRoute } from "@/constants/routes";
 import { getDevProjects } from "@/lib/content/dev";
@@ -54,9 +56,9 @@ const getArticlePageData = cache(async (slug: string) => {
   const article = await getDevArticleBySlug(slug);
   if (!article) return null;
 
-  const { document } = parseArticleMarkdown(article.body);
+  const { document, readingMinutes } = analyzeArticle(article);
   const highlights = await highlightArticleDocument(document);
-  return { article, document, highlights };
+  return { article, document, highlights, readingMinutes };
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -109,7 +111,7 @@ export default async function DevArticlePage({ params }: Props) {
   ]);
   if (!data) notFound();
 
-  const { article, document, highlights } = data;
+  const { article, document, highlights, readingMinutes } = data;
   const summary = toDevArticleSummary(article);
   const canonicalUrl = absoluteUrl(localizePath("ko", devArticleRoute(slug)));
   const tagLabels = article.tags.map((id) => tags.find((tag) => tag.id === id)?.[lang] ?? id);
@@ -140,7 +142,7 @@ export default async function DevArticlePage({ params }: Props) {
         cover={article.cover}
         coverAlt={article.coverAlt ? pickText(article.coverAlt, lang) : ""}
         publishedAt={summary.publishedAt}
-        readingMinutes={articleReadingMinutes(document)}
+        readingMinutes={readingMinutes}
         tagLabels={tagLabels}
         document={document}
         highlights={highlights}
@@ -148,6 +150,8 @@ export default async function DevArticlePage({ params }: Props) {
         shareUrl={absoluteUrl(localizePath("ko", devArticleRoute(slug)))}
         landmark
       >
+        <ArticleScreenTarget id={article.id} title={pickText(article.title, lang)} />
+        <BlogTools articles={toArticleToolData(articles, tags)} tags={tags} />
         <ArticleRelatedProjects projects={relatedProjects} lang={lang} />
         <ArticleNavigationTable
           articles={toDevArticleSummaries(articles)}

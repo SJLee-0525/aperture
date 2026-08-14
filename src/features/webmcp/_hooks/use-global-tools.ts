@@ -45,6 +45,7 @@ const SECTION_ROUTES: Record<SearchSection, Array<{ label: string; path: string 
   dev: [
     { label: "projects", path: ROUTES.DEV_PROJECTS },
     { label: "career and tech stack", path: ROUTES.DEV_CAREER },
+    { label: "blog", path: ROUTES.DEV_ARTICLES },
     { label: "about", path: ROUTES.DEV },
   ],
 };
@@ -61,8 +62,9 @@ const isSearchSection = (value: unknown): value is SearchSection =>
 const SEARCH_TOOL: WebMcpToolDefinition = {
   name: "search_portfolio",
   description:
-    "Search all published portfolio content (photography, music performances, dev projects) " +
-    "by keyword. Returns matching items with the page path to visit.",
+    "Search all published portfolio content (photography, music performances, dev projects, " +
+    "blog posts) by keyword. Returns matching items with the page path to visit. Blog posts " +
+    "are part of the dev section and appear as 'dev/blog'.",
   inputSchema: objectSchema(
     {
       query: stringProperty("Keyword to search for. Korean and English both work."),
@@ -115,12 +117,13 @@ const useGlobalTools = (profile: WebMcpProfile): void => {
     const ranked = rankDocuments(pool, query);
     if (ranked.length === 0) return `No results for "${query}".`;
 
-    return formatToolItems(
-      ranked,
-      args.limit,
-      (document) =>
-        `${pickText(document.title, lang)} · ${document.section} · ${localizePath(lang, document.href)}`,
-    );
+    return formatToolItems(ranked, args.limit, (document) => {
+      // subsection 이 없으면 섹션 하나가 종류를 다 설명한다. 글만 프로젝트와 같은 dev 섹션을 쓴다.
+      const kind = document.subsection
+        ? `${document.section}/${document.subsection}`
+        : document.section;
+      return `${pickText(document.title, lang)} · ${kind} · ${localizePath(lang, document.href)}`;
+    });
   });
 
   useModelContextTool(PROFILE_TOOL, (args) => {

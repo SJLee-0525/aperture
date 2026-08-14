@@ -2,8 +2,10 @@ import { Suspense } from "react";
 
 import { ArticlesListSkeleton } from "@/features/dev-blog/_components/ArticlesListSkeleton";
 import { ArticlesView } from "@/features/dev-blog/_components/ArticlesView";
+import { BlogTools } from "@/features/dev-blog/_components/BlogTools";
 
 import { toDevArticleSummaries } from "@/features/dev-blog/_lib/article-projection";
+import { toArticleToolData } from "@/features/dev-blog/_lib/article-tool-data";
 
 import { getDevArticles, getDevArticleTags } from "@/lib/content/dev-articles";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -42,6 +44,7 @@ export default async function DevArticlesPage() {
   return (
     <Suspense fallback={<ArticlesListSkeleton />}>
       <ArticlesView articles={toDevArticleSummaries(articles)} tags={tags} />
+      <BlogTools articles={toArticleToolData(articles, tags)} tags={tags} />
     </Suspense>
   );
 }
