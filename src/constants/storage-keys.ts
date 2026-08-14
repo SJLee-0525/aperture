@@ -4,6 +4,8 @@ const STORAGE_KEYS = {
   LANG: "ap-lang:v1",
   // v3: GA와 Sentry를 각각 선택할 수 있는 세분화 동의(ADR-0004).
   CONSENT: "ap-consent:v3",
+  // 저장은 됐지만 공개 캐시 무효화가 실패한 대상. 관리자가 재시도할 때까지 남는다.
+  ADMIN_REVALIDATE_FAILURE: "ap-admin-revalidate-failure:v1",
   // mock 모드의 블로그 글 저장소.
   ADMIN_DEV_ARTICLES: "ap-admin-dev-articles:v1",
   // 관리자 mock 저장소는 E2E 초기화를 위해 `ap-admin-` 접두사를 공유한다.

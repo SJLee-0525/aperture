@@ -1,3 +1,4 @@
+import { recordRevalidateFailure } from "@/lib/cache/revalidate-failure-store";
 import { revalidatePublicPages } from "@/lib/cache/revalidate-public";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 
@@ -23,8 +24,14 @@ const flushSoon = (): void => {
     const pathsToRevalidate = [...pendingPaths];
     pendingTags.clear();
     pendingPaths.clear();
-    revalidateAsCurrentAdmin(tagsToRevalidate, pathsToRevalidate).catch((error) => {
+    revalidateAsCurrentAdmin(tagsToRevalidate, pathsToRevalidate).catch((error: unknown) => {
       console.warn("[cache] 공개 페이지 재검증 실패 — ISR 주기 후 자동 갱신", error);
+      // 콘솔만으로는 관리자가 실패를 알 수 없다. 배너가 읽어 갈 대상과 사유를 남긴다.
+      recordRevalidateFailure({
+        tags: tagsToRevalidate,
+        paths: pathsToRevalidate,
+        reason: error instanceof Error ? error.message : String(error),
+      });
     });
   }, DEBOUNCE_MS);
 };

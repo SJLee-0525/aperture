@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { RagStaleBanner } from "@/features/admin-maintenance/_components/RagStaleBanner";
+import { RevalidateFailureBanner } from "@/features/admin-maintenance/_components/RevalidateFailureBanner";
 import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
 import { AdminMonitoring } from "@/features/monitoring/_components/AdminMonitoring";
@@ -34,6 +35,8 @@ const AdminLayoutClient = ({ children }: { children: ReactNode }) => {
       <AdminChrome>
         {/* RAG 잔류 감지는 실제 Firestore·임베딩 API 를 조회한다 — mock 모드에서는 조회 대상이 없다. */}
         {shouldUseMockContent() ? null : <RagStaleBanner />}
+        {/* 재검증은 mock 모드에서도 요청하지 않으므로 실패 기록 자체가 남지 않는다. */}
+        <RevalidateFailureBanner />
         {children}
       </AdminChrome>
     </AuthGuard>
