@@ -28,7 +28,7 @@ export async function generateStaticParams() {
   return albums.map((album) => ({ id: album.id }));
 }
 
-/** 빌드 후 발행된 새 앨범은 요청-시 렌더 — 상위 [lang]의 dynamicParams=false가 이 세그먼트까지 잠그지 않게 명시 고정 */
+/** 프리렌더 목록 밖 id 는 404 가 아니라 요청-시 렌더한다 — 빌드 후 발행한 앨범이 이 경로로 열린다. */
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ lang: Lang; id: string }> };

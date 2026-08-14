@@ -43,7 +43,7 @@ export async function generateStaticParams() {
   return articles.map((article) => ({ slug: article.slug }));
 }
 
-/** 빌드 후 발행한 글은 요청-시 렌더 — 상위 [lang] 의 dynamicParams=false 가 이 세그먼트까지 잠그지 않게 명시한다. */
+/** 프리렌더 목록 밖 slug 는 404 가 아니라 요청-시 렌더한다 — 빌드 후 발행한 글이 이 경로로 열린다. */
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ lang: Lang; slug: string }> };

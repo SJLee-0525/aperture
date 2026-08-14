@@ -31,17 +31,17 @@ const IMAGE_CLEANUP_WARNING =
   "글은 삭제했지만 일부 이미지 파일은 남아 있습니다. 유지보수 페이지의 '사용되지 않는 블로그 이미지'에서 정리할 수 있습니다.";
 
 /**
- * 공개 상세 경로의 존재 여부가 이 쓰기로 바뀌는지 판정한다.
- * 발행 상태가 그대로면 경로는 이전과 같이 200 또는 404다.
+ * 이 쓰기가 공개 상세 경로에 닿는지 판정한다.
+ *
+ * 발행 상태가 그대로여도 재검증이 필요하다. 초안일 때 열려 404로 캐시된 상세는 컬렉션 태그
+ * 무효화로 갱신되지 않아, 발행한 뒤 몇 번을 다시 저장해도 그대로 404로 남는다.
  *
  * @param {DevArticle | undefined} previous 쓰기 직전 저장본. 새 글이면 없다.
  * @param {DevArticleInput} next 저장할 값.
- * @returns {boolean} 경로의 존재 여부가 바뀌면 true.
+ * @returns {boolean} 쓰기 전후 중 한 번이라도 발행 상태면 true.
  */
-const didPublishedPathExistenceChange = (
-  previous: DevArticle | undefined,
-  next: DevArticleInput,
-): boolean => Boolean(previous?.published) !== next.published;
+const touchesPublishedPath = (previous: DevArticle | undefined, next: DevArticleInput): boolean =>
+  Boolean(previous?.published) || next.published;
 
 /**
  * 글 상세 경로 두 언어를 라우트 캐시에서 지우도록 요청한다.
@@ -146,7 +146,7 @@ const createLiveDevArticleRepository = (
     const stamped = stampFirstPublished(guarded, previous, now);
     if (stamped.published) await assertPublishableLive(id, stamped);
     await devArticlesCrud.update(id, asCrudInput(stamped));
-    if (didPublishedPathExistenceChange(previous, stamped)) revalidateArticlePaths(stamped.slug);
+    if (touchesPublishedPath(previous, stamped)) revalidateArticlePaths(stamped.slug);
   },
 
   setPublished: async (id, published) => {
@@ -169,7 +169,7 @@ const createLiveDevArticleRepository = (
     // listCrud.setPublished 는 published 만 바꾸므로 최초 발행 스탬프를 위해 update 경로를 쓴다.
     // RAG 정책은 작업 이름 없이 전후 상태만 보므로 계약이 같다.
     await devArticlesCrud.update(id, asCrudInput(stampFirstPublished(input, previous, now)));
-    if (previous.published !== published) revalidateArticlePaths(previous.slug);
+    if (touchesPublishedPath(previous, input)) revalidateArticlePaths(previous.slug);
   },
 
   remove: async (id) => {

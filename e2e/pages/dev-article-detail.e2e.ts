@@ -218,13 +218,20 @@ test.describe("개발 블로그 상세", () => {
     await expect(lightbox).toBeHidden();
   });
 
-  test("없는 slug 는 404 다", async ({ page }) => {
-    const response = await page.goto("/ko/dev/articles/does-not-exist");
-    expect(response?.status()).toBe(404);
+  // 프리렌더 목록 밖 경로는 요청-시 렌더되고, 그 응답의 상태 코드는 스트리밍이 시작된 뒤라
+  // 200 으로 남는다. 계약은 상태 코드가 아니라 "내용이 보이지 않고 색인되지 않는다" 로 고정한다.
+  test("없는 slug 는 404 화면을 보여주고 색인을 막는다", async ({ page }) => {
+    await page.goto("/ko/dev/articles/does-not-exist");
+
+    await expect(page.getByRole("heading", { name: /찾을 수 없습니다/ })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
   });
 
-  test("초안은 공개되지 않는다", async ({ page }) => {
-    const response = await page.goto("/ko/dev/articles/rag-chunking-draft");
-    expect(response?.status()).toBe(404);
+  test("초안은 제목도 본문도 노출되지 않는다", async ({ page }) => {
+    await page.goto("/ko/dev/articles/rag-chunking-draft");
+
+    await expect(page.getByRole("heading", { name: /찾을 수 없습니다/ })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("긴 글을 어떤 단위로 잘라 임베딩할까");
+    await expect(page.locator("body")).not.toContainText("문단 단위로 자를 때");
   });
 });

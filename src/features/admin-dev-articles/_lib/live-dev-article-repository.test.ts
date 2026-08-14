@@ -140,12 +140,14 @@ describe("createLiveDevArticleRepository", () => {
       expect(mocks.requestPublicPathRevalidate).not.toHaveBeenCalled();
     });
 
-    it("공개 글의 본문만 고치면 경로 재검증이 없다", async () => {
+    // 초안일 때 열려 404 로 캐시된 상세는 태그 무효화가 지우지 못한다. 발행 상태가 그대로인
+    // 저장도 경로를 재검증해야 그 404 가 풀린다.
+    it("공개 글의 본문만 고쳐도 경로를 재검증한다", async () => {
       mocks.get.mockResolvedValue(article({ published: true }));
 
       await repository.update("a1", input({ published: true, body: "고침" }));
 
-      expect(mocks.requestPublicPathRevalidate).not.toHaveBeenCalled();
+      expect(mocks.requestPublicPathRevalidate).toHaveBeenCalledWith(KO, EN);
     });
 
     it("초안을 발행하면 경로를 재검증한다", async () => {
@@ -166,7 +168,7 @@ describe("createLiveDevArticleRepository", () => {
   });
 
   describe("setPublished", () => {
-    it("상태가 실제로 바뀔 때만 경로를 재검증한다", async () => {
+    it("초안을 발행하면 경로를 재검증한다", async () => {
       mocks.get.mockResolvedValue(article({ published: false }));
 
       await repository.setPublished("a1", true);
@@ -174,10 +176,27 @@ describe("createLiveDevArticleRepository", () => {
       expect(mocks.requestPublicPathRevalidate).toHaveBeenCalledWith(KO, EN);
     });
 
-    it("같은 값으로 부르면 경로 재검증이 없다", async () => {
+    // 캐시된 404 를 푸는 수단이 이 토글이라, 같은 값으로 눌러도 경로를 다시 지운다.
+    it("이미 공개된 글에 같은 값을 넣어도 경로를 재검증한다", async () => {
       mocks.get.mockResolvedValue(article({ published: true }));
 
       await repository.setPublished("a1", true);
+
+      expect(mocks.requestPublicPathRevalidate).toHaveBeenCalledWith(KO, EN);
+    });
+
+    it("공개를 내려도 경로를 재검증한다", async () => {
+      mocks.get.mockResolvedValue(article({ published: true }));
+
+      await repository.setPublished("a1", false);
+
+      expect(mocks.requestPublicPathRevalidate).toHaveBeenCalledWith(KO, EN);
+    });
+
+    it("초안에 같은 값을 넣으면 경로 재검증이 없다", async () => {
+      mocks.get.mockResolvedValue(article({ published: false }));
+
+      await repository.setPublished("a1", false);
 
       expect(mocks.requestPublicPathRevalidate).not.toHaveBeenCalled();
     });
