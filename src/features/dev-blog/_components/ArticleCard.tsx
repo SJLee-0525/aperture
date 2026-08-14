@@ -22,6 +22,7 @@ type Props = {
   lang: Lang;
   tagLabels: string[];
   readingLabel: string;
+  priority?: boolean;
 };
 
 /**
@@ -40,9 +41,11 @@ type Props = {
  * @param {Lang} props.lang 링크 로케일 프리픽스와 제목·요약 언어를 고른다.
  * @param {string[]} props.tagLabels 사전에서 현재 언어로 해석한 태그 라벨.
  * @param {string} props.readingLabel 완성된 읽기 시간 문구.
+ * @param {boolean | undefined} props.priority LCP 보호. 첫 행의 실제 대표 이미지만 eager 로드한다.
+ *   대표 이미지가 없는 카드의 워드마크 자리표시자는 LCP 후보가 아니라서 받지 않는다.
  * @returns {JSX.Element}
  */
-const ArticleCard = ({ article, view, lang, tagLabels, readingLabel }: Props) => {
+const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = false }: Props) => {
   const title = pickText(article.title, lang);
   const coverUrl = article.cover ? imagePreviewUrl(article.cover) : "";
 
@@ -63,6 +66,7 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel }: Props) =>
               sizes={COVER_SIZES}
               className={styles.coverImg}
               draggable={false}
+              priority={priority}
             />
           ) : (
             <>

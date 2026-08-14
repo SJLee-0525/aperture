@@ -10,6 +10,7 @@ type Props = {
   count: number;
   title: string;
   subtitle: string;
+  priority?: boolean;
 };
 
 /**
@@ -22,9 +23,18 @@ type Props = {
  * @param {number} props.count
  * @param {string} props.title
  * @param {string} props.subtitle
+ * @param {boolean | undefined} props.priority LCP 보호 — 첫 화면에 들어오는 카드만 eager 로드.
  * @returns {JSX.Element}
  */
-const AlbumCard = ({ href, coverUrl, coverAlt, count, title, subtitle }: Props) => (
+const AlbumCard = ({
+  href,
+  coverUrl,
+  coverAlt,
+  count,
+  title,
+  subtitle,
+  priority = false,
+}: Props) => (
   <Link href={href} prefetch={false} className={styles.card} data-cursor-large="frame">
     <div className={styles.cover} data-protected-image>
       {coverUrl ? (
@@ -35,6 +45,7 @@ const AlbumCard = ({ href, coverUrl, coverAlt, count, title, subtitle }: Props) 
           sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
           className={styles.img}
           draggable={false}
+          priority={priority}
         />
       ) : null}
       <span className={styles.count}>{count}</span>

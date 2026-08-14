@@ -13,6 +13,9 @@ import { DevProjectCard } from "./DevProjectCard";
 import styles from "./DevProjectsView.module.css";
 import { OnDemandDevProjectDetail, preloadDevProjectDetail } from "./OnDemandDevProjectDetail";
 
+/** 가장 좁은 화면의 첫 행 카드 수. 720px 이하가 1열이라 더 주면 화면 밖 이미지를 preload 한다. */
+const FIRST_ROW_CARDS = 1;
+
 /**
  * 프로젝트 목록과 URL 기반 상세 선택을 조율한다.
  *
@@ -37,13 +40,14 @@ const DevProjectsView = ({ projects }: { projects: DevProjectCardData[] }) => {
         <p className={styles.empty}>{dict.comingSoon}</p>
       ) : (
         <div className={styles.grid}>
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <DevProjectCard
               key={project.id}
               project={project}
               lang={lang}
               onSelect={select}
               onPreload={preloadDevProjectDetail}
+              priority={index < FIRST_ROW_CARDS}
             />
           ))}
         </div>

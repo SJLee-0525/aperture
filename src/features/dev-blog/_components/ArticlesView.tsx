@@ -27,6 +27,9 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
 
 import styles from "./ArticlesView.module.css";
 
+/** 가장 좁은 화면의 첫 행 카드 수. list 보기와 767px 이하 grid 가 1열이다. */
+const FIRST_ROW_CARDS = 1;
+
 type Props = {
   articles: DevArticleSummary[];
   tags: DevArticleTag[];
@@ -122,12 +125,13 @@ const ArticlesView = ({ articles, tags }: Props) => {
       ) : (
         <>
           <ul className={styles.list} data-view={state.view}>
-            {visible.map((article) => (
+            {visible.map((article, index) => (
               <ArticleCard
                 key={article.id}
                 article={article}
                 view={state.view}
                 lang={lang}
+                priority={index < FIRST_ROW_CARDS}
                 tagLabels={article.tags.map(labelOf)}
                 readingLabel={dict.articleReadingMinutes.replace(
                   "{n}",
