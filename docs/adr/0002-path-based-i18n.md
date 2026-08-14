@@ -63,6 +63,10 @@ Accepted — **2026-08-09 최초 진입 언어 판정 개정 구현**
 - pathname을 소비하는 코드는 로케일 프리픽스를 전제해야 한다 — 섹션 판별(`sectionFromPath`)과
   활성 링크 판정은 `stripLangPrefix`를 경유한다.
 - 언어 전환이 내비게이션이 되므로 페이지 전환 애니메이션(template 재마운트)이 재생된다.
+- `[lang]` 이 모든 공개 라우트의 상위 세그먼트가 되므로 이 세그먼트의 route segment config 는
+  하위 전체에 적용된다. 특히 `dynamicParams = false` 를 두면 프리렌더 목록 밖의 글·앨범이
+  렌더되지 못하고 전역 404 가 되며, 자식 라우트의 `dynamicParams = true` 로 되돌릴 수 없다.
+  지원 외 언어 세그먼트는 레이아웃의 `isLang` 검사가 404 로 막는다.
 
 ## Amendment notes
 
