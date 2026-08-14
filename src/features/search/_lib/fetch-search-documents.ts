@@ -1,4 +1,7 @@
+import { toArticleSearchSources } from "@/features/dev-blog/_lib/article-search-source";
+
 import { getDevProjects } from "@/lib/content/dev";
+import { getDevArticles, getDevArticleTags } from "@/lib/content/dev-articles";
 import { getMusicAwards, getMusicMedia, getMusicWorks } from "@/lib/content/music";
 import { getAlbums, getPhotos } from "@/lib/content/photo";
 
@@ -12,15 +15,27 @@ import { createSearchDocuments } from "./search-documents";
  * @returns {Promise<SearchDocument[]>}
  */
 const fetchSearchDocuments = async (): Promise<SearchDocument[]> => {
-  const [photos, albums, works, awards, media, projects] = await Promise.all([
-    getPhotos(),
-    getAlbums(),
-    getMusicWorks(),
-    getMusicAwards(),
-    getMusicMedia(),
-    getDevProjects(),
-  ]);
-  return createSearchDocuments({ photos, albums, works, awards, media, projects });
+  const [photos, albums, works, awards, media, projects, articles, articleTags] = await Promise.all(
+    [
+      getPhotos(),
+      getAlbums(),
+      getMusicWorks(),
+      getMusicAwards(),
+      getMusicMedia(),
+      getDevProjects(),
+      getDevArticles(),
+      getDevArticleTags(),
+    ],
+  );
+  return createSearchDocuments({
+    photos,
+    albums,
+    works,
+    awards,
+    media,
+    projects,
+    articles: toArticleSearchSources(articles, articleTags),
+  });
 };
 
 export { fetchSearchDocuments };
