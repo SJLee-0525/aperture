@@ -18,6 +18,39 @@ test.describe("개발 블로그 상세", () => {
     await expect(rail).toBeVisible();
   });
 
+  test("제목 여러 개를 건너뛰어도 현재 항목 표시가 따라온다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "hover 확장은 포인터가 있는 환경 전용");
+
+    await page.goto(ARTICLE);
+    await settleImages(page);
+
+    /** 한 프레임에 제목 여러 개를 건너뛰는 이동. */
+    const jumpTo = async (heading: string) => {
+      const top = await page
+        .getByRole("heading", { name: heading, exact: true })
+        .evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+      await page.evaluate((y) => window.scrollTo(0, y), top - 40);
+    };
+
+    await jumpTo("남은 일");
+    await page.getByRole("button", { name: "목차 열기" }).hover();
+    await expect(page.getByRole("button", { name: "남은 일" })).toHaveAttribute(
+      "aria-current",
+      "location",
+    );
+
+    // 위로 크게 되돌아간다. 교차 상태 변화로만 판정하면 표시가 아래 항목에 멈춘다.
+    await jumpTo("보안 경계는 Rules 하나");
+    await expect(page.getByRole("button", { name: "보안 경계는 Rules 하나" })).toHaveAttribute(
+      "aria-current",
+      "location",
+    );
+    await expect(page.getByRole("button", { name: "남은 일" })).not.toHaveAttribute(
+      "aria-current",
+      "location",
+    );
+  });
+
   test("hover 로 목차를 펼치고 항목으로 이동한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "hover 확장은 포인터가 있는 환경 전용");
 
