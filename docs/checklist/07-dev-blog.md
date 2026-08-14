@@ -394,6 +394,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### 기록만 하고 이번에 고치지 않는 것
 
+- 상세 페이지 payload — 탐색 테이블과 WebMCP 도구가 전 글을 각각 투영한다. `BlogTools` 의 지원 여부 게이트는 **등록 청크만** 막고, `articles`·`tags` 는 client component 의 prop 이라 미지원 브라우저에도 RSC payload 로 직렬화된다. **공개 글이 30건을 넘으면** 도구 투영 축소(전 글 `headings` 제외)를 검토한다. 현재 2건이라 조건에 닿지 않았다
 - `ArticleDetailView.tsx:1` 이 `"use client"` 라 `ArticleBody`·`ArticleCodeBlock` 전체와 파싱된 AST·shiki 토큰이 RSC 페이로드로 브라우저에 실린다(SSR HTML 과 이중). 클라이언트가 실제로 필요한 것은 `ArticleToc` 뿐이다. 경계를 다시 그으면 상세 지면 구조가 바뀌므로 B5 에서 실데이터 본문 크기를 보고 판단한다
 - `preview-article-markdown.ts:46` 의 server action 이 `isTestAdminSessionEnabled() || verifyAdminIdToken(...)` 이다. 비프로덕션에서 플래그가 켜진 서버는 미인증 호출자에게 shiki 렌더를 연다. 프로덕션 빌드 가드가 있어 의도된 개발 전용이지만 조건을 여기 남긴다
 - `use-article-references.ts` 는 로딩 중 `articles` 가 `[]` 라 그 사이에 저장하면 slug 중복 검사가 통과한다. 태그가 없는 글에 한정되고 창이 매우 좁다 — B5 에서 서버 유일성 검사가 붙으면 함께 닫힌다
@@ -563,9 +564,8 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 ### B6 검증
 
 - [x] 초안이 검색·RAG·챗봇 참조·WebMCP 어디에도 노출되지 않는다 (§14) → 검색·WebMCP 는 `getDevArticles()`(published만), RAG 는 `raw.published !== true` 게이트 **+ `articleRagChunks` 자체 방어**, 챗봇은 공개 projection + fresh 검증. 각 경로에 테스트를 뒀다
-- [ ] 재검증 실패 시 관리자 표시 + maintenance 복구 경로 동작 (§11)
+- [x] 재검증 실패 시 관리자 표시 + maintenance 복구 경로 동작 (§11) → 실패한 태그·경로를 `revalidate-failure-store` 에 남기고 `RevalidateFailureBanner` 가 관리자 전 화면 상단에서 알린다. 배너의 `지금 다시 시도` 가 같은 대상으로 재검증을 다시 요청하고, 성공해야 기록을 지운다. 저장은 이미 끝난 상태라 재시도하지 않아도 ISR 주기가 지나면 갱신된다
 - [x] 실데이터 스냅샷 용량 — **285청크 / 457,098바이트**(한도 2MB 의 22.9%, 청크당 평균 1,604B). 내역은 벡터 43%·메타 18%·본문 39%. 경고선(1.5MB)까지 약 650청크, 절벽(2MB)까지 약 960청크 남았고 글 하나가 15청크 안팎이라 **40편쯤 더 쓰면 경고**가 뜬다. 개별 텍스트 상한은 한 청크의 폭주만 막고 스냅샷 용량은 **청크 수 × 임베딩 차원**이 지배한다 — 좁혀야 하면 `EMBEDDING_PROVIDER_DIMENSIONS` 를 낮추는 쪽이 벡터 몫을 비례해서 줄인다
-- [ ] 상세 페이지 payload — 탐색 테이블과 WebMCP 도구가 전 글을 각각 투영한다. `BlogTools` 의 지원 여부 게이트는 **등록 청크만** 막고, `articles`·`tags` 는 client component 의 prop 이라 미지원 브라우저에도 RSC payload 로 직렬화된다. **공개 글이 30건을 넘으면** 도구 투영 축소(전 글 `headings` 제외)를 검토한다
 - [ ] **Tool Inspector 평가 (남음)** — `/ko/dev/articles`·상세에서 도구 4개 노출과 두 도구 실행 확인 후 `docs/troubleshooting/webmcp-tool-eval.md` 에 회차 기록
 
 ---
