@@ -49,6 +49,37 @@ test.describe("개발 블로그 상세", () => {
     expect(top).toBeGreaterThanOrEqual(76);
   });
 
+  test("목차가 길면 잘리지 않고 공용 스크롤로 넘긴다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "hover 확장은 포인터가 있는 환경 전용");
+
+    // 세로가 짧은 창이면 목차 최대 높이가 작아져 항목이 넘친다.
+    await page.setViewportSize({ width: 1440, height: 460 });
+    await page.goto(ARTICLE);
+    await settleImages(page);
+    await page.evaluate(() => window.scrollTo(0, 1000));
+    await page.getByRole("button", { name: "목차 열기" }).hover();
+
+    const list = page.locator("nav[data-custom-scroll-container]");
+    await expect(list).toBeVisible();
+    const metrics = await list.evaluate((node) => ({
+      overflows: node.scrollHeight > node.clientHeight,
+      bottom: node.getBoundingClientRect().bottom,
+    }));
+
+    // 넘치는데도 스크롤되지 않으면 아래 항목이 그대로 잘린다.
+    expect(metrics.overflows).toBe(true);
+    expect(metrics.bottom).toBeLessThanOrEqual(460);
+
+    await list.evaluate((node) => node.scrollTo(0, node.scrollHeight));
+    expect(await list.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+
+    // 막대는 저장소 공용 CustomScrollbar 가 그린다 — 라벨이 목록 스코프로 바뀐다.
+    await expect(page.locator("[data-custom-scrollbar-ui]")).toHaveAttribute(
+      "aria-label",
+      "내부 목록 스크롤",
+    );
+  });
+
   test("모바일에서는 탭으로 목차 서랍을 열고 닫는다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "서랍은 손가락으로 쓰는 환경 전용");
 

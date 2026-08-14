@@ -157,7 +157,10 @@ test.describe("Admin · 블로그", () => {
     await altInput.fill("구조 다이어그램");
     await page.getByRole("button", { name: "본문에 넣기" }).click();
 
-    await expect(page.getByLabel("본문 Markdown")).toHaveValue(/!\[구조 다이어그램\]\(https:\/\//);
+    // 크기까지 함께 적혀야 공개 지면이 이미지 도착 전에 자리를 잡는다.
+    await expect(page.getByLabel("본문 Markdown")).toHaveValue(
+      /!\[구조 다이어그램\]\(https:\/\/[^\s)]+ "\d+x\d+"\)/,
+    );
     await expect(altInput).toBeHidden();
   });
 
