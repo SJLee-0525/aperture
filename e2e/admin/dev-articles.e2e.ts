@@ -65,13 +65,18 @@ test.describe("Admin · 블로그", () => {
     await expect(page).toHaveURL(/\/admin\/dev\/articles\/[^/]+$/);
     await expect(page.getByRole("heading", { name: "글 수정" })).toBeVisible();
 
-    await page.getByRole("link", { name: "전체 미리보기" }).click();
-    await expect(page).toHaveURL(/\/preview$/, { timeout: 60_000 });
-    await expect(page.getByRole("heading", { name: "E2E 작성 흐름", level: 1 })).toBeVisible();
+    // 미리보기는 새 탭에서 열리고 편집 화면은 그대로 남는다.
+    const [preview] = await Promise.all([
+      page.waitForEvent("popup"),
+      page.getByRole("link", { name: "전체 미리보기" }).click(),
+    ]);
+    await expect(preview).toHaveURL(new RegExp("/preview$"), { timeout: 60_000 });
+    await expect(preview.getByRole("heading", { name: "E2E 작성 흐름", level: 1 })).toBeVisible();
     // 본문 코드 블록이 서버 색칠을 거쳐 그려진다.
-    await expect(page.locator("pre code span").first()).toBeVisible();
+    await expect(preview.locator("pre code span").first()).toBeVisible();
+    await preview.close();
 
-    await page.getByRole("link", { name: "편집으로" }).click();
+    await expect(page.getByRole("heading", { name: "글 수정" })).toBeVisible();
     await page.getByLabel("발행", { exact: true }).check();
     await page.getByRole("button", { name: "저장" }).click();
     await expect(page.getByText("저장하지 않은 변경")).toBeHidden();

@@ -114,6 +114,7 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
           <button
             type="button"
             className={styles.tool}
+            aria-pressed={pendingImage !== null}
             disabled={uploading || preview || pendingImage !== null}
             onClick={() => fileRef.current?.click()}
           >
@@ -122,6 +123,7 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
           <button
             type="button"
             className={styles.tool}
+            aria-pressed={youtubeOpen}
             disabled={preview}
             onClick={() => setYoutubeOpen((open) => !open)}
           >
@@ -169,7 +171,7 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
       ) : null}
 
       {pendingImage ? (
-        <div className={formStyles.section}>
+        <div className={`${formStyles.panel} ${formStyles.section}`}>
           <div className={formStyles.inlineForm}>
             <AdminField
               label={`대체 텍스트 — ${pendingImage.name}`}
@@ -189,9 +191,8 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
             >
               {uploading ? "업로드 중…" : "본문에 넣기"}
             </AdminButton>
-            <button
-              type="button"
-              className={formStyles.remove}
+            <AdminButton
+              variant="secondary"
               disabled={uploading}
               onClick={() => {
                 setPendingImage(null);
@@ -200,7 +201,7 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
               }}
             >
               취소
-            </button>
+            </AdminButton>
           </div>
         </div>
       ) : null}

@@ -78,6 +78,7 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
           <div className={styles.inlineForm}>
             <AdminButton
               variant="secondary"
+              size="xs"
               disabled={uploading}
               onClick={() => inputRef.current?.click()}
             >
@@ -112,7 +113,6 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
             </AdminField>
           </div>
 
-          <p className={styles.note}>제목을 되풀이하지 말고 이미지에 무엇이 있는지 적습니다.</p>
           {error ? (
             <p className={styles.error} role="alert">
               {error}

@@ -39,9 +39,19 @@
   border-color: var(--line-strong);
   color: var(--text);
 }
-.tool:disabled {
+/* 삽입 패널이 열려 있는 동안의 상태. 탭과 같은 표시를 쓴다.
+   이 상태의 이미지 버튼은 잠기지만 흐려지는 대신 눌린 것으로 보여야 한다. */
+.tool[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+.tool:disabled:not([aria-pressed="true"]) {
   color: var(--text-4);
   cursor: not-allowed;
+}
+.tool[aria-pressed="true"]:disabled {
+  cursor: default;
 }
 
 .tabs {

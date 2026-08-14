@@ -77,22 +77,25 @@ const ArticleForm = ({ articleId, initial }: Props) => {
       </header>
 
       {recovery.pending ? (
-        <div className={styles.inlineForm}>
-          <p className={styles.note}>
+        <div className={`${styles.panel} ${styles.recovery}`}>
+          <p className={styles.recoveryNote}>
             저장하지 않은 편집본이 있습니다 ({formatShotAt(new Date(recovery.pending.savedAt))}).
           </p>
-          <AdminButton
-            variant="secondary"
-            onClick={() => {
-              const restored = recovery.restore();
-              if (restored) editor.applyForm(restored);
-            }}
-          >
-            복구하기
-          </AdminButton>
-          <button type="button" className={styles.remove} onClick={recovery.discard}>
-            버리기
-          </button>
+          <div className={styles.recoveryActions}>
+            <AdminButton
+              variant="secondary"
+              size="xs"
+              onClick={() => {
+                const restored = recovery.restore();
+                if (restored) editor.applyForm(restored);
+              }}
+            >
+              복구하기
+            </AdminButton>
+            <button type="button" className={styles.remove} onClick={recovery.discard}>
+              버리기
+            </button>
+          </div>
         </div>
       ) : null}
 
@@ -137,19 +140,24 @@ const ArticleForm = ({ articleId, initial }: Props) => {
       />
 
       <div className={styles.actions}>
-        <label className={styles.inlineForm}>
+        <label className={styles.checkbox}>
           <input
             type="checkbox"
             checked={editor.form.published}
             onChange={(event) => editor.patch({ published: event.target.checked })}
           />
-          <span className={styles.label}>발행</span>
+          <span>발행</span>
         </label>
 
         <span className={styles.spacer} />
 
         {editor.isEdit ? (
-          <AdminButton variant="secondary" href={adminDevArticlePreviewRoute(articleId)}>
+          <AdminButton
+            variant="secondary"
+            href={adminDevArticlePreviewRoute(articleId)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             전체 미리보기
           </AdminButton>
         ) : null}

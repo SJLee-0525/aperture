@@ -37,7 +37,7 @@ const ArticleYouTubeDialog = ({ onInsert, onClose }: Props) => {
   const canInsert = Boolean(videoId && title.trim());
 
   return (
-    <div className={styles.section}>
+    <div className={`${styles.panel} ${styles.section}`}>
       <div className={styles.inlineForm}>
         <AdminField label="영상 주소" className={styles.inlineField}>
           <AdminInput
@@ -59,9 +59,9 @@ const ArticleYouTubeDialog = ({ onInsert, onClose }: Props) => {
         >
           본문에 넣기
         </AdminButton>
-        <button type="button" className={styles.remove} onClick={onClose}>
+        <AdminButton variant="secondary" onClick={onClose}>
           닫기
-        </button>
+        </AdminButton>
       </div>
 
       {url.trim() && !videoId ? (
