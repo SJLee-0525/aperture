@@ -45,6 +45,16 @@ const stripLangPrefix = (pathname: string): string => {
 };
 
 /**
+ * 마지막 slash 하나 제거 — "/ko/dev/articles/" → "/ko/dev/articles". 루트 "/"는 그대로 둔다.
+ * 챗봇 화면 문맥과 WebMCP 의 "현재 글" 판정이 같은 정규화를 거쳐야 두 표면이 갈리지 않는다.
+ *
+ * @param {string} pathname
+ * @returns {string}
+ */
+const stripTrailingSlash = (pathname: string): string =>
+  pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+
+/**
  * 내부 경로에 언어 프리픽스 부착 — "/photo?x" → "/ko/photo?x", "/" → "/ko".
  * 이미 프리픽스가 있거나 관리자·API·외부 경로면 그대로 반환한다.
  *
@@ -73,4 +83,4 @@ const switchLangPath = (lang: Lang, path: string): string => {
   return `/${lang}${bare === "/" ? "" : bare}${suffix}`;
 };
 
-export { langFromPath, localizePath, stripLangPrefix, switchLangPath };
+export { langFromPath, localizePath, stripLangPrefix, stripTrailingSlash, switchLangPath };

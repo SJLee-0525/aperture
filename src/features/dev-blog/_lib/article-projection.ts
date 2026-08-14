@@ -1,5 +1,4 @@
-import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
-import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
+import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { ImageMeta } from "@/types/image";
@@ -29,8 +28,8 @@ type DevArticleSummary = {
 /**
  * 글 한 건을 목록용 요약으로 줄인다.
  *
- * 읽기 시간은 저장 필드가 아니라 본문에서 파생한다(`DevArticle` 주석). 파싱은 순수 동기
- * 함수라 서버 렌더 한 번에 글 수만큼 돌려도 ISR 캐시에 흡수된다. 색칠(shiki)은 하지 않는다 —
+ * 읽기 시간은 저장 필드가 아니라 본문에서 파생한다(`DevArticle` 주석). 파싱은 `analyzeArticle` 이
+ * 맡아 같은 요청의 다른 projection 과 결과를 나눠 쓴다. 색칠(shiki)은 하지 않는다 —
  * 목록에는 코드 블록을 그리지 않는다.
  *
  * @param {DevArticle} article 공개 글 한 건.
@@ -45,7 +44,7 @@ const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
   coverAlt: article.coverAlt,
   tags: article.tags,
   publishedAt: article.publishedAt ?? article.createdAt,
-  readingMinutes: articleReadingMinutes(parseArticleMarkdown(article.body).document),
+  readingMinutes: analyzeArticle(article).readingMinutes,
   relatedProjectIds: article.relatedProjectIds,
 });
 

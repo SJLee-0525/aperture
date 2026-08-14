@@ -1,27 +1,11 @@
 import { cache } from "react";
 
+import { compareByPublishedAtDesc } from "@/lib/content/article-order";
 import { shouldUseMockContent } from "@/lib/content/content-source";
 import { fetchDevArticleTags, fetchPublishedDevArticles } from "@/lib/firebase/public/dev-articles";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
-
-/**
- * 공개 목록 정렬 — 발행일 내림차순, 같은 발행일에는 id 오름차순.
- *
- * 다른 컬렉션이 쓰는 수동 `order` 를 블로그에는 두지 않는다. 관리자가 글 순서를 끌어
- * 옮길 이유가 없고, 발행일이 목록·탐색·pagination 의 공통 기준이기 때문이다.
- * B5 에서 붙일 Firestore 쿼리(`publishedAt desc` + `__name__ asc`)가 같은 순서를 내야 하며,
- * 보조 정렬이 없으면 발행일이 겹치는 글의 페이지 경계가 요청마다 흔들린다.
- *
- * @param {DevArticle} a
- * @param {DevArticle} b
- * @returns {number} `Array.prototype.sort` 비교 결과.
- */
-const compareByPublishedAtDesc = (a: DevArticle, b: DevArticle): number => {
-  const gap = (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0);
-  return gap !== 0 ? gap : a.id.localeCompare(b.id);
-};
 
 /**
  * 공개 글 목록. 초안은 제외한다.

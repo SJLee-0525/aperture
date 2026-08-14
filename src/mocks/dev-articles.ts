@@ -17,6 +17,19 @@ const storageImage = (articleId: string, name: string) =>
   `https://firebasestorage.googleapis.com/v0/b/aperture-demo.appspot.com/o/dev-blog%2F${articleId}%2F${name}.webp?alt=media`;
 
 /**
+ * 본문 이미지 한 줄. title 자리의 크기는 실제 업로드가 적어 주는 값과 같은 형식이라,
+ * mock 으로도 이미지 도착 전 자리 예약을 확인할 수 있다.
+ *
+ * @param {string} alt 대체 텍스트.
+ * @param {string} articleId 글 ID.
+ * @param {string} name 파일 이름.
+ * @param {[number, number]} [size] 원본 픽셀 크기. 생략하면 크기를 모르는 옛 글이 된다.
+ * @returns {string} Markdown 한 줄.
+ */
+const bodyImage = (alt: string, articleId: string, name: string, size?: [number, number]): string =>
+  `![${alt}](${storageImage(articleId, name)}${size ? ` "${size[0]}x${size[1]}"` : ""})`;
+
+/**
  * 대표 이미지는 저장소에 있는 샘플 파일을 쓴다. 목록 카드와 상세 hero 가 실제로 그려져야
  * 레이아웃과 시각 회귀를 확인할 수 있다 — 본문 이미지와 달리 출처 정책을 지나지 않는다.
  */
@@ -83,9 +96,12 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
       "",
       "`firebase-admin` 은 쓰지 않는다. 서비스 계정 키가 필요해지는 순간 *서버 없음* 이라는 전제가 깨진다.",
       "",
-      "![Firestore 규칙 편집 화면과 관리자 UID 비교 함수](" +
-        storageImage("serverless-portfolio", "rules") +
-        ")",
+      bodyImage(
+        "Firestore 규칙 편집 화면과 관리자 UID 비교 함수",
+        "serverless-portfolio",
+        "rules",
+        [2048, 1152],
+      ),
       "::caption[규칙을 바꾼 뒤에는 항상 emulator 로 먼저 확인한다]",
       "",
       "## 이미지 파이프라인",
@@ -98,9 +114,8 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
       "3. WebP 3단 압축",
       "4. Storage 업로드 후 주소를 Firestore 에 기록",
       "",
-      "![업로드 전 3단 WebP 압축 결과 비교](" +
-        storageImage("serverless-portfolio", "compression") +
-        ")",
+      // 크기를 적지 않은 옛 글의 이미지 — 임시 비율 폴백이 걸리는 쪽을 함께 남긴다.
+      bodyImage("업로드 전 3단 WebP 압축 결과 비교", "serverless-portfolio", "compression"),
       "::caption[2048px 메인 · 960px 프리뷰 · 320px 썸네일]",
       "",
       "## 정리",

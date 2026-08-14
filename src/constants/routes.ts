@@ -135,9 +135,29 @@ const devProjectRoute = (id: string) => `${ROUTES.DEV_PROJECTS}?project=${encode
  */
 const devArticleRoute = (slug: string) => `${ROUTES.DEV_ARTICLES}/${slug}`;
 
+/**
+ * slug 는 영어 제목이나 한글 로마자에서 만들어 소문자·숫자·하이픈만 남는다
+ * (`admin-dev-articles/_lib/dev-article-slug`). 대문자·밑줄·percent-encoding 은 slug 가 아니다.
+ */
+const DEV_ARTICLE_PATH_PATTERN = new RegExp(`^${ROUTES.DEV_ARTICLES}/([a-z0-9-]+)$`);
+
+/**
+ * 로케일을 뗀 경로가 블로그 상세인지 보고 slug 를 돌려준다.
+ *
+ * 챗봇의 화면 문맥 판정과 WebMCP 의 현재 글 해석이 같은 계약을 써야 해서 여기 둔다.
+ * 두 곳이 각자 정규식을 들면 한쪽만 고쳤을 때 조용히 갈라진다.
+ * 끝의 슬래시는 호출부가 미리 정리한다.
+ *
+ * @param {string} localPathname 로케일 프리픽스를 뗀 경로.
+ * @returns {string | null} 상세 경로면 slug, 아니면 null.
+ */
+const matchDevArticleSlug = (localPathname: string): string | null =>
+  DEV_ARTICLE_PATH_PATTERN.exec(localPathname)?.[1] ?? null;
+
 export {
   ROUTES,
   albumRoute,
+  matchDevArticleSlug,
   adminAlbumRoute,
   adminDevArticlePreviewRoute,
   adminDevArticleRoute,
