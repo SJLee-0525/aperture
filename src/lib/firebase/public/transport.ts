@@ -163,17 +163,21 @@ const runQuery = async (
  * @param {string} collectionId 조회할 Firestore 컬렉션 ID.
  * @param {string} documentId 조회할 문서 ID.
  * @param {string} label 오류 메시지에 표시할 문서 이름.
- * @param {{ fresh?: boolean }} [options] 캐시 동작을 정하는 조회 옵션.
+ * @param {{ fresh?: boolean; signal?: AbortSignal }} [options] 캐시 동작과 취소를 정하는 조회 옵션.
  * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
+ * @param {AbortSignal} [options.signal] 요청 취소 신호. 호출자가 제한 시간을 갖는 조회에 넘긴다.
  * @returns {Promise<Record<string, unknown> | null>} 디코딩된 문서. 문서가 없으면 `null`이다.
  */
 const fetchDocument = async (
   collectionId: string,
   documentId: string,
   label: string,
-  options?: { fresh?: boolean },
+  options?: { fresh?: boolean; signal?: AbortSignal },
 ): Promise<Record<string, unknown> | null> => {
-  const response = await fetch(`${documentsUrl()}/${collectionId}/${documentId}?key=${API_KEY}`, {
+  // 문서 ID 는 요청에서 올 수 있다. slash 를 인코딩하지 않으면 다른 컬렉션 경로로 내려간다.
+  const path = `${collectionId}/${encodeURIComponent(documentId)}`;
+  const response = await fetch(`${documentsUrl()}/${path}?key=${API_KEY}`, {
+    ...(options?.signal ? { signal: options.signal } : {}),
     ...(options?.fresh
       ? { cache: "no-store" as const }
       : {

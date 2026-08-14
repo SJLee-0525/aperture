@@ -49,6 +49,9 @@ describe("needsProfileContext", () => {
     ["lake에서 찍은 작업", ["profile", "photography"]],
     ["React 프로젝트가 궁금해", ["profile", "development"]],
     ["리액트로 만든 작업", ["profile", "development"]],
+    // 블로그는 개발 섹션의 콘텐츠다. 여기서 빠지면 글 질문에 RAG 검색이 아예 돌지 않는다.
+    ["블로그에 어떤 글을 썼어?", ["profile", "development"]],
+    ["what did you write on your blog?", ["profile", "development"]],
     ["피아노 연주와 수상 경력 알려줘", ["profile", "music"]],
     ["piano 작업을 알려줘", ["profile", "music"]],
     ["수상 경력을 알려줘", ["profile", "development", "music"]],

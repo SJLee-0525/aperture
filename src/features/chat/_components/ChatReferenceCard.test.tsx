@@ -60,4 +60,29 @@ describe("ChatReferenceCard", () => {
     fireEvent.click(link);
     expect(onNavigate).toHaveBeenCalledOnce();
   });
+
+  it.each([
+    ["ko", "글"],
+    ["en", "Article"],
+  ] as const)("%s 에서는 블로그 카드 종류를 %s 로 읽는다", (lang, label) => {
+    render(
+      <LangProvider lang={lang}>
+        <ChatReferenceCard
+          reference={{
+            type: "article",
+            id: "a1",
+            title: "서버 없이 운영한다",
+            subtitle: "2026.05.18 · 상시 백엔드를 없앤 기록",
+            href: "/dev/articles/serverless",
+            image: null,
+          }}
+          onNavigate={vi.fn()}
+        />
+      </LangProvider>,
+    );
+
+    expect(screen.getByText(label)).toBeTruthy();
+    expect(screen.getByText("2026.05.18 · 상시 백엔드를 없앤 기록")).toBeTruthy();
+    expect(screen.getByRole("link").getAttribute("href")).toBe(`/${lang}/dev/articles/serverless`);
+  });
 });

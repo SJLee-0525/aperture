@@ -126,6 +126,48 @@ describe("useChat", () => {
     });
   });
 
+  it("글 상세에서는 URL 대신 등록한 화면 target 의 문서 ID 를 보낸다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: { role: "assistant", content: "네." } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState(null, "", "/ko/dev/articles/serverless-portfolio");
+    const { result } = renderHook(() =>
+      useChat("ko", undefined, () => ({ type: "article", id: "a1", label: "서버 없이 운영한다" })),
+    );
+
+    act(() => expect(result.current.send("이 글 요약해 줘")).toBe(true));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    // slug 가 아니라 바뀌지 않는 문서 ID 를 보낸다. slug 는 서버가 대조에만 쓴다.
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string).context).toEqual({
+      pathname: "/ko/dev/articles/serverless-portfolio",
+      openTarget: { type: "article", id: "a1" },
+    });
+  });
+
+  it("등록한 target 이 없는 글 상세에서는 경로만 보낸다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: { role: "assistant", content: "네." } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState(null, "", "/ko/dev/articles/serverless-portfolio");
+    const { result } = renderHook(() => useChat("ko"));
+
+    act(() => expect(result.current.send("이 글 요약해 줘")).toBe(true));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string).context).toEqual({
+      pathname: "/ko/dev/articles/serverless-portfolio",
+    });
+  });
+
   it("실제 요청과 일치하는 화면 항목을 사용자 메시지에 표시용으로 기록한다", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ message: { role: "assistant", content: "네." } }), {

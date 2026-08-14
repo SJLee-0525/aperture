@@ -34,6 +34,16 @@ describe("parseChatContext", () => {
     expect(parseChatContext({ pathname: "/ko" })).toEqual({ pathname: "/ko" });
   });
 
+  it.each([["../../site/config"], ["a1?key=x"], ["a 1"], ["a/1"], ["a#1"]])(
+    "문서 ID로 쓸 수 없는 id(%s)는 openTarget을 버린다",
+    (id) => {
+      // 서버가 이 값으로 Firestore 문서를 직접 읽으므로 경로·query 문자를 허용하지 않는다.
+      expect(
+        parseChatContext({ pathname: "/ko/photo", openTarget: { type: "photo", id } }),
+      ).toEqual({ pathname: "/ko/photo" });
+    },
+  );
+
   it("64자를 넘는 id는 openTarget을 버린다", () => {
     expect(
       parseChatContext({
@@ -146,5 +156,50 @@ describe("contextTargetForPath", () => {
       type: "photo",
       queryKey: "photo",
     });
+  });
+});
+
+describe("블로그 상세 화면 문맥", () => {
+  const ARTICLE_PATH = "/ko/dev/articles/serverless-portfolio";
+
+  it("등록한 화면 target 에서 문서 ID 를 읽는다", () => {
+    expect(
+      buildChatContext(ARTICLE_PATH, new URLSearchParams(), { type: "article", id: "a1" }),
+    ).toEqual({
+      pathname: ARTICLE_PATH,
+      openTarget: { type: "article", id: "a1" },
+    });
+  });
+
+  it("등록한 target 이 없으면 경로만 보낸다", () => {
+    expect(buildChatContext(ARTICLE_PATH, new URLSearchParams())).toEqual({
+      pathname: ARTICLE_PATH,
+    });
+  });
+
+  it("다른 종류의 target 은 글 경로에서 쓰지 않는다", () => {
+    expect(
+      buildChatContext(ARTICLE_PATH, new URLSearchParams(), { type: "project", id: "p1" }),
+    ).toEqual({ pathname: ARTICLE_PATH });
+  });
+
+  it("목록 경로도 화면 문맥을 허용한다", () => {
+    expect(buildChatContext("/ko/dev/articles", new URLSearchParams())).toEqual({
+      pathname: "/ko/dev/articles",
+    });
+  });
+
+  it.each([
+    ["세그먼트가 더 깊은 경로", "/ko/dev/articles/a/b"],
+    ["대문자 slug", "/ko/dev/articles/Serverless"],
+    ["밑줄 slug", "/ko/dev/articles/server_less"],
+  ])("%s 는 화면 문맥을 만들지 않는다", (_label, pathname) => {
+    expect(buildChatContext(pathname, new URLSearchParams())).toBeUndefined();
+  });
+
+  it("서버는 경로가 함의하는 종류와 다른 target 을 버린다", () => {
+    expect(
+      parseChatContext({ pathname: ARTICLE_PATH, openTarget: { type: "project", id: "a1" } }),
+    ).toEqual({ pathname: ARTICLE_PATH });
   });
 });

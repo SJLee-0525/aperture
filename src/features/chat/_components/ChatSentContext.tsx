@@ -18,6 +18,7 @@ const SENT_CONTEXT_LABELS: Record<SentContext["type"], (dict: UIDict) => string>
   work: (dict) => dict.chatSentContextWork,
   award: (dict) => dict.chatSentContextAward,
   project: (dict) => dict.chatSentContextProject,
+  article: (dict) => dict.chatSentContextArticle,
 };
 
 /** 사용자 메시지가 어떤 화면 항목과 함께 전송됐는지 읽기 전용으로 표시한다. */

@@ -290,9 +290,11 @@
   outline-offset: 2px;
 }
 
+/* 정사각 썸네일이 행 높이를 정한다. `align-self` 를 stretch 로 두면 늘어나 정사각이 깨진다. */
 .referenceImage {
   position: relative;
-  min-height: 72px;
+  align-self: start;
+  aspect-ratio: 1;
   overflow: hidden;
   background: var(--surface-2);
 }
@@ -307,12 +309,13 @@
   border: 1px solid var(--line-strong);
 }
 
+/* 간격을 균등하게 두지 않는다. 종류와 제목을 한 덩이로 붙이고 요약만 띄운다. 세 줄 높이가
+   썸네일보다 낮으므로 블록째 가운데에 둔다. 위로 몰면 남는 높이가 카드 아래쪽 빈 칸으로 드러난다. */
 .referenceCopy {
   min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
 }
 
 .referenceCopy strong,
@@ -324,18 +327,35 @@
 
 .referenceCopy strong {
   font-size: var(--t-small);
+  line-height: 1.35;
 }
 
-.referenceCopy > span:last-child,
-.referenceType {
+.referenceCopy > span:last-child {
+  margin-top: 6px;
   color: var(--text-3);
   font-size: var(--t-label);
 }
 
+/* mono 는 이 저장소에서 날짜·숫자에만 쓴다. 라벨이 언어별 낱말이라 한글에는 글리프가 없고
+   uppercase 도 적용되지 않는다.
+
+   카드는 현재 지면과 다른 섹션의 항목을 가리킬 수 있어 지면 액센트로는 종류를 구분하지 못한다.
+   랜딩 진입 행과 같은 방식으로 항목 종류에 맞는 --accent 를 이 라벨에만 덮는다. */
 .referenceType {
-  font-family: var(--font-mono);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+  margin-bottom: 2px;
+  color: var(--accent);
+  font-size: var(--t-label);
+  font-weight: 600;
+}
+.referenceType[data-type="photo"] {
+  --accent: var(--accent-photo);
+}
+.referenceType[data-type="music"] {
+  --accent: var(--accent-music);
+}
+.referenceType[data-type="project"],
+.referenceType[data-type="article"] {
+  --accent: var(--accent-dev);
 }
 
 .suggestions {

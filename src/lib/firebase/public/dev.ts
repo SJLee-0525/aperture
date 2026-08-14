@@ -138,3 +138,4 @@ export {
   toDevConfig,
   toDevProject,
 };
+export type { ChatDevProject };

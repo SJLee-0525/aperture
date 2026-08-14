@@ -11,6 +11,8 @@ import {
 
 import { MOCK_ALBUMS } from "@/mocks/albums";
 import { MOCK_DEV_CONFIG, MOCK_DEV_PROJECTS } from "@/mocks/dev";
+import { MOCK_DEV_ARTICLE_TAGS } from "@/mocks/dev-article-tags";
+import { MOCK_DEV_ARTICLES } from "@/mocks/dev-articles";
 import {
   MOCK_MUSIC_AWARDS,
   MOCK_MUSIC_CONFIG,
@@ -30,6 +32,18 @@ const data = {
   musicMedia: MOCK_MUSIC_MEDIA,
   photos: MOCK_PHOTOS,
   albums: MOCK_ALBUMS,
+  articles: MOCK_DEV_ARTICLES.filter(({ published }) => published).map(
+    ({ id, slug, title, summary, cover, tags, publishedAt }) => ({
+      id,
+      slug,
+      title,
+      summary,
+      cover,
+      tags,
+      publishedAt,
+    }),
+  ),
+  articleTags: MOCK_DEV_ARTICLE_TAGS,
 };
 
 describe("formatProfileContext", () => {
@@ -97,6 +111,62 @@ describe("formatProfileContext", () => {
     expect(references.find(({ type }) => type === "project")).toMatchObject({
       href: expect.stringContaining("/dev/projects?project="),
     });
+  });
+
+  it("개발 블록에 글 목록을 넣되 본문은 넣지 않는다", () => {
+    const context = formatProfileContext(data, "ko");
+    const article = data.articles[0];
+
+    expect(context).toContain(`Article: ${article.title.ko}`);
+    // 모델이 참조 카드를 고르려면 경로를 볼 수 있어야 한다.
+    expect(context).toContain(`url: /dev/articles/${article.slug}`);
+    // 태그는 id 가 아니라 현재 언어 라벨로 읽힌다.
+    expect(context).toContain("tags: Next.js");
+    expect(context).not.toContain(article.summary.en);
+  });
+
+  it("글 줄에 참조 카드 조회에 쓰는 문서 ID 를 함께 적는다", () => {
+    // 글 주소는 slug 라 다른 섹션과 달리 url 만으로는 모델이 문서 ID 를 알 수 없다.
+    // ID 가 없으면 `resolveReferencesWithRefresh` 가 요청을 못 찾아 카드를 조용히 버린다.
+    // 운영 데이터의 문서 ID 는 Firestore 자동 ID 라 slug 와 다르다.
+    const withFirestoreId = {
+      ...data,
+      articles: [{ ...data.articles[0], id: "9rhrRuIfN0eREKKOId77", slug: "serverless-portfolio" }],
+    };
+    const context = formatProfileContext(withFirestoreId, "ko");
+    const reference = formatProfileReferences(withFirestoreId, "ko").find(
+      ({ type }) => type === "article",
+    );
+
+    expect(reference?.id).toBe("9rhrRuIfN0eREKKOId77");
+    expect(context).toContain("id: 9rhrRuIfN0eREKKOId77");
+    expect(context).toContain("url: /dev/articles/serverless-portfolio");
+  });
+
+  it("글이 늘어도 문맥에는 최근 12건까지만 싣고 참조 카드는 전부 유지한다", () => {
+    const many = Array.from({ length: 15 }, (_, index) => ({
+      ...data.articles[0],
+      id: `many-${index}`,
+      slug: `many-${index}`,
+      title: { ko: `글 ${index}`, en: `Article ${index}` },
+    }));
+    const grown = { ...data, articles: many };
+
+    const context = formatProfileContext(grown, "ko");
+    const references = formatProfileReferences(grown, "ko");
+
+    expect(context).toContain("url: /dev/articles/many-11");
+    expect(context).not.toContain("url: /dev/articles/many-12");
+    expect(references.filter(({ type }) => type === "article")).toHaveLength(15);
+  });
+
+  it("블로그 글 카드에 발행일과 요약을 한 줄로 담고 상세 경로를 준다", () => {
+    const references = formatProfileReferences(data, "ko");
+    const article = references.find(({ type }) => type === "article");
+
+    expect(article).toBeDefined();
+    expect(article?.href).toBe(`/dev/articles/${data.articles[0].slug}`);
+    expect(article?.subtitle).toMatch(/^\d{4}\.\d{2}\.\d{2} · /);
   });
 });
 

@@ -1,7 +1,8 @@
-import { devProjectRoute, ROUTES } from "@/constants/routes";
+import { devArticleRoute, devProjectRoute, ROUTES } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
+import { MOCK_DEV_ARTICLES } from "@/mocks/dev-articles";
 import { MOCK_MUSIC_WORKS } from "@/mocks/music";
 import { MOCK_PHOTOS } from "@/mocks/photos";
 
@@ -38,6 +39,16 @@ const mockReferences = (lang: Lang) => ({
     href: `${ROUTES.MUSIC}?work=${encodeURIComponent(work.id)}`,
     image: preview(work.poster),
   })),
+  articles: MOCK_DEV_ARTICLES.filter(({ published }) => published)
+    .slice(0, 2)
+    .map((article): ChatReference => ({
+      type: "article",
+      id: article.id,
+      title: pickText(article.title, lang),
+      subtitle: pickText(article.summary, lang),
+      href: devArticleRoute(article.slug),
+      image: preview(article.cover),
+    })),
   photos: MOCK_PHOTOS.slice(0, 3).map((photo): ChatReference => ({
     type: "photo",
     id: photo.id,
@@ -63,6 +74,17 @@ const REPLIES: Record<Lang, { test: RegExp; reply: MockReply }[]> = {
       reply: {
         content:
           "공개된 포트폴리오에는 현재 거주 지역이 나와 있지 않아 정확한 현지 시간은 알 수 없어요. 궁금한 도시를 알려주시면 그 지역을 기준으로 안내해 드릴게요.",
+      },
+    },
+    {
+      // 개발 규칙보다 앞에 둔다 — "개발 블로그" 처럼 두 규칙에 모두 걸리는 질문이 흔하다.
+      // "글" 은 앞 글자가 한글이면 "한글"·"영글" 처럼 다른 단어의 일부라 제외한다.
+      test: /블로그|아티클|포스트|(?<![가-힣])글/i,
+      reply: {
+        content:
+          "직접 만들며 막혔던 지점과 결정을 글로 정리해 두었어요. 목록에서 태그로 주제를 좁힐 수 있습니다.",
+        link: { href: "/dev/articles", label: "블로그 보기" },
+        references: REFERENCES.ko.articles,
       },
     },
     {
@@ -112,6 +134,16 @@ const REPLIES: Record<Lang, { test: RegExp; reply: MockReply }[]> = {
       reply: {
         content:
           "The public portfolio does not include a current place of residence, so I can’t determine the local time accurately. Tell me a city and I can help with that location instead.",
+      },
+    },
+    {
+      // 단어 경계가 없으면 "postgres"·"particle" 같은 무관한 단어가 블로그로 간다.
+      test: /\bblogs?\b|\barticles?\b|\bposts?\b|\bwriting\b/i,
+      reply: {
+        content:
+          "Notes on the problems and decisions behind what was built. The list can be narrowed by tag.",
+        link: { href: "/dev/articles", label: "Read the blog" },
+        references: REFERENCES.en.articles,
       },
     },
     {

@@ -51,6 +51,10 @@ const SCREEN_NOTICES: Record<
     notice: dict.chatScreenNoticeProject,
     placeholder: dict.chatScreenPlaceholderProject,
   }),
+  article: (dict) => ({
+    notice: dict.chatScreenNoticeArticle,
+    placeholder: dict.chatScreenPlaceholderArticle,
+  }),
 };
 
 const MESSAGE_TRANSITION = { duration: 0.22, ease: [0.22, 1, 0.36, 1] } as const;

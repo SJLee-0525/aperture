@@ -1,8 +1,10 @@
 import { MAX_RESPONSE_CHARS } from "@/features/chat/_lib/chat-tuning";
 import { parseContactDraft } from "@/features/chat/_lib/contact-draft";
 
+import { CHAT_REFERENCE_TYPES } from "@/types/chat";
+
 import type { ChatProviderResult } from "@/features/chat/_lib/chat-provider";
-import type { ChatLink, ChatReferenceRequest } from "@/types/chat";
+import type { ChatLink, ChatReferenceRequest, ChatReferenceType } from "@/types/chat";
 
 const CONTENT_DESCRIPTION =
   "A concise plain-text answer in the requested language. Do not include Markdown or URLs.";
@@ -47,7 +49,7 @@ const buildChatResponseSchema = ({ strict }: { strict: boolean }) => {
         maxItems: 3,
         items: object(
           {
-            type: { type: "string", enum: ["photo", "music", "project"] },
+            type: { type: "string", enum: [...CHAT_REFERENCE_TYPES] },
             id: { type: "string" },
           },
           ["type", "id"],
@@ -84,12 +86,15 @@ const parseLinks = (value: unknown): ChatLink[] | undefined => {
   return links.length ? links : undefined;
 };
 
+const isReferenceType = (value: unknown): value is ChatReferenceType =>
+  CHAT_REFERENCE_TYPES.some((type) => type === value);
+
 const parseReferences = (value: unknown): ChatReferenceRequest[] | undefined => {
   if (!Array.isArray(value)) return undefined;
   const references = value.slice(0, 3).flatMap((item) => {
     if (
       !isRecord(item) ||
-      (item.type !== "photo" && item.type !== "music" && item.type !== "project") ||
+      !isReferenceType(item.type) ||
       typeof item.id !== "string" ||
       !item.id.trim()
     ) {

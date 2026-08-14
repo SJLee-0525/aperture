@@ -3,10 +3,11 @@ import { unstable_cache } from "next/cache";
 import { buildScreenContextLookup } from "@/features/chat/_lib/resolve-chat-screen-context";
 
 import { CHAT_PROFILE_CACHE_TAG, PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/constants/cache";
-import { albumRoute, devProjectRoute, ROUTES } from "@/constants/routes";
+import { albumRoute, devArticleRoute, devProjectRoute, ROUTES } from "@/constants/routes";
 import { searchRagChunks } from "@/lib/ai/rag-search";
 import { getChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
+import { formatYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
@@ -15,7 +16,13 @@ import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";
-import type { RagQuery, StoredRagChunkMeta } from "@/types/rag";
+import type { RagPrioritize, RagQuery, StoredRagChunkMeta } from "@/types/rag";
+
+/**
+ * PROFILE_CONTEXT 에 싣는 글 수. 목록은 발행일 내림차순이라 최근 글이 남는다.
+ * 참조 카드 lookup 은 이 상한을 쓰지 않는다. 오래된 글도 카드로 나갈 수 있어야 한다.
+ */
+const ARTICLE_CONTEXT_LIMIT = 12;
 
 const byOrder = <T extends { order: number }>(items: T[]) =>
   items
@@ -33,6 +40,7 @@ const preview = (image: ImageMeta | null | undefined): ChatReference["image"] =>
 
 const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
   const tagById = new Map(data.site.tags.map((tag) => [tag.id, pickText(tag, lang)]));
+  const articleTagById = new Map(data.articleTags.map((tag) => [tag.id, pickText(tag, lang)]));
   const publicProjects = byOrder(data.devProjects);
   const publicWorks = byOrder(data.musicWorks);
   const publicAwards = byOrder(data.musicAwards);
@@ -73,6 +81,20 @@ const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
         (project) =>
           `Project: ${pickText(project.title, lang)} | ${pickText(project.summary, lang)} | role: ${pickText(project.position, lang)} | tech: ${project.techTags.join(", ")} | url: ${devProjectRoute(project.id)}`,
       ),
+      // 본문은 넣지 않는다. 전문은 RAG 청크가 맡는다. 여기 있어야 하는 이유는 mock 모드에
+      // 벡터 검색이 없고, 참조 카드를 만들려면 모델이 글의 경로를 볼 수 있어야 하기 때문이다.
+      // 목록 전체를 실으면 프롬프트가 글 수를 따라 커지므로 최근 글까지만 넣는다.
+      // 참조 카드는 문서 ID 로 조회한다. 글 주소는 slug 라 다른 섹션과 달리 ID 를 따로 적는다.
+      ...data.articles
+        .slice(0, ARTICLE_CONTEXT_LIMIT)
+        .map(
+          (article) =>
+            `Article: ${pickText(article.title, lang)} | ${pickText(article.summary, lang)} | tags: ${article.tags
+              .map((id) => articleTagById.get(id) ?? id)
+              .join(
+                ", ",
+              )} | published: ${article.publishedAt ? article.publishedAt.toISOString().slice(0, 10) : "-"} | id: ${article.id} | url: ${devArticleRoute(article.slug)}`,
+        ),
     ]),
     section("Music", [
       line("Introduction", pickText(data.musicConfig.intro, lang)),
@@ -178,6 +200,18 @@ const formatProfileReferences = (data: ChatProfileData, lang: Lang): ChatReferen
     href: devProjectRoute(project.id),
     image: preview(project.cover),
   })),
+  // 글 목록은 이미 발행일 순으로 정렬돼 있다(`getChatProfileData`). 블로그에는 `order` 가 없다.
+  ...data.articles.map((article) => ({
+    type: "article" as const,
+    id: article.id,
+    title: pickText(article.title, lang),
+    // 카드에는 부제 한 줄뿐이라 발행일과 요약을 한 자리에 담는다.
+    subtitle: article.publishedAt
+      ? `${formatYMD(article.publishedAt)} · ${pickText(article.summary, lang)}`
+      : pickText(article.summary, lang),
+    href: devArticleRoute(article.slug),
+    image: preview(article.cover),
+  })),
 ];
 
 const buildProfileSnapshot = unstable_cache(
@@ -188,12 +222,18 @@ const buildProfileSnapshot = unstable_cache(
       references: formatProfileReferences(data, lang),
       screenLookup: buildScreenContextLookup(data, lang),
       linkVocabulary: formatLinkVocabulary(data),
+      // 글 화면 문맥은 URL 의 slug 와 문서 ID 를 맞춰 봐야 한다. mock 검증이 쓰는 대조표다.
+      articleSlugById: Object.fromEntries(
+        data.articles.map((article) => [article.id, article.slug]),
+      ),
     };
   },
   // 반환 구조나 공개 projection이 바뀌면 이 키의 버전도 올린다.
   // v5: shotAt·exif·achievements projection + 화면 문맥 screenLookup 추가.
   // v6: 링크 검증용 linkVocabulary 추가.
-  ["chat-profile-context-v6-content-source"],
+  // v7: 블로그 글 projection · article 참조 카드 · article 화면 문맥 추가.
+  // v8: 글 목록 상한(최근 12건) · 글 줄에 문서 ID 표기.
+  ["chat-profile-context-v8-content-source"],
   { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
@@ -225,6 +265,7 @@ const appendRagChunks = (baseContext: string, chunks: StoredRagChunkMeta[]): str
  * @param {ProfileSection[] | undefined} sections 답변에 필요한 프로필 섹션.
  * @param {RagQuery | undefined} query 벡터 검색에 사용할 질의.
  * @param {AbortSignal | undefined} signal 요청 취소 신호.
+ * @param {RagPrioritize | undefined} prioritize 방문자가 열어 둔 원본. 그 청크를 먼저 채운다.
  * @returns {Promise<string>} provider에 전달할 프로필 문맥.
  */
 const buildProfileContextFromSnapshot = async (
@@ -232,6 +273,7 @@ const buildProfileContextFromSnapshot = async (
   sections?: ProfileSection[],
   query?: RagQuery,
   signal?: AbortSignal,
+  prioritize?: RagPrioritize,
 ): Promise<string> => {
   const source = getContentSource();
   const context = (await getSnapshot()).context;
@@ -240,10 +282,10 @@ const buildProfileContextFromSnapshot = async (
 
   if (source === "live" && sections?.length && query?.text) {
     try {
-      const relevant = await searchRagChunks(query, sections, signal);
-      // chunks=0을 Vercel 로그에 남겨 검색 누락을 확인한다.
+      const relevant = await searchRagChunks(query, sections, signal, { prioritize });
+      // chunks=0과 우선 검색 대상을 Vercel 로그에 남겨 검색 누락을 확인한다.
       console.info(
-        `[chat-rag] sections=${sections.join(",")} query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])} chunks=${relevant.length}`,
+        `[chat-rag] sections=${sections.join(",")} query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])} prioritize=${prioritize ? `${prioritize.sourceType}:${prioritize.sourceId}` : "none"} chunks=${relevant.length}`,
       );
       return appendRagChunks(formatted, relevant);
     } catch (error) {

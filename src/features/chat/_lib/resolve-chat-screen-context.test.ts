@@ -7,6 +7,7 @@ import {
 } from "@/features/chat/_lib/resolve-chat-screen-context";
 
 import { MOCK_DEV_PROJECTS } from "@/mocks/dev";
+import { MOCK_DEV_ARTICLES } from "@/mocks/dev-articles";
 import { MOCK_MUSIC_AWARDS, MOCK_MUSIC_WORKS } from "@/mocks/music";
 import { MOCK_PHOTOS } from "@/mocks/photos";
 
@@ -15,6 +16,17 @@ const source = {
   musicWorks: MOCK_MUSIC_WORKS,
   musicAwards: MOCK_MUSIC_AWARDS,
   devProjects: MOCK_DEV_PROJECTS,
+  articles: MOCK_DEV_ARTICLES.filter(({ published }) => published).map(
+    ({ id, slug, title, summary, cover, tags, publishedAt }) => ({
+      id,
+      slug,
+      title,
+      summary,
+      cover,
+      tags,
+      publishedAt,
+    }),
+  ),
 };
 
 const lookup = buildScreenContextLookup(source, "ko");

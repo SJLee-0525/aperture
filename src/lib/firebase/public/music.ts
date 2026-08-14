@@ -234,3 +234,4 @@ export {
   toMusicMedia,
   toMusicWork,
 };
+export type { ChatMusicAward, ChatMusicMedia, ChatMusicWork };

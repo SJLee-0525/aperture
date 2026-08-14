@@ -141,9 +141,12 @@ const useChat = (
       if (!question || replyingRef.current) return false;
 
       // 재시도할 때도 저장된 값 대신 현재 URL을 사용한다.
+      // 글 상세처럼 id가 URL에 없는 경로는 화면이 등록한 target에서 문서 ID를 읽는다.
+      const registeredTarget = getScreenTarget?.() ?? null;
       let context = buildChatContext(
         window.location.pathname,
         new URLSearchParams(window.location.search),
+        registeredTarget,
       );
       // 사용자가 제외한 항목과 현재 URL의 항목이 같을 때만 상세 정보를 뺀다.
       const excludedKey = getExcludedTargetKey?.() ?? null;
@@ -154,7 +157,7 @@ const useChat = (
         context = { pathname: context.pathname };
       }
       // 칩의 표시 대상과 실제 요청 target이 일치할 때만 사용자 메시지에 기록한다.
-      const screenTarget = getScreenTarget?.() ?? null;
+      const screenTarget = registeredTarget;
       const sentContext =
         context?.openTarget &&
         screenTarget?.type === context.openTarget.type &&

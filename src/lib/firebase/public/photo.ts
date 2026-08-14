@@ -187,3 +187,4 @@ export {
   toAlbum,
   toPhoto,
 };
+export type { ChatAlbum, ChatPhoto };

@@ -124,15 +124,22 @@ type UIDict = {
   chatScreenNoticeWork: string;
   chatScreenNoticeAward: string;
   chatScreenNoticeProject: string;
+  chatScreenNoticeArticle: string;
   chatScreenPlaceholderPhoto: string;
   chatScreenPlaceholderWork: string;
   chatScreenPlaceholderAward: string;
   chatScreenPlaceholderProject: string;
+  chatScreenPlaceholderArticle: string;
   chatScreenNoticeDismiss: string;
   chatSentContextPhoto: string;
   chatSentContextWork: string;
   chatSentContextAward: string;
   chatSentContextProject: string;
+  chatSentContextArticle: string;
+  chatReferenceTypePhoto: string;
+  chatReferenceTypeMusic: string;
+  chatReferenceTypeProject: string;
+  chatReferenceTypeArticle: string;
   chatPrivacyNote: string;
   chatSuggestionsLabel: string;
   chatSuggestions: string[];
@@ -321,15 +328,22 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatScreenNoticeWork: "보고 있는 연주",
     chatScreenNoticeAward: "보고 있는 수상 내역",
     chatScreenNoticeProject: "보고 있는 프로젝트",
+    chatScreenNoticeArticle: "보고 있는 글",
     chatScreenPlaceholderPhoto: "이 사진에 대해 물어보세요…",
     chatScreenPlaceholderWork: "이 연주에 대해 물어보세요…",
     chatScreenPlaceholderAward: "이 수상에 대해 물어보세요…",
     chatScreenPlaceholderProject: "이 프로젝트에 대해 물어보세요…",
+    chatScreenPlaceholderArticle: "이 글에 대해 물어보세요…",
     chatScreenNoticeDismiss: "이 항목을 답변에서 제외",
     chatSentContextPhoto: "함께 보낸 사진",
     chatSentContextWork: "함께 보낸 연주",
     chatSentContextAward: "함께 보낸 수상 내역",
     chatSentContextProject: "함께 보낸 프로젝트",
+    chatSentContextArticle: "함께 보낸 글",
+    chatReferenceTypePhoto: "사진",
+    chatReferenceTypeMusic: "연주",
+    chatReferenceTypeProject: "프로젝트",
+    chatReferenceTypeArticle: "글",
     chatPrivacyNote: "민감한 개인정보는 입력하지 마세요.",
     chatSuggestionsLabel: "추천 질문",
     chatSuggestions: [
@@ -522,15 +536,22 @@ const DICTIONARY: Record<Lang, UIDict> = {
     chatScreenNoticeWork: "Viewing performance",
     chatScreenNoticeAward: "Viewing award",
     chatScreenNoticeProject: "Viewing project",
+    chatScreenNoticeArticle: "Viewing article",
     chatScreenPlaceholderPhoto: "Ask about this photo…",
     chatScreenPlaceholderWork: "Ask about this performance…",
     chatScreenPlaceholderAward: "Ask about this award…",
     chatScreenPlaceholderProject: "Ask about this project…",
+    chatScreenPlaceholderArticle: "Ask about this article…",
     chatScreenNoticeDismiss: "Exclude this item from the answer",
     chatSentContextPhoto: "Sent with photo",
     chatSentContextWork: "Sent with performance",
     chatSentContextAward: "Sent with award",
     chatSentContextProject: "Sent with project",
+    chatSentContextArticle: "Sent with article",
+    chatReferenceTypePhoto: "Photo",
+    chatReferenceTypeMusic: "Performance",
+    chatReferenceTypeProject: "Project",
+    chatReferenceTypeArticle: "Article",
     chatPrivacyNote: "Please don’t share sensitive personal information.",
     chatSuggestionsLabel: "Suggested questions",
     chatSuggestions: [
