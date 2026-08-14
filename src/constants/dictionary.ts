@@ -51,6 +51,7 @@ type UIDict = {
   devTroubleResultLabel: string;
   devAchievementsLabel: string;
   devStackLabel: string;
+  devRelatedArticlesLabel: string;
   devTechLabel: string;
   devFieldLabel: string;
   devProjectLoadingLabel: string;
@@ -255,6 +256,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devTroubleResultLabel: "결과",
     devAchievementsLabel: "성과",
     devStackLabel: "기술 스택",
+    devRelatedArticlesLabel: "연관 글",
     devTechLabel: "사용 기술",
     devFieldLabel: "분야",
     devProjectLoadingLabel: "프로젝트 불러오는 중",
@@ -463,6 +465,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     devTroubleResultLabel: "Result",
     devAchievementsLabel: "Achievements",
     devStackLabel: "Stack",
+    devRelatedArticlesLabel: "Related posts",
     devTechLabel: "Tech Used",
     devFieldLabel: "Fields",
     devProjectLoadingLabel: "Loading project",

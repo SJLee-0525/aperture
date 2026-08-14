@@ -2,7 +2,7 @@ import { COLLECTIONS } from "@/constants/collections";
 import { fetchDocument, publishedQuery, runQuery, toDate } from "@/lib/firebase/public/transport";
 import { asText } from "@/lib/i18n/as-text";
 
-import type { DevArticle } from "@/types/dev-article";
+import type { DevArticle, DevArticleProjectLink } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 import type { ImageMeta } from "@/types/image";
 
@@ -170,9 +170,43 @@ const fetchChatDevArticles = async (options?: { fresh?: boolean }): Promise<Chat
     )
   ).map(({ id, data }) => toChatDevArticle(id, data));
 
+/**
+ * 프로젝트 역방향 목록에 필요한 필드만 읽는다.
+ *
+ * 본문을 빼는 것이 이 투영의 목적이다. 프로젝트 지면은 글 하나도 열지 않으면서 관계만
+ * 알면 되는데, 전체 조회를 재사용하면 모든 글의 Markdown 원문이 함께 실린다.
+ *
+ * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
+ * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
+ * @returns {Promise<DevArticleProjectLink[]>} 발행일 내림차순의 공개 글 관계 목록.
+ */
+const fetchDevArticleProjectLinks = async (options?: {
+  fresh?: boolean;
+}): Promise<DevArticleProjectLink[]> =>
+  (
+    await runQuery(
+      publishedQuery(
+        COLLECTIONS.DEV_ARTICLES,
+        [
+          { fieldPath: "publishedAt", direction: "DESCENDING" },
+          { fieldPath: "__name__", direction: "ASCENDING" },
+        ],
+        ["slug", "title", "publishedAt", "relatedProjectIds"],
+      ),
+      options,
+    )
+  ).map(({ id, data }) => ({
+    id,
+    slug: (data.slug as string) ?? "",
+    title: asText(data.title),
+    publishedAt: toNullableDate(data.publishedAt),
+    relatedProjectIds: (data.relatedProjectIds as string[]) ?? [],
+  }));
+
 export {
   fetchChatDevArticles,
   fetchDevArticleById,
+  fetchDevArticleProjectLinks,
   fetchDevArticleTags,
   fetchPublishedDevArticles,
   toDevArticle,

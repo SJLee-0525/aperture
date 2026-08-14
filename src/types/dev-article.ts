@@ -35,4 +35,15 @@ type DevArticle = {
   updatedAt: Date;
 };
 
-export type { DevArticle };
+/**
+ * 프로젝트 상세가 역방향으로 찾는 글 투영.
+ *
+ * 관계의 단일 원천은 글의 `relatedProjectIds` 이고 프로젝트 문서에는 글 id 를 저장하지 않는다.
+ * 프로젝트 쪽 목록은 공개 글의 관계 필드를 모아 뒤집어 만들며, 이 투영에는 본문이 없다.
+ */
+type DevArticleProjectLink = Pick<DevArticle, "id" | "slug" | "title" | "relatedProjectIds"> & {
+  /** 공개 글에는 항상 값이 있다. 정렬과 표시가 모두 이 값을 쓴다. */
+  publishedAt: Date | null;
+};
+
+export type { DevArticle, DevArticleProjectLink };

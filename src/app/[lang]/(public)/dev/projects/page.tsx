@@ -4,8 +4,10 @@ import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
 
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
+import { groupArticlesByProject } from "@/features/dev/_lib/group-articles-by-project";
 
 import { getDevProjects } from "@/lib/content/dev";
+import { getDevArticleProjectLinks } from "@/lib/content/dev-articles";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
@@ -32,10 +34,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * @returns {Promise<JSX.Element>}
  */
 export default async function DevProjectsPage() {
-  const projects = await getDevProjects();
+  const [projects, articleLinks] = await Promise.all([
+    getDevProjects(),
+    getDevArticleProjectLinks(),
+  ]);
   return (
     <Suspense fallback={<CardGridPageSkeleton kind="project" />}>
-      <DevProjectsView projects={toDevProjectCards(projects)} />
+      <DevProjectsView
+        projects={toDevProjectCards(projects)}
+        articlesByProject={groupArticlesByProject(articleLinks)}
+      />
     </Suspense>
   );
 }

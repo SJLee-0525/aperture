@@ -2,9 +2,13 @@ import { cache } from "react";
 
 import { compareByPublishedAtDesc } from "@/lib/content/article-order";
 import { shouldUseMockContent } from "@/lib/content/content-source";
-import { fetchDevArticleTags, fetchPublishedDevArticles } from "@/lib/firebase/public/dev-articles";
+import {
+  fetchDevArticleProjectLinks,
+  fetchDevArticleTags,
+  fetchPublishedDevArticles,
+} from "@/lib/firebase/public/dev-articles";
 
-import type { DevArticle } from "@/types/dev-article";
+import type { DevArticle, DevArticleProjectLink } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
 /**
@@ -34,6 +38,28 @@ const getDevArticleBySlug = async (slug: string): Promise<DevArticle | null> =>
   (await getDevArticles()).find((article) => article.slug === slug) ?? null;
 
 /**
+ * 프로젝트 역방향 목록이 쓰는 글 관계 투영.
+ *
+ * 프로젝트 지면에서 `getDevArticles` 를 쓰지 않는 이유는 본문이다. 관계만 필요한 화면이
+ * 모든 글의 Markdown 원문을 서버로 끌어오지 않게 필드를 좁힌 조회를 따로 둔다.
+ *
+ * @returns {Promise<DevArticleProjectLink[]>} 발행일 내림차순의 공개 글 관계 목록.
+ */
+const getDevArticleProjectLinks = cache(async (): Promise<DevArticleProjectLink[]> => {
+  if (!shouldUseMockContent()) return fetchDevArticleProjectLinks();
+  const { MOCK_DEV_ARTICLES } = await import("@/mocks/dev-articles");
+  return MOCK_DEV_ARTICLES.filter((article) => article.published)
+    .sort(compareByPublishedAtDesc)
+    .map(({ id, slug, title, publishedAt, relatedProjectIds }) => ({
+      id,
+      slug,
+      title,
+      publishedAt,
+      relatedProjectIds,
+    }));
+});
+
+/**
  * 블로그 태그 사전. 글에는 id 만 저장하므로 라벨은 여기서 찾는다.
  *
  * 저장 위치는 `devArticleTags` 컬렉션이다. 순서 계약은 id 사전순 —
@@ -46,4 +72,4 @@ const getDevArticleTags = cache(async (): Promise<DevArticleTag[]> => {
   return (await import("@/mocks/dev-article-tags")).MOCK_DEV_ARTICLE_TAGS;
 });
 
-export { getDevArticleBySlug, getDevArticles, getDevArticleTags };
+export { getDevArticleBySlug, getDevArticleProjectLinks, getDevArticles, getDevArticleTags };

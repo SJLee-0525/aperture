@@ -8,11 +8,15 @@ import { hasText } from "@/lib/i18n/has-text";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { DevProject } from "@/types/dev";
+import type { DevArticleProjectLink } from "@/types/dev-article";
 
+import { DevProjectRelatedArticles } from "./DevProjectRelatedArticles";
 import styles from "./DevProjectsView.module.css";
 
 type Props = {
   project: DevProject;
+  /** 이 프로젝트를 지목한 공개 글. 관계는 글에만 저장되므로 호출부가 뒤집어 넘긴다. */
+  articles: DevArticleProjectLink[];
 };
 
 /**
@@ -20,9 +24,10 @@ type Props = {
  *
  * @param {Props} props
  * @param {DevProject} props.project
+ * @param {DevArticleProjectLink[]} props.articles
  * @returns {JSX.Element}
  */
-const DevProjectDetailContent = ({ project }: Props) => {
+const DevProjectDetailContent = ({ project, articles }: Props) => {
   const { dict, lang } = useLang();
   const media = useMemo(
     () => (project.images.length > 0 ? project.images : project.cover ? [project.cover] : []),
@@ -152,6 +157,13 @@ const DevProjectDetailContent = ({ project }: Props) => {
           <span key={tag}>{tag}</span>
         ))}
       </div>
+
+      {articles.length > 0 ? (
+        <>
+          <div className={styles.secL}>{dict.devRelatedArticlesLabel}</div>
+          <DevProjectRelatedArticles articles={articles} lang={lang} />
+        </>
+      ) : null}
     </div>
   );
 };

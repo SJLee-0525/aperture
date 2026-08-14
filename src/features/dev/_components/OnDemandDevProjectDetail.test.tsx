@@ -55,6 +55,7 @@ describe("OnDemandDevProjectDetail", () => {
     render(
       <OnDemandDevProjectDetail
         project={toDevProjectCard(project)}
+        articles={[]}
         open
         onClose={vi.fn()}
         endpoint="/api/dev-projects"

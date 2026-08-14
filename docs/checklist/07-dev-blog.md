@@ -299,6 +299,7 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 - [x] 연관 프로젝트 카드 — 지정 순서, 비공개 ID 제외 (§7) → 프로젝트 상세는 목록 화면의 모달이라 `?project=` 딥링크로 보낸다(상세 지면에 모달과 데이터를 다시 세우지 않는다)
 - [x] 블로그 탐색 목록 — 표 형태 5개, 현재 글 페이지 우선·현재 행 강조, `?articlePage=` 분리, 본문 유지 갱신, 키보드 탐색 (§6) → 쪽 이동은 `replaceCurrentUrl`(push 아님) — 표를 넘긴 횟수만큼 뒤로가기가 쌓이면 목차 fragment 기록과 섞인다
 - [x] 관계·목록 projection — 본문 없이 id·slug·제목·요약·cover·태그·발행일·읽기 시간·프로젝트 ID만 캐시 (§6, §7) → `_lib/article-projection` 하나를 목록·상세·탐색 표가 함께 쓴다
+- [x] 프로젝트 모달 역방향 — 그 프로젝트를 지목한 공개 글을 발행일 내림차순으로 표시 (§7) → 관계는 글에만 저장하므로 `_lib/group-articles-by-project` 가 뒤집는다. 프로젝트 지면은 본문이 필요 없어 `getDevArticleProjectLinks`(slug·제목·발행일·관계만 select)를 따로 읽는다
 - [x] 영어 경로 — `This article is available in Korean only.` 안내, 본문 `lang="ko"` (§8)
 - [x] metadata — 언어별 제목·요약 metadata + Article 구조화 데이터, canonical은 한국어 URL, 초안·미리보기 `noindex`, sitemap 등재 (§8) → `pageMetadata` 결과의 `alternates` 를 통째로 바꿔 canonical 을 한국어로 고정하고 hreflang 은 달지 않는다(영어 경로는 번역본이 아니다). BlogPosting JSON-LD 는 저장소 최초. sitemap 도 같은 정책으로 글별 한국어 URL 하나만 올린다. 관리자 미리보기는 `robots.ts` 의 `/admin` disallow 로 이미 차단돼 있어 추가 작업 없음
 
