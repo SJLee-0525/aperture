@@ -72,12 +72,12 @@
   font-size: 0.84em;
 }
 
-/* 액센트색 대신 본문색 + 밑줄 — 정책 지면과 같은 규격이다. 문장 안에서 색이 튀지 않고
-   밑줄이 링크임을 알리므로 색만으로 상태를 전하지도 않는다. */
+/* 밑줄과 굵기를 함께 둔다. 색만으로 링크를 알리면 색각 이상이나 저대비 화면에서 본문과 구분되지 않는다. */
 .inlineLink {
-  color: var(--text);
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
+  font-weight: 600;
 }
 
 .quote {

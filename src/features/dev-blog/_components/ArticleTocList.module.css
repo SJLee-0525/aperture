@@ -43,7 +43,6 @@
   font-size: 0.78rem;
 }
 
-/* 현재 위치 — 색과 함께 왼쪽 막대·굵기로도 알린다. */
 .entry[aria-current="location"] {
   color: var(--accent);
   font-weight: 600;

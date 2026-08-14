@@ -23,11 +23,11 @@
 .panel {
   position: absolute;
   top: 50%;
-  right: var(--s-3);
+  right: 10px;
   display: flex;
   flex-direction: column;
   width: min(78vw, 300px);
-  max-height: min(56dvh, 420px);
+  max-height: min(60dvh, 420px);
   transform: translateY(-50%);
   background: var(--bg);
   border: 1px solid var(--line);
