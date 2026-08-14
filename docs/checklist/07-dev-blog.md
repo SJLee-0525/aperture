@@ -479,8 +479,8 @@ JSDoc은 아래 밀도를 기준으로 삼는다. 태그 수를 기계적으로 
 
 ### B5 검증
 
-- [ ] Rules·index emulator 검증 후 배포 (§12-B5) → Rules 테스트는 CI(Java 21)가 실행. **`firebase deploy --only firestore:rules,firestore:indexes` + 인덱스 빌드 완료 확인은 사용자와 함께**
-- [ ] 실제 초안 1건 — 작성·전체 미리보기·발행·발행 취소·삭제·이미지 정리 왕복 확인 (§12-B5) → Vercel 배포 또는 `NEXT_PUBLIC_USE_MOCK=0` 로컬 실행으로 사용자와 함께
+- [x] Rules·index emulator 검증 후 배포 (§12-B5) → Rules 테스트는 CI(Java 21)가 실행. 2026-08-14 `aperture-5ec81` 배포 확인 — `firestore:indexes` 조회에 `devArticles(published ASC, publishedAt DESC)` 포함(빌드 중 인덱스는 목록에 나오지 않으므로 READY), 재배포에서 `firestore.rules already up to date` + `released rules`
+- [x] 실제 초안 1건 — 작성·전체 미리보기·발행·발행 취소·삭제·이미지 정리 왕복 확인 (§12-B5) → 2026-08-14 실데이터로 사용자가 왕복 확인
 - [x] mock/live 소스가 섞이지 않고 mock 자동화 테스트가 계속 동작한다 (§12-B5) → 분기 교체는 `dev-article-repository`·`article-image-uploader` 의 기존 단일 지점만, E2E 는 전부 `NEXT_PUBLIC_USE_MOCK=1` 유지, 신규 live 모듈은 모듈 평가 시 Firebase 미접촉(회귀 테스트에 등록)
 
 ---
