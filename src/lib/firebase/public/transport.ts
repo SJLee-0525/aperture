@@ -3,6 +3,7 @@ import {
   firestoreCollectionCacheTag,
   firestoreDocumentCacheTag,
 } from "@/constants/cache";
+import { fetchWithRetry } from "@/lib/firebase/public/retry-fetch";
 
 type RestValue = Record<string, unknown>;
 type RestDocument = { name: string; fields?: Record<string, RestValue> };
@@ -133,7 +134,7 @@ const runQuery = async (
   )
     .map(({ collectionId }) => collectionId)
     .filter((collectionId): collectionId is string => Boolean(collectionId));
-  const response = await fetch(`${documentsUrl()}:runQuery?key=${API_KEY}`, {
+  const response = await fetchWithRetry(`${documentsUrl()}:runQuery?key=${API_KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ structuredQuery }),
@@ -176,7 +177,7 @@ const fetchDocument = async (
 ): Promise<Record<string, unknown> | null> => {
   // 문서 ID 는 요청에서 올 수 있다. slash 를 인코딩하지 않으면 다른 컬렉션 경로로 내려간다.
   const path = `${collectionId}/${encodeURIComponent(documentId)}`;
-  const response = await fetch(`${documentsUrl()}/${path}?key=${API_KEY}`, {
+  const response = await fetchWithRetry(`${documentsUrl()}/${path}?key=${API_KEY}`, {
     ...(options?.signal ? { signal: options.signal } : {}),
     ...(options?.fresh
       ? { cache: "no-store" as const }
