@@ -76,9 +76,46 @@ test.describe("Admin · 블로그", () => {
     await page.getByRole("button", { name: "저장" }).click();
     await expect(page.getByText("저장하지 않은 변경")).toBeHidden();
 
-    await page.getByRole("link", { name: "취소" }).click();
+    await page.getByRole("button", { name: "취소" }).click();
     const row = page.getByRole("listitem").filter({ hasText: "E2E 작성 흐름" });
     await expect(row.getByRole("button", { name: "공개" })).toBeVisible();
+  });
+
+  test("취소는 복구본과 이 탭이 잡아 둔 새 글 ID를 함께 버린다", async ({ page }) => {
+    await page.goto("/admin/dev/articles/new");
+    await expect(page.getByRole("heading", { name: "새 글" })).toBeVisible({ timeout: 30_000 });
+
+    await page.getByLabel("제목 (한국어)").fill("버릴 글");
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() =>
+            Object.keys(window.localStorage).some((key) =>
+              key.startsWith("ap-admin-dev-article-draft:"),
+            ),
+          ),
+        { timeout: 15_000 },
+      )
+      .toBe(true);
+
+    // 저장하지 않은 변경이 있으므로 확인창이 뜬다.
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "취소" }).click();
+    await expect(page).toHaveURL(new RegExp("/admin/dev/articles$"));
+
+    const leftover = await page.evaluate(() => ({
+      drafts: Object.keys(window.localStorage).filter((key) =>
+        key.startsWith("ap-admin-dev-article-draft:"),
+      ),
+      newId: window.sessionStorage.getItem("ap-admin-dev-article-new:v1"),
+    }));
+    expect(leftover.drafts).toEqual([]);
+    expect(leftover.newId).toBeNull();
+
+    // 다시 새 글을 열어도 버린 편집본이 복구 후보로 뜨지 않는다.
+    await page.getByRole("link", { name: "+ 새 글" }).click();
+    await expect(page.getByRole("heading", { name: "새 글" })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("저장하지 않은 편집본이 있습니다")).toBeHidden();
   });
 
   test("발행 조건을 만족하지 않으면 발행할 수 없다", async ({ page }) => {
