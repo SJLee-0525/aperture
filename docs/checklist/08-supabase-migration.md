@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M4 완료 — 공개 페이지가 Supabase 실데이터로 렌더. 보류: keep-alive `schedule` 확인은 main 머지 후, M3 실브라우저 로그인 확인은 사용자 대기)
+> 마지막 갱신: 2026-08-15 (M0~M4 완료 — 공개 페이지 Supabase 실데이터 렌더 + 실브라우저 로그인·세션 유지 확인. 보류: keep-alive `schedule` 자동 실행 확인은 main 머지 후)
 
 ## 진행 요약
 
@@ -12,7 +12,7 @@
 | M0   | 결정·측정·프로젝트 준비                | ✅ 완료 |
 | M1   | 스키마·RLS·버킷·keep-alive             | ✅ 완료 |
 | M2   | 데이터 마이그레이션 리허설             | ✅ 완료 |
-| M3   | 인증 교체                              | ✅ 완료 (실브라우저 로그인 확인만 대기) |
+| M3   | 인증 교체                              | ✅ 완료 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
 | M5   | 관리자 쓰기·Storage 교체               | ⬜ 미착수 |
 | M6   | RAG pgvector 전환                      | ⬜ 미착수 |
@@ -76,7 +76,7 @@
 - [x] 서버 JWT 검증: `getClaims`(JWKS 로컬 검증) + role 클레임 확인으로 `verify-admin-id-token.ts` 내부 교체 — 시그니처 유지로 호출 5곳(revalidate action, embeddings POST/GET, image-source, 미리보기 action) 무수정
 - [x] `AuthGuard`·`LoginForm`·`test-admin-session` 우회 동작 확인 (인터페이스 무변경, 테스트 세션 `isAdmin=false` 안전장치 유지)
 - [x] Sentry 스크러버(`scrub-event.ts`)는 헤더 키 기준이라 동작 무변경 — 주석·fixture 문구만 갱신
-- [ ] 실브라우저 로그인 검증: `/admin/login` 로그인 → 새로고침 세션 지속 → 로그아웃, 잘못된 비밀번호 한국어 에러 (사용자 확인 대기)
+- [x] 실브라우저 로그인 검증: `/admin/login` 로그인 → 새로고침 세션 지속 확인 (최초 시도에서 CSP connect-src 누락으로 차단 → Supabase 호스트를 connect-src·img-src·STORAGE_IMAGE_HOSTS 에 추가해 해결)
 - [x] 과도기 기록: live 관리자 CRUD·Storage·RAG sync 는 M5/M6 전환 전까지 브랜치에서 의도적 비정상 (프로덕션 main 무영향, mock 관리자·공개 경로 정상)
 
 ## M4 — 공개 읽기 교체 (§3, §4 M4)
