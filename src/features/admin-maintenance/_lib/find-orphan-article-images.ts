@@ -1,12 +1,9 @@
 "use client";
 
-import { deleteObject, ref } from "firebase/storage";
-
 import { articleBodyStoragePaths } from "@/features/admin-maintenance/_lib/article-body-storage-paths";
 
-import { getFirebaseStorage } from "@/lib/firebase/client";
-import { listFolderFiles } from "@/lib/firebase/storage";
 import { listDevArticleImageRefsAdmin } from "@/lib/supabase/admin-list";
+import { deleteImages, listFolderFiles } from "@/lib/supabase/storage";
 
 import { imagePaths } from "@/types/image";
 
@@ -92,13 +89,10 @@ const deleteOrphanArticleImages = async (
       .filter((path) => eligible.has(path))
       .map(async (path) => {
         try {
-          await deleteObject(ref(getFirebaseStorage(), path));
+          // 경로별 개별 삭제로 성공·실패를 파일 단위로 구분한다. 이미 없는 객체는 성공이다.
+          await deleteImages([path]);
           deleted.push(path);
         } catch (caught) {
-          if ((caught as { code?: string }).code === "storage/object-not-found") {
-            deleted.push(path);
-            return;
-          }
           failed.push({ path, message: (caught as Error).message || "삭제에 실패했습니다." });
         }
       }),

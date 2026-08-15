@@ -28,7 +28,7 @@ vi.mock("@/lib/supabase/dev-articles", () => ({
   updateDevArticleTag: vi.fn(),
   removeDevArticleTag: vi.fn(),
 }));
-vi.mock("@/lib/firebase/storage", () => ({ deleteArticleImages: mocks.deleteArticleImages }));
+vi.mock("@/lib/supabase/storage", () => ({ deleteArticleImages: mocks.deleteArticleImages }));
 vi.mock("@/lib/cache/request-revalidate", () => ({
   requestPublicPathRevalidate: mocks.requestPublicPathRevalidate,
   requestPublicRevalidate: vi.fn(),

@@ -9,7 +9,7 @@ import {
   uploadArticleImage,
   uploadArticlePreview,
   uploadArticleThumbnail,
-} from "@/lib/firebase/storage";
+} from "@/lib/supabase/storage";
 
 import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
 import type { ImageMeta } from "@/types/image";

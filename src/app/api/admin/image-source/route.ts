@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
-import { isAllowedStorageSourceUrl } from "@/lib/firebase/storage-source-url";
+import { isAllowedStorageSourceUrl } from "@/lib/supabase/storage-source-url";
 
 const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 
@@ -19,8 +19,7 @@ export async function POST(request: Request) {
 
   const payload = (await request.json().catch(() => null)) as { url?: unknown } | null;
   const sourceUrl = typeof payload?.url === "string" ? payload.url : "";
-  const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "";
-  if (!isAllowedStorageSourceUrl(sourceUrl, bucket)) {
+  if (!isAllowedStorageSourceUrl(sourceUrl)) {
     return NextResponse.json({ error: "허용되지 않은 이미지 URL입니다." }, { status: 400 });
   }
 
@@ -33,7 +32,8 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
-  if (!isAllowedStorageSourceUrl(source.url, bucket)) {
+  // redirect 를 따라간 최종 URL 재검증 — 허용 원본이 다른 호스트로 넘기는 SSRF 를 막는다.
+  if (!isAllowedStorageSourceUrl(source.url)) {
     return NextResponse.json({ error: "허용되지 않은 리디렉션입니다." }, { status: 502 });
   }
 

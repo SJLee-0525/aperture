@@ -3,11 +3,11 @@ import { COLLECTIONS, SITE_MUSIC_DOC, SUPABASE_COLLECTIONS } from "@/constants/c
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { deleteMusicWorkImages } from "@/lib/firebase/storage";
 import { asText } from "@/lib/i18n/as-text";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
+import { deleteMusicWorkImages } from "@/lib/supabase/storage";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 

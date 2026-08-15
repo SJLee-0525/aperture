@@ -5,11 +5,11 @@ import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
-import { deleteDevProjectImages } from "@/lib/firebase/storage";
 import { asText } from "@/lib/i18n/as-text";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
+import { deleteDevProjectImages } from "@/lib/supabase/storage";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 

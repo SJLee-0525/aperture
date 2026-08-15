@@ -51,7 +51,7 @@ vi.mock("@/lib/supabase/music", () => ({
 vi.mock("@/lib/supabase/auth", () => ({
   getAdminAccessToken: async () => mocks.accessToken,
 }));
-vi.mock("@/lib/firebase/storage", () => ({
+vi.mock("@/lib/supabase/storage", () => ({
   uploadDevPreview: mocks.uploadDevPreview,
   uploadDevThumbnail: mocks.uploadDevThumbnail,
   uploadMusicPosterPreview: mocks.uploadMusicPosterPreview,

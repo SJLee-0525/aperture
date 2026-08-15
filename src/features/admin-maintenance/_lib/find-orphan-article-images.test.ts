@@ -3,17 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   listDevArticleImageRefsAdmin: vi.fn(),
   listFolderFiles: vi.fn(),
-  deleteObject: vi.fn(),
+  deleteImages: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/admin-list", () => ({
   listDevArticleImageRefsAdmin: mocks.listDevArticleImageRefsAdmin,
 }));
-vi.mock("@/lib/firebase/storage", () => ({ listFolderFiles: mocks.listFolderFiles }));
-vi.mock("@/lib/firebase/client", () => ({ getFirebaseStorage: vi.fn(() => ({})) }));
-vi.mock("firebase/storage", () => ({
-  deleteObject: mocks.deleteObject,
-  ref: vi.fn((_storage: unknown, path: string) => ({ path })),
+vi.mock("@/lib/supabase/storage", () => ({
+  listFolderFiles: mocks.listFolderFiles,
+  deleteImages: mocks.deleteImages,
 }));
 
 import {
@@ -32,7 +30,7 @@ const bodyImage = (path: string) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.deleteObject.mockResolvedValue(undefined);
+  mocks.deleteImages.mockResolvedValue(undefined);
 });
 
 describe("scanOrphanArticleImages", () => {
@@ -91,16 +89,16 @@ describe("deleteOrphanArticleImages", () => {
 
     expect(result.deleted).toEqual(["dev-blog/a1/one.webp"]);
     expect(result.skipped).toEqual(["dev-blog/a1/two.webp"]);
-    expect(mocks.deleteObject).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteImages).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteImages).toHaveBeenCalledWith(["dev-blog/a1/one.webp"]);
   });
 
-  it("파일별 실패를 격리하고 이미 없는 객체는 성공으로 친다", async () => {
+  it("파일별 실패를 격리한다 — 이미 없는 객체는 remove 가 오류 없이 성공 처리한다", async () => {
     mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
     mocks.listFolderFiles.mockResolvedValue(files);
-    mocks.deleteObject
-      .mockRejectedValueOnce({ code: "storage/object-not-found" })
-      .mockRejectedValueOnce(new Error("network"))
-      .mockResolvedValueOnce(undefined);
+    mocks.deleteImages.mockImplementation(async (paths: string[]) => {
+      if (paths[0] === "dev-blog/a1/two.webp") throw new Error("network");
+    });
 
     const result = await deleteOrphanArticleImages(
       files.map((file) => file.path),

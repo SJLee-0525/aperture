@@ -4,7 +4,6 @@ import { createLocalListRepository } from "@/lib/admin/mock/local-list-repositor
 import { deleteMockImageFolder } from "@/lib/admin/mock/mock-image-store";
 import { selectRepository } from "@/lib/admin/select-repository";
 import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
-import { deletePhotoImages } from "@/lib/firebase/storage";
 import { listPhotoItemsAdmin } from "@/lib/supabase/admin-list";
 import {
   createPhoto,
@@ -15,6 +14,7 @@ import {
   updatePhoto,
   updatePhotoOrders,
 } from "@/lib/supabase/photos";
+import { deletePhotoImages } from "@/lib/supabase/storage";
 
 import type { AdminListRepository } from "@/lib/admin/admin-list-repository";
 import type { AdminPhotoListItem } from "@/types/admin";
