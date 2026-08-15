@@ -23,9 +23,11 @@ const MAX_SCREEN_CONTEXT_CHARS = 1_500;
 
 /**
  * 열어 둔 글 본문을 프롬프트에 실을 때의 최대 문자 수.
- * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다.
+ * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다. 현재 최장 글
+ * (약 37,000자 Markdown, 평문은 더 짧다)을 자르지 않는 크기로 잡았다 —
+ * 여기서 잘리면 "글 마지막" 질문이 앞부분 내용으로 답해진다.
  */
-const MAX_ARTICLE_BODY_CONTEXT_CHARS = 8_000;
+const MAX_ARTICLE_BODY_CONTEXT_CHARS = 32_000;
 
 /**
  * 공개된 항목만 남긴다.

@@ -205,7 +205,7 @@ describe("formatArticleScreenContextBlock", () => {
   });
 
   it("본문이 상한을 넘으면 자르고 생략 표시를 남긴다", () => {
-    const block = formatArticleScreenContextBlock(articleOf("가나다 ".repeat(4000)), "ko");
+    const block = formatArticleScreenContextBlock(articleOf("가나다 ".repeat(12000)), "ko");
 
     expect(block).toContain("[remainder truncated]");
     // 상한 + 항목 줄·헤더 여유. 본문만 잘리고 블록 전체가 다시 잘리지는 않는다.
