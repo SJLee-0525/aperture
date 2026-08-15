@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { useSearchParams } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -117,9 +117,17 @@ describe("SearchResults", () => {
     useSearchParamsMock.mockReturnValue(
       new URLSearchParams() as ReturnType<typeof useSearchParams>,
     );
+    // 본문 일치 fetch 기본 대역 — 각 테스트가 필요하면 응답을 덮어쓴다.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ matches: [] }) }),
+    );
   });
 
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
 
   it("검색어가 없으면 검색 안내를 보여준다", () => {
     render(<SearchResults documents={documents} />);
@@ -285,5 +293,73 @@ describe("SearchResults", () => {
       "/en/dev/projects?project=1",
     );
     expect(screen.getByText(DICTIONARY.en.sectionDev)).toBeTruthy();
+  });
+});
+
+describe("SearchResults — 본문 일치", () => {
+  beforeEach(() => {
+    useLangMock.mockReturnValue({
+      lang: "ko",
+      dict: DICTIONARY.ko,
+      setLang: vi.fn(),
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it("인덱스에 없는 질의라도 본문 일치 글을 스니펫과 함께 보여준다", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("q=수파베이스") as ReturnType<typeof useSearchParams>,
+    );
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ matches: [{ id: "1", snippet: "…수파베이스로 옮긴 이유는…" }] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SearchResults documents={documents} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: /포트폴리오를 서버 없이/ })).toBeTruthy();
+    });
+    expect(screen.getByText("…수파베이스로 옮긴 이유는…")).toBeTruthy();
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "/api/search-body?q=%EC%88%98%ED%8C%8C%EB%B2%A0%EC%9D%B4%EC%8A%A4",
+    );
+  });
+
+  it("인덱스 매치와 같은 글이면 본문 일치를 중복으로 넣지 않는다", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("q=firebase") as ReturnType<typeof useSearchParams>,
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ matches: [{ id: "1", snippet: "본문 일치" }] }),
+      }),
+    );
+
+    render(<SearchResults documents={documents} />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("link", { name: /포트폴리오를 서버 없이/ })).toHaveLength(1);
+    });
+  });
+
+  it("본문 일치 요청이 실패해도 인덱스 결과는 그대로 남는다", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("q=firebase") as ReturnType<typeof useSearchParams>,
+    );
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
+
+    render(<SearchResults documents={documents} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: /포트폴리오를 서버 없이/ })).toBeTruthy();
+    });
   });
 });
