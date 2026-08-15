@@ -27,9 +27,9 @@
 
 [`docs/checklist/07-dev-blog.md`](07-dev-blog.md)의 「전 단계 공통 구현 규칙」(저장소 컨벤션, JSDoc·주석)을 그대로 적용한다. 이 작업에 특화된 공통 규칙:
 
-- [ ] 런타임 코드·env 파일에 service_role 키를 두지 않는다. service_role은 저장소 밖 1회성 마이그레이션에서만 쓴다 (§5)
-- [ ] 공개 읽기는 supabase-js가 아니라 PostgREST 직접 `fetch` + `next:{revalidate,tags}`로만 한다. supabase-js는 브라우저(Auth·쓰기·Storage) 전용 (§1, §3)
-- [ ] 각 단계 완료 시 `npm run build`·`npm run lint`·`npm run test`가 통과한다. mock 모드(`NEXT_PUBLIC_USE_MOCK=1`) 화면이 무손상이어야 한다
+- [x] 런타임 코드·env 파일에 service_role 키를 두지 않는다. service_role은 저장소 밖 1회성 마이그레이션에서만 쓴다 (§5) — 전 단계 준수, 키는 M2 종료 시 폐기
+- [x] 공개 읽기는 supabase-js가 아니라 PostgREST 직접 `fetch` + `next:{revalidate,tags}`로만 한다. supabase-js는 브라우저(Auth·쓰기·Storage) 전용 (§1, §3) — depcruise·구현 전반에서 유지
+- [x] 각 단계 완료 시 `npm run build`·`npm run lint`·`npm run test`가 통과한다. mock 모드(`NEXT_PUBLIC_USE_MOCK=1`) 화면이 무손상이어야 한다 — M0~M8 전 단계 게이트 통과, PR #18 CI 통과
 - [x] 대체가 완료되고 소비처가 소멸한 Firebase 구현 파일은 단계별로 제거한다(M4~M6 이 이 방식으로 진행 — M6 에서 `lib/firebase/` 소멸). Firebase 패키지·Rules·프로젝트 설정·환경변수의 최종 해체는 M8
 
 ## M0 — 결정·측정·프로젝트 준비 (§4 M0)
@@ -134,11 +134,11 @@
 
 ## M8 — 배포 전환·관찰·Firebase 해체 (§4 M8, §8~§10)
 
-- [ ] 배포 후 수동 시나리오: 공개 3섹션·앨범·지도, 관리자 CRUD·정렬·업로드, 챗봇, `?photo=`/`?work=`/`?project=`·블로그 slug 딥링크
-- [ ] RLS 검증: anon 세션으로 비공개 문서 select·임의 insert가 거부되는지 실서버에서 확인
-- [ ] keep-alive 첫 실행 성공 확인, Supabase 대시보드 egress·용량 모니터링 시작
-- [ ] keep-alive 유효성 관찰: 주 2회로 충분하다고 가정하지 않고 관찰 기간 동안 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
-- [ ] 2주 관찰: Firebase 프로젝트·이전 환경변수 보존, 전환 직후 1주는 편집 최소화 (롤백 = 이전 커밋 재배포 + env 복원, §9)
+- [x] 배포 후 수동 시나리오(2026-08-15, sungjoon.works): 공개 경로 9종 200·Supabase 이미지 URL 522건(Firebase 0)·CSP 에 Supabase·Nominatim 확인, 블로그 slug 상세 렌더, 본문 검색 API 매치, 챗봇 RAG 참조 카드 정답. 관리자 CMS 전 영역 CRUD 는 사용자가 프로덕션에서 검증 완료 — 콘텐츠 편집 동결 해제
+- [x] RLS 검증(2026-08-15): anon 키로 비공개 select → 빈 배열, 임의 insert → 401 거부
+- [x] keep-alive 첫 실행 성공(수동 dispatch, 2026-08-15) + 주기를 주 2회 → 3일 간격으로 변경, Supabase 대시보드 모니터링 시작
+- [ ] keep-alive 유효성 관찰(관찰 기간 중): 3일 간격으로 충분하다고 가정하지 않고 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
+- [ ] 2주 관찰(2026-08-15 시작, ~08-29): Firebase 프로젝트·이전 환경변수 보존 (롤백 = 이전 커밋 재배포 + env 그대로, §9)
 - [ ] 로컬 Supabase 기반 RLS 통합 테스트 작성으로 `test:rules` 대체 (§8)
 - [ ] 관찰 종료 후 해체: firebase·firebase-tools·@firebase/rules-unit-testing 제거(lockfile npm 10 재생성), `firestore.rules`·`storage.rules`·`firestore.indexes.json`·`firebase.json`·`.firebaserc`·`lib/firebase/` 삭제, knip·depcruise 통과
 - [ ] 문서 개정: CLAUDE.md(스택·원칙·데이터 모델·env·한도 표·명령어), ADR-0001 각주, `.claude/agents/firebase.md`, troubleshooting 2편 (§10)
