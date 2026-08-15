@@ -11,7 +11,7 @@
 | ---- | -------------------------------------- | ------- |
 | M0   | 결정·측정·프로젝트 준비                | ✅ 완료 |
 | M1   | 스키마·RLS·버킷·keep-alive             | ✅ 완료 |
-| M2   | 데이터 마이그레이션 리허설             | ⬜ 미착수 |
+| M2   | 데이터 마이그레이션 리허설             | ✅ 완료 (키 폐기만 대기) |
 | M3   | 인증 교체                              | ⬜ 미착수 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ⬜ 미착수 |
 | M5   | 관리자 쓰기·Storage 교체               | ⬜ 미착수 |
@@ -57,15 +57,15 @@
 
 ## M2 — 데이터 마이그레이션 리허설 (§5)
 
-- [ ] 저장소 밖 임시 디렉토리에서 진행하고, Firebase 서비스 계정 키·service_role 키를 발급한다 (완료 후 폐기 항목까지 체크)
-- [ ] 공식 도구 `firestore2json.js`로 9개 컬렉션 덤프 (`ragDocuments` 제외 — M7 재생성), 변환 훅(Timestamp→ISO, 스칼라 컬럼 추출, 나머지 `data` jsonb) 작성 (§5.1)
-- [ ] 변환 예외 적용: `devArticleTags`는 `ko`·`en` 직접 컬럼 추출 (`data` 없음), `site`는 문서 id 3종(`config`·`music`·`dev`) 확인 (§5.1)
-- [ ] 도구가 §2.2 스키마와 안 맞으면 자체 스크립트(전 문서 JSON 덤프 + `pg` insert)로 전환을 결정하고 기록한다
-- [ ] `download.js`/`upload.js`로 4개 프리픽스(`photos`·`music`·`dev`·`dev-blog`) 파일 이전, 경로 보존 확인 (§5.2)
-- [ ] URL 재작성 스크립트 작성·실행: 문서 필드 5종의 ImageMeta를 재귀 변환 (`url`·`preview.url`·`thumbnail.url` 전부 — 화면이 파생본 URL을 우선 사용) + 블로그 본문 Markdown (§5.3)
-- [ ] 검증: 이전한 9개 컬렉션 문서 수 = 행 수, `data` 컬럼 보유 테이블에서 `firebasestorage` 잔존 0 (`dev_article_tags`·`rag_documents`는 `data`가 없어 제외), 표본 문서 필드 결손 없음 (§5.4)
-- [ ] 스크립트 일체를 재실행 가능하게 보관한다 (M7 본 이전에 재사용)
-- [ ] 마이그레이션에 쓴 두 키를 폐기했다
+- [x] 저장소 밖 임시 디렉토리(`~/Desktop/github/aperture-migration/`)에서 진행, Firebase 서비스 계정 키·Supabase secret key 발급
+- [x] 자체 스크립트로 전환 결정: 공식 도구는 스칼라+jsonb 하이브리드 스키마·태그 예외·URL 재작성을 어차피 훅으로 다 짜야 해서 채택하지 않음. `dump/transform/upload-storage/insert/verify` 5개 스크립트(firebase-admin + supabase-js, 전부 upsert라 M7 델타 재실행 안전)
+- [x] 9개 컬렉션 덤프 (`ragDocuments` 제외 — M7 재생성): 문서 204개 (photos 173·albums 1·musicWorks 4·musicAwards 0·musicMedia 4·devProjects 9·devArticles 3·devArticleTags 7·site 3)
+- [x] 변환: Timestamp→ISO, 스칼라 추출(`published`·`order`→`sort_order`·`slug`·`publishedAt`), 원본 `createdAt`/`updatedAt` 보존, 예외 적용(`devArticleTags` 직접 컬럼, `site` id 3종 확인)
+- [x] Storage 이전: 759개 객체를 `media` 버킷에 경로 보존 업로드, 공개 URL 실서빙 확인(HTTP 200, image/webp)
+- [x] URL 재작성: ImageMeta 재귀 변환(`url`·`preview.url`·`thumbnail.url`) + 블로그 본문 Markdown 치환(rag 글 이미지 4건 확인) (§5.3)
+- [x] 검증: 9개 컬렉션 문서 수 = 행 수 전부 일치, `data` 보유 8테이블 `firebasestorage` 잔존 0건, 표본(사진·글·site 3문서) 필드 결손 없음 (§5.4)
+- [x] 스크립트 일체를 `~/Desktop/github/aperture-migration/`에 재실행 가능하게 보관 (M7 본 이전에 재사용)
+- [ ] 마이그레이션에 쓴 두 키를 폐기했다 (Firebase 서비스 계정 키 삭제 + Supabase secret key 회전 — M7 때 재발급. 사용자 수행 후 체크)
 
 ## M3 — 인증 교체 (§3, §4 M3)
 
