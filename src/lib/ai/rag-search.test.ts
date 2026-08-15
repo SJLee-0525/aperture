@@ -121,13 +121,24 @@ describe("searchRagChunks — 열린 항목 우선 검색", () => {
     );
   });
 
-  it("우선 대상이 없으면 기존 결과와 같다", async () => {
+  it("우선 대상이 없으면 하한 통과 청크만 남는다", async () => {
     mocks.matchRagChunks.mockResolvedValue([...weakArticles, ...strong]);
 
     const chunks = await searchRagChunks({ text: "질문" }, ["development"]);
 
     expect(chunks).toHaveLength(8);
     expect(chunks.every(({ sourceType }) => sourceType === "project")).toBe(true);
+  });
+
+  it("하한 통과 청크가 상한을 넘으면 10개에서 자른다", async () => {
+    const many = Array.from({ length: 12 }, (_, index) =>
+      candidate({ id: `p${index}`, section: "development", sourceType: "project", vectorScore: 1 }),
+    );
+    mocks.matchRagChunks.mockResolvedValue(many);
+
+    const chunks = await searchRagChunks({ text: "질문" }, ["development"]);
+
+    expect(chunks).toHaveLength(10);
   });
 
   it("지시어 질의는 최소 점수 기준을 넘지 못한 우선 대상도 앞자리를 받는다", async () => {
@@ -137,9 +148,9 @@ describe("searchRagChunks — 열린 항목 우선 검색", () => {
       prioritize: { sourceType: "article", sourceId: "a1", ignoreScoreFloor: true },
     });
 
-    // 자르기 전에 나누지 않으면 전체 상위 8개가 프로젝트로 채워져 글이 한 건도 남지 않는다.
+    // 자르기 전에 나누지 않으면 상한이 프로젝트로 채워져 글이 한 건도 남지 않는다.
     expect(chunks.slice(0, 3).map(({ id }) => id)).toEqual(["a1-0", "a1-1", "a1-2"]);
-    expect(chunks).toHaveLength(8);
+    expect(chunks).toHaveLength(10);
     expect(chunks.slice(3).every(({ sourceType }) => sourceType === "project")).toBe(true);
   });
 

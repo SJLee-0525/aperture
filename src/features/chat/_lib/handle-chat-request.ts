@@ -25,10 +25,9 @@ import {
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import {
-  articleScreenEntry,
   buildScreenContextLookup,
   entryOf,
-  formatScreenContextBlock,
+  formatArticleScreenContextBlock,
   resolveScreenContext,
 } from "@/features/chat/_lib/resolve-chat-screen-context";
 
@@ -252,7 +251,8 @@ const resolveContextTarget = async (
     if (!article || !article.published || article.slug !== slug) return {};
     return {
       ...resolved,
-      screenContext: formatScreenContextBlock(articleScreenEntry(article, lang)),
+      // 열어 둔 글은 본문 평문까지 문맥에 싣는다. 검증에 읽은 문서를 재사용한다.
+      screenContext: formatArticleScreenContextBlock(article, lang),
     };
   } catch {
     // 조회가 막히면 이 글이 아직 공개인지 확인할 수 없다. 문맥 없이 답한다.

@@ -1,8 +1,12 @@
+import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
+import { articleBlockText } from "@/features/dev-blog/_lib/article-plain-text";
+
 import { devArticleRoute } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { ChatContextOpenTarget, ChatContextTarget } from "@/features/chat/_lib/chat-context";
 import type { ChatDevArticle, ChatProfileData } from "@/lib/content/chat";
+import type { DevArticle } from "@/types/dev-article";
 import type { Lang } from "@/types/lang";
 
 /** 화면 문맥에 필요한 다섯 종류의 공개 콘텐츠. */
@@ -16,6 +20,12 @@ type ScreenContextLookup = Record<ChatContextTarget, Record<string, string>>;
 
 /** 화면 문맥 프롬프트의 최대 문자 수. */
 const MAX_SCREEN_CONTEXT_CHARS = 1_500;
+
+/**
+ * 열어 둔 글 본문을 프롬프트에 실을 때의 최대 문자 수.
+ * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다.
+ */
+const MAX_ARTICLE_BODY_CONTEXT_CHARS = 8_000;
 
 /**
  * 공개된 항목만 남긴다.
@@ -148,6 +158,34 @@ const formatScreenContextBlock = (entry: string): string =>
     .slice(0, MAX_SCREEN_CONTEXT_CHARS);
 
 /**
+ * 열어 둔 글의 화면 문맥 — 항목 한 줄 뒤에 본문 평문 전체를 싣는다.
+ * 우선 RAG 슬롯만으로는 긴 글의 요약·후반부 질문에 앞부분 청크만 닿는다.
+ * 방문자가 보고 있는 글에 한해 본문을 그대로 넣으며, 문서는 target 검증이
+ * 이미 읽은 것을 재사용하므로 추가 조회가 없다.
+ *
+ * @param {DevArticle} article 검증을 마친 공개 글(본문 포함).
+ * @param {Lang} lang 표시 언어.
+ * @returns {string} provider에 전달할 화면 문맥 블록.
+ */
+const formatArticleScreenContextBlock = (article: DevArticle, lang: Lang): string => {
+  const body = analyzeArticle(article)
+    .document.blocks.map(articleBlockText)
+    .filter(Boolean)
+    .join("\n");
+  const clipped =
+    body.length > MAX_ARTICLE_BODY_CONTEXT_CHARS
+      ? `${body.slice(0, MAX_ARTICLE_BODY_CONTEXT_CHARS)}\n[remainder truncated]`
+      : body;
+  return [
+    "# SCREEN_CONTEXT",
+    "The visitor currently has this item open on screen:",
+    articleScreenEntry(article, lang),
+    "Full article text (plain):",
+    clipped,
+  ].join("\n");
+};
+
+/**
  * lookup의 own property에 저장된 문자열 항목만 읽는다.
  * 항목이 없으면 그 id 는 공개 데이터에 존재하지 않으므로, 호출부가 target 검증에도 쓴다.
  *
@@ -195,10 +233,10 @@ const resolveScreenContext = async (
 };
 
 export {
-  articleScreenEntry,
   buildScreenContextLookup,
   entryOf,
-  formatScreenContextBlock,
+  formatArticleScreenContextBlock,
+  MAX_ARTICLE_BODY_CONTEXT_CHARS,
   MAX_SCREEN_CONTEXT_CHARS,
   resolveScreenContext,
 };

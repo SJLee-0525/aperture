@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   buildScreenContextLookup,
+  formatArticleScreenContextBlock,
+  MAX_ARTICLE_BODY_CONTEXT_CHARS,
   MAX_SCREEN_CONTEXT_CHARS,
   resolveScreenContext,
 } from "@/features/chat/_lib/resolve-chat-screen-context";
@@ -166,5 +168,47 @@ describe("resolveScreenContext", () => {
 
     expect(block).toContain("Performance:");
     expect(getFreshScreenLookup).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("formatArticleScreenContextBlock", () => {
+  const articleOf = (body: string) => ({
+    id: "a1",
+    slug: "context-test",
+    title: { ko: "글 제목", en: "Post title" },
+    summary: { ko: "요약", en: "Summary" },
+    body,
+    cover: null,
+    coverAlt: null,
+    tags: [],
+    relatedProjectIds: [],
+    published: true,
+    publishedAt: new Date("2026-08-01T00:00:00.000Z"),
+    firstPublishedAt: null,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+  });
+
+  it("항목 한 줄 뒤에 본문 평문을 싣고 1,500자 상한을 적용하지 않는다", () => {
+    const paragraph = "긴 본문 문단입니다. ".repeat(80).trim();
+    const block = formatArticleScreenContextBlock(
+      articleOf(`# 소개\n\n${paragraph}\n\n## 상세\n\n${paragraph}`),
+      "ko",
+    );
+
+    expect(block).toContain("# SCREEN_CONTEXT");
+    expect(block).toContain("Article: 글 제목");
+    expect(block).toContain("Full article text (plain):");
+    expect(block).toContain("긴 본문 문단입니다.");
+    expect(block).toContain("상세");
+    expect(block.length).toBeGreaterThan(MAX_SCREEN_CONTEXT_CHARS);
+  });
+
+  it("본문이 상한을 넘으면 자르고 생략 표시를 남긴다", () => {
+    const block = formatArticleScreenContextBlock(articleOf("가나다 ".repeat(4000)), "ko");
+
+    expect(block).toContain("[remainder truncated]");
+    // 상한 + 항목 줄·헤더 여유. 본문만 잘리고 블록 전체가 다시 잘리지는 않는다.
+    expect(block.length).toBeLessThanOrEqual(MAX_ARTICLE_BODY_CONTEXT_CHARS + 500);
   });
 });
