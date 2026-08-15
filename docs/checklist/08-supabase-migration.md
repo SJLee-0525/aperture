@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M5 완료 — 관리자 CMS·Storage 가 Supabase 로 동작, 드래그 정렬 = RPC 1건. 보류: keep-alive `schedule` 확인은 main 머지 후. 다음: M6 RAG pgvector)
+> 마지막 갱신: 2026-08-15 (M0~M5 완료, M6 구현 완료 — RAG 가 pgvector 로 동작하고 `lib/firebase/` 가 소멸. 남은 M6 검증: 실데이터 fixture RPC·인덱스 재생성·p50 측정(관리자 토큰 필요). 보류: keep-alive `schedule` 확인은 main 머지 후)
 
 ## 진행 요약
 
@@ -15,7 +15,7 @@
 | M3   | 인증 교체                              | ✅ 완료 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
 | M5   | 관리자 쓰기·Storage 교체               | ✅ 완료 |
-| M6   | RAG pgvector 전환                      | ⬜ 미착수 |
+| M6   | RAG pgvector 전환                      | 🔄 구현 완료 (실데이터 검증 대기) |
 | M7   | 본 데이터 이전·전환 준비               | ⬜ 미착수 |
 | M8   | 배포 전환·관찰·Firebase 해체           | ⬜ 미착수 |
 
@@ -30,7 +30,7 @@
 - [ ] 런타임 코드·env 파일에 service_role 키를 두지 않는다. service_role은 저장소 밖 1회성 마이그레이션에서만 쓴다 (§5)
 - [ ] 공개 읽기는 supabase-js가 아니라 PostgREST 직접 `fetch` + `next:{revalidate,tags}`로만 한다. supabase-js는 브라우저(Auth·쓰기·Storage) 전용 (§1, §3)
 - [ ] 각 단계 완료 시 `npm run build`·`npm run lint`·`npm run test`가 통과한다. mock 모드(`NEXT_PUBLIC_USE_MOCK=1`) 화면이 무손상이어야 한다
-- [x] 대체가 완료되고 소비처가 소멸한 Firebase 구현 파일은 단계별로 제거할 수 있다. Firebase 패키지·설정·Rules 와 잔여 계층(RAG REST 경로)의 일괄 해체는 M8 (M5 계획 검수에서 규칙 정정 — M4·M5 가 이미 이 방식으로 진행됨)
+- [x] 대체가 완료되고 소비처가 소멸한 Firebase 구현 파일은 단계별로 제거한다(M4~M6 이 이 방식으로 진행 — M6 에서 `lib/firebase/` 소멸). Firebase 패키지·Rules·프로젝트 설정·환경변수의 최종 해체는 M8
 
 ## M0 — 결정·측정·프로젝트 준비 (§4 M0)
 
@@ -101,20 +101,26 @@
 - [x] 본문 이미지 경로 파서(`article-body-storage-paths`)를 Supabase 공개 URL(URL 파싱)과 기존 Firebase 형식 이중 지원으로 교체 — 누락 시 본문 이미지 전체가 미사용 삭제 후보가 되는 M5 최대 위험 해소 (테스트 8케이스 추가)
 - [x] `next.config.ts` remotePatterns 에 Supabase 호스트 추가, `storage-source-url` 을 Supabase origin 정확 일치 + 공개 media 경로 한정으로 재작성(서명·변환 엔드포인트 거부, redirect 재검증 보존)
 - [x] mock 모드 전 관리자 화면 회귀 확인 (`test:e2e:admin` 20 통과) — 실데이터 모드 CRUD·드래그 정렬·이미지 업로드 수동 확인은 사용자 검증 대기
-- [x] 실데이터 검증(사용자 수행): 관리자 목록·CRUD 왕복·드래그 정렬·이미지 업로드 확인
+- [x] 실데이터 검증(사용자 수행, M6 계획 승인 전 완주): 사진·앨범·연주(음악)·개발 프로젝트·블로그(수정·삭제 포함)·랜딩/사이트 설정·문의(연락) 전 영역의 CRUD·드래그 정렬·이미지 업로드 이상 없음. 유일한 발견 = 장소 검색 네트워크 오류 → Supabase 무관(CSP 강제 모드 회귀), M6 사전 픽스로 Nominatim 호스트를 connect-src 에 추가해 해소
 - [x] 원격 RPC 실검증(admin JWT): 2건→반환 2, 부재 ID 포함 3건→반환 2(부분 반영 검출), 동일 값 재저장→대상 행 수, `updated_at` 트리거 발동, `merge_site_document` 반환 1 + 기존 필드 7종 보존 병합 (anon 거부 포함, 테스트 행·probe 정리 완료)
 - [x] 알려진 부채 기록: 사진·음악·프로젝트 폴더의 Storage 잔존 파일은 orphan 스캔 대상(dev-blog 한정)이 아니다. M5 후에도 RAG 동기화는 M6까지 실패(라우트가 Firestore 에 쓰기 때문 — stale 배너 지속)
 
 ## M6 — RAG pgvector 전환 (§6)
 
-- [ ] `match_rag_chunks` RPC 마이그레이션 추가 (후보 40, 섹션·모델 키 필터, `revoke`/`grant execute` 명시) (§6)
-- [ ] `portfolio-embeddings` 라우트: Firestore commit 조립을 upsert + delete로 교체, 사용자 access token 전달로 RLS 인가, 배치 분할·1,000문서 가드 제거
-- [ ] `rag-search.ts`: RPC 후보 + 후처리(키워드 0.35 가중, 하한 0.3/0.5, 우선 슬롯 3, 최종 8) 구조로 교체 — 기존 반환 계약 유지
-- [ ] `prioritize` 대상이 후보 밖일 때의 보강 조회 구현 — 필터는 `(source_type, source_id)` 쌍 기준, `source_id` 단독 필터 금지 (§6)
-- [ ] `rag-index.ts`·`public/rag.ts` 삭제, `CHAT_PROFILE_CACHE_TAG`는 프로필 캐시용으로 유지
-- [ ] `/admin/maintenance` 전체 재생성으로 리허설 환경 인덱스 생성 후 챗봇 응답·참조 카드 확인
-- [ ] 챗 p50 응답 시간을 이전 구조와 비교해 기록
-- [ ] `use-rag-stale-alert`·fingerprint skip 정책이 새 저장소에서도 동작하는지 확인
+- [x] 사전 픽스: 장소 검색(Nominatim) 호스트를 CSP connect-src 에 추가 + 회귀 테스트 — CSP 강제 모드 이후 차단이 네트워크 오류로 위장되던 회귀(Supabase 무관)
+- [x] `match_rag_chunks` RPC 마이그레이션 적용 (후보 40 기본·1~100 clamp, 섹션 허용 4값 intersect, 모델 키 필터, published 명시, revoke 후 anon+authenticated grant). vector 확장이 `extensions` 스키마라 `set search_path = pg_catalog, extensions` + 테이블 완전 수식 — `''` 로는 `<=>` 해석 불가
+- [x] 우선 보강: `(prioritize_source_type, prioritize_source_id)` 쌍이 모두 있을 때만 그 원본의 발행 청크 전량을 후보에 union, `distinct on (id)` 중복 제거. 벡터 순위로 자르지 않는다 — 앱의 우선 슬롯 선별이 키워드 점수 합산 후라서
+- [x] `lib/supabase/rag.ts` 신설(서버 전용 `server-only`): RPC 검색(anon), 메타 조회(`order=id.asc` Range 페이지네이션·416 종료), 교체(upsert 100행 청크 → stale 삭제 50개 청크 `in.(...)` 이중따옴표 quoting). `replacementScopeFor()` 가 범위 단일 출처(photoTags = 사진 전체, sourceId 필터 금지). 저장 전 벡터 개수·512차원·유한값 전수 검증으로 부분 갱신 차단, 1,000문서 가드 유지
+- [x] `portfolio-embeddings` 라우트: Firestore commit 조립을 rag.ts 호출로 교체 — POST/GET 응답 스키마·502 불변, 업스트림 원문은 서버 로그만. GET 은 id 단순 비교(구 full resource name 비교 대체)
+- [x] `rag-search.ts`: RPC 후보 + 후처리(키워드 0.35 가중, 하한 0.3/0.5, 우선 슬롯 3, 최종 8) 구조로 교체 — 기존 반환 계약 유지, 모델·섹션 필터는 RPC 소관
+- [x] 알려진 검색 품질 변화: 키워드 구제가 벡터 상위 40 후보 안에서만 작동 — 벡터 41위 밖의 keyword-only 일치는 결과에서 빠질 수 있다(구조상 변화, 코드 주석·테스트에 명시). 실데이터 고유명사 질의 recall 확인은 아래 검증 항목
+- [x] `rag-index.ts`(+test)·`lib/firebase/public/*` 5파일 삭제, `CHAT_PROFILE_CACHE_TAG`·route 무효화는 프로필 캐시용으로 유지. 도메인 유틸 4종(+테스트)을 `lib/content/` 로 이동해 `lib/firebase/` 완전 소멸 — Firebase 활성 import·env 참조 0 (3분할 grep, 잔존 호스트 문자열은 CSP M8 유지분·구 URL 파서 픽스처·mock 뿐)
+- [x] 테스트 재작성: route 12케이스(upsert 선행·스코프 일치·quoting·Range·벡터 검증 시 쓰기 0회·502 원문 비노출), `rag.test.ts` 신설(scope 5매핑·직렬화·페이지네이션·순서·상한), rag-search 10케이스. 전체 1,599 통과 + check·lint·knip·depcruise·build 통과
+- [x] 원격 RPC anon 스모크: 512차원 → 200 `[]`(빈 테이블), 함수·연산자 해석 정상. 함수 인자 typmod 는 미강제라 차원 불일치는 행 존재 시 `<=>` 평가에서 오류 — fixture 검증에서 확인
+- [ ] 실제 행 fixture 원격 RPC 검증(관리자 토큰 필요): 포함/타 모델·타 섹션·미발행 제외/코사인 순위/우선 보강/중복 없음/clamp/차원 불일치 오류, 검증 후 행 삭제
+- [ ] `/admin/maintenance` 전체 재생성으로 실데이터 인덱스 생성(행 수 = count, GET percent 100) 후 챗봇 응답·참조 카드·고유명사 질의 recall 확인
+- [ ] 챗 p50 기록: warm-up 제외 고정 질의 15~20회, 전체 응답과 RPC 구간 분리 측정 — 구 구조 측정치가 없어 M6 baseline 으로 남긴다
+- [ ] `use-rag-stale-alert`·fingerprint skip 정책이 새 저장소에서도 동작하는지 확인 (글 저장 시 "RAG 자동 갱신 실패" 경고 소멸 포함)
 
 ## M7 — 본 데이터 이전·전환 준비 (§4 M7, §5)
 
