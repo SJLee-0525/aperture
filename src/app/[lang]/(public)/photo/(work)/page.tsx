@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     lang,
     title: { ko: "사진 작업", en: "Photography" },
     description: {
-      ko: "사진작가 이성준의 사진 작업을 주제와 촬영 정보별로 소개합니다.",
+      ko: "이성준의 사진 작업을 주제와 촬영 정보별로 소개합니다.",
       en: "Photography by Sungjoon Lee, organized by theme and shooting details.",
     },
     pathname: "/photo",

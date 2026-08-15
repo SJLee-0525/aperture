@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     lang,
     title: { ko: "피아니스트 소개", en: "About the Pianist" },
     description: {
-      ko: "피아니스트 이성준의 음악 활동과 레퍼토리를 소개합니다.",
-      en: "About pianist Sungjoon Lee, his musical activity and repertoire.",
+      ko: "이성준의 음악 활동과 레퍼토리를 소개합니다.",
+      en: "About Sungjoon Lee, his musical activity and repertoire.",
     },
     pathname: "/music/about",
   });

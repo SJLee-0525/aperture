@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     lang,
     title: { ko: "음악 경력", en: "Music Career" },
     description: {
-      ko: "피아니스트 이성준의 학력, 경력과 수상 이력을 소개합니다.",
-      en: "The education, career, and awards of pianist Sungjoon Lee.",
+      ko: "이성준의 학력, 경력과 수상 이력을 소개합니다.",
+      en: "The education, career, and awards of Sungjoon Lee.",
     },
     pathname: "/music/career",
   });
