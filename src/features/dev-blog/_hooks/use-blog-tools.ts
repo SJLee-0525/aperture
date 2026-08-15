@@ -18,7 +18,10 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
 const LIST_TOOL: WebMcpToolDefinition = {
   name: "list_blog_posts",
   description:
-    "List published blog posts, optionally filtered by tag. " +
+    "List published blog posts, or filter them by blog tag. Blog tags are a fixed set kept " +
+    "for the blog, separate from photo tags and project tech stacks. Call with no arguments " +
+    "to get every post plus the tags in use. Use this rather than search_portfolio whenever " +
+    "the request names a tag: only this tool knows the tag list and can say that none match. " +
     "Returns each post's id, slug, publish date, reading time and page path.",
   inputSchema: objectSchema({
     tag: stringProperty(
@@ -41,6 +44,18 @@ const GET_TOOL: WebMcpToolDefinition = {
   }),
   annotations: { readOnlyHint: true, untrustedContentHint: false },
 };
+
+/**
+ * 사전에 있는 태그를 id 와 두 언어 라벨로 나열한다.
+ *
+ * 태그를 못 맞힌 응답과 인자 없는 목록이 함께 쓴다. 어휘를 모르면 에이전트가 태그 질문을
+ * 키워드 검색으로 돌리고, 없는 태그를 "없다" 로 답할 근거도 사라진다.
+ *
+ * @param {DevArticleTag[]} tags 태그 사전 전체.
+ * @returns {string} `chatbot (챗봇 / Chatbot), …` 형태.
+ */
+const listKnownTags = (tags: DevArticleTag[]): string =>
+  tags.map((entry) => `${entry.id} (${entry.ko} / ${entry.en})`).join(", ");
 
 /**
  * 에이전트가 넘긴 문자열 인자를 정리한다. 공백만 있는 값은 넘기지 않은 것으로 본다.
@@ -88,13 +103,12 @@ const useBlogTools = (articles: ArticleToolData[], tags: DevArticleTag[]): void 
     if (tag) {
       matched = matched.filter((article) => matchesTag(article, tag));
       if (matched.length === 0) {
-        const known = tags.map((entry) => `${entry.id} (${entry.ko} / ${entry.en})`).join(", ");
-        return `No posts use "${tag}". Known tags: ${known}.`;
+        return `No posts use "${tag}". Known tags: ${listKnownTags(tags)}.`;
       }
     }
     if (matched.length === 0) return "No blog posts are published yet.";
 
-    return formatToolItems(matched, args.limit, (article) =>
+    const list = formatToolItems(matched, args.limit, (article) =>
       [
         pickText(article.title, lang),
         formatYMD(article.publishedAt),
@@ -106,6 +120,8 @@ const useBlogTools = (articles: ArticleToolData[], tags: DevArticleTag[]): void 
         .filter(Boolean)
         .join(" · "),
     );
+    // 태그를 지정하지 않은 호출은 어휘를 묻는 자리이기도 하다. 사전을 함께 준다.
+    return tag || tags.length === 0 ? list : `${list}\nKnown tags: ${listKnownTags(tags)}.`;
   });
 
   useModelContextTool(GET_TOOL, (args) => {

@@ -75,8 +75,12 @@ const CustomCursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const autoScrollAnchorRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  // 아래 효과는 포인터 좌표를 클로저 지역 변수로 들고 있다. 경로를 의존성에 넣으면 이동마다
+  // 효과가 다시 실행돼 좌표가 0,0 으로 초기화되고, 직후의 스크롤 이벤트가 커서를 좌상단에 그린다.
+  const pathnameRef = useRef(pathname);
 
   useEffect(() => {
+    pathnameRef.current = pathname;
     setCursorLoading("route", false);
   }, [pathname]);
 
@@ -133,6 +137,15 @@ const CustomCursor = () => {
       cursor.dataset.pressed = String(next);
     };
 
+    // 대기 표시는 모드와 따로 둔다. `draw` 는 스냅된 대상이 있으면 먼저 반환하는데,
+    // 링크를 클릭한 직후가 바로 그 상태라 모드에만 기대면 이동 중 표시가 나오지 않는다.
+    const setLoading = (next: boolean) => {
+      if (next === loading) return;
+      loading = next;
+      cursor.dataset.loading = String(next);
+      scheduleDraw();
+    };
+
     // 스냅된 요소에만 마킹 — 각 컴포넌트의 배경형 :hover가 :not([data-cursor-snapped])로
     // 자신을 끄게 해서 커서 면칠과 기초 호버 배경이 겹치지 않게 한다.
     const setSnapped = (next: HTMLElement | null) => {
@@ -167,7 +180,7 @@ const CustomCursor = () => {
       // --text를 사용해 라이트에서는 차콜, 다크에서는 밝은 무채색으로 대비를 유지한다.
       const accent =
         SECTION_ACCENTS[section ?? ""] ??
-        (stripLangPrefix(pathname) === "/" ? LANDING_CURSOR_ACCENT : "var(--accent)");
+        (stripLangPrefix(pathnameRef.current) === "/" ? LANDING_CURSOR_ACCENT : "var(--accent)");
       if (accent === currentAccent) return;
       currentAccent = accent;
       cursor.style.setProperty("--cursor-accent", accent);
@@ -423,15 +436,11 @@ const CustomCursor = () => {
     const onPointerUp = () => {
       setPressed(false);
     };
+    // 캡처 단계로 듣는다. next/link 는 자기 핸들러에서 기본 동작을 취소하므로, 버블 단계의
+    // window 리스너에는 `defaultPrevented` 가 이미 true 로 도착한다.
     const onClick = (event: MouseEvent) => {
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
+      if (suppressNextClick) return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return;
       }
 
@@ -440,10 +449,11 @@ const CustomCursor = () => {
       if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
 
       const nextUrl = new URL(anchor.href, window.location.href);
+      // 해제 신호가 pathname 변화라, 쿼리만 바꾸는 모달 딥링크(?photo=·?work=·?project=)에는
+      // 표시를 걸지 않는다. 걸면 해제될 일이 없어 안전 타이머가 만료될 때까지 남는다.
       if (
         nextUrl.origin !== window.location.origin ||
-        `${nextUrl.pathname}${nextUrl.search}` ===
-          `${window.location.pathname}${window.location.search}`
+        nextUrl.pathname === window.location.pathname
       ) {
         return;
       }
@@ -511,24 +521,19 @@ const CustomCursor = () => {
       window.clearTimeout(loadingSafetyTimer);
 
       if (loadingIds.size === 0) {
-        if (loading) {
-          loading = false;
-          scheduleDraw();
-        }
+        setLoading(false);
         return;
       }
 
       loadingSafetyTimer = window.setTimeout(() => {
         loadingIds.clear();
-        loading = false;
-        scheduleDraw();
+        setLoading(false);
       }, 10_000);
       if (loading) return;
 
       loadingDelayTimer = window.setTimeout(() => {
         if (loadingIds.size === 0) return;
-        loading = true;
-        scheduleDraw();
+        setLoading(true);
       }, 150);
     };
     const onWheel = (event: WheelEvent) => {
@@ -581,8 +586,9 @@ const CustomCursor = () => {
     window.addEventListener("pointerup", onPointerUp, { passive: true });
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("auxclick", onAuxClick);
+    // onClick 을 먼저 등록해 `suppressNextClick` 을 onClickCapture 가 소비하기 전에 읽는다.
+    window.addEventListener("click", onClick, true);
     window.addEventListener("click", onClickCapture, true);
-    window.addEventListener("click", onClick);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("wheel", onWheel, { passive: true });
     window.addEventListener("blur", onWindowBlur);
@@ -607,8 +613,8 @@ const CustomCursor = () => {
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("auxclick", onAuxClick);
+      window.removeEventListener("click", onClick, true);
       window.removeEventListener("click", onClickCapture, true);
-      window.removeEventListener("click", onClick);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("blur", onWindowBlur);
@@ -625,7 +631,7 @@ const CustomCursor = () => {
       if (frame) window.cancelAnimationFrame(frame);
       if (autoScrollFrame) window.cancelAnimationFrame(autoScrollFrame);
     };
-  }, [pathname]);
+  }, []);
 
   return (
     <>

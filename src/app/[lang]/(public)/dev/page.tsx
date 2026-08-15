@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+
+import { AboutPageSkeleton } from "@/components/PublicPageSkeletons";
 import { DevAboutView } from "@/features/dev/_components/DevAboutView";
 
 import { getDevConfig, getDevProjects } from "@/lib/content/dev";
@@ -21,12 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-/** 개발 — 소개 (/dev): 공통 소개 레이아웃(프로젝트·스택 파생 통계) + 인터뷰 Q&A.
- *  개발 섹션의 첫 화면이라 mega-menu 의 「개발」 버튼과 모바일 탭의 소개가 이 경로로 온다.
- *
- * @returns {Promise<JSX.Element>}
- *  뷰가 소비하는 config 필드와 프로젝트별 techTags만 투영해 직렬화. */
-export default async function DevPage() {
+/** 뷰가 소비하는 config 필드와 프로젝트별 techTags만 투영해 직렬화. */
+const DevAboutContent = async () => {
   const [config, projects] = await Promise.all([getDevConfig(), getDevProjects()]);
   return (
     <DevAboutView
@@ -36,5 +35,20 @@ export default async function DevPage() {
       timelineCount={config.timeline.length}
       projectTechTags={projects.map((p) => p.techTags)}
     />
+  );
+};
+
+/** 개발 — 소개 (/dev): 공통 소개 레이아웃(프로젝트·스택 파생 통계) + 인터뷰 Q&A.
+ *  개발 섹션의 첫 화면이라 mega-menu 의 「개발」 버튼과 모바일 탭의 소개가 이 경로로 온다.
+ *
+ *  셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `dev/loading.tsx` 경계는 career·projects·
+ *  articles 전환에도 함께 쓰여 이 지면 모양을 그릴 수 없다.
+ *
+ * @returns {JSX.Element} */
+export default function DevPage() {
+  return (
+    <Suspense fallback={<AboutPageSkeleton extended />}>
+      <DevAboutContent />
+    </Suspense>
   );
 }

@@ -95,6 +95,25 @@ describe("useBlogTools", () => {
     expect(result).toContain("/ko/dev/articles/serverless");
   });
 
+  // 태그 어휘를 모르면 에이전트가 태그 질문을 키워드 검색으로 돌린다(W6 6-6·6-8).
+  it("태그를 지정하지 않은 목록은 태그 사전을 함께 준다", async () => {
+    renderHook(() => useBlogTools(ARTICLES, TAGS));
+
+    const result = String(await executeOf("list_blog_posts")({}));
+
+    expect(result).toContain("Known tags:");
+    expect(result).toContain("accessibility");
+  });
+
+  it("태그로 거른 목록에는 사전을 덧붙이지 않는다", async () => {
+    renderHook(() => useBlogTools(ARTICLES, TAGS));
+
+    const result = String(await executeOf("list_blog_posts")({ tag: "회고" }));
+
+    expect(result).toContain("청크 나누기");
+    expect(result).not.toContain("Known tags:");
+  });
+
   it.each([
     ["태그 id", "retrospective"],
     ["한국어 라벨", "회고"],

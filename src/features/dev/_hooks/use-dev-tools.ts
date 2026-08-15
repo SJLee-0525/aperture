@@ -26,7 +26,8 @@ const LIST_TOOL: WebMcpToolDefinition = {
     "Returns each project's id, summary, and page path.",
   inputSchema: objectSchema({
     tech: stringProperty(
-      "Tech tag to filter by, e.g. 'React.js'. Case-insensitive; the '.js' suffix is optional.",
+      "Tech stack name to filter by, e.g. 'React.js'. Not a blog tag. " +
+        "Case-insensitive; the '.js' suffix is optional.",
     ),
     year: numberProperty("Only projects from this year."),
     limit: limitProperty(),

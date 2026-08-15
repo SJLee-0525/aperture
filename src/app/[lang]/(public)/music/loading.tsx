@@ -1,5 +1,5 @@
-import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
+import { PageLoadingPlaceholder } from "@/components/PageLoadingPlaceholder";
 
 export default function MusicLoading() {
-  return <CardGridPageSkeleton kind="poster" />;
+  return <PageLoadingPlaceholder />;
 }

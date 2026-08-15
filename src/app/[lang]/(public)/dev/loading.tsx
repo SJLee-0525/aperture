@@ -1,5 +1,5 @@
-import { AboutPageSkeleton } from "@/components/PublicPageSkeletons";
+import { PageLoadingPlaceholder } from "@/components/PageLoadingPlaceholder";
 
 export default function DevLoading() {
-  return <AboutPageSkeleton extended />;
+  return <PageLoadingPlaceholder />;
 }
