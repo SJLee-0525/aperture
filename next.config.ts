@@ -5,6 +5,26 @@ import packageJson from "./package.json" with { type: "json" };
 import { SECURITY_HEADERS } from "./src/constants/security-headers";
 import { assertDeployableContentSource } from "./src/lib/content/assert-deployable-content-source";
 
+/**
+ * env 에서 파생한 Supabase 이미지 호스트 패턴. CSP·PostgREST·Storage 검증기와
+ * 같은 env 를 단일 출처로 쓴다. env 가 없는 환경(mock 개발·typegen)에서는 빈 목록.
+ */
+const supabaseImagePatterns = () => {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!raw) return [];
+  try {
+    return [
+      {
+        protocol: "https" as const,
+        hostname: new URL(raw).hostname,
+        pathname: "/storage/v1/object/public/media/**",
+      },
+    ];
+  } catch {
+    return [];
+  }
+};
+
 const nextConfig: NextConfig = {
   // Playwright는 실행 중인 로컬 dev 서버와 충돌하지 않도록 전용 distDir를 주입한다.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
@@ -14,11 +34,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
     // Supabase 공개 버킷이 이미지 원본이다. Firebase 패턴은 이전 완료(M8)까지 유지한다.
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "jvvonzvzlooxxujfslcg.supabase.co",
-        pathname: "/storage/v1/object/public/media/**",
-      },
+      ...supabaseImagePatterns(),
       {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
