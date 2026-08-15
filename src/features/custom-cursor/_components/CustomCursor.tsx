@@ -256,11 +256,23 @@ const CustomCursor = () => {
         targetRadius >= Math.min(targetRect.width, targetRect.height) / 2 - 2;
     };
 
+    /**
+     * 대기 표식을 커서 요소 원점이 아니라 포인터 위에 둔다.
+     * 스냅·프레임 모드는 요소를 대상의 중심으로 옮기므로, 보정하지 않으면 표식이 카드
+     * 한가운데에서 돌아 포인터와 떨어진다.
+     */
+    const setLoadingOffset = (offsetX: number, offsetY: number) => {
+      cursor.style.setProperty("--cursor-loading-x", `${offsetX}px`);
+      cursor.style.setProperty("--cursor-loading-y", `${offsetY}px`);
+    };
+
     const draw = () => {
       frame = 0;
       if (!media.matches) return;
 
       if (targetDirty) measureTarget();
+      // 그 밖의 모드는 요소가 포인터 위에 있어 보정이 필요 없다.
+      if (loading) setLoadingOffset(0, 0);
 
       if (autoScrollTarget) {
         setSnapped(null);
@@ -313,11 +325,13 @@ const CustomCursor = () => {
           const hintX = targetRect.width ? (localX / targetRect.width) * 100 : 50;
           const hintY = targetRect.height ? (localY / targetRect.height) * 100 : 50;
 
+          const centerX = targetRect.left + targetRect.width / 2;
+          const centerY = targetRect.top + targetRect.height / 2;
+
           setSnapped(target);
           setMode("snap");
-          cursor.style.transform = `translate3d(${
-            targetRect.left + targetRect.width / 2
-          }px, ${targetRect.top + targetRect.height / 2}px, 0)`;
+          if (loading) setLoadingOffset(pointerX - centerX, pointerY - centerY);
+          cursor.style.transform = `translate3d(${centerX}px, ${centerY}px, 0)`;
           cursor.style.setProperty(
             "--cursor-width",
             `${targetCircular ? size : targetRect.width + expansion}px`,
@@ -346,10 +360,12 @@ const CustomCursor = () => {
           const horizontal = localX < targetRect.width / 2 ? "left" : "right";
           const vertical = localY < targetRect.height / 2 ? "top" : "bottom";
 
+          const centerX = targetRect.left + targetRect.width / 2;
+          const centerY = targetRect.top + targetRect.height / 2;
+
           cursor.dataset.corner = `${vertical}-${horizontal}`;
-          cursor.style.transform = `translate3d(${
-            targetRect.left + targetRect.width / 2
-          }px, ${targetRect.top + targetRect.height / 2}px, 0)`;
+          if (loading) setLoadingOffset(pointerX - centerX, pointerY - centerY);
+          cursor.style.transform = `translate3d(${centerX}px, ${centerY}px, 0)`;
           cursor.style.setProperty("--cursor-width", `${targetRect.width + expansion}px`);
           cursor.style.setProperty("--cursor-height", `${targetRect.height + expansion}px`);
           cursor.style.setProperty("--cursor-radius", "0px");
