@@ -178,14 +178,12 @@ describe("listRagDocumentMeta", () => {
   it("조회 오류는 빈 결과로 위장하지 않고 던진다", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue({
-          ok: false,
-          status: 500,
-          json: async () => [],
-          text: async () => "boom",
-        }),
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => [],
+        text: async () => "boom",
+      }),
     );
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
