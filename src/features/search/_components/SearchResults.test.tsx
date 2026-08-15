@@ -326,6 +326,8 @@ describe("SearchResults — 본문 일치", () => {
       expect(screen.getByRole("link", { name: /포트폴리오를 서버 없이/ })).toBeTruthy();
     });
     expect(screen.getByText("…수파베이스로 옮긴 이유는…")).toBeTruthy();
+    // 스니펫은 태그(meta)를 대체하지 않는다 — 태그는 제목 줄에 그대로 남는다.
+    expect(screen.getByText("Firebase · 아키텍처")).toBeTruthy();
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "/api/search-body?q=%EC%88%98%ED%8C%8C%EB%B2%A0%EC%9D%B4%EC%8A%A4",
     );
