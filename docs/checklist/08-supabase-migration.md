@@ -3,21 +3,21 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. M8 진행 중 — PR #18 머지(2026-08-15)로 프로덕션이 Supabase 전환, 2주 관찰 시작. 잔여: 배포 수동 시나리오·keep-alive 첫 실행·관찰 후 해체. 보류: keep-alive `schedule` 확인은 main 머지 후)
+> 마지막 갱신: 2026-08-16 (M0~M7 완료, M8 진행 중 — PR #18 머지로 프로덕션 Supabase 전환, 배포 후 수동 시나리오·RLS·keep-alive 확인 완료. 잔여: 2주 관찰(~08-29) 후 해체. 관찰·해체 절차: [09-supabase-observation-teardown.md](09-supabase-observation-teardown.md))
 
 ## 진행 요약
 
-| 단계 | 내용                                  | 상태      |
-| ---- | ------------------------------------- | --------- |
-| M0   | 결정·측정·프로젝트 준비               | ✅ 완료   |
-| M1   | 스키마·RLS·버킷·keep-alive            | ✅ 완료   |
-| M2   | 데이터 마이그레이션 리허설            | ✅ 완료   |
-| M3   | 인증 교체                             | ✅ 완료   |
-| M4   | 공개 읽기 교체 (PostgREST + ISR 유지) | ✅ 완료   |
-| M5   | 관리자 쓰기·Storage 교체              | ✅ 완료   |
-| M6   | RAG pgvector 전환                     | ✅ 완료   |
-| M7   | 본 데이터 이전·전환 준비              | ✅ 완료   |
-| M8   | 배포 전환·관찰·Firebase 해체          | ⬜ 미착수 |
+| 단계 | 내용                                  | 상태                         |
+| ---- | ------------------------------------- | ---------------------------- |
+| M0   | 결정·측정·프로젝트 준비               | ✅ 완료                      |
+| M1   | 스키마·RLS·버킷·keep-alive            | ✅ 완료                      |
+| M2   | 데이터 마이그레이션 리허설            | ✅ 완료                      |
+| M3   | 인증 교체                             | ✅ 완료                      |
+| M4   | 공개 읽기 교체 (PostgREST + ISR 유지) | ✅ 완료                      |
+| M5   | 관리자 쓰기·Storage 교체              | ✅ 완료                      |
+| M6   | RAG pgvector 전환                     | ✅ 완료                      |
+| M7   | 본 데이터 이전·전환 준비              | ✅ 완료                      |
+| M8   | 배포 전환·관찰·Firebase 해체          | 🔄 진행 중 (2주 관찰 ~08-29) |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
 
