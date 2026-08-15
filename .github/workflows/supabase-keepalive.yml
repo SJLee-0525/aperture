@@ -5,7 +5,9 @@ name: Supabase keep-alive
 
 on:
   schedule:
-    - cron: "23 3 * * 1,4"
+    # 3일 간격. 월말 경계(28~31일 → 1일)에서 간격이 1~3일로 흔들리지만
+    # 일시정지 기준(7일 무활동)보다 항상 짧다.
+    - cron: "23 3 */3 * *"
   workflow_dispatch:
 
 permissions: {}
