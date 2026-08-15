@@ -34,7 +34,7 @@
 
 ## Content source
 
-공개 페이지는 `src/lib/content/`의 getter를 통해 콘텐츠를 읽는다. `NEXT_PUBLIC_USE_MOCK=1`은 모든 공개 getter가 `src/mocks/`의 결정적인 데이터를 사용하도록 강제한다. E2E는 이 모드로 전용 Next.js 서버를 시작하며 Firebase 데이터나 관리자 인증에 의존하지 않는다.
+공개 페이지는 `src/lib/content/`의 getter를 통해 콘텐츠를 읽는다. `NEXT_PUBLIC_USE_MOCK=1`은 모든 공개 getter가 `src/mocks/`의 결정적인 데이터를 사용하도록 강제한다. E2E는 이 모드로 전용 Next.js 서버를 시작하며 Supabase 데이터나 관리자 인증에 의존하지 않는다.
 
 블로그 본문은 한국어 Markdown 원문 하나만 저장한다. 제목·요약·태그는 다른 콘텐츠처럼 한국어와 영어를 함께 저장하지만, 본문 번역은 제공하지 않는다. 초안은 공개 getter가 걸러내므로 공개 목록·상세·검색·RAG·sitemap 어디에도 나타나지 않는다.
 
@@ -62,12 +62,12 @@ Next.js App Router 단일 앱이며 의존 방향은 `app → features → compo
 - `app`: 라우팅, 공개 콘텐츠 fetch, feature 조립
 - `features`: 사용자 행동과 도메인 UI
 - `components`: props 기반 재사용 UI
-- `lib/content`: mock과 Firestore 콘텐츠 소스의 교체 지점
+- `lib/content`: mock과 Supabase 콘텐츠 소스의 교체 지점
 - `lib/monitoring`: Sentry 오류 관측. 공개 브라우저에서는 오류 보고 동의 후 로드하고, 관리자에서는 UID 확인 후 시작한다. 서버·엣지는 최소 수집 설정으로 항상 실행한다(ADR-0004).
 - `mocks`: 결정적인 공개 데모 콘텐츠
 - `admin`: 인증된 CMS이며 공개 E2E에서 제외
 
-공개 페이지의 서버 읽기는 Firestore REST를 사용하고 관리 기능은 Firebase client SDK를 사용한다. E2E mock 모드는 이 외부 경계를 통과하지 않는다. 지도 타일과 외부 링크는 제3자 시스템이므로 E2E는 앱의 컨테이너, 링크와 위치 데이터까지만 검증한다.
+공개 페이지의 서버 읽기는 PostgREST를 사용하고 관리 기능은 supabase-js를 사용한다. E2E mock 모드는 이 외부 경계를 통과하지 않는다. 지도 타일과 외부 링크는 제3자 시스템이므로 E2E는 앱의 컨테이너, 링크와 위치 데이터까지만 검증한다.
 
 ## E2E behavior contract
 

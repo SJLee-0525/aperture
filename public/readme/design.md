@@ -40,7 +40,7 @@
 
 ## 프로토타입에서 구현까지
 
-Claude Design으로 [`design/ver_2`](../../design/ver_2/)의 데스크톱·모바일 프로토타입을 만들고 이를 기준으로 화면을 구현했습니다. 프로토타입에 있던 정적 콘텐츠는 Firestore CMS와 한국어·영어 데이터 구조로 옮겼습니다. 추상 지도 대신 [MapLibre 기반 실제 지도](../../src/features/map/_components/MapCanvas.tsx)를 사용합니다.
+Claude Design으로 [`design/ver_2`](../../design/ver_2/)의 데스크톱·모바일 프로토타입을 만들고 이를 기준으로 화면을 구현했습니다. 프로토타입에 있던 정적 콘텐츠는 CMS와 한국어·영어 데이터 구조로 옮겼습니다. 추상 지도 대신 [MapLibre 기반 실제 지도](../../src/features/map/_components/MapCanvas.tsx)를 사용합니다.
 
 좋아요와 사진 프레임 내보내기는 현재 공개 범위에서 제외했습니다. 업로드 이미지는 [브라우저 압축 과정](../../src/features/image-upload/_lib/compress.ts)을 거쳐 긴 변 약 2048px의 WebP로 저장해 전송량과 Storage 사용량을 줄입니다.
 
