@@ -2,7 +2,7 @@ import { collectionCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
+import { removePhotoFromAlbum } from "@/lib/content/remove-photo-from-album";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { encodeListRow } from "@/lib/supabase/admin/row-codec";
 import { listAlbumsAdmin } from "@/lib/supabase/albums";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { devArticleRagPolicy } from "@/lib/firebase/dev-article-rag-policy";
+import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
 
 import type { DevArticle } from "@/types/dev-article";
 

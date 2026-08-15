@@ -3,7 +3,7 @@ import { getAlbumRepository } from "@/lib/admin/album-repository";
 import { createLocalListRepository } from "@/lib/admin/mock/local-list-repository";
 import { deleteMockImageFolder } from "@/lib/admin/mock/mock-image-store";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
+import { removePhotoFromAlbum } from "@/lib/content/remove-photo-from-album";
 import { listPhotoItemsAdmin } from "@/lib/supabase/admin-list";
 import {
   createPhoto,

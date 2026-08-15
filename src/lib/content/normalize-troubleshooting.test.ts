@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
+import { normalizeTroubleshooting } from "@/lib/content/normalize-troubleshooting";
 
 const empty = { ko: "", en: "" };
 

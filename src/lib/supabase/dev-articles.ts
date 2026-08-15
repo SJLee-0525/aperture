@@ -1,7 +1,7 @@
 import { collectionCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { devArticleRagPolicy } from "@/lib/firebase/dev-article-rag-policy";
+import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
 import { toDevArticle } from "@/lib/supabase/public/dev-articles";

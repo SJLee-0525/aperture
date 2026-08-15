@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
+import { removePhotoFromAlbum } from "@/lib/content/remove-photo-from-album";
 
 describe("removePhotoFromAlbum", () => {
   it("일반 사진 참조만 제거하고 커버는 유지한다", () => {

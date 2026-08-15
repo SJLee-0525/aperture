@@ -1,6 +1,6 @@
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
-import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
-import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
+import { normalizeDevAwards } from "@/lib/content/normalize-dev-awards";
+import { normalizeTroubleshooting } from "@/lib/content/normalize-troubleshooting";
 import { asText } from "@/lib/i18n/as-text";
 import { sanitizePublicLinks } from "@/lib/security/public-url";
 import { fetchRow, selectPublished } from "@/lib/supabase/public/transport";

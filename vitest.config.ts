@@ -19,7 +19,7 @@ export default defineConfig({
         "src/lib/format/*.ts",
         "src/lib/exif/*.ts",
         "src/lib/geo/*.ts",
-        "src/lib/firebase/normalize-troubleshooting.ts",
+        "src/lib/content/normalize-troubleshooting.ts",
         "src/hooks/use-query-modal.ts",
         "src/hooks/use-focus-trap.ts",
         "src/hooks/use-scroll-lock.ts",

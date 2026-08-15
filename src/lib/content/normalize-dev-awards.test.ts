@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
+import { normalizeDevAwards } from "@/lib/content/normalize-dev-awards";
 
 describe("normalizeDevAwards", () => {
   it("구형 수상에 안정적인 ID와 새 필드 기본값을 채운다", () => {

@@ -3,8 +3,8 @@ import { COLLECTIONS, SITE_DEV_DOC, SUPABASE_COLLECTIONS } from "@/constants/col
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
-import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
+import { normalizeDevAwards } from "@/lib/content/normalize-dev-awards";
+import { normalizeTroubleshooting } from "@/lib/content/normalize-troubleshooting";
 import { asText } from "@/lib/i18n/as-text";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
