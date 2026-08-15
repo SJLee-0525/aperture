@@ -11,9 +11,16 @@
 
 ## Why (스택)
 
-1. 사용자가 **Supabase 무료 DB 의 7일 무활동 일시정지를 거부** → Firestore 는 정지 없음.
+1. 사용자가 **Supabase 무료 DB 의 7일 무활동 일시정지를 거부** → Firestore 는 정지 없음. **(2026-08-15 재결정으로 뒤집힘 — 아래 「재결정」 참조)**
 2. 관리자 1명 + 방문자 구조라 상시 서버 불필요. 월 $0 목표.
 3. 트레이드오프: **Storage** 위해 Blaze 전환 + 카드 등록 (무료 한도 내 $0, 예산 알림 $1). 지도는 MapLibre+CARTO 무료 타일이라 결제 표면은 **Firebase 하나뿐**.
+
+## 재결정 (2026-08-15): 데이터 계층을 Supabase 로 이전
+
+- Firestore 읽기 한도(5만/일)가 실사용에서 소진되어(주범: 관리자 저장마다 RAG 스냅샷 캐시 무효화 → 챗 질문당 285문서 재조회) 위 Why 1번 트레이드오프를 재평가했다.
+- 7일 무활동 일시정지는 수용한다: ISR 이 재생성 실패 시 기존 캐시를 유지해 공개 페이지는 stale 로 살아 있고, GitHub Actions keep-alive(주 2회, Supabase API 직접 호출)로 정지를 막는다.
+- 측정(2026-08, 15일 사용): Storage 68.42MB · 객체 735개 · 전송 1.56GB(월 환산 약 3GB) · 요청 2.6만 → Supabase 무료 한도(Storage 1GB, egress 월 10GB) 내.
+- 결정·범위는 `docs/adr/0005-supabase-migration.md`, 실행 계획은 `docs/plan/08-supabase-migration.md`. 관리자 판별은 UID 하드코딩에서 `app_metadata.role="admin"` 클레임으로 변경.
 
 ## 프로젝트 정체성 (2026-07-01 확정)
 
