@@ -23,14 +23,31 @@ const FIREBASE_HOSTS = [
 const CARTO_HOSTS = ["https://basemaps.cartocdn.com", "https://*.basemaps.cartocdn.com"] as const;
 
 /**
+ * Supabase 프로젝트 origin. 인증·PostgREST·Storage 가 전부 이 호스트를 쓴다.
+ * env 미설정(mock 개발·단위 테스트)이면 목록에서 빠져 정책이 넓어지지 않는다.
+ */
+const supabaseHost = (): string | null => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+};
+
+/**
  * 관리자가 올린 이미지가 실제로 저장되는 호스트.
  * 블로그 본문 Markdown 의 이미지 출처 정책(`features/dev-blog/_lib/markdown-url-policy.ts`)이
  * 같은 목록을 사용해 CSP와 렌더 정책이 어긋나지 않게 한다.
+ * Firebase 호스트는 이전 완료(M8) 전까지 유지한다. mock 업로더가 [0]의 Firebase URL 형태를
+ * 쓰므로 Supabase 는 끝에 붙인다.
  */
 const STORAGE_IMAGE_HOSTS = [
   "https://firebasestorage.googleapis.com",
   "https://storage.googleapis.com",
-] as const;
+  ...(supabaseHost() ? [supabaseHost() as string] : []),
+];
 
 const IMAGE_HOSTS = [...STORAGE_IMAGE_HOSTS, "https://i.ytimg.com", ...CARTO_HOSTS] as const;
 
@@ -78,8 +95,11 @@ const ANALYTICS_CONNECT_HOSTS = [
  * @param {boolean} isDevelopment
  * @returns {string}
  */
-const buildContentSecurityPolicy = (isDevelopment: boolean) =>
-  [
+const buildContentSecurityPolicy = (isDevelopment: boolean) => {
+  // 테스트가 env 를 스텁한 뒤 호출할 수 있도록 모듈 로드가 아니라 호출 시점에 읽는다.
+  const supabase = supabaseHost();
+  const supabaseHosts = supabase ? [supabase] : [];
+  return [
     "default-src 'self'",
     "base-uri 'self'",
     "object-src 'none'",
@@ -92,15 +112,16 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) =>
     `style-src 'self' 'unsafe-inline' ${CAPTCHA_HOSTS.join(" ")}`,
     "font-src 'self' data:",
     // GA 는 fetch/beacon 이 막히면 1x1 픽셀로 폴백하므로 img-src 에도 같은 호스트가 필요하다.
-    `img-src 'self' data: blob: ${[...IMAGE_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
+    `img-src 'self' data: blob: ${[...new Set([...IMAGE_HOSTS, ...supabaseHosts, ...ANALYTICS_CONNECT_HOSTS])].join(" ")}`,
     // blob: 은 업로드 전 압축본(browser-image-compression)·내보내기 canvas 결과를 다시 읽는 경로.
     // data: 는 어느 경로도 fetch 하지 않아 넣지 않는다.
-    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...CARTO_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
+    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...supabaseHosts, ...CARTO_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
     `frame-src ${[...YOUTUBE_FRAME_HOSTS, ...CAPTCHA_HOSTS].join(" ")}`,
     // MapLibre 워커가 사용하는 blob: URL을 허용한다.
     "worker-src 'self' blob:",
     "upgrade-insecure-requests",
   ].join("; ");
+};
 
 const CONTENT_SECURITY_POLICY = buildContentSecurityPolicy(process.env.NODE_ENV !== "production");
 

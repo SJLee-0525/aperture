@@ -18,14 +18,14 @@ jobs:
       - name: Ping Supabase REST API
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "SUPABASE_URL / SUPABASE_ANON_KEY repo secrets가 필요합니다." >&2
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY repo secrets가 필요합니다." >&2
             exit 1
           fi
           curl --fail --silent --show-error \
             "$SUPABASE_URL/rest/v1/site_documents?select=id&limit=1" \
-            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
             > /dev/null
           echo "Supabase ping OK"
