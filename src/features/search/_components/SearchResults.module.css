@@ -173,6 +173,11 @@
     gap: var(--s-1);
   }
 
+  /* 모바일은 제목·태그만 남긴다. 좁은 화면에서 스니펫까지 쌓이면 행이 세 줄이 된다. */
+  .hitSnippet {
+    display: none;
+  }
+
   .hitMeta {
     overflow-wrap: anywhere;
     text-align: left;
