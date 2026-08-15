@@ -99,11 +99,25 @@
 }
 .hitText {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
+  gap: var(--s-1);
+}
+.hitRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  min-width: 0;
   gap: var(--s-4);
+}
+/* 본문 일치 근거 — 태그(hitMeta)는 제목 줄에 남고 스니펫만 아랫줄 한 줄로 자른다. */
+.hitSnippet {
+  overflow: hidden;
+  font-size: var(--t-small);
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hit:hover:not([data-cursor-snapped]) {
   background: var(--surface-2);
@@ -153,7 +167,7 @@
     height: 44px;
   }
 
-  .hitText {
+  .hitRow {
     align-items: stretch;
     flex-direction: column;
     gap: var(--s-1);

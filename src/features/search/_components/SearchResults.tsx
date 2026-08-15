@@ -30,6 +30,8 @@ type Hit = {
   href: string;
   imageUrl?: string;
   score: number;
+  /** 본문 일치 근거. 태그(meta)와 별개로 제목 아랫줄에 표시한다. */
+  snippet?: string;
 };
 /** 렌더 순서를 가진 결과 묶음 키. 개발 섹션만 프로젝트와 블로그로 나뉜다. */
 type GroupKey = SearchSection | "blog";
@@ -102,11 +104,12 @@ const SearchResults = ({ documents }: Props) => {
       hits.blog.push({
         key: document.key,
         titleSegments: splitTitleByMatches(pickText(document.title, lang), highlightTokens),
-        meta: match.snippet,
+        meta: document.meta ? pickText(document.meta, lang) : "",
         href: document.href,
         imageUrl: document.imageUrl,
         // 제목·태그 매치보다 근거가 약하므로 인덱스 매치 아래에 놓는다.
         score: 0,
+        snippet: match.snippet,
       });
     }
 
@@ -164,18 +167,25 @@ const SearchResults = ({ documents }: Props) => {
                       </span>
                     ) : null}
                     <span className={styles.hitText}>
-                      <span className={styles.hitTitle}>
-                        {hitItem.titleSegments.map((segment, segmentIndex) =>
-                          segment.hit ? (
-                            <mark key={segmentIndex} className={styles.mark}>
-                              {segment.text}
-                            </mark>
-                          ) : (
-                            <Fragment key={segmentIndex}>{segment.text}</Fragment>
-                          ),
-                        )}
+                      <span className={styles.hitRow}>
+                        <span className={styles.hitTitle}>
+                          {hitItem.titleSegments.map((segment, segmentIndex) =>
+                            segment.hit ? (
+                              <mark key={segmentIndex} className={styles.mark}>
+                                {segment.text}
+                              </mark>
+                            ) : (
+                              <Fragment key={segmentIndex}>{segment.text}</Fragment>
+                            ),
+                          )}
+                        </span>
+                        {hitItem.meta ? (
+                          <span className={styles.hitMeta}>{hitItem.meta}</span>
+                        ) : null}
                       </span>
-                      {hitItem.meta ? <span className={styles.hitMeta}>{hitItem.meta}</span> : null}
+                      {hitItem.snippet ? (
+                        <span className={styles.hitSnippet}>{hitItem.snippet}</span>
+                      ) : null}
                     </span>
                   </LocalizedLink>
                 </li>
