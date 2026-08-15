@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. M7 완료 — 델타 재실행 생략 확정·행 수 대조·Vercel Supabase env 추가·콘텐츠 편집 동결 선언. 다음: M8 배포 전환. 보류: keep-alive `schedule` 확인은 main 머지 후)
+> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. M8 진행 중 — PR #18 머지(2026-08-15)로 프로덕션이 Supabase 전환, 2주 관찰 시작. 잔여: 배포 수동 시나리오·keep-alive 첫 실행·관찰 후 해체. 보류: keep-alive `schedule` 확인은 main 머지 후)
 
 ## 진행 요약
 
