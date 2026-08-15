@@ -22,7 +22,7 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
 import type { MusicConfig } from "@/types/music";
 import type { SiteConfig } from "@/types/site";
 
-// 투영 타입은 디코더와 같은 층(`lib/firebase/public/*`)에서 한 번만 선언한다.
+// 투영 타입은 디코더와 같은 층(`lib/supabase/public/*`)에서 한 번만 선언한다.
 type ChatProfileData = {
   site: SiteConfig;
   devConfig: DevConfig;

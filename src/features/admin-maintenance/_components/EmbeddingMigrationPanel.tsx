@@ -16,7 +16,7 @@ import { shouldUseMockContent } from "@/lib/content/content-source";
 import styles from "./ImageMigrationPanel.module.css";
 
 const EmbeddingMigrationPanel = () => {
-  // 임베딩 생성·상태 조회는 실제 Firestore 와 OpenAI 연결을 요구한다 — mock 모드에서는 잠근다.
+  // 임베딩 생성·상태 조회는 실제 Supabase 와 OpenAI 연결을 요구한다. mock 모드에서는 잠근다.
   const mock = shouldUseMockContent();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<PortfolioEmbeddingResult | null>(null);
@@ -67,7 +67,7 @@ const EmbeddingMigrationPanel = () => {
       </div>
       {mock ? (
         <p className={styles.status}>
-          mock 모드에서는 실행할 수 없습니다. 실제 Firestore·OpenAI 연결이 필요합니다. .env.local에
+          mock 모드에서는 실행할 수 없습니다. 실제 Supabase·OpenAI 연결이 필요합니다. .env.local에
           NEXT_PUBLIC_USE_MOCK=0을 두고 다시 실행하세요.
         </p>
       ) : null}
