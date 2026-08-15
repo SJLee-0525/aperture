@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0·M1 완료 — 원격 `db push` 적용, anon·admin RLS 검증 통과. 보류 1건: keep-alive `schedule` 자동 실행 확인은 main 머지 후)
+> 마지막 갱신: 2026-08-15 (M0~M4 완료 — 공개 페이지가 Supabase 실데이터로 렌더. 보류: keep-alive `schedule` 확인은 main 머지 후, M3 실브라우저 로그인 확인은 사용자 대기)
 
 ## 진행 요약
 
@@ -11,9 +11,9 @@
 | ---- | -------------------------------------- | ------- |
 | M0   | 결정·측정·프로젝트 준비                | ✅ 완료 |
 | M1   | 스키마·RLS·버킷·keep-alive             | ✅ 완료 |
-| M2   | 데이터 마이그레이션 리허설             | ✅ 완료 (키 폐기만 대기) |
-| M3   | 인증 교체                              | ⬜ 미착수 |
-| M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ⬜ 미착수 |
+| M2   | 데이터 마이그레이션 리허설             | ✅ 완료 |
+| M3   | 인증 교체                              | ✅ 완료 (실브라우저 로그인 확인만 대기) |
+| M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
 | M5   | 관리자 쓰기·Storage 교체               | ⬜ 미착수 |
 | M6   | RAG pgvector 전환                      | ⬜ 미착수 |
 | M7   | 본 데이터 이전·전환 준비               | ⬜ 미착수 |
@@ -65,31 +65,33 @@
 - [x] URL 재작성: ImageMeta 재귀 변환(`url`·`preview.url`·`thumbnail.url`) + 블로그 본문 Markdown 치환(rag 글 이미지 4건 확인) (§5.3)
 - [x] 검증: 9개 컬렉션 문서 수 = 행 수 전부 일치, `data` 보유 8테이블 `firebasestorage` 잔존 0건, 표본(사진·글·site 3문서) 필드 결손 없음 (§5.4)
 - [x] 스크립트 일체를 `~/Desktop/github/aperture-migration/`에 재실행 가능하게 보관 (M7 본 이전에 재사용)
-- [ ] 마이그레이션에 쓴 두 키를 폐기했다 (Firebase 서비스 계정 키 삭제 + Supabase secret key 회전 — M7 때 재발급. 사용자 수행 후 체크)
+- [x] 마이그레이션에 쓴 두 키를 폐기했다 (Firebase 서비스 계정 키 삭제 + Supabase secret key 회전 완료 — M7 때 재발급)
 
 ## M3 — 인증 교체 (§3, §4 M3)
 
-- [ ] `@supabase/supabase-js` 추가 + lockfile을 npm 10으로 재생성 (`npx npm@10 install --package-lock-only` 후 `ci --dry-run`)
-- [ ] `lib/supabase/client.ts`: 지연 싱글턴 함수 반환 규약 유지
-- [ ] `lib/supabase/auth.ts`: `signInWithPassword`/`signOut`/`onAuthStateChange` + 한국어 에러 맵 재작성
-- [ ] `use-auth.ts`: UID 비교를 role 클레임 판별로 교체, `NEXT_PUBLIC_ADMIN_UID` 참조 제거
-- [ ] 서버 JWT 검증: JWKS 로컬 검증 + role 클레임 확인으로 `verify-admin-id-token.ts` 대체, 호출 4곳(revalidate action, embeddings 라우트 POST/GET, image-source, 미리보기 action) 연결
-- [ ] `AuthGuard`·`LoginForm`·`test-admin-session` 우회 동작 확인 (인터페이스 무변경)
-- [ ] Sentry 스크러버(`scrub-event.ts`)가 새 토큰 형태의 Authorization 헤더를 계속 지우는지 확인
+- [x] `@supabase/supabase-js` 추가 + lockfile을 npm 10으로 재생성 (`npx npm@10 install --package-lock-only` 후 `ci --dry-run`)
+- [x] `lib/supabase/client.ts`: 지연 싱글턴 함수 반환 규약 유지 (계약 테스트 포함). 서버 검증용 클라이언트는 `persistSession:false` 로 분리
+- [x] `lib/supabase/auth.ts`: `signInWithPassword`/`signOut`/`onAuthStateChange` + 한국어 에러 맵 재작성, 토큰 획득 7곳을 `getAdminAccessToken` 하나로 수렴
+- [x] `use-auth.ts`: UID 비교를 role 클레임 판별로 교체, `NEXT_PUBLIC_ADMIN_UID` 참조 제거, role 판별 단위 테스트 신설
+- [x] 서버 JWT 검증: `getClaims`(JWKS 로컬 검증) + role 클레임 확인으로 `verify-admin-id-token.ts` 내부 교체 — 시그니처 유지로 호출 5곳(revalidate action, embeddings POST/GET, image-source, 미리보기 action) 무수정
+- [x] `AuthGuard`·`LoginForm`·`test-admin-session` 우회 동작 확인 (인터페이스 무변경, 테스트 세션 `isAdmin=false` 안전장치 유지)
+- [x] Sentry 스크러버(`scrub-event.ts`)는 헤더 키 기준이라 동작 무변경 — 주석·fixture 문구만 갱신
+- [ ] 실브라우저 로그인 검증: `/admin/login` 로그인 → 새로고침 세션 지속 → 로그아웃, 잘못된 비밀번호 한국어 에러 (사용자 확인 대기)
+- [x] 과도기 기록: live 관리자 CRUD·Storage·RAG sync 는 M5/M6 전환 전까지 브랜치에서 의도적 비정상 (프로덕션 main 무영향, mock 관리자·공개 경로 정상)
 
 ## M4 — 공개 읽기 교체 (§3, §4 M4)
 
-- [ ] `lib/supabase/public/transport.ts`: PostgREST fetch + `next:{revalidate,tags}` + `retry-fetch` 재사용
-- [ ] 캐시 태그 접두사를 중립 이름으로 교체 (`constants/cache.ts` 생성기 2개)
-- [ ] `public/*.ts` fetcher 이관: published 필터·`sort_order` 정렬을 PostgREST 쿼리로, Timestamp 디코더 4종·REST 봉투 디코딩 삭제
-- [ ] `lib/content/` getter import 교체, mock 분기 무변경 확인
-- [ ] `revalidate-public.ts`: M3 검증 함수로 교체, `updateTag`·`revalidatePath`·`CHAT_PROFILE_CACHE_TAG` 로직 무변경
-- [ ] `admin-list-rest.ts`를 PostgREST `select=` projection으로 교체
-- [ ] `transport`·디코더 테스트를 PostgREST fixture로 갱신, 오류 전파(빈 결과와 장애 구분) 계약 유지 확인
-- [ ] 리허설 데이터가 있는 Supabase로 공개 3섹션 + 블로그 렌더 확인 (`NEXT_PUBLIC_USE_MOCK=0`)
+- [x] `lib/supabase/public/transport.ts`: PostgREST fetch + `next:{revalidate,tags}` + `retry-fetch` 재사용. 테이블별 서술자(`SUPABASE_COLLECTIONS`)가 projection·정렬·published 유무의 단일 출처, 행 병합은 data 먼저 + 스칼라 덮기
+- [x] 캐시 태그 접두사를 `db:` 논리 이름으로 교체 (`constants/cache.ts` 생성기 2개 + 호출처 rename) — 구 `firestore:*` 태그 캐시는 revalidate 3600s 내 자연 만료로 수용
+- [x] `public/*.ts` fetcher 이관: published 필터·`sort_order` 정렬을 PostgREST 쿼리로, Timestamp 디코더·REST 봉투 디코딩 삭제. 대체된 Firestore 공개 fetcher 5개 제거 (`transport`·`rag`·`retry-fetch` 는 M6까지 유지)
+- [x] `lib/content/` getter import 교체, mock 분기 무변경. `rag-source` 의 관리자 단건 조회는 사용자 토큰 + RLS 인가(`fetchRowAsUser`)로 재작성
+- [x] `revalidate-public.ts`: M3 검증 함수 그대로 사용 (시그니처 유지로 무수정), `updateTag`·`revalidatePath`·`CHAT_PROFILE_CACHE_TAG` 로직 무변경
+- [x] `transport`·디코더 테스트를 PostgREST fixture로 신설·갱신 (apikey 전용 헤더, fresh no-store, 논리 태그, 빈 배열→null, 4xx throw, 특수문자 ID, 태그 무필터, dev_articles 무 sort_order, 스칼라 우선)
+- [x] 리허설 데이터가 있는 Supabase로 공개 3섹션 + 앨범 + 블로그 목록/상세 렌더 확인 (`NEXT_PUBLIC_USE_MOCK=0` — supabase 이미지 URL 544건, firebasestorage 0건, 서버 로그 firestore 호출 0건. 챗봇은 기존 Firebase RAG 검색 경로 유지)
 
 ## M5 — 관리자 쓰기·Storage 교체 (§3, §4 M5)
 
+- [ ] `admin-list-rest.ts`를 PostgREST `select=` projection으로 교체 (인증된 관리자 읽기라 공개 읽기 M4가 아닌 M5 범위 — M4 계획 검수에서 이동)
 - [ ] `lib/admin/` repository들의 live 구현 내부를 supabase-js CRUD로 교체 (mock·화면·계약 무손상)
 - [ ] 블로그 live 저장소 교체: `features/admin-dev-articles/_lib/live-dev-article-repository.ts`와 하위 `lib/firebase/dev-articles.ts` (CRUD·slug 중복 검사·태그 CRUD) — `lib/admin/` 밖에 있어 누락하기 쉽다. slug 사전 조회는 폼 오류 메시지용으로 유지 (§4 M5)
 - [ ] `serverTimestamp()` 15곳 제거 (DB 기본값·트리거로 대체)

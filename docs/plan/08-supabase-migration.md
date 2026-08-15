@@ -321,7 +321,7 @@ grant execute on function match_rag_chunks to anon, authenticated;
 ```dotenv
 # 추가
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 # 제거 (M8에서)
 NEXT_PUBLIC_FIREBASE_API_KEY=
@@ -333,7 +333,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_ADMIN_UID=
 ```
 
-anon key는 Firebase 웹 키와 같은 성격의 공개 가능 키다(보안은 RLS 담당). service_role 키는
+publishable key(`sb_publishable_`)는 Firebase 웹 키와 같은 성격의 공개 가능 키다(보안은 RLS 담당). service_role 키는
 어떤 env 파일에도 넣지 않는다. `NEXT_PUBLIC_USE_MOCK`·`NEXT_PUBLIC_ADMIN_TEST_SESSION`
 스위치와 mock 가드는 그대로 유지한다.
 
