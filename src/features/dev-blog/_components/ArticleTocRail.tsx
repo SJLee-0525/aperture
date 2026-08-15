@@ -1,4 +1,5 @@
 import type { ArticleTocItem } from "@/features/dev-blog/_lib/markdown-toc";
+import type { CSSProperties } from "react";
 
 import styles from "./ArticleTocRail.module.css";
 
@@ -21,6 +22,8 @@ type RailTick = { id: string; depth: 2 | 3 };
  * 길이·굵기로도 알린다. 전체가 하나의 버튼이라 어느 선을 눌러도 목차가 열린다 — 선 하나를
  * 각각 누르게 하면 포인터 표적이 3px 짜리가 된다.
  *
+ * heading 이 많으면 눈금 사이 간격이 좁아져 전부 한 화면에 담긴다.
+ *
  * @param {Props} props
  * @param {ArticleTocItem[]} props.items 목차 항목.
  * @param {string | null} props.activeId 현재 heading id.
@@ -40,6 +43,8 @@ const ArticleTocRail = ({ items, activeId, label, expanded, panelId, onOpen }: P
     <button
       type="button"
       className={styles.rail}
+      // 눈금이 많을수록 CSS 가 간격을 좁힌다. 개수를 알아야 계산이 된다.
+      style={{ "--tick-count": ticks.length } as CSSProperties}
       aria-label={label}
       aria-expanded={expanded}
       aria-controls={panelId}

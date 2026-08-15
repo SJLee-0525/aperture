@@ -5,10 +5,20 @@
   --tick-h2-active: 20px;
   --tick-h3-active: 12px;
 
+  /* 눈금이 쓸 수 있는 세로 길이. `--article-toc-clearance` 는 이 버튼을 감싸는 dock 이 정의하며,
+     거기서 이 버튼의 위아래 padding 과 dock 이 펼쳐질 때 붙는 padding 을 뺀다. */
+  --rail-room: calc(100dvh - var(--article-toc-clearance) * 2 - var(--s-4) * 2 - var(--s-5) * 2);
+
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 9px;
+  /* heading 이 많으면 컴포넌트가 넘긴 `--tick-count` 에 맞춰 간격을 2px 까지 좁혀 전부 담는다.
+     눈금을 빼거나 레일을 스크롤하면 현재 위치를 가리키는 눈금이 화면 밖에 놓일 수 있다. */
+  gap: clamp(
+    2px,
+    calc((var(--rail-room) - var(--tick-count) * 1.5px) / (var(--tick-count) - 1)),
+    9px
+  );
   min-width: 44px;
   padding: var(--s-4) var(--s-6) var(--s-4) var(--s-4);
   border: 0;
