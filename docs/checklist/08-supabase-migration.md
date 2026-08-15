@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. M7 진행 중 — 델타 재실행 생략 확정(프로덕션 편집 없음), 행 수 대조 완료, 잔여 = Vercel Supabase env 추가(사용자). 보류: keep-alive `schedule` 확인은 main 머지 후)
+> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. M7 완료 — 델타 재실행 생략 확정·행 수 대조·Vercel Supabase env 추가·콘텐츠 편집 동결 선언. 다음: M8 배포 전환. 보류: keep-alive `schedule` 확인은 main 머지 후)
 
 ## 진행 요약
 
@@ -16,7 +16,7 @@
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
 | M5   | 관리자 쓰기·Storage 교체               | ✅ 완료 |
 | M6   | RAG pgvector 전환                      | ✅ 완료 |
-| M7   | 본 데이터 이전·전환 준비               | 🔄 진행 중 (잔여: Vercel env 추가) |
+| M7   | 본 데이터 이전·전환 준비               | ✅ 완료 |
 | M8   | 배포 전환·관찰·Firebase 해체           | ⬜ 미착수 |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
@@ -129,7 +129,7 @@
 - [x] §5.4 검증 재확인(델타 생략 판 — 초안 포함 전체 행 수): photos 174(+1, M5·M6 검증 저장분)·albums 1·music_works 4·music_awards 0·music_media 4·dev_projects 9·dev_articles 3·dev_article_tags 7·site_documents 3 — M2 기록 204문서 대비 검증 편집분 외 전 컬렉션 일치, 유실 없음
 - [x] RAG 인덱스 재생성 — M6 검증에서 완료(317청크, percent 100·stale 0). 모델·데이터 변경이 없으므로 재실행 불필요
 - [x] `.env.example` 갱신: 콘텐츠 소스·테스트 세션·보안 경계 문구를 Supabase(RLS) 기준으로 정정 (Firebase 블록 자체 제거는 M8)
-- [ ] Vercel 환경변수 추가(사용자): `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 전 환경(Production·Preview·Development). ⚠️ Firebase 변수 제거는 M8 배포 전환 후 — main 이 아직 Firebase 코드라 지금 지우면 프로덕션이 죽는다
+- [x] Vercel 환경변수 추가 완료(사용자, 2026-08-15): `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 전 환경. Firebase 변수 제거는 M8 배포 전환 후 — main 이 아직 Firebase 코드라 지금 지우면 프로덕션이 죽는다. 콘텐츠 편집 동결도 사용자가 선언(M8 전환 완료까지 게시글 업데이트 중단)
 - [x] 마이그레이션 키 폐기 재확인: M2 종료 시 Firebase 서비스 계정 키 삭제 + Supabase secret key 회전 완료, 델타 생략으로 재발급 자체가 없었음. Supabase CLI access token(30일)은 M8 해체 작업까지 유지 후 폐기
 
 ## M8 — 배포 전환·관찰·Firebase 해체 (§4 M8, §8~§10)
