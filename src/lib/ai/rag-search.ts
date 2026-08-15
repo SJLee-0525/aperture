@@ -2,7 +2,13 @@ import { embeddingModelKey, generateEmbedding } from "@/lib/ai/embedding";
 import { createKeywordScorer, expandRagQuery } from "@/lib/ai/rag-query";
 import { matchRagChunks } from "@/lib/supabase/rag";
 
-import type { RagPrioritize, RagQuery, RagSection, StoredRagChunkMeta } from "@/types/rag";
+import type {
+  RagExclude,
+  RagPrioritize,
+  RagQuery,
+  RagSection,
+  StoredRagChunkMeta,
+} from "@/types/rag";
 
 /**
  * 한 요청에서 모델에 넣는 청크 수.
@@ -31,10 +37,13 @@ const PRIORITIZED_SLOTS = 3;
  * 방문자가 그 원본을 보고 있다는 사실이 관련성의 근거다. 질문이 대상을 직접 말한 경우에는
  * 열어 둔 원본도 같은 최소 점수를 넘어야 자리를 차지한다.
  *
+ * `exclude` 는 화면 문맥에 본문 전문이 이미 실린 원본을 후보에서 뺀다. 우선 슬롯만
+ * 비우면 같은 글 청크가 나머지 자리로 흘러 중복이 오히려 늘어나므로 후보 전체에서 거른다.
+ *
  * @param {RagQuery} query 검색어와 키워드.
  * @param {RagSection[]} sections 검색할 섹션.
  * @param {AbortSignal} [signal] 요청 취소 신호.
- * @param {{ prioritize?: RagPrioritize }} [options] 우선 검색 대상.
+ * @param {{ prioritize?: RagPrioritize; exclude?: RagExclude }} [options] 우선 검색·제외 대상.
  * @returns {Promise<StoredRagChunkMeta[]>} 우선 대상 최대 3개(점수 내림차순) 뒤에 하한을 통과한
  *   나머지 청크(점수 내림차순). 두 묶음을 합쳐 최대 10개이며 전체가 점수순은 아니다 —
  *   `ignoreScoreFloor` 에서는 우선 대상이 더 높은 점수의 청크보다 앞에 온다.
@@ -43,7 +52,7 @@ const searchRagChunks = async (
   query: RagQuery,
   sections: RagSection[],
   signal?: AbortSignal,
-  options?: { prioritize?: RagPrioritize },
+  options?: { prioritize?: RagPrioritize; exclude?: RagExclude },
 ): Promise<StoredRagChunkMeta[]> => {
   const modelKey = embeddingModelKey();
   const expandedQuery = expandRagQuery(query.text);
@@ -59,10 +68,18 @@ const searchRagChunks = async (
       : {}),
     ...(signal ? { signal } : {}),
   });
-  const scored = candidates.map(({ vectorScore, ...chunk }) => {
-    const keywordScore = scoreKeywords(chunk.text);
-    return { chunk, score: vectorScore + keywordScore * 0.35, vectorScore, keywordScore };
-  });
+  const exclude = options?.exclude;
+  const scored = candidates
+    .filter(
+      (candidate) =>
+        !exclude ||
+        candidate.sourceType !== exclude.sourceType ||
+        candidate.sourceId !== exclude.sourceId,
+    )
+    .map(({ vectorScore, ...chunk }) => {
+      const keywordScore = scoreKeywords(chunk.text);
+      return { chunk, score: vectorScore + keywordScore * 0.35, vectorScore, keywordScore };
+    });
 
   const byScoreDesc = (a: (typeof scored)[number], b: (typeof scored)[number]) => b.score - a.score;
   const isPrioritized = ({ chunk }: (typeof scored)[number]) =>

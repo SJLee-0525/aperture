@@ -48,7 +48,7 @@ import type { ChatReference, ChatReferenceRequest, ChatReferenceType } from "@/t
 import type { ChatLink } from "@/types/chat";
 import type { DevArticle } from "@/types/dev-article";
 import type { Lang } from "@/types/lang";
-import type { RagPrioritize, RagQuery } from "@/types/rag";
+import type { RagExclude, RagPrioritize, RagQuery } from "@/types/rag";
 
 // route.ts의 maxDuration(60초)보다 5초 먼저 요청을 끝낸다. Vercel이 함수를 먼저
 // 종료하면 TIMEOUT 이벤트를 보낼 수 없다.
@@ -92,6 +92,8 @@ type ResolvedChatTarget = {
   /** 공개 데이터에서 이 target 을 찾았는지 여부. */
   verified?: boolean;
   prioritize?: { sourceType: string; sourceId: string };
+  /** 본문 전문이 화면 문맥에 실린 원본 — RAG 후보에서 빼 프롬프트 중복을 막는다. */
+  exclude?: RagExclude;
   /** 검증에 읽은 문서로 만든 화면 문맥. 있으면 추가 조회 없이 그대로 쓴다. */
   screenContext?: string;
 };
@@ -110,6 +112,7 @@ type ChatHandlerDependencies = {
     query?: RagQuery,
     signal?: AbortSignal,
     prioritize?: RagPrioritize,
+    exclude?: RagExclude,
   ) => Promise<string>;
   resolveReferences?: (
     requested: ChatReferenceRequest[],
@@ -247,13 +250,21 @@ const resolveContextTarget = async (
       return (await getSnapshot()).articleSlugById[openTarget.id] === slug ? resolved : {};
     }
     const article = await loadArticle(openTarget.id, signal);
-    // Rules 가 초안 read 를 거부하므로 여기 도달한 문서도 published 를 다시 확인한다.
+    // RLS 가 초안 read 를 거부하므로 여기 도달한 문서도 published 를 다시 확인한다.
     if (!article || !article.published || article.slug !== slug) return {};
-    return {
-      ...resolved,
-      // 열어 둔 글은 본문 평문까지 문맥에 싣는다. 검증에 읽은 문서를 재사용한다.
-      screenContext: formatArticleScreenContextBlock(article, lang),
-    };
+    // 열어 둔 글은 본문 평문까지 문맥에 싣는다. 검증에 읽은 문서를 재사용한다.
+    const block = formatArticleScreenContextBlock(article, lang);
+    if (block.complete) {
+      // 본문 전문이 문맥에 있으면 같은 글 청크는 중복이다. 우선 검색 대신 후보에서 뺀다.
+      return {
+        openTarget,
+        verified: true,
+        exclude: { sourceType: "article", sourceId: openTarget.id },
+        screenContext: block.text,
+      };
+    }
+    // 잘린 본문은 꼬리를 청크가 보완하도록 우선 검색을 유지한다.
+    return { ...resolved, screenContext: block.text };
   } catch {
     // 조회가 막히면 이 글이 아직 공개인지 확인할 수 없다. 문맥 없이 답한다.
     return {};
@@ -500,7 +511,14 @@ const handleChatRequest = async (
 
     const [profileContext, screenContext] = await Promise.all([
       profileSections.length > 0
-        ? buildContext(getSnapshot, profileSections, ragQuery, controller.signal, prioritize)
+        ? buildContext(
+            getSnapshot,
+            profileSections,
+            ragQuery,
+            controller.signal,
+            prioritize,
+            resolved.exclude,
+          )
         : Promise.resolve(
             "# PROFILE_CONTEXT\nNo portfolio lookup was needed for this conversational turn.",
           ),
@@ -514,8 +532,13 @@ const handleChatRequest = async (
               : undefined,
           }).catch(() => undefined),
     ]);
+    const instructions = buildChatInstructions(chatRequest.lang, profileContext, screenContext);
+    // 프롬프트 크기 계측 — 화면 본문·RAG 청크 예산 조정의 기준선 (checklist 08 M6 후속).
+    console.info(
+      `[chat-input] instructions=${instructions.length} profile=${profileContext.length} screen=${screenContext?.length ?? 0} messages=${chatRequest.messages.reduce((total, { content }) => total + content.length, 0)}`,
+    );
     const result = await provider({
-      instructions: buildChatInstructions(chatRequest.lang, profileContext, screenContext),
+      instructions,
       messages: chatRequest.messages,
       lang: chatRequest.lang,
       signal: controller.signal,

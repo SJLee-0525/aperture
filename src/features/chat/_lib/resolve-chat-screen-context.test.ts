@@ -196,19 +196,33 @@ describe("formatArticleScreenContextBlock", () => {
       "ko",
     );
 
-    expect(block).toContain("# SCREEN_CONTEXT");
-    expect(block).toContain("Article: 글 제목");
-    expect(block).toContain("Full article text (plain):");
-    expect(block).toContain("긴 본문 문단입니다.");
-    expect(block).toContain("상세");
-    expect(block.length).toBeGreaterThan(MAX_SCREEN_CONTEXT_CHARS);
+    expect(block.complete).toBe(true);
+    expect(block.text).toContain("# SCREEN_CONTEXT");
+    expect(block.text).toContain("Article: 글 제목");
+    // 모델이 references 에 쓸 문서 ID — 최근 글 목록 밖의 글은 이 줄이 유일한 출처다.
+    expect(block.text).toContain("id: a1");
+    expect(block.text).toContain("Full article text (plain):");
+    expect(block.text).toContain("긴 본문 문단입니다.");
+    expect(block.text).toContain("상세");
+    expect(block.text.length).toBeGreaterThan(MAX_SCREEN_CONTEXT_CHARS);
   });
 
-  it("본문이 상한을 넘으면 자르고 생략 표시를 남긴다", () => {
-    const block = formatArticleScreenContextBlock(articleOf("가나다 ".repeat(12000)), "ko");
+  it("코드 블록을 자르지 않은 평문이 실린다", () => {
+    const code = "x".repeat(600);
+    const block = formatArticleScreenContextBlock(
+      articleOf(`본문\n\n\`\`\`ts\n${code}\n\`\`\``),
+      "ko",
+    );
 
-    expect(block).toContain("[remainder truncated]");
+    expect(block.text).toContain(code);
+  });
+
+  it("본문이 상한을 넘으면 자르고 생략 표시와 complete=false 를 남긴다", () => {
+    const block = formatArticleScreenContextBlock(articleOf("가나다 ".repeat(15000)), "ko");
+
+    expect(block.complete).toBe(false);
+    expect(block.text).toContain("[remainder truncated]");
     // 상한 + 항목 줄·헤더 여유. 본문만 잘리고 블록 전체가 다시 잘리지는 않는다.
-    expect(block.length).toBeLessThanOrEqual(MAX_ARTICLE_BODY_CONTEXT_CHARS + 500);
+    expect(block.text.length).toBeLessThanOrEqual(MAX_ARTICLE_BODY_CONTEXT_CHARS + 500);
   });
 });

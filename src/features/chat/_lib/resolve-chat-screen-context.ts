@@ -1,5 +1,4 @@
-import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
-import { articleBlockText } from "@/features/dev-blog/_lib/article-plain-text";
+import { articlePlainText } from "@/features/dev-blog/_lib/article-plain-text";
 
 import { devArticleRoute } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -23,11 +22,12 @@ const MAX_SCREEN_CONTEXT_CHARS = 1_500;
 
 /**
  * 열어 둔 글 본문을 프롬프트에 실을 때의 최대 문자 수.
- * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다. 현재 최장 글
- * (약 37,000자 Markdown, 평문은 더 짧다)을 자르지 않는 크기로 잡았다 —
- * 여기서 잘리면 "글 마지막" 질문이 앞부분 내용으로 답해진다.
+ * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다. 현재 최장 글의
+ * 코드 무절단 평문(실측 약 32,000자)을 여유 있게 덮는 크기다 — 여기서 잘리면
+ * "글 마지막" 질문이 앞부분 내용으로 답해진다. 50,000자는 Gemini Flash-Lite
+ * 1M 컨텍스트의 5% 수준이고 무료 티어 한도는 요청 수 기준이라 영향이 없다.
  */
-const MAX_ARTICLE_BODY_CONTEXT_CHARS = 32_000;
+const MAX_ARTICLE_BODY_CONTEXT_CHARS = 50_000;
 
 /**
  * 공개된 항목만 남긴다.
@@ -82,6 +82,9 @@ const articleScreenEntry = (article: ChatDevArticle, lang: Lang): string =>
     `Article: ${pickText(article.title, lang)}`,
     part("summary", pickText(article.summary, lang)),
     part("published", article.publishedAt ? isoDate(article.publishedAt) : null),
+    // 모델이 references 에 넣을 문서 ID. PROFILE_CONTEXT 글 목록은 최근 글까지만
+    // 실리므로, 그 밖의 글을 열어 두면 이 줄이 프롬프트의 유일한 id 출처다.
+    part("id", article.id),
     part("path", devArticleRoute(article.slug)),
   ]);
 
@@ -159,32 +162,38 @@ const formatScreenContextBlock = (entry: string): string =>
     .join("\n")
     .slice(0, MAX_SCREEN_CONTEXT_CHARS);
 
+/** 열어 둔 글의 화면 문맥과, 본문이 잘리지 않고 전부 실렸는지 여부. */
+type ArticleScreenContext = { text: string; complete: boolean };
+
 /**
  * 열어 둔 글의 화면 문맥 — 항목 한 줄 뒤에 본문 평문 전체를 싣는다.
  * 우선 RAG 슬롯만으로는 긴 글의 요약·후반부 질문에 앞부분 청크만 닿는다.
  * 방문자가 보고 있는 글에 한해 본문을 그대로 넣으며, 문서는 target 검증이
  * 이미 읽은 것을 재사용하므로 추가 조회가 없다.
  *
+ * `complete` 는 호출부의 RAG 분기 근거다: 본문 전문이 실렸으면 같은 글 청크는
+ * 프롬프트 중복이라 제외하고, 잘렸으면 잘린 꼬리를 청크가 보완하도록 우선 검색을 유지한다.
+ *
  * @param {DevArticle} article 검증을 마친 공개 글(본문 포함).
  * @param {Lang} lang 표시 언어.
- * @returns {string} provider에 전달할 화면 문맥 블록.
+ * @returns {ArticleScreenContext} provider에 전달할 화면 문맥 블록과 완전성 여부.
  */
-const formatArticleScreenContextBlock = (article: DevArticle, lang: Lang): string => {
-  const body = analyzeArticle(article)
-    .document.blocks.map(articleBlockText)
-    .filter(Boolean)
-    .join("\n");
-  const clipped =
-    body.length > MAX_ARTICLE_BODY_CONTEXT_CHARS
-      ? `${body.slice(0, MAX_ARTICLE_BODY_CONTEXT_CHARS)}\n[remainder truncated]`
-      : body;
-  return [
-    "# SCREEN_CONTEXT",
-    "The visitor currently has this item open on screen:",
-    articleScreenEntry(article, lang),
-    "Full article text (plain):",
-    clipped,
-  ].join("\n");
+const formatArticleScreenContextBlock = (article: DevArticle, lang: Lang): ArticleScreenContext => {
+  const body = articlePlainText(article);
+  const complete = body.length <= MAX_ARTICLE_BODY_CONTEXT_CHARS;
+  const clipped = complete
+    ? body
+    : `${body.slice(0, MAX_ARTICLE_BODY_CONTEXT_CHARS)}\n[remainder truncated]`;
+  return {
+    text: [
+      "# SCREEN_CONTEXT",
+      "The visitor currently has this item open on screen:",
+      articleScreenEntry(article, lang),
+      "Full article text (plain):",
+      clipped,
+    ].join("\n"),
+    complete,
+  };
 };
 
 /**

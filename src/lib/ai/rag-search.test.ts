@@ -100,6 +100,50 @@ describe("searchRagChunks", () => {
   });
 });
 
+describe("searchRagChunks — 본문 전문 제외", () => {
+  it("exclude 원본의 청크는 우선·나머지 어느 자리에도 들어가지 않는다", async () => {
+    // 우선 슬롯만 비우면 같은 글 청크가 rest 로 흘러 중복이 늘어난다 — 후보 전체에서 걸러야 한다.
+    const articleChunks = Array.from({ length: 5 }, (_, index) =>
+      candidate({
+        id: `a1-${index}`,
+        section: "development",
+        sourceType: "article",
+        sourceId: "a1",
+        vectorScore: 1,
+      }),
+    );
+    const others = Array.from({ length: 4 }, (_, index) =>
+      candidate({
+        id: `p${index}`,
+        section: "development",
+        sourceType: "project",
+        vectorScore: 0.9,
+      }),
+    );
+    mocks.matchRagChunks.mockResolvedValue([...articleChunks, ...others]);
+
+    const chunks = await searchRagChunks({ text: "질문" }, ["development"], undefined, {
+      exclude: { sourceType: "article", sourceId: "a1" },
+    });
+
+    expect(chunks.every(({ sourceType }) => sourceType === "project")).toBe(true);
+    expect(chunks).toHaveLength(4);
+  });
+
+  it("exclude 는 sourceId 가 다른 같은 타입 청크를 남긴다", async () => {
+    mocks.matchRagChunks.mockResolvedValue([
+      candidate({ id: "a1-0", section: "development", sourceType: "article", sourceId: "a1" }),
+      candidate({ id: "a2-0", section: "development", sourceType: "article", sourceId: "a2" }),
+    ]);
+
+    const chunks = await searchRagChunks({ text: "질문" }, ["development"], undefined, {
+      exclude: { sourceType: "article", sourceId: "a1" },
+    });
+
+    expect(chunks.map(({ id }) => id)).toEqual(["a2-0"]);
+  });
+});
+
 describe("searchRagChunks — 열린 항목 우선 검색", () => {
   const article = (id: string, vectorScore: number) =>
     candidate({ id, section: "development", sourceType: "article", sourceId: "a1", vectorScore });

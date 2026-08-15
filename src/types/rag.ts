@@ -41,8 +41,12 @@ type RagQuery = { text: string; keywords?: string[] };
  */
 type RagPrioritize = { sourceType: string; sourceId: string; ignoreScoreFloor?: boolean };
 
+/** 검색 후보에서 뺄 원본 — 본문 전문이 이미 화면 문맥에 실린 글의 중복을 막는다. */
+type RagExclude = { sourceType: string; sourceId: string };
+
 export type {
   RagChunk,
+  RagExclude,
   RagPrioritize,
   RagQuery,
   RagSection,
