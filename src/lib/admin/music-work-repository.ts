@@ -2,8 +2,8 @@ import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalListRepository } from "@/lib/admin/mock/local-list-repository";
 import { deleteMockImageFolder } from "@/lib/admin/mock/mock-image-store";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { listMusicWorkItemsAdmin } from "@/lib/firebase/admin-list-rest";
-import { musicWorks } from "@/lib/firebase/music";
+import { listMusicWorkItemsAdmin } from "@/lib/supabase/admin-list";
+import { musicWorks } from "@/lib/supabase/music";
 
 import type { AdminListRepository } from "@/lib/admin/admin-list-repository";
 import type { AdminMusicWorkListItem } from "@/types/admin";

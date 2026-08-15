@@ -1,14 +1,15 @@
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
+import { COLLECTIONS, SITE_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { getFirebaseDb } from "@/lib/firebase/client";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+import { toJson } from "@/lib/supabase/admin/row-codec";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 import type { SiteConfig } from "@/types/site";
+
+const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
 
 /**
  * 관리자 site/config 읽기. 문서가 없으면(첫 저장 전) **빈 폼**으로 부트스트랩 —
@@ -18,45 +19,40 @@ import type { SiteConfig } from "@/types/site";
  * @returns {Promise<SiteConfig>} 저장된 사이트 설정. 문서가 없으면 빈 설정이다.
  */
 const getSiteConfig = async (): Promise<SiteConfig> => {
-  try {
-    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DOC));
-    if (!snap.exists()) return EMPTY_SITE_CONFIG;
-    const data = snap.data();
-    return {
-      name: data.name ?? EMPTY_SITE_CONFIG.name,
-      tagline: data.tagline ?? EMPTY_SITE_CONFIG.tagline,
-      landingLead: data.landingLead ?? EMPTY_SITE_CONFIG.landingLead,
-      contactLead: data.contactLead ?? EMPTY_SITE_CONFIG.contactLead,
-      bio: data.bio ?? EMPTY_TEXT,
-      links: data.links ?? [],
-      tags: data.tags ?? [],
-    };
-  } catch {
-    throw new Error("사이트 설정을 불러오지 못했습니다.");
-  }
+  const { data, error } = await getSupabaseClient()
+    .from(SITE_TABLE)
+    .select("data")
+    .eq("id", SITE_DOC)
+    .maybeSingle();
+  if (error) throw new Error("사이트 설정을 불러오지 못했습니다.");
+  if (!data) return EMPTY_SITE_CONFIG;
+  const d = (data.data as Record<string, unknown> | null) ?? {};
+  return {
+    name: (d.name as SiteConfig["name"]) ?? EMPTY_SITE_CONFIG.name,
+    tagline: (d.tagline as SiteConfig["tagline"]) ?? EMPTY_SITE_CONFIG.tagline,
+    landingLead: (d.landingLead as SiteConfig["landingLead"]) ?? EMPTY_SITE_CONFIG.landingLead,
+    contactLead: (d.contactLead as SiteConfig["contactLead"]) ?? EMPTY_SITE_CONFIG.contactLead,
+    bio: (d.bio as SiteConfig["bio"]) ?? EMPTY_TEXT,
+    links: (d.links as SiteConfig["links"]) ?? [],
+    tags: (d.tags as SiteConfig["tags"]) ?? [],
+  };
 };
 
 /**
  * 관리자 화면이 소유한 site/config 필드만 병합 저장한다.
  * 서로 다른 화면이 오래된 전체 snapshot으로 다른 화면의 최신 변경을 덮어쓰지 않도록
- * 전체 문서 교체는 이 seam 밖에 노출하지 않는다.
+ * 병합은 `merge_site_document` RPC 가 DB 한 문장으로 수행한다 — read-modify-write 로
+ * 바꾸면 그 경합이 되살아난다.
  *
  * @param {Partial<SiteConfig>} fields 현재 관리자 화면이 수정한 설정 필드.
  * @returns {Promise<void>} 병합 저장과 관련 RAG 동기화가 끝나면 완료된다.
  */
 const updateSiteConfigFields = async (fields: Partial<SiteConfig>): Promise<void> => {
-  try {
-    await setDoc(
-      doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DOC),
-      {
-        ...fields,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
-  } catch {
-    throw new Error("사이트 설정 저장에 실패했습니다.");
-  }
+  const { data, error } = await getSupabaseClient().rpc("merge_site_document", {
+    doc_id: SITE_DOC,
+    patch: toJson(fields as Record<string, unknown>),
+  });
+  if (error || data !== 1) throw new Error("사이트 설정 저장에 실패했습니다.");
   requestPublicRevalidate(documentCacheTag(COLLECTIONS.SITE, SITE_DOC));
   await requestRagSync("siteConfig", SITE_DOC);
   if (fields.tags) await requestRagSync("photoTags", SITE_DOC);

@@ -64,4 +64,4 @@ const getDevArticleRepository = (): DevArticleRepository => {
 };
 
 export { getDevArticleRepository };
-export type { DevArticleInput, DevArticleRemoveResult, DevArticleRepository };
+export type { DevArticleInput, DevArticleRepository };

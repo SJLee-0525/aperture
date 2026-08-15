@@ -4,9 +4,9 @@ import { deleteObject, ref } from "firebase/storage";
 
 import { articleBodyStoragePaths } from "@/features/admin-maintenance/_lib/article-body-storage-paths";
 
-import { listDevArticleImageRefsAdmin } from "@/lib/firebase/admin-list-rest";
 import { getFirebaseStorage } from "@/lib/firebase/client";
 import { listFolderFiles } from "@/lib/firebase/storage";
+import { listDevArticleImageRefsAdmin } from "@/lib/supabase/admin-list";
 
 import { imagePaths } from "@/types/image";
 

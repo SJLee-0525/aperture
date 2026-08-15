@@ -1,45 +1,46 @@
-import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from "firebase/firestore";
-
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
+import { COLLECTIONS, SITE_DEV_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { getFirebaseDb } from "@/lib/firebase/client";
-import { listCrud } from "@/lib/firebase/list-crud";
 import { normalizeDevAwards } from "@/lib/firebase/normalize-dev-awards";
 import { normalizeTroubleshooting } from "@/lib/firebase/normalize-troubleshooting";
 import { deleteDevProjectImages } from "@/lib/firebase/storage";
 import { asText } from "@/lib/i18n/as-text";
+import { toJson } from "@/lib/supabase/admin/row-codec";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { listCrud } from "@/lib/supabase/list-crud";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 
+const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
+
 /**
- * 개발 프로젝트 문서의 다국어 필드와 배열 기본값을 정규화한다.
+ * 프로젝트 행의 다국어 필드와 배열 기본값을 정규화한다.
  *
- * @param {string} id Firestore 프로젝트 문서 ID.
- * @param {DocumentData} d Firestore에서 읽은 프로젝트 문서 필드.
+ * @param {string} id 프로젝트 문서 ID.
+ * @param {Record<string, unknown>} d 병합된 프로젝트 문서 필드.
  * @returns {DevProject} 관리자 화면에서 사용하는 프로젝트 모델.
  */
-const toDevProject = (id: string, d: DocumentData): DevProject => ({
+const toDevProject = (id: string, d: Record<string, unknown>): DevProject => ({
   id,
   title: asText(d.title),
   category: asText(d.category),
-  year: d.year ?? "",
+  year: (d.year as string) ?? "",
   period: asText(d.period),
   position: asText(d.position),
   summary: asText(d.summary),
   overview: asText(d.overview),
-  features: d.features ?? [],
-  roles: d.roles ?? [],
+  features: (d.features as DevProject["features"]) ?? [],
+  roles: (d.roles as DevProject["roles"]) ?? [],
   troubleshooting: normalizeTroubleshooting(d.troubleshooting),
-  achievements: d.achievements ?? [],
-  techTags: d.techTags ?? [],
-  links: d.links ?? [],
-  cover: d.cover ?? null,
-  images: d.images ?? [],
-  order: d.order ?? 0,
-  published: d.published ?? false,
+  achievements: (d.achievements as DevProject["achievements"]) ?? [],
+  techTags: (d.techTags as string[]) ?? [],
+  links: (d.links as DevProject["links"]) ?? [],
+  cover: (d.cover as DevProject["cover"]) ?? null,
+  images: (d.images as DevProject["images"]) ?? [],
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
 });
 
 const devProjectsCrud = listCrud<DevProject>(
@@ -68,21 +69,22 @@ const devProjects = {
  * @returns {Promise<DevConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getDevConfigAdmin = async (): Promise<DevConfig> => {
-  try {
-    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DEV_DOC));
-    if (!snap.exists()) return EMPTY_DEV_CONFIG;
-    const d = snap.data();
-    return {
-      heroLead: asText(d.heroLead),
-      interview: d.interview ?? [],
-      stack: d.stack ?? [],
-      education: d.education ?? [],
-      timeline: d.timeline ?? [],
-      awards: normalizeDevAwards(d.awards),
-    };
-  } catch {
-    throw new Error("개발 설정을 불러오지 못했습니다.");
-  }
+  const { data, error } = await getSupabaseClient()
+    .from(SITE_TABLE)
+    .select("data")
+    .eq("id", SITE_DEV_DOC)
+    .maybeSingle();
+  if (error) throw new Error("개발 설정을 불러오지 못했습니다.");
+  if (!data) return EMPTY_DEV_CONFIG;
+  const d = (data.data as Record<string, unknown> | null) ?? {};
+  return {
+    heroLead: asText(d.heroLead),
+    interview: (d.interview as DevConfig["interview"]) ?? [],
+    stack: (d.stack as DevConfig["stack"]) ?? [],
+    education: (d.education as DevConfig["education"]) ?? [],
+    timeline: (d.timeline as DevConfig["timeline"]) ?? [],
+    awards: normalizeDevAwards(d.awards),
+  };
 };
 
 /**
@@ -92,14 +94,11 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
  * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
  */
 const updateDevConfig = async (config: DevConfig): Promise<void> => {
-  try {
-    await setDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_DEV_DOC), {
-      ...config,
-      updatedAt: serverTimestamp(),
-    });
-  } catch {
-    throw new Error("개발 설정 저장에 실패했습니다.");
-  }
+  const { data, error } = await getSupabaseClient()
+    .from(SITE_TABLE)
+    .upsert({ id: SITE_DEV_DOC, data: toJson(config as unknown as Record<string, unknown>) })
+    .select("id");
+  if (error || !data?.length) throw new Error("개발 설정 저장에 실패했습니다.");
   requestPublicRevalidate(documentCacheTag(COLLECTIONS.SITE, SITE_DEV_DOC));
   await requestRagSync("devConfig", SITE_DEV_DOC);
 };

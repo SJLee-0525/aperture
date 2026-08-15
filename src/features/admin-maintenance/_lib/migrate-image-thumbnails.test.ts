@@ -34,18 +34,18 @@ vi.mock("@/features/image-upload/_lib/compress", () => ({
 vi.mock("@/features/image-upload/_lib/read-dimensions", () => ({
   readDimensions: mocks.readDimensions,
 }));
-vi.mock("@/lib/firebase/albums", () => ({
+vi.mock("@/lib/supabase/albums", () => ({
   listAlbumsAdmin: mocks.listAlbumsAdmin,
   updateAlbum: mocks.updateAlbum,
 }));
-vi.mock("@/lib/firebase/dev", () => ({
+vi.mock("@/lib/supabase/dev", () => ({
   devProjects: { list: mocks.devList, update: mocks.devUpdate },
 }));
-vi.mock("@/lib/firebase/firestore", () => ({
+vi.mock("@/lib/supabase/photos", () => ({
   listPhotosAdmin: mocks.listPhotosAdmin,
   updatePhoto: mocks.updatePhoto,
 }));
-vi.mock("@/lib/firebase/music", () => ({
+vi.mock("@/lib/supabase/music", () => ({
   musicWorks: { list: mocks.musicList, update: mocks.musicUpdate },
 }));
 vi.mock("@/lib/supabase/auth", () => ({

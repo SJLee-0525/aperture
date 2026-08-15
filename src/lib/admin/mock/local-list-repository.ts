@@ -46,7 +46,7 @@ type LocalListRepository<TEntity extends ListEntity, TListItem> = {
   get: (id: string) => Promise<TEntity | null>;
   create: (id: string, input: Omit<TEntity, "id">) => Promise<void>;
   update: (id: string, input: Omit<TEntity, "id">) => Promise<void>;
-  updateOrder: (id: string, order: number) => Promise<void>;
+  updateOrder: (orders: Array<{ id: string; order: number }>) => Promise<void>;
   setPublished: (id: string, published: boolean) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
@@ -198,7 +198,25 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
     update: (id, input) =>
       enqueue(() => patch(id, (entity) => ({ ...entity, ...input, id: entity.id }))),
 
-    updateOrder: (id, order) => enqueue(() => patch(id, (entity) => ({ ...entity, order }))),
+    // live 의 정렬 RPC 처럼 한 번의 쓰기로 전 항목을 반영한다. 하나라도 없으면 저장하지 않는다.
+    updateOrder: (orders) =>
+      enqueue(async () => {
+        if (orders.length === 0) return;
+        const entities = await load();
+        const orderById = new Map(orders.map(({ id, order }) => [id, order]));
+        const missing = [...orderById.keys()].filter(
+          (id) => !entities.some((entity) => entity.id === id),
+        );
+        if (missing.length > 0) {
+          throw new Error(`수정할 ${config.label}을(를) 찾지 못했습니다.`);
+        }
+        save(
+          entities.map((entity) => {
+            const order = orderById.get(entity.id);
+            return order === undefined ? entity : { ...entity, order };
+          }),
+        );
+      }),
 
     setPublished: (id, published) =>
       enqueue(() => patch(id, (entity) => ({ ...entity, published }))),

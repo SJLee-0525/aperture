@@ -1,4 +1,4 @@
-import type { PostSyncPolicy } from "@/lib/firebase/list-crud";
+import type { PostSyncPolicy } from "@/lib/supabase/list-crud";
 import type { DevArticle } from "@/types/dev-article";
 
 /**

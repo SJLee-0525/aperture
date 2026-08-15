@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   listDevArticleTagsAdmin: vi.fn(async () => []),
 }));
 
-vi.mock("@/lib/firebase/dev-articles", () => ({
+vi.mock("@/lib/supabase/dev-articles", () => ({
   devArticlesCrud: {
     get: mocks.get,
     create: mocks.create,
@@ -33,7 +33,7 @@ vi.mock("@/lib/cache/request-revalidate", () => ({
   requestPublicPathRevalidate: mocks.requestPublicPathRevalidate,
   requestPublicRevalidate: vi.fn(),
 }));
-vi.mock("@/lib/firebase/admin-list-rest", () => ({
+vi.mock("@/lib/supabase/admin-list", () => ({
   listDevArticleItemsAdmin: mocks.listDevArticleItemsAdmin,
   listDevProjectItemsAdmin: mocks.listDevProjectItemsAdmin,
 }));

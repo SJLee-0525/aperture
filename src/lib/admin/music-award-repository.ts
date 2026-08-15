@@ -1,7 +1,7 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalListRepository } from "@/lib/admin/mock/local-list-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { musicAwards } from "@/lib/firebase/music";
+import { musicAwards } from "@/lib/supabase/music";
 
 import type { AdminListRepository } from "@/lib/admin/admin-list-repository";
 import type { MusicAward } from "@/types/music";

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   deleteObject: vi.fn(),
 }));
 
-vi.mock("@/lib/firebase/admin-list-rest", () => ({
+vi.mock("@/lib/supabase/admin-list", () => ({
   listDevArticleImageRefsAdmin: mocks.listDevArticleImageRefsAdmin,
 }));
 vi.mock("@/lib/firebase/storage", () => ({ listFolderFiles: mocks.listFolderFiles }));

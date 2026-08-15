@@ -2,7 +2,7 @@ import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalDocRepository } from "@/lib/admin/mock/local-doc-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { getMusicConfigAdmin, updateMusicConfig } from "@/lib/firebase/music";
+import { getMusicConfigAdmin, updateMusicConfig } from "@/lib/supabase/music";
 
 import type { MusicConfig } from "@/types/music";
 

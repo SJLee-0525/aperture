@@ -1,0 +1,209 @@
+import { collectionCacheTag } from "@/constants/cache";
+import { SUPABASE_COLLECTIONS, type CollectionId } from "@/constants/collections";
+import { requestRagSync } from "@/lib/ai/request-rag-sync";
+import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
+import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
+import { rowEncoderFor } from "@/lib/supabase/admin/row-codec";
+import { updateSortOrders, type SortOrder } from "@/lib/supabase/admin/sort-rpc";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { mergeRow } from "@/lib/supabase/public/transport";
+
+import type { RagSyncSourceType } from "@/types/rag";
+
+type WithId = { id: string };
+
+/**
+ * 쓰기 후 RAG 동기화 여부를 정하는 정책.
+ *
+ * 정책은 작업 이름 대신 쓰기 전후 문서 상태로 판단한다.
+ * `before` 는 쓰기 직전 스냅샷(생성이면 `null`), `after` 는 쓰기 결과(삭제면 `null`)다.
+ *
+ * `"remove"`도 `requestRagSync`를 호출한다. embeddings route 가 원본을 다시 읽어
+ * 비공개 또는 삭제된 문서의 청크를 비운다.
+ */
+type PostSyncPolicy<T> = (before: T | null, after: T | null) => "sync" | "remove" | "skip";
+
+type QueryError = { message: string } | null;
+
+/** supabase-js 는 실패를 던지지 않고 `{ error }` 로 돌려준다. 놓치면 실패가 성공으로 위장된다. */
+const assertNoError = (error: QueryError, message: string): void => {
+  if (error) throw new Error(message);
+};
+
+/**
+ * 목록형 컬렉션의 공통 관리자 CRUD 팩토리 (Supabase).
+ *
+ * 인코딩은 `rowEncoderFor` 가, 읽기 병합은 공개 transport 의 `mergeRow` 가 맡아
+ * 쓰기와 읽기가 같은 왕복 계약을 쓴다. 정렬·projection 은 `SUPABASE_COLLECTIONS`
+ * 서술자가 단일 출처다. `created_at`/`updated_at` 은 DB 기본값·트리거 소유라 쓰지 않는다.
+ *
+ * @param {CollectionId} collection 대상 논리 컬렉션 이름.
+ * @param {(id: string, d: Record<string, unknown>) => T} toEntity 병합된 행을 도메인 모델로 바꾸는 함수.
+ * @param {string} label 오류 메시지에 표시할 항목 이름.
+ * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류. 없으면 동기화 요청이 없다.
+ * @param {PostSyncPolicy<T>} [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책. 없으면 모든 쓰기가 동기화를 요청하고 쓰기 직전 스냅샷도 읽지 않는다.
+ * @returns {{ newId: () => string; list: () => Promise<T[]>; get: (id: string) => Promise<T | null>; create: (id: string, input: Omit<T, 'id'>) => Promise<void>; update: (id: string, input: Omit<T, 'id'>) => Promise<void>; updateOrder: (orders: SortOrder[]) => Promise<void>; setPublished: (id: string, published: boolean) => Promise<void>; remove: (id: string) => Promise<void> }} 해당 컬렉션에 묶인 관리자 CRUD 함수.
+ */
+const listCrud = <T extends WithId>(
+  collection: CollectionId,
+  toEntity: (id: string, d: Record<string, unknown>) => T,
+  label: string,
+  ragSourceType?: RagSyncSourceType,
+  syncPolicy?: PostSyncPolicy<T>,
+) => {
+  type Input = Omit<T, "id">;
+  /** 쓰기 직전 스냅샷과 조회 성공 여부. 실패와 "문서 없음"을 구분해야 fallback 이 성립한다. */
+  type BeforeSnapshot = { before: T | null; failed: boolean };
+
+  const descriptor = SUPABASE_COLLECTIONS[collection];
+  if (!descriptor) throw new Error(`Supabase 컬렉션 서술자가 없습니다: ${collection}`);
+  const { table, select, order } = descriptor;
+  const encode = rowEncoderFor(collection);
+  const cacheTag = collectionCacheTag(collection);
+  const from = () => getSupabaseClient().from(table);
+
+  const fetchEntity = async (id: string): Promise<T | null> => {
+    const { data, error } = await from().select(select).eq("id", id).maybeSingle();
+    if (error) throw new Error(`${label}을(를) 불러오지 못했습니다.`);
+    return data ? toEntity(id, mergeRow(collection, data as unknown as Record<string, unknown>).data) : null;
+  };
+
+  /**
+   * 정책 판단에 사용할 쓰기 직전 스냅샷. 정책이 없으면 읽지 않는다.
+   * 조회 실패는 `failed` 로 표시하고 쓰기를 막지 않는다.
+   */
+  const readBeforeWrite = async (id: string): Promise<BeforeSnapshot | null> => {
+    if (!(ragSourceType && syncPolicy)) return null;
+    try {
+      return { before: await fetchEntity(id), failed: false };
+    } catch {
+      return { before: null, failed: true };
+    }
+  };
+
+  /**
+   * 쓰기 성공 뒤 RAG 동기화를 요청한다. `ragSourceType` 이 없으면 아무것도 하지 않는다.
+   * 스냅샷 조회가 실패하면 청크가 남지 않도록 동기화를 요청한다.
+   */
+  const syncAfterWrite = async (
+    id: string,
+    snapshot: BeforeSnapshot | null,
+    after: T | null,
+  ): Promise<void> => {
+    if (!ragSourceType) return;
+    const decision =
+      !syncPolicy || !snapshot || snapshot.failed ? "sync" : syncPolicy(snapshot.before, after);
+    if (decision === "skip") return;
+    await requestRagSync(ragSourceType, id);
+  };
+
+  return {
+    /** 새 문서 ID를 미리 발급한다. Storage 경로를 먼저 정할 때 사용한다. */
+    newId: (): string => crypto.randomUUID(),
+    /**
+     * 초안을 포함한 전체 관리자 목록을 서술자 정렬 순으로 읽는다.
+     * 세션이 없으면 RLS 가 초안을 오류 없이 감추므로 먼저 로그인 오류로 바꾼다.
+     */
+    list: async (): Promise<T[]> => {
+      await requireAdminSession();
+      let query = from().select(select);
+      for (const part of order.split(",")) {
+        const [column, direction, nulls] = part.split(".");
+        query = query.order(column, {
+          ascending: direction !== "desc",
+          ...(nulls ? { nullsFirst: nulls === "nullsfirst" } : {}),
+        });
+      }
+      const { data, error } = await query;
+      if (error) throw new Error(`${label} 목록을 불러오지 못했습니다.`);
+      return (data as unknown as Array<Record<string, unknown>>).map((row) => {
+        const merged = mergeRow(collection, row);
+        return toEntity(merged.id, merged.data);
+      });
+    },
+    /**
+     * 관리자 편집용 문서 한 건을 읽는다.
+     *
+     * @param {string} id 조회할 문서 ID.
+     * @returns {Promise<T | null>} 변환된 모델. 문서가 없으면 `null`이다.
+     */
+    get: async (id: string): Promise<T | null> => {
+      await requireAdminSession();
+      return fetchEntity(id);
+    },
+    /**
+     * 미리 발급한 ID로 문서를 생성한다.
+     *
+     * @param {string} id 새 문서에 사용할 ID.
+     * @param {Input} input 문서 ID를 제외한 저장 필드.
+     * @returns {Promise<void>} 저장과 후속 갱신이 끝나면 완료된다.
+     */
+    create: async (id: string, input: Input): Promise<void> => {
+      const { error } = await from().insert(encode(id, input));
+      assertNoError(error, `${label} 저장에 실패했습니다.`);
+      requestPublicRevalidate(cacheTag);
+      // 생성 전 상태는 문서 없음으로 처리한다.
+      await syncAfterWrite(id, { before: null, failed: false }, { id, ...input } as T);
+    },
+    /**
+     * 기존 문서의 도메인 필드를 수정한다.
+     * RLS 거부·부재 문서는 오류 없이 0행이 되므로 반환 행으로 반영을 검증한다.
+     *
+     * @param {string} id 수정할 문서 ID.
+     * @param {Input} input 교체할 도메인 필드.
+     * @returns {Promise<void>} 수정과 후속 갱신이 끝나면 완료된다.
+     */
+    update: async (id: string, input: Input): Promise<void> => {
+      const snapshot = await readBeforeWrite(id);
+      const { data, error } = await from().update(encode(id, input)).eq("id", id).select("id");
+      if (error || !data?.length) throw new Error(`${label} 수정에 실패했습니다.`);
+      requestPublicRevalidate(cacheTag);
+      await syncAfterWrite(id, snapshot, { id, ...input } as T);
+    },
+    /**
+     * 드래그 정렬 결과를 RPC 1회로 저장한다. 정렬은 검색 본문과 무관해 RAG 동기화가 없다.
+     *
+     * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록.
+     * @returns {Promise<void>} 순서 저장이 끝나면 완료된다.
+     */
+    updateOrder: async (orders: SortOrder[]): Promise<void> => {
+      if (orders.length === 0) return;
+      await updateSortOrders(collection, orders);
+      requestPublicRevalidate(cacheTag);
+    },
+    /**
+     * 문서의 공개 상태를 변경한다.
+     *
+     * @param {string} id 상태를 바꿀 문서 ID.
+     * @param {boolean} published 공개 여부.
+     * @returns {Promise<void>} 상태 저장과 후속 갱신이 끝나면 완료된다.
+     */
+    setPublished: async (id: string, published: boolean): Promise<void> => {
+      const snapshot = await readBeforeWrite(id);
+      const { data, error } = await from().update({ published }).eq("id", id).select("id");
+      if (error || !data?.length) throw new Error("공개 상태 변경에 실패했습니다.");
+      requestPublicRevalidate(cacheTag);
+      // 이전 스냅샷의 published 값만 바꿔 정책에 전달한다. 스냅샷이 없으면
+      // syncAfterWrite 가 정책을 묻지 않으므로 after 는 쓰이지 않는다.
+      const after = snapshot?.before ? ({ ...snapshot.before, published } as T) : null;
+      await syncAfterWrite(id, snapshot, after);
+    },
+    /**
+     * 문서를 삭제하고 공개 캐시와 RAG 문서를 갱신한다. 이미 없는 문서의 삭제는
+     * 기존 deleteDoc 과 같이 성공으로 처리한다.
+     *
+     * @param {string} id 삭제할 문서 ID.
+     * @returns {Promise<void>} 삭제와 후속 갱신이 끝나면 완료된다.
+     */
+    remove: async (id: string): Promise<void> => {
+      const snapshot = await readBeforeWrite(id);
+      const { error } = await from().delete().eq("id", id);
+      assertNoError(error, `${label} 삭제에 실패했습니다.`);
+      requestPublicRevalidate(cacheTag);
+      await syncAfterWrite(id, snapshot, null);
+    },
+  };
+};
+
+export { listCrud };
+export type { PostSyncPolicy };

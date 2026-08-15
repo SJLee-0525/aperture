@@ -6,10 +6,6 @@ import {
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
-import { listAlbumsAdmin, updateAlbum } from "@/lib/firebase/albums";
-import { devProjects } from "@/lib/firebase/dev";
-import { listPhotosAdmin, updatePhoto } from "@/lib/firebase/firestore";
-import { musicWorks } from "@/lib/firebase/music";
 import {
   uploadDevThumbnail,
   uploadDevPreview,
@@ -18,7 +14,11 @@ import {
   uploadPhotoPreview,
   uploadPhotoThumbnail,
 } from "@/lib/firebase/storage";
+import { listAlbumsAdmin, updateAlbum } from "@/lib/supabase/albums";
 import { getAdminAccessToken } from "@/lib/supabase/auth";
+import { devProjects } from "@/lib/supabase/dev";
+import { musicWorks } from "@/lib/supabase/music";
+import { listPhotosAdmin, updatePhoto } from "@/lib/supabase/photos";
 
 import type { ImageMeta, ImageVariant } from "@/types/image";
 

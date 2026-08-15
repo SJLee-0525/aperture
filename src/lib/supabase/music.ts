@@ -1,87 +1,83 @@
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-  Timestamp,
-  type DocumentData,
-} from "firebase/firestore";
-
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
+import { COLLECTIONS, SITE_MUSIC_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { getFirebaseDb } from "@/lib/firebase/client";
-import { listCrud } from "@/lib/firebase/list-crud";
 import { deleteMusicWorkImages } from "@/lib/firebase/storage";
 import { asText } from "@/lib/i18n/as-text";
+import { toJson } from "@/lib/supabase/admin/row-codec";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { listCrud } from "@/lib/supabase/list-crud";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
-/**
- * Firestore에서 읽은 날짜 값을 화면 모델의 `Date`로 맞춘다.
- *
- * @param {unknown} v 변환할 Firestore `Timestamp` 또는 `Date` 값.
- * @returns {Date} 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
- */
-const asDate = (v: unknown): Date =>
-  v instanceof Timestamp ? v.toDate() : v instanceof Date ? v : new Date();
+const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
 
 /**
- * 연주 문서의 누락 필드를 기본값으로 채워 `MusicWork`로 변환한다.
+ * 병합된 행의 날짜 값을 화면 모델의 `Date`로 맞춘다.
  *
- * @param {string} id Firestore 연주 문서 ID.
- * @param {DocumentData} d Firestore에서 읽은 연주 문서 필드.
+ * @param {unknown} v 변환할 ISO 문자열 또는 `Date` 값.
+ * @returns {Date} 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
+ */
+const asDate = (v: unknown): Date => {
+  if (typeof v === "string" || typeof v === "number") return new Date(v);
+  return v instanceof Date ? v : new Date();
+};
+
+/**
+ * 연주 행의 누락 필드를 기본값으로 채워 `MusicWork`로 변환한다.
+ *
+ * @param {string} id 연주 문서 ID.
+ * @param {Record<string, unknown>} d 병합된 연주 문서 필드.
  * @returns {MusicWork} 관리자 화면에서 사용하는 연주 모델.
  */
-const toMusicWork = (id: string, d: DocumentData): MusicWork => ({
+const toMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
   id,
   title: asText(d.title),
   subtitle: asText(d.subtitle),
   performedAt: asDate(d.performedAt),
-  time: d.time ?? "",
+  time: (d.time as string) ?? "",
   venue: asText(d.venue),
   category: asText(d.category),
-  program: d.program ?? [],
+  program: (d.program as string[]) ?? [],
   description: asText(d.description),
-  poster: d.poster ?? { url: "", path: "", w: 0, h: 0 },
-  ticketUrl: d.ticketUrl ?? "",
-  order: d.order ?? 0,
-  published: d.published ?? false,
+  poster: (d.poster as MusicWork["poster"]) ?? { url: "", path: "", w: 0, h: 0 },
+  ticketUrl: (d.ticketUrl as string) ?? "",
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
 });
 
 /**
- * 수상 문서의 다국어 필드와 기본값을 정규화한다.
+ * 수상 행의 다국어 필드와 기본값을 정규화한다.
  *
- * @param {string} id Firestore 수상 문서 ID.
- * @param {DocumentData} d Firestore에서 읽은 수상 문서 필드.
+ * @param {string} id 수상 문서 ID.
+ * @param {Record<string, unknown>} d 병합된 수상 문서 필드.
  * @returns {MusicAward} 관리자 화면에서 사용하는 수상 모델.
  */
-const toMusicAward = (id: string, d: DocumentData): MusicAward => ({
+const toMusicAward = (id: string, d: Record<string, unknown>): MusicAward => ({
   id,
-  year: d.year ?? 0,
+  year: (d.year as number) ?? 0,
   name: asText(d.name),
-  place: d.place ?? "",
+  place: (d.place as string) ?? "",
   description: asText(d.description),
-  order: d.order ?? 0,
-  published: d.published ?? false,
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
 });
 
 /**
- * 영상 문서의 다국어 필드와 기본값을 정규화한다.
+ * 영상 행의 다국어 필드와 기본값을 정규화한다.
  *
- * @param {string} id Firestore 영상 문서 ID.
- * @param {DocumentData} d Firestore에서 읽은 영상 문서 필드.
+ * @param {string} id 영상 문서 ID.
+ * @param {Record<string, unknown>} d 병합된 영상 문서 필드.
  * @returns {MusicMedia} 관리자 화면에서 사용하는 영상 모델.
  */
-const toMusicMedia = (id: string, d: DocumentData): MusicMedia => ({
+const toMusicMedia = (id: string, d: Record<string, unknown>): MusicMedia => ({
   id,
   title: asText(d.title),
   source: asText(d.source),
-  youtubeId: d.youtubeId ?? "",
-  order: d.order ?? 0,
-  published: d.published ?? false,
+  youtubeId: (d.youtubeId as string) ?? "",
+  order: (d.order as number) ?? 0,
+  published: (d.published as boolean) ?? false,
 });
 
 const musicWorksCrud = listCrud<MusicWork>(
@@ -122,14 +118,19 @@ const musicMedia = listCrud<MusicMedia>(
  * @returns {Promise<MusicConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
-  try {
-    const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_MUSIC_DOC));
-    if (!snap.exists()) return EMPTY_MUSIC_CONFIG;
-    const d = snap.data();
-    return { intro: asText(d.intro), career: d.career ?? [], education: d.education ?? [] };
-  } catch {
-    throw new Error("음악 설정을 불러오지 못했습니다.");
-  }
+  const { data, error } = await getSupabaseClient()
+    .from(SITE_TABLE)
+    .select("data")
+    .eq("id", SITE_MUSIC_DOC)
+    .maybeSingle();
+  if (error) throw new Error("음악 설정을 불러오지 못했습니다.");
+  if (!data) return EMPTY_MUSIC_CONFIG;
+  const d = (data.data as Record<string, unknown> | null) ?? {};
+  return {
+    intro: asText(d.intro),
+    career: (d.career as MusicConfig["career"]) ?? [],
+    education: (d.education as MusicConfig["education"]) ?? [],
+  };
 };
 
 /**
@@ -139,14 +140,11 @@ const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
  * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
  */
 const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
-  try {
-    await setDoc(doc(getFirebaseDb(), COLLECTIONS.SITE, SITE_MUSIC_DOC), {
-      ...config,
-      updatedAt: serverTimestamp(),
-    });
-  } catch {
-    throw new Error("음악 설정 저장에 실패했습니다.");
-  }
+  const { data, error } = await getSupabaseClient()
+    .from(SITE_TABLE)
+    .upsert({ id: SITE_MUSIC_DOC, data: toJson(config as unknown as Record<string, unknown>) })
+    .select("id");
+  if (error || !data?.length) throw new Error("음악 설정 저장에 실패했습니다.");
   requestPublicRevalidate(documentCacheTag(COLLECTIONS.SITE, SITE_MUSIC_DOC));
   await requestRagSync("musicConfig", SITE_MUSIC_DOC);
 };

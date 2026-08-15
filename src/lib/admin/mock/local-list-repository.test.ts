@@ -123,7 +123,7 @@ describe("createLocalListRepository", () => {
   it("순서와 공개 상태만 바꾼다", async () => {
     const repo = repository(memoryStorage());
 
-    await repo.updateOrder("a", 5);
+    await repo.updateOrder([{ id: "a", order: 5 }]);
     await repo.setPublished("a", false);
 
     const changed = await repo.get("a");
@@ -132,15 +132,40 @@ describe("createLocalListRepository", () => {
     expect(changed?.title).toBe("첫 항목");
   });
 
-  it("병렬 쓰기가 서로의 변경을 덮어쓰지 않는다", async () => {
-    // 드래그 정렬은 바뀐 항목마다 updateOrder 를 병렬로 부른다 — 배열 전체를 다시 쓰는
-    // 저장소에서 직렬화 큐가 없으면 마지막 쓰기가 앞의 쓰기를 지운다.
+  it("일괄 정렬은 한 번의 저장으로 전 항목을 반영한다", async () => {
+    // live 의 정렬 RPC 와 같은 계약 — 드래그 1회의 변경 목록이 통째로 들어온다.
     const repo = repository(memoryStorage());
 
-    await Promise.all([repo.updateOrder("a", 1), repo.updateOrder("b", 0)]);
+    await repo.updateOrder([
+      { id: "a", order: 1 },
+      { id: "b", order: 0 },
+    ]);
 
     expect((await repo.get("a"))?.order).toBe(1);
     expect((await repo.get("b"))?.order).toBe(0);
+  });
+
+  it("없는 항목이 섞인 일괄 정렬은 저장하지 않는다", async () => {
+    // live RPC 의 행 수 검증과 같은 의미 — 부분 반영을 성공으로 위장하지 않는다.
+    const repo = repository(memoryStorage());
+
+    await expect(
+      repo.updateOrder([
+        { id: "a", order: 1 },
+        { id: "없는-id", order: 2 },
+      ]),
+    ).rejects.toThrow("찾지 못했습니다");
+    expect((await repo.get("a"))?.order).toBe(0);
+  });
+
+  it("병렬 쓰기가 서로의 변경을 덮어쓰지 않는다", async () => {
+    // 배열 전체를 다시 쓰는 저장소에서 직렬화 큐가 없으면 마지막 쓰기가 앞의 쓰기를 지운다.
+    const repo = repository(memoryStorage());
+
+    await Promise.all([repo.updateOrder([{ id: "a", order: 1 }]), repo.setPublished("b", false)]);
+
+    expect((await repo.get("a"))?.order).toBe(1);
+    expect((await repo.get("b"))?.published).toBe(false);
   });
 
   it("불변조건이 깨진 저장소는 통째로 버리고 다시 seed 한다", async () => {
@@ -172,6 +197,6 @@ describe("createLocalListRepository", () => {
     storage.setItem = () => {
       throw new Error("QuotaExceededError");
     };
-    await expect(repo.updateOrder("a", 3)).rejects.toThrow("저장 공간이 부족");
+    await expect(repo.updateOrder([{ id: "a", order: 3 }])).rejects.toThrow("저장 공간이 부족");
   });
 });

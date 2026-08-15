@@ -11,7 +11,7 @@ type OrderedAdminItem = {
 
 type OrderedAdminAdapter<T extends OrderedAdminItem> = {
   list: () => Promise<T[]>;
-  updateOrder: (id: string, order: number) => Promise<void>;
+  updateOrder: (orders: Array<{ id: string; order: number }>) => Promise<void>;
   setPublished: (id: string, published: boolean) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
@@ -86,13 +86,10 @@ const useOrderedAdmin = <T extends OrderedAdminItem>(adapter: OrderedAdminAdapte
       setError(null);
       replaceItems(moved);
       try {
-        const results = await Promise.allSettled(
-          changed.map((item) => adapter.updateOrder(item.id, item.order)),
-        );
-        const rejected = results.find(
-          (result): result is PromiseRejectedResult => result.status === "rejected",
-        );
-        if (rejected) throw rejected.reason;
+        // 바뀐 항목이 없으면 저장을 건너뛴다. live 는 목록 전체가 아니라 이 목록만 RPC 1건으로 보낸다.
+        if (changed.length > 0) {
+          await adapter.updateOrder(changed.map(({ id, order }) => ({ id, order })));
+        }
       } catch (caught) {
         setError((caught as Error).message);
         try {

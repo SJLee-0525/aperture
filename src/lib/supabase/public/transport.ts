@@ -171,4 +171,4 @@ const fetchRowAsUser = async (
   return first ? mergeRow(collection, first).data : null;
 };
 
-export { fetchRow, fetchRowAsUser, selectPublished, selectRows, toDate, toNullableDate };
+export { fetchRow, fetchRowAsUser, mergeRow, selectPublished, selectRows, toDate, toNullableDate };
