@@ -57,6 +57,12 @@ const YOUTUBE_FRAME_HOSTS = [
 ] as const;
 
 /**
+ * 관리자 사진 편집의 장소 검색(OpenStreetMap Nominatim, `lib/geo/geocode.ts`).
+ * connect-src 에 없으면 CSP 가 요청을 차단하고 화면에는 네트워크 오류로 위장된다.
+ */
+const GEOCODING_HOSTS = ["https://nominatim.openstreetmap.org"] as const;
+
+/**
  * Web3Forms가 사용하는 hCaptcha 호스트.
  * hCaptcha 는 스크립트·프레임·스타일·XHR 을 모두 자기 호스트에서 가져오므로 네 지시어에 함께 넣는다.
  * 하나라도 빠지면 위젯이 표시되지 않아 폼을 제출할 수 없다.
@@ -115,7 +121,7 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) => {
     `img-src 'self' data: blob: ${[...new Set([...IMAGE_HOSTS, ...supabaseHosts, ...ANALYTICS_CONNECT_HOSTS])].join(" ")}`,
     // blob: 은 업로드 전 압축본(browser-image-compression)·내보내기 canvas 결과를 다시 읽는 경로.
     // data: 는 어느 경로도 fetch 하지 않아 넣지 않는다.
-    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...supabaseHosts, ...CARTO_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
+    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...supabaseHosts, ...CARTO_HOSTS, ...GEOCODING_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
     `frame-src ${[...YOUTUBE_FRAME_HOSTS, ...CAPTCHA_HOSTS].join(" ")}`,
     // MapLibre 워커가 사용하는 blob: URL을 허용한다.
     "worker-src 'self' blob:",

@@ -56,6 +56,13 @@ describe("Content-Security-Policy", () => {
     STORAGE_IMAGE_HOSTS.forEach((host) => expect(imgSrc).toContain(host));
   });
 
+  it("장소 검색 호스트를 connect-src 에 연다", () => {
+    // 관리자 사진 편집의 Nominatim 지오코딩 — 빠지면 CSP 차단이 네트워크 오류로 위장된다.
+    const policy = buildContentSecurityPolicy(false);
+
+    expect(directive(policy, "connect-src")).toContain("https://nominatim.openstreetmap.org");
+  });
+
   it("Supabase 호스트를 인증·데이터(connect-src)와 이미지(img-src)에 연다", () => {
     // 로그인(auth/v1/token)·PostgREST 가 connect-src, 이전된 Storage 이미지가 img-src 에 걸린다.
     // 빠지면 로그인이 "네트워크 연결" 오류로 위장되고 사진이 전부 빈 칸이 된다.
