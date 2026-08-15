@@ -396,6 +396,13 @@
   animation: loadingOrbit 0.72s linear infinite;
 }
 
+/* 프레임 모드의 점은 대상 상자 위에 그린 그라디언트라, 확장 여백(8px)만큼 포인터와 어긋난다.
+   오브가 포인터를 정확히 짚는 동안 옆에 둘 이유가 없다. 모드별 opacity 를 덮어야 하므로
+   그 규칙들보다 뒤에 온다. */
+.cursor[data-loading="true"] .markerDot {
+  opacity: 0;
+}
+
 .cursor[data-mode="range"] .shape {
   background: transparent;
   box-shadow: none;
