@@ -220,6 +220,9 @@
   height: 28px;
   overflow: visible;
   color: var(--cursor-accent);
+  /* transform 은 회전 애니메이션이 쓰므로 위치 보정은 translate 로 따로 준다.
+     적용 순서가 translate → transform 이라 제자리에서 도는 모양이 유지된다. */
+  translate: var(--cursor-loading-x, 0px) var(--cursor-loading-y, 0px);
 }
 
 .loadingOrbit svg {
@@ -391,6 +394,13 @@
 .cursor[data-loading="true"] .loadingOrbit {
   opacity: 1;
   animation: loadingOrbit 0.72s linear infinite;
+}
+
+/* 프레임 모드의 점은 대상 상자 위에 그린 그라디언트라, 확장 여백(8px)만큼 포인터와 어긋난다.
+   오브가 포인터를 정확히 짚는 동안 옆에 둘 이유가 없다. 모드별 opacity 를 덮어야 하므로
+   그 규칙들보다 뒤에 온다. */
+.cursor[data-loading="true"] .markerDot {
+  opacity: 0;
 }
 
 .cursor[data-mode="range"] .shape {

@@ -1212,11 +1212,106 @@ search_portfolio {"query":"e2e"}                 → AlphaBat 1건 (프로젝트
 답으로 내놓는다.
 조치: 6-6 과 같다.
 
+## 7차 평가 · 2026-08-15 (6차 조치 배포 후)
+
+6-6 조치의 재검증이다. 도구 선택은 세 발화 모두에서 바뀌었다. 지면 한정 등록이 조치와
+부딪히는 지점을 랜딩에서 새로 찾았고, 콘솔로 응답 계약을 결정론적으로 확인했다.
+
+### 7-1. `/ko/dev/articles` — 통과 (선택 교정), 판단 보류 1
+
+```
+발화: 리액트 태그 글 보여줘
+list_blog_posts {"tag":"리액트"} →
+  No posts use "리액트". Known tags: chatbot (챗봇 / ChatBot), jwt (JWT / JWT), seo (SEO / SEO).
+search_portfolio {"section":"dev","query":"리액트"} → 프로젝트 6건
+search_portfolio {"section":"dev","query":"React"}  → 같은 프로젝트 6건
+⚠️ 429
+```
+
+판정: 선택은 통과. 6-6 에서 한 번도 오르지 않던 `list_blog_posts` 가 첫 호출이 됐고, 태그
+사전 안내가 처음으로 에이전트에게 닿았다.
+
+판단 보류: "그런 태그의 글이 없다" 를 받은 뒤에도 검색을 두 번 더 돌려 프로젝트를 가져왔다.
+질문 범위를 넓혀 답하려는 시도라 틀렸다고 보기 어렵다. 다만 무료 쿼터에서는 호출 두 번이
+비싸다. 문구를 더 단정하게 바꾸는 안이 있으나 이번에는 관찰만 남긴다.
+조치: 없음.
+
+### 7-2. `/ko/dev/articles` — 통과 (한 번에 정답)
+
+```
+발화: jwt 태그 글 보여줘
+list_blog_posts {"tag":"jwt"} →
+  JWT는 나를 힘들게 해 · 2026.08.15 · 13 min read · z01lb3WCKcJLJGkZQlG8 ·
+  jwt-gives-me-a-hard-time · /ko/dev/articles/jwt-gives-me-a-hard-time
+```
+
+판정: 통과. 호출 한 번으로 끝났고 답도 그 글 하나였다. 6-6 과 같은 형태의 발화가 정상 경로로
+들어온 것이 이번 조치의 목표였다.
+조치: 없음.
+
+### 7-3. `/ko/dev/articles` — 판단 보류 (문맥 지름길)
+
+```
+발화: jwt 태그 가진 블로그 글 보여줘
+get_blog_post {"slug":"jwt-gives-me-a-hard-time"} → 제목·요약·태그·목차
+⚠️ 429
+```
+
+판정: 판단 보류. 태그로 거르는 요청이니 `list_blog_posts {"tag":"jwt"}` 가 정석이다. 다만
+직전 7-2 에서 그 글의 slug 를 이미 알고 있어 상세로 바로 갔다. 결과는 맞았고 호출도 한 번이다.
+대화 문맥이 없는 상태에서 같은 발화를 다시 볼 필요가 있다.
+조치: 없음.
+
+### 7-4. `/ko` 랜딩 — 결함 (지면에 없는 도구를 부른다)
+
+```
+발화: 리액트 태그 글 보여줘 / e2e 태그 글 보여줘 / e2e 태그 가진 블로그 글 보여줘
+list_blog_posts {"tag":"React"} →
+  "Failed to execute 'executeTool' on 'ModelContext': The provided value is not of type 'RegisteredTool'."
+search_portfolio … → 프로젝트 목록
+get_page_content {"path":"/ko/dev/articles"} → 같은 RegisteredTool 오류
+⚠️ 429
+```
+
+판정: 결함. 블로그 도구는 계획 §10 대로 `/dev/articles` 와 상세에서만 등록한다. 랜딩에는 없는데
+6-6 조치가 `search_portfolio` 설명에서 그 도구를 가리키는 바람에, 에이전트가 없는 도구를 부르고
+실패한 뒤 검색으로 폴백했다. 호출 두 번이 버려진다.
+
+우리가 등록하지 않는 `get_page_content` 도 같은 오류를 냈다. 오류 자체는 Inspector 가 들고 있던
+도구 핸들이 만료됐을 때 나오는 것이고, 등록 코드의 문제는 아니다.
+조치: `search_portfolio` 설명에 전용 도구가 각 섹션 지면에만 등록된다는 점과, 목록에 없으면 그
+페이지를 열거나 이 검색으로 답하라는 지침을 덧붙였다. 문장 자체는 사실이지만 이것이 원인을
+덮는지는 확실하지 않다. 우리가 등록하지 않는 `get_page_content` 까지 같은 오류를 낸 것은
+에이전트가 현재 목록과 무관하게 도구를 골랐다는 뜻이고, 그렇다면 설명으로 닫을 수 있는 문제가
+아니다. 재검증은 고쳐졌는지가 아니라 둘 중 어느 쪽인지를 가르는 데 쓴다.
+
+### 7-5. 콘솔 결정론 확인 — 통과
+
+```
+(await mc.getTools()).map((t) => t.name)
+  → ['get_blog_post', 'get_profile', 'list_blog_posts', 'search_portfolio']
+
+executeTool(list_blog_posts, {}) →
+  JWT는 나를 힘들게 해 · … / 검색엔진 등록 절차 · … / 나만의 챗봇 설계 · …
+  Known tags: chatbot (챗봇 / ChatBot), jwt (JWT / JWT), seo (SEO / SEO).
+
+executeTool(list_blog_posts, {"tag":"e2e"}) →
+  No posts use "e2e". Known tags: chatbot (챗봇 / ChatBot), jwt (JWT / JWT), seo (SEO / SEO).
+```
+
+판정: 통과. 블로그 지면의 노출 4종과 6차에서 바꾼 두 응답 계약을 쿼터 없이 확정했다. 인자 없는
+목록이 태그 사전을 함께 주고, 없는 태그는 사전과 함께 0건을 알린다.
+조치: 없음.
+
 ## 재검증 대기
 
-- 태그가 걸린 블로그 질의의 도구 선택(6-6, 6-7, 6-8). 설명 세 개와 무인자 응답을 고쳤고
-  배포본에서 세 발화를 다시 돌려야 한다. 기대값은 `list_blog_posts {"tag":"리액트"}` 호출과
-  `No posts use "리액트". Known tags: …` 응답이다.
+- 랜딩에서 지면에 없는 전용 도구를 부르는 문제(7-4). 원인이 Inspector 의 stale 목록이면
+  `search_portfolio` 설명으로는 닫히지 않는다. 랜딩에서 `리액트 태그 글 보여줘` 를 한 번
+  돌려 가른다. `list_blog_posts` 를 부르지 않으면 안내가 닿은 것이고, 그대로 부르면 우리
+  쪽에서 할 수 있는 것이 없다는 확인이다. 새로고침 직후와 다른 지면을 거친 뒤를 각각 보면
+  stale 여부도 함께 드러난다.
+
+6-6 의 도구 선택 조치는 7-1·7-2·7-5 에서 확인했다.
 
 5차 조치까지는 배포본에서 모두 확인했다(5-5).
 
@@ -1259,12 +1354,12 @@ search_portfolio {"query":"e2e"}                 → AlphaBat 1건 (프로젝트
 | `list_photo_locations`    | 3-9 · 4-2                                      |
 | `prepare_contact_message` | 3-6 (폼 채움까지 확인)                         |
 | `list_music_awards`       | 5-3 · 5-5                                      |
-| `list_blog_posts`         | 6-1                                            |
-| `get_blog_post`           | 6-2 · 6-3                                      |
+| `list_blog_posts`         | 6-1 · 7-1 · 7-2 · 7-5                          |
+| `get_blog_post`           | 6-2 · 6-3 · 7-3 · 7-5                          |
 
 ### 배포 후 재검증 대기
 
-6-6 의 도구 선택 조치를 적용했고 배포본 재실행이 남았다. 그 밖의 코드 변경은 5-5 에서 확인했다.
+7-4 의 지면 한정 안내를 적용했고 배포본 재실행이 남았다. 6-6 조치는 7차에서 확인했다.
 
 ### 아직 못 해본 것
 
