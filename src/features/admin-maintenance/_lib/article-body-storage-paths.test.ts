@@ -124,7 +124,7 @@ describe("articleBodyStoragePaths — Supabase 공개 URL (M2 재작성 이후 �
     )}?alt=media`;
     const body = `![old](${firebase})\n![new](${PUBLIC}/dev-blog/a1/new.webp)`;
 
-    expect(articleBodyStoragePaths(body).sort()) .toEqual([
+    expect(articleBodyStoragePaths(body).sort()).toEqual([
       "dev-blog/a1/new.webp",
       "dev-blog/a1/old.webp",
     ]);

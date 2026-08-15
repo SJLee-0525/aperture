@@ -127,21 +127,21 @@ create policy "admin write" on photos
 
 ## 3. 교체 매핑
 
-| 현재 (Firebase) | 이후 (Supabase) | 비고 |
-| --- | --- | --- |
-| `lib/firebase/client.ts` | `lib/supabase/client.ts` — 브라우저 싱글턴 | 지연 함수 반환 규약 유지 (훅 의존성 배열 보호) |
-| `lib/firebase/auth.ts` | `signInWithPassword`/`signOut`/`onAuthStateChange` | 에러 맵 재작성 |
-| `lib/auth/verify-admin-id-token.ts` | JWKS 로컬 JWT 검증 + role 클레임 확인 | 외부 HTTP 왕복 소멸. 호출 4곳 시그니처 유지 |
-| `lib/firebase/public/transport.ts` | `lib/supabase/public/transport.ts` — PostgREST fetch | `next:{revalidate,tags}` 동일 적용. decode 봉투·`__name__` 로직 소멸 |
-| `lib/firebase/public/retry-fetch.ts` | 그대로 재사용 | 429 주석만 갱신 |
-| `lib/firebase/admin-list-rest.ts` | PostgREST `select=` projection | 227줄이 수십 줄로 축소 |
-| `lib/firebase/list-crud.ts`, `firestore.ts`, `albums.ts`, `music.ts`, `dev.ts`, `site.ts`, `dev-articles.ts` | supabase-js CRUD | `requestRagSync`·revalidate 트리거 지점은 그대로 |
-| `lib/firebase/storage.ts` | `.upload`/`.remove`/`.list` | `listFolderFiles`의 getMetadata N+1 소멸 |
-| `lib/ai/rag-index.ts` | **삭제** | pgvector 조회로 대체 |
-| `lib/firebase/public/rag.ts` | **삭제** | RPC 호출로 대체 |
-| `firestore.rules`, `storage.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc` | `supabase/migrations/*.sql` | 스키마·정책을 SQL 마이그레이션 파일로 저장소에 둔다 |
-| `constants/cache.ts`의 `firestore:` 태그 | `db:` 등 중립 접두사 | 태그 생성기 2개 함수만 수정 |
-| `next.config.ts` remotePatterns, `storage-source-url.ts` | `{project}.supabase.co` | Sentry 스크러버의 Authorization 처리 확인 포함 |
+| 현재 (Firebase)                                                                                              | 이후 (Supabase)                                      | 비고                                                                 |
+| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------------------------------- |
+| `lib/firebase/client.ts`                                                                                     | `lib/supabase/client.ts` — 브라우저 싱글턴           | 지연 함수 반환 규약 유지 (훅 의존성 배열 보호)                       |
+| `lib/firebase/auth.ts`                                                                                       | `signInWithPassword`/`signOut`/`onAuthStateChange`   | 에러 맵 재작성                                                       |
+| `lib/auth/verify-admin-id-token.ts`                                                                          | JWKS 로컬 JWT 검증 + role 클레임 확인                | 외부 HTTP 왕복 소멸. 호출 4곳 시그니처 유지                          |
+| `lib/firebase/public/transport.ts`                                                                           | `lib/supabase/public/transport.ts` — PostgREST fetch | `next:{revalidate,tags}` 동일 적용. decode 봉투·`__name__` 로직 소멸 |
+| `lib/firebase/public/retry-fetch.ts`                                                                         | 그대로 재사용                                        | 429 주석만 갱신                                                      |
+| `lib/firebase/admin-list-rest.ts`                                                                            | PostgREST `select=` projection                       | 227줄이 수십 줄로 축소                                               |
+| `lib/firebase/list-crud.ts`, `firestore.ts`, `albums.ts`, `music.ts`, `dev.ts`, `site.ts`, `dev-articles.ts` | supabase-js CRUD                                     | `requestRagSync`·revalidate 트리거 지점은 그대로                     |
+| `lib/firebase/storage.ts`                                                                                    | `.upload`/`.remove`/`.list`                          | `listFolderFiles`의 getMetadata N+1 소멸                             |
+| `lib/ai/rag-index.ts`                                                                                        | **삭제**                                             | pgvector 조회로 대체                                                 |
+| `lib/firebase/public/rag.ts`                                                                                 | **삭제**                                             | RPC 호출로 대체                                                      |
+| `firestore.rules`, `storage.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`                 | `supabase/migrations/*.sql`                          | 스키마·정책을 SQL 마이그레이션 파일로 저장소에 둔다                  |
+| `constants/cache.ts`의 `firestore:` 태그                                                                     | `db:` 등 중립 접두사                                 | 태그 생성기 2개 함수만 수정                                          |
+| `next.config.ts` remotePatterns, `storage-source-url.ts`                                                     | `{project}.supabase.co`                              | Sentry 스크러버의 Authorization 처리 확인 포함                       |
 
 ## 4. 단계별 계획
 
@@ -312,7 +312,7 @@ grant execute on function match_rag_chunks to anon, authenticated;
   추가한다면 `prioritize_source_type text, prioritize_source_id text` 둘 다 받는다.
   후보 합집합에 기존 선점 규칙을 적용하면 동작이 보존된다.
 - 쓰기 라우트는 `insert ... on conflict (id) do update` + `delete where source_type/source_id
-  and id not in (...)`로 교체한다. 배치 분할(`MAX_COMMIT_WRITES`)과 1,000문서 가드는 제거한다.
+and id not in (...)`로 교체한다. 배치 분할(`MAX_COMMIT_WRITES`)과 1,000문서 가드는 제거한다.
 - `revalidateTag(CHAT_PROFILE_CACHE_TAG)`는 프로필 컨텍스트 캐시용으로 유지한다.
   RAG 결합만 끊긴다.
 

@@ -131,7 +131,11 @@ describe("listFolderFiles", () => {
 
     expect(files).toEqual([
       { path: "dev-blog/loose.webp", size: 5, createdAt: new Date("2026-08-02T00:00:00.000Z") },
-      { path: "dev-blog/a1/cover.webp", size: 100, createdAt: new Date("2026-08-01T00:00:00.000Z") },
+      {
+        path: "dev-blog/a1/cover.webp",
+        size: 100,
+        createdAt: new Date("2026-08-01T00:00:00.000Z"),
+      },
     ]);
   });
 

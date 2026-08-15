@@ -65,7 +65,9 @@ const listCrud = <T extends WithId>(
   const fetchEntity = async (id: string): Promise<T | null> => {
     const { data, error } = await from().select(select).eq("id", id).maybeSingle();
     if (error) throw new Error(`${label}을(를) 불러오지 못했습니다.`);
-    return data ? toEntity(id, mergeRow(collection, data as unknown as Record<string, unknown>).data) : null;
+    return data
+      ? toEntity(id, mergeRow(collection, data as unknown as Record<string, unknown>).data)
+      : null;
   };
 
   /**

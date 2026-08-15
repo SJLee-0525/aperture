@@ -20,18 +20,34 @@ describe("isAllowedStorageSourceUrl", () => {
   });
 
   it("다른 origin·다른 버킷을 거부한다", () => {
-    expect(isAllowedStorageSourceUrl("https://evil.supabase.co/storage/v1/object/public/media/a.webp")).toBe(false);
-    expect(isAllowedStorageSourceUrl(`${ORIGIN}/storage/v1/object/public/other/a.webp`)).toBe(false);
+    expect(
+      isAllowedStorageSourceUrl("https://evil.supabase.co/storage/v1/object/public/media/a.webp"),
+    ).toBe(false);
+    expect(isAllowedStorageSourceUrl(`${ORIGIN}/storage/v1/object/public/other/a.webp`)).toBe(
+      false,
+    );
   });
 
   it("서명 URL 과 이미지 변환 엔드포인트를 거부한다", () => {
-    expect(isAllowedStorageSourceUrl(`${ORIGIN}/storage/v1/object/sign/media/a.webp?token=x`)).toBe(false);
-    expect(isAllowedStorageSourceUrl(`${ORIGIN}/storage/v1/render/image/public/media/a.webp`)).toBe(false);
+    expect(isAllowedStorageSourceUrl(`${ORIGIN}/storage/v1/object/sign/media/a.webp?token=x`)).toBe(
+      false,
+    );
+    expect(isAllowedStorageSourceUrl(`${ORIGIN}/storage/v1/render/image/public/media/a.webp`)).toBe(
+      false,
+    );
   });
 
   it("사용자 정보·비표준 포트·비정상 URL 을 거부한다", () => {
-    expect(isAllowedStorageSourceUrl("https://user:pw@test.supabase.co/storage/v1/object/public/media/a.webp")).toBe(false);
-    expect(isAllowedStorageSourceUrl("https://test.supabase.co:8443/storage/v1/object/public/media/a.webp")).toBe(false);
+    expect(
+      isAllowedStorageSourceUrl(
+        "https://user:pw@test.supabase.co/storage/v1/object/public/media/a.webp",
+      ),
+    ).toBe(false);
+    expect(
+      isAllowedStorageSourceUrl(
+        "https://test.supabase.co:8443/storage/v1/object/public/media/a.webp",
+      ),
+    ).toBe(false);
     expect(isAllowedStorageSourceUrl("not-a-url")).toBe(false);
   });
 

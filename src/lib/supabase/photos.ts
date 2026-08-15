@@ -107,10 +107,7 @@ const deletePhoto = async (id: string): Promise<void> => {
     for (const album of affected) {
       const { id: albumId, ...input } = {
         ...album,
-        ...removePhotoFromAlbum(
-          { coverPhotoId: album.coverPhotoId, photoIds: album.photoIds },
-          id,
-        ),
+        ...removePhotoFromAlbum({ coverPhotoId: album.coverPhotoId, photoIds: album.photoIds }, id),
       };
       const { data, error } = await getSupabaseClient()
         .from(albumsTable)

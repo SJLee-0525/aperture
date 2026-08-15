@@ -58,10 +58,7 @@ const TAGS_CACHE_TAG = collectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
  * @returns {Promise<DevArticleTag[]>} id 오름차순의 태그 사전.
  */
 const listDevArticleTagsAdmin = async (): Promise<DevArticleTag[]> => {
-  const { data, error } = await getSupabaseClient()
-    .from(TAGS_TABLE)
-    .select("id,ko,en")
-    .order("id");
+  const { data, error } = await getSupabaseClient().from(TAGS_TABLE).select("id,ko,en").order("id");
   if (error) throw new Error("태그 목록을 불러오지 못했습니다.");
   return (data as DevArticleTag[]) ?? [];
 };

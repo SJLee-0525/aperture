@@ -30,7 +30,10 @@ const okResponse = () => ({ ok: true, status: 201, json: async () => [], text: a
 
 type FetchCall = { url: string; init: RequestInit & { headers: Record<string, string> } };
 const calls = (fetchMock: ReturnType<typeof vi.fn>): FetchCall[] =>
-  fetchMock.mock.calls.map(([url, init]) => ({ url: String(url), init: init as FetchCall["init"] }));
+  fetchMock.mock.calls.map(([url, init]) => ({
+    url: String(url),
+    init: init as FetchCall["init"],
+  }));
 
 beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
@@ -153,7 +156,12 @@ describe("listRagDocumentMeta", () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(fullPage))
-      .mockResolvedValueOnce({ ok: false, status: 416, json: async () => [], text: async () => "" });
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 416,
+        json: async () => [],
+        text: async () => "",
+      });
     vi.stubGlobal("fetch", fetchMock);
 
     const rows = await listRagDocumentMeta("token");
@@ -170,7 +178,14 @@ describe("listRagDocumentMeta", () => {
   it("조회 오류는 빈 결과로 위장하지 않고 던진다", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: false, status: 500, json: async () => [], text: async () => "boom" }),
+      vi
+        .fn()
+        .mockResolvedValue({
+          ok: false,
+          status: 500,
+          json: async () => [],
+          text: async () => "boom",
+        }),
     );
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
@@ -194,9 +209,9 @@ describe("replaceRagDocuments", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(
-      replaceRagDocuments("token", [chunk("a")], [[0.1, 0.2]], "m@512"),
-    ).rejects.toThrow("임베딩 차원이 저장소 계약(512)과 다릅니다");
+    await expect(replaceRagDocuments("token", [chunk("a")], [[0.1, 0.2]], "m@512")).rejects.toThrow(
+      "임베딩 차원이 저장소 계약(512)과 다릅니다",
+    );
     await expect(
       replaceRagDocuments("token", [chunk("a")], [[...vector512().slice(1), Number.NaN]], "m@512"),
     ).rejects.toThrow("유한하지 않은 값");

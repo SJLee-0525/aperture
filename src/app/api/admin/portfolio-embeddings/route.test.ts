@@ -65,7 +65,10 @@ const okResponse = () => ({ ok: true, status: 201, json: async () => [], text: a
 
 type FetchCall = { url: string; init: RequestInit & { headers: Record<string, string> } };
 const calls = (fetchMock: ReturnType<typeof vi.fn>): FetchCall[] =>
-  fetchMock.mock.calls.map(([url, init]) => ({ url: String(url), init: init as FetchCall["init"] }));
+  fetchMock.mock.calls.map(([url, init]) => ({
+    url: String(url),
+    init: init as FetchCall["init"],
+  }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -93,7 +96,11 @@ describe("POST /api/admin/portfolio-embeddings", () => {
 
   it("전체 모드는 upsert 를 먼저 하고 다음 색인에 없는 문서만 지운다", async () => {
     const chunks = [
-      chunkOf("profile-site-intro", { section: "profile", sourceType: "profile", sourceId: "site" }),
+      chunkOf("profile-site-intro", {
+        section: "profile",
+        sourceType: "profile",
+        sourceId: "site",
+      }),
       chunkOf("development-project-overview", {
         section: "development",
         sourceType: "project",
@@ -223,7 +230,10 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     mocks.generateEmbeddings.mockImplementation(async (texts: string[]) =>
       texts.map(() => vector512()),
     );
-    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse([])).mockResolvedValue(okResponse());
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValue(okResponse());
     vi.stubGlobal("fetch", fetchMock);
 
     const result = (await (await POST(request())).json()) as { count: number };
@@ -278,11 +288,17 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue([chunkOf("photo-a")]);
     mocks.generateEmbeddings.mockResolvedValue([vector512()]);
-    const upstreamBody = '{"message":"column rag_documents.secret does not exist","hint":"internal"}';
+    const upstreamBody =
+      '{"message":"column rag_documents.secret does not exist","hint":"internal"}';
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse([]))
-      .mockResolvedValue({ ok: false, status: 500, json: async () => ({}), text: async () => upstreamBody });
+      .mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+        text: async () => upstreamBody,
+      });
     vi.stubGlobal("fetch", fetchMock);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
@@ -305,7 +321,9 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     const staleRows = Array.from({ length: 51 }, (_, index) => ({ id: `gone-${index}` }));
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(staleRows.map((row) => ({ ...row, embedding_model: "m" }))))
+      .mockResolvedValueOnce(
+        jsonResponse(staleRows.map((row) => ({ ...row, embedding_model: "m" }))),
+      )
       .mockResolvedValue(okResponse());
     vi.stubGlobal("fetch", fetchMock);
 
@@ -315,9 +333,9 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     const all = calls(fetchMock);
     const upserts = all.filter(({ init }) => init.method === "POST");
     const removes = all.filter(({ init }) => init.method === "DELETE");
-    expect(upserts.map(({ init }) => (JSON.parse(init.body as string) as unknown[]).length)).toEqual(
-      [100, 100, 1],
-    );
+    expect(
+      upserts.map(({ init }) => (JSON.parse(init.body as string) as unknown[]).length),
+    ).toEqual([100, 100, 1]);
     expect(removes).toHaveLength(2);
     expect(decodeURIComponent(removes[1].url)).toContain('"gone-50"');
   });
@@ -404,7 +422,12 @@ describe("GET /api/admin/portfolio-embeddings", () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(fullPage))
-      .mockResolvedValueOnce({ ok: false, status: 416, json: async () => [], text: async () => "" });
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 416,
+        json: async () => [],
+        text: async () => "",
+      });
     vi.stubGlobal("fetch", fetchMock);
 
     const status = (await (await GET(request())).json()) as { stale: number };
