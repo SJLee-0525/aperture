@@ -13,7 +13,7 @@ type Props = { children: ReactNode };
 
 /**
  * 관리자 라우트 가드. 로그인 페이지(/admin/login)는 통과, 그 외는 관리자만.
- * ⚠️ UX 가드일 뿐 — 실제 보안 경계는 Firestore/Storage Rules 다 (아키텍처 원칙 #1).
+ * ⚠️ UX 가드일 뿐이다. 실제 보안 경계는 Supabase RLS 다 (ADR-0005).
  *
  * 테스트 전용 세션 판정은 `useAuth` 가 소유한다 — 구독을 열지 말지와 화면을 열지 말지가
  * 같은 값에서 갈려야 둘이 어긋나지 않는다. 그 세션에서도 `isAdmin` 은 false 로 남는다.

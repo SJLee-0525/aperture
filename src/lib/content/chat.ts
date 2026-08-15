@@ -102,7 +102,7 @@ const getChatProfileData = async (options?: {
           musicMedia,
           photos,
           albums,
-          // live 는 Firestore 쿼리(`publishedAt desc` + `__name__ asc`)가 순서를 마쳐 온다.
+          // live 는 PostgREST 쿼리(`published_at desc nullslast, id asc`)가 순서를 마쳐 온다.
           articles,
         })),
   ]);
