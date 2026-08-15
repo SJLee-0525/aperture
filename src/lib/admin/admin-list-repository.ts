@@ -13,7 +13,8 @@ type AdminListRepository<TEntity extends { id: string }, TListItem> = {
   get: (id: string) => Promise<TEntity | null>;
   create: (id: string, input: Omit<TEntity, "id">) => Promise<void>;
   update: (id: string, input: Omit<TEntity, "id">) => Promise<void>;
-  updateOrder: (id: string, order: number) => Promise<void>;
+  /** 드래그 정렬 결과를 일괄 저장한다. 바뀐 항목만 담고, live 는 요청 1건(RPC)으로 처리한다. */
+  updateOrder: (orders: Array<{ id: string; order: number }>) => Promise<void>;
   setPublished: (id: string, published: boolean) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };

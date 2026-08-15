@@ -1,6 +1,6 @@
 import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { shouldUseMockContent } from "@/lib/content/content-source";
-import { fetchSiteConfig } from "@/lib/firebase/public/site";
+import { fetchSiteConfig } from "@/lib/supabase/public/site";
 
 import type { SiteConfig } from "@/types/site";
 

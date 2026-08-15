@@ -11,7 +11,7 @@ import { ROUTES } from "@/constants/routes";
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
-import type { MusicMediaInput } from "@/lib/firebase/music";
+import type { MusicMediaInput } from "@/lib/supabase/music";
 import type { MusicMedia } from "@/types/music";
 
 import styles from "./MediaForm.module.css";

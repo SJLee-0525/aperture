@@ -4,7 +4,7 @@
  * `dataCollection` 잠금(userInfo·cookies·httpBodies 차단)이 1차 방어지만, SDK 옵션은
  * 버전에 따라 기본값이 움직인 전례가 있어 전송 직전에 한 번 더 지운다(ADR-0004).
  * 이 프로젝트에서 실제로 위험한 값은 셋이다:
- * - `Authorization` 헤더의 Firebase ID token (관리자 server action 호출)
+ * - `Authorization` 헤더의 Supabase access token (관리자 server action·API 호출)
  * - 방문자가 입력한 질문 전체가 담긴 `/api/chat` 요청 본문
  * - URL 쿼리의 `q`(통합 검색어) · `token` · `code`
  *

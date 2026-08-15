@@ -2,8 +2,8 @@ import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalListRepository } from "@/lib/admin/mock/local-list-repository";
 import { deleteMockImageFolder } from "@/lib/admin/mock/mock-image-store";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { listDevProjectItemsAdmin } from "@/lib/firebase/admin-list-rest";
-import { devProjects } from "@/lib/firebase/dev";
+import { listDevProjectItemsAdmin } from "@/lib/supabase/admin-list";
+import { devProjects } from "@/lib/supabase/dev";
 
 import type { AdminListRepository } from "@/lib/admin/admin-list-repository";
 import type { AdminDevProjectListItem } from "@/types/admin";

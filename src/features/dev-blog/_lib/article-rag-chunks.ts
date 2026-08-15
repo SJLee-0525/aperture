@@ -14,6 +14,13 @@ import type { RagChunk } from "@/types/rag";
 const ARTICLE_CHUNK_MAX_CHARS = 1_200;
 
 /**
+ * 코드 블록 하나가 청크에서 차지할 수 있는 최대 길이.
+ * 청크 예산과 같게 두면 코드 하나가 제목과 주변 설명을 전부 밀어낸다.
+ * 이 상한은 청크 전용이다 — 챗 화면 문맥·본문 검색은 코드를 자르지 않는다.
+ */
+const ARTICLE_CODE_BLOCK_MAX_CHARS = 400;
+
+/**
  * 두 번째 part 부터 다시 붙이는 구간 제목의 최대 길이.
  * 제목이 길어도 본문에 남는 예산이 `ARTICLE_CHUNK_MAX_CHARS` 의 대부분을 유지한다.
  */
@@ -151,7 +158,9 @@ const articleRagChunks = (article: DevArticle, tagLabels: string[]): RagChunk[] 
   );
 
   toSections(analyzeArticle(article).document.blocks).forEach((section, sectionIndex) => {
-    const pieces = section.blocks.map(articleBlockText).filter(Boolean);
+    const pieces = section.blocks
+      .map((block) => articleBlockText(block, { codeMaxChars: ARTICLE_CODE_BLOCK_MAX_CHARS }))
+      .filter(Boolean);
     if (pieces.length === 0) return;
     // 두 번째 part 부터 구간 제목을 다시 붙이므로 그만큼을 미리 빼고 채운다.
     // 첫 part 에는 붙이지 않으므로 상한을 그대로 준다.

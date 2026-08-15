@@ -1,0 +1,31 @@
+# Supabase 무료 프로젝트의 7일 무활동 일시정지를 막는다 (ADR-0005).
+# ISR 이 방문자 트래픽을 DB 에서 가리므로 사이트 URL 이 아니라 Supabase API 를 직접 호출해야 한다.
+# schedule 은 기본 브랜치에서만 실행된다. main 머지 전에는 workflow_dispatch 로 수동 실행한다.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "23 3 * * 1,4"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY repo secrets가 필요합니다." >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            "$SUPABASE_URL/rest/v1/site_documents?select=id&limit=1" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            > /dev/null
+          echo "Supabase ping OK"

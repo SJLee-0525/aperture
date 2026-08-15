@@ -1,6 +1,6 @@
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { shouldUseMockContent } from "@/lib/content/content-source";
-import { fetchDevConfig, fetchPublishedDevProjects } from "@/lib/firebase/public/dev";
+import { fetchDevConfig, fetchPublishedDevProjects } from "@/lib/supabase/public/dev";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 

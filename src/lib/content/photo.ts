@@ -1,5 +1,5 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
-import { fetchPublishedAlbums, fetchPublishedPhotos } from "@/lib/firebase/public/photo";
+import { fetchPublishedAlbums, fetchPublishedPhotos } from "@/lib/supabase/public/photo";
 
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";

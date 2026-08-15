@@ -3,8 +3,13 @@ import { describe, expect, it } from "vitest";
 import { articleBlockText } from "@/features/dev-blog/_lib/article-plain-text";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
-const textOf = (markdown: string): string =>
-  parseArticleMarkdown(markdown).document.blocks.map(articleBlockText).filter(Boolean).join(" | ");
+import type { ArticlePlainTextOptions } from "@/features/dev-blog/_lib/article-plain-text";
+
+const textOf = (markdown: string, options: ArticlePlainTextOptions = {}): string =>
+  parseArticleMarkdown(markdown)
+    .document.blocks.map((block) => articleBlockText(block, options))
+    .filter(Boolean)
+    .join(" | ");
 
 describe("articleBlockText", () => {
   it("중첩 목록의 텍스트를 모두 남긴다", () => {
@@ -29,12 +34,35 @@ describe("articleBlockText", () => {
     expect(textOf("**굵게** 와 `code` 를 섞는다")).toBe("굵게 와 code 를 섞는다");
   });
 
-  it("코드 블록은 언어를 붙이고 400자까지만 남긴다", () => {
+  it("옵션이 없으면 코드 블록을 자르지 않는다", () => {
     const long = "x".repeat(500);
     const text = textOf(["```ts", long, "```"].join("\n"));
 
     expect(text.startsWith("code(ts): ")).toBe(true);
+    expect(text).toHaveLength("code(ts): ".length + 500);
+  });
+
+  it("codeMaxChars 를 주면 그 길이에서 자른다", () => {
+    const long = "x".repeat(500);
+    const text = textOf(["```ts", long, "```"].join("\n"), { codeMaxChars: 400 });
+
     expect(text).toHaveLength("code(ts): ".length + 400);
+  });
+
+  it("목록 항목 안의 코드 블록에도 옵션이 적용된다", () => {
+    // 재귀 경로가 옵션을 넘기지 않으면 중첩 코드만 무제한으로 남는다.
+    const markdown = ["- 항목", "", "  ```ts", "  " + "y".repeat(500), "  ```"].join("\n");
+
+    expect(textOf(markdown, { codeMaxChars: 100 })).toContain("y".repeat(100));
+    expect(textOf(markdown, { codeMaxChars: 100 })).not.toContain("y".repeat(101));
+    expect(textOf(markdown)).toContain("y".repeat(500));
+  });
+
+  it("인용문 안의 코드 블록에도 옵션이 적용된다", () => {
+    const markdown = ["> 인용", ">", "> ```", "> " + "z".repeat(300), "> ```"].join("\n");
+
+    expect(textOf(markdown, { codeMaxChars: 50 })).toContain("z".repeat(50));
+    expect(textOf(markdown, { codeMaxChars: 50 })).not.toContain("z".repeat(51));
   });
 
   it("언어가 없는 코드 블록도 값을 남긴다", () => {

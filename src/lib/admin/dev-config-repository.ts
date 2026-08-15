@@ -2,7 +2,7 @@ import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalDocRepository } from "@/lib/admin/mock/local-doc-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { getDevConfigAdmin, updateDevConfig } from "@/lib/firebase/dev";
+import { getDevConfigAdmin, updateDevConfig } from "@/lib/supabase/dev";
 
 import type { DevConfig } from "@/types/dev";
 

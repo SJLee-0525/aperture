@@ -109,6 +109,7 @@ describe("handleChatRequest", () => {
       { text: "development project" },
       expect.anything(),
       undefined,
+      undefined,
     );
     expect(provider).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -148,6 +149,7 @@ describe("handleChatRequest", () => {
       { text: "개발 수상 내역", keywords: ["수상", "우수상"] },
       expect.anything(),
       undefined,
+      undefined,
     );
   });
 
@@ -173,6 +175,7 @@ describe("handleChatRequest", () => {
       ["profile", "development"],
       { text: "개발 프로젝트를 알려줘\n그건 언제 했어?" },
       expect.anything(),
+      undefined,
       undefined,
     );
   });
@@ -619,6 +622,7 @@ describe("handleChatRequest", () => {
       expect.anything(),
       expect.anything(),
       undefined,
+      undefined,
     );
   });
 
@@ -897,8 +901,8 @@ describe("handleChatRequest", () => {
 
     it("live 에서는 글 한 건만 읽어 검증하고 목록 전체를 다시 읽지 않는다", async () => {
       vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
       const loadFreshData = vi.fn();
       const loadArticle = vi.fn(async () => LIVE_ARTICLE);
       const buildContext = vi.fn<(...args: unknown[]) => Promise<string>>(async () => "context");
@@ -931,10 +935,66 @@ describe("handleChatRequest", () => {
       vi.unstubAllEnvs();
     });
 
+    it("본문 전문이 문맥에 실리면 우선 검색 대신 같은 글을 후보에서 뺀다", async () => {
+      vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+      const buildContext = vi.fn<(...args: unknown[]) => Promise<string>>(async () => "context");
+      const provider = vi.fn(async () => ({ content: "요약입니다.", contactDraft: null }));
+
+      await handleChatRequest(
+        createRequest({
+          lang: "ko",
+          messages: [{ role: "user", content: "이 글 요약해 줘" }],
+          context: ARTICLE_CONTEXT,
+        }),
+        {
+          provider,
+          loadSnapshot: async () => snapshotWith({}),
+          buildContext,
+          loadArticle: async () => LIVE_ARTICLE,
+        },
+      );
+
+      expect(buildContext.mock.calls[0]?.[4]).toBeUndefined();
+      expect(buildContext.mock.calls[0]?.[5]).toEqual({ sourceType: "article", sourceId: "a1" });
+      vi.unstubAllEnvs();
+    });
+
+    it("본문이 상한에서 잘리면 꼬리 보완을 위해 우선 검색을 유지한다", async () => {
+      vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+      const buildContext = vi.fn<(...args: unknown[]) => Promise<string>>(async () => "context");
+      const provider = vi.fn(async () => ({ content: "요약입니다.", contactDraft: null }));
+
+      await handleChatRequest(
+        createRequest({
+          lang: "ko",
+          messages: [{ role: "user", content: "이 글 요약해 줘" }],
+          context: ARTICLE_CONTEXT,
+        }),
+        {
+          provider,
+          loadSnapshot: async () => snapshotWith({}),
+          buildContext,
+          loadArticle: async () => ({ ...LIVE_ARTICLE, body: "가나다 ".repeat(15000) }),
+        },
+      );
+
+      expect(buildContext.mock.calls[0]?.[4]).toEqual({
+        sourceType: "article",
+        sourceId: "a1",
+        ignoreScoreFloor: true,
+      });
+      expect(buildContext.mock.calls[0]?.[5]).toBeUndefined();
+      vi.unstubAllEnvs();
+    });
+
     it("live 조회가 막히면 문맥 없이 답한다", async () => {
       vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
       const { prioritize, instructions } = await runWith(snapshotWith({}), {
         loadArticle: async () => {
           throw new Error("Firestore 블로그 글 읽기 실패 (403)");

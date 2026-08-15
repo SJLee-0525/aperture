@@ -29,7 +29,7 @@ type StoredRagChunk = RagChunk & {
   published: boolean;
 };
 
-/** 벡터 본체를 제외한 저장 청크 — 스냅샷 인덱스가 벡터를 별도 압축 보관할 때 사용. */
+/** 벡터 본체를 제외한 저장 청크. 벡터는 DB 에만 있고 검색 결과는 메타만 오간다. */
 type StoredRagChunkMeta = Omit<StoredRagChunk, "embedding">;
 
 /** RAG 검색 입력 — text는 임베딩·로컬 토큰화용, keywords는 인텐트 분류기가 추출한 검색 키워드. */
@@ -41,13 +41,16 @@ type RagQuery = { text: string; keywords?: string[] };
  */
 type RagPrioritize = { sourceType: string; sourceId: string; ignoreScoreFloor?: boolean };
 
+/** 검색 후보에서 뺄 원본 — 본문 전문이 이미 화면 문맥에 실린 글의 중복을 막는다. */
+type RagExclude = { sourceType: string; sourceId: string };
+
 export type {
   RagChunk,
+  RagExclude,
   RagPrioritize,
   RagQuery,
   RagSection,
   RagSyncSourceType,
   RagSyncTarget,
-  StoredRagChunk,
   StoredRagChunkMeta,
 };

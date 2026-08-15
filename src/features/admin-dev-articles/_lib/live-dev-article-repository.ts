@@ -9,7 +9,8 @@ import {
 
 import { devArticleRoute } from "@/constants/routes";
 import { requestPublicPathRevalidate } from "@/lib/cache/request-revalidate";
-import { listDevArticleItemsAdmin, listDevProjectItemsAdmin } from "@/lib/firebase/admin-list-rest";
+import { localizePath } from "@/lib/i18n/locale-path";
+import { listDevArticleItemsAdmin, listDevProjectItemsAdmin } from "@/lib/supabase/admin-list";
 import {
   createDevArticleTag,
   devArticlesCrud,
@@ -17,9 +18,8 @@ import {
   listDevArticleTagsAdmin,
   removeDevArticleTag,
   updateDevArticleTag,
-} from "@/lib/firebase/dev-articles";
-import { deleteArticleImages } from "@/lib/firebase/storage";
-import { localizePath } from "@/lib/i18n/locale-path";
+} from "@/lib/supabase/dev-articles";
+import { deleteArticleImages } from "@/lib/supabase/storage";
 
 import type {
   DevArticleInput,

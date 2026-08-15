@@ -3,17 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   listDevArticleImageRefsAdmin: vi.fn(),
   listFolderFiles: vi.fn(),
-  deleteObject: vi.fn(),
+  deleteImageStrict: vi.fn(),
 }));
 
-vi.mock("@/lib/firebase/admin-list-rest", () => ({
+vi.mock("@/lib/supabase/admin-list", () => ({
   listDevArticleImageRefsAdmin: mocks.listDevArticleImageRefsAdmin,
 }));
-vi.mock("@/lib/firebase/storage", () => ({ listFolderFiles: mocks.listFolderFiles }));
-vi.mock("@/lib/firebase/client", () => ({ getFirebaseStorage: vi.fn(() => ({})) }));
-vi.mock("firebase/storage", () => ({
-  deleteObject: mocks.deleteObject,
-  ref: vi.fn((_storage: unknown, path: string) => ({ path })),
+vi.mock("@/lib/supabase/storage", () => ({
+  listFolderFiles: mocks.listFolderFiles,
+  deleteImageStrict: mocks.deleteImageStrict,
 }));
 
 import {
@@ -32,7 +30,7 @@ const bodyImage = (path: string) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.deleteObject.mockResolvedValue(undefined);
+  mocks.deleteImageStrict.mockResolvedValue(undefined);
 });
 
 describe("scanOrphanArticleImages", () => {
@@ -91,16 +89,16 @@ describe("deleteOrphanArticleImages", () => {
 
     expect(result.deleted).toEqual(["dev-blog/a1/one.webp"]);
     expect(result.skipped).toEqual(["dev-blog/a1/two.webp"]);
-    expect(mocks.deleteObject).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteImageStrict).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteImageStrict).toHaveBeenCalledWith("dev-blog/a1/one.webp");
   });
 
-  it("파일별 실패를 격리하고 이미 없는 객체는 성공으로 친다", async () => {
+  it("파일별 실패를 격리한다 — 삭제 미확인은 그 파일만 실패로 보고한다", async () => {
     mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
     mocks.listFolderFiles.mockResolvedValue(files);
-    mocks.deleteObject
-      .mockRejectedValueOnce({ code: "storage/object-not-found" })
-      .mockRejectedValueOnce(new Error("network"))
-      .mockResolvedValueOnce(undefined);
+    mocks.deleteImageStrict.mockImplementation(async (path: string) => {
+      if (path === "dev-blog/a1/two.webp") throw new Error("network");
+    });
 
     const result = await deleteOrphanArticleImages(
       files.map((file) => file.path),

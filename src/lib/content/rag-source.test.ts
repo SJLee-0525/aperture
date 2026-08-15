@@ -5,9 +5,9 @@ const mocks = vi.hoisted(() => ({
   fetchDevArticleTags: vi.fn(),
 }));
 
-vi.mock("@/lib/firebase/public/dev-articles", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/firebase/public/dev-articles")>(
-    "@/lib/firebase/public/dev-articles",
+vi.mock("@/lib/supabase/public/dev-articles", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/supabase/public/dev-articles")>(
+    "@/lib/supabase/public/dev-articles",
   );
   return {
     ...actual,
@@ -20,32 +20,29 @@ import { getRagSourceDataForTarget } from "@/lib/content/rag-source";
 
 import { MOCK_DEV_ARTICLE_TAGS } from "@/mocks/dev-article-tags";
 
-/** 문서 필드를 그대로 돌려주는 Firestore REST 응답. `null` 은 삭제된 글이다. */
-const stubFirestore = (fields: Record<string, unknown> | null) => {
+/** 대상 행을 그대로 돌려주는 PostgREST 응답. `null` 은 삭제된 글(빈 배열)이다. */
+const stubPostgrest = (row: Record<string, unknown> | null) => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        fields
-          ? { ok: true, status: 200, json: async () => ({ fields }) }
-          : { ok: true, status: 404, json: async () => ({}) },
-      ),
+    vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => (row ? [row] : []) }),
   );
 };
 
 describe("getRagSourceDataForTarget — 블로그 글", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = "test-project";
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY = "firebase-key";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
     mocks.fetchDevArticleTags.mockResolvedValue(MOCK_DEV_ARTICLE_TAGS);
   });
 
   it("공개된 글은 태그 사전과 함께 돌려준다", async () => {
-    stubFirestore({
-      slug: { stringValue: "chunking" },
-      published: { booleanValue: true },
+    stubPostgrest({
+      id: "a1",
+      published: true,
+      slug: "chunking",
+      published_at: "2026-08-01T00:00:00Z",
+      data: { body: "# 본문" },
     });
 
     const data = await getRagSourceDataForTarget(
@@ -63,7 +60,7 @@ describe("getRagSourceDataForTarget — 블로그 글", () => {
   });
 
   it("초안은 빈 결과라 청크가 지워진다", async () => {
-    stubFirestore({ published: { booleanValue: false } });
+    stubPostgrest({ id: "a1", published: false, slug: "", published_at: null, data: {} });
 
     const data = await getRagSourceDataForTarget(
       { sourceType: "article", sourceId: "a1" },
@@ -74,7 +71,7 @@ describe("getRagSourceDataForTarget — 블로그 글", () => {
   });
 
   it("삭제된 글도 빈 결과다", async () => {
-    stubFirestore(null);
+    stubPostgrest(null);
 
     const data = await getRagSourceDataForTarget(
       { sourceType: "article", sourceId: "gone" },

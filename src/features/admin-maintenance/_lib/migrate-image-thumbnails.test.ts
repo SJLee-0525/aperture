@@ -9,7 +9,7 @@ import type { ImageMeta } from "@/types/image";
 const mocks = vi.hoisted(() => ({
   compressPreviewToWebp: vi.fn(),
   compressThumbnailToWebp: vi.fn(),
-  currentUser: null as { getIdToken: ReturnType<typeof vi.fn> } | null,
+  accessToken: null as string | null,
   devList: vi.fn(),
   devUpdate: vi.fn(),
   listAlbumsAdmin: vi.fn(),
@@ -34,28 +34,24 @@ vi.mock("@/features/image-upload/_lib/compress", () => ({
 vi.mock("@/features/image-upload/_lib/read-dimensions", () => ({
   readDimensions: mocks.readDimensions,
 }));
-vi.mock("@/lib/firebase/albums", () => ({
+vi.mock("@/lib/supabase/albums", () => ({
   listAlbumsAdmin: mocks.listAlbumsAdmin,
   updateAlbum: mocks.updateAlbum,
 }));
-vi.mock("@/lib/firebase/dev", () => ({
+vi.mock("@/lib/supabase/dev", () => ({
   devProjects: { list: mocks.devList, update: mocks.devUpdate },
 }));
-vi.mock("@/lib/firebase/firestore", () => ({
+vi.mock("@/lib/supabase/photos", () => ({
   listPhotosAdmin: mocks.listPhotosAdmin,
   updatePhoto: mocks.updatePhoto,
 }));
-vi.mock("@/lib/firebase/music", () => ({
+vi.mock("@/lib/supabase/music", () => ({
   musicWorks: { list: mocks.musicList, update: mocks.musicUpdate },
 }));
-vi.mock("@/lib/firebase/client", () => ({
-  getFirebaseAuth: () => ({
-    get currentUser() {
-      return mocks.currentUser;
-    },
-  }),
+vi.mock("@/lib/supabase/auth", () => ({
+  getAdminAccessToken: async () => mocks.accessToken,
 }));
-vi.mock("@/lib/firebase/storage", () => ({
+vi.mock("@/lib/supabase/storage", () => ({
   uploadDevPreview: mocks.uploadDevPreview,
   uploadDevThumbnail: mocks.uploadDevThumbnail,
   uploadMusicPosterPreview: mocks.uploadMusicPosterPreview,
@@ -96,7 +92,7 @@ const asFixture = <T>(value: unknown): T => value as T;
 describe("migrateImageThumbnails", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.currentUser = { getIdToken: vi.fn().mockResolvedValue("admin-token") };
+    mocks.accessToken = "admin-token";
     mocks.listPhotosAdmin.mockResolvedValue([]);
     mocks.listAlbumsAdmin.mockResolvedValue([]);
     mocks.musicList.mockResolvedValue([]);
@@ -299,7 +295,7 @@ describe("migrateImageThumbnails", () => {
   });
 
   it("관리자 인증이 없으면 이미지 다운로드 전에 중단한다", async () => {
-    mocks.currentUser = null;
+    mocks.accessToken = null;
     mocks.listPhotosAdmin.mockResolvedValue([asFixture({ id: "photo-1", image: image("photo") })]);
 
     await expect(migrateImageThumbnails(false)).rejects.toThrow("관리자 로그인이 필요합니다.");

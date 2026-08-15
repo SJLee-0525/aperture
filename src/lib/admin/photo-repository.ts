@@ -3,7 +3,8 @@ import { getAlbumRepository } from "@/lib/admin/album-repository";
 import { createLocalListRepository } from "@/lib/admin/mock/local-list-repository";
 import { deleteMockImageFolder } from "@/lib/admin/mock/mock-image-store";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { listPhotoItemsAdmin } from "@/lib/firebase/admin-list-rest";
+import { removePhotoFromAlbum } from "@/lib/content/remove-photo-from-album";
+import { listPhotoItemsAdmin } from "@/lib/supabase/admin-list";
 import {
   createPhoto,
   deletePhoto,
@@ -11,10 +12,9 @@ import {
   newPhotoId,
   setPhotoPublished,
   updatePhoto,
-  updatePhotoOrder,
-} from "@/lib/firebase/firestore";
-import { removePhotoFromAlbum } from "@/lib/firebase/remove-photo-from-album";
-import { deletePhotoImages } from "@/lib/firebase/storage";
+  updatePhotoOrders,
+} from "@/lib/supabase/photos";
+import { deletePhotoImages } from "@/lib/supabase/storage";
 
 import type { AdminListRepository } from "@/lib/admin/admin-list-repository";
 import type { AdminPhotoListItem } from "@/types/admin";
@@ -111,7 +111,7 @@ const createLivePhotoRepository = (): PhotoRepository => ({
   get: getPhotoAdmin,
   create: createPhoto,
   update: updatePhoto,
-  updateOrder: updatePhotoOrder,
+  updateOrder: updatePhotoOrders,
   setPublished: setPhotoPublished,
   remove: async (id) => {
     await deletePhoto(id);

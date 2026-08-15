@@ -2,7 +2,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminInput } from "@/components/AdminInput";
 
 import type { LocalizedArrayKey } from "@/features/admin-dev-projects/_hooks/use-project-editor";
-import type { DevProjectInput } from "@/lib/firebase/dev";
+import type { DevProjectInput } from "@/lib/supabase/dev";
 
 import styles from "./ProjectForm.module.css";
 

@@ -60,7 +60,7 @@ const ALBUM_DETAIL_PATH_PATTERN = /^\/photo\/albums\/[A-Za-z0-9-]+$/;
 const MAX_PATHNAME_CHARS = 128;
 const MAX_TARGET_ID_CHARS = 64;
 
-/** Firestore 문서 ID에 허용하는 문자. */
+/** 문서 ID에 허용하는 문자. */
 const TARGET_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const MAX_CONTEXT_BYTES = 600;
 
@@ -123,8 +123,8 @@ const contextTargetForPath = (
 /**
  * target id의 형식과 길이를 검사한다.
  *
- * 서버가 이 값으로 Firestore 문서를 직접 읽으므로 경로 구분자와 query 문자를 허용하지 않는다.
- * Firestore 자동 ID와 이 저장소가 쓰는 수동 ID가 모두 이 문자 집합 안에 있다.
+ * 서버가 이 값으로 DB 문서 한 건을 직접 읽으므로 경로 구분자와 query 문자를 허용하지 않는다.
+ * 기존 Firestore 자동 ID와 이 저장소가 쓰는 수동 ID가 모두 이 문자 집합 안에 있다.
  *
  * @param {unknown} raw 요청 또는 query에서 읽은 값.
  * @returns {string | null} 정리한 id. 유효하지 않으면 null.

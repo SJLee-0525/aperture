@@ -16,7 +16,7 @@ import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";
-import type { RagPrioritize, RagQuery, StoredRagChunkMeta } from "@/types/rag";
+import type { RagExclude, RagPrioritize, RagQuery, StoredRagChunkMeta } from "@/types/rag";
 
 /**
  * PROFILE_CONTEXT 에 싣는 글 수. 목록은 발행일 내림차순이라 최근 글이 남는다.
@@ -274,6 +274,7 @@ const buildProfileContextFromSnapshot = async (
   query?: RagQuery,
   signal?: AbortSignal,
   prioritize?: RagPrioritize,
+  exclude?: RagExclude,
 ): Promise<string> => {
   const source = getContentSource();
   const context = (await getSnapshot()).context;
@@ -282,10 +283,10 @@ const buildProfileContextFromSnapshot = async (
 
   if (source === "live" && sections?.length && query?.text) {
     try {
-      const relevant = await searchRagChunks(query, sections, signal, { prioritize });
+      const relevant = await searchRagChunks(query, sections, signal, { prioritize, exclude });
       // chunks=0과 우선 검색 대상을 Vercel 로그에 남겨 검색 누락을 확인한다.
       console.info(
-        `[chat-rag] sections=${sections.join(",")} query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])} prioritize=${prioritize ? `${prioritize.sourceType}:${prioritize.sourceId}` : "none"} chunks=${relevant.length}`,
+        `[chat-rag] sections=${sections.join(",")} query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])} prioritize=${prioritize ? `${prioritize.sourceType}:${prioritize.sourceId}` : "none"} exclude=${exclude ? `${exclude.sourceType}:${exclude.sourceId}` : "none"} chunks=${relevant.length}`,
       );
       return appendRagChunks(formatted, relevant);
     } catch (error) {

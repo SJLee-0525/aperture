@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { articleBodyStoragePaths } from "@/features/admin-maintenance/_lib/article-body-storage-paths";
 
@@ -63,5 +63,70 @@ describe("articleBodyStoragePaths", () => {
 
   it("이미지가 없는 본문은 빈 목록이다", () => {
     expect(articleBodyStoragePaths("이미지 없는 본문")).toEqual([]);
+  });
+});
+
+describe("articleBodyStoragePaths — Supabase 공개 URL (M2 재작성 이후 형태)", () => {
+  const ORIGIN = "https://test.supabase.co";
+  const PUBLIC = `${ORIGIN}/storage/v1/object/public/media`;
+
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", ORIGIN);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("공개 객체 URL 의 dev-blog/ 경로를 채집한다 — 놓치면 본문 이미지 전체가 삭제 후보가 된다", () => {
+    const body = `![그림](${PUBLIC}/dev-blog/a1/inline.webp)`;
+
+    expect(articleBodyStoragePaths(body)).toEqual(["dev-blog/a1/inline.webp"]);
+  });
+
+  it("percent-encoding 된 파일명을 디코딩한다", () => {
+    const body = `![한글](${PUBLIC}/dev-blog/a1/%EB%B0%9C%ED%91%9C%20%EC%9E%90%EB%A3%8C.webp)`;
+
+    expect(articleBodyStoragePaths(body)).toEqual(["dev-blog/a1/발표 자료.webp"]);
+  });
+
+  it("query 가 붙어도 경로만 읽는다", () => {
+    const body = `![q](${PUBLIC}/dev-blog/a1/x.webp?width=100)`;
+
+    expect(articleBodyStoragePaths(body)).toEqual(["dev-blog/a1/x.webp"]);
+  });
+
+  it("다른 버킷·서명 URL·변환 엔드포인트는 무시한다", () => {
+    const body = [
+      `![다른버킷](${ORIGIN}/storage/v1/object/public/other/dev-blog/a1/x.webp)`,
+      `![서명](${ORIGIN}/storage/v1/object/sign/media/dev-blog/a1/x.webp?token=t)`,
+      `![변환](${ORIGIN}/storage/v1/render/image/public/media/dev-blog/a1/x.webp)`,
+    ].join("\n");
+
+    expect(articleBodyStoragePaths(body)).toEqual([]);
+  });
+
+  it("다른 origin 의 프리픽스 유사 URL 을 무시한다", () => {
+    const body = `![외부](https://evil.example.com/storage/v1/object/public/media/dev-blog/a1/x.webp)`;
+
+    expect(articleBodyStoragePaths(body)).toEqual([]);
+  });
+
+  it("dev-blog 프리픽스 유사 폴더(dev-blog-evil/)는 무시한다", () => {
+    const body = `![유사](${PUBLIC}/dev-blog-evil/a1/x.webp)`;
+
+    expect(articleBodyStoragePaths(body)).toEqual([]);
+  });
+
+  it("Firebase 형식과 Supabase 형식이 섞인 본문에서 둘 다 읽는다", () => {
+    const firebase = `${HOST}/v0/b/demo.appspot.com/o/${encodeURIComponent(
+      "dev-blog/a1/old.webp",
+    )}?alt=media`;
+    const body = `![old](${firebase})\n![new](${PUBLIC}/dev-blog/a1/new.webp)`;
+
+    expect(articleBodyStoragePaths(body).sort()).toEqual([
+      "dev-blog/a1/new.webp",
+      "dev-blog/a1/old.webp",
+    ]);
   });
 });

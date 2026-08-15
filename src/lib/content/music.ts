@@ -5,7 +5,7 @@ import {
   fetchPublishedMusicAwards,
   fetchPublishedMusicMedia,
   fetchPublishedMusicWorks,
-} from "@/lib/firebase/public/music";
+} from "@/lib/supabase/public/music";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 

@@ -2,7 +2,7 @@ import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { hasText } from "@/lib/i18n/has-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
 
-import type { DevProjectInput } from "@/lib/firebase/dev";
+import type { DevProjectInput } from "@/lib/supabase/dev";
 import type { DevProject, DevTroubleshooting } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
 

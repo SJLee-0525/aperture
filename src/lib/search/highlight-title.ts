@@ -27,19 +27,20 @@ const highlightTokensFor = (
 };
 
 /**
- * 제목에서 검색 토큰과 일치하는 구간을 강조 세그먼트로 나눈다.
+ * 텍스트에서 검색 토큰과 일치하는 구간을 강조 세그먼트로 나눈다. 결과 제목과
+ * 본문 스니펫이 같은 규칙을 공유한다.
  * 정렬 근거를 눈에 보이게 하는 용도라 부분·별칭 일치까지 흉내내지 않는다(그건 마크 없이 통과).
  * 토큰이 NFKC+소문자 정규화본이라 제목도 같은 변환본에서 위치를 찾되, 변환으로 길이가
  * 정규화 후 문자열 길이가 달라지면 잘못된 위치를 강조하지 않도록 원문을 반환한다.
  *
- * @param {string} title
+ * @param {string} text
  * @param {ReadonlySet<string>} queryTokens
  * @returns {TitleSegment[]}
  */
-const splitTitleByMatches = (title: string, queryTokens: ReadonlySet<string>): TitleSegment[] => {
-  const whole: TitleSegment[] = [{ text: title, hit: false }];
-  const lowered = title.normalize("NFKC").toLocaleLowerCase("ko-KR");
-  if (lowered.length !== title.length) return whole;
+const splitTextByMatches = (text: string, queryTokens: ReadonlySet<string>): TitleSegment[] => {
+  const whole: TitleSegment[] = [{ text, hit: false }];
+  const lowered = text.normalize("NFKC").toLocaleLowerCase("ko-KR");
+  if (lowered.length !== text.length) return whole;
 
   const ranges: Array<[number, number]> = [];
   for (const token of queryTokens) {
@@ -61,13 +62,13 @@ const splitTitleByMatches = (title: string, queryTokens: ReadonlySet<string>): T
   const segments: TitleSegment[] = [];
   let cursor = 0;
   for (const [start, end] of merged) {
-    if (cursor < start) segments.push({ text: title.slice(cursor, start), hit: false });
-    segments.push({ text: title.slice(start, end), hit: true });
+    if (cursor < start) segments.push({ text: text.slice(cursor, start), hit: false });
+    segments.push({ text: text.slice(start, end), hit: true });
     cursor = end;
   }
-  if (cursor < title.length) segments.push({ text: title.slice(cursor), hit: false });
+  if (cursor < text.length) segments.push({ text: text.slice(cursor), hit: false });
   return segments;
 };
 
-export { highlightTokensFor, splitTitleByMatches };
+export { highlightTokensFor, splitTextByMatches };
 export type { TitleSegment };

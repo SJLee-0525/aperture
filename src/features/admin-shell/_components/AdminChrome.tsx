@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ROUTES } from "@/constants/routes";
-import { signOutAdmin } from "@/lib/firebase/auth";
+import { signOutAdmin } from "@/lib/supabase/auth";
 
 import type { ReactNode } from "react";
 

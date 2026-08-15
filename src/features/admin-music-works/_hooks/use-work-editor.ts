@@ -13,7 +13,7 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 import { ROUTES } from "@/constants/routes";
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
-import type { MusicWorkInput } from "@/lib/firebase/music";
+import type { MusicWorkInput } from "@/lib/supabase/music";
 import type { ImageMeta } from "@/types/image";
 import type { MusicWork } from "@/types/music";
 

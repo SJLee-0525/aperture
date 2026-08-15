@@ -7,22 +7,22 @@ afterEach(() => {
 });
 
 describe("shouldUseMockContent", () => {
-  it("개발 환경에서 Firebase 설정이 없으면 mock을 사용한다", () => {
+  it("개발 환경에서 Supabase 설정이 없으면 mock을 사용한다", () => {
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
 
     expect(shouldUseMockContent()).toBe(true);
   });
 
-  it("운영 환경에서 Firebase 설정이 없으면 즉시 실패한다", () => {
+  it("운영 환경에서 Supabase 설정이 없으면 즉시 실패한다", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
 
-    expect(() => shouldUseMockContent()).toThrow("Firebase 공개 콘텐츠 설정이 없습니다");
+    expect(() => shouldUseMockContent()).toThrow("Supabase 공개 콘텐츠 설정이 없습니다");
   });
 
   it("프로덕션 빌드가 확정한 플래그를 그대로 읽는다 — 여기서 배포 환경을 다시 판정하지 않는다", () => {
@@ -35,11 +35,11 @@ describe("shouldUseMockContent", () => {
     expect(shouldUseMockContent()).toBe(true);
   });
 
-  it("Firebase 설정이 있으면 실데이터를 사용한다", () => {
+  it("Supabase 설정이 있으면 실데이터를 사용한다", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
 
     expect(shouldUseMockContent()).toBe(false);
   });
@@ -49,8 +49,8 @@ describe("shouldUseMockContent", () => {
     expect(getContentSource()).toBe("mock");
 
     vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
-    vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
     expect(getContentSource()).toBe("live");
   });
 });

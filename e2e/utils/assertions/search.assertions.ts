@@ -22,8 +22,9 @@ const searchAssertions = {
 
     if (mobile) {
       const firstResult = page.locator("main li a").first();
-      // 제목·메타는 hitText 래퍼 안의 중첩 span — 결과에 썸네일 span이 있든 없든 동일하게 잡힌다.
-      const textSpans = firstResult.locator("span span");
+      // 제목·메타는 hitText > hitRow 안의 span — 두 단계 중첩(span span span)이라
+      // 행 래퍼(hitRow)·본문 스니펫(hitText 직속)은 잡히지 않는다.
+      const textSpans = firstResult.locator("span span span");
       await textSpans.last().evaluate((meta) => {
         meta.textContent = "서울역, 세종대로, 봉래동2가, 회현동, 중구, 서울특별시, 04509, 대한민국";
       });

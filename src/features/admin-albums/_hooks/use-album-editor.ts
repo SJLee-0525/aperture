@@ -15,7 +15,7 @@ import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
-import type { AlbumInput } from "@/lib/firebase/albums";
+import type { AlbumInput } from "@/lib/supabase/albums";
 import type { AdminPhotoListItem } from "@/types/admin";
 import type { Album } from "@/types/album";
 

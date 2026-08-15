@@ -1,7 +1,7 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalListRepository } from "@/lib/admin/mock/local-list-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { listAlbumItemsAdmin } from "@/lib/firebase/admin-list-rest";
+import { listAlbumItemsAdmin } from "@/lib/supabase/admin-list";
 import {
   createAlbum,
   deleteAlbum,
@@ -9,8 +9,8 @@ import {
   newAlbumId,
   setAlbumPublished,
   updateAlbum,
-  updateAlbumOrder,
-} from "@/lib/firebase/albums";
+  updateAlbumOrders,
+} from "@/lib/supabase/albums";
 
 import type { AdminListRepository } from "@/lib/admin/admin-list-repository";
 import type { AdminAlbumListItem } from "@/types/admin";
@@ -49,7 +49,7 @@ const createLiveAlbumRepository = (): AlbumRepository => ({
   get: getAlbumAdmin,
   create: createAlbum,
   update: updateAlbum,
-  updateOrder: updateAlbumOrder,
+  updateOrder: updateAlbumOrders,
   setPublished: setAlbumPublished,
   remove: deleteAlbum,
 });

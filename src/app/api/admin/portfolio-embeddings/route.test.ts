@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   verifyAdminIdToken: vi.fn(),
@@ -33,65 +33,93 @@ const request = () =>
     headers: { Authorization: "Bearer admin-token" },
   });
 
+const targetRequest = (target: { sourceType: string; sourceId: string }) =>
+  new Request("http://localhost/api/admin/portfolio-embeddings", {
+    method: "POST",
+    headers: { Authorization: "Bearer admin-token", "Content-Type": "application/json" },
+    body: JSON.stringify({ target }),
+  });
+
 /** 청크 조립은 mock 이 대신하지만 route 가 블로그 글을 직접 훑으므로 두 배열은 실제로 필요하다. */
 const EMPTY_SOURCE = { source: true, devArticles: [], devArticleTags: [] };
 
-describe("POST /api/admin/portfolio-embeddings", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = "test-project";
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY = "firebase-key";
-  });
+/** DB vector(512) 계약을 만족하는 벡터. */
+const vector512 = (fill = 0.1) => Array.from({ length: 512 }, () => fill);
 
+const chunkOf = (id: string, overrides: Partial<Record<string, string>> = {}) => ({
+  id,
+  section: overrides.section ?? "photography",
+  sourceType: overrides.sourceType ?? "photo",
+  sourceId: overrides.sourceId ?? id,
+  chunkKey: overrides.chunkKey ?? "photo",
+  text: overrides.text ?? `본문 ${id}`,
+});
+
+const jsonResponse = (rows: unknown[]) => ({
+  ok: true,
+  status: 200,
+  json: async () => rows,
+  text: async () => JSON.stringify(rows),
+});
+const okResponse = () => ({ ok: true, status: 201, json: async () => [], text: async () => "" });
+
+type FetchCall = { url: string; init: RequestInit & { headers: Record<string, string> } };
+const calls = (fetchMock: ReturnType<typeof vi.fn>): FetchCall[] =>
+  fetchMock.mock.calls.map(([url, init]) => ({
+    url: String(url),
+    init: init as FetchCall["init"],
+  }));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
+describe("POST /api/admin/portfolio-embeddings", () => {
   it("관리자가 아니면 임베딩을 생성하지 않는다", async () => {
     mocks.verifyAdminIdToken.mockResolvedValue(false);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
 
     const response = await POST(request());
 
     expect(response.status).toBe(401);
     expect(mocks.generateEmbeddings).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("전체 청크를 배치 임베딩하고 기존 문서를 원자적으로 교체한다", async () => {
+  it("전체 모드는 upsert 를 먼저 하고 다음 색인에 없는 문서만 지운다", async () => {
     const chunks = [
-      {
-        id: "profile-site-intro",
+      chunkOf("profile-site-intro", {
         section: "profile",
         sourceType: "profile",
         sourceId: "site",
-        chunkKey: "intro",
-        text: "프로필 소개",
-      },
-      {
-        id: "development-project-overview",
+      }),
+      chunkOf("development-project-overview", {
         section: "development",
         sourceType: "project",
         sourceId: "project-1",
-        chunkKey: "overview",
-        text: "프로젝트 소개",
-      },
+      }),
     ];
     mocks.verifyAdminIdToken.mockResolvedValue(true);
     mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue(chunks);
-    mocks.generateEmbeddings.mockResolvedValue([
-      [0.1, 0.2],
-      [0.3, 0.4],
-    ]);
+    mocks.generateEmbeddings.mockResolvedValue([vector512(0.1), vector512(0.2)]);
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          documents: [
-            {
-              name: "projects/test-project/databases/(default)/documents/ragDocuments/stale",
-            },
-          ],
-        }),
-      })
-      .mockResolvedValueOnce({ ok: true, status: 200 });
+      .mockResolvedValueOnce(
+        jsonResponse([
+          { id: "stale", embedding_model: "old" },
+          { id: "profile-site-intro", embedding_model: "text-embedding-3-small@512" },
+        ]),
+      )
+      .mockResolvedValue(okResponse());
     vi.stubGlobal("fetch", fetchMock);
 
     const response = await POST(request());
@@ -100,94 +128,92 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     expect(response.status).toBe(200);
     expect(result).toMatchObject({
       count: 2,
-      dimensions: 2,
+      dimensions: 512,
       model: "text-embedding-3-small@512",
+      mode: "full",
       sections: { profile: 1, development: 1, music: 0, photography: 0 },
     });
-    expect(mocks.generateEmbeddings).toHaveBeenCalledWith(["프로필 소개", "프로젝트 소개"], {
-      signal: expect.any(AbortSignal),
+    const [meta, upsert, remove] = calls(fetchMock);
+    expect(meta.url).toContain("select=id%2Cembedding_model");
+    expect(meta.url).toContain("order=id.asc");
+    // upsert 실패 시 유효 청크가 남아 있도록 삭제는 upsert 뒤에 온다.
+    expect(upsert.init.method).toBe("POST");
+    expect(upsert.init.headers.Prefer).toBe("resolution=merge-duplicates");
+    const rows = JSON.parse(upsert.init.body as string) as Array<Record<string, unknown>>;
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({
+      id: "profile-site-intro",
+      chunk_key: "photo",
+      published: true,
+      embedding_model: "text-embedding-3-small@512",
     });
-    const commitBody = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string) as {
-      writes: Array<{ delete?: string; update?: { name: string } }>;
-    };
-    expect(commitBody.writes).toHaveLength(3);
-    expect(commitBody.writes[0]).toEqual({
-      delete: "projects/test-project/databases/(default)/documents/ragDocuments/stale",
-    });
-    expect(commitBody.writes[1]?.update?.name).toContain(
-      "/documents/ragDocuments/profile-site-intro",
-    );
+    expect((rows[0]?.embedding as number[]).length).toBe(512);
+    expect(remove.init.method).toBe("DELETE");
+    expect(decodeURIComponent(remove.url)).toContain('id=in.("stale")');
+    expect(decodeURIComponent(remove.url)).not.toContain("profile-site-intro");
     expect(mocks.revalidateTag).toHaveBeenCalled();
   });
 
-  it("지정한 콘텐츠의 청크만 임베딩하고 같은 원본의 이전 청크만 교체한다", async () => {
-    const targetChunk = {
-      id: "photography-photo-photo-1-photo",
-      section: "photography",
-      sourceType: "photo",
-      sourceId: "photo-1",
-      chunkKey: "photo",
-      text: "Canon EOS R6 사진",
-    };
+  it("지정한 콘텐츠는 같은 범위의 이전 청크만 조회해 교체한다", async () => {
+    const targetChunk = chunkOf("photography-photo-photo-1-photo", { sourceId: "photo-1" });
     mocks.verifyAdminIdToken.mockResolvedValue(true);
     mocks.getRagSourceDataForTarget.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue([
       targetChunk,
-      { ...targetChunk, id: "other", sourceId: "photo-2", text: "다른 사진" },
+      chunkOf("other", { sourceId: "photo-2", text: "다른 사진" }),
     ]);
-    mocks.generateEmbeddings.mockResolvedValue([[0.1, 0.2]]);
-    const field = (stringValue: string) => ({ stringValue });
+    mocks.generateEmbeddings.mockResolvedValue([vector512()]);
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [
-          {
-            document: {
-              name: "projects/test-project/databases/(default)/documents/ragDocuments/old-photo-1",
-              fields: { sourceType: field("photo"), sourceId: field("photo-1") },
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce({ ok: true, status: 200 });
+      .mockResolvedValueOnce(jsonResponse([{ id: "old-photo-1" }]))
+      .mockResolvedValue(okResponse());
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await POST(
-      new Request("http://localhost/api/admin/portfolio-embeddings", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer admin-token",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ target: { sourceType: "photo", sourceId: "photo-1" } }),
-      }),
-    );
+    const response = await POST(targetRequest({ sourceType: "photo", sourceId: "photo-1" }));
     const result = await response.json();
 
     expect(result).toMatchObject({ count: 1, mode: "incremental" });
-    expect(mocks.generateEmbeddings).toHaveBeenCalledWith(["Canon EOS R6 사진"], expect.anything());
-    const commitBody = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string) as {
-      writes: Array<{ delete?: string; update?: { name: string } }>;
-    };
-    expect(commitBody.writes).toHaveLength(2);
-    expect(commitBody.writes[0]?.delete).toContain("/ragDocuments/old-photo-1");
-    expect(JSON.stringify(commitBody)).not.toContain("other-photo");
-    expect(fetchMock.mock.calls[0]?.[0]).toContain("documents:runQuery");
-    expect(fetchMock.mock.calls[0]?.[1]?.body).toContain('"stringValue":"photo-1"');
+    expect(mocks.generateEmbeddings).toHaveBeenCalledWith(
+      ["본문 photography-photo-photo-1-photo"],
+      expect.anything(),
+    );
+    const [scope, upsert, remove] = calls(fetchMock);
+    expect(decodeURIComponent(scope.url)).toContain('source_type=in.("photo")');
+    expect(decodeURIComponent(scope.url)).toContain("source_id=eq.photo-1");
+    const rows = JSON.parse(upsert.init.body as string) as Array<{ id: string }>;
+    expect(rows.map(({ id }) => id)).toEqual(["photography-photo-photo-1-photo"]);
+    expect(decodeURIComponent(remove.url)).toContain('id=in.("old-photo-1")');
+  });
+
+  it("photoTags 는 요청 sourceId 와 무관하게 사진 청크 전체가 범위다", async () => {
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceDataForTarget.mockResolvedValue(EMPTY_SOURCE);
+    mocks.buildRagChunks.mockReturnValue([
+      chunkOf("photo-a", { sourceId: "photo-a" }),
+      chunkOf("album-1", { sourceType: "album" }),
+    ]);
+    mocks.generateEmbeddings.mockResolvedValue([vector512()]);
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([{ id: "photo-a" }, { id: "photo-gone" }]))
+      .mockResolvedValue(okResponse());
+    vi.stubGlobal("fetch", fetchMock);
+
+    await POST(targetRequest({ sourceType: "photoTags", sourceId: "config" }));
+
+    const [scope, upsert, remove] = calls(fetchMock);
+    expect(decodeURIComponent(scope.url)).toContain('source_type=in.("photo")');
+    // 요청의 sourceId(config)는 저장 청크 범위와 무관하다 — 필터에 쓰면 사진 전체가 stale 로 남는다.
+    expect(scope.url).not.toContain("source_id");
+    const rows = JSON.parse(upsert.init.body as string) as Array<{ id: string }>;
+    expect(rows.map(({ id }) => id)).toEqual(["photo-a"]);
+    expect(decodeURIComponent(remove.url)).toContain('id=in.("photo-gone")');
   });
 
   it("지원하지 않는 소스 타입은 거부한다", async () => {
     mocks.verifyAdminIdToken.mockResolvedValue(true);
 
-    const response = await POST(
-      new Request("http://localhost/api/admin/portfolio-embeddings", {
-        method: "POST",
-        headers: { Authorization: "Bearer admin-token", "Content-Type": "application/json" },
-        body: JSON.stringify({ target: { sourceType: "unknown", sourceId: "x" } }),
-      }),
-    );
+    const response = await POST(targetRequest({ sourceType: "unknown", sourceId: "x" }));
 
     expect(response.status).toBe(400);
     expect(mocks.generateEmbeddings).not.toHaveBeenCalled();
@@ -201,11 +227,13 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       devArticleTags: MOCK_DEV_ARTICLE_TAGS,
     });
     mocks.buildRagChunks.mockReturnValue([]);
-    mocks.generateEmbeddings.mockImplementation(async (texts: string[]) => texts.map(() => [0.1]));
+    mocks.generateEmbeddings.mockImplementation(async (texts: string[]) =>
+      texts.map(() => vector512()),
+    );
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ documents: [] }) })
-      .mockResolvedValue({ ok: true, status: 200 });
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValue(okResponse());
     vi.stubGlobal("fetch", fetchMock);
 
     const result = (await (await POST(request())).json()) as { count: number };
@@ -223,46 +251,114 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       devArticleTags: MOCK_DEV_ARTICLE_TAGS,
     });
     mocks.buildRagChunks.mockReturnValue([]);
-    mocks.generateEmbeddings.mockImplementation(async (texts: string[]) => texts.map(() => [0.1]));
-    const field = (stringValue: string) => ({ stringValue });
+    mocks.generateEmbeddings.mockImplementation(async (texts: string[]) =>
+      texts.map(() => vector512()),
+    );
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [
-          {
-            document: {
-              name: "projects/test-project/databases/(default)/documents/ragDocuments/stale-article",
-              fields: { sourceType: field("article"), sourceId: field(article.id) },
-            },
-          },
-          {
-            document: {
-              name: "projects/test-project/databases/(default)/documents/ragDocuments/other-photo",
-              fields: { sourceType: field("photo"), sourceId: field("photo-1") },
-            },
-          },
-        ],
-      })
-      .mockResolvedValue({ ok: true, status: 200 });
+      .mockResolvedValueOnce(jsonResponse([{ id: "stale-article" }]))
+      .mockResolvedValue(okResponse());
     vi.stubGlobal("fetch", fetchMock);
 
-    await POST(
-      new Request("http://localhost/api/admin/portfolio-embeddings", {
-        method: "POST",
-        headers: { Authorization: "Bearer admin-token", "Content-Type": "application/json" },
-        body: JSON.stringify({ target: { sourceType: "article", sourceId: article.id } }),
-      }),
-    );
+    await POST(targetRequest({ sourceType: "article", sourceId: article.id }));
 
-    const commit = JSON.stringify(
-      fetchMock.mock.calls.slice(1).map(([, init]) => (init as { body: string }).body),
-    );
-    expect(commit).toContain("stale-article");
-    expect(commit).not.toContain("other-photo");
+    const [scope, , remove] = calls(fetchMock);
+    expect(decodeURIComponent(scope.url)).toContain('source_type=in.("article")');
+    expect(decodeURIComponent(scope.url)).toContain(`source_id=eq.${article.id}`);
+    expect(decodeURIComponent(remove.url)).toContain('id=in.("stale-article")');
   });
 
+  it("벡터 검증(개수·차원·유한값)에 걸리면 아무것도 쓰지 않고 502 로 끝낸다", async () => {
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
+    mocks.buildRagChunks.mockReturnValue([chunkOf("photo-a")]);
+    mocks.generateEmbeddings.mockResolvedValue([[0.1, 0.2]]);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(502);
+    // 부분 갱신 차단 — 검증이 쓰기 시작 전에 실패하므로 조회조차 하지 않는다.
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("업스트림 오류 원문은 응답에 싣지 않고 상태 코드는 502 를 유지한다", async () => {
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
+    mocks.buildRagChunks.mockReturnValue([chunkOf("photo-a")]);
+    mocks.generateEmbeddings.mockResolvedValue([vector512()]);
+    const upstreamBody =
+      '{"message":"column rag_documents.secret does not exist","hint":"internal"}';
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+        text: async () => upstreamBody,
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const response = await POST(request());
+    const result = (await response.json()) as { error: string };
+
+    expect(response.status).toBe(502);
+    expect(result.error).toBe("임베딩 저장 실패 (500)");
+    expect(result.error).not.toContain("secret");
+    expect(errorSpy.mock.calls.some(([line]) => String(line).includes("secret"))).toBe(true);
+    errorSpy.mockRestore();
+  });
+
+  it("대량 upsert 는 100행씩, stale 삭제는 50개씩 나눠 보낸다", async () => {
+    const chunks = Array.from({ length: 201 }, (_, index) => chunkOf(`photo-${index}`));
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
+    mocks.buildRagChunks.mockReturnValue(chunks);
+    mocks.generateEmbeddings.mockResolvedValue(chunks.map(() => vector512()));
+    const staleRows = Array.from({ length: 51 }, (_, index) => ({ id: `gone-${index}` }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(staleRows.map((row) => ({ ...row, embedding_model: "m" }))),
+      )
+      .mockResolvedValue(okResponse());
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(200);
+    const all = calls(fetchMock);
+    const upserts = all.filter(({ init }) => init.method === "POST");
+    const removes = all.filter(({ init }) => init.method === "DELETE");
+    expect(
+      upserts.map(({ init }) => (JSON.parse(init.body as string) as unknown[]).length),
+    ).toEqual([100, 100, 1]);
+    expect(removes).toHaveLength(2);
+    expect(decodeURIComponent(removes[1].url)).toContain('"gone-50"');
+  });
+
+  it("PostgREST 예약문자가 든 stale id 를 이중따옴표로 감싼다", async () => {
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
+    mocks.buildRagChunks.mockReturnValue([chunkOf("photo-a")]);
+    mocks.generateEmbeddings.mockResolvedValue([vector512()]);
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([{ id: 'weird,(id)"x' }]))
+      .mockResolvedValue(okResponse());
+    vi.stubGlobal("fetch", fetchMock);
+
+    await POST(request());
+
+    const remove = calls(fetchMock).find(({ init }) => init.method === "DELETE");
+    expect(decodeURIComponent(remove!.url)).toContain('id=in.("weird,(id)\\"x")');
+  });
+});
+
+describe("GET /api/admin/portfolio-embeddings", () => {
   it("상태 조회의 전체 개수에도 블로그 글 청크가 들어간다", async () => {
     const article = MOCK_DEV_ARTICLES.find(({ published }) => published)!;
     mocks.verifyAdminIdToken.mockResolvedValue(true);
@@ -271,10 +367,7 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       devArticleTags: MOCK_DEV_ARTICLE_TAGS,
     });
     mocks.buildRagChunks.mockReturnValue([]);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ documents: [] }) }),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
 
     const status = (await (await GET(request())).json()) as { total: number };
 
@@ -286,96 +379,63 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     mocks.verifyAdminIdToken.mockResolvedValue(true);
     mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue([
-      {
-        id: "ready",
-        section: "profile",
-        sourceType: "profile",
-        sourceId: "site",
-        chunkKey: "a",
-        text: "a",
-      },
-      {
-        id: "missing",
-        section: "music",
-        sourceType: "musicWork",
-        sourceId: "work",
-        chunkKey: "b",
-        text: "b",
-      },
+      chunkOf("ready", { section: "profile", sourceType: "profile", sourceId: "site" }),
+      chunkOf("missing", { section: "music", sourceType: "musicWork", sourceId: "work" }),
     ]);
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: async () => ({
-            documents: [
-              {
-                name: "projects/test-project/databases/(default)/documents/ragDocuments/ready",
-                fields: { embeddingModel: { stringValue: "text-embedding-3-small@512" } },
-              },
-            ],
-            nextPageToken: "next-page",
-          }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: async () => ({
-            documents: [
-              {
-                name: "projects/test-project/databases/(default)/documents/ragDocuments/missing",
-                fields: { embeddingModel: { stringValue: "text-embedding-3-small@512" } },
-              },
-            ],
-          }),
-        }),
+      vi.fn().mockResolvedValue(
+        jsonResponse([
+          { id: "ready", embedding_model: "text-embedding-3-small@512" },
+          { id: "gone", embedding_model: "text-embedding-3-small@512" },
+          { id: "outdated-doc", embedding_model: "text-embedding-3-small" },
+        ]),
+      ),
     );
+    mocks.buildRagChunks.mockReturnValue([
+      chunkOf("ready"),
+      chunkOf("missing"),
+      chunkOf("outdated-doc"),
+    ]);
 
     const response = await GET(request());
 
     await expect(response.json()).resolves.toMatchObject({
-      completed: 2,
-      pending: 0,
-      percent: 100,
-      total: 2,
+      completed: 1,
+      outdated: 1,
+      pending: 2,
+      percent: 33,
+      stale: 1,
+      total: 3,
     });
     expect(mocks.generateEmbeddings).not.toHaveBeenCalled();
   });
 
-  it("대량 벡터 쓰기를 Firestore 안전 크기의 여러 커밋으로 나눈다", async () => {
-    const chunks = Array.from({ length: 201 }, (_, index) => ({
-      id: `photo-${index}`,
-      section: "photography",
-      sourceType: "photo",
-      sourceId: `photo-${index}`,
-      chunkKey: "photo",
-      text: `사진 ${index}`,
-    }));
+  it("1,000행 페이지는 다음 Range 를 이어 읽고 416 은 종료로 처리한다", async () => {
     mocks.verifyAdminIdToken.mockResolvedValue(true);
     mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
-    mocks.buildRagChunks.mockReturnValue(chunks);
-    mocks.generateEmbeddings.mockResolvedValue(chunks.map(() => [0.1, 0.2]));
+    mocks.buildRagChunks.mockReturnValue([chunkOf("photo-0")]);
+    const fullPage = Array.from({ length: 1000 }, (_, index) => ({
+      id: `photo-${index}`,
+      embedding_model: "text-embedding-3-small@512",
+    }));
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ documents: [] }) })
-      .mockResolvedValueOnce({ ok: true, status: 200 })
-      .mockResolvedValueOnce({ ok: true, status: 200 });
+      .mockResolvedValueOnce(jsonResponse(fullPage))
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 416,
+        json: async () => [],
+        text: async () => "",
+      });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await POST(request());
+    const status = (await (await GET(request())).json()) as { stale: number };
 
-    expect(response.status).toBe(200);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    const firstCommit = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string) as {
-      writes: unknown[];
-    };
-    const secondCommit = JSON.parse(fetchMock.mock.calls[2]?.[1]?.body as string) as {
-      writes: unknown[];
-    };
-    expect(firstCommit.writes).toHaveLength(200);
-    expect(secondCommit.writes).toHaveLength(1);
+    expect(status.stale).toBe(999);
+    const [first, second] = calls(fetchMock);
+    expect(first.init.headers.Range).toBe("0-999");
+    expect(second.init.headers.Range).toBe("1000-1999");
+    expect(first.url).toContain("order=id.asc");
   });
 });

@@ -1,6 +1,6 @@
 import { recordRevalidateFailure } from "@/lib/cache/revalidate-failure-store";
 import { revalidatePublicPages } from "@/lib/cache/revalidate-public";
-import { getFirebaseAuth } from "@/lib/firebase/client";
+import { getAdminAccessToken } from "@/lib/supabase/auth";
 
 /** 연속 저장(드래그 재정렬 = 문서 N개 병렬 쓰기)을 1회 호출로 합치는 지연. */
 const DEBOUNCE_MS = 300;
@@ -10,9 +10,8 @@ const pendingTags = new Set<string>();
 const pendingPaths = new Set<string>();
 
 const revalidateAsCurrentAdmin = async (tags: string[], paths: string[]): Promise<void> => {
-  const user = getFirebaseAuth().currentUser;
-  if (!user) throw new Error("관리자 인증이 필요합니다.");
-  const idToken = await user.getIdToken();
+  const idToken = await getAdminAccessToken();
+  if (!idToken) throw new Error("관리자 인증이 필요합니다.");
   await revalidatePublicPages(idToken, tags, paths);
 };
 

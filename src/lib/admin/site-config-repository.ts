@@ -2,7 +2,7 @@ import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { createLocalDocRepository } from "@/lib/admin/mock/local-doc-repository";
 import { selectRepository } from "@/lib/admin/select-repository";
-import { getSiteConfig, updateSiteConfigFields } from "@/lib/firebase/site";
+import { getSiteConfig, updateSiteConfigFields } from "@/lib/supabase/site";
 
 import type { SiteConfig } from "@/types/site";
 

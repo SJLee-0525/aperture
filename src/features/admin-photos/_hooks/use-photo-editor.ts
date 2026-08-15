@@ -15,7 +15,7 @@ import { ROUTES } from "@/constants/routes";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
-import type { PhotoInput } from "@/lib/firebase/firestore";
+import type { PhotoInput } from "@/lib/supabase/photos";
 import type { Photo } from "@/types/photo";
 
 const usePhotoEditor = (photoId: string, initial?: Photo) => {

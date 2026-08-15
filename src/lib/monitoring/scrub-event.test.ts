@@ -41,10 +41,10 @@ describe("scrubQueryString / scrubUrl", () => {
 });
 
 describe("scrubEvent", () => {
-  it("Authorization 헤더의 Firebase ID token을 마스킹한다 (대소문자 무관)", () => {
+  it("Authorization 헤더의 관리자 access token을 마스킹한다 (대소문자 무관)", () => {
     const event = {
       request: {
-        headers: { Authorization: "Bearer firebase-id-token", accept: "application/json" },
+        headers: { Authorization: "Bearer admin-access-token", accept: "application/json" },
       },
     } as unknown as ErrorEvent;
 

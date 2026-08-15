@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildContentSecurityPolicy,
@@ -13,6 +13,10 @@ const directive = (policy: string, name: string) =>
     ?.slice(name.length + 1) ?? "";
 
 describe("Content-Security-Policy", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("프로덕션 정책에는 'unsafe-eval'이 들어가지 않는다", () => {
     // 배포 정책에 새어 들어가면 임의 문자열 실행을 열어줘 CSP 의 의미가 크게 줄어든다.
     expect(buildContentSecurityPolicy(false)).not.toContain("'unsafe-eval'");
@@ -50,6 +54,28 @@ describe("Content-Security-Policy", () => {
 
     // 콘텐츠가 참조하는 출처와 CSP 가 어긋나면 렌더는 통과했는데 브라우저가 막아 빈 칸만 남는다.
     STORAGE_IMAGE_HOSTS.forEach((host) => expect(imgSrc).toContain(host));
+  });
+
+  it("장소 검색 호스트를 connect-src 에 연다", () => {
+    // 관리자 사진 편집의 Nominatim 지오코딩 — 빠지면 CSP 차단이 네트워크 오류로 위장된다.
+    const policy = buildContentSecurityPolicy(false);
+
+    expect(directive(policy, "connect-src")).toContain("https://nominatim.openstreetmap.org");
+  });
+
+  it("Supabase 호스트를 인증·데이터(connect-src)와 이미지(img-src)에 연다", () => {
+    // 로그인(auth/v1/token)·PostgREST 가 connect-src, 이전된 Storage 이미지가 img-src 에 걸린다.
+    // 빠지면 로그인이 "네트워크 연결" 오류로 위장되고 사진이 전부 빈 칸이 된다.
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    const policy = buildContentSecurityPolicy(false);
+
+    expect(directive(policy, "connect-src")).toContain("https://test.supabase.co");
+    expect(directive(policy, "img-src")).toContain("https://test.supabase.co");
+  });
+
+  it("Supabase env 가 없으면 정책이 넓어지지 않는다", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    expect(buildContentSecurityPolicy(false)).not.toContain("supabase.co");
   });
 
   it("GA4 로더와 수집 비콘 경로를 함께 연다", () => {

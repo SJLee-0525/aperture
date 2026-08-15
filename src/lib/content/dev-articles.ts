@@ -6,7 +6,7 @@ import {
   fetchDevArticleProjectLinks,
   fetchDevArticleTags,
   fetchPublishedDevArticles,
-} from "@/lib/firebase/public/dev-articles";
+} from "@/lib/supabase/public/dev-articles";
 
 import type { DevArticle, DevArticleProjectLink } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
@@ -14,11 +14,11 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
 /**
  * 공개 글 목록. 초안은 제외한다.
  *
- * live 소스는 Firestore REST 쿼리가 정렬(`publishedAt desc + __name__ asc`)까지 마친
+ * live 소스는 PostgREST 쿼리가 정렬(`published_at desc nullslast, id asc`)까지 마친
  * 결과를 그대로 쓰고, mock 만 같은 계약의 `compareByPublishedAtDesc` 로 정렬한다.
  *
  * 한 렌더에서 여러 번 불린다(`generateStaticParams`·metadata·페이지 본문) — `cache` 로 감싸
- * 같은 요청 안에서는 한 번만 만든다. Firestore 읽기가 렌더당 1회로 억제되는 장치다.
+ * 같은 요청 안에서는 한 번만 만든다. DB 읽기가 렌더당 1회로 억제되는 장치다.
  *
  * @returns {Promise<DevArticle[]>} 발행일 내림차순 정렬된 공개 글.
  */

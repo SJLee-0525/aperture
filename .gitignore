@@ -52,6 +52,10 @@ pubsub-debug.log
 # .firebaserc(프로젝트 ID)는 배포에 필요 → 커밋
 !.firebaserc
 
+# supabase
+supabase/.branches
+supabase/.temp
+
 # IDE / OS
 .idea
 .vscode/*
