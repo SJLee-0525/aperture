@@ -3,14 +3,14 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0 완료 — 측정: Storage 68.42MB·객체 735·egress 월 환산 약 3GB. M1 진행 중, 적용 방식은 원격 `db push` 확정)
+> 마지막 갱신: 2026-08-15 (M0·M1 완료 — 원격 `db push` 적용, anon·admin RLS 검증 통과. 보류 1건: keep-alive `schedule` 자동 실행 확인은 main 머지 후)
 
 ## 진행 요약
 
 | 단계 | 내용                                   | 상태    |
 | ---- | -------------------------------------- | ------- |
 | M0   | 결정·측정·프로젝트 준비                | ✅ 완료 |
-| M1   | 스키마·RLS·버킷·keep-alive             | 🔄 진행 중 |
+| M1   | 스키마·RLS·버킷·keep-alive             | ✅ 완료 |
 | M2   | 데이터 마이그레이션 리허설             | ⬜ 미착수 |
 | M3   | 인증 교체                              | ⬜ 미착수 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ⬜ 미착수 |
@@ -42,16 +42,18 @@
 
 ## M1 — 스키마·RLS·버킷·keep-alive (§2, §4 M1)
 
-- [ ] `supabase/migrations/`에 테이블 10개 DDL 작성 (text PK, `sort_order`, `data` jsonb, timestamptz 기본값) (§2.1, §2.2)
-- [ ] 예외 테이블 확인: `dev_articles`는 `sort_order` 없음(수동 정렬 없는 유일한 목록 테이블) + slug는 UNIQUE 제약 대신 `where slug <> ''` 부분 unique 인덱스 (빈 slug 초안 중복 허용 계약), `dev_article_tags`는 `id·ko·en` 세 컬럼만 (published·sort_order 없음) (§2.2)
-- [ ] `updated_at` BEFORE UPDATE 트리거 작성
-- [ ] 인덱스: 목록 테이블 `(published, sort_order)` 6개, `dev_articles (published, published_at desc, id asc)`, `rag_documents (source_type, source_id)` — 벡터 인덱스는 만들지 않는다
-- [ ] `create extension vector` + `rag_documents.embedding vector(512)` (§2.2)
-- [ ] 정렬 일괄 갱신 RPC 6개 작성 (수동 정렬 테이블별 템플릿 — `dev_articles` 제외, `security invoker` + `set search_path` + `revoke`/`grant execute`) — 부분 upsert는 `data jsonb not null` 검사로 실패하므로 금지 (§2.3)
-- [ ] RLS: published 게이트 8개 테이블 + 전체 공개 2개 테이블, role 클레임 기반 admin write (§2.4)
-- [ ] Storage 버킷 `media` 생성: 공개 read, `file_size_limit` 10MB, `allowed_mime_types image/*`, admin 클레임 write/delete 정책
-- [ ] keep-alive 워크플로 `.github/workflows/supabase-keepalive.yml`: 주 2회 cron + `workflow_dispatch`, PostgREST를 anon key(repo secrets)로 직접 호출, 실패 알림 확인 — `schedule`은 main 머지 후에만 자동 실행되므로 그 전에는 수동 dispatch로 대신
-- [ ] 원격 적용·검증: `supabase link` + `supabase db push`로 원격 프로젝트에 적용하고, PostgREST 호출로 RLS 동작(anon 게이트·admin 쓰기) 확인 (§4 M1 — 로컬 Docker 스택 없이 진행)
+- [x] `supabase/migrations/`에 테이블 10개 DDL 작성 (text PK, `sort_order`, `data` jsonb, timestamptz 기본값) (§2.1, §2.2)
+- [x] 예외 테이블 확인: `dev_articles`는 `sort_order` 없음(수동 정렬 없는 유일한 목록 테이블) + slug는 UNIQUE 제약 대신 `where slug <> ''` 부분 unique 인덱스 (빈 slug 초안 중복 허용 계약), `dev_article_tags`는 `id·ko·en` 세 컬럼만 (published·sort_order 없음) (§2.2)
+- [x] `updated_at` BEFORE UPDATE 트리거 작성
+- [x] 인덱스: 목록 테이블 `(published, sort_order)` 6개, `dev_articles (published, published_at desc, id asc)`, `rag_documents (source_type, source_id)` — 벡터 인덱스는 만들지 않는다
+- [x] `create extension vector` + `rag_documents.embedding vector(512)` (§2.2)
+- [x] 정렬 일괄 갱신 RPC 6개 작성 (수동 정렬 테이블별 템플릿 — `dev_articles` 제외, `security invoker` + `set search_path` + `revoke`/`grant execute`) — 부분 upsert는 `data jsonb not null` 검사로 실패하므로 금지 (§2.3)
+- [x] RLS: published 게이트 8개 테이블 + 전체 공개 2개 테이블, role 클레임 기반 admin write (§2.4)
+- [x] Storage 버킷 `media` 생성: 공개 read, `file_size_limit` 10MB, `allowed_mime_types image/*`, admin 클레임 write/delete 정책 (공개 URL 응답으로 버킷 존재 확인)
+- [x] keep-alive 워크플로 `.github/workflows/supabase-keepalive.yml`: 주 2회 cron + `workflow_dispatch`, PostgREST를 anon key(repo secrets)로 직접 호출 — 핑 경로(`site_documents` select)는 curl로 검증 완료. `schedule`은 main 머지 후에만 자동 실행되므로 그 전에는 수동 dispatch로 대신
+- [x] 원격 적용: `supabase link` + `supabase db push`로 마이그레이션 4개 적용 완료 (§4 M1 — 로컬 Docker 스택 없이 진행)
+- [x] anon 검증: 읽기 200(`photos`·`site_documents`·`rag_documents` 빈 배열), 쓰기 42501 거부, 정렬 RPC 실행 거부
+- [x] admin 검증: 관리자 JWT `app_metadata.role=admin`(ES256) 확인, insert 201 → 미발행 anon 비노출 → 정렬 RPC 204(`sort_order` 반영 + `updated_at` 트리거 동작) → 발행 후 anon 노출 → delete 204 왕복 통과
 
 ## M2 — 데이터 마이그레이션 리허설 (§5)
 
