@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. 보류: keep-alive `schedule` 확인은 main 머지 후. 다음: M7 콘텐츠 동결·최종 이전)
+> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. M7 진행 중 — 델타 재실행 생략 확정(프로덕션 편집 없음), 행 수 대조 완료, 잔여 = Vercel Supabase env 추가(사용자). 보류: keep-alive `schedule` 확인은 main 머지 후)
 
 ## 진행 요약
 
@@ -16,7 +16,7 @@
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
 | M5   | 관리자 쓰기·Storage 교체               | ✅ 완료 |
 | M6   | RAG pgvector 전환                      | ✅ 완료 |
-| M7   | 본 데이터 이전·전환 준비               | ⬜ 미착수 |
+| M7   | 본 데이터 이전·전환 준비               | 🔄 진행 중 (잔여: Vercel env 추가) |
 | M8   | 배포 전환·관찰·Firebase 해체           | ⬜ 미착수 |
 
 상태: ⬜ 미착수 · 🔄 진행 중 · ✅ 완료
@@ -124,12 +124,13 @@
 
 ## M7 — 본 데이터 이전·전환 준비 (§4 M7, §5)
 
-- [ ] 콘텐츠 편집 동결 선언 (관리자 본인)
-- [ ] M2 스크립트로 최종 데이터·파일 이전 + URL 재작성 재실행
-- [ ] §5.4 검증 3종 재확인
-- [ ] RAG 인덱스는 `/admin/maintenance` 전체 재생성으로 새로 생성
-- [ ] Vercel 환경변수 교체 (§7 추가·제거 목록), `.env.example` 갱신
-- [ ] 마이그레이션 키 폐기 재확인
+- [x] 델타 재실행 생략 결정(2026-08-15, 사용자 확인): M2 덤프 이후 프로덕션(Firebase) 관리자 편집이 없었다. M5·M6 실데이터 검증 편집은 전부 Supabase 로 갔으므로 Firestore→Supabase upsert 재실행은 오히려 최신 수정을 옛 데이터로 덮어쓴다 — 계획의 재실행 전제(프로덕션이 계속 Firebase 로 편집됨)가 소멸해 생략이 안전한 유일한 경로
+- [x] 콘텐츠 편집 규칙 선언: M8 배포 전환까지 프로덕션(Firebase) 관리자에서 편집 금지 — Firestore 에 쓰여 유실된다. 편집은 이 브랜치의 실데이터 dev 서버(Supabase)로만
+- [x] §5.4 검증 재확인(델타 생략 판 — 초안 포함 전체 행 수): photos 174(+1, M5·M6 검증 저장분)·albums 1·music_works 4·music_awards 0·music_media 4·dev_projects 9·dev_articles 3·dev_article_tags 7·site_documents 3 — M2 기록 204문서 대비 검증 편집분 외 전 컬렉션 일치, 유실 없음
+- [x] RAG 인덱스 재생성 — M6 검증에서 완료(317청크, percent 100·stale 0). 모델·데이터 변경이 없으므로 재실행 불필요
+- [x] `.env.example` 갱신: 콘텐츠 소스·테스트 세션·보안 경계 문구를 Supabase(RLS) 기준으로 정정 (Firebase 블록 자체 제거는 M8)
+- [ ] Vercel 환경변수 추가(사용자): `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 전 환경(Production·Preview·Development). ⚠️ Firebase 변수 제거는 M8 배포 전환 후 — main 이 아직 Firebase 코드라 지금 지우면 프로덕션이 죽는다
+- [x] 마이그레이션 키 폐기 재확인: M2 종료 시 Firebase 서비스 계정 키 삭제 + Supabase secret key 회전 완료, 델타 생략으로 재발급 자체가 없었음. Supabase CLI access token(30일)은 M8 해체 작업까지 유지 후 폐기
 
 ## M8 — 배포 전환·관찰·Firebase 해체 (§4 M8, §8~§10)
 
