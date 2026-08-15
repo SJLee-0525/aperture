@@ -106,7 +106,7 @@
 }
 .hitRow {
   display: flex;
-  align-items: baseline;
+  align-items: start;
   justify-content: space-between;
   min-width: 0;
   gap: var(--s-4);
