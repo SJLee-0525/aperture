@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. 남은 M6 확인 1건: 글 저장 시 RAG 자동 갱신 경고 소멸(사용자). 보류: keep-alive `schedule` 확인은 main 머지 후. 다음: M7 콘텐츠 동결·최종 이전)
+> 마지막 갱신: 2026-08-15 (M0~M6 완료 — RAG 가 pgvector 로 동작(316청크·fixture RPC 11/11·p50 기록), `lib/firebase/` 소멸, 장소 검색 복구 확인. 보류: keep-alive `schedule` 확인은 main 머지 후. 다음: M7 콘텐츠 동결·최종 이전)
 
 ## 진행 요약
 
@@ -15,7 +15,7 @@
 | M3   | 인증 교체                              | ✅ 완료 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
 | M5   | 관리자 쓰기·Storage 교체               | ✅ 완료 |
-| M6   | RAG pgvector 전환                      | ✅ 완료 (잔여: 글 저장 경고 소멸 확인) |
+| M6   | RAG pgvector 전환                      | ✅ 완료 |
 | M7   | 본 데이터 이전·전환 준비               | ⬜ 미착수 |
 | M8   | 배포 전환·관찰·Firebase 해체           | ⬜ 미착수 |
 
@@ -120,7 +120,7 @@
 - [x] 실제 행 fixture 원격 RPC 검증 11/11 통과: 정상 포함·타 모델/타 섹션/미발행(anon) 제외·코사인 순위·후보 밖 우선 대상 보강·중복 없음·clamp 하한(0→1행)/상한·511차원 오류(행 존재 시 `<=>` 평가에서 발생)·허용 밖 섹션 빈 결과, fixture 행 정리 완료
 - [x] 실데이터 전체 재생성 성공: 316청크/4.8초(profile 1·development 127·music 13·photography 175), `rag_documents` 행 수 316 = count, GET percent 100·stale 0. 챗 실검증 — 프로젝트·수상(SSAFY 우수상)·울릉도 사진 질의 모두 참조 카드(Supabase 썸네일 URL 포함)와 함께 정답, 고유명사 recall 정상
 - [x] 챗 p50 M6 baseline 기록(2026-08-15, 로컬 dev + 원격 Supabase): `match_rag_chunks` RPC 구간 warm-up 3회 제외 20회 median 78ms·mean 93ms·max 191ms. 전체 챗 응답(고정 질의, warm-up 3회 제외 15회) median 3.92s·max 4.49s — LLM 생성이 지배적이라 RPC 왕복(질문당 1회)은 총 지연의 2% 수준. 요청 간 캐시 소멸(구 스냅샷 대비)은 수용
-- [ ] `use-rag-stale-alert`·fingerprint skip 정책이 새 저장소에서도 동작하는지 확인 (글 저장 시 "RAG 자동 갱신 실패" 경고 소멸 포함 — 사용자 확인 대기. GET 상태·stale 산식은 실데이터로 검증 완료, 장소 검색 복구는 dev 서버 재시작 후 확인됨)
+- [x] 사용자 최종 확인(2026-08-15): 사진 저장 시 "RAG 자동 갱신 실패" 경고 소멸(증분 sync 정상 — 저장 후 317/317·갱신 필요 0), maintenance 패널 수치 표시 정상(이미지 파생본 243/243·orphan 0), 장소 검색 dev 서버 재시작 후 복구
 
 ## M7 — 본 데이터 이전·전환 준비 (§4 M7, §5)
 
