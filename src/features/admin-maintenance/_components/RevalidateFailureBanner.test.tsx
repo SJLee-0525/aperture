@@ -13,8 +13,8 @@ vi.mock("@/lib/cache/revalidate-public", () => ({
   revalidatePublicPages: mocks.revalidatePublicPages,
 }));
 
-vi.mock("@/lib/firebase/client", () => ({
-  getFirebaseAuth: () => ({ currentUser: { getIdToken: async () => "id-token" } }),
+vi.mock("@/lib/supabase/auth", () => ({
+  getAdminAccessToken: async () => "id-token",
 }));
 
 afterEach(() => {

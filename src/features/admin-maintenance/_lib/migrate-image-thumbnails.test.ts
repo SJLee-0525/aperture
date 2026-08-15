@@ -9,7 +9,7 @@ import type { ImageMeta } from "@/types/image";
 const mocks = vi.hoisted(() => ({
   compressPreviewToWebp: vi.fn(),
   compressThumbnailToWebp: vi.fn(),
-  currentUser: null as { getIdToken: ReturnType<typeof vi.fn> } | null,
+  accessToken: null as string | null,
   devList: vi.fn(),
   devUpdate: vi.fn(),
   listAlbumsAdmin: vi.fn(),
@@ -48,12 +48,8 @@ vi.mock("@/lib/firebase/firestore", () => ({
 vi.mock("@/lib/firebase/music", () => ({
   musicWorks: { list: mocks.musicList, update: mocks.musicUpdate },
 }));
-vi.mock("@/lib/firebase/client", () => ({
-  getFirebaseAuth: () => ({
-    get currentUser() {
-      return mocks.currentUser;
-    },
-  }),
+vi.mock("@/lib/supabase/auth", () => ({
+  getAdminAccessToken: async () => mocks.accessToken,
 }));
 vi.mock("@/lib/firebase/storage", () => ({
   uploadDevPreview: mocks.uploadDevPreview,
@@ -96,7 +92,7 @@ const asFixture = <T>(value: unknown): T => value as T;
 describe("migrateImageThumbnails", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.currentUser = { getIdToken: vi.fn().mockResolvedValue("admin-token") };
+    mocks.accessToken = "admin-token";
     mocks.listPhotosAdmin.mockResolvedValue([]);
     mocks.listAlbumsAdmin.mockResolvedValue([]);
     mocks.musicList.mockResolvedValue([]);
@@ -299,7 +295,7 @@ describe("migrateImageThumbnails", () => {
   });
 
   it("관리자 인증이 없으면 이미지 다운로드 전에 중단한다", async () => {
-    mocks.currentUser = null;
+    mocks.accessToken = null;
     mocks.listPhotosAdmin.mockResolvedValue([asFixture({ id: "photo-1", image: image("photo") })]);
 
     await expect(migrateImageThumbnails(false)).rejects.toThrow("관리자 로그인이 필요합니다.");

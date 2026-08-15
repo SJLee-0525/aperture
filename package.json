@@ -39,6 +39,7 @@
     "@sentry/nextjs": "^10.69.0",
     "@shikijs/langs": "^4.4.3",
     "@shikijs/themes": "^4.4.3",
+    "@supabase/supabase-js": "^2.112.3",
     "browser-image-compression": "^2.0.2",
     "es-hangul": "^2.4.0",
     "exifr": "^7.1.3",

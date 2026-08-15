@@ -9,7 +9,7 @@ import {
   type RevalidateFailure,
 } from "@/lib/cache/revalidate-failure-store";
 import { revalidatePublicPages } from "@/lib/cache/revalidate-public";
-import { getFirebaseAuth } from "@/lib/firebase/client";
+import { getAdminAccessToken } from "@/lib/supabase/auth";
 
 type RevalidateFailureAlert = {
   failure: RevalidateFailure | null;
@@ -43,9 +43,9 @@ const useRevalidateFailure = (): RevalidateFailureAlert => {
     setRetrying(true);
     setError(null);
     const run = async () => {
-      const user = getFirebaseAuth().currentUser;
-      if (!user) throw new Error("관리자 인증이 필요합니다.");
-      await revalidatePublicPages(await user.getIdToken(), failure.tags, failure.paths);
+      const idToken = await getAdminAccessToken();
+      if (!idToken) throw new Error("관리자 인증이 필요합니다.");
+      await revalidatePublicPages(idToken, failure.tags, failure.paths);
     };
     run()
       .then(() => clearRevalidateFailure())

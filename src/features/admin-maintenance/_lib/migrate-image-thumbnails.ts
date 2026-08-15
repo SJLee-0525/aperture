@@ -7,7 +7,6 @@ import {
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
 import { listAlbumsAdmin, updateAlbum } from "@/lib/firebase/albums";
-import { getFirebaseAuth } from "@/lib/firebase/client";
 import { devProjects } from "@/lib/firebase/dev";
 import { listPhotosAdmin, updatePhoto } from "@/lib/firebase/firestore";
 import { musicWorks } from "@/lib/firebase/music";
@@ -19,6 +18,7 @@ import {
   uploadPhotoPreview,
   uploadPhotoThumbnail,
 } from "@/lib/firebase/storage";
+import { getAdminAccessToken } from "@/lib/supabase/auth";
 
 import type { ImageMeta, ImageVariant } from "@/types/image";
 
@@ -62,9 +62,8 @@ const createMissingVariants = async (
   const needsThumbnail = !image.thumbnail?.url;
   if (!needsPreview && !needsThumbnail) return image;
 
-  const user = getFirebaseAuth().currentUser;
-  if (!user) throw new Error("관리자 로그인이 필요합니다.");
-  const idToken = await user.getIdToken();
+  const idToken = await getAdminAccessToken();
+  if (!idToken) throw new Error("관리자 로그인이 필요합니다.");
   const response = await fetch("/api/admin/image-source", {
     method: "POST",
     headers: {

@@ -3,15 +3,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  currentUser: null as { getIdToken: ReturnType<typeof vi.fn> } | null,
+  accessToken: null as string | null,
 }));
 
-vi.mock("@/lib/firebase/client", () => ({
-  getFirebaseAuth: () => ({
-    get currentUser() {
-      return mocks.currentUser;
-    },
-  }),
+vi.mock("@/lib/supabase/auth", () => ({
+  getAdminAccessToken: async () => mocks.accessToken,
 }));
 
 import { getPortfolioEmbeddingStatus } from "@/features/admin-maintenance/_lib/get-portfolio-embedding-status";
@@ -19,7 +15,7 @@ import { getPortfolioEmbeddingStatus } from "@/features/admin-maintenance/_lib/g
 describe("getPortfolioEmbeddingStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.currentUser = { getIdToken: vi.fn().mockResolvedValue("admin-token") };
+    mocks.accessToken = "admin-token";
   });
 
   it("관리자 token으로 캐시하지 않는 상태 요청을 보낸다", async () => {
@@ -43,7 +39,7 @@ describe("getPortfolioEmbeddingStatus", () => {
   });
 
   it("로그인하지 않은 경우 요청하지 않는다", async () => {
-    mocks.currentUser = null;
+    mocks.accessToken = null;
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 

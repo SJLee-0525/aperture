@@ -18,9 +18,12 @@ vi.mock("next/navigation", () => ({
   usePathname: () => state.pathname,
   useRouter: () => ({ replace: state.replace }),
 }));
-// 실제 Firebase 를 부르지 않는 이유는 이 파일이 검증하려는 것이 "구독을 여느냐" 이기 때문이다.
-// 설정 없이 모듈을 불러올 수 있는지는 `lib/firebase/client.test.ts` 가 따로 본다.
-vi.mock("@/lib/firebase/auth", () => ({ subscribeAuth: state.subscribeAuth }));
+// 실제 Supabase 를 부르지 않는 이유는 이 파일이 검증하려는 것이 "구독을 여느냐" 이기 때문이다.
+// 설정 없이 모듈을 불러올 수 있는지는 `lib/supabase/client.test.ts` 가 따로 본다.
+vi.mock("@/lib/supabase/auth", () => ({
+  subscribeAuth: state.subscribeAuth,
+  isAdminUser: (user: unknown) => user != null,
+}));
 
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
 
@@ -53,7 +56,7 @@ describe("AuthGuard — 테스트 관리자 세션", () => {
     expect(state.replace).not.toHaveBeenCalled();
   });
 
-  it("Firebase 인증 구독을 시작하지 않는다", () => {
+  it("Supabase 인증 구독을 시작하지 않는다", () => {
     vi.stubEnv("NEXT_PUBLIC_ADMIN_TEST_SESSION", "1");
 
     renderGuard();

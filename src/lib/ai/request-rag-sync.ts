@@ -1,14 +1,13 @@
 "use client";
 
-import { getFirebaseAuth } from "@/lib/firebase/client";
+import { getAdminAccessToken } from "@/lib/supabase/auth";
 
 import type { RagSyncSourceType } from "@/types/rag";
 
 const requestRagSync = async (sourceType: RagSyncSourceType, sourceId: string) => {
   try {
-    const user = getFirebaseAuth().currentUser;
-    if (!user) return;
-    const idToken = await user.getIdToken();
+    const idToken = await getAdminAccessToken();
+    if (!idToken) return;
     const init = {
       method: "POST",
       headers: {

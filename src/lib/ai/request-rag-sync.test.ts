@@ -3,15 +3,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  currentUser: null as { getIdToken: ReturnType<typeof vi.fn> } | null,
+  accessToken: null as string | null,
 }));
 
-vi.mock("@/lib/firebase/client", () => ({
-  getFirebaseAuth: () => ({
-    get currentUser() {
-      return mocks.currentUser;
-    },
-  }),
+vi.mock("@/lib/supabase/auth", () => ({
+  getAdminAccessToken: async () => mocks.accessToken,
 }));
 
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
@@ -19,7 +15,7 @@ import { requestRagSync } from "@/lib/ai/request-rag-sync";
 describe("requestRagSync", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.currentUser = { getIdToken: vi.fn().mockResolvedValue("admin-token") };
+    mocks.accessToken = "admin-token";
   });
 
   it("저장된 콘텐츠 종류와 ID만 증분 API에 전달한다", async () => {

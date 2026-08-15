@@ -1,36 +1,34 @@
-type Fetcher = typeof fetch;
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-type LookupResponse = {
-  users?: Array<{ localId?: string }>;
-};
+import { isSupabaseConfigured, supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
+
+let verifier: SupabaseClient | null = null;
 
 /**
- * Firebase Auth REST가 ID token의 서명·만료·프로젝트를 검증한 결과로 관리자 UID를 확인한다.
- * 웹 API 키와 관리자 UID는 비밀이 아니며, 권한 증명은 검증된 ID token이 담당한다.
+ * 토큰 검증 전용 서버 클라이언트. 세션을 만들지 않으므로 브라우저 싱글턴과 분리한다.
+ * JWKS 공개 키 캐시가 이 인스턴스에 붙어, 요청마다 키를 다시 받지 않는다.
+ */
+const getVerifier = (): SupabaseClient =>
+  (verifier ??= createClient(supabaseUrl(), supabasePublishableKey(), {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  }));
+
+/**
+ * Supabase access token 의 서명·만료를 검증하고 `app_metadata.role` 로 관리자를 판별한다.
+ * 비대칭 서명 키 프로젝트라 검증은 로컬 WebCrypto 로 수행된다.
+ * URL·publishable key 와 role 값은 비밀이 아니며, 권한 증명은 검증된 토큰이 담당한다.
  *
  * @param {string} idToken
- * @param {Fetcher} [fetcher]
  * @returns {Promise<boolean>}
  */
-const verifyAdminIdToken = async (idToken: string, fetcher: Fetcher = fetch): Promise<boolean> => {
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-  const adminUid = process.env.NEXT_PUBLIC_ADMIN_UID;
-  if (!idToken || !apiKey || !adminUid) return false;
+const verifyAdminIdToken = async (idToken: string): Promise<boolean> => {
+  if (!idToken || !isSupabaseConfigured()) return false;
 
   try {
-    const response = await fetcher(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ idToken }),
-        cache: "no-store",
-      },
-    );
-    if (!response.ok) return false;
-
-    const payload = (await response.json()) as LookupResponse;
-    return payload.users?.[0]?.localId === adminUid;
+    const { data, error } = await getVerifier().auth.getClaims(idToken);
+    if (error || !data) return false;
+    const role = (data.claims.app_metadata as { role?: unknown } | undefined)?.role;
+    return role === "admin";
   } catch {
     return false;
   }

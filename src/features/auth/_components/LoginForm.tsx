@@ -8,7 +8,7 @@ import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 
 import { ROUTES } from "@/constants/routes";
-import { signIn } from "@/lib/firebase/auth";
+import { signIn } from "@/lib/supabase/auth";
 
 import styles from "./LoginForm.module.css";
 
