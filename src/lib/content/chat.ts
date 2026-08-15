@@ -4,19 +4,19 @@ import { getDevConfig } from "@/lib/content/dev";
 import { getDevArticleTags } from "@/lib/content/dev-articles";
 import { getMusicConfig } from "@/lib/content/music";
 import { getSite } from "@/lib/content/site";
-import { fetchChatDevProjects } from "@/lib/firebase/public/dev";
-import { fetchChatDevArticles } from "@/lib/firebase/public/dev-articles";
+import { fetchChatDevProjects } from "@/lib/supabase/public/dev";
+import { fetchChatDevArticles } from "@/lib/supabase/public/dev-articles";
 import {
   fetchChatMusicAwards,
   fetchChatMusicMedia,
   fetchChatMusicWorks,
-} from "@/lib/firebase/public/music";
-import { fetchChatAlbums, fetchChatPhotos } from "@/lib/firebase/public/photo";
+} from "@/lib/supabase/public/music";
+import { fetchChatAlbums, fetchChatPhotos } from "@/lib/supabase/public/photo";
 
-import type { ChatDevProject } from "@/lib/firebase/public/dev";
-import type { ChatDevArticle } from "@/lib/firebase/public/dev-articles";
-import type { ChatMusicAward, ChatMusicMedia, ChatMusicWork } from "@/lib/firebase/public/music";
-import type { ChatAlbum, ChatPhoto } from "@/lib/firebase/public/photo";
+import type { ChatDevProject } from "@/lib/supabase/public/dev";
+import type { ChatDevArticle } from "@/lib/supabase/public/dev-articles";
+import type { ChatMusicAward, ChatMusicMedia, ChatMusicWork } from "@/lib/supabase/public/music";
+import type { ChatAlbum, ChatPhoto } from "@/lib/supabase/public/photo";
 import type { DevConfig } from "@/types/dev";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 import type { MusicConfig } from "@/types/music";

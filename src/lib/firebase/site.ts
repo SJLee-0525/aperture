@@ -1,6 +1,6 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
-import { firestoreDocumentCacheTag } from "@/constants/cache";
+import { documentCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
 import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
@@ -57,7 +57,7 @@ const updateSiteConfigFields = async (fields: Partial<SiteConfig>): Promise<void
   } catch {
     throw new Error("사이트 설정 저장에 실패했습니다.");
   }
-  requestPublicRevalidate(firestoreDocumentCacheTag(COLLECTIONS.SITE, SITE_DOC));
+  requestPublicRevalidate(documentCacheTag(COLLECTIONS.SITE, SITE_DOC));
   await requestRagSync("siteConfig", SITE_DOC);
   if (fields.tags) await requestRagSync("photoTags", SITE_DOC);
 };

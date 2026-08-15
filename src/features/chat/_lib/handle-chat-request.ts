@@ -35,13 +35,13 @@ import {
 import { matchDevArticleSlug, ROUTES } from "@/constants/routes";
 import { getChatProfileData, type ChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
-import { fetchDevArticleById } from "@/lib/firebase/public/dev-articles";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
 import {
   buildPhotoFilterHref,
   parsePhotoFilterQueryStrict,
   type PhotoFilterVocabulary,
 } from "@/lib/photo-filter-query";
+import { fetchDevArticleById } from "@/lib/supabase/public/dev-articles";
 
 import type { ChatContext, ChatContextOpenTarget } from "@/features/chat/_lib/chat-context";
 import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";

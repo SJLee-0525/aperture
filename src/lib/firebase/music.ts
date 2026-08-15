@@ -7,7 +7,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { firestoreDocumentCacheTag } from "@/constants/cache";
+import { documentCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
@@ -147,7 +147,7 @@ const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
   } catch {
     throw new Error("음악 설정 저장에 실패했습니다.");
   }
-  requestPublicRevalidate(firestoreDocumentCacheTag(COLLECTIONS.SITE, SITE_MUSIC_DOC));
+  requestPublicRevalidate(documentCacheTag(COLLECTIONS.SITE, SITE_MUSIC_DOC));
   await requestRagSync("musicConfig", SITE_MUSIC_DOC);
 };
 

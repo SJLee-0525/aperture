@@ -13,7 +13,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { firestoreCollectionCacheTag } from "@/constants/cache";
+import { collectionCacheTag } from "@/constants/cache";
 import { COLLECTIONS } from "@/constants/collections";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
@@ -24,8 +24,8 @@ import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import type { Album } from "@/types/album";
 import type { Photo } from "@/types/photo";
 
-const PHOTOS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.PHOTOS);
-const ALBUMS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.ALBUMS);
+const PHOTOS_CACHE_TAG = collectionCacheTag(COLLECTIONS.PHOTOS);
+const ALBUMS_CACHE_TAG = collectionCacheTag(COLLECTIONS.ALBUMS);
 
 /** 새 사진을 저장할 때 사용하는 문서 ID 제외 입력값. */
 type PhotoInput = Omit<Photo, "id">;

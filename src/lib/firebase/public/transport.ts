@@ -1,8 +1,4 @@
-import {
-  PUBLIC_CACHE_REVALIDATE_SECONDS,
-  firestoreCollectionCacheTag,
-  firestoreDocumentCacheTag,
-} from "@/constants/cache";
+import { PUBLIC_CACHE_REVALIDATE_SECONDS, collectionCacheTag } from "@/constants/cache";
 import { fetchWithRetry } from "@/lib/firebase/public/retry-fetch";
 
 type RestValue = Record<string, unknown>;
@@ -51,17 +47,6 @@ const decodeValue = (value: RestValue | undefined): unknown => {
  */
 const decodeFields = (fields: Record<string, RestValue>): Record<string, unknown> =>
   Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, decodeValue(value)]));
-
-/**
- * REST 타임스탬프 또는 숫자 값을 `Date`로 변환한다.
- *
- * @param {unknown} value 변환할 ISO 문자열 또는 밀리초 값.
- * @returns {Date} 변환된 날짜. 지원하지 않는 값이면 Unix epoch를 반환한다.
- */
-const toDate = (value: unknown): Date => {
-  if (typeof value === "string" || typeof value === "number") return new Date(value);
-  return new Date(0);
-};
 
 type QueryDirection = "ASCENDING" | "DESCENDING";
 type QueryOrder = { fieldPath: string; direction: QueryDirection };
@@ -143,7 +128,7 @@ const runQuery = async (
       : {
           next: {
             revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
-            tags: collectionIds.map(firestoreCollectionCacheTag),
+            tags: collectionIds.map(collectionCacheTag),
           },
         }),
   });
@@ -158,49 +143,4 @@ const runQuery = async (
     }));
 };
 
-/**
- * Firestore REST API에서 문서 한 건을 읽어 일반 객체로 디코딩한다.
- *
- * @param {string} collectionId 조회할 Firestore 컬렉션 ID.
- * @param {string} documentId 조회할 문서 ID.
- * @param {string} label 오류 메시지에 표시할 문서 이름.
- * @param {{ fresh?: boolean; signal?: AbortSignal }} [options] 캐시 동작과 취소를 정하는 조회 옵션.
- * @param {boolean} [options.fresh] 캐시를 건너뛰고 최신 데이터를 읽을지 여부.
- * @param {AbortSignal} [options.signal] 요청 취소 신호. 호출자가 제한 시간을 갖는 조회에 넘긴다.
- * @returns {Promise<Record<string, unknown> | null>} 디코딩된 문서. 문서가 없으면 `null`이다.
- */
-const fetchDocument = async (
-  collectionId: string,
-  documentId: string,
-  label: string,
-  options?: { fresh?: boolean; signal?: AbortSignal },
-): Promise<Record<string, unknown> | null> => {
-  // 문서 ID 는 요청에서 올 수 있다. slash 를 인코딩하지 않으면 다른 컬렉션 경로로 내려간다.
-  const path = `${collectionId}/${encodeURIComponent(documentId)}`;
-  const response = await fetchWithRetry(`${documentsUrl()}/${path}?key=${API_KEY}`, {
-    ...(options?.signal ? { signal: options.signal } : {}),
-    ...(options?.fresh
-      ? { cache: "no-store" as const }
-      : {
-          next: {
-            revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
-            tags: [firestoreDocumentCacheTag(collectionId, documentId)],
-          },
-        }),
-  });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`Firestore ${label} 읽기 실패 (${response.status})`);
-
-  const document = (await response.json()) as RestDocument;
-  return decodeFields(document.fields ?? {});
-};
-
-export {
-  decodeFields,
-  fetchDocument,
-  projectedPublishedOrderedQuery,
-  publishedOrderedQuery,
-  publishedQuery,
-  runQuery,
-  toDate,
-};
+export { projectedPublishedOrderedQuery, publishedOrderedQuery, publishedQuery, runQuery };

@@ -1,6 +1,6 @@
 import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from "firebase/firestore";
 
-import { firestoreDocumentCacheTag } from "@/constants/cache";
+import { documentCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SITE_DEV_DOC } from "@/constants/collections";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
@@ -100,7 +100,7 @@ const updateDevConfig = async (config: DevConfig): Promise<void> => {
   } catch {
     throw new Error("개발 설정 저장에 실패했습니다.");
   }
-  requestPublicRevalidate(firestoreDocumentCacheTag(COLLECTIONS.SITE, SITE_DEV_DOC));
+  requestPublicRevalidate(documentCacheTag(COLLECTIONS.SITE, SITE_DEV_DOC));
   await requestRagSync("devConfig", SITE_DEV_DOC);
 };
 

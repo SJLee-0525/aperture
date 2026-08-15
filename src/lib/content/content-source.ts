@@ -1,4 +1,4 @@
-import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 type ContentSource = "mock" | "live";
 
@@ -26,17 +26,17 @@ const mockContentEnabled = (): boolean => {
 };
 
 /**
- * 개발 환경은 Firebase 설정이 없으면 mock 으로 동작할 수 있지만, 운영 환경에서는
+ * 개발 환경은 Supabase 설정이 없으면 mock 으로 동작할 수 있지만, 운영 환경에서는
  * 설정 누락을 콘텐츠 없음으로 위장하지 않는다. 명시적 mock 빌드만 예외다.
  *
  * @returns {boolean}
  */
 const shouldUseMockContent = (): boolean => {
   if (mockContentEnabled()) return true;
-  if (isFirebaseConfigured()) return false;
+  if (isSupabaseConfigured()) return false;
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "Firebase 공개 콘텐츠 설정이 없습니다. NEXT_PUBLIC_FIREBASE_PROJECT_ID와 NEXT_PUBLIC_FIREBASE_API_KEY를 확인하세요.",
+      "Supabase 공개 콘텐츠 설정이 없습니다. NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY를 확인하세요.",
     );
   }
   return true;

@@ -11,7 +11,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { firestoreCollectionCacheTag } from "@/constants/cache";
+import { collectionCacheTag } from "@/constants/cache";
 import { COLLECTIONS } from "@/constants/collections";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { getFirebaseDb } from "@/lib/firebase/client";
@@ -93,7 +93,7 @@ const findArticleSlugOwner = async (slug: string, selfId: string): Promise<strin
   return snap.docs.find((docSnap) => docSnap.id !== selfId)?.id ?? null;
 };
 
-const TAGS_CACHE_TAG = firestoreCollectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
+const TAGS_CACHE_TAG = collectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
 
 /**
  * 태그 전체를 공개 getter와 같은 ID 오름차순으로 읽는다.

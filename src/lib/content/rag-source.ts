@@ -1,15 +1,16 @@
 import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   fetchDevConfig,
   fetchPublishedDevProjects,
   toDevConfig,
   toDevProject,
-} from "@/lib/firebase/public/dev";
+} from "@/lib/supabase/public/dev";
 import {
   fetchDevArticleTags,
   fetchPublishedDevArticles,
   toDevArticle,
-} from "@/lib/firebase/public/dev-articles";
+} from "@/lib/supabase/public/dev-articles";
 import {
   fetchMusicConfig,
   fetchPublishedMusicAwards,
@@ -19,16 +20,17 @@ import {
   toMusicConfig,
   toMusicMedia,
   toMusicWork,
-} from "@/lib/firebase/public/music";
+} from "@/lib/supabase/public/music";
 import {
   fetchPublishedAlbums,
   fetchPublishedPhotos,
   toAlbum,
   toPhoto,
-} from "@/lib/firebase/public/photo";
-import { fetchSiteConfig, toSiteConfig } from "@/lib/firebase/public/site";
-import { decodeFields } from "@/lib/firebase/public/transport";
+} from "@/lib/supabase/public/photo";
+import { fetchSiteConfig, toSiteConfig } from "@/lib/supabase/public/site";
+import { fetchRowAsUser } from "@/lib/supabase/public/transport";
 
+import type { CollectionId } from "@/constants/collections";
 import type { RagSyncTarget } from "@/types/rag";
 
 /**
@@ -38,7 +40,7 @@ import type { RagSyncTarget } from "@/types/rag";
  */
 const FRESH = { fresh: true } as const;
 
-const targetCollection: Partial<Record<RagSyncTarget["sourceType"], string>> = {
+const targetCollection: Partial<Record<RagSyncTarget["sourceType"], CollectionId>> = {
   photo: "photos",
   album: "albums",
   project: "devProjects",
@@ -51,21 +53,14 @@ const targetCollection: Partial<Record<RagSyncTarget["sourceType"], string>> = {
   article: "devArticles",
 };
 
+/**
+ * 관리자 access token 으로 타깃 원본을 초안 포함해 읽는다. 인가는 RLS 가 한다 —
+ * 발행 취소된 문서도 읽어야 stale 청크 삭제 판정이 가능하다.
+ */
 const fetchAdminTarget = async (target: RagSyncTarget, idToken: string) => {
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   const collection = targetCollection[target.sourceType];
-  if (!projectId || !apiKey || !collection) return null;
-  const response = await fetch(
-    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${collection}/${encodeURIComponent(target.sourceId)}?key=${encodeURIComponent(apiKey)}`,
-    { headers: { Authorization: `Bearer ${idToken}` }, cache: "no-store" },
-  );
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`RAG 원본 조회 실패 (${response.status})`);
-  const payload = (await response.json()) as {
-    fields?: Record<string, Record<string, unknown>>;
-  };
-  return decodeFields(payload.fields ?? {});
+  if (!isSupabaseConfigured() || !collection) return null;
+  return fetchRowAsUser(collection, target.sourceId, idToken);
 };
 
 const getRagSourceData = async () => {

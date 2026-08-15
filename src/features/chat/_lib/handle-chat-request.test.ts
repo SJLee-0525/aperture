@@ -897,8 +897,8 @@ describe("handleChatRequest", () => {
 
     it("live 에서는 글 한 건만 읽어 검증하고 목록 전체를 다시 읽지 않는다", async () => {
       vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
       const loadFreshData = vi.fn();
       const loadArticle = vi.fn(async () => LIVE_ARTICLE);
       const buildContext = vi.fn<(...args: unknown[]) => Promise<string>>(async () => "context");
@@ -933,8 +933,8 @@ describe("handleChatRequest", () => {
 
     it("live 조회가 막히면 문맥 없이 답한다", async () => {
       vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "project");
-      vi.stubEnv("NEXT_PUBLIC_FIREBASE_API_KEY", "key");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+      vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
       const { prioritize, instructions } = await runWith(snapshotWith({}), {
         loadArticle: async () => {
           throw new Error("Firestore 블로그 글 읽기 실패 (403)");

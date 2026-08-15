@@ -12,7 +12,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 
-import { firestoreCollectionCacheTag } from "@/constants/cache";
+import { collectionCacheTag } from "@/constants/cache";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { getFirebaseDb } from "@/lib/firebase/client";
@@ -57,7 +57,7 @@ const listCrud = <T extends WithId>(
   type BeforeSnapshot = { before: T | null; failed: boolean };
   /** @returns {ReturnType<typeof collection>} 현재 CRUD가 사용하는 컬렉션 참조. */
   const col = () => collection(getFirebaseDb(), name);
-  const cacheTag = firestoreCollectionCacheTag(name);
+  const cacheTag = collectionCacheTag(name);
   const consultPolicy = Boolean(ragSourceType && syncPolicy);
 
   /**

@@ -6,7 +6,7 @@ import {
   fetchDevArticleProjectLinks,
   fetchDevArticleTags,
   fetchPublishedDevArticles,
-} from "@/lib/firebase/public/dev-articles";
+} from "@/lib/supabase/public/dev-articles";
 
 import type { DevArticle, DevArticleProjectLink } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
