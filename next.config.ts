@@ -4,25 +4,26 @@ import type { NextConfig } from "next";
 import packageJson from "./package.json" with { type: "json" };
 import { SECURITY_HEADERS } from "./src/constants/security-headers";
 import { assertDeployableContentSource } from "./src/lib/content/assert-deployable-content-source";
+import { supabaseUrl } from "./src/lib/supabase/config";
 
 /**
- * env 에서 파생한 Supabase 이미지 호스트 패턴. CSP·PostgREST·Storage 검증기와
- * 같은 env 를 단일 출처로 쓴다. env 가 없는 환경(mock 개발·typegen)에서는 빈 목록.
+ * env 에서 파생한 Supabase 이미지 호스트 패턴. `supabaseUrl()` 이 CSP·PostgREST·Storage
+ * 검증기와 같은 정규화(공백·credentials 거부·origin)를 적용하므로 규칙이 갈리지 않는다.
+ * protocol·port 를 URL 값 그대로 쓰는 이유: 로컬 스택(http://127.0.0.1:54321)을 막지 않는다.
+ * env 가 없는 환경(mock 개발·typegen)에서는 빈 목록.
  */
 const supabaseImagePatterns = () => {
-  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!raw) return [];
-  try {
-    return [
-      {
-        protocol: "https" as const,
-        hostname: new URL(raw).hostname,
-        pathname: "/storage/v1/object/public/media/**",
-      },
-    ];
-  } catch {
-    return [];
-  }
+  const origin = supabaseUrl();
+  if (!origin) return [];
+  const url = new URL(origin);
+  return [
+    {
+      protocol: url.protocol.replace(":", "") as "http" | "https",
+      hostname: url.hostname,
+      ...(url.port ? { port: url.port } : {}),
+      pathname: "/storage/v1/object/public/media/**",
+    },
+  ];
 };
 
 const nextConfig: NextConfig = {
