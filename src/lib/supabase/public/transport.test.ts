@@ -48,7 +48,7 @@ describe("supabase public transport", () => {
     const [url, init] = lastCall(fetchMock);
     const params = new URL(url).searchParams;
     expect(params.get("select")).toBe("id,published,sort_order,data");
-    expect(params.get("order")).toBe("sort_order.asc");
+    expect(params.get("order")).toBe("sort_order.asc,id.asc");
     expect(params.get("published")).toBe("eq.true");
     expect(init.next).toEqual({ revalidate: 3600, tags: ["db:photos"] });
   });

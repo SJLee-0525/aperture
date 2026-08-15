@@ -116,8 +116,13 @@ const deletePhoto = async (id: string): Promise<void> => {
         .select("id");
       if (error || !data?.length) throw new Error("앨범 참조 정리 실패");
     }
-    const { error } = await getSupabaseClient().from(photosTable).delete().eq("id", id);
-    if (error) throw new Error("사진 삭제 실패");
+    // DELETE 는 RLS 가 행을 감추면 오류 없이 0행이 된다. 반환 행으로 검증한다.
+    const { data, error } = await getSupabaseClient()
+      .from(photosTable)
+      .delete()
+      .eq("id", id)
+      .select("id");
+    if (error || !data?.length) throw new Error("사진 삭제 실패");
   } catch {
     throw new Error("사진 삭제에 실패했습니다.");
   }

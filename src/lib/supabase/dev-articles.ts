@@ -2,6 +2,7 @@ import { collectionCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
+import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
 import { toDevArticle } from "@/lib/supabase/public/dev-articles";
@@ -40,6 +41,8 @@ const devArticlesCrud = listCrud<DevArticle>(
  */
 const findArticleSlugOwner = async (slug: string, selfId: string): Promise<string | null> => {
   if (!slug) return null;
+  // 세션 없이 조회하면 RLS 가 초안을 감춰 선점된 slug 를 "사용 가능"으로 판정한다.
+  await requireAdminSession();
   const { data, error } = await getSupabaseClient()
     .from(ARTICLES_TABLE)
     .select("id")

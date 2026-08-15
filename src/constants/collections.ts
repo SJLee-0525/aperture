@@ -40,7 +40,9 @@ type SupabaseCollectionDescriptor = {
 const listDescriptor = (table: string): SupabaseCollectionDescriptor => ({
   table,
   select: "id,published,sort_order,data",
-  order: "sort_order.asc",
+  // id 2차 키가 없으면 동점(sort_order) 행의 상대 순서가 정의되지 않는다.
+  // 신규 항목이 전부 order 0 으로 생성되므로 동점은 기본 상태다.
+  order: "sort_order.asc,id.asc",
   hasPublished: true,
   hasData: true,
   scalars: { published: "published", order: "sort_order" },

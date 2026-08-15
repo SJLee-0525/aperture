@@ -23,7 +23,7 @@ const builder = () => {
     update: (row: unknown) => ({
       eq: () => ({ select: () => Promise.resolve(mocks.updateSelect(row)) }),
     }),
-    delete: () => ({ eq: () => Promise.resolve(mocks.del()) }),
+    delete: () => ({ eq: () => ({ select: () => Promise.resolve(mocks.del()) }) }),
     then: (
       resolve: (value: unknown) => unknown,
       reject: (reason: unknown) => unknown,
@@ -82,7 +82,7 @@ beforeEach(() => {
   mocks.hasSession = true;
   mocks.insert.mockReturnValue(ok);
   mocks.updateSelect.mockReturnValue(okRows);
-  mocks.del.mockReturnValue(ok);
+  mocks.del.mockReturnValue(okRows);
   mocks.rpc.mockReturnValue({ data: 1, error: null });
   mocks.requestRagSync.mockResolvedValue(undefined);
 });
@@ -199,6 +199,17 @@ describe("listCrud — supabase 오류·0행 처리", () => {
     await expect(crud.update("doc-1", { published: true, body: "a" })).rejects.toThrow(
       "프로젝트 수정에 실패했습니다.",
     );
+    expect(mocks.requestRagSync).not.toHaveBeenCalled();
+  });
+
+  it("delete 가 0행이면 RLS 거부·부재를 실패로 처리한다", async () => {
+    // 세션 만료 시 DELETE 가 anon 으로 나가면 오류 없이 0행이 된다. 성공으로 위장되면
+    // UI 는 행을 지우는데 라이브 데이터는 남는다.
+    const crud = listCrud<Entity>("devProjects", toEntity, "프로젝트", "project");
+    mocks.del.mockReturnValue({ data: [], error: null });
+
+    await expect(crud.remove("doc-1")).rejects.toThrow("프로젝트 삭제에 실패했습니다.");
+    expect(mocks.requestPublicRevalidate).not.toHaveBeenCalled();
     expect(mocks.requestRagSync).not.toHaveBeenCalled();
   });
 

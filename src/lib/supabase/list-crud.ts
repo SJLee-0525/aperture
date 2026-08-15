@@ -191,16 +191,18 @@ const listCrud = <T extends WithId>(
       await syncAfterWrite(id, snapshot, after);
     },
     /**
-     * 문서를 삭제하고 공개 캐시와 RAG 문서를 갱신한다. 이미 없는 문서의 삭제는
-     * 기존 deleteDoc 과 같이 성공으로 처리한다.
+     * 문서를 삭제하고 공개 캐시와 RAG 문서를 갱신한다.
+     * DELETE 는 RLS 가 행을 감추면 오류 없이 0행이 되므로 반환 행으로 검증한다.
+     * 이미 없는 문서의 삭제도 실패다 — CMS 삭제 대상은 방금 목록에 뜬 문서라서,
+     * 0행은 부재가 아니라 세션 만료가 원인일 가능성이 높다.
      *
      * @param {string} id 삭제할 문서 ID.
      * @returns {Promise<void>} 삭제와 후속 갱신이 끝나면 완료된다.
      */
     remove: async (id: string): Promise<void> => {
       const snapshot = await readBeforeWrite(id);
-      const { error } = await from().delete().eq("id", id);
-      assertNoError(error, `${label} 삭제에 실패했습니다.`);
+      const { data, error } = await from().delete().eq("id", id).select("id");
+      if (error || !data?.length) throw new Error(`${label} 삭제에 실패했습니다.`);
       requestPublicRevalidate(cacheTag);
       await syncAfterWrite(id, snapshot, null);
     },
