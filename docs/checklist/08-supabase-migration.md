@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M4 완료 — 공개 페이지 Supabase 실데이터 렌더 + 실브라우저 로그인·세션 유지 확인. 보류: keep-alive `schedule` 자동 실행 확인은 main 머지 후)
+> 마지막 갱신: 2026-08-15 (M0~M4 완료, M5 구현 완료 — 실데이터 수동 검증·원격 RPC 검증만 대기. 보류: keep-alive `schedule` 확인은 main 머지 후)
 
 ## 진행 요약
 
@@ -14,7 +14,7 @@
 | M2   | 데이터 마이그레이션 리허설             | ✅ 완료 |
 | M3   | 인증 교체                              | ✅ 완료 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
-| M5   | 관리자 쓰기·Storage 교체               | ⬜ 미착수 |
+| M5   | 관리자 쓰기·Storage 교체               | 🔄 구현 완료 (실데이터 검증 대기) |
 | M6   | RAG pgvector 전환                      | ⬜ 미착수 |
 | M7   | 본 데이터 이전·전환 준비               | ⬜ 미착수 |
 | M8   | 배포 전환·관찰·Firebase 해체           | ⬜ 미착수 |
@@ -30,7 +30,7 @@
 - [ ] 런타임 코드·env 파일에 service_role 키를 두지 않는다. service_role은 저장소 밖 1회성 마이그레이션에서만 쓴다 (§5)
 - [ ] 공개 읽기는 supabase-js가 아니라 PostgREST 직접 `fetch` + `next:{revalidate,tags}`로만 한다. supabase-js는 브라우저(Auth·쓰기·Storage) 전용 (§1, §3)
 - [ ] 각 단계 완료 시 `npm run build`·`npm run lint`·`npm run test`가 통과한다. mock 모드(`NEXT_PUBLIC_USE_MOCK=1`) 화면이 무손상이어야 한다
-- [ ] Firebase 코드 삭제는 M8 해체 단계까지 미룬다. 그 전까지는 새 `lib/supabase/` 경계를 추가하고 import를 옮기는 방식으로 진행한다
+- [x] 대체가 완료되고 소비처가 소멸한 Firebase 구현 파일은 단계별로 제거할 수 있다. Firebase 패키지·설정·Rules 와 잔여 계층(RAG REST 경로)의 일괄 해체는 M8 (M5 계획 검수에서 규칙 정정 — M4·M5 가 이미 이 방식으로 진행됨)
 
 ## M0 — 결정·측정·프로젝트 준비 (§4 M0)
 
@@ -91,16 +91,19 @@
 
 ## M5 — 관리자 쓰기·Storage 교체 (§3, §4 M5)
 
-- [ ] `admin-list-rest.ts`를 PostgREST `select=` projection으로 교체 (인증된 관리자 읽기라 공개 읽기 M4가 아닌 M5 범위 — M4 계획 검수에서 이동)
-- [ ] `lib/admin/` repository들의 live 구현 내부를 supabase-js CRUD로 교체 (mock·화면·계약 무손상)
-- [ ] 블로그 live 저장소 교체: `features/admin-dev-articles/_lib/live-dev-article-repository.ts`와 하위 `lib/firebase/dev-articles.ts` (CRUD·slug 중복 검사·태그 CRUD) — `lib/admin/` 밖에 있어 누락하기 쉽다. slug 사전 조회는 폼 오류 메시지용으로 유지 (§4 M5)
-- [ ] `serverTimestamp()` 15곳 제거 (DB 기본값·트리거로 대체)
-- [ ] `updateOrder` 계약을 배열 일괄로 변경: `admin-list-repository.ts` 타입, `use-ordered-admin.ts` 호출부, mock 구현, live는 정렬 전용 RPC 1회 호출 (§2.3 — 부분 upsert 금지)
-- [ ] 사진 삭제의 앨범 참조 정리 로직 유지 확인 (조인 테이블 정규화는 범위 제외)
-- [ ] `lib/supabase/storage.ts`: 업로드 18종·삭제·목록 시그니처 유지, 미사용 이미지 스캔을 `.list()` 메타데이터 기반으로 단순화
-- [ ] `next.config.ts` remotePatterns·`storage-source-url.ts` 호스트 교체
-- [ ] mock 모드 전 관리자 화면 회귀 확인 + 실데이터 모드 CRUD·드래그 정렬·이미지 업로드 수동 확인
-- [ ] 드래그 정렬 1회가 네트워크 요청 1건인지 확인 (쓰기 증폭 해소의 완료 조건)
+- [x] `admin-list-rest.ts`를 supabase-js `select` projection(`lib/supabase/admin-list.ts`)으로 교체 — jsonb 별칭은 객체·배열 `->`, 텍스트 `->>` 로 응답 타입을 고정. 공통 `requireAdminSession()` 가드가 RLS 의 조용한 초안 누락을 로그인 오류로 변환
+- [x] `lib/admin/` repository들의 live 구현 내부를 supabase-js CRUD로 교체 (mock·화면·계약 무손상 — E2E admin 20케이스 통과). 행 인코딩은 `admin/row-codec` 단일 출처(스칼라를 data 에서 제거, DB 소유 타임스탬프 미기록, 왕복 테스트 포함)
+- [x] 블로그 live 저장소 교체: `live-dev-article-repository.ts`는 import 만 교체(로직 무변경), CRUD·slug 중복 검사·태그 CRUD 는 `lib/supabase/dev-articles.ts` 로 이식. 태그 생성은 사전 조회 대신 PK 충돌(23505)을 한국어 메시지로 변환
+- [x] `serverTimestamp()` 18곳 제거 (계획의 15곳은 실측 정정 — DB 기본값·트리거로 대체. `undefined` 필드를 거부하던 Firestore 특성도 JSON 직렬화로 함께 해소)
+- [x] `updateOrder` 계약을 배열 일괄로 변경: `admin-list-repository.ts` 타입, `use-ordered-admin.ts` 호출부(신규 훅 테스트 포함), mock 구현, live는 행 수를 반환하는 정렬 RPC 1회(반환 수 불일치 = 실패, 빈 목록 = 미호출, 중복 ID 사전 거부)
+- [x] 사진 삭제의 앨범 참조 정리 로직 유지 (순차 처리 — 앨범 정리 실패 시 사진 미삭제, 단계별 실패 의미 주석 고정. 조인 테이블 정규화는 범위 제외)
+- [x] `lib/supabase/storage.ts`: 업로드 12종·삭제 5종·목록 시그니처 유지, `.list()` 1,000개 페이지네이션 + 폴더 재귀, `.remove()` 1,000개 청크, 미사용 이미지 스캔은 응답 메타데이터 기반(객체별 getMetadata N+1 소멸)
+- [x] 본문 이미지 경로 파서(`article-body-storage-paths`)를 Supabase 공개 URL(URL 파싱)과 기존 Firebase 형식 이중 지원으로 교체 — 누락 시 본문 이미지 전체가 미사용 삭제 후보가 되는 M5 최대 위험 해소 (테스트 8케이스 추가)
+- [x] `next.config.ts` remotePatterns 에 Supabase 호스트 추가, `storage-source-url` 을 Supabase origin 정확 일치 + 공개 media 경로 한정으로 재작성(서명·변환 엔드포인트 거부, redirect 재검증 보존)
+- [x] mock 모드 전 관리자 화면 회귀 확인 (`test:e2e:admin` 20 통과) — 실데이터 모드 CRUD·드래그 정렬·이미지 업로드 수동 확인은 사용자 검증 대기
+- [ ] 실데이터 검증(사용자): 관리자 목록(초안 포함)·항목 생성→편집→발행→삭제 왕복·이미지 업로드·site 설정 병합 저장·태그 중복 거부, **드래그 정렬 1회 = 네트워크 요청 1건**(devtools — 쓰기 증폭 해소의 완료 조건), 삭제 후 Storage 폴더 소멸
+- [ ] 원격 RPC 실검증(admin JWT): 2건→반환 2 / 부재 ID 포함→부분 반환 검출 / 동일 값 재저장→대상 행 수 / `updated_at` 트리거 (anon 거부는 확인 완료)
+- [x] 알려진 부채 기록: 사진·음악·프로젝트 폴더의 Storage 잔존 파일은 orphan 스캔 대상(dev-blog 한정)이 아니다. M5 후에도 RAG 동기화는 M6까지 실패(라우트가 Firestore 에 쓰기 때문 — stale 배너 지속)
 
 ## M6 — RAG pgvector 전환 (§6)
 
