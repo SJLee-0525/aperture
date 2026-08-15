@@ -2,6 +2,7 @@ import { COLLECTIONS } from "@/constants/collections";
 import { asText } from "@/lib/i18n/as-text";
 import {
   fetchRow,
+  selectProjectedPublished,
   selectPublished,
   selectRows,
   toDate,
@@ -52,21 +53,27 @@ const toDevArticle = (id: string, data: Record<string, unknown>): DevArticle => 
 });
 
 /**
- * 채팅 투영용 디코더. 공개 글이면 `publishedAt` 이 반드시 있지만, 필드가 빠진 비정상
- * 문서에서도 정렬이 무너지지 않도록 `null` 을 그대로 보존한다.
- *
- * @param {string} id 문서 ID.
- * @param {Record<string, unknown>} data 병합된 문서 필드.
- * @returns {ChatDevArticle}
+ * 챗 목록 projection — 본문 Markdown(`data->body`)을 전송에서 제외하는 것이 목적이다.
+ * jsonb 경로·별칭은 JSON 키의 camelCase 를 그대로 쓴다.
  */
-const toChatDevArticle = (id: string, data: Record<string, unknown>): ChatDevArticle => ({
-  id,
-  slug: (data.slug as string) ?? "",
-  title: asText(data.title),
-  summary: asText(data.summary),
-  cover: (data.cover as ImageMeta | null) ?? null,
-  tags: (data.tags as string[]) ?? [],
-  publishedAt: toNullableDate(data.publishedAt),
+const CHAT_ARTICLE_SELECT =
+  "id,slug,published_at,title:data->title,summary:data->summary,cover:data->cover,tags:data->tags";
+
+const PROJECT_LINK_SELECT =
+  "id,slug,published_at,title:data->title,relatedProjectIds:data->relatedProjectIds";
+
+/**
+ * projection 행의 채팅 투영 디코더. 공개 글이면 `published_at` 이 반드시 있지만,
+ * 필드가 빠진 비정상 문서에서도 정렬이 무너지지 않도록 `null` 을 그대로 보존한다.
+ */
+const toChatDevArticle = (row: Record<string, unknown>): ChatDevArticle => ({
+  id: String(row.id),
+  slug: (row.slug as string) ?? "",
+  title: asText(row.title),
+  summary: asText(row.summary),
+  cover: (row.cover as ImageMeta | null) ?? null,
+  tags: (row.tags as string[]) ?? [],
+  publishedAt: toNullableDate(row.published_at),
 });
 
 /**
@@ -119,20 +126,20 @@ const fetchDevArticleTags = async (options?: { fresh?: boolean }): Promise<DevAr
   }));
 
 /**
- * 챗봇 문맥과 참조 카드에 필요한 글 목록. 행 전체를 받아 본문을 뺀 도메인 투영만 유지한다 —
+ * 챗봇 문맥과 참조 카드에 필요한 글 목록. projection 으로 본문을 전송에서 제외한다 —
  * 챗봇이 쓰는 것은 제목·요약·태그·경로이고 본문은 RAG 청크가 맡는다.
  *
  * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
  * @returns {Promise<ChatDevArticle[]>} 발행일 내림차순의 채팅용 글 목록.
  */
 const fetchChatDevArticles = async (options?: { fresh?: boolean }): Promise<ChatDevArticle[]> =>
-  (await selectPublished(COLLECTIONS.DEV_ARTICLES, options)).map(({ id, data }) =>
-    toChatDevArticle(id, data),
+  (await selectProjectedPublished(COLLECTIONS.DEV_ARTICLES, CHAT_ARTICLE_SELECT, options)).map(
+    toChatDevArticle,
   );
 
 /**
- * 프로젝트 역방향 목록에 필요한 관계 필드만 남긴다. 프로젝트 지면은 글 하나도 열지
- * 않으면서 관계만 알면 된다.
+ * 프로젝트 역방향 목록에 필요한 관계 필드만 projection 으로 남긴다. 프로젝트 지면은
+ * 글 하나도 열지 않으면서 관계만 알면 된다.
  *
  * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
  * @returns {Promise<DevArticleProjectLink[]>} 발행일 내림차순의 공개 글 관계 목록.
@@ -140,13 +147,15 @@ const fetchChatDevArticles = async (options?: { fresh?: boolean }): Promise<Chat
 const fetchDevArticleProjectLinks = async (options?: {
   fresh?: boolean;
 }): Promise<DevArticleProjectLink[]> =>
-  (await selectPublished(COLLECTIONS.DEV_ARTICLES, options)).map(({ id, data }) => ({
-    id,
-    slug: (data.slug as string) ?? "",
-    title: asText(data.title),
-    publishedAt: toNullableDate(data.publishedAt),
-    relatedProjectIds: (data.relatedProjectIds as string[]) ?? [],
-  }));
+  (await selectProjectedPublished(COLLECTIONS.DEV_ARTICLES, PROJECT_LINK_SELECT, options)).map(
+    (row) => ({
+      id: String(row.id),
+      slug: (row.slug as string) ?? "",
+      title: asText(row.title),
+      publishedAt: toNullableDate(row.published_at),
+      relatedProjectIds: (row.relatedProjectIds as string[]) ?? [],
+    }),
+  );
 
 export {
   fetchChatDevArticles,

@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { fetchDevArticleById, toDevArticle } from "@/lib/supabase/public/dev-articles";
+import {
+  fetchChatDevArticles,
+  fetchDevArticleById,
+  fetchDevArticleProjectLinks,
+  toDevArticle,
+} from "@/lib/supabase/public/dev-articles";
 
 describe("toDevArticle — 날짜 계약", () => {
   it("발행 필드는 값이 있을 때만 Date 가 된다", () => {
@@ -85,5 +90,78 @@ describe("fetchDevArticleById — 행 병합", () => {
     // firstPublishedAt 은 스칼라 컬럼이 없어 data 값이 그대로 살아야 한다.
     expect(article?.firstPublishedAt?.toISOString()).toBe("2026-07-01T00:00:00.000Z");
     expect(article?.body).toBe("# 본문");
+  });
+});
+
+describe("챗·관계 projection — 본문을 전송에서 제외한다", () => {
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("챗 목록은 별칭 projection 을 요청하고 published_at 을 디코딩한다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [
+        {
+          id: "a1",
+          slug: "chunking",
+          published_at: "2026-08-01T00:00:00.000Z",
+          title: { ko: "청킹", en: "Chunking" },
+          summary: { ko: "요약", en: "Summary" },
+          cover: null,
+          tags: ["rag"],
+        },
+      ],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const [article] = await fetchChatDevArticles();
+
+    const url = String(fetchMock.mock.calls[0]?.[0]);
+    const select = new URL(url).searchParams.get("select") ?? "";
+    expect(select).toContain("title:data->title");
+    expect(select).not.toContain("body");
+    expect(new URL(url).searchParams.get("published")).toBe("eq.true");
+    expect(article).toEqual({
+      id: "a1",
+      slug: "chunking",
+      title: { ko: "청킹", en: "Chunking" },
+      summary: { ko: "요약", en: "Summary" },
+      cover: null,
+      tags: ["rag"],
+      publishedAt: new Date("2026-08-01T00:00:00.000Z"),
+    });
+  });
+
+  it("관계 목록의 jsonb 경로는 JSON 키의 camelCase 를 그대로 쓴다", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [
+        {
+          id: "a1",
+          slug: "chunking",
+          published_at: null,
+          title: { ko: "청킹", en: "" },
+          relatedProjectIds: ["p1"],
+        },
+      ],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const [link] = await fetchDevArticleProjectLinks();
+
+    const select = new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get("select") ?? "";
+    // PostgREST jsonb 경로는 대소문자를 구분한다 — relatedprojectids 로 내려쓰면 null 만 온다.
+    expect(select).toContain("relatedProjectIds:data->relatedProjectIds");
+    expect(link.relatedProjectIds).toEqual(["p1"]);
+    expect(link.publishedAt).toBeNull();
   });
 });

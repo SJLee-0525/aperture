@@ -119,6 +119,28 @@ const selectPublished = async (
 };
 
 /**
+ * published 행을 호출자 지정 projection 으로 읽는다.
+ * `mergeRow` 는 data 와 서술자 스칼라만 알아서 별칭 필드를 버리므로, 여기서는
+ * 행을 그대로 돌려주고 디코딩은 호출자가 한다. 본문 Markdown 처럼 무거운 jsonb
+ * 필드를 전송에서 제외해야 하는 경로에 쓴다.
+ *
+ * @param {string} select 별칭 포함 PostgREST projection. jsonb 경로는 JSON 키의
+ *   대소문자를 그대로 써야 한다 (`data->relatedProjectIds`).
+ * @returns {Promise<Array<Record<string, unknown>>>} projection 그대로의 행 목록.
+ */
+const selectProjectedPublished = async (
+  collection: CollectionId,
+  select: string,
+  options?: { fresh?: boolean },
+): Promise<Array<Record<string, unknown>>> => {
+  const { order, hasPublished } = descriptor(collection);
+  if (!hasPublished) throw new Error(`published 게이트가 없는 컬렉션입니다: ${collection}`);
+  const params = new URLSearchParams({ select, order });
+  params.set("published", "eq.true");
+  return requestRows(collection, params, collectionCacheTag(collection), options);
+};
+
+/**
  * 문서 한 건을 읽는다. published 게이트 컬렉션은 공개 행만 조회한다.
  * 응답은 배열로 받아 빈 배열을 `null` 로 해석한다 — 단일 객체 Accept 의 406 의미에
  * 의존하지 않기 위해서다.
@@ -171,4 +193,13 @@ const fetchRowAsUser = async (
   return first ? mergeRow(collection, first).data : null;
 };
 
-export { fetchRow, fetchRowAsUser, mergeRow, selectPublished, selectRows, toDate, toNullableDate };
+export {
+  fetchRow,
+  fetchRowAsUser,
+  mergeRow,
+  selectProjectedPublished,
+  selectPublished,
+  selectRows,
+  toDate,
+  toNullableDate,
+};
