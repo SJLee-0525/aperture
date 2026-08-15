@@ -265,14 +265,16 @@ describe("SearchResults", () => {
     expect(screen.queryByRole("link", { name: /고요한 저녁/ })).toBeNull();
   });
 
-  it("일치하는 문서가 없으면 빈 결과 안내와 0건을 보여준다", () => {
+  it("일치하는 문서가 없으면 본문 대조를 기다렸다가 빈 결과 안내와 0건을 보여준다", async () => {
     useSearchParamsMock.mockReturnValue(
       new URLSearchParams("q=%EC%A0%9C%EC%A3%BC") as ReturnType<typeof useSearchParams>,
     );
 
     render(<SearchResults documents={documents} />);
 
-    expect(screen.getByText(DICTIONARY.ko.searchEmpty)).toBeTruthy();
+    // 본문 대조 응답 전에는 "결과 없음"이 오판일 수 있어 검색 중 표시가 먼저다.
+    expect(screen.getByText(DICTIONARY.ko.searchLoading)).toBeTruthy();
+    expect(await screen.findByText(DICTIONARY.ko.searchEmpty)).toBeTruthy();
     expect(screen.getByText(DICTIONARY.ko.searchEmptyChatHint)).toBeTruthy();
     expect(screen.getByText("0")).toBeTruthy();
   });
@@ -325,7 +327,9 @@ describe("SearchResults — 본문 일치", () => {
     await waitFor(() => {
       expect(screen.getByRole("link", { name: /포트폴리오를 서버 없이/ })).toBeTruthy();
     });
-    expect(screen.getByText("…수파베이스로 옮긴 이유는…")).toBeTruthy();
+    // 스니펫의 질의 일치 구간은 mark 로 쪼개져 렌더된다.
+    expect(screen.getByText("수파베이스").tagName).toBe("MARK");
+    expect(screen.getByText(/옮긴 이유는/)).toBeTruthy();
     // 스니펫은 태그(meta)를 대체하지 않는다 — 태그는 제목 줄에 그대로 남는다.
     expect(screen.getByText("Firebase · 아키텍처")).toBeTruthy();
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(

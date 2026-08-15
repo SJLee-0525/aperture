@@ -110,6 +110,7 @@ type UIDict = {
   searchPlaceholder: string;
   searchSuggestionsLabel: string;
   searchPrompt: string;
+  searchLoading: string;
   searchEmpty: string;
   searchEmptyChatHint: string;
   // 챗봇 (Ask Sungjoon)
@@ -316,6 +317,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     searchPlaceholder: "검색 · 태그 / 장비 / 장소",
     searchSuggestionsLabel: "추천 결과",
     searchPrompt: "검색어를 입력하세요.",
+    searchLoading: "검색 중…",
     searchEmpty: "검색 결과가 없습니다.",
     searchEmptyChatHint: "원하는 결과를 찾지 못했다면 챗봇에게 물어보세요.",
     chatOpenLabel: "챗봇 열기",
@@ -525,6 +527,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     searchPlaceholder: "Search · tag / gear / place",
     searchSuggestionsLabel: "Suggestions",
     searchPrompt: "Type to search.",
+    searchLoading: "Searching…",
     searchEmpty: "No results found.",
     searchEmptyChatHint: "If you couldn’t find what you need, try asking the chatbot.",
     chatOpenLabel: "Open chat",

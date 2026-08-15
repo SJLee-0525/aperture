@@ -1,5 +1,5 @@
 import { pickText } from "@/lib/i18n/pick-text";
-import { highlightTokensFor, splitTitleByMatches } from "@/lib/search/highlight-title";
+import { highlightTokensFor, splitTextByMatches } from "@/lib/search/highlight-title";
 import { rankDocuments } from "@/lib/search/rank-documents";
 import { tokensFor } from "@/lib/text/korean-tokenize";
 
@@ -42,7 +42,7 @@ const suggestDocuments = (
     .map((document) => ({
       key: document.key,
       section: document.section,
-      titleSegments: splitTitleByMatches(pickText(document.title, lang), highlightTokens),
+      titleSegments: splitTextByMatches(pickText(document.title, lang), highlightTokens),
       href: document.href,
     }));
 };
