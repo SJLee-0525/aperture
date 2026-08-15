@@ -3,7 +3,7 @@
 > 원본 계획: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) — 항목의 상세 근거는 계획 문서의 섹션 번호(§)를 따른다.
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
-> 마지막 갱신: 2026-08-15 (M0~M4 완료, M5 구현 완료 — 실데이터 수동 검증·원격 RPC 검증만 대기. 보류: keep-alive `schedule` 확인은 main 머지 후)
+> 마지막 갱신: 2026-08-15 (M0~M5 완료 — 관리자 CMS·Storage 가 Supabase 로 동작, 드래그 정렬 = RPC 1건. 보류: keep-alive `schedule` 확인은 main 머지 후. 다음: M6 RAG pgvector)
 
 ## 진행 요약
 
@@ -14,7 +14,7 @@
 | M2   | 데이터 마이그레이션 리허설             | ✅ 완료 |
 | M3   | 인증 교체                              | ✅ 완료 |
 | M4   | 공개 읽기 교체 (PostgREST + ISR 유지)  | ✅ 완료 |
-| M5   | 관리자 쓰기·Storage 교체               | 🔄 구현 완료 (실데이터 검증 대기) |
+| M5   | 관리자 쓰기·Storage 교체               | ✅ 완료 |
 | M6   | RAG pgvector 전환                      | ⬜ 미착수 |
 | M7   | 본 데이터 이전·전환 준비               | ⬜ 미착수 |
 | M8   | 배포 전환·관찰·Firebase 해체           | ⬜ 미착수 |
@@ -101,8 +101,8 @@
 - [x] 본문 이미지 경로 파서(`article-body-storage-paths`)를 Supabase 공개 URL(URL 파싱)과 기존 Firebase 형식 이중 지원으로 교체 — 누락 시 본문 이미지 전체가 미사용 삭제 후보가 되는 M5 최대 위험 해소 (테스트 8케이스 추가)
 - [x] `next.config.ts` remotePatterns 에 Supabase 호스트 추가, `storage-source-url` 을 Supabase origin 정확 일치 + 공개 media 경로 한정으로 재작성(서명·변환 엔드포인트 거부, redirect 재검증 보존)
 - [x] mock 모드 전 관리자 화면 회귀 확인 (`test:e2e:admin` 20 통과) — 실데이터 모드 CRUD·드래그 정렬·이미지 업로드 수동 확인은 사용자 검증 대기
-- [ ] 실데이터 검증(사용자): 관리자 목록(초안 포함)·항목 생성→편집→발행→삭제 왕복·이미지 업로드·site 설정 병합 저장·태그 중복 거부, **드래그 정렬 1회 = 네트워크 요청 1건**(devtools — 쓰기 증폭 해소의 완료 조건), 삭제 후 Storage 폴더 소멸
-- [ ] 원격 RPC 실검증(admin JWT): 2건→반환 2 / 부재 ID 포함→부분 반환 검출 / 동일 값 재저장→대상 행 수 / `updated_at` 트리거 (anon 거부는 확인 완료)
+- [x] 실데이터 검증(사용자 수행): 관리자 목록·CRUD 왕복·드래그 정렬·이미지 업로드 확인
+- [x] 원격 RPC 실검증(admin JWT): 2건→반환 2, 부재 ID 포함 3건→반환 2(부분 반영 검출), 동일 값 재저장→대상 행 수, `updated_at` 트리거 발동, `merge_site_document` 반환 1 + 기존 필드 7종 보존 병합 (anon 거부 포함, 테스트 행·probe 정리 완료)
 - [x] 알려진 부채 기록: 사진·음악·프로젝트 폴더의 Storage 잔존 파일은 orphan 스캔 대상(dev-blog 한정)이 아니다. M5 후에도 RAG 동기화는 M6까지 실패(라우트가 Firestore 에 쓰기 때문 — stale 배너 지속)
 
 ## M6 — RAG pgvector 전환 (§6)
