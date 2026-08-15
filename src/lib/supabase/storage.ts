@@ -77,8 +77,24 @@ const deleteFolder = async (folder: string): Promise<void> => {
 };
 
 /**
+ * 경로 하나를 삭제하고 실제로 지워졌는지 응답 목록으로 검증한다.
+ * `.remove()` 는 RLS 가 행을 걸러도(세션 만료) 오류 없이 빈 목록을 돌려주므로,
+ * 존재를 방금 확인한 파일을 지우는 orphan 정리는 빈 목록을 실패로 처리해야
+ * "N개 삭제" 보고가 실제 삭제와 어긋나지 않는다. 경로를 하나만 보내므로 응답
+ * 항목의 name 표기(전체 경로/파일명)와 무관하게 목록이 비어 있지 않으면 그 파일이다.
+ */
+const deleteImageStrict = async (path: string): Promise<void> => {
+  const { data, error } = await bucket().remove([path]);
+  if (error) throw new Error(error.message);
+  if (!(data ?? []).length) {
+    throw new Error("파일이 삭제되지 않았습니다. 로그인 상태를 확인하세요.");
+  }
+};
+
+/**
  * 중복 경로를 제거한 뒤 Storage 이미지 여러 개를 삭제한다.
- * `.remove()` 는 존재하지 않는 경로를 오류로 처리하지 않으므로 이미 삭제된 객체도 성공이다.
+ * `.remove()` 는 존재하지 않는 경로를 오류로 처리하지 않으므로 이미 삭제된 객체도 성공이다 —
+ * 문서 삭제가 이미 지워진 파생본을 다시 지우는 멱등 경로가 이 계약에 의존한다.
  *
  * @param {Iterable<string>} paths 삭제할 Storage 객체 경로 모음.
  * @returns {Promise<void>} 존재하는 객체의 삭제가 끝나면 완료된다.
@@ -165,6 +181,7 @@ const listFolderFiles = async (folder: string): Promise<StorageFileInfo[]> => {
 export {
   deleteArticleImages,
   deleteDevProjectImages,
+  deleteImageStrict,
   deleteImages,
   deleteMusicWorkImages,
   deletePhotoImages,

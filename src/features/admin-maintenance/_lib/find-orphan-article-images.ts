@@ -3,7 +3,7 @@
 import { articleBodyStoragePaths } from "@/features/admin-maintenance/_lib/article-body-storage-paths";
 
 import { listDevArticleImageRefsAdmin } from "@/lib/supabase/admin-list";
-import { deleteImages, listFolderFiles } from "@/lib/supabase/storage";
+import { deleteImageStrict, listFolderFiles } from "@/lib/supabase/storage";
 
 import { imagePaths } from "@/types/image";
 
@@ -89,8 +89,9 @@ const deleteOrphanArticleImages = async (
       .filter((path) => eligible.has(path))
       .map(async (path) => {
         try {
-          // 경로별 개별 삭제로 성공·실패를 파일 단위로 구분한다. 이미 없는 객체는 성공이다.
-          await deleteImages([path]);
+          // 경로별 개별 삭제로 성공·실패를 파일 단위로 구분한다. rescan 이 존재를 방금
+          // 확인했으므로 삭제 미확인(세션 만료로 0건)은 성공으로 위장하지 않고 실패다.
+          await deleteImageStrict(path);
           deleted.push(path);
         } catch (caught) {
           failed.push({ path, message: (caught as Error).message || "삭제에 실패했습니다." });

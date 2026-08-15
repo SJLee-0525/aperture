@@ -22,6 +22,7 @@ vi.mock("@/lib/supabase/client", () => ({
 }));
 
 import {
+  deleteImageStrict,
   deleteImages,
   deletePhotoImages,
   listFolderFiles,
@@ -94,6 +95,23 @@ describe("deleteImages", () => {
     const paths = Array.from({ length: 1001 }, (_, index) => `f-${index}.webp`);
 
     await expect(deleteImages(paths)).rejects.toThrow("denied");
+  });
+});
+
+describe("deleteImageStrict", () => {
+  it("응답 목록이 비어 있지 않으면 삭제 확인으로 본다", async () => {
+    mocks.remove.mockResolvedValue({ data: [{ name: "one.webp" }], error: null });
+
+    await expect(deleteImageStrict("dev-blog/a1/one.webp")).resolves.toBeUndefined();
+    expect(mocks.remove).toHaveBeenCalledWith(["dev-blog/a1/one.webp"]);
+  });
+
+  it("오류 없이 빈 목록이면(세션 만료로 RLS 가 거른 경우) 실패로 처리한다", async () => {
+    mocks.remove.mockResolvedValue({ data: [], error: null });
+
+    await expect(deleteImageStrict("dev-blog/a1/one.webp")).rejects.toThrow(
+      "파일이 삭제되지 않았습니다",
+    );
   });
 });
 
