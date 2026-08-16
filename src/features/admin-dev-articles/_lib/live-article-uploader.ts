@@ -15,19 +15,20 @@ import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mo
 import type { ImageMeta } from "@/types/image";
 
 /**
- * 블로그 이미지를 세 가지 크기의 WebP로 Storage에 올린다.
+ * 대표 이미지를 세 가지 크기의 WebP로 Storage에 올린다.
  * 파이프라인(2048 메인·960 프리뷰·320 썸네일)을 `dev-blog/{articleId}/` 경로에 태운다.
  *
- * 본문 Markdown은 메인 이미지 URL만 저장한다. 프리뷰와 썸네일은
- * 그 자산을 대표 이미지로 지정할 때만 문서에 참조가 남고, 본문 전용 이미지의 파생본은
- * 참조가 없으면 미사용 이미지 정리 대상이 된다. 삭제해도 본문에는 영향이 없다.
+ * 목록 카드와 상세 hero 가 프리뷰를, 통합검색 결과가 썸네일을 쓴다.
+ * 세 파일은 같은 asset ID 를 파일명으로 공유해, 문서에서 참조가 끊긴 뒤에도 미사용 이미지
+ * 정리가 한 벌임을 경로만으로 판단한다.
  *
  * @param {string} articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정한다.
  * @returns {ArticleImageUploader} 파일 한 장을 압축·업로드해 ImageMeta 를 주는 함수.
  */
-const createLiveArticleImageUploader =
+const createLiveArticleCoverUploader =
   (articleId: string): ArticleImageUploader =>
   async (file: File): Promise<ImageMeta> => {
+    const assetId = crypto.randomUUID();
     const [compressed, preview, thumbnail] = await Promise.all([
       compressToWebp(file),
       compressPreviewToWebp(file),
@@ -38,9 +39,9 @@ const createLiveArticleImageUploader =
         readDimensions(compressed),
         readDimensions(preview),
         readDimensions(thumbnail),
-        uploadArticleImage(articleId, compressed),
-        uploadArticlePreview(articleId, preview),
-        uploadArticleThumbnail(articleId, thumbnail),
+        uploadArticleImage(articleId, assetId, compressed),
+        uploadArticlePreview(articleId, assetId, preview),
+        uploadArticleThumbnail(articleId, assetId, thumbnail),
       ]);
     return {
       ...mainUpload,
@@ -50,4 +51,24 @@ const createLiveArticleImageUploader =
     };
   };
 
-export { createLiveArticleImageUploader };
+/**
+ * 본문 이미지를 2048 WebP 한 장으로 Storage에 올린다.
+ *
+ * 본문 Markdown 은 원본 주소만 저장하고 렌더도 그 한 장만 쓴다. 파생본을 만들면 어디서도
+ * 참조되지 않는 파일이 글마다 두 개씩 쌓인다.
+ *
+ * @param {string} articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정한다.
+ * @returns {ArticleImageUploader} 파일 한 장을 압축·업로드해 ImageMeta 를 주는 함수.
+ */
+const createLiveArticleBodyUploader =
+  (articleId: string): ArticleImageUploader =>
+  async (file: File): Promise<ImageMeta> => {
+    const compressed = await compressToWebp(file);
+    const [size, upload] = await Promise.all([
+      readDimensions(compressed),
+      uploadArticleImage(articleId, crypto.randomUUID(), compressed),
+    ]);
+    return { ...upload, ...size };
+  };
+
+export { createLiveArticleBodyUploader, createLiveArticleCoverUploader };

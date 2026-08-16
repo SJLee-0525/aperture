@@ -15,14 +15,14 @@ import {
   youtubeMarkdown,
 } from "@/features/admin-dev-articles/_lib/markdown-insert";
 
-import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
+import type { ArticleBodyUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
 
 import styles from "./ArticleBodyEditor.module.css";
 import formStyles from "./ArticleForm.module.css";
 
 type Props = {
   value: string;
-  upload: ArticleImageUploader;
+  upload: ArticleBodyUploader;
   onChange: (next: string) => void;
 };
 
@@ -37,7 +37,7 @@ type Props = {
  *
  * @param {Props} props
  * @param {string} props.value 본문 원문.
- * @param {ArticleImageUploader} props.upload 이미지 업로더.
+ * @param {ArticleBodyUploader} props.upload 이미지 업로더.
  * @param {(next: string) => void} props.onChange 본문이 바뀌었을 때.
  * @returns {JSX.Element}
  */

@@ -38,8 +38,9 @@ const formatUploadedAt = (value: Date): string =>
 /**
  * 글에서 사용하지 않는 블로그 이미지를 정리하는 패널.
  *
- * 참조가 없고 업로드한 지 24시간이 지난 `dev-blog/` 파일을 찾는다. 삭제 직전에
- * 참조를 다시 확인하며, Storage를 연결하지 않는 mock 모드에서는 실행할 수 없다.
+ * 원본·프리뷰·썸네일 한 벌이 모두 미참조이고 업로드한 지 24시간이 지난 것만 찾는다.
+ * 삭제 직전에 같은 기준으로 다시 확인하며, Storage를 연결하지 않는 mock 모드에서는
+ * 실행할 수 없다.
  *
  * @returns {JSX.Element}
  */
@@ -49,6 +50,7 @@ const ArticleOrphanImagePanel = () => {
   const [scan, setScan] = useState<OrphanScanResult | null>(null);
   const [deletion, setDeletion] = useState<OrphanDeleteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (mock) return;
@@ -68,6 +70,7 @@ const ArticleOrphanImagePanel = () => {
   const rescan = async () => {
     setPending(true);
     setError(null);
+    setCopied(false);
     setDeletion(null);
     try {
       setScan(await scanOrphanArticleImages());
@@ -79,19 +82,21 @@ const ArticleOrphanImagePanel = () => {
   };
 
   const removeAll = async () => {
-    const candidates = scan?.candidates ?? [];
-    if (candidates.length === 0) return;
+    const groups = scan?.groups ?? [];
+    const paths = groups.flatMap((group) => group.paths);
+    if (paths.length === 0) return;
     if (
       !window.confirm(
-        `사용되지 않는 이미지 ${candidates.length}개를 삭제할까요? 삭제한 파일은 복구할 수 없습니다.`,
+        `사용되지 않는 이미지 ${groups.length}개(파일 ${paths.length}개)를 삭제할까요? 삭제한 파일은 복구할 수 없습니다.`,
       )
     ) {
       return;
     }
     setPending(true);
     setError(null);
+    setCopied(false);
     try {
-      setDeletion(await deleteOrphanArticleImages(candidates.map((candidate) => candidate.path)));
+      setDeletion(await deleteOrphanArticleImages(paths));
       setScan(await scanOrphanArticleImages());
     } catch (caught) {
       setError((caught as Error).message);
@@ -100,14 +105,30 @@ const ArticleOrphanImagePanel = () => {
     }
   };
 
+  const copyKeptPaths = async () => {
+    setError(null);
+    try {
+      await navigator.clipboard.writeText(
+        (scan?.keptFiles ?? []).map((file) => file.path).join("\n"),
+      );
+      setCopied(true);
+    } catch {
+      setError("경로를 복사하지 못했습니다. 목록에서 직접 선택해 복사하세요.");
+    }
+  };
+
+  const totalFiles = scan?.groups.reduce((sum, group) => sum + group.paths.length, 0) ?? 0;
+  const estimatedCount = scan?.groups.filter((group) => group.estimated).length ?? 0;
+
   return (
     <section className={base.panel}>
       <h1 className={base.title}>사용되지 않는 블로그 이미지</h1>
       <p className={base.description}>
-        대표 이미지나 본문에서 사용하지 않고, 업로드한 지 24시간이 지난 파일을 찾습니다. 먼저 삭제
-        대상을 확인할 수 있으며, 삭제 직전에 참조 여부를 한 번 더 검사합니다. 본문에 넣은 이미지의
-        프리뷰와 썸네일은 사용되지 않는 파일로 표시될 수 있습니다. 이 파일을 삭제해도 본문에는
-        영향이 없습니다.
+        한 이미지의 원본·프리뷰·썸네일을 한 벌로 묶어, <strong>셋 다 어디에도 쓰이지 않고</strong>{" "}
+        업로드한 지 24시간이 지났을 때만 정리 대상으로 봅니다. 하나라도 쓰이고 있으면 그 이미지는
+        건드리지 않습니다. 먼저 삭제 대상을 확인할 수 있으며, 삭제 직전에 같은 기준으로 한 번 더
+        검사합니다. 파일명을 공유하지 않는 예전 파일은 업로드 시각으로 묶고 <strong>추정</strong>{" "}
+        으로 표시합니다. 이 줄은 다른 이미지의 파생본을 담고 있을 수 있습니다.
       </p>
 
       <div className={base.actions}>
@@ -116,7 +137,7 @@ const ArticleOrphanImagePanel = () => {
         </button>
         <button
           type="button"
-          disabled={pending || mock || (scan?.candidates.length ?? 0) === 0}
+          disabled={pending || mock || (scan?.groups.length ?? 0) === 0}
           onClick={removeAll}
         >
           확인 후 삭제
@@ -133,17 +154,45 @@ const ArticleOrphanImagePanel = () => {
       {scan ? (
         <div className={base.summary} aria-live="polite">
           <div className={base.summaryLine}>
-            <strong>삭제 대상 {scan.candidates.length}개</strong>
+            <strong>
+              삭제 대상 이미지 {scan.groups.length}개 · 파일 {totalFiles}개
+              {estimatedCount > 0 ? ` · 추정 묶음 ${estimatedCount}개` : ""}
+            </strong>
             <span>
               검사한 파일 {scan.scannedCount}개 · 예상 절감 {formatBytes(scan.totalBytes)}
             </span>
           </div>
-          {scan.candidates.length > 0 ? (
+
+          {scan.keptFiles.length > 0 ? (
+            <details className={styles.kept}>
+              <summary>
+                사용 중 이미지와 함께 유지한 파일 {scan.keptFiles.length}개 ·{" "}
+                {formatBytes(scan.keptBytes)} (정리 대상 아님)
+              </summary>
+              <p className={styles.keptHint}>
+                같은 벌의 다른 파일이 쓰이고 있어 그룹 규칙이 남긴 파일입니다. 파일 자체는 어디에도
+                쓰이지 않고 업로드한 지 24시간이 지나, 위 삭제 버튼과 같은 조건을 만족합니다. 경로를
+                복사해 Storage에서 직접 정리할 수 있습니다.
+              </p>
+              <button type="button" className={styles.copy} onClick={copyKeptPaths}>
+                {copied ? "복사함" : "경로 복사"}
+              </button>
+              <ul className={styles.keptList}>
+                {scan.keptFiles.map((file) => (
+                  <li key={file.path} className={styles.path} title={file.path}>
+                    {file.path}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+          {scan.groups.length > 0 ? (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th scope="col">경로</th>
+                    <th scope="col">미리보기</th>
+                    <th scope="col">파일</th>
                     <th scope="col" className={styles.numberCell}>
                       크기
                     </th>
@@ -151,13 +200,34 @@ const ArticleOrphanImagePanel = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {scan.candidates.map((candidate) => (
-                    <tr key={candidate.path}>
-                      <td className={styles.pathCell} title={candidate.path}>
-                        {candidate.path}
+                  {scan.groups.map((group) => (
+                    <tr key={group.paths[0]}>
+                      <td>
+                        <span className={styles.thumb}>
+                          {/* 전역 설정이 Vercel 최적화를 끄고 Storage 파일을 그대로 보내므로
+                              next/image 대신 img 를 쓴다. 주소는 그룹에서 가장 작은 파생본이다. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={group.previewUrl}
+                            alt=""
+                            className={styles.thumbImg}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </span>
                       </td>
-                      <td className={styles.numberCell}>{formatBytes(candidate.size)}</td>
-                      <td>{formatUploadedAt(candidate.uploadedAt)}</td>
+                      <td className={styles.pathCell}>
+                        {group.estimated ? (
+                          <span className={styles.estimated}>추정 묶음</span>
+                        ) : null}
+                        {group.paths.map((path) => (
+                          <span key={path} className={styles.path} title={path}>
+                            {path}
+                          </span>
+                        ))}
+                      </td>
+                      <td className={styles.numberCell}>{formatBytes(group.size)}</td>
+                      <td>{formatUploadedAt(group.uploadedAt)}</td>
                     </tr>
                   ))}
                 </tbody>

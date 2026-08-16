@@ -20,21 +20,36 @@ type ListedEntry = {
 const bucket = () => getSupabaseClient().storage.from(BUCKET);
 
 /**
+ * Storage 경로를 공개 버킷 URL 로 바꾼다.
+ * 동기 문자열 조립이라 객체의 존재나 접근 권한을 확인하지 않는다.
+ *
+ * @param {string} path 문서에 저장하는 형태의 Storage 객체 경로(버킷명 제외).
+ * @returns {string} `next.config` 의 remotePatterns 가 허용하는 공개 URL.
+ */
+const publicImageUrl = (path: string): string => bucket().getPublicUrl(path).data.publicUrl;
+
+/**
  * WebP 이미지를 UUID 파일명으로 업로드한다.
  * 새 경로를 사용해 CDN과 브라우저의 이전 이미지 캐시를 피한다.
  * 경로에 버킷명을 넣지 않는다 — 문서의 `path` 필드가 기존 데이터와 같은 형태여야 한다.
  *
  * @param {string} folder 이미지를 저장할 Storage 폴더.
  * @param {Blob} blob 업로드할 WebP 이미지 데이터.
+ * @param {string} [name] 확장자를 뺀 파일명. 한 이미지의 원본·프리뷰·썸네일에 같은 값을 넘기면
+ *   문서 없이도 세 파일이 한 벌임을 경로만으로 알 수 있다. 생략하면 파일마다 새 UUID.
  * @returns {Promise<{ url: string; path: string }>} 공개 URL과 Storage 객체 경로.
  */
-const uploadWebp = async (folder: string, blob: Blob): Promise<{ url: string; path: string }> => {
-  const path = `${folder}/${crypto.randomUUID()}.webp`;
+const uploadWebp = async (
+  folder: string,
+  blob: Blob,
+  name: string = crypto.randomUUID(),
+): Promise<{ url: string; path: string }> => {
+  const path = `${folder}/${name}.webp`;
   // Blob 의 type 이 비면 supabase-js 가 text/plain 으로 보내 버킷 mime 제한에 걸린다 — 명시한다.
   const { error } = await bucket().upload(path, blob, { contentType: "image/webp" });
   if (error) throw new Error("이미지 업로드에 실패했습니다. 네트워크·용량을 확인하세요.");
-  // getPublicUrl 은 동기 문자열 조립이라 업로드 성공을 검증하지 않는다 — 위 error 확인이 전제다.
-  return { url: bucket().getPublicUrl(path).data.publicUrl, path };
+  // publicImageUrl 은 업로드 성공을 검증하지 않는다. 위 error 확인이 전제다.
+  return { url: publicImageUrl(path), path };
 };
 
 /** `.remove()` 는 요청당 경로 수 제한이 있어 청크로 나눠 보낸다. 청크 실패는 그대로 전파한다. */
@@ -138,15 +153,19 @@ const uploadDevThumbnail = (projectId: string, blob: Blob) =>
 /** 프로젝트 문서에 속한 모든 Storage 이미지를 삭제한다. */
 const deleteDevProjectImages = (projectId: string) => deleteFolder(`dev/${projectId}`);
 
-/** 블로그 본문·대표 이미지 원본을 `dev-blog/{articleId}` 폴더에 업로드한다. */
-const uploadArticleImage = (articleId: string, blob: Blob) =>
-  uploadWebp(`dev-blog/${articleId}`, blob);
-/** 블로그 이미지 미리보기를 전용 하위 폴더에 업로드한다. */
-const uploadArticlePreview = (articleId: string, blob: Blob) =>
-  uploadWebp(`dev-blog/${articleId}/previews`, blob);
-/** 블로그 이미지 썸네일을 전용 하위 폴더에 업로드한다. */
-const uploadArticleThumbnail = (articleId: string, blob: Blob) =>
-  uploadWebp(`dev-blog/${articleId}/thumbnails`, blob);
+/**
+ * 블로그 본문·대표 이미지 원본을 `dev-blog/{articleId}` 폴더에 업로드한다.
+ * `assetId` 는 세 변형이 공유한다. 문서에서 참조가 끊긴 뒤에도 미사용 이미지 정리가
+ * 파일명만으로 한 벌을 복원한다.
+ */
+const uploadArticleImage = (articleId: string, assetId: string, blob: Blob) =>
+  uploadWebp(`dev-blog/${articleId}`, blob, assetId);
+/** 블로그 이미지 미리보기를 전용 하위 폴더에 원본과 같은 `assetId` 로 업로드한다. */
+const uploadArticlePreview = (articleId: string, assetId: string, blob: Blob) =>
+  uploadWebp(`dev-blog/${articleId}/previews`, blob, assetId);
+/** 블로그 이미지 썸네일을 전용 하위 폴더에 원본과 같은 `assetId` 로 업로드한다. */
+const uploadArticleThumbnail = (articleId: string, assetId: string, blob: Blob) =>
+  uploadWebp(`dev-blog/${articleId}/thumbnails`, blob, assetId);
 /** 글 문서에 속한 모든 Storage 이미지를 삭제한다. */
 const deleteArticleImages = (articleId: string) => deleteFolder(`dev-blog/${articleId}`);
 
@@ -186,6 +205,7 @@ export {
   deleteMusicWorkImages,
   deletePhotoImages,
   listFolderFiles,
+  publicImageUrl,
   uploadArticleImage,
   uploadArticlePreview,
   uploadArticleThumbnail,

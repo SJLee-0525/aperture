@@ -11,14 +11,14 @@ import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import { imagePreviewUrl } from "@/types/image";
 
+import type { ArticleCoverUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
 import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
-import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
 
 import styles from "./ArticleForm.module.css";
 
 type Props = {
   form: DevArticleInput;
-  upload: ArticleImageUploader;
+  upload: ArticleCoverUploader;
   onPatch: (next: Partial<DevArticleInput>) => void;
 };
 
@@ -30,7 +30,7 @@ type Props = {
  *
  * @param {Props} props
  * @param {DevArticleInput} props.form 현재 폼 값.
- * @param {ArticleImageUploader} props.upload 주입받은 업로더. mock 단계에서는 fixture 주소를 준다.
+ * @param {ArticleCoverUploader} props.upload 주입받은 업로더. mock 단계에서는 fixture 주소를 준다.
  * @param {(next: Partial<DevArticleInput>) => void} props.onPatch 폼 일부를 갱신한다.
  * @returns {JSX.Element}
  */
