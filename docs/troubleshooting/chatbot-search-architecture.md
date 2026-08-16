@@ -9,12 +9,13 @@
 | 날짜       | 변경 내용                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-08-11 | 현재 화면의 항목을 ID로 직접 조회하는 `SCREEN_CONTEXT` 경로, 사용자 메시지의 전송 문맥 기록과 원래 URL 복귀 동작을 반영했다. 사진 필터 링크와 연락 초안 검증, 부분 JSON 복구 정책도 현재 응답 계약에 맞게 갱신했다. 라이브 평가에서 단순 인사와 숫자 입력을 LLM이 포트폴리오 질문으로 과잉 분류한 사례가 있어, 입력 전체가 인사나 기호뿐인 경우만 정규식 결과를 사용하도록 고정했다. 숫자는 연도·초점거리·식별자일 수 있으므로 LLM 분류를 유지하고 프롬프트에서 근거 없는 조회를 제한한다. |
+| 2026-08-17 | 저장소가 Firestore에서 Supabase로 바뀐 것을 반영했다. RAG 검색은 `match_rag_chunks` RPC가 pgvector 상위 후보를 돌려주고 애플리케이션이 그 안에서 키워드 점수를 더한다. int8 양자화 스냅샷(`rag-index.ts`)은 제거됐다. 통합검색 결과 페이지는 서버 렌더로 바뀌어 인덱스 매치와 블로그 본문 매치를 한 번에 모아 내보낸다. `/api/search-body`는 삭제했다.                                                                                                                                     |
 
 ## 1. 목적
 
 방문자가 사진·음악·개발 프로젝트를 한국어와 영어로 쉽게 탐색할 수 있도록 세 가지 조회 경로를 제공한다.
 
-- **통합검색**은 빠르고 비용이 들지 않는 탐색 수단이다. 제목, 장소, 장비, 프로그램, 기술 스택 등 공개 메타데이터를 브라우저에서 검색한다.
+- **통합검색**은 빠르고 모델 호출이 없는 탐색 수단이다. 제목, 장소, 장비, 프로그램, 기술 스택 등 공개 메타데이터를 대조한다. 검색창 자동완성은 브라우저 메모리에서, `/search` 결과 페이지는 서버 렌더에서 대조한다.
 - **화면 문맥**은 질문을 보낸 시점의 사진·연주·수상 내역·프로젝트 ID를 공개 데이터에서 직접 조회한다. "이 사진"처럼 열린 항목을 가리키는 질문에 사용한다.
 - **RAG 챗봇**은 자연어 질문을 이해하고 관련 포트폴리오 청크를 찾아 설명한다. 필요한 경우 사진·연주·프로젝트 카드를 함께 반환한다.
 
@@ -28,12 +29,14 @@ flowchart LR
     U --> C[챗봇 패널]
     C --> M[전송 문맥 기록<br/>항목 이름 + 원래 URL]
 
-    F[(Firestore 공개 콘텐츠)] --> SD[검색 문서 projection]
+    F[(Supabase 공개 콘텐츠)] --> SD[검색 문서 projection]
     SD --> S
+    F --> SB[블로그 본문 평문 대조]
+    SB --> S
 
     F --> CH[의미 단위 청크 생성]
     CH --> E[text-embedding-3-small]
-    E --> R[(Firestore ragDocuments)]
+    E --> R[(Supabase rag_documents)]
 
     C -->|메시지 + pathname + 열린 type·ID| API[POST /api/chat]
     API --> SC[화면 경로·type 검증]
@@ -65,7 +68,7 @@ flowchart LR
 | 콘텐츠 임베딩  | OpenAI `text-embedding-3-small`      | `src/lib/ai/embedding.ts`                               | 최초 일괄 생성 또는 콘텐츠 변경 후 증분 동기화할 때 |
 | 질문 임베딩    | OpenAI `text-embedding-3-small`      | `src/lib/ai/rag-search.ts`                              | live 포트폴리오 문맥이 필요한 챗봇 질문마다         |
 | 화면 문맥 조회 | 외부 모델 없음                       | `src/features/chat/_lib/resolve-chat-screen-context.ts` | 열린 사진·연주·수상·프로젝트가 있는 질문마다        |
-| 일반 통합검색  | 외부 모델 없음                       | `src/features/search/_components/SearchResults.tsx`     | `/search?q=...`를 열거나 검색어가 바뀔 때           |
+| 일반 통합검색  | 외부 모델 없음                       | `src/features/search/_lib/build-search-groups.ts`       | `/search?q=...`를 열 때 서버에서 1회                |
 
 기본·폴백 채팅 제공자는 OpenAI와 Gemini 중에서 선택한다. `.env.example`은 OpenAI를 기본, Gemini를 폴백으로 두지만 여섯 개의 채팅 환경변수를 서로 바꾸면 코드 수정 없이 순서를 교체할 수 있다. 이 동작은 `chat-provider.test.ts`와 `chat-provider-symmetry.test.ts`로 검증한다. 채팅과 임베딩은 API 키, 모델, 할당량을 분리하며 임베딩 키가 없을 때 채팅 키를 대신 사용하지 않는다.
 
@@ -103,7 +106,7 @@ sequenceDiagram
     participant SC as 화면 문맥 resolver
     participant N as 의도 분류기
     participant RAG as RAG 검색
-    participant FS as Firestore
+    participant DB as Supabase
     participant EMB as OpenAI Embeddings
     participant P as 기본 채팅 제공자
     participant O as 폴백 제공자
@@ -113,8 +116,8 @@ sequenceDiagram
     API->>API: 본문·화면 문맥 검증, rate limit
     par 화면 문맥 조회
         API->>SC: 검증된 type·ID
-        SC->>FS: 최신 공개 projection 조회
-        FS-->>SC: 실패·미발견 시 캐시 스냅샷 사용
+        SC->>DB: 최신 공개 projection 조회
+        DB-->>SC: 실패·미발견 시 캐시 스냅샷 사용
         SC-->>API: SCREEN_CONTEXT 또는 생략
     and 질문 의도 분류
         API->>N: 최근 메시지 6개
@@ -124,15 +127,12 @@ sequenceDiagram
         API->>API: 정규식 분류로 폴백
     end
     alt live 포트폴리오 문맥 필요
-        par 질문 벡터 생성
-            API->>EMB: 확장된 질문
-            EMB-->>API: 512차원 질문 벡터
-        and 스냅샷 인덱스 로드
-            API->>FS: 캐시 미스 시에만 공개 ragDocuments
-            FS-->>API: int8 양자화 스냅샷 (1시간 Data Cache·태그 무효화)
-        end
-        API->>RAG: 코사인 유사도 + 키워드 점수
-        RAG-->>API: 관련 청크 최대 8개
+        API->>EMB: 확장된 질문
+        EMB-->>API: 512차원 질문 벡터
+        API->>DB: match_rag_chunks(질문 벡터, 분야, 모델 키)
+        DB-->>API: 코사인 거리 상위 후보 40개
+        API->>RAG: 후보에 키워드 점수 합산
+        RAG-->>API: 관련 청크 최대 10개
     else mock 또는 일반 대화
         API->>API: 선택 분야의 mock 문맥 또는 조회 생략
     end
@@ -186,7 +186,7 @@ type ChatContext = {
 
 분류 결과가 `none` 또는 빈 배열이거나 API 키 미설정, 잘못된 응답, 429·5xx·네트워크 오류, `CHAT_INTENT_TIMEOUT_MS` 초과가 발생하면 `chat-intent.ts`의 기존 정규식 분류를 한 번 더 실행한다. 분류 timeout 기본값은 3초이며 환경변수로 조정할 수 있다. 요청 제한을 통과한 뒤 분류하므로 차단된 요청이 모델 할당량을 소비하지 않는다. 정규식은 직접 분야 키워드와 “그거”, “더 보여줘” 같은 단순 후속 질문을 처리하는 무비용 복구 경로다.
 
-분류기를 유지하는 이유는 모든 데이터를 매번 모델에 보내지 않고 필요한 분야만 검색하기 위해서다. 이는 입력 토큰, Firestore 처리량, 응답 시간을 줄이고 서로 무관한 콘텐츠가 답변에 섞이는 문제도 완화한다.
+분류기를 유지하는 이유는 모든 데이터를 매번 모델에 보내지 않고 필요한 분야만 검색하기 위해서다. 이는 입력 토큰, DB 처리량, 응답 시간을 줄이고 서로 무관한 콘텐츠가 답변에 섞이는 문제도 완화한다.
 
 ### 4.3 하이브리드 RAG 검색
 
@@ -200,9 +200,13 @@ type ChatContext = {
 
 - **벡터 유사도**는 표현이 달라도 의미가 가까운 콘텐츠를 찾는다.
 - **키워드 유사도**는 모델명, 기술명, 고유명사처럼 정확한 문자열이 중요한 검색을 보강한다.
-- 벡터 점수 0.3 이상 또는 키워드 점수 0.5 이상인 후보 중 상위 8개만 모델 문맥에 넣는다.
+- 벡터 점수 0.3 이상 또는 키워드 점수 0.5 이상인 후보 중 상위 10개만 모델 문맥에 넣는다.
 
-Firestore의 네이티브 벡터 검색 기능은 사용하지 않는다. Route Handler가 공개 `ragDocuments`를 읽고 코사인 유사도를 계산한다. raw 벡터 응답은 Data Cache의 항목당 2MB 제한을 넘기므로 그대로 캐시하지 않고, `rag-index.ts`가 벡터를 int8로 양자화해 base64로 압축한 스냅샷을 1시간 Data Cache에 담는다. 스냅샷은 임베딩 동기화가 무효화하는 같은 캐시 태그를 공유하므로 콘텐츠 변경이 다음 질문에 반영되고, 방문자 질문의 Firestore 읽기와 egress는 캐시 fill 시점에만 발생한다. 임베딩은 MRL 잘라내기로 기본 512차원을 사용한다(`EMBEDDING_PROVIDER_DIMENSIONS`). 벡터 공간 호환성은 `모델명@차원` 키로 관리하며, 모델이나 차원을 바꾸면 키가 어긋난 기존 청크가 자동 배제되고 전체 재생성이 이행 경로다. 코퍼스가 커져 스냅샷이 한도에 근접하면 Firestore `findNearest` 이전을 검토한다.
+유사도 계산은 DB가 맡는다. `match_rag_chunks` RPC가 pgvector 코사인 거리로 발행 청크를 정렬해 상위 40개를 돌려주고, 애플리케이션은 그 후보 안에서만 키워드 점수를 더한다. 벡터 순위 40위 밖의 키워드 단독 일치는 후보에 없다. 방문자가 열어 둔 원본의 청크는 RPC가 벡터 순위와 무관하게 후보에 보태므로, ID로 알고 있는 항목이 순위 때문에 빠지지 않는다.
+
+RPC는 `stable security invoker`라 RLS의 published 게이트가 호출자 권한으로 적용된다. `search_path`를 비우면 `extensions` 스키마의 `<=>` 연산자를 찾지 못하므로 `pg_catalog, extensions`로 제한하고 테이블은 스키마까지 수식한다.
+
+임베딩은 MRL 잘라내기로 기본 512차원을 사용한다(`EMBEDDING_PROVIDER_DIMENSIONS`). 벡터 공간 호환성은 `모델명@차원` 키로 관리하며, 모델이나 차원을 바꾸면 키가 어긋난 기존 청크가 자동 배제되고 전체 재생성이 이행 경로다. 청크가 수백 개인 현재 규모에서는 벡터 인덱스를 만들지 않는다. RPC가 정렬 후 자르는 형태라 나중에 HNSW를 붙여도 쿼리를 다시 쓸 필요가 없다.
 
 RAG 검색에 문제가 생기면 챗봇 전체를 중단하지 않고 해당 분야의 기존 포맷 문맥으로 폴백한다. 벡터 검색은 섹션 요약을 대체하지 않고 보강만 한다 — 검색이 관련 청크를 놓쳐도 요약(수상·경력 라인 등)이 남아 있어야 “있는데 없다” 오답을 막는다. 검색 결과는 `[chat-rag]` 로그(sections·query·keywords·chunks 수)로 남겨 Vercel 함수 로그에서 검색 빗나감(chunks=0)을 추적한다.
 
@@ -255,7 +259,7 @@ type ChatProviderResult = {
 
 의도적으로 폴백하지 않는 실패도 있다.
 
-- **프로필 스냅샷(Firestore REST) 로드 실패** — 1시간 Data Cache가 대부분 흡수하고, 캐시 만료와 Firestore 장애가 겹치는 드문 경우에는 문맥 없는 답변(환각 위험)보다 재시도 안내가 낫다고 판단해 오류로 반환한다.
+- **프로필 스냅샷(PostgREST) 로드 실패** — 1시간 Data Cache가 대부분 흡수하고, 캐시 만료와 DB 장애가 겹치는 드문 경우에는 문맥 없는 답변(환각 위험)보다 재시도 안내가 낫다고 판단해 오류로 반환한다.
 - **화면 문맥 조회 실패** — 최신 공개 데이터와 캐시에서 항목을 찾지 못하면 화면 문맥 없이 계속한다(§4.1).
 - **RAG 벡터 검색 실패** — 챗봇을 중단하지 않고 섹션 요약 문맥으로 계속한다(§4.3).
 - **참조 카드 조회 실패** — 완성된 답변을 폐기하지 않고 카드만 포기한다(§4.6).
@@ -277,9 +281,9 @@ type ChatProviderResult = {
 
 `NEXT_PUBLIC_USE_MOCK`은 챗봇 문맥, 참조 카드와 RAG 검색에 동일하게 적용한다.
 
-- `1`: mock 프로필·Photo·Music·Dev 데이터만 사용하고 live Firestore RAG를 호출하지 않는다.
-- `0`: live Firestore 공개 데이터와 live RAG를 사용한다.
-- 미설정: 개발 환경은 mock 우선, 프로덕션은 Firebase 설정이 있어야 live를 사용한다.
+- `1`: mock 프로필·Photo·Music·Dev 데이터만 사용하고 live RAG RPC를 호출하지 않는다.
+- `0`: live Supabase 공개 데이터와 live RAG를 사용한다.
+- 미설정: 개발 환경은 mock 우선, 프로덕션은 Supabase 설정이 있어야 live를 사용한다. 프로덕션 빌드에서 `1`은 `next.config.ts`가 막는다.
 
 Portfolio 스냅샷 캐시 함수는 언어뿐 아니라 `mock | live` 콘텐츠 소스를 인자로 받아 캐시 키를 분리한다. mock reference가 없을 때 live 데이터로 재조회하지 않으며, live에서만 stale reference 복구를 허용한다. 따라서 모드를 전환해도 반대쪽 문맥이나 카드가 캐시에서 섞이지 않는다.
 
@@ -289,7 +293,7 @@ Portfolio 스냅샷 캐시 함수는 언어뿐 아니라 `mock | live` 콘텐츠
 
 ### 5.1 원본 데이터
 
-임베딩 대상은 Firestore의 공개 포트폴리오 데이터다.
+임베딩 대상은 Supabase의 공개 포트폴리오 데이터다.
 
 - 사이트 프로필과 사진 소개
 - 개발 소개, 기술 스택, 경력, 학력, 수상
@@ -304,13 +308,13 @@ Portfolio 스냅샷 캐시 함수는 언어뿐 아니라 `mock | live` 콘텐츠
 
 `rag-chunks.ts`가 한 콘텐츠를 의미 단위로 나눈다. 한 프로젝트도 개요, 작업 내용, 트러블슈팅이 별도 청크가 될 수 있다. 한국어와 영어 값을 같은 텍스트에 함께 넣어 어느 언어로 질문해도 같은 원본을 찾을 수 있게 한다.
 
-Firestore `ragDocuments`의 각 문서는 다음 정보를 가진다.
+`rag_documents` 테이블의 각 행은 다음 정보를 가진다.
 
 | 필드             | 설명                                                                 |
 | ---------------- | -------------------------------------------------------------------- |
 | `section`        | profile, development, music, photography                             |
 | `sourceType`     | photo, album, project, musicWork 등 원본 종류                        |
-| `sourceId`       | 원본 Firestore 문서 ID                                               |
+| `sourceId`       | 원본 행의 기본 키                                                    |
 | `chunkKey`       | overview, work, troubleshooting-0 같은 의미 단위                     |
 | `text`           | 한국어·영어와 검색 메타데이터를 합친 임베딩 원문                     |
 | `embedding`      | `text-embedding-3-small`이 생성한 기본 512차원 float 배열            |
@@ -322,12 +326,12 @@ Firestore `ragDocuments`의 각 문서는 다음 정보를 가진다.
 ```mermaid
 flowchart TD
     A[/admin/maintenance/] --> B[전체 임베딩 생성·갱신]
-    B --> C[Firebase 관리자 ID token 검증]
+    B --> C[Supabase access token 검증<br/>app_metadata.role = admin]
     C --> D[공개 원본 전체 조회]
     D --> E[의미 단위 청크 생성]
     E --> F[OpenAI 임베딩 일괄 요청]
-    F --> G[Firestore commit 크기로 분할]
-    G --> H[(ragDocuments 교체)]
+    F --> G[요청 크기로 분할]
+    G --> H[(rag_documents 교체)]
     H --> I[캐시 무효화]
 ```
 
@@ -339,10 +343,10 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[관리자 콘텐츠 저장] --> B[Firestore 원본 저장 완료]
+    A[관리자 콘텐츠 저장] --> B[Supabase 원본 저장 완료]
     B --> C[해당 sourceType + sourceId 청크 재생성]
     C --> D[text-embedding-3-small]
-    D --> E[관련 ragDocuments만 교체]
+    D --> E[관련 rag_documents 행만 교체]
     E --> F[캐시 무효화]
 ```
 
@@ -354,17 +358,31 @@ flowchart LR
 
 ### 6.1 데이터 흐름
 
+경로가 둘이다. 검색창 자동완성은 브라우저에서, 결과 페이지는 서버에서 대조한다.
+
 ```mermaid
 flowchart LR
-    F[(Firestore 공개 콘텐츠)] --> P[서버에서 최소 검색 문서 projection]
-    P --> ISR[ISR 캐시 페이지]
-    ISR --> B[브라우저 SearchResults]
-    Q[URL의 q 검색어] --> A[정규화·별칭 확장]
-    A --> B
-    B --> R[사진·음악·개발 그룹 결과]
+    F[(Supabase 공개 콘텐츠)] --> P[최소 검색 문서 projection<br/>ISR 캐시]
+
+    P --> IDX["/api/search-index"]
+    IDX -->|검색창 포커스 시 1회| MEM[브라우저 인메모리 색인]
+    MEM --> AC[자동완성 상위 5건]
+
+    P --> SR["/search 서버 렌더"]
+    F --> BODY[블로그 평문 대조<br/>search-article-bodies]
+    BODY --> SR
+    Q[URL의 q 검색어] --> SR
+    SR --> G[buildSearchGroups<br/>정규화·별칭 확장·채점]
+    G --> R[개발·블로그·사진·음악 그룹 결과]
 ```
 
-`/search` 페이지는 서버에서 공개 데이터를 최소한의 `SearchDocument`로 투영한다. 검색어 `q`와 무관하게 페이지 데이터를 캐시하고, 브라우저에서 검색어를 필터링하므로 타이핑과 언어 전환에 즉시 반응한다.
+**자동완성**은 검색창에 처음 포커스할 때 `/api/search-index`로 색인을 한 번 받아 두고, 이후 입력마다 브라우저 메모리에서 대조한다. 서버 왕복이 없어 타이핑에 즉시 반응한다. 같은 모듈 캐시를 WebMCP `search_portfolio` 도구가 공유한다.
+
+**결과 페이지**는 서버 컴포넌트다. `fetchSearchDocuments()`와 `searchArticleBodies(q)`를 병렬로 실행하고 `buildSearchGroups`가 두 결과를 합쳐 완성된 목록을 한 번에 렌더한다. `searchParams`를 읽으므로 라우트는 dynamic이지만, 데이터 계층이 ISR 캐시를 쓰므로 질의마다 DB를 치지는 않는다. 실데이터 193문서 기준 warm 45~80ms, cold 133ms다.
+
+이전에는 결과 페이지도 브라우저에서 대조하고 본문 일치만 `/api/search-body`로 따로 받았다. 제목·태그 매치가 먼저 그려지고 약 890ms 뒤 본문 매치가 목록 아래에 붙어, 읽는 중에 목록이 자라고 총계가 바뀌었다. 두 대조를 같은 서버 렌더로 합치면서 그 단계를 없앴다.
+
+**자동완성과 결과 페이지의 범위는 다르다.** 자동완성은 본문을 보지 않으므로 드롭다운에는 없는 글이 결과 페이지에 나올 수 있다. 본문을 색인에 실으면 글 수에 비례해 방문자 다운로드가 커지므로 의도적으로 뺀 데이터이며, 이 차이는 계약으로 유지한다.
 
 검색 문서에 포함되는 대표 필드는 다음과 같다.
 
@@ -379,7 +397,7 @@ flowchart LR
 ### 6.2 일반 검색에 임베딩을 사용하지 않는 이유
 
 - 검색할 때마다 OpenAI 호출 비용과 네트워크 지연이 발생하지 않는다.
-- Vercel 서버리스 함수 호출 없이 브라우저에서 즉시 필터링할 수 있다.
+- 자동완성은 서버리스 함수 호출 없이 브라우저에서 즉시 대조한다.
 - 현재 데이터 규모에서는 제목·장소·장비·기술명 검색이 대부분을 충족한다.
 - 검색 결과가 없을 때는 자동으로 챗봇을 열지 않고, 자연어로 질문해 보라는 안내만 표시한다.
 
@@ -389,15 +407,15 @@ flowchart LR
 
 - Next.js Route Handler를 사용하며 별도 상시 서버를 운영하지 않는다.
 - 공개 프로필 projection은 1시간 Data Cache를 사용하며 `ko/en`과 `mock/live`별로 분리한다.
-- raw `ragDocuments` 벡터 응답은 2MB 제한을 넘으므로 int8 양자화 스냅샷으로 압축해 캐시한다. 방문자 질문의 Firestore 읽기·egress는 캐시 fill(콘텐츠 변경 또는 1시간 주기) 시점에만 발생한다.
+- 벡터 유사도는 `match_rag_chunks` RPC가 DB에서 계산한다. 질문마다 RPC 1회를 왕복하며 전체 청크를 애플리케이션 메모리로 옮기지 않는다.
 - 관리자 콘텐츠 저장과 임베딩 완료 후 같은 캐시 태그를 무효화한다.
-- 일반 통합검색은 모델 호출 비용이 없다.
+- 통합검색은 모델 호출 비용이 없다. 결과 페이지는 서버 렌더 1회를 쓰지만 데이터는 ISR 캐시에서 온다.
 - live 포트폴리오 질문에는 의도 분류 1회, 질문 임베딩 1회와 채팅 모델 호출 1회가 발생한다. mock 질문은 RAG와 질문 임베딩을 생략한다.
 - 전체 임베딩 비용은 최초 구축, 모델 변경, 전체 복구 시에 발생한다.
 - 일반적인 콘텐츠 수정은 변경된 항목의 청크만 다시 임베딩한다.
-- Firestore 벡터는 문서의 float 배열로 저장하며 현재는 서버에서 유사도를 계산한다.
+- 벡터는 `extensions.vector(512)` 컬럼에 저장한다.
 
-데이터가 크게 증가해 한 요청에서 모든 벡터를 읽고 비교하는 비용이 부담될 때 Firestore 네이티브 벡터 검색이나 전용 벡터 DB를 검토한다. 현재 규모에서는 추가 인프라보다 단순한 서버 계산이 운영상 유리하다.
+청크가 수백 개인 현재 규모에서는 벡터 인덱스 없이 순차 스캔이 충분하다. 코퍼스가 커지면 HNSW 인덱스를 붙인다. RPC가 정렬 후 자르는 형태라 그때 쿼리를 다시 쓰지 않아도 된다.
 
 ## 8. 선택한 구조와 대안
 
@@ -428,7 +446,7 @@ flowchart LR
 - [x] `NEXT_PUBLIC_USE_MOCK` 변경 후 빌드 또는 개발 서버를 재시작하고 새 채팅에서 데이터 소스를 확인한다.
 - [x] OpenAI 채팅 키는 Responses Write 중심의 제한 권한을 사용한다.
 - [x] OpenAI 임베딩 키는 Embeddings Write 중심의 제한 권한을 사용한다.
-- [x] Firebase Rules와 indexes를 배포한다.
+- [x] Supabase 마이그레이션과 RLS 정책을 배포한다.
 - [x] `/admin/maintenance`에서 임베딩 완료율이 100%인지 확인한다.
 - [x] 콘텐츠를 새로 저장한 뒤 해당 항목의 증분 임베딩 요청이 성공하는지 확인한다.
 - [x] `npm run test:chat-eval`로 한국어·영어 mock 응답과 참조 카드를 검사한다.
@@ -456,14 +474,15 @@ flowchart LR
 | Gemini                  | `src/features/chat/_lib/gemini-chat-provider.ts`        |
 | 프로필 문맥·참조 검증   | `src/features/chat/_lib/build-profile-context.ts`       |
 | RAG 검색                | `src/lib/ai/rag-search.ts`                              |
-| RAG 스냅샷 인덱스       | `src/lib/ai/rag-index.ts`                               |
 | 검색어 별칭·키워드 점수 | `src/lib/ai/rag-query.ts`                               |
 | 청크 생성               | `src/lib/ai/rag-chunks.ts`                              |
 | 임베딩 API              | `src/lib/ai/embedding.ts`                               |
 | 임베딩 관리 API         | `src/app/api/admin/portfolio-embeddings/route.ts`       |
 | 증분 동기화             | `src/lib/ai/request-rag-sync.ts`                        |
-| Firestore RAG 읽기      | `src/lib/firebase/public/rag.ts`                        |
+| RAG 조회·교체 RPC       | `src/lib/supabase/rag.ts`                               |
 | 통합검색 문서           | `src/features/search/_lib/search-documents.ts`          |
+| 통합검색 결과 조립      | `src/features/search/_lib/build-search-groups.ts`       |
+| 통합검색 본문 대조      | `src/features/search/_lib/search-article-bodies.ts`     |
 | 통합검색 UI             | `src/features/search/_components/SearchResults.tsx`     |
 | 사진 필터 URL codec     | `src/lib/photo-filter-query.ts`                         |
 | 연락 초안 검증          | `src/features/chat/_lib/contact-draft.ts`               |
