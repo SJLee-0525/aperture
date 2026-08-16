@@ -15,7 +15,10 @@ import { useArticleEditor } from "@/features/admin-dev-articles/_hooks/use-artic
 import { useArticleRecovery } from "@/features/admin-dev-articles/_hooks/use-article-recovery";
 import { useArticleReferences } from "@/features/admin-dev-articles/_hooks/use-article-references";
 
-import { createArticleImageUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
+import {
+  createArticleBodyUploader,
+  createArticleCoverUploader,
+} from "@/features/admin-dev-articles/_lib/article-image-uploader";
 import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-article-id";
 
 import { adminDevArticlePreviewRoute, ROUTES } from "@/constants/routes";
@@ -48,7 +51,8 @@ const ArticleForm = ({ articleId, initial }: Props) => {
   const references = useArticleReferences();
   const editor = useArticleEditor(articleId, references, initial);
   const recovery = useArticleRecovery(articleId, editor.form, editor.dirty);
-  const upload = useMemo(() => createArticleImageUploader(articleId), [articleId]);
+  const uploadCover = useMemo(() => createArticleCoverUploader(articleId), [articleId]);
+  const uploadBodyImage = useMemo(() => createArticleBodyUploader(articleId), [articleId]);
 
   const blockedByPublish = editor.form.published && editor.publishIssues.length > 0;
 
@@ -125,11 +129,11 @@ const ArticleForm = ({ articleId, initial }: Props) => {
         onChange={(relatedProjectIds) => editor.patch({ relatedProjectIds })}
       />
 
-      <ArticleCoverField form={editor.form} upload={upload} onPatch={editor.patch} />
+      <ArticleCoverField form={editor.form} upload={uploadCover} onPatch={editor.patch} />
 
       <ArticleBodyEditor
         value={editor.form.body}
-        upload={upload}
+        upload={uploadBodyImage}
         onChange={(body) => editor.patch({ body })}
       />
 

@@ -3,7 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/**/*.test.{ts,tsx}"],
+    // scripts/ 의 빌드 산출물 분석 도구는 의존성 없는 .mjs 라 별도 패턴으로 받는다.
+    include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.mjs"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

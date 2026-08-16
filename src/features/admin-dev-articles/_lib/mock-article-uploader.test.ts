@@ -9,11 +9,11 @@ import { STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
 const file = (name: string) => new File([], name, { type: "image/png" });
 
 describe("createMockArticleImageUploader", () => {
-  it("글 폴더 아래 경로를 만든다", async () => {
+  it("글 폴더 아래 UUID 경로를 만든다", async () => {
     const upload = createMockArticleImageUploader("a1");
     const image = await upload(file("스크린샷.PNG"));
 
-    expect(image.path).toMatch(/^dev-blog\/a1\/1-[a-z0-9-]*\.webp$/);
+    expect(image.path).toMatch(/^dev-blog\/a1\/[0-9a-f-]{36}\.webp$/);
   });
 
   it("같은 글에 여러 장을 올려도 경로가 겹치지 않는다", async () => {
@@ -21,6 +21,16 @@ describe("createMockArticleImageUploader", () => {
     const [first, second] = [await upload(file("a.png")), await upload(file("a.png"))];
 
     expect(first.path).not.toBe(second.path);
+  });
+
+  it("업로더 인스턴스가 둘이어도 경로가 겹치지 않는다", async () => {
+    // 대표 이미지와 본문 이미지가 각자 인스턴스를 쓴다.
+    const [cover, body] = [
+      await createMockArticleImageUploader("a1")(file("a.png")),
+      await createMockArticleImageUploader("a1")(file("a.png")),
+    ];
+
+    expect(cover.path).not.toBe(body.path);
   });
 
   it("허용 호스트 아래 주소를 준다", async () => {
@@ -35,12 +45,6 @@ describe("createMockArticleImageUploader", () => {
 
     expect(issues).toEqual([]);
     expect(document.blocks[0]).toMatchObject({ type: "image", src: image.url });
-  });
-
-  it("이름에 쓸 글자가 없어도 경로를 만든다", async () => {
-    const image = await createMockArticleImageUploader("a1")(file("한글이름.png"));
-
-    expect(image.path).toBe("dev-blog/a1/1-image.webp");
   });
 
   it("카드가 쓸 크기를 채워 준다", async () => {

@@ -15,14 +15,14 @@ import {
   youtubeMarkdown,
 } from "@/features/admin-dev-articles/_lib/markdown-insert";
 
-import type { ArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
+import type { ArticleBodyUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
 
 import styles from "./ArticleBodyEditor.module.css";
 import formStyles from "./ArticleForm.module.css";
 
 type Props = {
   value: string;
-  upload: ArticleImageUploader;
+  upload: ArticleBodyUploader;
   onChange: (next: string) => void;
 };
 
@@ -37,7 +37,7 @@ type Props = {
  *
  * @param {Props} props
  * @param {string} props.value 본문 원문.
- * @param {ArticleImageUploader} props.upload 이미지 업로더.
+ * @param {ArticleBodyUploader} props.upload 이미지 업로더.
  * @param {(next: string) => void} props.onChange 본문이 바뀌었을 때.
  * @returns {JSX.Element}
  */
@@ -68,12 +68,19 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
       ? { start: textarea.selectionStart, end: textarea.selectionEnd }
       : { start: current.length, end: current.length };
 
+    // 본문을 통째로 바꾸면 브라우저가 커서를 끝으로 보내며 스크롤을 맨 아래로 내린다.
+    // 삽입 지점 위의 줄은 그대로라 원래 위치를 되돌리면 보던 자리가 유지된다.
+    const scrollTop = textarea?.scrollTop ?? 0;
+
     const next = insertAtSelection(current, selection, snippet);
     onChange(next.value);
     // 삽입한 조각 뒤로 커서를 옮긴다. 값이 반영된 뒤여야 해서 다음 프레임에 미룬다.
     window.requestAnimationFrame(() => {
-      textarea?.focus();
-      textarea?.setSelectionRange(next.selection.start, next.selection.end);
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(next.selection.start, next.selection.end);
+      // focus 도 스크롤을 움직이므로 마지막에 되돌린다.
+      textarea.scrollTop = scrollTop;
     });
   };
 

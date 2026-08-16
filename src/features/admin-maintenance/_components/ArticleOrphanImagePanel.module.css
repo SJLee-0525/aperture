@@ -13,6 +13,7 @@
 .table td {
   padding: var(--s-2) var(--s-3);
   text-align: left;
+  vertical-align: top;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
@@ -22,18 +23,93 @@
   font-weight: 500;
 }
 
+.thumb {
+  display: block;
+  width: 72px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--photo-bg);
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .pathCell {
   font-family: var(--font-mono);
   font-size: var(--t-micro);
   color: var(--text-2);
+}
+
+.estimated {
+  display: inline-block;
+  margin-bottom: var(--s-1);
+  padding: 0 var(--s-2);
+  color: var(--text-3);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-sans);
+  line-height: 1.8;
+}
+
+.path {
+  display: block;
   /* 경로가 길다 — 셀이 표 폭을 끌고 나가지 않게 자른다 */
-  max-width: 380px;
+  max-width: 320px;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.kept {
+  color: var(--text-3);
+  font-size: var(--t-small);
+}
+
+.kept summary {
+  cursor: pointer;
+}
+
+.keptHint {
+  margin: var(--s-3) 0 var(--s-2);
+  line-height: 1.65;
+}
+
+.copy {
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.keptList {
+  margin-top: var(--s-2);
+  /* 목록이 길어도 패널이 끝없이 늘어나지 않게 자체 스크롤을 준다 */
+  max-height: 240px;
+  overflow-y: auto;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-2);
 }
 
 .numberCell {
   text-align: right;
   color: var(--text-3);
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .thumb {
+    width: 56px;
+    height: 40px;
+  }
+  .path {
+    max-width: 180px;
+  }
 }
