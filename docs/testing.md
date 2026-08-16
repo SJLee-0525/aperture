@@ -45,6 +45,80 @@ tag 요청 차단, 허용 후 로드, 철회 후 재허용, Footer 재설정, �
 상태의 챗봇 접근을 검증한다. E2E의 기본 저장 상태는 `denied`라 기존 공개 화면 테스트에 동의 배너가
 겹치지 않는다.
 
+## E2E 불안정 테스트 좁히기
+
+이 저장소의 production E2E는 변경이 없어도 실행마다 소수가 실패한다. 실패를 봤을 때
+종료 코드가 아니라 어떤 테스트가 실패했는지를 변경 전 커밋과 대조한다.
+
+`e2e/run.cjs`는 `--build`를 줄 때만 빌드한다. 한 번 빌드해 두면 이후 반복은 서버 기동과
+Playwright 실행만 한다. 나머지 인자는 Playwright로 그대로 넘어간다.
+
+```bash
+# 최초 1회. dist 를 만든다
+NEXT_DIST_DIR=.next-playwright-v7 node e2e/run.cjs --production --build e2e/pages/locale.e2e.ts
+
+# 이후 반복 (빌드 없음)
+NEXT_DIST_DIR=.next-playwright-v7 E2E_PRODUCTION=1 \
+node e2e/run.cjs --production \
+  e2e/pages/photo.e2e.ts --project=mobile --repeat-each=20
+```
+
+스펙 단위로 재현률을 먼저 재고, 재현되는 항목만 `-g "<테스트명>"`으로 좁혀 반복한다.
+줄 번호는 코드가 바뀌면 어긋나므로 기록에는 테스트명을 쓴다.
+
+| file | project | test title | before | after | 원인 |
+| ---- | ------- | ---------- | ------ | ----- | ---- |
+
+`before`·`after`는 `실패수/반복수`로 적는다. **수정 전에 실패를 재현하지 못했다면
+`after`가 0이어도 "고쳤다"가 아니라 "재현하지 못했다"** 이다.
+
+### 관찰 기록: 로컬 실패는 머신 부하와 함께 움직인다
+
+같은 dist 로 조건만 바꿔 재현을 시도한 결과다.
+
+| 조건                                                   | 실행 시간 | 결과                       |
+| ------------------------------------------------------ | --------- | -------------------------- |
+| `photo.e2e.ts` 단독, mobile, `--repeat-each=20`        | 5.7m      | 220/220 통과               |
+| `photo.e2e.ts` 단독, desktop, `--repeat-each=20`       | 5.6m      | 200 통과 / 20 skip, 실패 0 |
+| `photo`+`chat`+`dev-article-detail`, `--repeat-each=3` | 4.3m      | 183 통과 / 33 skip, 실패 0 |
+| 전체 스위트, 동시 작업 없음                            | 3.5m      | 211 통과 / 75 skip, 실패 0 |
+
+실패가 나왔던 과거 실행과 비교하면 시간 차이가 크다. 같은 전체 스위트가 59.3m 걸리면서 6건이
+실패한 적이 있고, 그때는 다른 빌드·테스트가 함께 돌고 있었다. 3.5m 대 59.3m 은 17배이며,
+`playwright.config.ts` 의 `expect.timeout` 이 10초인 이상 이 정도로 느려지면 타임아웃이 무작위로
+터진다. 실행마다 다른 테스트가 실패하는 양상이 그 설명과 맞는다.
+
+따라서 로컬에서 e2e 를 돌릴 때는 **빌드·유닛 테스트를 동시에 돌리지 않는다.** 실패를 봤다면
+먼저 그 실행의 총 소요 시간을 확인한다. 평소보다 몇 배 느렸다면, 테스트 자체의 타이밍 결함과는
+별개로 머신 부하가 실패를 증폭했을 가능성을 우선 의심할 근거가 된다.
+
+강한 상관관계까지가 확인된 범위다. 수정 전 실패를 재현하지 못했고 실패 trace 를 원인별로
+분석하지도 못했으므로 인과는 입증되지 않았다. 부하에도 견뎌야 하는 테스트라면 결국 timeout 이나
+대기 조건이 취약한 것일 수 있다.
+
+아직 확인하지 못한 것: CI(windows-latest)에서도 같은 실패가 나는지는 별개 문제다. CI 는
+`retries: 2` 라 한 번 실패해도 리포트가 통과로 끝날 수 있으므로, 실제 재시도율을 보려면 실행
+로그의 flaky 표시를 확인해야 한다.
+
+### trace 로 원인 가르기
+
+`playwright.config.ts`가 `trace: "retain-on-failure"`를 켜 두었다.
+
+```bash
+npx playwright show-trace test-results/<...>/trace.zip
+```
+
+- 이미지 로딩·레이아웃 이동 (`e2e/utils/settle-images.ts`가 덮지 못하는 지점)
+- motion·scroll 완료 대기 부족
+- URL 상태 갱신과 assertion 경쟁 (`?photo=`·`?project=` 딥링크)
+- chat route interception 등록 시점
+- dialog focus·scroll lock 해제 시점
+
+### 완료 기준
+
+수정 후 최소 재현 루프에서 0회, 같은 project로 해당 파일 전체를 반복했을 때도 0회,
+마지막으로 전체 production E2E가 CI retry 없이 첫 시도에 통과해야 한다.
+
 ## Lighthouse
 
 프로덕션 빌드가 있어야 한다.
