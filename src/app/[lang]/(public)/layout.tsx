@@ -13,6 +13,7 @@ import { WebMcpTools } from "@/features/webmcp/_components/WebMcpTools";
 
 import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
 
+import { toLang } from "@/constants/langs";
 import { getSite } from "@/lib/content/site";
 import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
 
@@ -21,15 +22,22 @@ import styles from "./layout.module.css";
 // Next.js 정적 분석을 위해 리터럴 유지 — 모든 공개 페이지의 기본 ISR 주기(1시간).
 export const revalidate = 3600;
 
+// Next.js 가 생성하는 LayoutProps 는 세그먼트를 string 으로 준다. Lang 으로 좁히는 것은 아래 isLang 검사다.
+type Props = { children: React.ReactNode; params: Promise<{ lang: string }> };
+
 /**
  * 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config.
  *
- * @param {{ children: React.ReactNode }} props
+ * 헤더·푸터는 서버 컴포넌트라 언어를 컨텍스트가 아니라 `[lang]` 세그먼트에서 받는다.
+ *
+ * @param {Props} props
  * @param {ReactNode} props.children
+ * @param {Promise<{ lang: string }>} props.params
  * @returns {Promise<JSX.Element>}
  */
-const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
-  const site = await getSite();
+const PublicLayout = async ({ children, params }: Props) => {
+  const [{ lang: segment }, site] = await Promise.all([params, getSite()]);
+  const lang = toLang(segment);
   const forceConsentBanner =
     process.env.NODE_ENV !== "production" &&
     process.env.NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER === "1";
@@ -43,13 +51,14 @@ const PublicLayout = async ({ children }: { children: React.ReactNode }) => {
       <MobileNavigationVisibility />
       <SectionAccent />
       <IntroSplash />
-      <SiteHeader />
+      <SiteHeader lang={lang} />
       {/* 상세 모달의 제목을 챗봇 입력창에 표시한다. */}
       <ChatScreenTargetProvider>
         <div id="page-content" className={styles.content}>
           {children}
         </div>
         <SiteFooter
+          lang={lang}
           tagline={site.tagline}
           links={site.links}
           privacyControls={<AnalyticsSettingsButton />}

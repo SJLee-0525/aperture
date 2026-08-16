@@ -1,5 +1,6 @@
 import { AboutView } from "@/features/about/_components/AboutView";
 
+import { toLang } from "@/constants/langs";
 import { getAlbums, getPhotos } from "@/lib/content/photo";
 import { getSite } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -25,10 +26,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * 소개 — 통계는 사진·앨범에서 자동 집계. 파생에 쓰는 필드만 투영해 직렬화.
  *
+ * @param {Props} props
+ * @param {Promise<{ lang: Lang }>} props.params
  * @returns {Promise<JSX.Element>}
  */
-export default async function AboutPage() {
-  const [site, photos, albums] = await Promise.all([getSite(), getPhotos(), getAlbums()]);
+export default async function AboutPage({ params }: Props) {
+  const [{ lang }, site, photos, albums] = await Promise.all([
+    params,
+    getSite(),
+    getPhotos(),
+    getAlbums(),
+  ]);
   const photoFacts = photos.map(({ camera, lens, place }) => ({ camera, lens, place }));
-  return <AboutView bio={site.bio} photoFacts={photoFacts} albumCount={albums.length} />;
+  return (
+    <AboutView
+      lang={toLang(lang)}
+      bio={site.bio}
+      photoFacts={photoFacts}
+      albumCount={albums.length}
+    />
+  );
 }

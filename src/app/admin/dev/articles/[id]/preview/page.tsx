@@ -1,7 +1,3 @@
-"use client";
-
-import { use } from "react";
-
 import { ArticleFullPreview } from "@/features/admin-dev-articles/_components/ArticleFullPreview";
 
 type Props = { params: Promise<{ id: string }> };
@@ -12,10 +8,10 @@ type Props = { params: Promise<{ id: string }> };
  *
  * @param {Props} props
  * @param {Promise<{ id: string }>} props.params
- * @returns {JSX.Element}
+ * @returns {Promise<JSX.Element>}
  */
-const DevArticlePreviewPage = ({ params }: Props) => {
-  const { id } = use(params);
+const DevArticlePreviewPage = async ({ params }: Props) => {
+  const { id } = await params;
   return <ArticleFullPreview articleId={id} />;
 };
 

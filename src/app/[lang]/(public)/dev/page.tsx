@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { AboutPageSkeleton } from "@/components/PublicPageSkeletons";
 import { DevAboutView } from "@/features/dev/_components/DevAboutView";
 
+import { toLang } from "@/constants/langs";
 import { getDevConfig, getDevProjects } from "@/lib/content/dev";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -24,11 +25,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-/** 뷰가 소비하는 config 필드와 프로젝트별 techTags만 투영해 직렬화. */
-const DevAboutContent = async () => {
-  const [config, projects] = await Promise.all([getDevConfig(), getDevProjects()]);
+/** 뷰가 소비하는 config 필드와 프로젝트별 techTags만 투영해 직렬화.
+ *  params 를 await 하지 않고 그대로 받아 셸이 동기로 남게 한다. */
+const DevAboutContent = async ({ params }: Props) => {
+  const [{ lang }, config, projects] = await Promise.all([
+    params,
+    getDevConfig(),
+    getDevProjects(),
+  ]);
   return (
     <DevAboutView
+      lang={toLang(lang)}
       heroLead={config.heroLead}
       stack={config.stack}
       interview={config.interview}
@@ -44,11 +51,13 @@ const DevAboutContent = async () => {
  *  셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `dev/loading.tsx` 경계는 career·projects·
  *  articles 전환에도 함께 쓰여 이 지면 모양을 그릴 수 없다.
  *
+ * @param {Props} props
+ * @param {Promise<{ lang: Lang }>} props.params
  * @returns {JSX.Element} */
-export default function DevPage() {
+export default function DevPage({ params }: Props) {
   return (
     <Suspense fallback={<AboutPageSkeleton extended />}>
-      <DevAboutContent />
+      <DevAboutContent params={params} />
     </Suspense>
   );
 }

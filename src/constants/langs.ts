@@ -14,4 +14,16 @@ const DEFAULT_LANG: Lang = "ko";
  */
 const isLang = (value: string): value is Lang => (LANGS as readonly string[]).includes(value);
 
-export { LANGS, DEFAULT_LANG, isLang };
+/**
+ * `[lang]` 세그먼트를 지원 언어로 좁힌다. 지원 외 값은 기본 언어로 대체한다.
+ *
+ * 서버 렌더는 상위 `[lang]/layout.tsx` 의 `notFound()` 를 기다리지 않고 함께 실행되므로,
+ * 세그먼트로 `DICTIONARY` 를 인덱싱하는 자리는 "/fr/dev" 같은 요청에서도 던지지 않아야 한다.
+ * 던지면 응답이 404 가 아니라 500 이 된다.
+ *
+ * @param {string} value URL 에서 온 검증 전 세그먼트.
+ * @returns {Lang}
+ */
+const toLang = (value: string): Lang => (isLang(value) ? value : DEFAULT_LANG);
+
+export { LANGS, DEFAULT_LANG, isLang, toLang };
