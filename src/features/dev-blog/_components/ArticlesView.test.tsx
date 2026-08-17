@@ -81,7 +81,7 @@ describe("ArticlesView", () => {
     renderView();
 
     expect(screen.getByText("10 articles")).toBeTruthy();
-    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(8);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(8);
   });
 
   it("태그를 고르면 결과와 주소가 함께 바뀐다", () => {
@@ -136,12 +136,15 @@ describe("ArticlesView — 고정 글", () => {
 
   const renderPinned = () => render(<ArticlesView articles={WITH_PINNED} tags={TAGS} />);
 
-  /** 고정 섹션 안의 글 제목. 섹션 제목도 h2 라 그것만 걷어낸다. */
+  /** 고정 섹션 안의 글 제목. 섹션 이름은 h2, 카드 제목은 h3 라 레벨로 갈린다. */
   const pinnedTitles = () =>
     within(screen.getByRole("region", { name: DICTIONARY.ko.articlesPinned }))
-      .getAllByRole("heading", { level: 2 })
-      .map((heading) => heading.textContent)
-      .filter((text) => text !== DICTIONARY.ko.articlesPinned);
+      .getAllByRole("heading", { level: 3 })
+      .map((heading) => heading.textContent);
+
+  /** 지면 전체의 글 제목. 섹션 이름은 섞이지 않는다. */
+  const allTitles = () =>
+    screen.getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent);
 
   beforeEach(() => {
     window.history.replaceState({}, "", "/ko/dev/articles");
@@ -163,11 +166,17 @@ describe("ArticlesView — 고정 글", () => {
   it("고정 글은 아래 목록에도 발행일 자리에 그대로 남는다", () => {
     renderPinned();
 
-    const listed = screen
-      .getAllByRole("heading", { level: 2 })
-      .map((heading) => heading.textContent);
-    // 섹션 제목 1 + 고정 섹션 카드 1 + 목록 카드 1.
-    expect(listed.filter((text) => text === "pinned-note 제목")).toHaveLength(2);
+    // 고정 섹션 카드 1 + 목록 카드 1.
+    expect(allTitles().filter((text) => text === "pinned-note 제목")).toHaveLength(2);
+  });
+
+  // 보조기술 목차가 h1 지면 제목 → h2 섹션 → h3 글 제목으로 계단이 져야 한다.
+  it("고정 섹션과 전체 목록에 각각 이름을 준다", () => {
+    renderPinned();
+
+    expect(
+      screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual([DICTIONARY.ko.articlesPinned, DICTIONARY.ko.articlesAll]);
   });
 
   it("페이지를 넘겨도 고정 섹션은 남는다", () => {
@@ -197,9 +206,7 @@ describe("ArticlesView — 고정 글", () => {
 
     expect(screen.queryByRole("region", { name: DICTIONARY.ko.articlesPinned })).toBeNull();
     // 목록에서 빠지는 것은 아니다.
-    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toContain(
-      "pinned-note 제목",
-    );
+    expect(allTitles()).toContain("pinned-note 제목");
   });
 
   it("고정 섹션은 보기 토글과 무관하게 목록 행으로 그린다", () => {

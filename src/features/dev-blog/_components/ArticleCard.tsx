@@ -127,7 +127,8 @@ const ArticleCard = ({
             </time>
             <span>{readingLabel}</span>
           </div>
-          <h2 className={styles.title}>{title}</h2>
+          {/* 목록 지면의 h1 은 `PageToolbar`, h2 는 고정·전체 섹션 이름이 갖는다. */}
+          <h3 className={styles.title}>{title}</h3>
           {tagLabels.length > 0 ? (
             <div className={styles.tags}>{tagLabels.map((label) => `#${label}`).join(" ")}</div>
           ) : null}
