@@ -16,7 +16,8 @@ const builder = () => {
     then: (
       resolve: (value: unknown) => unknown,
       reject: (reason: unknown) => unknown,
-    ): Promise<unknown> => Promise.resolve({ data: mocks.rows(), error: null }).then(resolve, reject),
+    ): Promise<unknown> =>
+      Promise.resolve({ data: mocks.rows(), error: null }).then(resolve, reject),
   };
   return chain;
 };
