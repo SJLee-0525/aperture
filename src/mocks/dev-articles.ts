@@ -54,6 +54,9 @@ const coverImage = (file: string, path: string) => ({
  * 공개 글은 목록 한 페이지 정원(8)을 넘겨 두 페이지가 되게 둔다. pagination 이 한 페이지에서만
  * 돌면 페이지 이동과 URL 복원을 확인할 수 없다. 사전의 `accessibility` 태그는 어느 글도 쓰지
  * 않는다 — 결과가 빈 태그 필터의 안내 화면을 확인하려는 것이다.
+ *
+ * 고정 글은 `serverless-portfolio` 하나다. 발행일이 가장 최근인 글(`isr-revalidate-tags`)을
+ * 고르면 고정하지 않아도 맨 위라 고정 섹션이 동작하는지 화면으로 구분할 수 없다.
  */
 const MOCK_DEV_ARTICLES: DevArticle[] = [
   {
@@ -143,6 +146,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     },
     tags: ["nextjs", "firebase", "architecture"],
     relatedProjectIds: ["portfolio", "photo-portfolio"],
+    pinned: true,
     published: true,
     publishedAt: new Date("2026-05-18T09:00:00+09:00"),
     firstPublishedAt: new Date("2026-05-18T09:00:00+09:00"),
@@ -227,6 +231,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     },
     tags: ["typescript", "css"],
     relatedProjectIds: ["portfolio"],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-04-02T20:30:00+09:00"),
     firstPublishedAt: new Date("2026-04-02T20:30:00+09:00"),
@@ -259,6 +264,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     coverAlt: null,
     tags: ["css", "architecture"],
     relatedProjectIds: ["design-system"],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-01-20T10:00:00+09:00"),
     firstPublishedAt: new Date("2026-01-20T10:00:00+09:00"),
@@ -291,6 +297,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     coverAlt: null,
     tags: ["testing"],
     relatedProjectIds: [],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-01-20T10:00:00+09:00"),
     firstPublishedAt: new Date("2026-01-20T10:00:00+09:00"),
@@ -317,6 +324,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     coverAlt: null,
     tags: ["retrospective"],
     relatedProjectIds: [],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-02-11T18:45:00+09:00"),
     firstPublishedAt: new Date("2026-02-11T18:45:00+09:00"),
@@ -351,6 +359,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     },
     tags: ["nextjs", "architecture"],
     relatedProjectIds: ["portfolio"],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-06-20T21:00:00+09:00"),
     firstPublishedAt: new Date("2026-06-20T21:00:00+09:00"),
@@ -380,6 +389,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     coverAlt: null,
     tags: ["firebase"],
     relatedProjectIds: [],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-03-15T19:20:00+09:00"),
     firstPublishedAt: new Date("2026-03-15T19:20:00+09:00"),
@@ -413,6 +423,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     coverAlt: null,
     tags: ["architecture", "testing"],
     relatedProjectIds: ["portfolio"],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-02-28T13:05:00+09:00"),
     firstPublishedAt: new Date("2026-02-28T13:05:00+09:00"),
@@ -448,6 +459,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     },
     tags: ["firebase", "css"],
     relatedProjectIds: ["photo-portfolio"],
+    pinned: false,
     published: true,
     publishedAt: new Date("2025-12-05T11:50:00+09:00"),
     firstPublishedAt: new Date("2025-12-05T11:50:00+09:00"),
@@ -477,6 +489,7 @@ const MOCK_DEV_ARTICLES: DevArticle[] = [
     coverAlt: null,
     tags: ["architecture"],
     relatedProjectIds: ["aidap"],
+    pinned: false,
     published: false,
     publishedAt: null,
     firstPublishedAt: null,

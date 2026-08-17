@@ -18,6 +18,7 @@ const input = (overrides: Partial<DevArticleInput> = {}): DevArticleInput => ({
   coverAlt: null,
   tags: ["nextjs"],
   relatedProjectIds: ["aperture"],
+  pinned: false,
   published: true,
   publishedAt: new Date("2026-01-20T10:00:00.000Z"),
   firstPublishedAt: null,

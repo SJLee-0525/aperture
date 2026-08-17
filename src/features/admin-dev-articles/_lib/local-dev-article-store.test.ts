@@ -21,6 +21,7 @@ const article = (overrides: Partial<DevArticle> = {}): DevArticle => ({
   coverAlt: null,
   tags: ["nextjs"],
   relatedProjectIds: ["aperture"],
+  pinned: false,
   published: true,
   publishedAt: new Date("2026-01-20T10:00:00.000Z"),
   firstPublishedAt: new Date("2026-01-20T10:00:00.000Z"),

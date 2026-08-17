@@ -800,6 +800,7 @@ describe("handleChatRequest", () => {
       coverAlt: null,
       tags: [],
       relatedProjectIds: [],
+      pinned: false,
       published: true,
       publishedAt: new Date("2026-05-18T00:00:00Z"),
       firstPublishedAt: new Date("2026-05-18T00:00:00Z"),

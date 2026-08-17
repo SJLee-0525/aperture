@@ -28,8 +28,8 @@ type ChatDevArticle = Pick<DevArticle, "id" | "slug" | "title" | "summary" | "co
  * RAG 증분 동기화가 관리자 권한으로 읽은 문서를 같은 모양으로 정규화할 때
  * 재사용하는 규약이므로 export 한다 (`toDevProject` 와 같은 역할).
  *
- * `slug`·`publishedAt`·`createdAt`·`updatedAt` 은 transport 병합이 행 스칼라로 덮은 값이고,
- * `firstPublishedAt` 은 data jsonb 안에 남는다.
+ * `slug`·`pinned`·`publishedAt`·`createdAt`·`updatedAt` 은 transport 병합이 행 스칼라로 덮은
+ * 값이고, `firstPublishedAt` 은 data jsonb 안에 남는다.
  *
  * @param {string} id 문서 ID.
  * @param {Record<string, unknown>} data 병합된 문서 필드.
@@ -45,6 +45,7 @@ const toDevArticle = (id: string, data: Record<string, unknown>): DevArticle => 
   coverAlt: data.coverAlt ? asText(data.coverAlt) : null,
   tags: (data.tags as string[]) ?? [],
   relatedProjectIds: (data.relatedProjectIds as string[]) ?? [],
+  pinned: (data.pinned as boolean) ?? false,
   published: (data.published as boolean) ?? false,
   publishedAt: toNullableDate(data.publishedAt),
   firstPublishedAt: toNullableDate(data.firstPublishedAt),

@@ -161,6 +161,8 @@ const createLiveDevArticleRepository = (
       coverAlt: previous.coverAlt,
       tags: previous.tags,
       relatedProjectIds: previous.relatedProjectIds,
+      // 이 경로는 전체 행을 다시 쓴다. 고정 값을 빼면 공개 토글 한 번에 고정이 풀린다.
+      pinned: previous.pinned,
       published,
       publishedAt: previous.publishedAt,
       firstPublishedAt: previous.firstPublishedAt,

@@ -19,6 +19,7 @@ type ListRow = {
 type ArticleRow = {
   id: string;
   published: boolean;
+  pinned: boolean;
   slug: string;
   published_at: string | null;
   data: Record<string, unknown>;
@@ -45,17 +46,18 @@ const encodeListRow = (id: string, input: Record<string, unknown>): ListRow => {
 };
 
 /**
- * dev_articles 인코딩. 스칼라는 `published`·`slug`·`published_at` 3개뿐이다.
+ * dev_articles 인코딩. 스칼라는 `published`·`pinned`·`slug`·`published_at` 4개다.
  * `created_at`/`updated_at` 은 DB(default·트리거) 소유라 쓰지 않고,
  * `firstPublishedAt` 은 조회 대상이 아니라 data 안에 남긴다.
  */
 const encodeArticleRow = (id: string, input: Record<string, unknown>): ArticleRow => {
-  const { published, slug, publishedAt, createdAt, updatedAt, ...rest } = input;
+  const { published, pinned, slug, publishedAt, createdAt, updatedAt, ...rest } = input;
   void createdAt;
   void updatedAt;
   return {
     id,
     published: published === true,
+    pinned: pinned === true,
     slug: typeof slug === "string" ? slug : "",
     published_at: publishedAt instanceof Date ? publishedAt.toISOString() : null,
     data: toJson(rest),

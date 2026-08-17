@@ -87,7 +87,9 @@ describe("supabase public transport", () => {
 
     const [url] = lastCall(fetchMock);
     const params = new URL(url).searchParams;
-    expect(params.get("select")).toBe("id,published,slug,published_at,created_at,updated_at,data");
+    expect(params.get("select")).toBe(
+      "id,published,pinned,slug,published_at,created_at,updated_at,data",
+    );
     expect(params.get("select")).not.toContain("sort_order");
     expect(params.get("order")).toBe("published_at.desc.nullslast,id.asc");
   });

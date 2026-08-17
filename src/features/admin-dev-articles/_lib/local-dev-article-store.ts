@@ -22,8 +22,11 @@ import type { LocalizedText } from "@/types/localized";
  * 그대로 따른다.
  */
 
-/** 저장 형식 버전. 필드 계약이 바뀌면 올리고, 과거 값은 승계하지 않고 버린다. v2: 공용 봉투 이관. */
-const STORE_VERSION = 2;
+/**
+ * 저장 형식 버전. 필드 계약이 바뀌면 올리고, 과거 값은 승계하지 않고 버린다.
+ * v2: 공용 봉투 이관. v3: `pinned` 추가.
+ */
+const STORE_VERSION = 3;
 
 type DevArticleStore = { articles: DevArticle[]; tags: DevArticleTag[] };
 
@@ -91,6 +94,7 @@ const toArticle = (value: unknown): DevArticle | null => {
   if (cover === undefined) return null;
   if (value.coverAlt !== null && !isLocalizedText(value.coverAlt)) return null;
   if (!isStringArray(value.tags) || !isStringArray(value.relatedProjectIds)) return null;
+  if (typeof value.pinned !== "boolean") return null;
   if (typeof value.published !== "boolean") return null;
   if (!createdAt || !updatedAt) return null;
 
@@ -104,6 +108,7 @@ const toArticle = (value: unknown): DevArticle | null => {
     coverAlt: value.coverAlt as LocalizedText | null,
     tags: value.tags,
     relatedProjectIds: value.relatedProjectIds,
+    pinned: value.pinned,
     published: value.published,
     publishedAt: toDate(value.publishedAt),
     firstPublishedAt: toDate(value.firstPublishedAt),

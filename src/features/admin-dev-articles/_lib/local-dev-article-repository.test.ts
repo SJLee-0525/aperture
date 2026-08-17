@@ -34,6 +34,7 @@ const input = (overrides: Partial<DevArticleInput> = {}): DevArticleInput => ({
   coverAlt: null,
   tags: [],
   relatedProjectIds: [],
+  pinned: false,
   published: false,
   publishedAt: null,
   firstPublishedAt: null,
@@ -65,7 +66,7 @@ describe("createLocalDevArticleRepository", () => {
     const [item] = await repository().list();
 
     expect(Object.keys(item).sort()).toEqual(
-      ["id", "published", "publishedAt", "slug", "tags", "title", "updatedAt"].sort(),
+      ["id", "pinned", "published", "publishedAt", "slug", "tags", "title", "updatedAt"].sort(),
     );
   });
 

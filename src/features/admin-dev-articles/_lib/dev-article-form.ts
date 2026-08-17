@@ -21,6 +21,7 @@ const emptyArticleInput = (): DevArticleInput => ({
   coverAlt: null,
   tags: [],
   relatedProjectIds: [],
+  pinned: false,
   published: false,
   publishedAt: null,
   firstPublishedAt: null,

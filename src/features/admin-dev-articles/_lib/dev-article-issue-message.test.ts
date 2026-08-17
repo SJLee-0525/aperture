@@ -73,6 +73,7 @@ describe("publishIssueMessage", () => {
         coverAlt: null,
         tags: ["없는-태그"],
         relatedProjectIds: ["없는-프로젝트"],
+        pinned: false,
         published: true,
         publishedAt: null,
         firstPublishedAt: null,

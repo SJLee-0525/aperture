@@ -121,7 +121,7 @@ const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
   (
     await listProjected(
       "dev_articles",
-      "id,published,slug,published_at,updated_at,title:data->title,tags:data->tags",
+      "id,published,pinned,slug,published_at,updated_at,title:data->title,tags:data->tags",
       ["id"],
     )
   ).map((row) => ({
@@ -129,6 +129,7 @@ const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
     slug: (row.slug as string) ?? "",
     title: asText(row.title),
     tags: (row.tags as string[]) ?? [],
+    pinned: (row.pinned as boolean) ?? false,
     published: (row.published as boolean) ?? false,
     publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     updatedAt: new Date((row.updated_at as string) ?? 0),

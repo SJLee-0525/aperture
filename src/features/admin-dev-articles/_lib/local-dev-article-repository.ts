@@ -31,6 +31,7 @@ const toListItem = (article: DevArticle): AdminDevArticleListItem => ({
   slug: article.slug,
   title: article.title,
   tags: article.tags,
+  pinned: article.pinned,
   published: article.published,
   publishedAt: article.publishedAt,
   updatedAt: article.updatedAt,

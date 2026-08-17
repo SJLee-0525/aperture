@@ -17,6 +17,7 @@ const article: DevArticle = {
   coverAlt: null,
   tags: ["css"],
   relatedProjectIds: [],
+  pinned: false,
   published: true,
   publishedAt: new Date("2026-05-01T09:00:00+09:00"),
   firstPublishedAt: new Date("2026-05-01T09:00:00+09:00"),
