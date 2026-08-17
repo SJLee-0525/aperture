@@ -2,9 +2,14 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { createLocalDevArticleRepository } from "@/features/admin-dev-articles/_lib/local-dev-article-repository";
 
+import { MAX_PINNED_ARTICLES, PIN_LIMIT_MESSAGE } from "@/constants/dev-article-pin";
+
 import { MOCK_DEV_ARTICLES } from "@/mocks/dev-articles";
 
-import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-repository";
+import type {
+  DevArticleInput,
+  DevArticleRepository,
+} from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
 /** 테스트마다 새로 만드는 메모리 저장소. 실제 localStorage 를 건드리지 않는다. */
 const createMemoryStorage = (): Storage => {
@@ -40,6 +45,20 @@ const input = (overrides: Partial<DevArticleInput> = {}): DevArticleInput => ({
   ...overrides,
 });
 
+/**
+ * 상한까지 고정한다. seed 에 이미 고정된 글이 있어 몇 건을 더 채워야 하는지는 그때그때 다르다.
+ *
+ * @param {DevArticleRepository} repo 대상 저장소.
+ * @returns {Promise<string[]>} 상한을 채우고 남은 미고정 글의 id.
+ */
+const fillPins = async (repo: DevArticleRepository): Promise<string[]> => {
+  const items = await repo.list();
+  const spare = items.filter((item) => !item.pinned).map((item) => item.id);
+  const need = MAX_PINNED_ARTICLES - items.filter((item) => item.pinned).length;
+  for (const id of spare.slice(0, need)) await repo.setPinned(id, true);
+  return spare.slice(need);
+};
+
 let storage: Storage;
 const repository = () =>
   createLocalDevArticleRepository(
@@ -65,7 +84,7 @@ describe("createLocalDevArticleRepository", () => {
     const [item] = await repository().list();
 
     expect(Object.keys(item).sort()).toEqual(
-      ["id", "published", "publishedAt", "slug", "tags", "title", "updatedAt"].sort(),
+      ["id", "pinned", "published", "publishedAt", "slug", "tags", "title", "updatedAt"].sort(),
     );
   });
 
@@ -129,6 +148,83 @@ describe("createLocalDevArticleRepository", () => {
     const toggled = await repo.get("fresh");
     expect(toggled?.published).toBe(true);
     expect(toggled?.firstPublishedAt).toEqual(NOW);
+  });
+
+  it("고정 토글이 발행 상태와 발행 시각을 건드리지 않는다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input({ published: true, publishedAt: NOW }));
+
+    await repo.setPinned("fresh", true);
+
+    const pinned = await repo.get("fresh");
+    expect(pinned?.pinned).toBe(true);
+    expect(pinned?.published).toBe(true);
+    expect(pinned?.publishedAt).toEqual(NOW);
+  });
+
+  // 입력에 고정 값이 아예 없다. 폼 스냅샷이 낡아도 고정을 덮을 수 없어야 한다.
+  it("공개 토글과 폼 저장은 고정 값을 유지한다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input({ published: true, publishedAt: NOW }));
+    await repo.setPinned("fresh", true);
+
+    await repo.setPublished("fresh", false);
+    expect((await repo.get("fresh"))?.pinned).toBe(true);
+
+    await repo.update("fresh", input({ published: true, publishedAt: NOW }));
+    expect((await repo.get("fresh"))?.pinned).toBe(true);
+  });
+
+  // live 는 트리거가 pinned 만 바뀐 UPDATE 를 거른다. 두 모드의 수정 시각 계약이 같아야 한다.
+  it("고정 토글은 수정 시각을 올리지 않는다", async () => {
+    const later = new Date("2026-09-01T00:00:00.000Z");
+    const repo = createLocalDevArticleRepository(
+      () => storage,
+      () => later,
+    );
+    const [first] = await repo.list();
+
+    await repo.setPinned(first.id, !first.pinned);
+
+    expect((await repo.get(first.id))?.updatedAt).toEqual(first.updatedAt);
+  });
+
+  it("새 글은 고정하지 않은 상태로 만든다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input());
+
+    expect((await repo.get("fresh"))?.pinned).toBe(false);
+  });
+
+  it("없는 글을 고정하면 거부한다", async () => {
+    await expect(repository().setPinned("없음", true)).rejects.toThrow("찾지 못했습니다");
+  });
+
+  it("상한을 넘겨 고정하면 거부한다", async () => {
+    const repo = repository();
+    const [overflow] = await fillPins(repo);
+
+    await expect(repo.setPinned(overflow, true)).rejects.toThrow(PIN_LIMIT_MESSAGE);
+  });
+
+  // 상한 검사가 상태 비교보다 앞서면 이 재시도가 실패로 뒤집힌다.
+  it("상한에 도달해도 이미 고정된 글의 재고정은 성공한다", async () => {
+    const repo = repository();
+    await fillPins(repo);
+    const [already] = (await repo.list()).filter((item) => item.pinned);
+
+    await expect(repo.setPinned(already.id, true)).resolves.toBeUndefined();
+    expect((await repo.get(already.id))?.pinned).toBe(true);
+  });
+
+  it("상한에 도달해도 해제는 허용한다", async () => {
+    const repo = repository();
+    await fillPins(repo);
+    const [already] = (await repo.list()).filter((item) => item.pinned);
+
+    await repo.setPinned(already.id, false);
+
+    expect((await repo.get(already.id))?.pinned).toBe(false);
   });
 
   it("발행 조건을 만족하지 않는 초안은 목록 토글로도 발행되지 않는다", async () => {

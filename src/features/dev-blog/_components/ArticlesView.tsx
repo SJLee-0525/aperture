@@ -8,6 +8,7 @@ import { TagFilterBar } from "@/components/TagFilterBar";
 import { ViewToggle } from "@/components/ViewToggle";
 import { ArticleCard } from "@/features/dev-blog/_components/ArticleCard";
 import { ArticlePagination } from "@/features/dev-blog/_components/ArticlePagination";
+import { PinnedArticles } from "@/features/dev-blog/_components/PinnedArticles";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
@@ -29,6 +30,9 @@ import styles from "./ArticlesView.module.css";
 
 /** 가장 좁은 화면의 첫 행 카드 수. list 보기와 767px 이하 grid 가 1열이다. */
 const FIRST_ROW_CARDS = 1;
+
+/** 지면에 이 목록은 하나뿐이라 고정 id 로 제목과 영역을 잇는다. */
+const LIST_HEADING_ID = "all-articles-heading";
 
 type Props = {
   articles: DevArticleSummary[];
@@ -57,14 +61,33 @@ const ArticlesView = ({ articles, tags }: Props) => {
 
   const state = useMemo(() => parseArticleListQuery(searchParams, tags), [searchParams, tags]);
   // `TagFilterBar` 가 목록 변경을 감지해 넘침을 다시 재므로, 렌더마다 새 배열을 주지 않는다.
-  const tagItems = useMemo(
-    () => tags.map((tag) => ({ id: tag.id, label: pickText(tag, lang) })),
-    [tags, lang],
-  );
-  const filtered = useMemo(
-    () => (state.tag ? articles.filter((article) => article.tags.includes(state.tag!)) : articles),
-    [articles, state.tag],
-  );
+  // 칩 목록과 라벨 색인을 한 번에 만든다 — 라벨 조회가 카드 수 × 태그 수만큼 일어난다.
+  const { tagItems, tagLabelById } = useMemo(() => {
+    const tagItems: Array<{ id: string; label: string }> = [];
+    const tagLabelById = new Map<string, string>();
+    for (const tag of tags) {
+      const label = pickText(tag, lang);
+      tagItems.push({ id: tag.id, label });
+      tagLabelById.set(tag.id, label);
+    }
+    return { tagItems, tagLabelById };
+  }, [tags, lang]);
+
+  // 고정 글은 목록에서 빼지 않고 위에 한 번 더 보여 준다. 한 번의 순회로 두 배열을 만들고,
+  // 입력이 발행일 내림차순이라 각 배열의 내부 순서가 그대로 유지된다.
+  //
+  // 고정 섹션은 전체 보기에서만 만든다. 태그로 좁힌 화면은 그 태그의 목록이 전부이고,
+  // 거기에 같은 글을 위아래로 두 번 놓으면 필터 결과를 세는 데 방해가 된다.
+  const { filtered, pinned } = useMemo(() => {
+    const filtered: DevArticleSummary[] = [];
+    const pinned: DevArticleSummary[] = [];
+    for (const article of articles) {
+      if (state.tag && !article.tags.includes(state.tag)) continue;
+      filtered.push(article);
+      if (!state.tag && article.pinned) pinned.push(article);
+    }
+    return { filtered, pinned };
+  }, [articles, state.tag]);
 
   const pageCount = articlePageCount(filtered.length);
   const page = Math.min(state.page, pageCount);
@@ -81,10 +104,9 @@ const ArticlesView = ({ articles, tags }: Props) => {
   const go = (next: Partial<typeof canonical>) =>
     pushCurrentUrl(buildArticleListHref(window.location.pathname, { ...canonical, ...next }));
 
-  const labelOf = (id: string) => {
-    const tag = tags.find((candidate) => candidate.id === id);
-    return tag ? pickText(tag, lang) : id;
-  };
+  const labelOf = (id: string) => tagLabelById.get(id) ?? id;
+  const readingLabelOf = (minutes: number) =>
+    dict.articleReadingMinutes.replace("{n}", String(minutes));
 
   const visible = sliceArticlesPage(filtered, page);
 
@@ -109,6 +131,17 @@ const ArticlesView = ({ articles, tags }: Props) => {
         onSelect={(tag) => go({ tag, page: 1 })}
       />
 
+      {pinned.length > 0 ? (
+        <PinnedArticles
+          articles={pinned}
+          lang={lang}
+          heading={dict.articlesPinned}
+          badgeLabel={dict.articlePinnedBadge}
+          labelOf={labelOf}
+          readingLabelOf={readingLabelOf}
+        />
+      ) : null}
+
       {visible.length === 0 ? (
         <div className={styles.empty}>
           <p>{state.tag ? dict.articlesEmptyTag : dict.articlesEmptyAll}</p>
@@ -124,22 +157,25 @@ const ArticlesView = ({ articles, tags }: Props) => {
         </div>
       ) : (
         <>
-          <ul className={styles.list} data-view={state.view}>
-            {visible.map((article, index) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                view={state.view}
-                lang={lang}
-                priority={index < FIRST_ROW_CARDS}
-                tagLabels={article.tags.map(labelOf)}
-                readingLabel={dict.articleReadingMinutes.replace(
-                  "{n}",
-                  String(article.readingMinutes),
-                )}
-              />
-            ))}
-          </ul>
+          <section aria-labelledby={LIST_HEADING_ID}>
+            <h2 id={LIST_HEADING_ID} className={styles.heading}>
+              {dict.articlesAll}
+            </h2>
+            <ul className={styles.list} data-view={state.view}>
+              {visible.map((article, index) => (
+                <ArticleCard
+                  key={article.id}
+                  article={article}
+                  view={state.view}
+                  lang={lang}
+                  priority={index < FIRST_ROW_CARDS}
+                  pinnedLabel={article.pinned ? dict.articlePinnedBadge : undefined}
+                  tagLabels={article.tags.map(labelOf)}
+                  readingLabel={readingLabelOf(article.readingMinutes)}
+                />
+              ))}
+            </ul>
+          </section>
 
           <ArticlePagination
             page={page}

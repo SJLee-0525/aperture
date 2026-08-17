@@ -20,6 +20,7 @@ const article = (overrides: Partial<DevArticle> = {}): DevArticle => ({
   coverAlt: null,
   tags: ["firebase"],
   relatedProjectIds: [],
+  pinned: false,
   published: true,
   publishedAt: new Date("2026-01-05T09:00:00Z"),
   firstPublishedAt: new Date("2026-01-05T09:00:00Z"),

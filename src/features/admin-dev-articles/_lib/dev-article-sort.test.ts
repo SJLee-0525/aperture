@@ -14,6 +14,7 @@ const item = (
   slug: id,
   title: { ko: `제목 ${id}`, en: `Title ${id}` },
   tags: [],
+  pinned: false,
   published: publishedAt !== null,
   publishedAt: publishedAt ? new Date(publishedAt) : null,
   updatedAt: new Date(updatedAt),

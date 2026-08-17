@@ -47,6 +47,8 @@ const useOnDemandPhotoDetails = (
         setPhotosById((current) => mergePhotoCache(current, payload.photos.map(revivePhoto)));
         setTags(payload.tags);
         tagsLoadedRef.current = true;
+        // 실패 기록을 남겨 두면 나중에 이 사진이 정상 로드돼도 오류 화면이 다시 뜬다.
+        setFailedId(null);
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;

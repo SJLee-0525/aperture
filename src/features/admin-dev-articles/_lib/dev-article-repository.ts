@@ -7,8 +7,11 @@ import type { AdminDevArticleListItem } from "@/types/admin";
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
-/** 저장하는 필드. 문서 ID와 시스템 시각은 저장소가 채운다. */
-type DevArticleInput = Omit<DevArticle, "id" | "createdAt" | "updatedAt">;
+/**
+ * 저장하는 필드. 문서 ID와 시스템 시각은 저장소가 채운다.
+ * `pinned` 도 빠진다. 이 값은 `setPinned` 만 쓰고, 폼이 실어 나르면 낡은 스냅샷이 고정을 지운다.
+ */
+type DevArticleInput = Omit<DevArticle, "id" | "createdAt" | "updatedAt" | "pinned">;
 
 /**
  * 삭제 결과. 글 삭제가 실패하면 reject한다. 이미지만 일부 남은 경우에는 글 삭제를
@@ -35,6 +38,8 @@ type DevArticleRepository = {
   create: (id: string, input: DevArticleInput) => Promise<void>;
   update: (id: string, input: DevArticleInput) => Promise<void>;
   setPublished: (id: string, published: boolean) => Promise<void>;
+  /** 고정 여부만 바꾼다. 발행 상태와 발행 시각은 건드리지 않는다. */
+  setPinned: (id: string, pinned: boolean) => Promise<void>;
   remove: (id: string) => Promise<DevArticleRemoveResult>;
   listTags: () => Promise<DevArticleTag[]>;
   createTag: (tag: DevArticleTag) => Promise<void>;

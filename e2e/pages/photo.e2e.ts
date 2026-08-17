@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { photoAssertions } from "../utils/assertions/photo.assertions";
 import { commonAssertions } from "../utils/assertions/common.assertions";
+import { swipeHorizontally } from "../utils/touch-swipe";
 
 test.describe("Photo", () => {
   test("모바일 상세 모달의 스켈레톤과 실제 이미지 영역 높이가 같다", async ({ page }, testInfo) => {
@@ -80,6 +81,87 @@ test.describe("Photo", () => {
       frame: getComputedStyle(root.querySelector("[data-photo-modal-frame]")!).opacity,
     }));
     expect(opacity).toEqual({ root: "1", frame: "1" });
+  });
+
+  test.describe("모바일 좌우 스와이프", () => {
+    const openFirstPhoto = async (page: Parameters<typeof swipeHorizontally>[0]) => {
+      await page.goto("/ko/photo?photo=p01");
+      await commonAssertions.dialogOpened(page, "새벽의 항구");
+      // 이웃 슬라이드가 로드되기 전에는 넘기지 않는다. 이동 버튼은 이웃 상태를
+      // 반영하지 않으므로 세 슬라이드의 로드 완료를 직접 기다린다.
+      await expect
+        .poll(() =>
+          page
+            .locator("[data-photo-modal-track] img")
+            .evaluateAll(
+              (nodes) =>
+                nodes.length === 3 && nodes.every((node) => (node as HTMLImageElement).complete),
+            ),
+        )
+        .toBe(true);
+      return page.locator("[data-photo-modal-track]");
+    };
+
+    test("왼쪽으로 끌면 다음 사진으로 넘어간다", async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "mobile", "터치 제스처는 모바일 컨텍스트 전용");
+      await openFirstPhoto(page);
+
+      await swipeHorizontally(page, { from: 300, to: 40, y: 300 });
+
+      await expect(page).toHaveURL(/[?&]photo=p02/);
+    });
+
+    test("끄는 동안 이웃 사진이 손가락을 따라 들어온다", async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "mobile", "터치 제스처는 모바일 컨텍스트 전용");
+      const track = await openFirstPhoto(page);
+      const offsets: number[] = [];
+
+      await swipeHorizontally(page, { from: 300, to: 40, y: 300 }, async (step) => {
+        if (step !== 5) return;
+        offsets.push(
+          await track.evaluate(
+            (node) => new DOMMatrixReadOnly(getComputedStyle(node).transform).m41,
+          ),
+        );
+      });
+
+      // 트랙이 왼쪽으로 밀려 다음 슬라이드가 화면에 걸쳐 있어야 한다.
+      expect(offsets[0]).toBeLessThan(-20);
+    });
+
+    test("상세를 받지 못해도 스와이프가 오류와 재시도에 닿는다", async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "mobile", "터치 제스처는 모바일 컨텍스트 전용");
+      let offline = false;
+      await page.route("**/api/photos/*", (route) => (offline ? route.abort() : route.continue()));
+      await openFirstPhoto(page);
+      offline = true;
+
+      // 첫 번째 사진은 이웃으로 받아 뒀고, 그 다음 사진의 상세 요청이 실패한다.
+      await swipeHorizontally(page, { from: 300, to: 40, y: 300 });
+      await expect(page).toHaveURL(/[?&]photo=p02/);
+
+      // 받지 못한 사진으로 넘겨도 조용히 멈추지 않고 로딩 프레임이 상태를 알린다.
+      await swipeHorizontally(page, { from: 300, to: 40, y: 300 });
+      await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
+    });
+
+    test("EXIF 패널이 펼쳐져 있으면 스와이프해도 사진이 바뀌지 않는다", async ({
+      page,
+    }, testInfo) => {
+      test.skip(testInfo.project.name !== "mobile", "터치 제스처는 모바일 컨텍스트 전용");
+      await openFirstPhoto(page);
+
+      const handle = page.getByRole("button", { name: "사진 정보 펼치기" });
+      await handle.click();
+      await expect(page.getByRole("button", { name: "사진 정보 접기" })).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+
+      await swipeHorizontally(page, { from: 300, to: 40, y: 300 });
+
+      await expect(page).toHaveURL(/[?&]photo=p01/);
+    });
   });
 
   test("사진을 검색하고 상세 모달을 열고 닫는다", async ({ page }) => {

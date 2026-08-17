@@ -81,6 +81,20 @@ describe("row-codec — dev_articles", () => {
     expect("publishedAt" in row.data).toBe(false);
   });
 
+  // pinned 는 setDevArticlePinned 만 쓴다. 여기서 함께 쓰면 낡은 폼 스냅샷이 고정을 지운다.
+  it("pinned 를 컬럼에도 data 에도 쓰지 않는다", () => {
+    const row = encodeArticleRow("a1", {
+      published: true,
+      pinned: true,
+      slug: "chunking",
+      publishedAt: null,
+      body: "# 본문",
+    });
+
+    expect("pinned" in row).toBe(false);
+    expect("pinned" in row.data).toBe(false);
+  });
+
   it("초안의 publishedAt null 을 보존하고 DB 소유 타임스탬프는 쓰지 않는다", () => {
     const row = encodeArticleRow("a1", {
       published: false,

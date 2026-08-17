@@ -182,6 +182,7 @@ describe("formatArticleScreenContextBlock", () => {
     coverAlt: null,
     tags: [],
     relatedProjectIds: [],
+    pinned: false,
     published: true,
     publishedAt: new Date("2026-08-01T00:00:00.000Z"),
     firstPublishedAt: null,

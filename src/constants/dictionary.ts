@@ -166,6 +166,9 @@ type UIDict = {
   // 블로그 목록
   articlesEmptyTag: string;
   articlesEmptyAll: string;
+  articlesPinned: string;
+  articlesAll: string;
+  articlePinnedBadge: string;
   articleReadingMinutes: string;
   articleKoreanOnlyNotice: string;
   articleDraftLabel: string;
@@ -379,6 +382,9 @@ const DICTIONARY: Record<Lang, UIDict> = {
     viewList: "목록",
     articlesEmptyTag: "이 태그로 발행한 글이 아직 없습니다",
     articlesEmptyAll: "아직 발행한 글이 없습니다",
+    articlesPinned: "고정된 글",
+    articlesAll: "전체 글",
+    articlePinnedBadge: "고정",
     articleReadingMinutes: "{n}분",
     articleKoreanOnlyNotice: "This article is available in Korean only.",
     articleDraftLabel: "초안",
@@ -588,6 +594,9 @@ const DICTIONARY: Record<Lang, UIDict> = {
     viewList: "List",
     articlesEmptyTag: "No published articles with this tag yet",
     articlesEmptyAll: "No published articles yet",
+    articlesPinned: "Pinned",
+    articlesAll: "All articles",
+    articlePinnedBadge: "Pinned",
     articleReadingMinutes: "{n} min",
     articleKoreanOnlyNotice: "This article is available in Korean only.",
     articleDraftLabel: "Draft",

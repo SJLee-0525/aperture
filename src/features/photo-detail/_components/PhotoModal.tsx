@@ -2,22 +2,35 @@
 
 import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { ExifStrip } from "@/components/ExifStrip";
+import { Icon } from "@/components/Icon";
 import { ExifPanel } from "@/features/photo-detail/_components/ExifPanel";
 import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanelSkeleton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { PHOTO_QUERY_KEY } from "@/features/photo-detail/_hooks/use-photo-detail-session";
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
+import { useOverlayDrag } from "@/hooks/use-overlay-drag";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+
+import { readPhotoNeighbors } from "@/features/photo-detail/_lib/photo-neighbors";
 
 import { pickText } from "@/lib/i18n/pick-text";
 
@@ -37,6 +50,14 @@ type Props = {
   chatTarget?: boolean;
 };
 
+type ImageStatus = "loaded" | "failed";
+
+type Slide = {
+  key: string;
+  item: Photo | null;
+  current: boolean;
+};
+
 const EASE = [0.22, 1, 0.36, 1] as const;
 const MOBILE_QUERY = "(max-width: 900px)";
 const COLLAPSE_TOUCH_THRESHOLD = 56;
@@ -51,37 +72,11 @@ const subscribeMobile = (onChange: () => void) => {
 const readMobile = () => window.matchMedia(MOBILE_QUERY).matches;
 const readServerMobile = () => false;
 
-const chevLeft = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
-const chevRight = (
-  <svg
-    viewBox="0 0 24 24"
-    width="17"
-    height="17"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
-
 /**
  * 사진 상세 — 데스크톱 라이트박스 / 모바일 바텀시트(탭으로 peek↔확장).
  * document.body로 포털 렌더 → sticky 헤더 등 어떤 조상 스태킹 컨텍스트에도 안 갇히고 항상 최상단.
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
+ * 이전·현재·다음 세 장을 트랙에 올려 모바일에서 좌우로 끌어 넘길 수 있게 한다.
  *
  * @param {Props} props
  * @param {Photo[]} props.photos
@@ -107,16 +102,37 @@ const PhotoModal = ({
   const { dict, lang } = useLang();
   const [expanded, setExpanded] = useState(false);
   const [photoChromeVisible, setPhotoChromeVisible] = useState(true);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  // 이웃으로 미리 그려 둔 이미지가 현재로 승격돼도 onLoad는 다시 뛰지 않는다.
+  // 사진별 결과를 누적해야 승격 직후 스피너가 다시 덮지 않는다.
+  const [imageStatus, setImageStatus] = useState<ReadonlyMap<string, ImageStatus>>(() => new Map());
+  // 재시도할 때마다 슬라이드 키를 바꿔 img 를 다시 마운트한다. 같은 src 는 그냥 두면 다시 받지 않는다.
+  const [retryCounts, setRetryCounts] = useState<ReadonlyMap<string, number>>(() => new Map());
+
+  const searchParams = useSearchParams();
+
+  // usePhotoModal 이 반환하는 photo 로는 그 호출의 인자를 만들 수 없어 URL 에서 직접 읽는다.
+  const activePhotoId = searchParams.get(PHOTO_QUERY_KEY);
+  const activeStatus = activePhotoId != null ? imageStatus.get(activePhotoId) : undefined;
+
+  // 실패도 결판이 난 상태다. 스피너를 걷고 오류를 보여 준다.
+  const imgLoaded = activeStatus != null;
+  const imgFailed = activeStatus === "failed";
   const mobile = useSyncExternalStore(subscribeMobile, readMobile, readServerMobile);
   const navigationLocked = mobile && expanded;
   const isTopLayer = useOverlayLayer(Boolean(photos.length));
   const showPhotoChrome = !navigationLocked && photoChromeVisible;
-  const onNavigateStart = useCallback(() => setImgLoaded(false), []);
-  const { photo, open, close, next, prev } = usePhotoModal(
+  const {
+    photo,
+    open,
+    close,
+    next,
+    prev,
+    navigationIds,
+    index: photoIndex,
+  } = usePhotoModal(
     photos,
     !navigationLocked && imgLoaded,
-    onNavigateStart,
+    undefined,
     photoIds,
     onClose,
     isTopLayer,
@@ -133,22 +149,83 @@ const PhotoModal = ({
   const dismissSurfaceRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
-  // 사진이 바뀌면(prev/next·열기) 로더/스켈레톤을 다시 표시 — effect 없이 render-time reseed.
+
+  // 사진이 바뀌면(prev/next·열기) 패널과 크롬을 기본 상태로 — effect 없이 render-time reseed.
   if (photo && photo.id !== seenId) {
     setSeenId(photo.id);
-    setImgLoaded(false);
     setExpanded(false);
     setPhotoChromeVisible(true);
   }
   const trapRef = useFocusTrap(open && revealed);
   const mounted = useMounted();
   useScrollLock(open);
+
+  const alt = photo ? pickText(photo.title, lang) : "";
+  // 렌더마다(크롬 토글·스크롤 상태 변화) 반복되는 id 조회는 Map으로 — O(사진×이웃), O(태그×사진태그) 제거.
+  const photoById = useMemo(() => new Map(photos.map((item) => [item.id, item])), [photos]);
+  const tagById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag])), [tags]);
+  const neighbors = readPhotoNeighbors(navigationIds, photoById, photoIndex);
+  // 버튼과 방향키는 아직 못 받은 사진으로도 이동한다. 온디맨드 경로가 그 상태를 로딩
+  // 프레임으로 받아 실패하면 재시도까지 보여 준다. 이웃을 요구하면 그 출구가 막힌다.
+  const canNavigatePrev = imgLoaded && !navigationLocked;
+  const canNavigateNext = imgLoaded && !navigationLocked;
+  // 이웃이 아직 없으면 밀어 보여 줄 그림이 없다. 넘기기는 하되 애니메이션만 건너뛴다.
+  const canPeekPrev =
+    neighbors.previous != null && imageStatus.get(neighbors.previous.id) === "loaded";
+  const canPeekNext = neighbors.next != null && imageStatus.get(neighbors.next.id) === "loaded";
+  const tagLabels = photo
+    ? photo.tags.map((id) => {
+        const found = tagById.get(id);
+        return found ? pickText(found, lang) : id;
+      })
+    : [];
+  const slideKey = (id: string, suffix = "") => `${id}${suffix}@${retryCounts.get(id) ?? 0}`;
+  const slides: Slide[] = photo
+    ? [
+        {
+          key: neighbors.previous ? slideKey(neighbors.previous.id) : "empty-previous",
+          item: neighbors.previous,
+          current: false,
+        },
+        { key: slideKey(photo.id), item: photo, current: true },
+        {
+          // 사진이 2장이면 이전과 다음이 같은 문서라 키가 겹친다.
+          key:
+            neighbors.next == null
+              ? "empty-next"
+              : slideKey(
+                  neighbors.next.id,
+                  neighbors.next.id === neighbors.previous?.id ? "#next" : "",
+                ),
+          item: neighbors.next,
+          current: false,
+        },
+      ]
+    : [];
+
+  const markImage = useCallback((id: string, status: ImageStatus) => {
+    setImageStatus((current) =>
+      current.get(id) === status ? current : new Map(current).set(id, status),
+    );
+  }, []);
+
+  const retryImage = useCallback((id: string) => {
+    setImageStatus((current) => {
+      const rest = new Map(current);
+      rest.delete(id);
+      return rest;
+    });
+    setRetryCounts((current) => new Map(current).set(id, (current.get(id) ?? 0) + 1));
+  }, []);
+
   const {
-    onTouchStart: onDismissTouchStart,
-    onTouchMove: onDismissTouchMove,
-    onTouchEnd: onDismissTouchEnd,
-    onTouchCancel: onDismissTouchCancel,
-  } = usePullDownDismiss({
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
+    consumeDragged,
+    swipeSurfaceRef: trackRef,
+  } = useOverlayDrag({
     enabled: mobile && open && revealed && !expanded,
     onDismiss: close,
     surfaceRef: dismissSurfaceRef,
@@ -158,6 +235,14 @@ const PhotoModal = ({
       const panel = element?.closest("aside");
       return !panel || panel.scrollTop <= 1;
     },
+    canSwipeStart: (target) =>
+      target instanceof Element &&
+      target.closest("[data-photo-modal-track]") != null &&
+      target.closest("button") == null,
+    canSwipeCommit: (direction) => (direction === 1 ? canNavigateNext : canNavigatePrev),
+    canSwipePeek: (direction) => (direction === 1 ? canPeekNext : canPeekPrev),
+    getSwipeStageWidth: () => photoRef.current?.clientWidth ?? 0,
+    onSwipe: (direction) => (direction === 1 ? next() : prev()),
   });
 
   useEffect(() => {
@@ -177,29 +262,21 @@ const PhotoModal = ({
     };
   }, [open, photo?.id]);
 
-  const alt = photo ? pickText(photo.title, lang) : "";
-  // 렌더마다(크롬 토글·스크롤 상태 변화) 반복되는 id 조회는 Map으로 — O(사진×이웃), O(태그×사진태그) 제거.
-  const photoById = useMemo(() => new Map(photos.map((item) => [item.id, item])), [photos]);
-  const tagById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag])), [tags]);
-  const navigationIds = photoIds ?? photos.map((item) => item.id);
-  const photoIndex = photo ? navigationIds.indexOf(photo.id) : -1;
-  const adjacentPhotos =
-    photoIndex >= 0 && navigationIds.length > 1
-      ? [
-          ...new Set([
-            navigationIds[(photoIndex - 1 + navigationIds.length) % navigationIds.length],
-            navigationIds[(photoIndex + 1) % navigationIds.length],
-          ]),
-        ]
-          .map((id) => photoById.get(id))
-          .filter((item): item is Photo => item != null)
-      : [];
-  const tagLabels = photo
-    ? photo.tags.map((id) => {
-        const found = tagById.get(id);
-        return found ? pickText(found, lang) : id;
-      })
-    : [];
+  // 온디맨드 경로의 pending 프레임은 이 신호로 걷힌다. 이미 로드된 이웃으로 넘어가면
+  // onLoad 가 다시 뛰지 않으므로 로드 여부에서 파생해 알린다.
+  // 페인트 뒤에 알리면 이미 준비된 사진 위로 로딩 프레임이 한 프레임 지나간다.
+  useLayoutEffect(() => {
+    if (activePhotoId != null && imgLoaded) onImageReady?.(activePhotoId);
+  }, [activePhotoId, imgLoaded, onImageReady]);
+
+  // 커밋 애니메이션이 남긴 이동값을 페인트 전에 되돌린다. 그대로 두면 새 현재 사진이 아니라
+  // 그 다음 슬라이드가 가운데에 보인다.
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.style.transition = "none";
+    track.style.transform = "translate3d(0, 0, 0)";
+  }, [photo?.id, trackRef]);
 
   const collapsePanel = (panel: HTMLElement) => {
     touchStartY.current = null;
@@ -269,10 +346,10 @@ const PhotoModal = ({
           animate={{ opacity: animateOnOpen ? (revealed ? 1 : 0) : 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
-          onTouchStart={onDismissTouchStart}
-          onTouchMove={onDismissTouchMove}
-          onTouchEnd={onDismissTouchEnd}
-          onTouchCancel={onDismissTouchCancel}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onTouchCancel={onTouchCancel}
         >
           <button
             type="button"
@@ -300,6 +377,8 @@ const PhotoModal = ({
               onContextMenu={(event) => event.preventDefault()}
               onDragStart={(event) => event.preventDefault()}
               onClick={(event) => {
+                // 드래그 뒤 브라우저가 합성하는 click 은 크롬 토글로 보지 않는다.
+                if (consumeDragged()) return;
                 if ((event.target as HTMLElement).closest("button")) return;
                 if (mobile && expanded && panelRef.current) {
                   collapsePanel(panelRef.current);
@@ -308,46 +387,50 @@ const PhotoModal = ({
                 }
               }}
             >
-              <Image
-                key={photo.id}
-                src={photo.image.url}
-                alt={alt}
-                fill
-                sizes="100vw"
-                className={styles.img}
-                draggable={false}
-                onContextMenu={(event) => event.preventDefault()}
-                onDragStart={(event) => event.preventDefault()}
-                priority
-                onLoad={() => {
-                  setImgLoaded(true);
-                  onImageReady?.(photo.id);
-                }}
-                onError={() => {
-                  setImgLoaded(true);
-                  onImageReady?.(photo.id);
-                }}
-              />
-              <div className={styles.preloads} aria-hidden="true">
-                {adjacentPhotos.map((adjacent) => (
-                  <Image
-                    key={adjacent.id}
-                    src={adjacent.image.url}
-                    alt=""
-                    width={adjacent.image.w}
-                    height={adjacent.image.h}
-                    sizes="100vw"
-                    draggable={false}
-                  />
+              <div ref={trackRef} className={styles.track} data-photo-modal-track>
+                {slides.map(({ key, item, current }) => (
+                  <div key={key} className={styles.slide} aria-hidden={current ? undefined : true}>
+                    {/* 실패한 이미지는 걷어 낸다. 깨진 그림 위에 오류 문구를 겹치지 않는다. */}
+                    {item && imageStatus.get(item.id) !== "failed" ? (
+                      <Image
+                        src={item.image.url}
+                        alt={current ? alt : ""}
+                        fill
+                        sizes="100vw"
+                        className={styles.img}
+                        draggable={false}
+                        onContextMenu={(event) => event.preventDefault()}
+                        onDragStart={(event) => event.preventDefault()}
+                        priority={current}
+                        // 이웃은 화면 밖이라 lazy 로 두면 엔진 휴리스틱에 따라 로드가 미뤄지고,
+                        // 그러면 스와이프 커밋 조건이 열리지 않는다.
+                        loading="eager"
+                        onLoad={() => markImage(item.id, "loaded")}
+                        onError={() => markImage(item.id, "failed")}
+                      />
+                    ) : null}
+                  </div>
                 ))}
               </div>
+              {imgFailed ? (
+                <div className={styles.imgError} role="alert">
+                  <p>{dict.photoLoadError}</p>
+                  <button
+                    type="button"
+                    className={styles.retry}
+                    onClick={() => retryImage(photo.id)}
+                  >
+                    {dict.errorRetry}
+                  </button>
+                </div>
+              ) : null}
               {imgLoaded ? null : (
                 <div className={styles.imgLoader} aria-hidden="true">
                   <span className={styles.spinner} />
                 </div>
               )}
               <AnimatePresence>
-                {imgLoaded && showPhotoChrome ? (
+                {imgLoaded && !imgFailed && showPhotoChrome ? (
                   <m.div
                     key="exif-strip"
                     className={styles.strip}
@@ -381,13 +464,13 @@ const PhotoModal = ({
                     className={`${styles.nav} ${styles.prev}`}
                     aria-label={dict.previousImageLabel}
                     onClick={prev}
-                    disabled={!imgLoaded}
+                    disabled={!canNavigatePrev}
                     initial={{ opacity: 0, x: -6, y: "-50%" }}
                     animate={{ opacity: 1, x: 0, y: "-50%" }}
                     exit={{ opacity: 0, x: -6, y: "-50%" }}
                     transition={CHROME_TRANSITION}
                   >
-                    {chevLeft}
+                    <Icon name="chevronLeft" size={17} />
                   </m.button>
                 ) : null}
                 {showPhotoChrome ? (
@@ -397,13 +480,13 @@ const PhotoModal = ({
                     className={`${styles.nav} ${styles.next}`}
                     aria-label={dict.nextImageLabel}
                     onClick={next}
-                    disabled={!imgLoaded}
+                    disabled={!canNavigateNext}
                     initial={{ opacity: 0, x: 6, y: "-50%" }}
                     animate={{ opacity: 1, x: 0, y: "-50%" }}
                     exit={{ opacity: 0, x: 6, y: "-50%" }}
                     transition={CHROME_TRANSITION}
                   >
-                    {chevRight}
+                    <Icon name="chevronRight" size={17} />
                   </m.button>
                 ) : null}
               </AnimatePresence>

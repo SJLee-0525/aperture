@@ -23,6 +23,14 @@ type DevArticle = {
   tags: string[];
   /** 연관 프로젝트 관계의 단일 원천. 표시 순서를 그대로 유지한다. */
   relatedProjectIds: string[];
+  /**
+   * 목록 최상단 고정 섹션에 노출한다. 페이지 번호와 무관하게 보이고, 일반 목록에도
+   * 발행일 자리에 그대로 남아 페이지 나누기가 달라지지 않는다.
+   *
+   * `MAX_PINNED_ARTICLES` 만큼만 켤 수 있고, 값을 바꾸는 경로는 저장소의 `setPinned` 뿐이다.
+   * 발행 여부와 독립이라 초안에 켜 두면 발행한 뒤부터 적용된다.
+   */
+  pinned: boolean;
   published: boolean;
   /** 관리자가 직접 지정하는 발행 일시. 공개 목록 정렬의 기준이며 초안에서는 비어 있다. */
   publishedAt: Date | null;

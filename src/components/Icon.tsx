@@ -115,6 +115,7 @@ const PATHS = {
   arrowUp: <path d="M12 20V5M6 11l6-6 6 6" />,
   arrowDown: <path d="M12 4v15M6 13l6 6 6-6" />,
   check: <path d="M4 12.5l5 5L20 6.5" />,
+  pin: <path d="M9 4h6l-1 6 3 3v2H7v-2l3-3-1-6zM12 15v5" />,
 } as const satisfies Record<string, ReactNode>;
 
 /**

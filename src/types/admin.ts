@@ -24,7 +24,7 @@ type AdminMusicWorkListItem = Pick<
  */
 type AdminDevArticleListItem = Pick<
   DevArticle,
-  "id" | "slug" | "title" | "tags" | "published" | "publishedAt" | "updatedAt"
+  "id" | "slug" | "title" | "tags" | "pinned" | "published" | "publishedAt" | "updatedAt"
 >;
 
 export type {

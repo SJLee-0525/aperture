@@ -58,13 +58,16 @@ const SUPABASE_COLLECTIONS: Partial<Record<CollectionId, SupabaseCollectionDescr
   [COLLECTIONS.DEV_PROJECTS]: listDescriptor("dev_projects"),
   [COLLECTIONS.DEV_ARTICLES]: {
     table: "dev_articles",
-    select: "id,published,slug,published_at,created_at,updated_at,data",
+    select: "id,published,pinned,slug,published_at,created_at,updated_at,data",
     // publishedAt desc + id asc — 기존 `__name__ ASC` 명시와 같은 순서 계약.
+    // 고정 글은 이 정렬에 끼어들지 않는다. 목록·sitemap·검색·이웃 글 표가 같은 순서를 쓰고,
+    // 고정 섹션 분리는 목록 화면(`ArticlesView`)만 한다.
     order: "published_at.desc.nullslast,id.asc",
     hasPublished: true,
     hasData: true,
     scalars: {
       published: "published",
+      pinned: "pinned",
       slug: "slug",
       publishedAt: "published_at",
       createdAt: "created_at",

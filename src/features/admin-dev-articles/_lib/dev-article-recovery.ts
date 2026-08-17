@@ -11,7 +11,7 @@ import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-art
  */
 
 /** 복구본 형식 버전. 폼 필드가 바뀌면 올리고 과거 값은 복구하지 않는다. */
-const RECOVERY_VERSION = 1;
+const RECOVERY_VERSION = 3;
 
 /**
  * 복구본 수명. 지난달에 덮어 둔 값이 오늘 편집을 덮어쓰는 일이 없게 짧게 잡되,

@@ -19,6 +19,8 @@ type DevArticleSummary = {
   coverAlt: LocalizedText | null;
   /** `DevArticleTag.id` 참조. 라벨 해석은 화면이 사전으로 한다. */
   tags: string[];
+  /** 목록 화면이 고정 섹션과 일반 목록을 나누는 기준. */
+  pinned: boolean;
   /** 공개 글에는 항상 값이 있다. 초안이 섞여 들어오면 생성 시각으로 대신한다. */
   publishedAt: Date;
   readingMinutes: number;
@@ -43,6 +45,7 @@ const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
   cover: article.cover,
   coverAlt: article.coverAlt,
   tags: article.tags,
+  pinned: article.pinned,
   publishedAt: article.publishedAt ?? article.createdAt,
   readingMinutes: analyzeArticle(article).readingMinutes,
   relatedProjectIds: article.relatedProjectIds,

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Icon } from "@/components/Icon";
+
 import { devArticleRoute } from "@/constants/routes";
 import { formatYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
@@ -14,7 +16,12 @@ import type { Lang } from "@/types/lang";
 
 import styles from "./ArticleCard.module.css";
 
-const COVER_SIZES = "(max-width: 720px) 100vw, 560px";
+/**
+ * 커버 슬롯의 실제 폭. `ArticleCard.module.css` 의 `.cover` 규칙과 같은 값이라 한쪽만 고치면
+ * 어긋난다. list 는 폭이 고정이라 100vw 를 주면 116px 자리에 뷰포트 크기 소스를 받는다.
+ */
+const GRID_COVER_SIZES = "(max-width: 720px) 100vw, 560px";
+const LIST_COVER_SIZES = "(max-width: 560px) 116px, 200px";
 
 type Props = {
   article: DevArticleSummary;
@@ -22,6 +29,7 @@ type Props = {
   lang: Lang;
   tagLabels: string[];
   readingLabel: string;
+  pinnedLabel?: string;
   priority?: boolean;
 };
 
@@ -41,13 +49,24 @@ type Props = {
  * @param {Lang} props.lang 링크 로케일 프리픽스와 제목·요약 언어를 고른다.
  * @param {string[]} props.tagLabels 사전에서 현재 언어로 해석한 태그 라벨.
  * @param {string} props.readingLabel 완성된 읽기 시간 문구.
+ * @param {string | undefined} props.pinnedLabel 고정 배지 문구. 값이 있을 때만 배지를 그린다.
+ *   화면에는 아이콘만 보이고 이 문구는 링크 이름에만 남는다.
  * @param {boolean | undefined} props.priority LCP 보호. 첫 행의 실제 대표 이미지만 eager 로드한다.
  *   대표 이미지가 없는 카드의 워드마크 자리표시자는 LCP 후보가 아니라서 받지 않는다.
  * @returns {JSX.Element}
  */
-const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = false }: Props) => {
+const ArticleCard = ({
+  article,
+  view,
+  lang,
+  tagLabels,
+  readingLabel,
+  pinnedLabel,
+  priority = false,
+}: Props) => {
   const title = pickText(article.title, lang);
   const coverUrl = article.cover ? imagePreviewUrl(article.cover) : "";
+  const coverSizes = view === "list" ? LIST_COVER_SIZES : GRID_COVER_SIZES;
 
   return (
     <li className={styles.item} data-view={view}>
@@ -55,6 +74,7 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
         href={localizePath(lang, devArticleRoute(article.slug))}
         prefetch={false}
         className={styles.card}
+        data-pinned={pinnedLabel ? "" : undefined}
         data-cursor-large="frame"
       >
         <div className={styles.cover} data-protected-image>
@@ -63,7 +83,7 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
               src={coverUrl}
               alt={article.coverAlt ? pickText(article.coverAlt, lang) : ""}
               fill
-              sizes={COVER_SIZES}
+              sizes={coverSizes}
               className={styles.coverImg}
               draggable={false}
               priority={priority}
@@ -74,7 +94,7 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
                 src="/dev-project-image"
                 alt=""
                 fill
-                sizes={COVER_SIZES}
+                sizes={coverSizes}
                 className={`${styles.coverImg} ${styles.fallbackLight}`}
                 draggable={false}
                 unoptimized
@@ -83,13 +103,21 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
                 src="/dev-project-image-dark"
                 alt=""
                 fill
-                sizes={COVER_SIZES}
+                sizes={coverSizes}
                 className={`${styles.coverImg} ${styles.fallbackDark}`}
                 draggable={false}
                 unoptimized
               />
             </>
           )}
+          {pinnedLabel ? (
+            <span className={styles.pinned}>
+              <Icon name="pin" size={15} />
+              {/* 아이콘만 보이지만 링크 이름에는 남는다. 아이콘은 aria-hidden 이라 지우면
+                  카드가 고정 글이라는 사실이 보조기술에 전달되지 않는다. */}
+              <span className={styles.pinnedLabel}>{pinnedLabel}</span>
+            </span>
+          ) : null}
         </div>
 
         <div className={styles.cardBody}>
@@ -99,7 +127,8 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
             </time>
             <span>{readingLabel}</span>
           </div>
-          <h2 className={styles.title}>{title}</h2>
+          {/* 목록 지면의 h1 은 `PageToolbar`, h2 는 고정·전체 섹션 이름이 갖는다. */}
+          <h3 className={styles.title}>{title}</h3>
           {tagLabels.length > 0 ? (
             <div className={styles.tags}>{tagLabels.map((label) => `#${label}`).join(" ")}</div>
           ) : null}
