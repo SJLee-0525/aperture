@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ArticlesView } from "@/features/dev-blog/_components/ArticlesView";
@@ -32,7 +32,7 @@ const TAGS: DevArticleTag[] = [
   { id: "accessibility", ko: "접근성", en: "Accessibility" },
 ];
 
-const summary = (id: string, tags: string[]): DevArticleSummary => ({
+const summary = (id: string, tags: string[], pinned = false): DevArticleSummary => ({
   id,
   slug: id,
   title: { ko: `${id} 제목`, en: `${id} title` },
@@ -40,6 +40,7 @@ const summary = (id: string, tags: string[]): DevArticleSummary => ({
   cover: null,
   coverAlt: null,
   tags,
+  pinned,
   publishedAt: new Date("2026-05-01T09:00:00+09:00"),
   readingMinutes: 3,
   relatedProjectIds: [],
@@ -125,5 +126,83 @@ describe("ArticlesView", () => {
     fireEvent.click(screen.getByRole("button", { name: "목록" }));
 
     expect(mocks.push).toHaveBeenCalledWith("/ko/dev/articles?view=list");
+  });
+});
+
+describe("ArticlesView — 고정 글", () => {
+  /** 고정 1건 + css 태그 9건. 고정 글을 빼면 일반 목록이 두 페이지가 된다. */
+  const PINNED = summary("pinned-note", ["css"], true);
+  const WITH_PINNED = [PINNED, ...ARTICLES];
+
+  const renderPinned = () => render(<ArticlesView articles={WITH_PINNED} tags={TAGS} />);
+
+  /** 고정 섹션 안의 글 제목. 섹션 제목도 h2 라 그것만 걷어낸다. */
+  const pinnedTitles = () =>
+    within(screen.getByRole("region", { name: DICTIONARY.ko.articlesPinned }))
+      .getAllByRole("heading", { level: 2 })
+      .map((heading) => heading.textContent)
+      .filter((text) => text !== DICTIONARY.ko.articlesPinned);
+
+  beforeEach(() => {
+    window.history.replaceState({}, "", "/ko/dev/articles");
+  });
+
+  afterEach(() => {
+    cleanup();
+    mocks.search = new URLSearchParams();
+    mocks.push.mockClear();
+    mocks.replace.mockClear();
+  });
+
+  it("고정 글을 별도 섹션에 보여 준다", () => {
+    renderPinned();
+
+    expect(pinnedTitles()).toEqual(["pinned-note 제목"]);
+  });
+
+  it("고정 글은 아래 목록에도 발행일 자리에 그대로 남는다", () => {
+    renderPinned();
+
+    const listed = screen
+      .getAllByRole("heading", { level: 2 })
+      .map((heading) => heading.textContent);
+    // 섹션 제목 1 + 고정 섹션 카드 1 + 목록 카드 1.
+    expect(listed.filter((text) => text === "pinned-note 제목")).toHaveLength(2);
+  });
+
+  it("페이지를 넘겨도 고정 섹션은 남는다", () => {
+    mocks.search = new URLSearchParams("page=2");
+    window.history.replaceState({}, "", "/ko/dev/articles?page=2");
+    renderPinned();
+
+    expect(pinnedTitles()).toEqual(["pinned-note 제목"]);
+  });
+
+  it("고정은 페이지 나누기를 바꾸지 않는다", () => {
+    renderPinned();
+
+    // 11건이 그대로 페이지 대상이다 — 고정해도 공유한 페이지 주소의 내용이 밀리지 않는다.
+    expect(screen.getByText("11 articles")).toBeTruthy();
+    const lastPage = DICTIONARY.ko.paginationPage.replace("{n}", "2");
+    expect(screen.getByRole("button", { name: lastPage })).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: DICTIONARY.ko.paginationPage.replace("{n}", "3") }),
+    ).toBeNull();
+  });
+
+  it("태그 필터는 고정 글에도 적용된다", () => {
+    mocks.search = new URLSearchParams("tag=testing");
+    renderPinned();
+
+    expect(screen.queryByRole("region", { name: DICTIONARY.ko.articlesPinned })).toBeNull();
+  });
+
+  it("고정 섹션은 보기 토글과 무관하게 목록 행으로 그린다", () => {
+    mocks.search = new URLSearchParams("view=grid");
+    renderPinned();
+
+    const section = screen.getByRole("region", { name: DICTIONARY.ko.articlesPinned });
+    expect(section.querySelector("[data-view='grid']")).toBeNull();
+    expect(section.querySelectorAll("[data-view='list']").length).toBeGreaterThan(0);
   });
 });

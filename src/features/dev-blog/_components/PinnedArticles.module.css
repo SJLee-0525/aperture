@@ -1,0 +1,25 @@
+.section {
+  margin-bottom: var(--s-8);
+  padding-bottom: var(--s-8);
+  border-bottom: 1px solid var(--line);
+}
+
+.heading {
+  margin-bottom: var(--s-4);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* 보기 토글과 무관하게 1열이다. 카드 자체는 `ArticleCard` 의 list 모양을 쓴다. */
+.list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

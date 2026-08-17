@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Icon } from "@/components/Icon";
+
 import { devArticleRoute } from "@/constants/routes";
 import { formatYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
@@ -22,6 +24,7 @@ type Props = {
   lang: Lang;
   tagLabels: string[];
   readingLabel: string;
+  pinnedLabel?: string;
   priority?: boolean;
 };
 
@@ -41,11 +44,21 @@ type Props = {
  * @param {Lang} props.lang 링크 로케일 프리픽스와 제목·요약 언어를 고른다.
  * @param {string[]} props.tagLabels 사전에서 현재 언어로 해석한 태그 라벨.
  * @param {string} props.readingLabel 완성된 읽기 시간 문구.
+ * @param {string | undefined} props.pinnedLabel 고정 배지 문구. 값이 있을 때만 배지를 그린다.
+ *   화면에는 아이콘만 보이고 이 문구는 링크 이름에만 남는다.
  * @param {boolean | undefined} props.priority LCP 보호. 첫 행의 실제 대표 이미지만 eager 로드한다.
  *   대표 이미지가 없는 카드의 워드마크 자리표시자는 LCP 후보가 아니라서 받지 않는다.
  * @returns {JSX.Element}
  */
-const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = false }: Props) => {
+const ArticleCard = ({
+  article,
+  view,
+  lang,
+  tagLabels,
+  readingLabel,
+  pinnedLabel,
+  priority = false,
+}: Props) => {
   const title = pickText(article.title, lang);
   const coverUrl = article.cover ? imagePreviewUrl(article.cover) : "";
 
@@ -55,6 +68,7 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
         href={localizePath(lang, devArticleRoute(article.slug))}
         prefetch={false}
         className={styles.card}
+        data-pinned={pinnedLabel ? "" : undefined}
         data-cursor-large="frame"
       >
         <div className={styles.cover} data-protected-image>
@@ -90,6 +104,14 @@ const ArticleCard = ({ article, view, lang, tagLabels, readingLabel, priority = 
               />
             </>
           )}
+          {pinnedLabel ? (
+            <span className={styles.pinned}>
+              <Icon name="pin" size={15} />
+              {/* 아이콘만 보이지만 링크 이름에는 남는다. 아이콘은 aria-hidden 이라 지우면
+                  카드가 고정 글이라는 사실이 보조기술에 전달되지 않는다. */}
+              <span className={styles.pinnedLabel}>{pinnedLabel}</span>
+            </span>
+          ) : null}
         </div>
 
         <div className={styles.cardBody}>
