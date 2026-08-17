@@ -96,9 +96,22 @@ const useDevArticlesAdmin = () => {
         // 낙관적 변경을 옛 값으로 되돌리므로 이 행만 가져온다.
         const fresh = new Map((await repository.list()).map((item) => [item.id, item]));
         const updated = fresh.get(id);
-        // 저장소에서 사라진 행은 화면에서도 없앤다.
         replaceItems(
-          itemsRef.current.flatMap((item) => (item.id !== id ? [item] : updated ? [updated] : [])),
+          itemsRef.current.flatMap((item) => {
+            if (item.id !== id) return [item];
+            // 저장소에서 사라진 행은 화면에서도 없앤다.
+            if (!updated) return [];
+            // 발행이 바꾼 값만 가져온다. 행을 통째로 갈아 끼우면 같은 행에서 진행 중인
+            // 고정의 낙관적 값이 응답 시점의 옛 값으로 되돌아간다.
+            return [
+              {
+                ...item,
+                published: updated.published,
+                publishedAt: updated.publishedAt,
+                updatedAt: updated.updatedAt,
+              },
+            ];
+          }),
         );
       } catch (caught) {
         setError((caught as Error).message);

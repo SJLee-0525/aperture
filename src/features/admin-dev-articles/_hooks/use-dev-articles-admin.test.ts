@@ -100,6 +100,37 @@ describe("useDevArticlesAdmin — 겹치는 낙관적 갱신", () => {
     });
   });
 
+  it("공개 갱신의 재조회가 같은 행의 진행 중인 고정을 덮지 않는다", async () => {
+    // 고정 버튼만 진행 중 잠금을 걸어서, 같은 글의 공개 버튼은 그 사이에도 눌린다.
+    const publish = deferred();
+    const pin = deferred();
+    mocks.setPublished.mockReturnValue(publish.promise);
+    mocks.setPinned.mockReturnValue(pin.promise);
+    const { result } = await setup();
+
+    act(() => {
+      void result.current.togglePinned("a1", true);
+      void result.current.togglePublished("a1", true);
+    });
+
+    // 재조회 응답에는 a1 의 고정이 아직 반영돼 있지 않다.
+    mocks.list.mockResolvedValue([item("a1", { published: true }), item("b1")]);
+    await act(async () => {
+      publish.settle();
+      await publish.promise;
+    });
+
+    expect(rowOf(result.current.articles, "a1")?.pinned).toBe(true);
+    expect(rowOf(result.current.articles, "a1")?.published).toBe(true);
+
+    await act(async () => {
+      pin.settle();
+      await pin.promise;
+    });
+
+    expect(rowOf(result.current.articles, "a1")?.pinned).toBe(true);
+  });
+
   it("공개 갱신 중 지운 행이 재조회 결과로 되살아나지 않는다", async () => {
     const publish = deferred();
     mocks.setPublished.mockReturnValue(publish.promise);
