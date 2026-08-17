@@ -190,11 +190,16 @@ describe("ArticlesView — 고정 글", () => {
     ).toBeNull();
   });
 
-  it("태그 필터는 고정 글에도 적용된다", () => {
-    mocks.search = new URLSearchParams("tag=testing");
+  // 고정 글이 그 태그를 갖고 있어도 숨긴다. 태그로 좁힌 화면은 그 목록이 전부다.
+  it("태그를 고르면 고정 섹션을 숨긴다", () => {
+    mocks.search = new URLSearchParams("tag=css");
     renderPinned();
 
     expect(screen.queryByRole("region", { name: DICTIONARY.ko.articlesPinned })).toBeNull();
+    // 목록에서 빠지는 것은 아니다.
+    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toContain(
+      "pinned-note 제목",
+    );
   });
 
   it("고정 섹션은 보기 토글과 무관하게 목록 행으로 그린다", () => {

@@ -23,8 +23,8 @@ type Props = {
 /**
  * 목록 위에 붙는 고정 글 섹션.
  *
- * 페이지를 넘겨도 계속 보이는 자리라 제목이 없으면 발행일 순서를 어긴 카드가 맨 위에
- * 있는 것으로 읽힌다. 같은 글은 아래 목록에도 발행일 자리에 그대로 남는다.
+ * 같은 글은 아래 목록에도 발행일 자리에 그대로 남는다. 화면에 섹션 제목은 두지 않고
+ * 카드의 고정 배지가 이 자리의 이유를 설명한다. 제목은 보조기술용으로만 남는다.
  *
  * 보기 토글과 무관하게 항상 목록 행으로 그린다. 카드형은 16:9 대표 이미지가 세로를 크게
  * 차지하는데, 이 섹션은 모든 페이지에 반복되므로 아래 목록이 첫 화면에서 밀려난다.
@@ -32,7 +32,7 @@ type Props = {
  * @param {Props} props
  * @param {DevArticleSummary[]} props.articles 고정 글. 비어 있으면 호출부가 이 섹션을 그리지 않는다.
  * @param {Lang} props.lang 링크 프리픽스와 제목 언어.
- * @param {string} props.heading 섹션 제목.
+ * @param {string} props.heading 영역 이름. 화면에는 보이지 않고 보조기술만 읽는다.
  * @param {string} props.badgeLabel 카드에 붙일 고정 배지 문구.
  * @param {(tagId: string) => string} props.labelOf 태그 id 를 현재 언어 라벨로 바꾼다.
  * @param {(minutes: number) => string} props.readingLabelOf 읽기 시간 문구를 만든다.

@@ -72,13 +72,16 @@ const ArticlesView = ({ articles, tags }: Props) => {
 
   // 고정 글은 목록에서 빼지 않고 위에 한 번 더 보여 준다. 한 번의 순회로 두 배열을 만들고,
   // 입력이 발행일 내림차순이라 각 배열의 내부 순서가 그대로 유지된다.
+  //
+  // 고정 섹션은 전체 보기에서만 만든다. 태그로 좁힌 화면은 그 태그의 목록이 전부이고,
+  // 거기에 같은 글을 위아래로 두 번 놓으면 필터 결과를 세는 데 방해가 된다.
   const { filtered, pinned } = useMemo(() => {
     const filtered: DevArticleSummary[] = [];
     const pinned: DevArticleSummary[] = [];
     for (const article of articles) {
       if (state.tag && !article.tags.includes(state.tag)) continue;
       filtered.push(article);
-      if (article.pinned) pinned.push(article);
+      if (!state.tag && article.pinned) pinned.push(article);
     }
     return { filtered, pinned };
   }, [articles, state.tag]);
