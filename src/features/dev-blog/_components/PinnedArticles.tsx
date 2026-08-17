@@ -28,6 +28,7 @@ type Props = {
  *
  * 보기 토글과 무관하게 항상 목록 행으로 그린다. 카드형은 16:9 대표 이미지가 세로를 크게
  * 차지하는데, 이 섹션은 모든 페이지에 반복되므로 아래 목록이 첫 화면에서 밀려난다.
+ * 같은 이유로 고정 자체가 `MAX_PINNED_ARTICLES` 건으로 제한된다.
  *
  * @param {Props} props
  * @param {DevArticleSummary[]} props.articles 고정 글. 비어 있으면 호출부가 이 섹션을 그리지 않는다.
@@ -57,7 +58,8 @@ const PinnedArticles = ({
           article={article}
           view="list"
           lang={lang}
-          // 이 섹션이 목록 위에 있으므로 화면 첫 카드의 대표 이미지가 LCP 후보다.
+          // 이 섹션의 첫 카드는 화면 맨 위라 LCP 후보다. 아래 목록의 첫 카드도 따로 받는다.
+          // grid 보기에서는 그쪽 커버가 더 크고, 이 섹션의 글에 대표 이미지가 없을 수도 있다.
           priority={index < FIRST_ROW_CARDS}
           pinnedLabel={badgeLabel}
           tagLabels={article.tags.map(labelOf)}
