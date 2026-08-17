@@ -9,8 +9,8 @@ import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useOverlayDrag } from "@/hooks/use-overlay-drag";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { usePullDownDismiss } from "@/hooks/use-pull-down-dismiss";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import type { ImageMeta } from "@/types/image";
@@ -139,7 +139,7 @@ const ImageLightbox = ({
     onTouchMove: onDismissTouchMove,
     onTouchEnd: onDismissTouchEnd,
     onTouchCancel: onDismissTouchCancel,
-  } = usePullDownDismiss({
+  } = useOverlayDrag({
     enabled: true,
     onDismiss: onClose,
     surfaceRef: containerRef,

@@ -23,6 +23,7 @@ export default defineConfig({
         "src/lib/content/normalize-troubleshooting.ts",
         "src/hooks/use-query-modal.ts",
         "src/hooks/use-focus-trap.ts",
+        "src/hooks/use-overlay-drag.ts",
         "src/hooks/use-scroll-lock.ts",
         "src/features/contact/_hooks/use-contact-form.ts",
         "src/features/contact/_hooks/use-contact-draft.ts",

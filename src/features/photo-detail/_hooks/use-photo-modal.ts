@@ -16,7 +16,7 @@ import type { Photo } from "@/types/photo";
  * @param {string[]} [photoIds]
  * @param {() => void} [onClose]
  * @param {boolean} [keyboardEnabled]
- * @returns {{ photo: Photo | null; open: boolean; close: () => void; next: () => void; prev: () => void }}
+ * @returns {{ photo: Photo | null; open: boolean; close: () => void; next: () => void; prev: () => void; navigationIds: string[]; index: number }}
  */
 const usePhotoModal = (
   photos: Photo[],
@@ -78,6 +78,8 @@ const usePhotoModal = (
     close,
     next: () => step(1),
     prev: () => step(-1),
+    navigationIds,
+    index,
   };
 };
 
