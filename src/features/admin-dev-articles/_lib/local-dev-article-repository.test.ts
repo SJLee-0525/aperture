@@ -34,7 +34,6 @@ const input = (overrides: Partial<DevArticleInput> = {}): DevArticleInput => ({
   coverAlt: null,
   tags: [],
   relatedProjectIds: [],
-  pinned: false,
   published: false,
   publishedAt: null,
   firstPublishedAt: null,
@@ -144,6 +143,7 @@ describe("createLocalDevArticleRepository", () => {
     expect(pinned?.publishedAt).toEqual(NOW);
   });
 
+  // 입력에 고정 값이 아예 없다. 폼 스냅샷이 낡아도 고정을 덮을 수 없어야 한다.
   it("공개 토글과 폼 저장은 고정 값을 유지한다", async () => {
     const repo = repository();
     await repo.create("fresh", input({ published: true, publishedAt: NOW }));
@@ -152,8 +152,15 @@ describe("createLocalDevArticleRepository", () => {
     await repo.setPublished("fresh", false);
     expect((await repo.get("fresh"))?.pinned).toBe(true);
 
-    await repo.update("fresh", input({ published: true, publishedAt: NOW, pinned: true }));
+    await repo.update("fresh", input({ published: true, publishedAt: NOW }));
     expect((await repo.get("fresh"))?.pinned).toBe(true);
+  });
+
+  it("새 글은 고정하지 않은 상태로 만든다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input());
+
+    expect((await repo.get("fresh"))?.pinned).toBe(false);
   });
 
   it("없는 글을 고정하면 거부한다", async () => {

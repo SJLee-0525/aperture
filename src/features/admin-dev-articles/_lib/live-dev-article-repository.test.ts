@@ -203,13 +203,13 @@ describe("createLiveDevArticleRepository", () => {
       expect(mocks.requestPublicPathRevalidate).not.toHaveBeenCalled();
     });
 
-    // 이 경로는 전체 행을 다시 쓴다. 고정 값을 빠뜨리면 공개 토글 한 번에 고정이 풀린다.
-    it("고정 값을 그대로 넘긴다", async () => {
+    // 이 경로는 전체 행을 다시 쓴다. 고정 값을 실어 보내면 setPinned 와 경합해 고정을 덮는다.
+    it("고정 값을 페이로드에 담지 않는다", async () => {
       mocks.get.mockResolvedValue(article({ published: true, pinned: true }));
 
       await repository.setPublished("a1", false);
 
-      expect(mocks.update).toHaveBeenCalledWith("a1", expect.objectContaining({ pinned: true }));
+      expect(mocks.update.mock.calls[0][1]).not.toHaveProperty("pinned");
     });
   });
 

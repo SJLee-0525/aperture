@@ -149,6 +149,8 @@ const createLocalDevArticleRepository = (
             {
               id,
               ...stampFirstPublished(input, undefined, now),
+              // 새 글은 고정하지 않는다. live 는 컬럼 default 가 같은 값을 준다.
+              pinned: false,
               createdAt: stamped,
               updatedAt: stamped,
             },

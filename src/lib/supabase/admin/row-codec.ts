@@ -19,7 +19,6 @@ type ListRow = {
 type ArticleRow = {
   id: string;
   published: boolean;
-  pinned: boolean;
   slug: string;
   published_at: string | null;
   data: Record<string, unknown>;
@@ -46,18 +45,22 @@ const encodeListRow = (id: string, input: Record<string, unknown>): ListRow => {
 };
 
 /**
- * dev_articles 인코딩. 스칼라는 `published`·`pinned`·`slug`·`published_at` 4개다.
+ * dev_articles 인코딩. 쓰는 스칼라는 `published`·`slug`·`published_at` 3개다.
  * `created_at`/`updated_at` 은 DB(default·트리거) 소유라 쓰지 않고,
  * `firstPublishedAt` 은 조회 대상이 아니라 data 안에 남긴다.
+ *
+ * `pinned` 는 읽기 병합의 대상이지만 이 인코더가 유일하게 되돌려 쓰지 않는 컬럼이다.
+ * `setDevArticlePinned` 만 그 컬럼을 쓴다. 여기서 함께 쓰면 낡은 폼 스냅샷이 고정을 지운다.
+ * data 에서는 계속 걷어낸다 — 남겨 두면 컬럼과 이중 저장이 되어 곧바로 stale 이 된다.
  */
 const encodeArticleRow = (id: string, input: Record<string, unknown>): ArticleRow => {
   const { published, pinned, slug, publishedAt, createdAt, updatedAt, ...rest } = input;
+  void pinned;
   void createdAt;
   void updatedAt;
   return {
     id,
     published: published === true,
-    pinned: pinned === true,
     slug: typeof slug === "string" ? slug : "",
     published_at: publishedAt instanceof Date ? publishedAt.toISOString() : null,
     data: toJson(rest),

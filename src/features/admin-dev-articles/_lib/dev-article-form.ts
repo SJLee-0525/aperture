@@ -21,7 +21,6 @@ const emptyArticleInput = (): DevArticleInput => ({
   coverAlt: null,
   tags: [],
   relatedProjectIds: [],
-  pinned: false,
   published: false,
   publishedAt: null,
   firstPublishedAt: null,
@@ -29,15 +28,23 @@ const emptyArticleInput = (): DevArticleInput => ({
 
 /**
  * 저장된 글을 폼 값으로 되돌린다.
+ * `pinned` 도 뺀다. 폼이 들고 있으면 편집을 시작한 시점의 값으로 저장돼 목록 토글을 덮는다.
  *
  * @param {DevArticle} article 편집할 글.
- * @returns {DevArticleInput} 문서 ID와 시스템 시각을 뺀 폼 값.
+ * @returns {DevArticleInput} 문서 ID·시스템 시각·고정 여부를 뺀 폼 값.
  */
 const articleToInput = (article: DevArticle): DevArticleInput => {
-  const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...input } = article;
+  const {
+    id: _id,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    pinned: _pinned,
+    ...input
+  } = article;
   void _id;
   void _createdAt;
   void _updatedAt;
+  void _pinned;
   return input;
 };
 
