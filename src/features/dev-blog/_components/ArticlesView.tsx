@@ -161,8 +161,7 @@ const ArticlesView = ({ articles, tags }: Props) => {
                 article={article}
                 view={state.view}
                 lang={lang}
-                // 고정 섹션이 위에 있으면 화면 첫 카드는 그쪽이라 여기서 받지 않는다.
-                priority={pinned.length === 0 && index < FIRST_ROW_CARDS}
+                priority={index < FIRST_ROW_CARDS}
                 pinnedLabel={article.pinned ? dict.articlePinnedBadge : undefined}
                 tagLabels={article.tags.map(labelOf)}
                 readingLabel={readingLabelOf(article.readingMinutes)}

@@ -16,7 +16,12 @@ import type { Lang } from "@/types/lang";
 
 import styles from "./ArticleCard.module.css";
 
-const COVER_SIZES = "(max-width: 720px) 100vw, 560px";
+/**
+ * 커버 슬롯의 실제 폭. `ArticleCard.module.css` 의 `.cover` 규칙과 같은 값이라 한쪽만 고치면
+ * 어긋난다. list 는 폭이 고정이라 100vw 를 주면 116px 자리에 뷰포트 크기 소스를 받는다.
+ */
+const GRID_COVER_SIZES = "(max-width: 720px) 100vw, 560px";
+const LIST_COVER_SIZES = "(max-width: 560px) 116px, 200px";
 
 type Props = {
   article: DevArticleSummary;
@@ -61,6 +66,7 @@ const ArticleCard = ({
 }: Props) => {
   const title = pickText(article.title, lang);
   const coverUrl = article.cover ? imagePreviewUrl(article.cover) : "";
+  const coverSizes = view === "list" ? LIST_COVER_SIZES : GRID_COVER_SIZES;
 
   return (
     <li className={styles.item} data-view={view}>
@@ -77,7 +83,7 @@ const ArticleCard = ({
               src={coverUrl}
               alt={article.coverAlt ? pickText(article.coverAlt, lang) : ""}
               fill
-              sizes={COVER_SIZES}
+              sizes={coverSizes}
               className={styles.coverImg}
               draggable={false}
               priority={priority}
@@ -88,7 +94,7 @@ const ArticleCard = ({
                 src="/dev-project-image"
                 alt=""
                 fill
-                sizes={COVER_SIZES}
+                sizes={coverSizes}
                 className={`${styles.coverImg} ${styles.fallbackLight}`}
                 draggable={false}
                 unoptimized
@@ -97,7 +103,7 @@ const ArticleCard = ({
                 src="/dev-project-image-dark"
                 alt=""
                 fill
-                sizes={COVER_SIZES}
+                sizes={coverSizes}
                 className={`${styles.coverImg} ${styles.fallbackDark}`}
                 draggable={false}
                 unoptimized
