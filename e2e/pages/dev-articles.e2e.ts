@@ -82,11 +82,49 @@ test.describe("개발 블로그 목록", () => {
 
   test("카드에서 상세로 이동한다", async ({ page }) => {
     await page.goto(LIST);
-    await page.getByRole("link", { name: /서버 없이 포트폴리오를 운영한다/ }).click();
+    // 이 글은 고정이라 위 섹션과 아래 목록에 각각 한 번씩 있다.
+    await page
+      .getByRole("link", { name: /서버 없이 포트폴리오를 운영한다/ })
+      .first()
+      .click();
 
     await expect(page).toHaveURL(/\/ko\/dev\/articles\/serverless-portfolio$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "서버 없이 포트폴리오를 운영한다",
     );
+  });
+});
+
+const PINNED_TITLE = /서버 없이 포트폴리오를 운영한다/;
+
+test.describe("개발 블로그 고정 글", () => {
+  test.beforeEach(({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "고정 섹션 계약은 데스크톱에서 검증");
+  });
+
+  test("페이지를 넘겨도 고정 섹션이 남는다", async ({ page }) => {
+    const section = page.getByRole("region", { name: "고정된 글" });
+    await page.goto(LIST);
+    await expect(section.getByRole("link", { name: PINNED_TITLE })).toBeVisible();
+
+    await page.getByRole("button", { name: "2페이지" }).click();
+    await expect(page).toHaveURL(/\?page=2$/);
+    await expect(section.getByRole("link", { name: PINNED_TITLE })).toBeVisible();
+  });
+
+  test("고정 글은 아래 목록에도 발행일 자리에 남는다", async ({ page }) => {
+    await page.goto(LIST);
+
+    // 섹션 1 + 목록 1. 고정해도 목록에서 사라지지 않아 페이지 경계가 그대로다.
+    await expect(page.getByRole("link", { name: PINNED_TITLE })).toHaveCount(2);
+    await expect(page.locator("main").getByText(/\d+ articles/)).toHaveText("9 articles");
+  });
+
+  test("태그를 고르면 고정 섹션을 숨긴다", async ({ page }) => {
+    // firebase 는 고정 글이 가진 태그다. 그래도 섹션은 뜨지 않고 목록에만 남는다.
+    await page.goto(`${LIST}?tag=firebase`);
+
+    await expect(page.getByRole("region", { name: "고정된 글" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: PINNED_TITLE })).toHaveCount(1);
   });
 });
