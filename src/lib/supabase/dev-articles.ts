@@ -1,5 +1,6 @@
 import { collectionCacheTag } from "@/constants/cache";
 import { COLLECTIONS, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { MAX_PINNED_ARTICLES, PIN_LIMIT_MESSAGE } from "@/constants/dev-article-pin";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
@@ -55,22 +56,28 @@ const findArticleSlugOwner = async (slug: string, selfId: string): Promise<strin
 
 /**
  * 고정 여부만 바꾼다. 제목·요약·본문·태그가 그대로라 RAG 청크가 달라지지 않으므로
- * `devArticlesCrud` 를 거치지 않고 컬럼 하나만 갱신한다. 발행 필드도 건드리지 않는다.
+ * `devArticlesCrud` 를 거치지 않는다. 발행 필드도 건드리지 않는다.
  *
- * 상세 지면의 내용은 바뀌지 않고 목록 순서만 달라져 컬렉션 태그만 무효화한다.
+ * 상한 검사와 갱신은 RPC 한 번에 묶는다. 개수 조회와 update 를 나누면 두 클라이언트가
+ * 같은 개수를 읽고 각자 고정해 상한을 넘긴다. 이미 같은 상태면 RPC 가 상한과 무관하게
+ * 성공으로 끝내므로, 상한에 도달한 뒤에도 재시도가 실패로 뒤집히지 않는다.
+ *
+ * 이 UPDATE 는 `updated_at` 을 올리지 않는다. 트리거가 data·published·slug·published_at
+ * 이 실제로 바뀔 때만 발화하므로 SEO 수정 시각이 고정 토글에 흔들리지 않는다.
  *
  * @param {string} id 대상 글의 문서 ID.
  * @param {boolean} pinned 고정 여부.
  * @returns {Promise<void>} 저장과 공개 캐시 갱신이 끝나면 완료된다.
- * @throws {Error} 문서가 없거나 RLS 가 쓰기를 막아 0행이 된 경우.
+ * @throws {Error} 상한을 넘겼거나, 문서가 없거나, RLS 가 쓰기를 막아 0행이 된 경우.
  */
 const setDevArticlePinned = async (id: string, pinned: boolean): Promise<void> => {
-  const { data, error } = await getSupabaseClient()
-    .from(ARTICLES_TABLE)
-    .update({ pinned })
-    .eq("id", id)
-    .select("id");
-  if (error || !data?.length) throw new Error("고정 상태 변경에 실패했습니다.");
+  const { data, error } = await getSupabaseClient().rpc("set_dev_article_pinned", {
+    p_id: id,
+    p_pinned: pinned,
+    p_max: MAX_PINNED_ARTICLES,
+  });
+  if (error?.code === "23514") throw new Error(PIN_LIMIT_MESSAGE);
+  if (error || data !== true) throw new Error("고정 상태 변경에 실패했습니다.");
   requestPublicRevalidate(collectionCacheTag(COLLECTIONS.DEV_ARTICLES));
 };
 

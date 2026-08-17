@@ -12,6 +12,8 @@ import {
   type DevArticleStore,
 } from "@/features/admin-dev-articles/_lib/local-dev-article-store";
 
+import { MAX_PINNED_ARTICLES, PIN_LIMIT_MESSAGE } from "@/constants/dev-article-pin";
+
 import type {
   DevArticleInput,
   DevArticleRepository,
@@ -203,13 +205,21 @@ const createLocalDevArticleRepository = (
     setPinned: (id, pinned) =>
       enqueue(async () => {
         const store = await load();
-        if (!store.articles.some((article) => article.id === id)) {
-          throw new Error("고정할 글을 찾지 못했습니다.");
+        const previous = store.articles.find((article) => article.id === id);
+        if (!previous) throw new Error("고정할 글을 찾지 못했습니다.");
+        // 상태가 이미 같으면 상한 검사를 건너뛴다. 상한에 도달한 뒤에도 재시도가 성공으로 끝난다.
+        if (previous.pinned === pinned) return;
+        if (
+          pinned &&
+          store.articles.filter((article) => article.pinned).length >= MAX_PINNED_ARTICLES
+        ) {
+          throw new Error(PIN_LIMIT_MESSAGE);
         }
+        // `updatedAt` 은 그대로 둔다. live 는 트리거가 pinned 만 바뀐 UPDATE 를 걸러 낸다.
         save({
           ...store,
           articles: store.articles.map((article) =>
-            article.id === id ? { ...article, pinned, updatedAt: now() } : article,
+            article.id === id ? { ...article, pinned } : article,
           ),
         });
       }),
