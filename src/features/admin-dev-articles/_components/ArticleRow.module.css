@@ -58,13 +58,25 @@
   cursor: pointer;
   transition: all var(--dur) var(--ease);
 }
-.badge:hover {
+.badge:hover:not(:disabled) {
   border-color: var(--line-strong);
+}
+.badge:disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 .badgeOn {
   background: var(--accent-soft);
   border-color: transparent;
   color: var(--accent);
+}
+
+/* 고정 토글은 아이콘 하나뿐이라 정사각으로 좁힌다. 꺼진 상태는 .badge 의 흐린 색 그대로다. */
+.pinBadge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  padding: 0;
 }
 
 .actions {
@@ -100,7 +112,9 @@
     gap: var(--s-3);
     padding: var(--s-3);
   }
-  .tags {
+  /* 좁은 폭에서는 제목이 먼저다. 태그 수와 발행일을 빼야 제목이 잘리지 않는다. */
+  .tags,
+  .date {
     display: none;
   }
 }

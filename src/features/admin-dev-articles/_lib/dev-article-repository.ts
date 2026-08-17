@@ -35,6 +35,8 @@ type DevArticleRepository = {
   create: (id: string, input: DevArticleInput) => Promise<void>;
   update: (id: string, input: DevArticleInput) => Promise<void>;
   setPublished: (id: string, published: boolean) => Promise<void>;
+  /** 고정 여부만 바꾼다. 발행 상태와 발행 시각은 건드리지 않는다. */
+  setPinned: (id: string, pinned: boolean) => Promise<void>;
   remove: (id: string) => Promise<DevArticleRemoveResult>;
   listTags: () => Promise<DevArticleTag[]>;
   createTag: (tag: DevArticleTag) => Promise<void>;

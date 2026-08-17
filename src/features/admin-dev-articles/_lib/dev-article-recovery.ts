@@ -10,8 +10,11 @@ import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-art
  * 이미지 바이너리는 넣지 않는다. 폼이 들고 있는 것도 이미 업로드가 끝난 URL 뿐이다.
  */
 
-/** 복구본 형식 버전. 폼 필드가 바뀌면 올리고 과거 값은 복구하지 않는다. */
-const RECOVERY_VERSION = 1;
+/**
+ * 복구본 형식 버전. 폼 필드가 바뀌면 올리고 과거 값은 복구하지 않는다.
+ * v2: `pinned` 추가 — v1 복구본을 되살리면 이 필드가 빠진 채로 저장돼 고정이 풀린다.
+ */
+const RECOVERY_VERSION = 2;
 
 /**
  * 복구본 수명. 지난달에 덮어 둔 값이 오늘 편집을 덮어쓰는 일이 없게 짧게 잡되,

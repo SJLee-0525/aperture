@@ -132,6 +132,34 @@ describe("createLocalDevArticleRepository", () => {
     expect(toggled?.firstPublishedAt).toEqual(NOW);
   });
 
+  it("고정 토글이 발행 상태와 발행 시각을 건드리지 않는다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input({ published: true, publishedAt: NOW }));
+
+    await repo.setPinned("fresh", true);
+
+    const pinned = await repo.get("fresh");
+    expect(pinned?.pinned).toBe(true);
+    expect(pinned?.published).toBe(true);
+    expect(pinned?.publishedAt).toEqual(NOW);
+  });
+
+  it("공개 토글과 폼 저장은 고정 값을 유지한다", async () => {
+    const repo = repository();
+    await repo.create("fresh", input({ published: true, publishedAt: NOW }));
+    await repo.setPinned("fresh", true);
+
+    await repo.setPublished("fresh", false);
+    expect((await repo.get("fresh"))?.pinned).toBe(true);
+
+    await repo.update("fresh", input({ published: true, publishedAt: NOW, pinned: true }));
+    expect((await repo.get("fresh"))?.pinned).toBe(true);
+  });
+
+  it("없는 글을 고정하면 거부한다", async () => {
+    await expect(repository().setPinned("없음", true)).rejects.toThrow("찾지 못했습니다");
+  });
+
   it("발행 조건을 만족하지 않는 초안은 목록 토글로도 발행되지 않는다", async () => {
     // 이 검사가 없으면 발행일 없는 글이 `published: true` · `publishedAt: null` 로 남는다.
     // 폼에서는 막히는 상태이고, 공개 목록은 그 글의 날짜를 작성일로 대신 보여 준다.

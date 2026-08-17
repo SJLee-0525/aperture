@@ -53,6 +53,27 @@ const findArticleSlugOwner = async (slug: string, selfId: string): Promise<strin
   return (data?.[0]?.id as string | undefined) ?? null;
 };
 
+/**
+ * 고정 여부만 바꾼다. 제목·요약·본문·태그가 그대로라 RAG 청크가 달라지지 않으므로
+ * `devArticlesCrud` 를 거치지 않고 컬럼 하나만 갱신한다. 발행 필드도 건드리지 않는다.
+ *
+ * 상세 지면의 내용은 바뀌지 않고 목록 순서만 달라져 컬렉션 태그만 무효화한다.
+ *
+ * @param {string} id 대상 글의 문서 ID.
+ * @param {boolean} pinned 고정 여부.
+ * @returns {Promise<void>} 저장과 공개 캐시 갱신이 끝나면 완료된다.
+ * @throws {Error} 문서가 없거나 RLS 가 쓰기를 막아 0행이 된 경우.
+ */
+const setDevArticlePinned = async (id: string, pinned: boolean): Promise<void> => {
+  const { data, error } = await getSupabaseClient()
+    .from(ARTICLES_TABLE)
+    .update({ pinned })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) throw new Error("고정 상태 변경에 실패했습니다.");
+  requestPublicRevalidate(collectionCacheTag(COLLECTIONS.DEV_ARTICLES));
+};
+
 const TAGS_CACHE_TAG = collectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
 
 /**
@@ -122,5 +143,6 @@ export {
   findArticleSlugOwner,
   listDevArticleTagsAdmin,
   removeDevArticleTag,
+  setDevArticlePinned,
   updateDevArticleTag,
 };

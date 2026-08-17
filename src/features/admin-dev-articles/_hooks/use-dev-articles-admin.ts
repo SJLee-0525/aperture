@@ -23,8 +23,9 @@ type AdminArticlesStatus = "loading" | "ready" | "error";
  * 정렬은 저장소가 아니라 여기서 한다. 초안은 `publishedAt` 이 없어 Firestore 쿼리로 자리를
  * 정할 수 없으므로 B5 이후에도 같은 순수 함수를 쓴다.
  *
- * @returns {{ articles: AdminDevArticleListItem[]; total: number; status: AdminArticlesStatus; error: string | null; keyword: string; setKeyword: (value: string) => void; statusFilter: AdminArticleStatusFilter; setStatusFilter: (value: AdminArticleStatusFilter) => void; togglePublished: (id: string, next: boolean) => Promise<void>; remove: (id: string) => Promise<void> }}
+ * @returns {{ articles: AdminDevArticleListItem[]; total: number; status: AdminArticlesStatus; error: string | null; keyword: string; setKeyword: (value: string) => void; statusFilter: AdminArticleStatusFilter; setStatusFilter: (value: AdminArticleStatusFilter) => void; togglePublished: (id: string, next: boolean) => Promise<void>; togglePinned: (id: string, next: boolean) => Promise<void>; pendingPinId: string | null; remove: (id: string) => Promise<void> }}
  *   `articles` 는 필터를 적용한 목록, `total` 은 필터 전 전체 글 수다.
+ *   `pendingPinId` 는 고정 요청이 진행 중인 행이다.
  */
 const useDevArticlesAdmin = () => {
   const repository = useMemo(() => getDevArticleRepository(), []);
@@ -33,6 +34,8 @@ const useDevArticlesAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<AdminArticleStatusFilter>("all");
+  /** 고정 요청이 끝나기 전 같은 행을 다시 누르지 못하게 잡아 두는 문서 ID. */
+  const [pendingPinId, setPendingPinId] = useState<string | null>(null);
   const itemsRef = useRef<AdminDevArticleListItem[]>([]);
 
   const replaceItems = useCallback((next: AdminDevArticleListItem[]) => {
@@ -77,6 +80,25 @@ const useDevArticlesAdmin = () => {
     [repository, replaceItems],
   );
 
+  const togglePinned = useCallback(
+    async (id: string, next: boolean) => {
+      const previous = itemsRef.current;
+      setError(null);
+      setPendingPinId(id);
+      replaceItems(previous.map((item) => (item.id === id ? { ...item, pinned: next } : item)));
+      try {
+        // 고정은 발행 시각을 건드리지 않아 정렬 기준이 그대로다. 목록을 다시 읽지 않는다.
+        await repository.setPinned(id, next);
+      } catch (caught) {
+        replaceItems(previous);
+        setError((caught as Error).message);
+      } finally {
+        setPendingPinId(null);
+      }
+    },
+    [repository, replaceItems],
+  );
+
   const remove = useCallback(
     async (id: string) => {
       setError(null);
@@ -107,6 +129,8 @@ const useDevArticlesAdmin = () => {
     statusFilter,
     setStatusFilter,
     togglePublished,
+    togglePinned,
+    pendingPinId,
     remove,
   };
 };

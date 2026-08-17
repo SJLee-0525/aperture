@@ -198,6 +198,20 @@ const createLocalDevArticleRepository = (
         });
       }),
 
+    setPinned: (id, pinned) =>
+      enqueue(async () => {
+        const store = await load();
+        if (!store.articles.some((article) => article.id === id)) {
+          throw new Error("고정할 글을 찾지 못했습니다.");
+        }
+        save({
+          ...store,
+          articles: store.articles.map((article) =>
+            article.id === id ? { ...article, pinned, updatedAt: now() } : article,
+          ),
+        });
+      }),
+
     remove: (id) =>
       enqueue(async () => {
         const store = await load();

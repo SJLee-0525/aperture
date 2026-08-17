@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   listDevArticleItemsAdmin: vi.fn(async () => []),
   listDevProjectItemsAdmin: vi.fn(async () => []),
   listDevArticleTagsAdmin: vi.fn(async () => []),
+  setDevArticlePinned: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/dev-articles", () => ({
@@ -24,6 +25,7 @@ vi.mock("@/lib/supabase/dev-articles", () => ({
   },
   findArticleSlugOwner: mocks.findArticleSlugOwner,
   listDevArticleTagsAdmin: mocks.listDevArticleTagsAdmin,
+  setDevArticlePinned: mocks.setDevArticlePinned,
   createDevArticleTag: vi.fn(),
   updateDevArticleTag: vi.fn(),
   removeDevArticleTag: vi.fn(),
@@ -197,6 +199,38 @@ describe("createLiveDevArticleRepository", () => {
       mocks.get.mockResolvedValue(article({ published: false }));
 
       await repository.setPublished("a1", false);
+
+      expect(mocks.requestPublicPathRevalidate).not.toHaveBeenCalled();
+    });
+
+    // 이 경로는 전체 행을 다시 쓴다. 고정 값을 빠뜨리면 공개 토글 한 번에 고정이 풀린다.
+    it("고정 값을 그대로 넘긴다", async () => {
+      mocks.get.mockResolvedValue(article({ published: true, pinned: true }));
+
+      await repository.setPublished("a1", false);
+
+      expect(mocks.update).toHaveBeenCalledWith("a1", expect.objectContaining({ pinned: true }));
+    });
+  });
+
+  describe("setPinned", () => {
+    it("컬럼 갱신 함수에 그대로 넘긴다", async () => {
+      await repository.setPinned("a1", true);
+
+      expect(mocks.setDevArticlePinned).toHaveBeenCalledWith("a1", true);
+    });
+
+    // 고정은 본문·발행 상태를 건드리지 않는다. 문서를 다시 쓰면 RAG 동기화와
+    // firstPublishedAt 스탬프까지 딸려 온다.
+    it("문서를 읽거나 다시 쓰지 않는다", async () => {
+      await repository.setPinned("a1", true);
+
+      expect(mocks.get).not.toHaveBeenCalled();
+      expect(mocks.update).not.toHaveBeenCalled();
+    });
+
+    it("상세 경로는 내용이 그대로라 재검증하지 않는다", async () => {
+      await repository.setPinned("a1", false);
 
       expect(mocks.requestPublicPathRevalidate).not.toHaveBeenCalled();
     });

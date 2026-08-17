@@ -17,6 +17,7 @@ import {
   findArticleSlugOwner,
   listDevArticleTagsAdmin,
   removeDevArticleTag,
+  setDevArticlePinned,
   updateDevArticleTag,
 } from "@/lib/supabase/dev-articles";
 import { deleteArticleImages } from "@/lib/supabase/storage";
@@ -173,6 +174,8 @@ const createLiveDevArticleRepository = (
     await devArticlesCrud.update(id, asCrudInput(stampFirstPublished(input, previous, now)));
     if (touchesPublishedPath(previous, input)) revalidateArticlePaths(previous.slug);
   },
+
+  setPinned: setDevArticlePinned,
 
   remove: async (id) => {
     // slug 조회는 경로 재검증에만 쓴다. 조회가 실패하면 경로를 알 수 없지만 삭제는 진행하고,

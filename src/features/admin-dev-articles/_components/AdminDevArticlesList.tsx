@@ -38,6 +38,8 @@ const AdminDevArticlesPage = () => {
     statusFilter,
     setStatusFilter,
     togglePublished,
+    togglePinned,
+    pendingPinId,
     remove,
   } = useDevArticlesAdmin();
 
@@ -119,7 +121,9 @@ const AdminDevArticlesPage = () => {
             <ArticleRow
               key={article.id}
               article={article}
+              pinBusy={pendingPinId === article.id}
               onTogglePublished={togglePublished}
+              onTogglePinned={togglePinned}
               onDelete={remove}
             />
           ))}
