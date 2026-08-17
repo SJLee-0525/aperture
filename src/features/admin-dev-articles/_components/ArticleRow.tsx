@@ -38,13 +38,7 @@ type Props = {
  * @param {(id: string) => void} props.onDelete 확인 후 글을 지운다.
  * @returns {JSX.Element}
  */
-const ArticleRow = ({
-  article,
-  pinBusy,
-  onTogglePublished,
-  onTogglePinned,
-  onDelete,
-}: Props) => {
+const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDelete }: Props) => {
   const title = article.title.ko || "제목 없음";
   const onDeleteClick = () => {
     if (window.confirm(`"${title}" 글을 삭제할까요?`)) {
@@ -71,12 +65,13 @@ const ArticleRow = ({
           : `수정 ${formatYMD(article.updatedAt)}`}
       </span>
 
-      {/* 아이콘만 두고 색으로 상태를 나눈다. 보조기술은 aria-pressed 와 이름으로 읽는다. */}
+      {/* 아이콘만 두고 색으로 상태를 나눈다. 이름은 고정하고 상태는 aria-pressed 가 전한다.
+          이름까지 뒤집으면 보조기술이 "고정 해제, 눌림" 처럼 반대되는 두 신호를 함께 읽는다. */}
       <button
         type="button"
         className={`${styles.badge} ${styles.pinBadge} ${article.pinned ? styles.badgeOn : ""}`}
         aria-pressed={article.pinned}
-        aria-label={`${title} 글 ${article.pinned ? "고정 해제" : "고정"}`}
+        aria-label={`${title} 고정`}
         disabled={pinBusy}
         onClick={() => onTogglePinned(article.id, !article.pinned)}
       >
