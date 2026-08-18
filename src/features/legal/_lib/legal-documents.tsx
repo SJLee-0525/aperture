@@ -242,27 +242,23 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                       <td>오류 제목·유형·메시지, 코드 스택 위치, 배포 환경과 릴리즈</td>
                       <td>미국 · 오류 알림 발생 시 · HTTPS</td>
                       <td>
-                        오류 심각도 판정과 조치 제안 · 판정 결과는 사이트 DB에 운영 목적 달성 또는
-                        삭제 요청 시까지 보관
+                        오류 심각도 판정과 조치 제안 · 사이트 DB에 목적 달성 또는 삭제 요청 시까지
                       </td>
                       <td>
-                        공개 브라우저 오류는 동의 설정에서 끌 수 있습니다. 서버에서 발생한 오류는
-                        서비스 운영에 필요해 동의와 무관하게 처리합니다
+                        공개 브라우저 오류만 동의 설정에서 끌 수 있음 · 서버 오류는 서비스 운영에
+                        필요해 동의와 무관
                       </td>
                     </tr>
                   ) : null}
                   {SENTRY_ENABLED ? (
                     <tr>
-                      <td>Discord Netherlands B.V. 및 Discord Inc.</td>
-                      <td>
-                        오류 제목·level·culprit, 배포 환경과 릴리즈, AI 판정
-                        결과(심각도·영향·원인·조치)
-                      </td>
+                      <td>Discord Inc. · privacy@discord.com</td>
+                      <td>오류 내용과 발생 위치, 배포 환경과 릴리즈, AI 판정 결과</td>
                       <td>미국 · 오류 알림 발생 시 · HTTPS</td>
-                      <td>운영자에게 오류 알림 전달 · Discord 채널 정책에 따름</td>
+                      <td>운영자 오류 알림 · 채널에서 삭제할 때까지</td>
                       <td>
-                        공개 브라우저 오류는 동의 설정에서 끌 수 있습니다. 서버에서 발생한 오류는
-                        서비스 운영에 필요해 동의와 무관하게 처리합니다
+                        공개 브라우저 오류만 동의 설정에서 끌 수 있음 · 서버 오류는 서비스 운영에
+                        필요해 동의와 무관
                       </td>
                     </tr>
                   ) : null}
@@ -316,7 +312,7 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   {SENTRY_ENABLED ? (
                     <tr>
                       <td>Discord</td>
-                      <td>오류 요약과 AI 판정 결과를 담은 알림 카드</td>
+                      <td>오류 요약과 AI 판정 결과</td>
                       <td>운영자 오류 알림</td>
                     </tr>
                   ) : null}
@@ -347,8 +343,8 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                 오류 알림의 심각도와 조치를 판정하기 위해 오류 요약을 AI 제공자에게 한 번 더
                 전송합니다. 보내는 항목은 오류 제목·유형·메시지, 코드 스택 위치, 배포 환경과
                 릴리즈로 한정하며, 접속 주소·요청 헤더·요청 본문·화면 기록·접속 지역과 방문자 식별
-                정보는 포함하지 않습니다. 판정 결과와 위 항목은 운영자에게 알림을 보내기 위해
-                Discord 채널로 전달하고, 같은 내용을 사이트 데이터베이스에 기록합니다.
+                정보는 포함하지 않습니다. 같은 항목과 판정 결과를 Discord 채널로 보내 운영자에게
+                알리고, 사이트 데이터베이스에도 기록합니다.
               </p>
             ) : null}
             <p>
@@ -590,28 +586,24 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                       </td>
                       <td>United States · when an error alert fires · HTTPS</td>
                       <td>
-                        Severity triage and suggested fixes · the verdict is kept in this
-                        site&apos;s database until the operational purpose ends or deletion is
-                        requested
+                        Severity triage and suggested fixes · kept in this site&apos;s database
+                        until the purpose ends or deletion is requested
                       </td>
                       <td>
-                        Public browser errors can be turned off in settings. Errors raised on the
-                        server are processed regardless of consent because the service needs them
+                        Turn off Error reporting in settings to stop browser errors; server errors
+                        are processed regardless of consent
                       </td>
                     </tr>
                   ) : null}
                   {SENTRY_ENABLED ? (
                     <tr>
-                      <td>Discord Netherlands B.V. and Discord Inc.</td>
-                      <td>
-                        Error title, level, culprit, environment, release, and the AI verdict
-                        (severity, impact, cause, suggested actions)
-                      </td>
+                      <td>Discord Inc. · privacy@discord.com</td>
+                      <td>Error details and location, environment, release, and the AI verdict</td>
                       <td>United States · when an error alert fires · HTTPS</td>
-                      <td>Delivering the alert to the operator · under Discord channel policy</td>
+                      <td>Operator alerts · until deleted from the channel</td>
                       <td>
-                        Public browser errors can be turned off in settings. Errors raised on the
-                        server are processed regardless of consent because the service needs them
+                        Turn off Error reporting in settings to stop browser errors; server errors
+                        are processed regardless of consent
                       </td>
                     </tr>
                   ) : null}
@@ -670,7 +662,7 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   {SENTRY_ENABLED ? (
                     <tr>
                       <td>Discord</td>
-                      <td>Alert card containing the error summary and the AI verdict</td>
+                      <td>Error summary and the AI verdict</td>
                       <td>Operator error alerts</td>
                     </tr>
                   ) : null}
@@ -702,8 +694,8 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                 once more to an AI provider. That summary is limited to the error title, type,
                 message, code stack locations, deployment environment, and release. It excludes the
                 visited URL, request headers, request bodies, screen replays, location, and visitor
-                identifiers. The verdict and those fields are delivered to a Discord channel to
-                alert the operator, and the same content is recorded in this site&apos;s database.
+                identifiers. The same fields and the verdict go to a Discord channel to alert the
+                operator, and are recorded in this site&apos;s database.
               </p>
             ) : null}
             <p>
