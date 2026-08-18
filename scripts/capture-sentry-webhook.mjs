@@ -21,8 +21,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(root, "src/features/sentry-triage/_lib/__fixtures__");
 const port = Number(process.env.PORT ?? 8787);
 
-/** 정상 페이로드는 수십 KB 다. 이보다 큰 요청은 이 캡처의 대상이 아니다. */
-const MAX_BODY_BYTES = 2_000_000;
+/** 실측 페이로드는 약 14KB 다. 캡처 단계에서는 넉넉히 두고 거절 시 크기를 남긴다. */
+const MAX_BODY_BYTES = 20_000_000;
 
 let captureCount = 0;
 
@@ -92,7 +92,7 @@ const server = createServer(async (request, response) => {
   // Sentry 는 응답이 늦거나 실패하면 재전송한다. 먼저 끝내고 파일을 쓴다.
   response.writeHead(body === null ? 413 : 200).end();
   if (body === null) {
-    console.log("본문이 상한을 넘어 버렸다.");
+    console.log(`본문이 상한(${MAX_BODY_BYTES} bytes)을 넘어 거절했다.`);
     return;
   }
 
