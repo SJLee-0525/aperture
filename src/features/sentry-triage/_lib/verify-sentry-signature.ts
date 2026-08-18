@@ -1,0 +1,74 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+/**
+ * 서명 계산 전에 거절할 본문 크기. 실측 페이로드는 수십 KB 수준이라 여유가 크다.
+ * Vercel 이 훨씬 큰 값에서 자르지만 그것과 별개로 우리 상한을 둔다.
+ */
+const MAX_WEBHOOK_BODY_BYTES = 262_144;
+
+const SIGNATURE_HEADER = "sentry-hook-signature";
+
+type WebhookRejection =
+  "body-too-large" | "missing-secret" | "missing-signature" | "signature-mismatch";
+
+type WebhookGate = { ok: true } | { ok: false; reason: WebhookRejection };
+
+/**
+ * 본문을 읽기 전에 선언된 크기만 보고 거절할지 정한다.
+ *
+ * 본문을 다 받은 뒤 길이를 재면 이미 전부 버퍼링한 뒤라 서명 계산만 아끼게 된다.
+ * `Content-Length` 가 없으면 판단하지 않고 통과시킨다. 그 경우는 본문을 읽은 뒤
+ * 길이로 다시 확인한다.
+ *
+ * @param headers 요청 헤더.
+ * @param max 허용 바이트 수.
+ * @returns 선언된 크기가 상한을 넘으면 true.
+ */
+const declaredBodyTooLarge = (headers: Headers, max = MAX_WEBHOOK_BODY_BYTES): boolean => {
+  const declared = Number(headers.get("content-length"));
+  return Number.isFinite(declared) && declared > max;
+};
+
+/**
+ * hex 문자열 두 개를 길이 정보만 노출하는 방식으로 비교한다.
+ * 길이가 다르면 `timingSafeEqual` 이 예외를 던지므로 먼저 거른다.
+ */
+const equalsSignature = (expected: string, received: string): boolean => {
+  if (expected.length !== received.length) return false;
+  return timingSafeEqual(Buffer.from(expected, "utf8"), Buffer.from(received, "utf8"));
+};
+
+/**
+ * Sentry 웹훅 서명을 검증한다.
+ *
+ * 서명 대상은 Sentry 가 직렬화한 **본문 문자열 원문**이다. `request.json()` 으로 파싱한 뒤
+ * 다시 `JSON.stringify` 한 값으로 검증하면 키 순서나 공백 차이로 해시가 어긋나
+ * 정상 요청이 전부 거절된다.
+ *
+ * 타임스탬프 헤더는 서명 대상이 아니라 신선도 검증에 쓸 수 없다. 재전송과 재생은
+ * 저장 계층의 `(issue_id, event_id)` 멱등성이 막는다.
+ *
+ * @param rawBody `request.text()` 로 받은 원문.
+ * @param headers 요청 헤더.
+ * @param secret 통합의 Client Secret.
+ * @returns 통과 여부와 거절 사유.
+ */
+const verifySentrySignature = (
+  rawBody: string,
+  headers: Headers,
+  secret: string | undefined,
+): WebhookGate => {
+  const normalizedSecret = secret?.trim();
+  if (!normalizedSecret) return { ok: false, reason: "missing-secret" };
+
+  const received = headers.get(SIGNATURE_HEADER)?.trim().toLowerCase();
+  if (!received) return { ok: false, reason: "missing-signature" };
+
+  const expected = createHmac("sha256", normalizedSecret).update(rawBody, "utf8").digest("hex");
+
+  return equalsSignature(expected, received)
+    ? { ok: true }
+    : { ok: false, reason: "signature-mismatch" };
+};
+
+export { declaredBodyTooLarge, MAX_WEBHOOK_BODY_BYTES, verifySentrySignature };
