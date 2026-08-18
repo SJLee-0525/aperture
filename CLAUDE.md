@@ -49,6 +49,8 @@
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
 > **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **카드 등록 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
 > 오류 모니터링은 카드 등록이 필요 없는 Sentry Developer 플랜을 사용한다. 쿼터를 초과하면 수집만 중단된다([ADR-0004](docs/adr/0004-consent-gated-error-monitoring.md)).
+> 오류 알림은 Sentry 공식 Discord 연동 대신 `/api/sentry-alert` 웹훅이 LLM 판정을 붙여 Discord 카드로 보낸다([ADR-0006](docs/adr/0006-ai-error-triage-alerts.md)).
+> 이 경로의 Supabase 쓰기는 RLS 가 아니라 `security definer` RPC + 공유 시크릿이 경계다(`service_role` 미사용).
 
 ### 상단 네비게이션 규칙 (사용자 확정) ★
 
@@ -208,6 +210,11 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 # NEXT_PUBLIC_SENTRY_DSN=             # (선택) Sentry DSN. DSN·지역 중 하나라도 비거나 불일치하면 비활성
 # NEXT_PUBLIC_SENTRY_DATA_REGION=US|DE # 필수 짝. 실제 Sentry 저장 지역과 일치하지 않으면 수집 금지
 # SENTRY_AUTH_TOKEN=                  # (빌드 전용 시크릿) 소스맵 업로드용. .env.sentry-build-plugin·Vercel에만 저장
+# SENTRY_ALERT_WEBHOOK_SECRET=        # (서버 전용) Sentry Internal Integration Client Secret. 웹훅 HMAC 검증
+# SENTRY_ALERT_LOG_SECRET=            # (서버 전용) Supabase 기록 RPC 인가. 같은 값의 SHA-256 을 DB 에 1회 등록
+# DISCORD_ALERT_WEBHOOK_URL=          # (서버 전용) AI 트리아지 카드를 받을 채널 웹훅
+# TRIAGE_PROVIDER=openai|gemini|mock  # 트리아지 LLM. 챗봇과 같은 규약 (_API_KEY·_MODEL + TRIAGE_FALLBACK_* 3종)
+# SENTRY_TRIAGE_DAILY_LIMIT=50        # (선택) 하루 LLM 호출 상한. 초과 시 판정만 건너뛰고 기본 카드는 전송
 # NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER=0|1 # (개발 전용) 저장 상태와 무관하게 동의 배너 미리보기
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션 빌드에 '1'이면 next.config가 즉시 throw
 # NEXT_PUBLIC_ADMIN_TEST_SESSION=0|1  # (개발·E2E 전용) AuthGuard 우회 — 프로덕션 빌드에서 '1'이면 즉시 throw. mock 여부와 무관한 별도 플래그

@@ -4,6 +4,10 @@
 > Discord 알림 구성과 운영 데이터에 근거한 노이즈 정리다. 개인정보 처리 원칙은
 > [ADR-0004](../adr/0004-consent-gated-error-monitoring.md)를 따른다. 배포 검증 중 이벤트나
 > 알림이 보이지 않을 때는 [Sentry 오류 수집과 Discord 알림](../troubleshooting/sentry-error-alerts.md)을 본다.
+>
+> ⚠️ 알림 전송 방식은 [ADR-0006](../adr/0006-ai-error-triage-alerts.md)이 대체했다.
+> 공식 Discord Integration 대신 자체 웹훅 파이프라인이 AI 트리아지 카드를 보낸다(P1 절 참고).
+> 이 문서의 나머지 결정(수집 범위, 동의, 태그, 노이즈 정책)은 그대로 유효하다.
 
 ## 현재 런타임 계약
 
@@ -80,20 +84,30 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] Event Highlights에 `environment`, `release`, `app_runtime`, `area`, `transaction` 등록
 - [x] URL 전체, 사용자 입력, 오류 메시지처럼 값 종류가 계속 늘어나는 데이터는 태그로 넣지 않기
 
-### P1. Discord 알림
+### P1. Discord 알림 — [ADR-0006](../adr/0006-ai-error-triage-alerts.md)이 대체함
+
+> 전송 방식이 공식 Integration에서 자체 웹훅 파이프라인으로 바뀐다. 구현 계획은 [plan 10](10-sentry-ai-triage.md).
+> 아래 완료 항목은 2026-08-18까지의 구성 기록이다. 공식 Integration 제거는 새 파이프라인이
+> 실제로 카드를 보내는 것을 확인한 뒤에 한다(plan 10 §10의 9단계).
 
 - [x] Sentry의 공식 Discord Integration 설치
 - [x] Discord에 `#aperture-errors` 채널 생성 및 연결
 - [x] 알림 카드 표시 태그를 `environment,release,app_runtime,area,transaction`으로 설정
-- [ ] Production의 새 서버·Edge·관리자 이슈를 즉시 알림
-- [ ] Production에서 해결 후 다시 발생한 Regressed 이슈를 즉시 알림
 - [x] 공개 브라우저 오류는 새 이슈 또는 짧은 시간 내 반복 증가 시에만 알림
 - [x] Preview에서 공개 브라우저 이슈의 Resolve → Regressed 전환과 Discord 알림 확인
-- [ ] Spike Protection 발생 알림도 같은 채널에 연결
-- [ ] 테스트 오류로 Discord 카드의 제목, 태그, 릴리즈와 원본 스택 링크 확인
+- [ ] Production의 새 서버·Edge·관리자 이슈를 즉시 알림 (plan 10 §10의 Alert Rule 조건으로 이관)
+- [ ] Production에서 해결 후 다시 발생한 Regressed 이슈를 즉시 알림 (같은 항목으로 이관)
+- [ ] 테스트 오류로 카드의 제목, 태그, 릴리즈와 원본 스택 링크 확인 (plan 10 §10의 6단계로 이관)
+- [ ] Spike Protection 발생 알림은 Sentry 기본 이메일 알림으로 받는다
 
-일반 Discord Webhook을 직접 호출하지 않는다. 공식 연동을 사용하면 Discord 메시지에서 이슈를
-할당하거나 무시하고 해결 상태로 바꿀 수 있으며, Sentry의 알림 규칙과 태그 표시를 그대로 쓸 수 있다.
+일반 Discord Webhook을 직접 호출하지 않는다는 기존 결정은 유지하지 않는다.
+공식 연동의 이점은 카드에서 이슈를 할당·무시·해결할 수 있다는 것이었다. 대신 그 카드가 알려주는 것은
+무엇이 발생했는지까지이고, 무엇이 깨졌으며 지금 봐야 하는지는 매번 Sentry에서 스택을 읽어야 판단이 섰다.
+AI 트리아지 카드와 공식 카드를 함께 보내면 같은 이슈로 카드가 두 장 오므로 하나를 골라야 했고,
+운영자가 1명이라 할당 기능의 가치가 낮았다. 근거와 대가는 ADR-0006에 있다.
+
+알림 경로가 하나로 줄어드는 대가가 생긴다. 파이프라인이 죽으면 "알림이 오지 않는 것"과
+"오류가 없는 것"이 구분되지 않으므로, Sentry 기본 이메일 알림을 백업으로 남긴다.
 
 ### P2. 노이즈 필터
 

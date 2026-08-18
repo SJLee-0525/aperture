@@ -4,6 +4,12 @@
 
 Accepted, 2026-08-10
 
+2026-08-18 보완: [ADR-0006](0006-ai-error-triage-alerts.md)이 오류 데이터의 수신자를 확장한다.
+Sentry가 수집한 이벤트 중 화이트리스트로 추린 항목이 LLM 제공자(OpenAI·Google)로 한 번 더 나간다.
+이 ADR의 최소 수집 원칙은 그 경로에도 그대로 적용되며, 아래 결정은 모두 유효하다.
+수신자 확장이 실제로 발생하는 시점은 [plan 10](../plan/10-sentry-ai-triage.md)의 배포 이후이고,
+처리방침(`src/features/legal/_lib/legal-documents.tsx`) 갱신은 그 배포와 같은 변경에 포함한다.
+
 ## Context
 
 공개 페이지의 브라우저 오류는 방문자의 선택 없이 외부로 보내지 않는다. 관리자 CMS와 서버 오류는

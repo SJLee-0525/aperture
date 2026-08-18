@@ -7,6 +7,10 @@ Accepted — 2026-08-15 (조사: [`docs/research/firebase-to-supabase.md`](../re
 수용 근거 측정치(2026-08, 15일 사용): Storage 68.42MB · 객체 735개 · 전송 1.56GB(월 환산 약 3GB) · 요청 2.6만.
 무료 한도(Storage 1GB, egress 월 10GB) 안에 여유가 있어 일시정지 트레이드오프를 keep-alive 전제로 수용한다.
 
+2026-08-18: [ADR-0006](0006-ai-error-triage-alerts.md)이 "런타임 코드에 service_role 키를 두지 않는다"를
+사용자 세션이 없는 웹훅 쓰기 경로에 적용했다. `security definer` 함수와 공유 시크릿으로 쓰기 범위를
+테이블 하나로 좁히는 방식이며, 이 ADR의 결정은 바뀌지 않는다.
+
 ## Context
 
 Firestore Spark의 읽기 한도(5만/일)가 실사용에서 소진된다. 주범은 방문자 트래픽이 아니라
