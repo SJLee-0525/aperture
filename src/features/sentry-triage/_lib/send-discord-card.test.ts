@@ -35,6 +35,69 @@ describe("sendDiscordCard", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it("요청에 남은 예산만큼의 signal 을 붙인다", async () => {
+    const fetcher = vi.fn(async () => response(204));
+
+    await sendDiscordCard(WEBHOOK, embed, { fetcher: fetcher as typeof fetch });
+
+    const init = (fetcher.mock.calls[0] as unknown as [string, RequestInit])[1];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("재시도 요청에도 signal 을 붙인다", async () => {
+    const { sleep } = collectSleeps();
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(response(500))
+      .mockResolvedValueOnce(response(204));
+
+    await sendDiscordCard(WEBHOOK, embed, { fetcher: fetcher as typeof fetch, sleep });
+
+    const init = (fetcher.mock.calls[1] as unknown as [string, RequestInit])[1];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("첫 요청이 예산을 다 쓰면 429 대기를 하지 않는다", async () => {
+    const { slept, sleep } = collectSleeps();
+    let clock = 0;
+    const fetcher = vi.fn(async () => {
+      // 첫 요청이 예산 전부를 소모한 상황.
+      clock = 9_500;
+      return response(429, { retry_after: 1 });
+    });
+
+    const result = await sendDiscordCard(WEBHOOK, embed, {
+      fetcher: fetcher as typeof fetch,
+      sleep,
+      now: () => clock,
+      budgetMs: 9_000,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(slept).toEqual([]);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("5xx 재시도 대기가 예산을 넘으면 재시도하지 않는다", async () => {
+    const { slept, sleep } = collectSleeps();
+    let clock = 0;
+    const fetcher = vi.fn(async () => {
+      clock = 9_800;
+      return response(503);
+    });
+
+    const result = await sendDiscordCard(WEBHOOK, embed, {
+      fetcher: fetcher as typeof fetch,
+      sleep,
+      now: () => clock,
+      budgetMs: 10_000,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(slept).toEqual([]);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
   it("embeds 배열로 감싸 POST 한다", async () => {
     const fetcher = vi.fn(async () => response(204));
 

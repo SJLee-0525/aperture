@@ -5,8 +5,9 @@ type SendResult = { ok: true } | { ok: false; error: string };
 type SendOptions = {
   fetcher?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
+  now?: () => number;
   /**
-   * 이 전송에 쓸 수 있는 전체 시간. 429 대기가 이 값을 넘으면 재시도하지 않는다.
+   * 이 전송에 쓸 수 있는 전체 시간. 요청과 429 대기가 모두 이 예산을 나눠 쓴다.
    * 함수 실행 상한(maxDuration 60초) 안에서 기록 RPC 까지 끝나야 하기 때문이다.
    */
   budgetMs?: number;
@@ -48,18 +49,26 @@ const sendDiscordCard = async (
 
   const fetcher = options.fetcher ?? fetch;
   const sleep = options.sleep ?? defaultSleep;
+  const now = options.now ?? Date.now;
   const budgetMs = options.budgetMs ?? DEFAULT_BUDGET_MS;
 
-  const post = () =>
+  // 요청마다 개별 상한을 두면 최악 경로가 요청 + 429 대기 + 요청이 되어 예산을 넘는다.
+  // 데드라인 하나를 두고 각 요청에 남은 시간만 준다.
+  const deadline = now() + budgetMs;
+  const remaining = () => deadline - now();
+
+  // 대기가 예상보다 길어져 남은 시간이 0 이하가 되면 AbortSignal.timeout 이 거부한다.
+  const post = (timeoutMs: number) =>
     fetcher(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ embeds: [embed] }),
+      signal: AbortSignal.timeout(Math.max(1, timeoutMs)),
     });
 
   let response: Response;
   try {
-    response = await post();
+    response = await post(remaining());
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "request failed" };
   }
@@ -69,11 +78,14 @@ const sendDiscordCard = async (
   if (response.status === 429) {
     const waitMs = await retryAfterMs(response);
     if (waitMs === null) return { ok: false, error: "429 without a usable retry_after" };
-    if (waitMs > budgetMs) {
-      return { ok: false, error: `429 retry_after ${waitMs}ms exceeds the ${budgetMs}ms budget` };
+    if (waitMs >= remaining()) {
+      return { ok: false, error: `429 retry_after ${waitMs}ms exceeds the remaining budget` };
     }
     await sleep(waitMs);
   } else if (response.status >= 500) {
+    if (SERVER_ERROR_RETRY_MS >= remaining()) {
+      return { ok: false, error: `Discord returned ${response.status} and the budget is spent` };
+    }
     await sleep(SERVER_ERROR_RETRY_MS);
   } else {
     // 400·401·404 는 카드 구성이나 웹훅 주소 문제라 같은 요청을 다시 보내도 같은 답이 온다.
@@ -81,7 +93,7 @@ const sendDiscordCard = async (
   }
 
   try {
-    const retried = await post();
+    const retried = await post(remaining());
     return retried.ok
       ? { ok: true }
       : { ok: false, error: `Discord retry failed (${retried.status})` };
