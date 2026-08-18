@@ -15,7 +15,8 @@
 - [x] 일일 상한 — Upstash 카운터, 실패 시 통과
 - [x] 기록 계층 — 테이블·RPC 2개·transport
 - [x] 오케스트레이션과 라우트 — `after()` 로 202 이후 처리
-- [x] 전체 검증 통과 — 테스트 1953개, 타입·lint·format·knip·deps·프로덕션 빌드
+- [x] 전체 검증 통과 — 테스트 1969개, 타입·lint·format·knip·deps·프로덕션 빌드
+- [x] 코드리뷰 9건 반영 (커밋 `4a911f3`~`76909db`)
 
 ### 데이터베이스 (2026-08-19 적용)
 
@@ -42,8 +43,8 @@
 - [x] Internal Integration 의 Webhook URL 을 `https://<도메인>/api/sentry-alert` 로 교체
 - [x] `Alert Action` 이 켜져 있는지 확인 (꺼져 있으면 Alert Rule 목록에 안 뜬다)
 - [x] 하단 Webhooks 구독(issue·error·comment)이 전부 꺼져 있는지 확인
-- [ ] Alert Rule 을 Production · 신규/회귀/escalated 로 좁히기 (캡처용 임시 규칙을 고쳐 쓴다)
-- [ ] (선택) 규칙 이름을 알아볼 수 있게 바꾸기. 이 문자열이 카드 푸터의 `triggered_rule` 로 나간다
+- [x] Alert Rule 을 Production · 신규/회귀/escalated 로 좁히기 (캡처용 임시 규칙을 고쳐 썼다)
+- [x] 규칙 이름을 `Production AI triage` 로 지정. 이 문자열이 카드 푸터의 `triggered_rule` 로 나간다
 - [ ] (선택) 이 라우트의 transaction 제외 필터 — `transaction is not POST /api/sentry-alert`
   - 넣지 않아도 된다. `handleSentryAlert` 가 예외를 전부 삼켜 `after()` 안에서 Sentry 로 올라갈
     오류가 없으므로 알림 고리가 코드에서 막혀 있다.
@@ -87,7 +88,14 @@ Sensitive 로 넣을 것은 자격증명 5개다.
 
 ## 배포 후 검증
 
-- [ ] 테스트 오류 1회로 카드 도착 확인 — 제목 접두사, 심각도 색, Sentry 링크, 조치 목록, 푸터
+- [ ] 테스트 오류 1회로 카드 도착 확인 — 제목 접두사, 심각도 색, Sentry 링크, 조치 목록
+
+      푸터는 이 형태여야 한다. 규칙 이름이 다르게 보이면 다른 Alert Rule 이 발동한 것이다.
+
+  ```
+  production · aperture@<sha> · Production AI triage · openai/gpt-5.6-luna · 확신도 <high|medium|low>
+  ```
+
 - [ ] `sentry_alerts` 에 행이 남고 `completed_at` 이 채워지는지 확인
 - [ ] 같은 전달을 재전송했을 때 두 번째 카드가 안 나가는지 확인
 - [ ] 잘못된 서명으로 호출했을 때 401 인지 확인
