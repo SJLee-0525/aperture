@@ -1,0 +1,102 @@
+# Sentry AI 트리아지 배포 체크리스트
+
+> 설계 [ADR-0006](../adr/0006-ai-error-triage-alerts.md) · 구현 계획 [plan 10](../plan/10-sentry-ai-triage.md)
+> 순서를 바꾸면 안 되는 것 두 가지: 공식 Discord Integration 제거는 **마지막**, Vercel env 는 **Production 스코프만**.
+
+## 완료
+
+### 코드
+
+- [x] 페이로드 정규화 — 화이트리스트, 실물 fixture 계약 테스트
+- [x] 웹훅 서명 검증 — HMAC-SHA256, 원문 대상, `Content-Length` 선검사
+- [x] 트리아지 provider — env 교체, primary/폴백, 제공자별 요청 본문 고정 테스트
+- [x] Discord 카드 — 판정 카드와 기본 카드, 3단계 길이 처리
+- [x] 카드 전송 — 429 `retry_after` 준수, 5xx 1회 재시도
+- [x] 일일 상한 — Upstash 카운터, 실패 시 통과
+- [x] 기록 계층 — 테이블·RPC 2개·transport
+- [x] 오케스트레이션과 라우트 — `after()` 로 202 이후 처리
+- [x] 전체 검증 통과 — 테스트 1953개, 타입·lint·format·knip·deps·프로덕션 빌드
+
+### 데이터베이스 (2026-08-19 적용)
+
+- [x] `supabase db push` 로 `20260819000000_sentry_alerts.sql` 원격 적용
+- [x] `private.webhook_secrets` 에 시크릿 SHA-256 1회 등록
+- [x] anon 직접 SELECT 가 빈 결과인지 확인
+- [x] anon 직접 INSERT 가 `42501` 로 거부되는지 확인
+- [x] 틀린 시크릿 RPC 가 `42501 unauthorized` 로 거부되는지 확인 (pgcrypto 동작도 함께 증명)
+- [x] 맞는 시크릿 RPC 가 행 id 를 돌려주는지 확인
+- [x] 같은 `(issue_id, event_id)` 두 번째 호출이 `null` 인지 확인
+- [x] 열거값 밖 `severity` 가 CHECK 로 거부되는지 확인
+- [x] 배열 아닌 `recommendedActions` 가 함수에서 거부되는지 확인
+- [ ] 검증용 행 삭제 — `delete from public.sentry_alerts where issue_id = 'verify-1';`
+
+### 제공자
+
+- [x] `gpt-5.6-luna` 가 `reasoning.effort` + strict `json_schema` 조합을 받는지 실호출 확인
+- [x] 두 제공자 실호출 확인 (openai 3.9초 · gemini 1.6초, 판정 일치)
+
+## 배포 전
+
+### Sentry
+
+- [ ] Internal Integration 의 Webhook URL 을 `https://<도메인>/api/sentry-alert` 로 교체
+- [ ] `Alert Action` 이 켜져 있는지 확인 (꺼져 있으면 Alert Rule 목록에 안 뜬다)
+- [ ] 하단 Webhooks 구독(issue·error·comment)이 전부 꺼져 있는지 확인
+- [ ] Alert Rule 을 Production · 신규/회귀/escalated 로 좁히기
+- [ ] **이 라우트의 transaction 제외 필터**를 실제 태그 값을 확인한 뒤 작성
+      (`POST /api/sentry-alert` 형태일 수 있어 경로만 적으면 필터가 걸리지 않는다)
+- [ ] 캡처용 임시 Alert Rule 삭제
+- [ ] 캡처용 테스트 이슈와 Replay 정리 (`payload capture`, `capture A1`, `capture A2`)
+- [ ] Sentry 기본 이메일 알림이 살아 있는지 확인 (파이프라인이 죽었을 때의 유일한 백업)
+
+### Vercel
+
+- [ ] 환경변수 9종을 **Production 스코프 + Sensitive** 로 등록. Preview 에는 넣지 않는다
+      (공개 저장소의 프리뷰 배포가 같은 시크릿으로 실행된다)
+
+```
+SENTRY_ALERT_WEBHOOK_SECRET
+SENTRY_ALERT_LOG_SECRET
+DISCORD_ALERT_WEBHOOK_URL
+TRIAGE_PROVIDER=openai
+TRIAGE_PROVIDER_MODEL=gpt-5.6-luna
+TRIAGE_PROVIDER_API_KEY
+TRIAGE_FALLBACK_PROVIDER=gemini
+TRIAGE_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite
+TRIAGE_FALLBACK_PROVIDER_API_KEY
+```
+
+- [ ] (선택) `SENTRY_TRIAGE_DAILY_LIMIT`
+
+### Discord
+
+- [ ] `#aperture-errors` 채널 웹훅 URL 발급
+
+## 배포 후 검증
+
+- [ ] 테스트 오류 1회로 카드 도착 확인 — 제목 접두사, 심각도 색, Sentry 링크, 조치 목록, 푸터
+- [ ] `sentry_alerts` 에 행이 남고 `completed_at` 이 채워지는지 확인
+- [ ] 같은 전달을 재전송했을 때 두 번째 카드가 안 나가는지 확인
+- [ ] 잘못된 서명으로 호출했을 때 401 인지 확인
+- [ ] Vercel 런타임 로그에 시크릿이 찍히지 않는지 확인
+
+## 마지막
+
+- [ ] **공식 Discord Integration 제거** (위 검증이 전부 끝난 뒤에만)
+- [ ] 캡처 스크립트와 `package.json` 의 `capture:sentry-webhook` 항목 삭제
+- [ ] plan 05 P1 의 이관 항목 정리
+
+## 운영 중 확인
+
+처리가 끝나지 않은 전달을 보는 쿼리다. 계속 쌓이면 파이프라인이 조용히 죽은 것이다.
+
+```sql
+select id, issue_id, title, triage_status, notified, notify_error, created_at
+from public.sentry_alerts
+where completed_at is null or notified = false
+order by created_at desc
+limit 50;
+```
+
+- [ ] 첫 배포 후 24시간과 7일 시점에 판정 품질과 LLM 호출량 확인
+- [ ] 판정이 반복해서 빗나가면 모델을 올리기 전에 입력 화이트리스트에 빠진 신호가 있는지 먼저 본다
