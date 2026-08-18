@@ -39,19 +39,24 @@
 
 ### Sentry
 
-- [ ] Internal Integration 의 Webhook URL 을 `https://<도메인>/api/sentry-alert` 로 교체
-- [ ] `Alert Action` 이 켜져 있는지 확인 (꺼져 있으면 Alert Rule 목록에 안 뜬다)
-- [ ] 하단 Webhooks 구독(issue·error·comment)이 전부 꺼져 있는지 확인
-- [ ] Alert Rule 을 Production · 신규/회귀/escalated 로 좁히기
-- [ ] **이 라우트의 transaction 제외 필터**를 실제 태그 값을 확인한 뒤 작성
-      (`POST /api/sentry-alert` 형태일 수 있어 경로만 적으면 필터가 걸리지 않는다)
-- [ ] 캡처용 임시 Alert Rule 삭제
-- [ ] 캡처용 테스트 이슈와 Replay 정리 (`payload capture`, `capture A1`, `capture A2`)
-- [ ] Sentry 기본 이메일 알림이 살아 있는지 확인 (파이프라인이 죽었을 때의 유일한 백업)
+- [x] Internal Integration 의 Webhook URL 을 `https://<도메인>/api/sentry-alert` 로 교체
+- [x] `Alert Action` 이 켜져 있는지 확인 (꺼져 있으면 Alert Rule 목록에 안 뜬다)
+- [x] 하단 Webhooks 구독(issue·error·comment)이 전부 꺼져 있는지 확인
+- [ ] Alert Rule 을 Production · 신규/회귀/escalated 로 좁히기 (캡처용 임시 규칙을 고쳐 쓴다)
+- [ ] (선택) 규칙 이름을 알아볼 수 있게 바꾸기. 이 문자열이 카드 푸터의 `triggered_rule` 로 나간다
+- [ ] (선택) 이 라우트의 transaction 제외 필터 — `transaction is not POST /api/sentry-alert`
+  - 넣지 않아도 된다. `handleSentryAlert` 가 예외를 전부 삼켜 `after()` 안에서 Sentry 로 올라갈
+    오류가 없으므로 알림 고리가 코드에서 막혀 있다.
+  - 반대로 `is not` 조건은 해당 태그가 없는 이벤트의 판정이 구현에 달려 있어, 태그 없는 이슈의
+    알림을 통째로 삼킬 수 있다.
+  - 넣는다면 저장 후 테스트 오류로 카드가 오는지 반드시 확인한다.
+
+- [x] 캡처용 테스트 이슈와 Replay 정리 (`payload capture`, `capture A1`, `capture A2`)
+- [x] Sentry 기본 이메일 알림이 살아 있는지 확인 (파이프라인이 죽었을 때의 유일한 백업)
 
 ### Vercel
 
-- [ ] 환경변수 9종을 **Production 스코프에만** 등록. Preview 에는 넣지 않는다
+- [x] 환경변수 9종을 **Production 스코프에만** 등록. Preview 에는 넣지 않는다
       (공개 저장소의 프리뷰 배포가 같은 시크릿으로 실행된다)
 
 Sensitive 로 넣을 것은 자격증명 5개다.
@@ -72,13 +77,13 @@ Sensitive 로 넣을 것은 자격증명 5개다.
 모델명을 Sensitive 로 넣지 않는다. 비밀이 아닌데 나중에 어떤 모델로 돌고 있는지 확인할 수 없게 된다.
 판정 품질이 이상할 때 제일 먼저 보는 값이다.
 
-- [ ] Sensitive 는 저장 후 값을 다시 볼 수 없으므로 5개 모두 사본을 확보한다.
+- [x] Sensitive 는 저장 후 값을 다시 볼 수 없으므로 5개 모두 사본을 확보한다.
       특히 `SENTRY_ALERT_LOG_SECRET` 은 DB 에 해시만 있어 잃어버리면 복구할 수 없고,
       새로 만들어 `private.webhook_secrets` 행을 갱신해야 한다
 
 ### Discord
 
-- [ ] `#aperture-errors` 채널 웹훅 URL 발급
+- [x] `#aperture-errors` 채널 웹훅 URL 발급
 
 ## 배포 후 검증
 
