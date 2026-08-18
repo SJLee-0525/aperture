@@ -56,6 +56,35 @@ const callRpc = async (name: string, body: unknown): Promise<Response | null> =>
 };
 
 /**
+ * 선점 RPC 의 응답 본문을 읽는다.
+ *
+ * PostgREST 는 중복일 때 정확히 JSON `null` 을 돌려준다. 본문이 비었거나 JSON 이 아닌 것은
+ * 프록시·게이트웨이 이상이므로 중복과 구분한다. 둘을 합치면 그 응답을 받은 알림이
+ * 카드도 로그도 없이 사라진다.
+ *
+ * @param body 응답 본문 원문. 읽기에 실패했으면 null.
+ */
+const readClaimBody = (body: string | null): ClaimOutcome => {
+  if (body === null) {
+    console.error("[sentry-alerts] claim response body could not be read");
+    return { status: "failed" };
+  }
+
+  const trimmed = body.trim();
+  if (trimmed === "null") return { status: "duplicate" };
+
+  try {
+    const parsed: unknown = JSON.parse(trimmed);
+    if (typeof parsed === "string" && parsed) return { status: "claimed", alertId: parsed };
+  } catch {
+    // 아래 로그로 넘어간다.
+  }
+
+  console.error(`[sentry-alerts] unexpected claim response: ${trimmed.slice(0, 200)}`);
+  return { status: "failed" };
+};
+
+/**
  * 웹훅 전달 하나를 선점한다. LLM 을 부르기 전에 호출한다.
  *
  * 반환값을 네 가지로 나누는 이유는 호출자의 대응이 다르기 때문이다.
@@ -93,9 +122,7 @@ const claimSentryAlert = async (summary: SentryAlertSummary): Promise<ClaimOutco
     return { status: "failed" };
   }
 
-  const alertId = (await response.json().catch(() => null)) as string | null;
-  // 함수는 중복일 때 null 을 돌려준다.
-  return alertId ? { status: "claimed", alertId } : { status: "duplicate" };
+  return readClaimBody(await response.text().catch(() => null));
 };
 
 /**

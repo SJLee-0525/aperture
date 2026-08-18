@@ -71,6 +71,38 @@ describe("claimSentryAlert", () => {
     await expect(claimSentryAlert(summary)).resolves.toEqual({ status: "duplicate" });
   });
 
+  it("공백이 섞인 null 도 중복으로 본다", async () => {
+    stubFetch(async () => new Response("  null\n"));
+
+    await expect(claimSentryAlert(summary)).resolves.toEqual({ status: "duplicate" });
+  });
+
+  describe("200 인데 본문을 읽을 수 없을 때", () => {
+    it("빈 본문은 중복이 아니라 실패다", async () => {
+      stubFetch(async () => new Response(""));
+
+      await expect(claimSentryAlert(summary)).resolves.toEqual({ status: "failed" });
+    });
+
+    it("HTML 본문도 실패다", async () => {
+      stubFetch(async () => new Response("<html><body>502</body></html>"));
+
+      await expect(claimSentryAlert(summary)).resolves.toEqual({ status: "failed" });
+    });
+
+    it("문자열이 아닌 JSON 도 실패다", async () => {
+      stubFetch(async () => new Response(JSON.stringify({ id: "row-1" })));
+
+      await expect(claimSentryAlert(summary)).resolves.toEqual({ status: "failed" });
+    });
+
+    it("빈 문자열 id 도 실패다", async () => {
+      stubFetch(async () => new Response(JSON.stringify("")));
+
+      await expect(claimSentryAlert(summary)).resolves.toEqual({ status: "failed" });
+    });
+  });
+
   it("시크릿이 없으면 설정 오류로 구분하고 호출하지 않는다", async () => {
     vi.stubEnv("SENTRY_ALERT_LOG_SECRET", "");
     const fetchMock = stubFetch(async () => new Response("null"));
