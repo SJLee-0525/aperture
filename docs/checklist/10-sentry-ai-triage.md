@@ -51,22 +51,30 @@
 
 ### Vercel
 
-- [ ] 환경변수 9종을 **Production 스코프 + Sensitive** 로 등록. Preview 에는 넣지 않는다
+- [ ] 환경변수 9종을 **Production 스코프에만** 등록. Preview 에는 넣지 않는다
       (공개 저장소의 프리뷰 배포가 같은 시크릿으로 실행된다)
 
-```
-SENTRY_ALERT_WEBHOOK_SECRET
-SENTRY_ALERT_LOG_SECRET
-DISCORD_ALERT_WEBHOOK_URL
-TRIAGE_PROVIDER=openai
-TRIAGE_PROVIDER_MODEL=gpt-5.6-luna
-TRIAGE_PROVIDER_API_KEY
-TRIAGE_FALLBACK_PROVIDER=gemini
-TRIAGE_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite
-TRIAGE_FALLBACK_PROVIDER_API_KEY
-```
+Sensitive 로 넣을 것은 자격증명 5개다.
 
-- [ ] (선택) `SENTRY_TRIAGE_DAILY_LIMIT`
+| 변수                                                   | 유형                                |
+| ------------------------------------------------------ | ----------------------------------- |
+| `SENTRY_ALERT_WEBHOOK_SECRET`                          | Sensitive                           |
+| `SENTRY_ALERT_LOG_SECRET`                              | Sensitive                           |
+| `DISCORD_ALERT_WEBHOOK_URL`                            | Sensitive (URL 자체가 자격증명이다) |
+| `TRIAGE_PROVIDER_API_KEY`                              | Sensitive                           |
+| `TRIAGE_FALLBACK_PROVIDER_API_KEY`                     | Sensitive                           |
+| `TRIAGE_PROVIDER=openai`                               | 평문                                |
+| `TRIAGE_PROVIDER_MODEL=gpt-5.6-luna`                   | 평문                                |
+| `TRIAGE_FALLBACK_PROVIDER=gemini`                      | 평문                                |
+| `TRIAGE_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite` | 평문                                |
+| `SENTRY_TRIAGE_DAILY_LIMIT` (선택)                     | 평문                                |
+
+모델명을 Sensitive 로 넣지 않는다. 비밀이 아닌데 나중에 어떤 모델로 돌고 있는지 확인할 수 없게 된다.
+판정 품질이 이상할 때 제일 먼저 보는 값이다.
+
+- [ ] Sensitive 는 저장 후 값을 다시 볼 수 없으므로 5개 모두 사본을 확보한다.
+      특히 `SENTRY_ALERT_LOG_SECRET` 은 DB 에 해시만 있어 잃어버리면 복구할 수 없고,
+      새로 만들어 `private.webhook_secrets` 행을 갱신해야 한다
 
 ### Discord
 
