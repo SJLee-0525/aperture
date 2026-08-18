@@ -39,8 +39,8 @@ const labelled = (label: string, value: string | undefined): string | null =>
 /**
  * 화이트리스트로 추린 요약을 모델 입력 텍스트로 만든다.
  *
- * 이 함수가 LLM 으로 나가는 마지막 관문이다. `SentryAlertSummary` 에 없는 값은 여기에도
- * 없으며, 요약에 새 필드를 더할 때는 그 값이 외부 제공자에게 나가도 되는지 먼저 판단한다.
+ * 외부 제공자에게 나가는 문자열은 이 함수의 반환값이 전부다. `SentryAlertSummary` 에 없는 값은
+ * 여기에도 없으며, 요약에 새 필드를 더할 때는 그 값이 제공자에게 나가도 되는지 먼저 판단한다.
  *
  * @param alert 정규화를 마친 이벤트 요약.
  * @returns 제공자에게 보낼 사용자 메시지.
