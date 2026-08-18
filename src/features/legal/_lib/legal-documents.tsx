@@ -97,7 +97,10 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   </tr>
                   {SENTRY_ENABLED ? (
                     <tr>
-                      <td>오류 내용, 발생 시점의 화면 재현과 일반 기기·브라우저 정보</td>
+                      <td>
+                        오류 내용, 발생 시점의 화면 재현, 일반 기기·브라우저 정보와 접속 지역(도시
+                        단위)
+                      </td>
                       <td>동의한 방문자의 오류 진단과 수정</td>
                       <td>Sentry Developer 플랜 · 30일</td>
                     </tr>
@@ -218,11 +221,27 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   {SENTRY_ENABLED ? (
                     <tr>
                       <td>Sentry, Inc. · privacy@sentry.io</td>
-                      <td>오류 내용, 오류 발생 전후 화면 기록, 일반 기기·브라우저 정보</td>
+                      <td>
+                        오류 내용, 오류 발생 전후 화면 기록, 일반 기기·브라우저 정보와 접속
+                        지역(도시 단위)
+                      </td>
                       <td>
                         {SENTRY_TRANSFER_COUNTRY.ko} · 오류 발생 시 · 동일 출처 터널을 거친 HTTPS
                       </td>
                       <td>오류 진단과 수정 · 30일</td>
+                      <td>동의 설정에서 오류 보고를 끌 수 있으며 사이트 기능에는 영향 없음</td>
+                    </tr>
+                  ) : null}
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>
+                        OpenAI, L.L.C. 및/또는 Google LLC ·{" "}
+                        <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI</a> ·{" "}
+                        <a href={EXTERNAL_POLICY_URLS.gemini}>Google</a>
+                      </td>
+                      <td>오류 제목·유형·메시지, 코드 스택 위치, 배포 환경과 릴리즈</td>
+                      <td>미국 · 오류 알림 발생 시 · HTTPS</td>
+                      <td>오류 심각도 판정과 조치 제안 · 사이트에 저장하지 않음</td>
                       <td>동의 설정에서 오류 보고를 끌 수 있으며 사이트 기능에는 영향 없음</td>
                     </tr>
                   ) : null}
@@ -266,6 +285,13 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                       <td>오류 진단과 수정</td>
                     </tr>
                   ) : null}
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>OpenAI 및/또는 Google Gemini</td>
+                      <td>오류 요약(제목·유형·메시지·코드 스택 위치·배포 환경·릴리즈)</td>
+                      <td>오류 심각도 판정과 조치 제안</td>
+                    </tr>
+                  ) : null}
                   <tr>
                     <td>Upstash</td>
                     <td>SHA-256 해시 IP 키와 집계 수</td>
@@ -286,6 +312,14 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                 대화 영역은 가려집니다. 서버 오류 로그는 서비스 정상 동작 확인을 위해 동의와
                 무관하게 기록하되, 인증 정보·쿠키·요청 본문·방문자 식별 정보를 제거한 오류 내용만
                 전송합니다.
+              </p>
+            ) : null}
+            {SENTRY_ENABLED ? (
+              <p>
+                오류 알림의 심각도와 조치를 판정하기 위해 오류 요약을 AI 제공자에게 한 번 더
+                전송합니다. 보내는 항목은 오류 제목·유형·메시지, 코드 스택 위치, 배포 환경과
+                릴리즈로 한정하며, 접속 주소·요청 헤더·요청 본문·화면 기록·접속 지역과 방문자 식별
+                정보는 포함하지 않습니다.
               </p>
             ) : null}
             <p>
@@ -377,7 +411,8 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   {SENTRY_ENABLED ? (
                     <tr>
                       <td>
-                        Error details, a screen replay of the failure, and general device data
+                        Error details, a screen replay of the failure, general device data, and
+                        approximate city-level location
                       </td>
                       <td>Error diagnosis and fixes for consenting visitors</td>
                       <td>Sentry Developer plan · 30 days</td>
@@ -502,13 +537,30 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     <tr>
                       <td>Sentry, Inc. · privacy@sentry.io</td>
                       <td>
-                        Error details, recording around an error, and general device/browser data
+                        Error details, recording around an error, general device/browser data, and
+                        approximate city-level location
                       </td>
                       <td>
                         {SENTRY_TRANSFER_COUNTRY.en} · when an error occurs · HTTPS through a
                         same-origin tunnel
                       </td>
                       <td>Error diagnosis and fixes · 30 days</td>
+                      <td>Turn off Error reporting in settings; site features remain available</td>
+                    </tr>
+                  ) : null}
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>
+                        OpenAI, L.L.C. and/or Google LLC ·{" "}
+                        <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI</a> ·{" "}
+                        <a href={EXTERNAL_POLICY_URLS.gemini}>Google</a>
+                      </td>
+                      <td>
+                        Error title, type, message, code stack locations, deployment environment and
+                        release
+                      </td>
+                      <td>United States · when an error alert fires · HTTPS</td>
+                      <td>Severity triage and suggested fixes · not stored by this site</td>
                       <td>Turn off Error reporting in settings; site features remain available</td>
                     </tr>
                   ) : null}
@@ -554,6 +606,16 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                       <td>Error diagnosis and fixes</td>
                     </tr>
                   ) : null}
+                  {SENTRY_ENABLED ? (
+                    <tr>
+                      <td>OpenAI and/or Google Gemini</td>
+                      <td>
+                        Error summary (title, type, message, code stack locations, environment,
+                        release)
+                      </td>
+                      <td>Severity triage and suggested fixes</td>
+                    </tr>
+                  ) : null}
                   <tr>
                     <td>Upstash</td>
                     <td>SHA-256 hashed IP key and aggregate count</td>
@@ -574,6 +636,15 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                 mask typed input and the chatbot conversation area. Server error logs are recorded
                 regardless of consent to keep the service working, but only after removing
                 credentials, cookies, request bodies, and visitor identifiers.
+              </p>
+            ) : null}
+            {SENTRY_ENABLED ? (
+              <p>
+                To triage the severity of an error alert and suggest a fix, an error summary is sent
+                once more to an AI provider. That summary is limited to the error title, type,
+                message, code stack locations, deployment environment, and release. It excludes the
+                visited URL, request headers, request bodies, screen replays, location, and visitor
+                identifiers.
               </p>
             ) : null}
             <p>
