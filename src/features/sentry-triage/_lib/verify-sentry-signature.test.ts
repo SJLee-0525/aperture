@@ -95,6 +95,45 @@ describe("verifySentrySignature", () => {
   it("빈 본문도 서명이 맞으면 통과한다", () => {
     expect(verifySentrySignature("", headersWith(sign("")), SECRET)).toEqual({ ok: true });
   });
+
+  describe("본문 크기", () => {
+    it("상한을 넘는 본문은 서명을 보기 전에 거절한다", () => {
+      const big = "a".repeat(MAX_WEBHOOK_BODY_BYTES + 1);
+
+      expect(verifySentrySignature(big, headersWith(sign(big)), SECRET)).toEqual({
+        ok: false,
+        reason: "body-too-large",
+      });
+    });
+
+    it("길이를 코드 유닛이 아니라 바이트로 잰다", () => {
+      // 한글은 UTF-8 에서 3바이트다. 코드 유닛으로 세면 상한의 1/3 만 채운 것으로 보인다.
+      const korean = "가".repeat(40);
+
+      expect(verifySentrySignature(korean, headersWith(sign(korean)), SECRET, 100)).toEqual({
+        ok: false,
+        reason: "body-too-large",
+      });
+      expect(korean.length).toBeLessThan(100);
+    });
+
+    it("상한과 같은 크기는 통과시킨다", () => {
+      const body = "a".repeat(100);
+
+      expect(verifySentrySignature(body, headersWith(sign(body)), SECRET, 100)).toEqual({
+        ok: true,
+      });
+    });
+
+    it("크기 거절이 시크릿 미설정보다 먼저다", () => {
+      const big = "a".repeat(MAX_WEBHOOK_BODY_BYTES + 1);
+
+      expect(verifySentrySignature(big, headersWith(null), undefined)).toEqual({
+        ok: false,
+        reason: "body-too-large",
+      });
+    });
+  });
 });
 
 describe("declaredBodyTooLarge", () => {

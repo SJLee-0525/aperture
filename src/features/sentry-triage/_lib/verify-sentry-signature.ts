@@ -48,16 +48,24 @@ const equalsSignature = (expected: string, received: string): boolean => {
  * 타임스탬프 헤더는 서명 대상이 아니라 신선도 검증에 쓸 수 없다. 재전송과 재생은
  * 저장 계층의 `(issue_id, event_id)` 멱등성이 막는다.
  *
+ * 크기를 여기서 다시 잰다. `Content-Length` 는 `Transfer-Encoding: chunked` 요청에 없어서
+ * 헤더 검사만으로는 상한이 강제되지 않고, 비인증 요청이 전량 버퍼링과 HMAC 계산까지 도달한다.
+ *
  * @param rawBody `request.text()` 로 받은 원문.
  * @param headers 요청 헤더.
  * @param secret 통합의 Client Secret.
+ * @param max 허용 바이트 수.
  * @returns 통과 여부와 거절 사유.
  */
 const verifySentrySignature = (
   rawBody: string,
   headers: Headers,
   secret: string | undefined,
+  max = MAX_WEBHOOK_BODY_BYTES,
 ): WebhookGate => {
+  // 상한은 바이트 기준이다. String.length 는 UTF-16 코드 유닛 수라 한글 본문을 1/3 로 센다.
+  if (Buffer.byteLength(rawBody, "utf8") > max) return { ok: false, reason: "body-too-large" };
+
   const normalizedSecret = secret?.trim();
   if (!normalizedSecret) return { ok: false, reason: "missing-secret" };
 

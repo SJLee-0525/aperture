@@ -33,6 +33,8 @@ export async function POST(request: Request): Promise<Response> {
   const raw = await request.text();
   const gate = verifySentrySignature(raw, request.headers, process.env.SENTRY_ALERT_WEBHOOK_SECRET);
   if (!gate.ok) {
+    // chunked 요청은 Content-Length 가 없어 위 선검사를 지나온다. 크기 거절은 여기서 나온다.
+    if (gate.reason === "body-too-large") return new Response(null, { status: 413 });
     // 시크릿 미설정은 배포 실수라 인증 실패와 구분해 로그에 남긴다.
     if (gate.reason === "missing-secret") {
       console.error("[sentry-alert] SENTRY_ALERT_WEBHOOK_SECRET is not configured");
