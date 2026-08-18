@@ -88,7 +88,7 @@ Sensitive 로 넣을 것은 자격증명 5개다.
 
 ## 배포 후 검증
 
-- [ ] 테스트 오류 1회로 카드 도착 확인 — 제목 접두사, 심각도 색, Sentry 링크, 조치 목록
+- [x] 테스트 오류 1회로 카드 도착 확인 — 제목 접두사, 심각도 색, Sentry 링크, 조치 목록
 
       푸터는 이 형태여야 한다. 규칙 이름이 다르게 보이면 다른 Alert Rule 이 발동한 것이다.
 
@@ -96,16 +96,16 @@ Sensitive 로 넣을 것은 자격증명 5개다.
   production · aperture@<sha> · Production AI triage · openai/gpt-5.6-luna · 확신도 <high|medium|low>
   ```
 
-- [ ] `sentry_alerts` 에 행이 남고 `completed_at` 이 채워지는지 확인
-- [ ] 같은 전달을 재전송했을 때 두 번째 카드가 안 나가는지 확인
-- [ ] 잘못된 서명으로 호출했을 때 401 인지 확인
-- [ ] Vercel 런타임 로그에 시크릿이 찍히지 않는지 확인
+- [x] `sentry_alerts` 에 행이 남고 `completed_at` 이 채워지는지 확인
+- [x] 같은 전달을 재전송했을 때 두 번째 카드가 안 나가는지 확인
+- [x] 잘못된 서명으로 호출했을 때 401 인지 확인
+- [x] Vercel 런타임 로그에 시크릿이 찍히지 않는지 확인
 
 ## 마지막
 
-- [ ] **공식 Discord Integration 제거** (위 검증이 전부 끝난 뒤에만)
-- [ ] 캡처 스크립트와 `package.json` 의 `capture:sentry-webhook` 항목 삭제
-- [ ] plan 05 P1 의 이관 항목 정리
+- [x] **공식 Discord Integration 제거** (위 검증이 전부 끝난 뒤에만)
+- [x] 캡처 스크립트와 `package.json` 의 `capture:sentry-webhook` 항목 삭제
+- [x] plan 05 P1 의 이관 항목 정리
 
 ## 운영 중 확인
 

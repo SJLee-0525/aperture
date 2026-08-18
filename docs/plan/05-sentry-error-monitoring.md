@@ -95,10 +95,10 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] 알림 카드 표시 태그를 `environment,release,app_runtime,area,transaction`으로 설정
 - [x] 공개 브라우저 오류는 새 이슈 또는 짧은 시간 내 반복 증가 시에만 알림
 - [x] Preview에서 공개 브라우저 이슈의 Resolve → Regressed 전환과 Discord 알림 확인
-- [ ] Production의 새 서버·Edge·관리자 이슈를 즉시 알림 (plan 10 §10의 Alert Rule 조건으로 이관)
-- [ ] Production에서 해결 후 다시 발생한 Regressed 이슈를 즉시 알림 (같은 항목으로 이관)
-- [ ] 테스트 오류로 카드의 제목, 태그, 릴리즈와 원본 스택 링크 확인 (plan 10 §10의 6단계로 이관)
-- [ ] Spike Protection 발생 알림은 Sentry 기본 이메일 알림으로 받는다
+- [x] Production의 새 서버·Edge·관리자 이슈를 즉시 알림 (plan 10 §10의 Alert Rule 조건으로 이관)
+- [x] Production에서 해결 후 다시 발생한 Regressed 이슈를 즉시 알림 (같은 항목으로 이관)
+- [x] 테스트 오류로 카드의 제목, 태그, 릴리즈와 원본 스택 링크 확인 (plan 10 §10의 6단계로 이관)
+- [x] Spike Protection 발생 알림은 Sentry 기본 이메일 알림으로 받는다
 
 일반 Discord Webhook을 직접 호출하지 않는다는 기존 결정은 유지하지 않는다.
 공식 연동의 이점은 카드에서 이슈를 할당·무시·해결할 수 있다는 것이었다. 대신 그 카드가 알려주는 것은
