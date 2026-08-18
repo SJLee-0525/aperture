@@ -121,22 +121,34 @@ describe("handleSentryAlert — 실패 모드", () => {
     expect(d.complete).not.toHaveBeenCalled();
   });
 
-  it("기록 시크릿이 없어도 카드는 보낸다", async () => {
+  it("기록 시크릿이 없으면 판정을 건너뛰고 카드만 보낸다", async () => {
     const d = deps({ claim: vi.fn(async () => ({ status: "unconfigured" as const })) });
 
     await handleSentryAlert(FIXTURE, d);
 
+    expect(d.provider).not.toHaveBeenCalled();
     expect(d.sendCard).toHaveBeenCalledTimes(1);
     expect(d.complete).not.toHaveBeenCalled();
   });
 
-  it("선점이 런타임 실패해도 카드는 보낸다", async () => {
+  it("선점이 런타임 실패하면 판정을 건너뛰고 카드만 보낸다", async () => {
     const d = deps({ claim: vi.fn(async () => ({ status: "failed" as const })) });
 
     await handleSentryAlert(FIXTURE, d);
 
+    // 멱등성이 없는 구간이라 재전송이 유료 호출로 이어지지 않아야 한다.
+    expect(d.provider).not.toHaveBeenCalled();
+    expect(d.rateLimiter).not.toHaveBeenCalled();
     expect(d.sendCard).toHaveBeenCalledTimes(1);
     expect(d.complete).not.toHaveBeenCalled();
+  });
+
+  it("선점 실패로 나간 카드는 판정 없는 기본 카드다", async () => {
+    const d = deps({ claim: vi.fn(async () => ({ status: "failed" as const })) });
+
+    await handleSentryAlert(FIXTURE, d);
+
+    expect(sentCard(d).color).toBe(0x8b8d98);
   });
 
   it("일일 상한을 넘으면 LLM 을 건너뛰고 기본 카드를 보낸다", async () => {
@@ -166,7 +178,7 @@ describe("handleSentryAlert — 실패 모드", () => {
     });
   });
 
-  it("제한기가 던져도 알림을 멈추지 않는다", async () => {
+  it("제한기가 던져도 판정과 알림을 그대로 진행한다", async () => {
     const d = deps({
       rateLimiter: vi.fn(async () => {
         throw new Error("upstash down");
@@ -175,8 +187,10 @@ describe("handleSentryAlert — 실패 모드", () => {
 
     await handleSentryAlert(FIXTURE, d);
 
-    expect(d.sendCard).not.toHaveBeenCalled();
-    expect(d.complete).not.toHaveBeenCalled();
+    // 제공자 호출까지 확인해야 제한기 오류가 판정 실패로 뭉개지지 않은 것을 알 수 있다.
+    expect(d.provider).toHaveBeenCalledTimes(1);
+    expect(d.sendCard).toHaveBeenCalledTimes(1);
+    expect(completedWith(d).outcome).toMatchObject({ status: "ok" });
   });
 
   it("전송이 실패하면 사유를 기록에 남긴다", async () => {

@@ -36,7 +36,16 @@ const runTriage = async (
   summary: Parameters<typeof claimSentryAlert>[0],
   deps: SentryAlertDependencies,
 ): Promise<TriageOutcome> => {
-  const limit = await deps.rateLimiter();
+  // 제한기 호출만 따로 감싼다. 아래 try 에 넣으면 제한기 오류가 제공자 실패와 같은 값이 되어
+  // 판정을 시도하지 못한 채 끝난다.
+  let limit: { allowed: boolean; count: number };
+  try {
+    limit = await deps.rateLimiter();
+  } catch (error) {
+    console.warn("[sentry-alert] the daily counter failed; continuing without a cap:", error);
+    limit = { allowed: true, count: 0 };
+  }
+
   if (!limit.allowed) {
     return { status: "skipped", reason: `일일 상한 초과 (${limit.count}번째 호출)` };
   }
@@ -75,11 +84,13 @@ const handleSentryAlert = async (raw: string, deps: SentryAlertDependencies): Pr
 
     const claim = await deps.claim(summary);
     if (claim.status === "duplicate") return;
-    // 설정 오류와 런타임 장애는 기록만 포기하고 카드는 그대로 보낸다.
-    // DB 는 로그이지 알림의 관문이 아니다.
-    const alertId = claim.status === "claimed" ? claim.alertId : null;
 
-    const outcome = await runTriage(summary, deps);
+    // 선점하지 못하면 같은 전달을 두 번 처리하는 것을 막을 수단이 없다. 그 구간에서는
+    // 판정을 건너뛰어 재전송이 유료 호출로 이어지지 않게 하고, 카드만 보낸다.
+    const alertId = claim.status === "claimed" ? claim.alertId : null;
+    const outcome: TriageOutcome = alertId
+      ? await runTriage(summary, deps)
+      : { status: "skipped", reason: "기록 선점 실패로 판정을 건너뜀" };
     if (outcome.status !== "ok") {
       console.warn(`[sentry-alert] sending an untriaged card: ${outcome.reason}`);
     }
