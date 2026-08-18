@@ -24,6 +24,7 @@
     "test:visual": "node e2e/run.cjs --production --build e2e/visual",
     "test:visual:update": "node e2e/run.cjs --production --build e2e/visual --update-snapshots",
     "test:a11y": "node e2e/run.cjs e2e/accessibility.e2e.ts",
+    "capture:sentry-webhook": "node scripts/capture-sentry-webhook.mjs",
     "test:chat-eval": "node scripts/run-chat-eval.mjs",
     "test:chat-eval:live": "node scripts/chat-eval.mjs",
     "test:lighthouse": "lhci autorun",
