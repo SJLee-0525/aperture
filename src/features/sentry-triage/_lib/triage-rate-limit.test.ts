@@ -155,10 +155,12 @@ describe("getTriageRateLimiter", () => {
   });
 
   describe("상한 설정", () => {
-    it("env 로 상한을 바꾼다", async () => {
+    it("인자를 생략하면 process.env 의 상한을 쓴다", async () => {
+      vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://u");
+      vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "t");
       vi.stubEnv("SENTRY_TRIAGE_DAILY_LIMIT", "1");
       const fetcher = vi.fn(async () => counted(2));
-      const limiter = getTriageRateLimiter(UPSTASH, {
+      const limiter = getTriageRateLimiter(process.env, {
         fetcher: fetcher as unknown as typeof fetch,
         now: () => NOW,
       });
@@ -167,23 +169,49 @@ describe("getTriageRateLimiter", () => {
     });
 
     it("잘못된 env 값은 기본값으로 되돌린다", async () => {
-      vi.stubEnv("SENTRY_TRIAGE_DAILY_LIMIT", "많이");
       const fetcher = vi.fn(async () => counted(DEFAULT_DAILY_LIMIT));
-      const limiter = getTriageRateLimiter(UPSTASH, {
-        fetcher: fetcher as unknown as typeof fetch,
-        now: () => NOW,
-      });
+      const limiter = getTriageRateLimiter(
+        { ...UPSTASH, SENTRY_TRIAGE_DAILY_LIMIT: "많이" },
+        {
+          fetcher: fetcher as unknown as typeof fetch,
+          now: () => NOW,
+        },
+      );
 
       await expect(limiter()).resolves.toMatchObject({ allowed: true });
     });
 
-    it("0 이하 값도 기본값으로 되돌린다", async () => {
-      vi.stubEnv("SENTRY_TRIAGE_DAILY_LIMIT", "0");
+    it("주입한 env 의 상한이 적용된다", async () => {
+      const fetcher = vi.fn(async () => counted(2));
+      const limiter = getTriageRateLimiter(
+        { ...UPSTASH, SENTRY_TRIAGE_DAILY_LIMIT: "1" },
+        { fetcher: fetcher as unknown as typeof fetch, now: () => NOW },
+      );
+
+      await expect(limiter()).resolves.toMatchObject({ allowed: false });
+    });
+
+    it("limit 이 undefined 로 주입돼도 기본값이 살아 있다", async () => {
       const fetcher = vi.fn(async () => counted(DEFAULT_DAILY_LIMIT));
       const limiter = getTriageRateLimiter(UPSTASH, {
         fetcher: fetcher as unknown as typeof fetch,
         now: () => NOW,
+        limit: undefined,
       });
+
+      // 말미 스프레드가 기본값을 덮으면 count <= undefined 가 거짓이 되어 상한 초과로 떨어진다.
+      await expect(limiter()).resolves.toMatchObject({ allowed: true });
+    });
+
+    it("0 이하 값도 기본값으로 되돌린다", async () => {
+      const fetcher = vi.fn(async () => counted(DEFAULT_DAILY_LIMIT));
+      const limiter = getTriageRateLimiter(
+        { ...UPSTASH, SENTRY_TRIAGE_DAILY_LIMIT: "0" },
+        {
+          fetcher: fetcher as unknown as typeof fetch,
+          now: () => NOW,
+        },
+      );
 
       await expect(limiter()).resolves.toMatchObject({ allowed: true });
     });

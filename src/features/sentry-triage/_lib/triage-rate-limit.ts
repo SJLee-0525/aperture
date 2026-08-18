@@ -41,18 +41,17 @@ const ALLOW_WITHOUT_COUNT: TriageRateLimitResult = { allowed: true, count: 0 };
 const dailyKey = (now: number): string =>
   `sentry-triage:daily:v1:${new Date(now).toISOString().slice(0, 10)}`;
 
-const configuredLimit = (): number => {
-  const parsed = Number(process.env.SENTRY_TRIAGE_DAILY_LIMIT);
+const configuredLimit = (env: TriageRateLimitEnvironment): number => {
+  const parsed = Number(env.SENTRY_TRIAGE_DAILY_LIMIT);
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_DAILY_LIMIT;
 };
 
 /**
  * 실패하면 통과시킨다.
  *
- * 챗봇(`chat-rate-limit.ts`)은 반대로 자격증명이 없으면 요청을 막는다. 보호 대상이 다르다.
- * 챗은 방문자 트래픽이라 제한기가 없으면 비용이 열린다. 트리아지는 Sentry Alert Rule 이
- * 이미 발동 횟수를 제한하고 있어서, 여기서 막으면 비용이 아니라 알림이 사라진다.
- * 알림 누락이 비용 초과보다 나쁘다.
+ * 챗봇(`chat-rate-limit.ts`)은 반대로 자격증명이 없으면 요청을 막는다. 챗은 방문자 트래픽이라
+ * 제한기가 없으면 호출량에 상한이 없어진다. 트리아지는 Sentry Alert Rule 이 발동 횟수를
+ * 제한하므로, 제한기 실패를 차단으로 처리하면 남는 결과는 비용 절감이 아니라 알림 누락이다.
  */
 const createUpstashTriageRateLimiter = (options: UpstashOptions): TriageRateLimiter => {
   const { url, token, limit, timeoutMs, fetcher, now } = options;
@@ -118,13 +117,14 @@ const getTriageRateLimiter = (
     return async () => ALLOW_WITHOUT_COUNT;
   }
 
+  // overrides 를 뒤에 다시 펼치지 않는다. 값이 undefined 인 키가 있으면 아래 기본값을
+  // 덮어써 limit 이 undefined 가 되고, 모든 알림이 상한 초과로 판정 없이 나간다.
   return createUpstashTriageRateLimiter({
     ...credentials,
-    limit: overrides.limit ?? configuredLimit(),
+    limit: overrides.limit ?? configuredLimit(env),
     timeoutMs: overrides.timeoutMs ?? 1_000,
     fetcher: overrides.fetcher ?? fetch,
     now: overrides.now ?? Date.now,
-    ...overrides,
   });
 };
 
