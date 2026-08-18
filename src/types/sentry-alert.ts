@@ -53,4 +53,11 @@ type TriageOutcome =
   | { status: "ok"; result: TriageResult; provider: string; model: string; latencyMs: number }
   | { status: "failed" | "skipped"; reason: string };
 
-export type { SentryAlertSummary, TriageOutcome, TriageResult, TriageSeverity };
+export type {
+  SentryAlertSummary,
+  SentryFrame,
+  TriageConfidence,
+  TriageOutcome,
+  TriageResult,
+  TriageSeverity,
+};
