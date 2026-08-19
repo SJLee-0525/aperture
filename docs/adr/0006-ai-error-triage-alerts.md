@@ -2,8 +2,11 @@
 
 ## Status
 
-Accepted — 2026-08-18 (구현 예정. 오류 수집 자체의 개인정보 원칙은 [ADR-0004](0004-consent-gated-error-monitoring.md),
+Accepted — 2026-08-18 · Amended — 2026-08-19 (오류 수집 자체의 개인정보 원칙은 [ADR-0004](0004-consent-gated-error-monitoring.md),
 저장 계층 제약은 [ADR-0005](0005-supabase-migration.md)를 따른다.)
+
+2026-08-19 개정: 결정 7을 바꿨다. Sentry 공식 Discord Integration을 제거하지 않고 남긴다.
+나머지 결정은 그대로다.
 
 ## Context
 
@@ -28,7 +31,7 @@ Accepted — 2026-08-18 (구현 예정. 오류 수집 자체의 개인정보 원
 
 ## Decision
 
-1. Sentry Alert Rule의 알림 대상을 Internal Integration 웹훅으로 바꾸고, Vercel Route Handler
+1. Sentry Alert Rule의 알림 대상에 Internal Integration 웹훅을 더하고, Vercel Route Handler
    `/api/sentry-alert`가 받는다. 서명(`Sentry-Hook-Signature`, HMAC-SHA256)을 검증한다.
    `/monitoring`은 Sentry 터널이 쓰는 경로라 접두사를 겹치지 않는다.
 2. 라우트는 검증 직후 202를 반환하고, 실제 작업은 `after()`(`next/server`)에서 수행한다.
@@ -44,25 +47,33 @@ Accepted — 2026-08-18 (구현 예정. 오류 수집 자체의 개인정보 원
    `service_role`은 도입하지 않는다.
    이 경로에서 보안 경계는 RLS가 아니라 함수 실행 권한, 시크릿 검증, 함수 안의 입력 검증이다.
    `security definer`는 소유자 권한으로 실행되어 RLS를 우회하기 때문이다.
-7. Sentry 공식 Discord Integration은 뺀다. plan 05의 "일반 Discord Webhook을 직접 호출하지 않는다"
-   결정을 이 ADR이 대체한다.
+7. Sentry 공식 Discord Integration은 남긴다. 같은 Alert Rule의 알림 대상에 공식 Integration과
+   Internal Integration을 함께 두고, 같은 이슈로 카드 2장을 받는다.
+   plan 05의 "일반 Discord Webhook을 직접 호출하지 않는다" 결정은 이 ADR이 대체한다.
 8. Sentry 기본 이메일 알림은 파이프라인 자체가 죽었을 때의 백업으로 남긴다.
 
 ## 추론 과정
 
-### 공식 Discord Integration을 왜 뺐나
+### 공식 Discord Integration을 왜 남기나
 
-공식 연동을 남긴 이유는 카드에서 바로 Assign·Ignore·Resolve를 누를 수 있다는 것이었다.
-AI 카드를 함께 보내면 같은 이슈로 카드가 2장 오고, 알림 채널의 신호 대 잡음이 나빠진다.
-운영자가 1명이면 Assign은 의미가 없고, Ignore·Resolve는 카드의 Sentry 링크를 한 번 더 눌러
-처리해도 비용이 크지 않다. 반대로 "지금 봐야 하는가"의 판단은 알림을 받는 순간에 필요하다.
-잃는 것보다 얻는 것이 크다고 봤다.
+처음 결정(2026-08-18)은 제거였다. 같은 이슈로 카드가 2장 오면 채널의 신호 대 잡음이 나빠지고,
+운영자가 1명이라 카드의 Assign 버튼이 의미가 없다는 이유였다.
 
-대신 알림 경로가 하나로 줄어드는 대가가 생긴다. Discord 웹훅 URL 만료, 라우트 500,
-Sentry 쪽 웹훅 비활성화 중 무엇이 일어나도 "알림이 안 오는 것"과 "오류가 없는 것"이 구분되지 않는다.
-그래서 Sentry 기본 이메일 알림을 백업으로 남긴다. 무료이고, Production 신규 이슈로 좁히면 노이즈도 적다.
-같은 이유로 LLM 실패 시 기본 카드 전송은 선택 사항이 아니라 요구사항이다.
-AI가 알림 파이프라인의 단일 장애점이 되면 안 된다.
+2026-08-19 배포 검증에서 두 카드를 나란히 받아 본 뒤 결정을 뒤집었다. Alert Rule을 Production의
+신규·회귀·escalated로 좁히면 알림량이 월 수십 건이라 카드가 2장이어도 채널이 묻히지 않는다.
+남겨서 얻는 것은 두 가지다.
+
+첫째, 알림 경로가 둘이 된다. Discord 웹훅 URL 만료, 라우트 500, Internal Integration 비활성화 중
+무엇이 일어나도 자체 카드만 멈추므로 "알림이 안 오는 것"과 "오류가 없는 것"이 그 자리에서 구분된다.
+이메일 백업은 그다음 수단이고, 이쪽이 더 빠르다.
+둘째, Ignore·Resolve 버튼이 공식 카드에 남는다. AI 카드가 판단을 주고 공식 카드가 처리를 받는다.
+
+대가는 채널의 카드 수가 2배가 되는 것이다. 알림량이 늘어 잡음이 문제가 되면 Alert Rule 조건을
+먼저 좁히고, 그래도 남으면 공식 Integration을 뗀다.
+
+Sentry 기본 이메일 알림은 두 경로가 모두 죽었을 때의 백업으로 그대로 남긴다.
+LLM 실패 시 기본 카드 전송도 그대로 요구사항이다. 공식 카드가 있다고 해서 AI 경로가 조용히
+실패해도 되는 것은 아니다.
 
 ### `service_role` 대신 RPC + 공유 시크릿을 고른 이유
 
@@ -97,7 +108,7 @@ RPC + 공유 시크릿은 SQL 20줄이면 되고, 시크릿이 유출돼도 할 
 기본값은 `gpt-5.6-luna`(입력 $0.20 / 출력 $1.20 per 1M)다. 스택을 읽고 원인을 추정하는 작업이라
 분류기보다 추론 쪽 능력이 필요하고, 이 가격대에서 그 조건을 만족한다.
 폴백은 챗봇이 쓰는 Gemini 키를 재사용해 `gemini-3.5-flash-lite`로 둔다.
-공식 연동을 뺀 이상 한쪽 제공자가 죽었을 때 기본 카드로 강등되는 것보다 폴백으로 온전한 카드가 나가는 편이 낫다.
+한쪽 제공자가 죽었을 때 기본 카드로 강등되는 것보다 폴백으로 온전한 카드가 나가는 편이 낫다.
 
 챗봇 provider를 일반화해서 공유하지 않는다. 채팅은 스트리밍과 `links`/`references`/`contactDraft`
 계약에 묶여 있고 트리아지는 단발 JSON이다. 합치면 양쪽 다 복잡해진다.
@@ -124,7 +135,9 @@ URL 쿼리, 헤더, 본문, 방문자 식별자, Replay는 보내지 않는다.
 
 ## Consequences
 
-- 알림 카드에서 Assign·Ignore·Resolve 버튼이 사라진다. 카드의 Sentry 링크로 대체한다.
+- 같은 이슈로 Discord 카드가 2장 온다. 판단은 AI 카드에서 하고 Assign·Ignore·Resolve는 공식 카드에서 한다.
+- Alert Rule 하나가 알림 대상 2개(공식 Integration, Internal Integration)를 갖는다.
+  한쪽을 지우면 그 경로만 조용히 멈춘다.
 - 오류 데이터의 수신자에 OpenAI와 Google이 추가된다.
   `src/features/legal/_lib/legal-documents.tsx`의 처리방침(수신자, 국가, 항목)을 갱신해야 하고,
   ADR-0004의 수신자 서술과도 정합성을 맞춘다.
@@ -161,6 +174,7 @@ SENTRY_TRIAGE_DAILY_LIMIT=50     # 선택, 기본값 있음
   공유 시크릿을 늘리지 말고 secret key 도입을 다시 검토한다. 시크릿 3개가 흩어지는 것은 키 1개보다 나쁘다.
 - 트리아지 판정이 반복해서 빗나가면 모델을 올리기 전에 입력 화이트리스트에 빠진 신호가 있는지 먼저 본다.
 - 알림량이 하루 상한에 자주 닿으면 Alert Rule 조건부터 좁힌다. 상한을 올리는 것은 그다음이다.
+- 카드 2장이 채널을 묻을 만큼 알림이 늘면 Alert Rule 조건을 좁히고, 그래도 남으면 공식 Integration을 뗀다.
 
 ## 착수 전 확인이 필요한 것
 

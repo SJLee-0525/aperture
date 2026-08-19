@@ -5,10 +5,10 @@
 > [ADR-0006: AI 트리아지 알림](../adr/0006-ai-error-triage-alerts.md)
 > 운영 체크리스트: [Sentry 오류 모니터링 구현 및 운영 TODO](../plan/05-sentry-error-monitoring.md)
 >
-> ⚠️ 알림 전송 경로가 공식 Discord Integration에서 자체 웹훅 파이프라인으로 바뀐다
-> ([plan 10](../plan/10-sentry-ai-triage.md)). 아래 Sentry 쪽 절차(이벤트 수집, Alert 조건,
-> 태그 필터, Regression 판정)는 두 방식에서 같다. 달라지는 것은 카드를 누가 보내느냐이며,
-> 전환 후 점검 순서는 마지막 절에 있다.
+> ⚠️ 같은 이슈로 Discord 카드가 2장 온다. 공식 Discord Integration의 카드와 자체 웹훅
+> 파이프라인의 AI 트리아지 카드다([plan 10](../plan/10-sentry-ai-triage.md)).
+> 아래 Sentry 쪽 절차(이벤트 수집, Alert 조건, 태그 필터, Regression 판정)는 두 경로에서 같다.
+> 어느 카드가 빠졌는지로 원인을 좁힌 뒤 해당 절을 본다.
 
 ## 빠른 판별표
 
@@ -22,6 +22,8 @@
 | Discord 테스트 알림은 오지만 실제 알림은 안 옴 | Issue 상태와 Alert 필터             | 연동은 정상이다. 신규·Escalated·Regressed 전환 여부와 태그 필터를 확인한다.                                            |
 | Regressed 알림처럼 보이지 않음                 | Issue Activity와 Alert 이름         | Discord에 보이는 이름은 고정된 규칙 이름이다. Activity의 `Resolved → Regressed`로 판정한다.                            |
 | AI 트리아지 카드가 오지 않음                   | `/api/sentry-alert` 응답 코드       | 401은 서명 시크릿 불일치다. 202면 `sentry_alerts` 행과 `notify_error`를 본다.                                          |
+| 공식 카드만 오고 AI 카드가 없음                | 자체 파이프라인                     | Sentry는 발동했다. 아래 "AI 트리아지 카드가 오지 않을 때" 절로 간다.                                                   |
+| AI 카드만 오고 공식 카드가 없음                | Alert Rule의 알림 대상              | 규칙에서 공식 Integration 대상이 빠졌다. 두 대상을 모두 둔다.                                                          |
 | 카드는 오는데 판정 내용이 없음                 | `sentry_alerts.triage_status`       | `failed`·`skipped`는 LLM 쪽 문제다. 기본 카드로 강등된 것이며 알림 경로는 정상이다.                                    |
 
 ## 브라우저 오류를 확실하게 발생시키기
@@ -130,7 +132,7 @@ Production Environment는 Production 이벤트를 처음 받은 뒤 선택 목�
 `All environments`로 Preview 알림을 검증할 수 있지만, Production 배포 후 세 규칙을 모두
 `production`으로 제한해야 Preview 배포 오류가 운영 채널에 섞이지 않는다.
 
-## Discord 알림이 오지 않을 때 (공식 Integration 사용 중)
+## 공식 Integration 카드가 오지 않을 때
 
 1. Alert 편집 화면의 `Send Test Notification`을 실행한다.
 2. 테스트도 오지 않으면 Discord 설치, 채널 ID와 봇의 채널 보기·메시지 보내기·링크 첨부 권한을 확인한다.
@@ -139,7 +141,7 @@ Production Environment는 Production 이벤트를 처음 받은 뒤 선택 목�
 5. Issue Activity에서 신규·Escalated·Regressed 중 실제 상태 전환이 있었는지 확인한다.
 6. Alert의 최근 발동 시각과 Discord 도착 시각을 비교한다. 전송은 수십 초 이상 늦을 수 있다.
 
-## AI 트리아지 카드가 오지 않을 때 (자체 파이프라인 전환 후)
+## AI 트리아지 카드가 오지 않을 때 (자체 파이프라인)
 
 Sentry가 알림을 발동했는지와 파이프라인이 받았는지를 먼저 나눈다. 1~2번이 정상이면 원인은 앱 쪽이다.
 
@@ -154,8 +156,9 @@ Sentry가 알림을 발동했는지와 파이프라인이 받았는지를 먼저
 6. 행의 `triage_status`가 `failed`나 `skipped`면 LLM 문제이지 전송 문제가 아니다.
    이때도 판정 없는 기본 카드는 나가야 하므로, 카드 자체가 없다면 5번을 다시 본다.
 
-카드가 아예 오지 않는 상태가 이어지면 Sentry 기본 이메일 알림으로 오류를 확인한다.
+두 카드가 모두 오지 않는 상태가 이어지면 Sentry 기본 이메일 알림으로 오류를 확인한다.
 이메일 백업을 남겨 둔 이유가 이 경우다.
 
 일반 Discord Webhook을 별도로 만들지 않는다는 기존 지침은 유지하지 않는다.
-전환 근거와 그 대가는 [ADR-0006](../adr/0006-ai-error-triage-alerts.md)에 있다.
+공식 Integration을 남긴 채 자체 웹훅을 함께 쓰는 근거와 그 대가는
+[ADR-0006](../adr/0006-ai-error-triage-alerts.md)에 있다.

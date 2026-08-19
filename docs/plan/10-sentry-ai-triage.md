@@ -1,6 +1,6 @@
 # Sentry 오류 알림 AI 트리아지 구현 계획
 
-> 상태: **계획 (미착수)**. 작성일 2026-08-18
+> 상태: **구현·배포 완료** (2026-08-19). 작성일 2026-08-18
 > 선행 결정: [ADR-0006](../adr/0006-ai-error-triage-alerts.md) (이 계획의 결정과 근거)
 > 관련: [ADR-0004](../adr/0004-consent-gated-error-monitoring.md) (오류 수집 개인정보 원칙),
 > [ADR-0005](../adr/0005-supabase-migration.md) (런타임 service_role 금지), [plan 05](05-sentry-error-monitoring.md) (현재 알림 구성)
@@ -22,12 +22,12 @@ Sentry 알림이 도착한 시점에 "무엇이 깨졌고, 방문자가 무엇�
 - env로 모델을 교체하는 트리아지 provider (OpenAI primary, Gemini 폴백)
 - Discord 웹훅 카드 전송 (AI 카드 + LLM 실패 시 기본 카드)
 - Supabase 기록 테이블 1개와 그 쓰기 경로 RPC 2개
-- Sentry 공식 Discord Integration 제거
 
 범위 밖:
 
 - 관리자 화면에서 `sentry_alerts` 를 조회하는 UI. 필요해지면 후속 과제로 다룬다.
-- Discord에서 이슈를 Resolve·Ignore 하는 상호작용. 카드의 Sentry 링크로 대체한다(ADR-0006).
+- AI 카드에서 이슈를 Resolve·Ignore 하는 상호작용. 그 조작은 공식 Integration 카드에서 한다(ADR-0006).
+- 공식 Discord Integration 제거. 두 카드를 함께 받는다(2026-08-19 결정 변경).
 - Sentry Seer 등 Sentry 자체 AI 기능 도입.
 
 ## 2. 전체 흐름
@@ -503,12 +503,13 @@ limit 50;
 
 ## 10. 배포 순서
 
-순서가 중요하다. 공식 Discord Integration 제거는 마지막이다.
+Alert Rule 의 기존 공식 Integration 대상을 지우지 않고 Internal Integration 을 더한다.
 
 1. 마이그레이션 적용. Supabase SQL 에디터에서 시크릿 1회 삽입:
    `insert into private.webhook_secrets values ('sentry_alert', encode(digest('<시크릿>','sha256'),'hex'));`
 2. Sentry에서 Internal Integration 생성. 웹훅 URL을 `https://<도메인>/api/sentry-alert` 로 등록하고
    client secret 을 확보한다. Alert Rule 의 알림 대상에 이 통합을 추가한다.
+   기존 공식 Discord Integration 대상은 그대로 둔다.
 3. Alert Rule 조건을 Production · 신규/회귀/escalated 로 좁힌다. 이 라우트의 transaction 제외
    필터는 **실제 이벤트의 태그 값을 확인한 뒤** 작성한다. 라우트에서 오류를 한 번 내고 Sentry
    이벤트의 `transaction` 값을 그대로 복사한다. `POST /api/sentry-alert` 형태일 수 있어
@@ -519,7 +520,7 @@ limit 50;
 6. 배포 후 Sentry에서 테스트 오류를 발생시켜 카드 도착, 링크, 잘림, 색상을 확인한다.
 7. `sentry_alerts` 행이 남았는지, 같은 전달을 다시 보내면 두 번째 카드가 안 나가는지 확인한다.
 8. 기본 이메일 알림 규칙이 살아 있는지 확인한다.
-9. **공식 Discord Integration 제거.**
+9. 같은 이슈로 공식 카드와 AI 카드가 모두 도착하는지 확인한다.
 10. 문서 갱신(§12).
 
 ## 11. 테스트

@@ -5,8 +5,8 @@
 > [ADR-0004](../adr/0004-consent-gated-error-monitoring.md)를 따른다. 배포 검증 중 이벤트나
 > 알림이 보이지 않을 때는 [Sentry 오류 수집과 Discord 알림](../troubleshooting/sentry-error-alerts.md)을 본다.
 >
-> ⚠️ 알림 전송 방식은 [ADR-0006](../adr/0006-ai-error-triage-alerts.md)이 대체했다.
-> 공식 Discord Integration 대신 자체 웹훅 파이프라인이 AI 트리아지 카드를 보낸다(P1 절 참고).
+> ⚠️ 알림 전송 경로는 [ADR-0006](../adr/0006-ai-error-triage-alerts.md)이 하나 더 늘렸다.
+> 공식 Discord Integration을 남긴 채 자체 웹훅 파이프라인이 AI 트리아지 카드를 함께 보낸다(P1 절 참고).
 > 이 문서의 나머지 결정(수집 범위, 동의, 태그, 노이즈 정책)은 그대로 유효하다.
 
 ## 현재 런타임 계약
@@ -84,11 +84,11 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] Event Highlights에 `environment`, `release`, `app_runtime`, `area`, `transaction` 등록
 - [x] URL 전체, 사용자 입력, 오류 메시지처럼 값 종류가 계속 늘어나는 데이터는 태그로 넣지 않기
 
-### P1. Discord 알림 — [ADR-0006](../adr/0006-ai-error-triage-alerts.md)이 대체함
+### P1. Discord 알림 — [ADR-0006](../adr/0006-ai-error-triage-alerts.md)이 AI 카드를 더함
 
-> 전송 방식이 공식 Integration에서 자체 웹훅 파이프라인으로 바뀐다. 구현 계획은 [plan 10](10-sentry-ai-triage.md).
-> 아래 완료 항목은 2026-08-18까지의 구성 기록이다. 공식 Integration 제거는 새 파이프라인이
-> 실제로 카드를 보내는 것을 확인한 뒤에 한다(plan 10 §10의 9단계).
+> 같은 Alert Rule이 알림 대상 2개를 갖는다. 공식 Integration이 기존 카드를, 자체 웹훅 파이프라인이
+> AI 트리아지 카드를 보낸다. 구현 계획은 [plan 10](10-sentry-ai-triage.md).
+> 아래 항목은 공식 Integration 쪽 구성이며 그대로 유효하다.
 
 - [x] Sentry의 공식 Discord Integration 설치
 - [x] Discord에 `#aperture-errors` 채널 생성 및 연결
@@ -101,13 +101,12 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] Spike Protection 발생 알림은 Sentry 기본 이메일 알림으로 받는다
 
 일반 Discord Webhook을 직접 호출하지 않는다는 기존 결정은 유지하지 않는다.
-공식 연동의 이점은 카드에서 이슈를 할당·무시·해결할 수 있다는 것이었다. 대신 그 카드가 알려주는 것은
-무엇이 발생했는지까지이고, 무엇이 깨졌으며 지금 봐야 하는지는 매번 Sentry에서 스택을 읽어야 판단이 섰다.
-AI 트리아지 카드와 공식 카드를 함께 보내면 같은 이슈로 카드가 두 장 오므로 하나를 골라야 했고,
-운영자가 1명이라 할당 기능의 가치가 낮았다. 근거와 대가는 ADR-0006에 있다.
+공식 카드는 무엇이 발생했는지까지 알려주고, 무엇이 깨졌으며 지금 봐야 하는지는 Sentry에서 스택을
+읽어야 판단이 섰다. 그 판단을 AI 카드가 대신한다. 근거와 대가는 ADR-0006에 있다.
 
-알림 경로가 하나로 줄어드는 대가가 생긴다. 파이프라인이 죽으면 "알림이 오지 않는 것"과
-"오류가 없는 것"이 구분되지 않으므로, Sentry 기본 이메일 알림을 백업으로 남긴다.
+두 카드를 함께 받으므로 같은 이슈로 카드가 두 장 온다. 대신 한쪽 경로가 죽어도 다른 카드가 오기 때문에
+"알림이 오지 않는 것"과 "오류가 없는 것"이 구분된다. 두 경로가 모두 죽었을 때를 대비해
+Sentry 기본 이메일 알림도 백업으로 남긴다.
 
 ### P2. 노이즈 필터
 

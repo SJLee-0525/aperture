@@ -49,7 +49,7 @@
 > ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
 > **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **카드 등록 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
 > 오류 모니터링은 카드 등록이 필요 없는 Sentry Developer 플랜을 사용한다. 쿼터를 초과하면 수집만 중단된다([ADR-0004](docs/adr/0004-consent-gated-error-monitoring.md)).
-> 오류 알림은 Sentry 공식 Discord 연동 대신 `/api/sentry-alert` 웹훅이 LLM 판정을 붙여 Discord 카드로 보낸다([ADR-0006](docs/adr/0006-ai-error-triage-alerts.md)).
+> 오류 알림은 Sentry 공식 Discord 연동과 `/api/sentry-alert` 웹훅을 함께 쓴다. 웹훅 쪽이 LLM 판정을 붙인 카드를 보낸다([ADR-0006](docs/adr/0006-ai-error-triage-alerts.md)).
 > 이 경로의 Supabase 쓰기는 RLS 가 아니라 `security definer` RPC + 공유 시크릿이 경계다(`service_role` 미사용).
 
 ### 상단 네비게이션 규칙 (사용자 확정) ★

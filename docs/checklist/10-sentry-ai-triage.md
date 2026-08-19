@@ -1,7 +1,8 @@
 # Sentry AI 트리아지 배포 체크리스트
 
 > 설계 [ADR-0006](../adr/0006-ai-error-triage-alerts.md) · 구현 계획 [plan 10](../plan/10-sentry-ai-triage.md)
-> 순서를 바꾸면 안 되는 것 두 가지: 공식 Discord Integration 제거는 **마지막**, Vercel env 는 **Production 스코프만**.
+> Vercel env 는 **Production 스코프만** 등록한다.
+> 공식 Discord Integration 은 제거하지 않고 남긴다(2026-08-19 결정 변경, ADR-0006 개정).
 
 ## 완료
 
@@ -40,7 +41,7 @@
 
 ### Sentry
 
-- [x] Internal Integration 의 Webhook URL 을 `https://<도메인>/api/sentry-alert` 로 교체
+- [x] Internal Integration 의 Webhook URL 을 `https://<도메인>/api/sentry-alert` 로 등록
 - [x] `Alert Action` 이 켜져 있는지 확인 (꺼져 있으면 Alert Rule 목록에 안 뜬다)
 - [x] 하단 Webhooks 구독(issue·error·comment)이 전부 꺼져 있는지 확인
 - [x] Alert Rule 을 Production · 신규/회귀/escalated 로 좁히기 (캡처용 임시 규칙을 고쳐 썼다)
@@ -103,9 +104,12 @@ Sensitive 로 넣을 것은 자격증명 5개다.
 
 ## 마지막
 
-- [x] **공식 Discord Integration 제거** (위 검증이 전부 끝난 뒤에만)
 - [x] 캡처 스크립트와 `package.json` 의 `capture:sentry-webhook` 항목 삭제
 - [x] plan 05 P1 의 이관 항목 정리
+- [x] **공식 Discord Integration 을 남긴 상태로 되돌리기** (2026-08-19 결정 변경)
+  - Alert Rule `Production AI triage` 의 알림 대상에 공식 Integration 과 Internal Integration 이 둘 다 있는지 확인한다.
+  - 검증 중 공식 Integration 을 이미 뗐다면 다시 설치하고 `#aperture-errors` 채널에 연결한다.
+  - 테스트 오류 1회로 같은 이슈에 카드 2장이 오는지 확인한다.
 
 ## 운영 중 확인
 
