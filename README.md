@@ -23,6 +23,7 @@
 - 공개 콘텐츠를 관리하는 개인용 Supabase CMS
 - 일반 검색, 현재 화면 문맥과 포트폴리오 RAG를 연결한 챗봇
 - 외부 브라우저 에이전트용 WebMCP 도구 15종과 선언형 연락 폼
+- Sentry 오류 알림을 LLM으로 판정해 Discord 카드로 보내는 트리아지 파이프라인
 - 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
 - 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
 - 개인정보처리방침, 사이트 이용 및 콘텐츠 정책, 접근성 안내
@@ -64,7 +65,7 @@
 - OpenAI 또는 Gemini 기반 채팅
 - OpenAI 임베딩을 사용하는 포트폴리오 RAG 검색
 - mdast 기반 Markdown 파싱과 서버 전용 Shiki 코드 하이라이트
-- Sentry 오류 모니터링
+- Sentry 오류 모니터링과 LLM 기반 오류 트리아지 알림
 - Vitest, Playwright, Storybook, Lighthouse CI
 
 ## 프로젝트 구조
@@ -138,6 +139,7 @@ src/
 │       ├── photos/[id]/route.ts    # 사진 상세 on-demand 조회
 │       ├── photo-map/[id]/route.ts # 지도 사진 상세 조회
 │       ├── dev-projects/[id]/route.ts # 개발 프로젝트 상세 조회
+│       ├── sentry-alert/route.ts   # Sentry 알림 웹훅, 서명 검증과 트리아지 위임
 │       └── admin/                  # 이미지 원본·포트폴리오 임베딩 관리
 ├── features/                       # 도메인 UI와 사용자 행동
 │   # 각 feature 내부: _components/ · _hooks/ · _lib/ · _types/
@@ -153,6 +155,7 @@ src/
 │   ├── site-header/ · site-footer/ # 데스크톱 mega-menu와 모바일 내비게이션
 │   ├── lang/ · theme/ · motion/    # 언어, 테마, 애니메이션 상태
 │   ├── auth/ · image-upload/       # 관리자 인증과 이미지 처리
+│   ├── sentry-triage/              # Sentry 웹훅 정규화, LLM 판정과 Discord 카드
 │   ├── admin-dev-articles/         # 블로그 작성·미리보기·발행 조건과 로컬 복구본
 │   └── admin-*/                    # 도메인별 CMS 목록·폼·정렬·저장 로직
 ├── components/                     # props 기반 공용 UI
@@ -253,6 +256,7 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [챗봇 화면 문맥 인식 계획](./docs/plan/06-chat-screen-context.md)            | URL 화면 문맥, 사진 필터와 연락 초안 전달   |
 | [개발 블로그 개편 계획](./docs/plan/07-dev-blog.md)                          | 블로그 정보 구조, Markdown 계약과 발행 흐름 |
 | [Supabase 이전 계획](./docs/plan/08-supabase-migration.md)                   | Firebase에서 Supabase로의 데이터 계층 이전  |
+| [오류 알림 AI 트리아지](./docs/plan/10-sentry-ai-triage.md)                  | Sentry 웹훅, LLM 판정과 Discord 알림 구성   |
 | [UI 품질 테스트](./docs/testing.md)                                          | 시각 회귀, 접근성, 언어·분석 동의 검증 방법 |
 
 ## 제작 및 AI 활용

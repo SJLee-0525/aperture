@@ -13,6 +13,9 @@
 
 관리자
 └─ Admin CMS ─ Supabase Auth · Postgres · Storage
+
+운영
+└─ Sentry Alert ─ 공식 Discord Integration · 자체 웹훅의 AI 트리아지 카드
 ```
 
 공개 페이지는 콘텐츠를 읽고, 인증된 Admin은 콘텐츠를 변경합니다. 방문자 UI는 관리자 인증 상태나 supabase-js를 불러오지 않습니다.
@@ -94,13 +97,33 @@ Feature 폴더는 필요에 따라 `_components`, `_hooks`, `_lib`, `_types`로 
 [`src/features/legal`](../../src/features/legal)의 공용 문서 화면과 중앙 문서 데이터로 관리합니다.
 한국어와 영어 페이지가 같은 구조를 사용하므로 정책을 바꿀 때 두 언어 원문을 함께 검토합니다.
 
+## 오류 알림
+
+브라우저와 서버 오류는 Sentry가 수집합니다. 공개 브라우저에서는 방문자가 오류 보고를 허용한 뒤에만 SDK를 내려받고, 이벤트는 같은 출처의 `/monitoring` 터널로 보냅니다.
+
+Alert가 발동하면 알림이 두 경로로 나갑니다.
+
+```text
+Sentry Alert Rule (Production · 신규·회귀·escalated)
+├─ 공식 Discord Integration ─ Discord 채널
+└─ /api/sentry-alert ─ 서명 검증 ─ 트리아지 LLM ─ Discord 웹훅
+```
+
+[`src/app/api/sentry-alert`](../../src/app/api/sentry-alert)는 HMAC 서명을 확인한 뒤 바로 202를 반환하고 나머지 처리를 응답 이후로 미룹니다. Sentry는 응답이 늦으면 같은 알림을 다시 보내기 때문입니다. [`src/features/sentry-triage`](../../src/features/sentry-triage)는 화이트리스트로 추린 이벤트 요약만 LLM에 넘겨 심각도, 사용자 영향, 추정 원인과 조치를 받고 Discord 카드로 만듭니다. LLM이 실패하면 제목, 환경, 릴리즈와 Sentry 링크만 담은 기본 카드를 대신 보냅니다.
+
+전달 기록은 Postgres에 남깁니다. 이 경로에는 사용자 세션이 없어 RLS를 쓸 수 없으므로, 공유 시크릿을 검증하는 `security definer` RPC 두 개만 쓰기 권한을 갖습니다. 같은 이슈와 이벤트 조합은 한 번만 기록되며, 웹훅이 중복 전달돼도 카드는 한 장만 나갑니다.
+
+카드를 두 경로로 받는 이유는 경로 이중화입니다. 자체 파이프라인이 멈춰도 공식 카드가 도착하므로 알림이 오지 않는 것과 오류가 없는 것을 구분할 수 있습니다. 이슈 처리 버튼은 공식 카드에 있고, 판단에 필요한 정보는 AI 카드에 있습니다. 결정과 그 영향은 [ADR-0006](../../docs/adr/0006-ai-error-triage-alerts.md)에 정리했습니다.
+
 ## 외부 서비스 경계
 
 - Supabase는 공개 콘텐츠, 관리자 인증, 이미지 저장과 RAG 벡터 검색을 담당합니다.
 - MapLibre GL은 사진 위치를 지도에 표시합니다.
-- OpenAI와 Gemini는 챗봇 응답, 분야 분류 또는 임베딩에 사용됩니다.
+- OpenAI와 Gemini는 챗봇 응답, 분야 분류, 임베딩과 오류 트리아지 판정에 사용됩니다.
 - Web3Forms는 문의 폼이 설정된 경우에만 사용됩니다.
-- Upstash Redis는 배포 환경에서 IP당 분당 10회·전역 일일 1,000회의 챗봇 요청 제한을 공유합니다.
+- Upstash Redis는 배포 환경에서 챗봇 요청 제한(IP당 분당 10회·전역 일일 1,000회)과 트리아지 LLM 일일 상한을 공유합니다.
 - Google Analytics는 방문자가 분석을 허용한 뒤에만 로드됩니다.
+- Sentry는 오류를 수집하고 Alert를 발동합니다. 공개 브라우저 수집은 오류 보고 동의가 있을 때만 시작합니다.
+- Discord는 공식 Integration과 웹훅 카드를 함께 받는 알림 채널입니다.
 
 로컬에서는 외부 서비스 없이 mock 콘텐츠로 공개 화면을 확인할 수 있습니다.
