@@ -151,7 +151,8 @@ Sentry가 알림을 발동했는지와 파이프라인이 받았는지를 먼저
 3. Vercel 런타임 로그에서 해당 시각의 `/api/sentry-alert` 응답 코드를 본다.
    401이면 `SENTRY_ALERT_WEBHOOK_SECRET`이 통합의 Client Secret과 다르다.
 4. 202인데 카드가 없으면 `sentry_alerts` 테이블에서 그 이슈의 행을 본다.
-   행이 없으면 같은 UTC 날짜에 이미 알림이 나간 이슈다. 하루 한 번이 설계된 동작이다.
+   행이 없으면 같은 `(issue_id, event_id)` 전달이 이미 처리된 것이다. Sentry 재전송으로 카드가
+   두 번 나가지 않게 하는 설계된 동작이며, 이슈 단위나 날짜 단위 억제가 아니다.
 5. 행이 있고 `notified = false`면 `notify_error`를 본다. Discord 웹훅 URL 만료나 429가 여기에 남는다.
 6. 행의 `triage_status`가 `failed`나 `skipped`면 LLM 문제이지 전송 문제가 아니다.
    이때도 판정 없는 기본 카드는 나가야 하므로, 카드 자체가 없다면 5번을 다시 본다.
