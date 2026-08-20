@@ -7,6 +7,12 @@ import { absoluteUrl } from "@/lib/seo/site-url";
  */
 const EXPIRES_DAYS = 180;
 
+/**
+ * 배포 시각에서 만료일을 계산한다.
+ *
+ * @param {Date} [from] 기준 시각. 테스트가 고정할 수 있게 주입받는다.
+ * @returns {string} RFC 9116 `Expires` 값.
+ */
 const expiresAt = (from: Date = new Date()): string =>
   new Date(from.getTime() + EXPIRES_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
@@ -24,6 +30,8 @@ const body = [
  *
  * @returns {Response} 하루 동안 캐시 가능한 UTF-8 security.txt 응답.
  */
+export { expiresAt };
+
 export function GET(): Response {
   return new Response(body, {
     headers: {

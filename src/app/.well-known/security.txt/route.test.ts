@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { GET } from "./route";
+import { expiresAt, GET } from "./route";
 
 describe("security.txt", () => {
   it("RFC 9116의 필수 연락·만료·canonical 필드를 일반 텍스트로 제공한다", async () => {
@@ -13,13 +13,20 @@ describe("security.txt", () => {
     expect(body).toMatch(/^Canonical: https?:\/\//m);
   });
 
-  it("Expires 가 충분히 미래여야 만료 직전 배포가 게이트에 걸린다", async () => {
+  it("만료일을 배포 시각에서 계산한다 — 날짜를 다시 박아 넣는 것을 막는다", () => {
+    const from = new Date("2026-01-01T00:00:00.000Z");
+
+    // 고정 날짜로 되돌아가면 기준 시각을 바꿔도 값이 그대로라 이 단언이 깨진다.
+    expect(expiresAt(from)).toBe("2026-06-30T00:00:00.000Z");
+    expect(expiresAt(new Date("2027-01-01T00:00:00.000Z"))).toBe("2027-06-30T00:00:00.000Z");
+  });
+
+  it("응답의 Expires 는 미래 시각이다", async () => {
     const body = await GET().text();
 
     const expires = /^Expires: (.+)$/m.exec(body)?.[1] ?? "";
-    const remainingDays = (Date.parse(expires) - Date.now()) / (24 * 60 * 60 * 1000);
     expect(Number.isNaN(Date.parse(expires))).toBe(false);
-    // 90일 아래로 내려가면 이 테스트가 재배포를 요구한다.
-    expect(remainingDays).toBeGreaterThan(90);
+    // 재배포가 곧 갱신이라, 180일 넘게 배포하지 않는 위험은 이 테스트가 잡지 않는다.
+    expect(Date.parse(expires)).toBeGreaterThan(Date.now());
   });
 });

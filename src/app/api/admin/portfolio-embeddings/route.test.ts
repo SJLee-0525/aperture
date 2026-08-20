@@ -70,6 +70,14 @@ const calls = (fetchMock: ReturnType<typeof vi.fn>): FetchCall[] =>
     init: init as FetchCall["init"],
   }));
 
+/**
+ * 쓰기 요청만 남긴다.
+ * 기존 청크 조회는 더 읽을 행이 없다는 확인 요청까지 포함해 여러 번 나가므로,
+ * 위치로 upsert·삭제를 집으면 조회 횟수에 흔들린다.
+ */
+const writeCalls = (fetchMock: ReturnType<typeof vi.fn>): FetchCall[] =>
+  calls(fetchMock).filter(({ init }) => init.method && init.method !== "GET");
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
@@ -133,7 +141,9 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       mode: "full",
       sections: { profile: 1, development: 1, music: 0, photography: 0 },
     });
-    const [meta, upsert, remove] = calls(fetchMock);
+    // 첫 GET 뒤에는 더 읽을 행이 없다는 확인 요청이 한 번 더 나간다.
+    const [meta] = calls(fetchMock);
+    const [upsert, remove] = writeCalls(fetchMock);
     expect(meta.url).toContain("select=id%2Cembedding_model");
     expect(meta.url).toContain("order=id.asc");
     // upsert 실패 시 유효 청크가 남아 있도록 삭제는 upsert 뒤에 온다.
@@ -177,7 +187,8 @@ describe("POST /api/admin/portfolio-embeddings", () => {
       ["본문 photography-photo-photo-1-photo"],
       expect.anything(),
     );
-    const [scope, upsert, remove] = calls(fetchMock);
+    const [scope] = calls(fetchMock);
+    const [upsert, remove] = writeCalls(fetchMock);
     expect(decodeURIComponent(scope.url)).toContain('source_type=in.("photo")');
     expect(decodeURIComponent(scope.url)).toContain("source_id=eq.photo-1");
     const rows = JSON.parse(upsert.init.body as string) as Array<{ id: string }>;
@@ -201,7 +212,8 @@ describe("POST /api/admin/portfolio-embeddings", () => {
 
     await POST(targetRequest({ sourceType: "photoTags", sourceId: "config" }));
 
-    const [scope, upsert, remove] = calls(fetchMock);
+    const [scope] = calls(fetchMock);
+    const [upsert, remove] = writeCalls(fetchMock);
     expect(decodeURIComponent(scope.url)).toContain('source_type=in.("photo")');
     // 요청의 sourceId(config)는 저장 청크 범위와 무관하다 — 필터에 쓰면 사진 전체가 stale 로 남는다.
     expect(scope.url).not.toContain("source_id");
@@ -262,7 +274,8 @@ describe("POST /api/admin/portfolio-embeddings", () => {
 
     await POST(targetRequest({ sourceType: "article", sourceId: article.id }));
 
-    const [scope, , remove] = calls(fetchMock);
+    const [scope] = calls(fetchMock);
+    const [, remove] = writeCalls(fetchMock);
     expect(decodeURIComponent(scope.url)).toContain('source_type=in.("article")');
     expect(decodeURIComponent(scope.url)).toContain(`source_id=eq.${article.id}`);
     expect(decodeURIComponent(remove.url)).toContain('id=in.("stale-article")');
@@ -384,13 +397,17 @@ describe("GET /api/admin/portfolio-embeddings", () => {
     ]);
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse([
-          { id: "ready", embedding_model: "text-embedding-3-small@512" },
-          { id: "gone", embedding_model: "text-embedding-3-small@512" },
-          { id: "outdated-doc", embedding_model: "text-embedding-3-small" },
-        ]),
-      ),
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse([
+            { id: "ready", embedding_model: "text-embedding-3-small@512" },
+            { id: "gone", embedding_model: "text-embedding-3-small@512" },
+            { id: "outdated-doc", embedding_model: "text-embedding-3-small" },
+          ]),
+        )
+        // 조회는 빈 페이지를 받아야 끝난다.
+        .mockResolvedValue(jsonResponse([])),
     );
     mocks.buildRagChunks.mockReturnValue([
       chunkOf("ready"),
