@@ -231,7 +231,9 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=  # apikey 헤더 전용. 공개돼도 위험하지 않다 — 경계는 RLS
 # 관리자 판별은 환경변수가 아니라 JWT app_metadata.role === "admin" 이다 (RLS is_admin() 과 같은 클레임)
 # UPSTASH_REDIS_REST_URL / _TOKEN     # (서버 전용) 챗 사용량 제한. 프로덕션에 없으면 챗이 비활성
-# CHAT_PROVIDER / _MODEL / _API_KEY   # 챗 LLM (+ CHAT_FALLBACK_* 3종, CHAT_INTENT_*, CHAT_DAILY_LIMIT)
+# CHAT_PROVIDER / _MODEL / _API_KEY   # 챗 LLM (+ CHAT_FALLBACK_* 3종, CHAT_INTENT_*)
+# CHAT_DAILY_LIMIT=1000               # (선택) 하루 요청 수 상한. 넘으면 429
+# CHAT_DAILY_INPUT_CHAR_LIMIT=2000000 # (선택) 하루 입력 문자 예산. 넘으면 문맥 없이 답한다
 # EMBEDDING_PROVIDER / _MODEL / _API_KEY / _DIMENSIONS  # RAG 임베딩
 # NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX      # (선택) GA4 측정 ID. 미설정 시 gtag 미삽입. 실값은 Vercel에만
 # NEXT_PUBLIC_SENTRY_DSN=             # (선택) Sentry DSN. DSN·지역 중 하나라도 비거나 불일치하면 비활성
@@ -279,7 +281,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=  # apikey 헤더 전용. 공개돼도 위�
 | Supabase 가동    | 무활동 시 일시정지   | `supabase-keepalive.yml` 이 3일 간격으로 깨운다. 실패가 이어지면 수동 dispatch |
 | Vercel           | 100GB 대역폭/월      | next/image 최적화                                                              |
 | 지도 (CARTO)     | 무료 타일 (저트래픽) | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드                      |
-| 챗 LLM           | 제공자별 무료 티어   | IP 분당 10회 + 전역 일일 상한(`CHAT_DAILY_LIMIT`). Upstash Redis 가 카운터     |
+| 챗 요청 수       | 제공자별 무료 티어   | IP 분당 10회, 전역 하루 `CHAT_DAILY_LIMIT` 회. 넘으면 429                      |
+| 챗 입력량        | 제공자별 토큰 과금   | 하루 `CHAT_DAILY_INPUT_CHAR_LIMIT` 자. 넘으면 문맥을 빼고 답한다               |
+
+> 상한이 둘인 이유는 요청 수만 세면 비용이 잡히지 않아서다. 글을 열어 둔 질문은 본문을 최대
+> 25,000자까지 함께 보내므로, 요청 수가 같아도 하루 비용이 몇 배로 벌어진다. 문자 예산을 넘기면
+> 요청을 거절하는 대신 화면 문맥과 RAG 검색을 건너뛴다. 두 카운터 모두 Upstash Redis 에 있고,
+> 자격증명이 없으면 문자 예산은 동작하지 않는다(프로덕션은 자격증명이 없으면 챗 자체가 비활성).
 
 ## 개발 명령어
 
