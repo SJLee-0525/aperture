@@ -1,10 +1,20 @@
 import { absoluteUrl } from "@/lib/seo/site-url";
 
+/**
+ * RFC 9116 은 `Expires` 가 미래 시각이어야 한다고 요구한다. 날짜를 고정해 두면 그날이
+ * 지난 뒤 스캐너와 신고자가 이 파일을 무효로 처리하는 것을 아무도 모른 채 지나간다.
+ * 배포 시각에서 계산해 재배포마다 갱신되게 한다.
+ */
+const EXPIRES_DAYS = 180;
+
+const expiresAt = (from: Date = new Date()): string =>
+  new Date(from.getTime() + EXPIRES_DAYS * 24 * 60 * 60 * 1000).toISOString();
+
 /** RFC 9116 security.txt 원문. 마지막 빈 문자열은 POSIX 줄바꿈을 보장한다. */
 const body = [
   `Contact: ${absoluteUrl("/en/contact")}`,
   "Preferred-Languages: ko, en",
-  "Expires: 2027-02-10T00:00:00.000Z",
+  `Expires: ${expiresAt()}`,
   `Canonical: ${absoluteUrl("/.well-known/security.txt")}`,
   "",
 ].join("\n");
