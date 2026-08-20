@@ -164,25 +164,120 @@ const contentFromPartialJson = (serialized: string): string => {
 };
 
 /**
+ * `"content"` 여는 따옴표를 찾을 때 조각 경계 앞으로 되짚는 길이.
+ * `"content"` 와 공백, 콜론, 여는 따옴표를 합친 최소 12자를 덮는다.
+ */
+const CONTENT_KEY_LOOKBACK = 32;
+
+/**
+ * 이스케이프 시퀀스를 자르지 않고 디코딩할 수 있는 앞부분의 길이.
+ * 조각 경계가 `\` 나 미완성 `\uXXXX` 한가운데에 놓이면 그 앞까지만 돌려준다.
+ *
+ * @param {string} value JSON 문자열 본문의 원문 조각.
+ * @returns {number} 지금 디코딩해도 되는 길이.
+ */
+const safeDecodeLength = (value: string): number => {
+  let index = 0;
+  let safe = 0;
+  while (index < value.length) {
+    if (value[index] !== "\\") {
+      index += 1;
+      safe = index;
+      continue;
+    }
+    const next = value[index + 1];
+    if (next === undefined) return safe;
+    if (next === "u") {
+      if (index + 6 > value.length) return safe;
+      index += 6;
+    } else {
+      index += 2;
+    }
+    safe = index;
+  }
+  return safe;
+};
+
+/**
+ * JSON 문자열 본문 조각을 디코딩한다. 깨진 조각은 빈 문자열로 본다.
+ *
+ * @param {string} raw 따옴표를 뺀 원문 조각.
+ * @returns {string}
+ */
+const decodeJsonStringSegment = (raw: string): string => {
+  try {
+    return JSON.parse(`"${raw}"`) as string;
+  } catch {
+    return "";
+  }
+};
+
+/**
  * 스트리밍 조각을 누적하면서 아직 내보내지 않은 본문 증분만 전달한다.
  * 구조화 JSON 이 완성되기 전에도 content 값만 뽑아 보여주기 위한 공통 로직으로,
  * 두 제공자의 스트림 처리 차이를 이 한 곳으로 흡수한다.
+ *
+ * 새로 도착한 조각만 훑는다. 매번 누적 문자열 전체를 다시 읽으면 답변 길이의 제곱에
+ * 비례해 서버 CPU 시간이 늘어 요청 제한 시간을 갉아먹는다.
  *
  * @param {(delta: string) => void} onContentDelta
  * @returns {{ push(chunk: string): void; readonly serialized: string }}
  */
 const createStreamingContentCollector = (onContentDelta: (delta: string) => void) => {
   let serialized = "";
-  let emitted = "";
+  /** 여는 따옴표를 찾기 전까지 다시 훑기 시작할 위치. */
+  let searchFrom = 0;
+  /** content 문자열 본문에서 이미 훑은 위치. */
+  let scanned = -1;
+  let closed = false;
+  /** 이스케이프 경계 때문에 아직 디코딩하지 않은 원문 꼬리. */
+  let pendingRaw = "";
+  let escaped = false;
+  let emittedChars = 0;
+
+  /** content 문자열이 시작하는 위치를 찾는다. 못 찾으면 -1. */
+  const findContentStart = (): number => {
+    const match = /"content"\s*:\s*"/.exec(serialized.slice(searchFrom));
+    if (!match) {
+      searchFrom = Math.max(searchFrom, serialized.length - CONTENT_KEY_LOOKBACK);
+      return -1;
+    }
+    return searchFrom + match.index + match[0].length;
+  };
 
   return {
     push(chunk: string) {
       serialized += chunk;
-      const content = contentFromPartialJson(serialized).slice(0, MAX_RESPONSE_CHARS);
-      if (content.length > emitted.length) {
-        onContentDelta(content.slice(emitted.length));
-        emitted = content;
+      if (closed) return;
+      if (scanned < 0) {
+        scanned = findContentStart();
+        if (scanned < 0) return;
       }
+
+      let raw = "";
+      while (scanned < serialized.length) {
+        const character = serialized[scanned] ?? "";
+        if (!escaped && character === '"') {
+          closed = true;
+          break;
+        }
+        raw += character;
+        escaped = escaped ? false : character === "\\";
+        scanned += 1;
+      }
+
+      pendingRaw += raw;
+      const safe = safeDecodeLength(pendingRaw);
+      if (safe === 0) return;
+      const decoded = decodeJsonStringSegment(pendingRaw.slice(0, safe));
+      pendingRaw = pendingRaw.slice(safe);
+      if (!decoded) return;
+
+      const room = MAX_RESPONSE_CHARS - emittedChars;
+      if (room <= 0) return;
+      const delta = decoded.slice(0, room);
+      emittedChars += delta.length;
+      onContentDelta(delta);
     },
     get serialized() {
       return serialized;

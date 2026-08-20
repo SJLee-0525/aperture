@@ -7,6 +7,7 @@ import {
   parseChatResult,
   parseOrSalvageChatResult,
 } from "@/features/chat/_lib/chat-response-contract";
+import { MAX_RESPONSE_CHARS } from "@/features/chat/_lib/chat-tuning";
 
 import { CHAT_REFERENCE_TYPES } from "@/types/chat";
 
@@ -79,6 +80,56 @@ describe("chat response contract", () => {
 
     collector.push('{"con');
     expect(onContentDelta).not.toHaveBeenCalled();
+  });
+
+  it("본문을 여는 키가 조각 경계에 걸쳐도 이어서 인식한다", () => {
+    const onContentDelta = vi.fn();
+    const collector = createStreamingContentCollector(onContentDelta);
+
+    collector.push('{"cont');
+    collector.push('ent" : "안녕하세요');
+
+    expect(onContentDelta.mock.calls.flat().join("")).toBe("안녕하세요");
+  });
+
+  it("이스케이프가 조각 경계에 걸쳐도 복원한다", () => {
+    const onContentDelta = vi.fn();
+    const collector = createStreamingContentCollector(onContentDelta);
+
+    collector.push('{"content":"첫 줄\\');
+    collector.push("n둘째 줄");
+
+    expect(onContentDelta.mock.calls.flat().join("")).toBe("첫 줄\n둘째 줄");
+  });
+
+  it("유니코드 이스케이프가 조각 경계에 걸쳐도 복원한다", () => {
+    const onContentDelta = vi.fn();
+    const collector = createStreamingContentCollector(onContentDelta);
+
+    collector.push('{"content":"\\u00');
+    collector.push("41B");
+
+    expect(onContentDelta.mock.calls.flat().join("")).toBe("AB");
+  });
+
+  it("닫는 따옴표 뒤의 다른 필드는 본문에 섞지 않는다", () => {
+    const onContentDelta = vi.fn();
+    const collector = createStreamingContentCollector(onContentDelta);
+
+    collector.push('{"content":"본문","links":[{"label":"섞이면 안 되는 값"}]}');
+
+    expect(onContentDelta.mock.calls.flat().join("")).toBe("본문");
+  });
+
+  it("긴 스트림도 누적 문자열을 다시 훑지 않는다", () => {
+    const onContentDelta = vi.fn();
+    const collector = createStreamingContentCollector(onContentDelta);
+
+    collector.push('{"content":"');
+    for (let index = 0; index < 500; index += 1) collector.push("가".repeat(10));
+
+    // 상한까지만 내보내고 그 뒤로는 조각을 받아도 추가 전달이 없다.
+    expect(onContentDelta.mock.calls.flat().join("").length).toBe(MAX_RESPONSE_CHARS);
   });
 
   /**
