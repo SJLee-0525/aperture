@@ -18,6 +18,8 @@ vi.mock("@/lib/supabase/storage", () => ({
 
 import {
   deleteOrphanArticleImages,
+  OrphanConfirmationRequiredError,
+  orphanConfirmationToken,
   scanOrphanArticleImages,
 } from "@/features/admin-maintenance/_lib/find-orphan-article-images";
 
@@ -173,6 +175,52 @@ describe("scanOrphanArticleImages", () => {
     // 참조된 파일이 없어 남긴 것이라 '함께 유지한 파일' 집계에도 들어가지 않는다.
     expect(result.keptFiles).toEqual([]);
   });
+
+  it("글이 한 편도 없으면 확인 사유를 남긴다", async () => {
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
+    mocks.listFolderFiles.mockResolvedValue([
+      { path: "dev-blog/a1/asset-1.webp", size: 400, createdAt: hoursAgo(48) },
+    ]);
+
+    const result = await scanOrphanArticleImages(now);
+
+    expect(result.confirmationReason).toContain("글이 한 편도 조회되지 않아");
+  });
+
+  it("삭제 대상이 절반을 넘으면 확인 사유를 남긴다", async () => {
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([
+      { cover: null, body: bodyImage("dev-blog/a1/kept.webp") },
+    ]);
+    mocks.listFolderFiles.mockResolvedValue([
+      { path: "dev-blog/a1/kept.webp", size: 10, createdAt: hoursAgo(48) },
+      { path: "dev-blog/a1/gone-1.webp", size: 10, createdAt: hoursAgo(48) },
+      { path: "dev-blog/a1/gone-2.webp", size: 10, createdAt: hoursAgo(48) },
+    ]);
+
+    const result = await scanOrphanArticleImages(now);
+
+    expect(result.groups).toHaveLength(2);
+    expect(result.confirmationReason).toBe("이미지 3개 중 2개가 삭제 대상입니다.");
+  });
+
+  it("삭제 대상이 절반 이하면 확인 사유가 없다", async () => {
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([
+      {
+        cover: null,
+        body: `${bodyImage("dev-blog/a1/kept-1.webp")}${bodyImage("dev-blog/a1/kept-2.webp")}`,
+      },
+    ]);
+    mocks.listFolderFiles.mockResolvedValue([
+      { path: "dev-blog/a1/kept-1.webp", size: 10, createdAt: hoursAgo(48) },
+      { path: "dev-blog/a1/kept-2.webp", size: 10, createdAt: hoursAgo(48) },
+      { path: "dev-blog/a1/gone.webp", size: 10, createdAt: hoursAgo(48) },
+    ]);
+
+    const result = await scanOrphanArticleImages(now);
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.confirmationReason).toBeNull();
+  });
 });
 
 describe("deleteOrphanArticleImages", () => {
@@ -182,7 +230,11 @@ describe("deleteOrphanArticleImages", () => {
     { path: "dev-blog/a1/fresh-candidate.webp", size: 30, createdAt: hoursAgo(48) },
   ];
 
-  it("확인 후 그룹의 한 파일이 참조되면 같은 그룹을 통째로 지우지 않는다", async () => {
+  /** 관리자가 확인 화면에서 본 근거. */
+  const confirmationTokenNow = async () =>
+    orphanConfirmationToken(await scanOrphanArticleImages(now));
+
+  it("확인 후 그룹의 한 파일이 참조되면 삭제하지 않고 재확인을 요구한다", async () => {
     const group = [
       { path: "dev-blog/a1/asset-1.webp", size: 400, createdAt: hoursAgo(48) },
       { path: "dev-blog/a1/previews/asset-1.webp", size: 100, createdAt: hoursAgo(48) },
@@ -191,7 +243,8 @@ describe("deleteOrphanArticleImages", () => {
     // 관리자가 확인할 때는 셋 다 미참조였다.
     mocks.listDevArticleImageRefsAdmin.mockResolvedValueOnce([]);
     mocks.listFolderFiles.mockResolvedValue(group);
-    const confirmed = (await scanOrphanArticleImages(now)).groups.flatMap((each) => each.paths);
+    const confirmedScan = await scanOrphanArticleImages(now);
+    const confirmed = confirmedScan.groups.flatMap((each) => each.paths);
     expect(confirmed).toHaveLength(3);
 
     // 삭제 재검사 시점에는 원본이 다시 본문에 들어가 있다.
@@ -199,10 +252,51 @@ describe("deleteOrphanArticleImages", () => {
       { cover: null, body: bodyImage("dev-blog/a1/asset-1.webp") },
     ]);
 
-    const result = await deleteOrphanArticleImages(confirmed, now);
+    await expect(
+      deleteOrphanArticleImages(confirmed, {
+        confirmationToken: orphanConfirmationToken(confirmedScan),
+        now,
+      }),
+    ).rejects.toBeInstanceOf(OrphanConfirmationRequiredError);
+    expect(mocks.deleteImageStrict).not.toHaveBeenCalled();
+  });
 
-    expect(result.skipped).toEqual(confirmed);
-    expect(result.deleted).toEqual([]);
+  it("재확인 오류는 최신 스캔을 함께 준다", async () => {
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
+    mocks.listFolderFiles.mockResolvedValue(files);
+
+    let caught: OrphanConfirmationRequiredError | null = null;
+    try {
+      await deleteOrphanArticleImages(["dev-blog/a1/one.webp"], {
+        confirmationToken: "옛 화면의 근거",
+        now,
+      });
+    } catch (error) {
+      caught = error as OrphanConfirmationRequiredError;
+    }
+
+    // 화면이 이 값으로 상태를 바꿔야 다음 확인이 새 내용을 담는다.
+    expect(caught?.scan.groups.flatMap((group) => group.paths)).toHaveLength(files.length);
+    expect(caught?.reason).toContain("글이 한 편도 조회되지 않아");
+  });
+
+  it("사유가 같아도 삭제 대상이 바뀌면 재확인을 요구한다", async () => {
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
+    mocks.listFolderFiles.mockResolvedValueOnce(files);
+    const staleToken = await confirmationTokenNow();
+
+    // 파일 하나가 더 늘었다. 사유(글 0건)는 그대로다.
+    mocks.listFolderFiles.mockResolvedValue([
+      ...files,
+      { path: "dev-blog/a1/extra.webp", size: 10, createdAt: hoursAgo(48) },
+    ]);
+
+    await expect(
+      deleteOrphanArticleImages(
+        files.map((file) => file.path),
+        { confirmationToken: staleToken, now },
+      ),
+    ).rejects.toBeInstanceOf(OrphanConfirmationRequiredError);
     expect(mocks.deleteImageStrict).not.toHaveBeenCalled();
   });
 
@@ -216,7 +310,7 @@ describe("deleteOrphanArticleImages", () => {
     // fresh-candidate 는 재검증 후보지만 관리자가 확인한 목록에 없다 — 건드리지 않는다.
     const result = await deleteOrphanArticleImages(
       ["dev-blog/a1/one.webp", "dev-blog/a1/two.webp"],
-      now,
+      { confirmationToken: await confirmationTokenNow(), now },
     );
 
     expect(result.deleted).toEqual(["dev-blog/a1/one.webp"]);
@@ -234,11 +328,38 @@ describe("deleteOrphanArticleImages", () => {
 
     const result = await deleteOrphanArticleImages(
       files.map((file) => file.path),
-      now,
+      { confirmationToken: await confirmationTokenNow(), now },
     );
 
     expect(result.deleted).toHaveLength(2);
     expect(result.failed).toEqual([{ path: "dev-blog/a1/two.webp", message: "network" }]);
     expect(result.skipped).toEqual([]);
+  });
+
+  it("확인 근거 없이 부르면 아무것도 지우지 않는다", async () => {
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
+    mocks.listFolderFiles.mockResolvedValue(files);
+
+    await expect(
+      deleteOrphanArticleImages(
+        files.map((file) => file.path),
+        { now },
+      ),
+    ).rejects.toBeInstanceOf(OrphanConfirmationRequiredError);
+    expect(mocks.deleteImageStrict).not.toHaveBeenCalled();
+  });
+
+  it("근거가 일치하면 확인이 필요한 상태에서도 진행한다", async () => {
+    // 초기 상태(글 0건, 미참조 이미지 다수)에서도 정리를 영구히 막지 않는다.
+    mocks.listDevArticleImageRefsAdmin.mockResolvedValue([]);
+    mocks.listFolderFiles.mockResolvedValue(files);
+
+    const result = await deleteOrphanArticleImages(
+      files.map((file) => file.path),
+      { confirmationToken: await confirmationTokenNow(), now },
+    );
+
+    expect(result.deleted).toHaveLength(3);
+    expect(result.failed).toEqual([]);
   });
 });

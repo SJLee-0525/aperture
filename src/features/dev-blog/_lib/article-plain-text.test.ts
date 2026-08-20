@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { articleBlockText } from "@/features/dev-blog/_lib/article-plain-text";
+import {
+  articleBlockText,
+  articlePlainTextClipped,
+} from "@/features/dev-blog/_lib/article-plain-text";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 import type { ArticlePlainTextOptions } from "@/features/dev-blog/_lib/article-plain-text";
+import type { DevArticle } from "@/types/dev-article";
 
 const textOf = (markdown: string, options: ArticlePlainTextOptions = {}): string =>
   parseArticleMarkdown(markdown)
@@ -91,5 +95,54 @@ describe("articleBlockText", () => {
 
   it("구분선은 빈 문자열이라 구분자가 겹치지 않는다", () => {
     expect(textOf(["첫 문단", "", "---", "", "둘째 문단"].join("\n"))).toBe("첫 문단 | 둘째 문단");
+  });
+});
+
+describe("articlePlainTextClipped", () => {
+  const articleOf = (body: string): DevArticle => ({
+    id: "a1",
+    slug: "clip-test",
+    title: { ko: "제목", en: "Title" },
+    summary: { ko: "요약", en: "Summary" },
+    body,
+    cover: null,
+    coverAlt: null,
+    tags: [],
+    relatedProjectIds: [],
+    pinned: false,
+    published: true,
+    publishedAt: new Date("2026-08-01T00:00:00.000Z"),
+    firstPublishedAt: null,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+  });
+
+  it("예산 안에 들어가면 전문을 그대로 돌려준다", () => {
+    const result = articlePlainTextClipped(articleOf("첫 문단\n\n둘째 문단"), 1_000);
+
+    expect(result).toEqual({ text: "첫 문단\n둘째 문단", complete: true });
+  });
+
+  it("예산을 넘으면 블록 경계까지만 담는다", () => {
+    const paragraph = "가".repeat(100);
+    const result = articlePlainTextClipped(
+      articleOf([paragraph, paragraph, paragraph].join("\n\n")),
+      250,
+    );
+
+    // 문단 두 개 + 구분자 = 201자. 세 번째를 넣으면 302자라 통째로 뺀다.
+    expect(result.text).toBe(`${paragraph}\n${paragraph}`);
+    expect(result.complete).toBe(false);
+  });
+
+  it("첫 블록부터 예산을 넘으면 그 블록을 예산 길이로 자른다", () => {
+    const result = articlePlainTextClipped(articleOf("가".repeat(500)), 100);
+
+    expect(result.text).toHaveLength(100);
+    expect(result.complete).toBe(false);
+  });
+
+  it("본문이 비면 전문으로 본다", () => {
+    expect(articlePlainTextClipped(articleOf(""), 100)).toEqual({ text: "", complete: true });
   });
 });

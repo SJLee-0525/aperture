@@ -127,12 +127,12 @@ const useChat = (
   );
 
   useEffect(() => {
-    setMessages((current) => {
-      if (current.length !== 1 || current[0]?.id !== "welcome") return current;
-      const next = [createInitialMessage(lang)];
-      messagesRef.current = next;
-      return next;
-    });
+    // 이 훅은 ref 를 대화 기록의 단일 출처로 쓴다. setState updater 안에서 ref 를 바꾸면
+    // React 가 updater 를 다시 부르거나 결과를 버릴 때 ref 와 화면이 어긋난다.
+    if (messagesRef.current.length !== 1 || messagesRef.current[0]?.id !== "welcome") return;
+    const next = [createInitialMessage(lang)];
+    messagesRef.current = next;
+    setMessages(next);
   }, [lang]);
 
   const send = useCallback(

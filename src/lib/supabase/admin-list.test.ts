@@ -2,10 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   select: vi.fn(),
+  range: vi.fn(),
   rows: vi.fn(),
 }));
 
-/** supabase-js 쿼리 빌더 대역 — `listProjected` 가 쓰는 select·order 체인만 재현한다. */
+/**
+ * 이번 테스트에서 이미 내보낸 페이지 수. 페이지마다 `from()` 이 새로 불려
+ * 빌더 지역 변수로는 구간을 셀 수 없다.
+ */
+let pagesServed = 0;
+
+/** supabase-js 쿼리 빌더 대역 — `listProjected` 가 쓰는 select·order·range 체인만 재현한다. */
 const builder = () => {
   const chain = {
     select: (select: string) => {
@@ -13,11 +20,19 @@ const builder = () => {
       return chain;
     },
     order: () => chain,
+    range: (from: number, to: number) => {
+      mocks.range(from, to);
+      return chain;
+    },
     then: (
       resolve: (value: unknown) => unknown,
       reject: (reason: unknown) => unknown,
-    ): Promise<unknown> =>
-      Promise.resolve({ data: mocks.rows(), error: null }).then(resolve, reject),
+    ): Promise<unknown> => {
+      // 목록 조회는 빈 페이지를 받아야 끝난다. 첫 구간만 행을 주고 그 뒤는 비운다.
+      const data = pagesServed === 0 ? mocks.rows() : [];
+      pagesServed += 1;
+      return Promise.resolve({ data, error: null }).then(resolve, reject);
+    },
   };
   return chain;
 };
@@ -34,7 +49,18 @@ import { listDevArticleItemsAdmin } from "@/lib/supabase/admin-list";
 describe("listDevArticleItemsAdmin — 목록 projection", () => {
   beforeEach(() => {
     mocks.select.mockClear();
+    mocks.range.mockClear();
     mocks.rows.mockReset();
+    pagesServed = 0;
+  });
+
+  it("첫 페이지를 max_rows 구간으로 요청한다", async () => {
+    mocks.rows.mockReturnValue([]);
+
+    await listDevArticleItemsAdmin();
+
+    // 구간을 지정하지 않으면 PostgREST 가 max_rows 에서 조용히 자른다.
+    expect(mocks.range).toHaveBeenCalledWith(0, 999);
   });
 
   it("본문을 빼고 고정 여부를 함께 읽는다", async () => {

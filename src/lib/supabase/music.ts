@@ -4,6 +4,7 @@ import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { asText } from "@/lib/i18n/as-text";
+import { isDangerousStoredHref } from "@/lib/security/public-url";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
@@ -42,6 +43,9 @@ const toMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
   program: (d.program as string[]) ?? [],
   description: asText(d.description),
   poster: (d.poster as MusicWork["poster"]) ?? { url: "", path: "", w: 0, h: 0 },
+  // 읽기에서 정화하지 않는다. https 가 아닌 주소를 빈 값으로 바꾸면 폼이 그 빈 값을
+  // 그대로 저장하고, 전체 문서를 되쓰는 마이그레이션도 원본을 지운다.
+  // 정책(https 전용)은 폼이, 위험 스킴 차단은 저장 경계가 본다.
   ticketUrl: (d.ticketUrl as string) ?? "",
   order: (d.order as number) ?? 0,
   published: (d.published as boolean) ?? false,
@@ -86,8 +90,30 @@ const musicWorksCrud = listCrud<MusicWork>(
   "연주",
   "musicWork",
 );
+/**
+ * 저장하면 안 되는 예매 링크를 거부한다.
+ *
+ * 폼을 거치지 않는 경로(이미지 마이그레이션의 전체 문서 저장 등)도 이 경계를 지난다.
+ * https 전용 표시 정책은 폼이 보고, 여기서는 실행 가능한 스킴만 막는다.
+ *
+ * @throws {Error} `javascript:` 처럼 링크로 그릴 때 실행되는 주소일 때.
+ */
+const assertStorableTicketUrl = (input: MusicWorkInput): void => {
+  if (isDangerousStoredHref(input.ticketUrl)) {
+    throw new Error("예매 링크에 사용할 수 없는 주소입니다.");
+  }
+};
+
 const musicWorks = {
   ...musicWorksCrud,
+  create: async (id: string, input: MusicWorkInput): Promise<void> => {
+    assertStorableTicketUrl(input);
+    await musicWorksCrud.create(id, input);
+  },
+  update: async (id: string, input: MusicWorkInput): Promise<void> => {
+    assertStorableTicketUrl(input);
+    await musicWorksCrud.update(id, input);
+  },
   /**
    * 연주 문서를 삭제한 뒤 해당 연주의 Storage 이미지도 정리한다.
    *

@@ -29,10 +29,11 @@ const createLiveArticleCoverUploader =
   (articleId: string): ArticleImageUploader =>
   async (file: File): Promise<ImageMeta> => {
     const assetId = crypto.randomUUID();
-    const [compressed, preview, thumbnail] = await Promise.all([
-      compressToWebp(file),
-      compressPreviewToWebp(file),
-      compressThumbnailToWebp(file),
+    // 원본을 셋이 각자 디코딩하지 않도록 메인 webp 를 만든 뒤 그것을 줄인다.
+    const compressed = await compressToWebp(file);
+    const [preview, thumbnail] = await Promise.all([
+      compressPreviewToWebp(compressed),
+      compressThumbnailToWebp(compressed),
     ]);
     const [size, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
       await Promise.all([

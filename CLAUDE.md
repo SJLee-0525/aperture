@@ -3,7 +3,7 @@
 > 디자인 단일 출처: [`design/README.md`](design/README.md) → `design/ver_2/` (Claude Design에서 export한 Desktop/Mobile 프로토타입).
 > 구현과 디자인이 충돌하면 **디자인이 우선** (단, [문서화된 의도적 이탈](design/README.md) 예외).
 > 운영 철학: **서버 0대, 월 $0**. 관리자(본인) 1명 + 불특정 방문자 구조이므로
-> 상시 가동 백엔드 대신 Firebase BaaS + 정적 우선 렌더링.
+> 상시 가동 백엔드 대신 Supabase BaaS + 정적 우선 렌더링.
 >
 > ⚠️ **이 저장소는 사진 포트폴리오 `Aperture.` 에서 출발**해 지금은 **이성준 개인 통합 포트폴리오 `Sungjoon Lee.`** 로 확장 중이다.
 > 사진 섹션은 기존 구현(P1·P2 완료)을 그대로 계승하고 브랜드만 서브브랜드 `Aperture.` 로 유지한다.
@@ -34,9 +34,9 @@
 | ----------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | 프레임워크  | Next.js (App Router)                              | 공개 페이지 정적 우선 + 관리자 페이지 동거. 3섹션 라우트 공존                                                                          |
 | 호스팅      | Vercel Hobby                                      | 무료, git push 자동 배포                                                                                                               |
-| 인증        | Firebase Auth                                     | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성                                                                            |
-| DB          | Firestore                                         | **무활동 일시정지 없음**. 사진·음악·개발 콘텐츠 전부 여기 (섹션별 컬렉션)                                                              |
-| 이미지      | Firebase Storage                                  | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
+| 인증        | Supabase Auth                                     | 관리자 1명. **회원가입 없음** — 콘솔에서 계정 1개 수동 생성 + `app_metadata.role = "admin"` 부여                                       |
+| DB          | Supabase Postgres (PostgREST)                     | 사진·음악·개발 콘텐츠 전부 여기 (섹션별 테이블). 무활동 시 일시정지가 있어 **keep-alive 워크플로**로 방지                              |
+| 이미지      | Supabase Storage (`media` 버킷)                   | 브라우저에서 직접 업로드, **webp 3단 압축** (2048px 메인·960px 프리뷰·320px 썸네일)                                                    |
 | 스타일      | **CSS Modules + CSS 변수**                        | 디자인 export가 순수 CSS → Tailwind 재작성 세금 회피 + 파일당 SRP. **Tailwind 미사용**                                                 |
 | i18n        | 자체 구현 (라이브러리 X)                          | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
 | 지도        | **MapLibre GL + CARTO**                           | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
@@ -46,8 +46,9 @@
 | 블로그 본문 | `mdast-util-from-markdown` (+gfm-table·directive) | 파싱만 라이브러리, 렌더는 **허용 노드 → React element 직접 매핑**. HTML 문자열 단계가 없어 sanitizer·`dangerouslySetInnerHTML` 불필요  |
 | 코드 색칠   | `shiki` **서버 전용**                             | 문법·테마를 브라우저에 보내지 않는다. 토큰만 넘기고 라이트·다크는 CSS 변수 한 쌍(`--shiki-light`/`--shiki-dark`)                       |
 
-> ⚠️ **Firebase Storage는 Blaze(종량제) 전환 + 카드 등록 필요.** 무료 한도 내에서는 청구액 $0.
-> **GCP 예산 알림 $1 등록 필수.** 지도는 MapLibre+CARTO 무료 타일이라 **카드 등록 표면은 Firebase 하나뿐** (Google Maps 미사용 — 카드·비용 회피).
+> ⚠️ **Supabase Free 플랜은 카드 등록이 필요 없다.** 지도(MapLibre+CARTO)·Vercel Hobby·Sentry Developer도 마찬가지라
+> **카드 등록 표면이 0이다** (Google Maps 미사용 — 카드·비용 회피).
+> 대신 Free 플랜은 **무활동 프로젝트를 일시정지**하므로 `supabase-keepalive.yml` 워크플로가 3일 간격으로 깨운다.
 > 오류 모니터링은 카드 등록이 필요 없는 Sentry Developer 플랜을 사용한다. 쿼터를 초과하면 수집만 중단된다([ADR-0004](docs/adr/0004-consent-gated-error-monitoring.md)).
 > 오류 알림은 Sentry 공식 Discord 연동과 `/api/sentry-alert` 웹훅을 함께 쓴다. 웹훅 쪽이 LLM 판정을 붙인 카드를 보낸다([ADR-0006](docs/adr/0006-ai-error-triage-alerts.md)).
 > 이 경로의 Supabase 쓰기는 RLS 가 아니라 `security definer` RPC + 공유 시크릿이 경계다(`service_role` 미사용).
@@ -60,32 +61,43 @@
 
 ## 아키텍처 원칙 (서버리스)
 
-1. **별도 백엔드 서버 없음.** 보안 경계는 Firestore/Storage **Security Rules가 전부**다.
+1. **별도 백엔드 서버 없음.** 보안 경계는 Postgres/Storage **RLS 정책이 전부**다.
    클라이언트 코드의 인증 가드는 UX 편의일 뿐, 보안이 아니다.
-2. **관리자 판별 = 단일 UID 비교.** Rules의 `isAdmin()` 함수에서 본인 UID 하드코딩.
+2. **관리자 판별 = JWT의 `app_metadata.role === "admin"`.** RLS `is_admin()`과 서버의
+   `verifyAdminIdToken`이 같은 클레임을 본다. `user_metadata`는 사용자가 스스로 수정할 수 있어 쓰지 않는다.
 3. **이미지 흐름**: 브라우저에서 ① `exifr`로 EXIF·좌표 추출(**압축 前 ★**, 사진만) → ② 원본 dimension 추출 →
-   ③ `browser-image-compression`으로 webp(2048px 메인·960px 프리뷰·320px 썸네일) 압축 → ④ Storage 직접 업로드 → ⑤ 다운로드 URL + 메타를 Firestore에 저장.
+   ③ `browser-image-compression`으로 webp(2048px 메인·960px 프리뷰·320px 썸네일) 압축 → ④ Storage `media` 버킷 직접 업로드 → ⑤ 공개 URL + 메타를 DB에 저장.
    (음악 포스터·개발 썸네일은 EXIF 추출 없이 ②③④⑤만.)
-4. **방문자 read 규칙**: `published == true` 문서만. 초안은 관리자만 읽기 가능. **전 컬렉션 공통.**
-5. **firebase-admin SDK 사용 금지.** 서비스 계정 키가 필요해지는 순간 서버리스 원칙이 깨진다.
-   (hook이 서비스 계정 키 파일 수정을 차단함)
-6. **공개 페이지 서버 읽기 = Firestore REST API + `fetch`** (`lib/firebase/firestore-rest.ts`),
-   클라이언트 SDK 아님. 클라 SDK를 서버 렌더(ISR 재생성)에서 쓰면 stale/실패 → 재생성이 폐기되고
-   재빌드 전까지 공개 페이지가 안 바뀐다. REST는 `fetch` 기반이라 ISR·`revalidatePath`와 정상 연동.
-   published 문서·`site`는 Rules가 무인증 read를 허용 → 웹 API 키만으로 충분. **쓰기·관리자 읽기만 클라 SDK**(`firestore.ts`).
-7. **★ 무인증 쓰기 전면 금지.** 방문자는 모든 컬렉션을 읽기만 하며, Firestore·Storage 쓰기는 관리자만 허용한다.
-   공개 server action도 Firebase ID token을 검증하고 관리자 UID와 일치할 때만 실행한다.
-8. **★ AI = 서버리스 Route Handler만.** 채팅과 OpenAI 임베딩 키는 Vercel 서버 환경변수로 분리하고
-   브라우저 번들에 노출하지 않는다. 관리자 쓰기는 Firebase ID token과 고정 관리자 UID를 검증한다.
-   별도 상시 서버와 `firebase-admin`은 두지 않는다. 자세한 결정은 `docs/adr/0001-serverless-rag.md`를 따른다.
+4. **방문자 read 규칙**: `published = true` 행만. 초안은 관리자만 읽기 가능. **전 테이블 공통.**
+   RLS는 미인증 조회를 거부하지 않고 공개 행만 돌려주므로, 관리자 읽기 경로는
+   `requireAdminSession()`으로 "초안이 조용히 사라지는 상태"를 로그인 오류로 바꾼다.
+5. **`service_role` 키 사용 금지.** RLS를 통째로 우회하는 키가 필요해지는 순간 서버리스 원칙이 깨진다.
+   서버 경로도 publishable key + 사용자 토큰만 쓴다. (예외: Sentry 알림 기록은 `security definer` RPC + 공유 시크릿이 경계다.)
+6. **공개 페이지 서버 읽기 = PostgREST + `fetch`** (`lib/supabase/public/transport.ts`),
+   supabase-js 클라이언트 아님. 클라 SDK를 서버 렌더(ISR 재생성)에서 쓰면 stale/실패 → 재생성이 폐기되고
+   재빌드 전까지 공개 페이지가 안 바뀐다. REST는 `fetch` 기반이라 ISR·태그 재검증과 정상 연동.
+   published 행·`site_documents`는 RLS가 무인증 read를 허용 → publishable key를 `apikey` 헤더로만 보낸다
+   (`Authorization`은 사용자 토큰 전용). **쓰기·관리자 읽기만 supabase-js**(`lib/supabase/*.ts`).
+7. **★ 무인증 쓰기 전면 금지.** 방문자는 모든 테이블을 읽기만 하며, DB·Storage 쓰기는 관리자만 허용한다.
+   공개 server action도 Supabase access token을 검증하고 관리자 클레임이 있을 때만 실행한다.
+8. **★ AI = 서버리스 Route Handler만.** 채팅과 임베딩 키는 Vercel 서버 환경변수로 분리하고
+   브라우저 번들에 노출하지 않는다. 관리자 쓰기는 Supabase access token의 서명·만료와 관리자 클레임을 검증한다.
+   별도 상시 서버와 `service_role`은 두지 않는다. 자세한 결정은 `docs/adr/0001-serverless-rag.md`를 따른다.
 9. **★ 섹션 액센트 = `html[data-section]`.** 라우트에 따라 `photo`(블루)/`music`(레드)/`dev`(그린)/`home`(블루)를 설정,
    `globals.css`가 `--accent` 계열을 오버라이드. 컴포넌트는 항상 `--accent` 변수만 참조(섹션별 색 하드코딩 금지).
 
-## 데이터 모델 (Firestore)
+## 데이터 모델 (Supabase Postgres)
 
+> **저장 형태**: 테이블은 `id`, 승격된 스칼라 컬럼(`published`·`sort_order`·`slug`·`published_at`·`created_at`·`updated_at` 등),
+> 나머지 전 필드를 담는 **`data` jsonb** 한 칸으로 구성된다. 아래 표의 "주요 필드"는 `data` 안의 JSON 키다(camelCase 유지).
+> 논리 컬렉션 이름(`COLLECTIONS`)과 물리 테이블은 `constants/collections.ts`의 **서술자**가 매핑한다
+> (`photos`·`albums`·`music_works`·`music_awards`·`music_media`·`dev_projects`·`dev_articles`·`dev_article_tags`·`site_documents`).
+> 읽을 때 `mergeRow`가 `data`를 펼친 뒤 스칼라 컬럼으로 덮는다. 구형 데이터에 남은 `data.published` 잔존값이 DB 스칼라를 이기지 못하게 하는 계약이다.
+>
 > ko/en 이중언어 필드는 `{ko, en}` map. 언어 무관 필드(카메라·렌즈·EXIF 수치·좌표·날짜·파일명·기술 태그·URL)는 평면 값.
-> 모든 시간 필드는 Timestamp, 표시 포맷은 렌더 시. **전 리스트 컬렉션 공통**: `order`(수동 정렬) · `published` · `createdAt` · `updatedAt`.
-> 공개 쿼리 = `where(published==true) + orderBy(order)` → 컬렉션마다 **복합 인덱스 1개** (`firestore.indexes.json`).
+> 시간 필드는 ISO 문자열로 저장하고 디코더가 `Date`로 바꾼다. 표시 포맷은 렌더 시.
+> 공개 쿼리 = `published=eq.true` + 서술자 `order`. **정렬에는 항상 `id` 2차 키가 붙는다**(`sort_order.asc,id.asc`) —
+> 동점 행의 상대 순서가 정의되지 않으면 페이지네이션에서 중복·누락이 생긴다.
 
 ### 사진 섹션 (기존)
 
@@ -108,7 +120,18 @@
 | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `devProjects` | 프로젝트 | title{ko,en}, category{ko,en}, year, period{ko,en}, position{ko,en}, summary{ko,en}, overview{ko,en}, features[]{ko,en}(제품 기능), roles[]{ko,en}(담당·작업), troubleshooting[]{title,problem,solution,result?}(각 {ko,en}), achievements[]{ko,en}(성과·수상·지표), techTags[](평면), links[]{label,href}, cover{url,path,w,h}\|null, images[], order, published |
 
-### 고정 config 문서 (`site` 컬렉션)
+### 개발 블로그 (`dev_articles` · `dev_article_tags`)
+
+| 테이블             | 역할      | 주요 필드                                                                                                                                                                                                                                   |
+| ------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev_articles`     | 글        | 스칼라 승격: `slug`·`published`·`pinned`·`published_at`·`created_at`·`updated_at`. `data`: title{ko,en}, summary{ko,en}, **body**(한국어 Markdown 원문 1벌), cover, coverAlt{ko,en}, tags[](태그 id), relatedProjectIds[], firstPublishedAt |
+| `dev_article_tags` | 태그 사전 | `id`·`ko`·`en` 평면 컬럼 (`data` 없음, published 게이트 없음)                                                                                                                                                                               |
+
+- 상세는 모달이 아니라 **독립 페이지** `/dev/articles/[slug]` — 이 저장소에서 slug를 쓰는 유일한 콘텐츠다.
+- 읽기 시간·목차는 `body`에서 파생하며 별도 필드로 저장하지 않는다(목록 화면도 body를 필요로 하는 이유).
+- 정렬 계약은 `published_at.desc.nullslast,id.asc`. 고정 글은 이 정렬에 끼어들지 않고 목록 화면이 분리한다.
+
+### 고정 config 문서 (`site_documents` 테이블)
 
 | 문서 ID  | 역할           | 주요 필드                                                                                                                                                                                      |
 | -------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -124,10 +147,13 @@
   개발 troubleshooting 은 구조화 map 배열({title,problem,solution,result?})이며 그 텍스트 하위 필드가 `{ko,en}`.
   구형 평문 `{ko,en}` 항목은 디코더의 `normalize-troubleshooting` 이 하위호환 정규화(재저장 시 신형 이행).
 - **좌표는 사진 전용** — EXIF GPS 자동 또는 관리자 지도 클릭. 음악·개발엔 좌표 없음.
-- 콘텐츠 소량 → **페이지네이션 없음**, 전체 fetch + 클라이언트 필터/검색. 검색은 사진 섹션 한정.
-- slug 없음 — 사진 상세·연주 상세·프로젝트 상세는 **모달**(`?photo=`/`?work=`/`?project=` 딥링크), 문서 ID가 식별자. 앨범 상세 = `/photo/albums/[id]`.
+- 콘텐츠 소량 → **화면 페이지네이션 없음**, 전체 fetch + 클라이언트 필터/검색. 검색은 사진 섹션 한정.
+  단 **전송 계층은 PostgREST의 `max_rows`(기본 1000)에서 조용히 잘리므로** 전량 조회 경로는
+  `paginateAll`로 페이지를 이어 읽는다. 이건 UI 페이지네이션이 아니라 절단 방지다.
+- 사진 상세·연주 상세·프로젝트 상세는 **모달**(`?photo=`/`?work=`/`?project=` 딥링크), 행 ID가 식별자.
+  앨범 상세 = `/photo/albums/[id]`. slug를 쓰는 콘텐츠는 블로그 글뿐이다.
 
-상세 설계·Rules 패턴은 [`firebase` agent](.claude/agents/firebase.md) 참조.
+상세 설계·RLS 패턴은 [`firebase` agent](.claude/agents/firebase.md) 참조 (⚠️ 이름은 레거시 — 8/29 해체 시 supabase 에이전트로 개편 예정, [checklist 09](docs/checklist/09-supabase-observation-teardown.md) §2.2).
 
 ## 디렉토리 구조 (단일 Next.js 앱, 루트 — 3계층: app → features → components)
 
@@ -169,11 +195,13 @@ src/
 │   ├── image-upload/           # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
 │   ├── admin-dev-articles/     # 블로그 CMS: _lib/(저장소 경계·slug·발행 조건·복구본·미리보기 action) · _hooks/ · _components/
 │   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
-├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·firebase 접근 금지, props만
+├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·DB 접근 금지, props만
 │   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css
-├── lib/firebase/               # client.ts, auth.ts, firestore.ts, firestore-rest.ts, storage.ts
-├── lib/admin/                  # 관리자 저장소 경계 — 컬렉션별 *-repository.ts 가 mock(로컬)↔live(Firestore) 선택 ★ + mock/(로컬 저장 구현)
-├── lib/content/                # 공개 페이지 getter — mock↔Firestore 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
+├── lib/supabase/               # client.ts, auth.ts, storage.ts, 컬렉션별 쓰기(photos/albums/music/dev/dev-articles/site), list-crud.ts, admin-list.ts, rag.ts
+│   ├── public/                 # 공개 읽기 = PostgREST fetch (transport.ts + 섹션별 디코더) ★ 서버 렌더 경로
+│   └── admin/                  # require-admin-session, row-codec, sort-rpc
+├── lib/admin/                  # 관리자 저장소 경계 — 컬렉션별 *-repository.ts 가 mock(로컬)↔live(Supabase) 선택 ★ + mock/(로컬 저장 구현)
+├── lib/content/                # 공개 페이지 getter — mock↔Supabase 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
 ├── lib/exif/                   # exifr 래퍼 (사진 전용)
 ├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
@@ -199,13 +227,14 @@ import는 **같은 하위폴더면 `./`**(예: `_components/` 안의 컴포넌�
 ## 환경변수 (`.env.local` — hook이 자동 수정 차단, 직접 편집)
 
 ```
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비교(Rules 하드코딩 UID와 동기화)
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=  # apikey 헤더 전용. 공개돼도 위험하지 않다 — 경계는 RLS
+# 관리자 판별은 환경변수가 아니라 JWT app_metadata.role === "admin" 이다 (RLS is_admin() 과 같은 클레임)
+# UPSTASH_REDIS_REST_URL / _TOKEN     # (서버 전용) 챗 사용량 제한. 프로덕션에 없으면 챗이 비활성
+# CHAT_PROVIDER / _MODEL / _API_KEY   # 챗 LLM (+ CHAT_FALLBACK_* 3종, CHAT_INTENT_*)
+# CHAT_DAILY_LIMIT=1000               # (선택) 하루 요청 수 상한. 넘으면 429
+# CHAT_DAILY_INPUT_CHAR_LIMIT=2000000 # (선택) 하루 입력 문자 예산. 넘으면 문맥 없이 답한다
+# EMBEDDING_PROVIDER / _MODEL / _API_KEY / _DIMENSIONS  # RAG 임베딩
 # NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX      # (선택) GA4 측정 ID. 미설정 시 gtag 미삽입. 실값은 Vercel에만
 # NEXT_PUBLIC_SENTRY_DSN=             # (선택) Sentry DSN. DSN·지역 중 하나라도 비거나 불일치하면 비활성
 # NEXT_PUBLIC_SENTRY_DATA_REGION=US|DE # 필수 짝. 실제 Sentry 저장 지역과 일치하지 않으면 수집 금지
@@ -230,7 +259,7 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 
 > **콘텐츠 소스(개발 편의)**: getter는 **개발(`npm run dev`)에선 mock 우선**(음악·개발 미완성 중 UI 테스트),
 > **프로덕션 빌드는 실데이터**(배포 안전). `NEXT_PUBLIC_USE_MOCK` 로 강제 override(`0`=실데이터, `1`=mock). — `lib/content/content-source.ts`
-> **관리자 화면도 같은 스위치를 따른다(B3.5)**: mock 모드의 관리자 저장은 Firestore 가 아니라 브라우저 로컬 저장소로
+> **관리자 화면도 같은 스위치를 따른다(B3.5)**: mock 모드의 관리자 저장은 Supabase 가 아니라 브라우저 로컬 저장소로
 > 간다(`lib/admin/*-repository.ts` 가 mock/live 선택, 상단 MOCK 배지로 표시). **실데이터를 만지려면 `NEXT_PUBLIC_USE_MOCK=0`.**
 >
 > **프로덕션 빌드 + mock 은 `next.config.ts` 가 막는다**(`lib/content/assert-deployable-content-source.ts`).
@@ -239,27 +268,42 @@ NEXT_PUBLIC_ADMIN_UID=                 # UI 가드 + 검증된 ID token UID 비�
 > (`e2e/run.cjs` 가 build·server 환경 모두에 주입). **로컬에서 mock 프로덕션 빌드를 점검할 때도 이 플래그가 필요하다.**
 
 > 지도(MapLibre+CARTO)는 **키가 없다** — CARTO 무료 타일 사용.
-> Firebase 웹 키(`AIza…`)는 공개돼도 보안 위험이 아니다 — 보안은 Rules가 담당.
+> Supabase publishable key는 공개돼도 보안 위험이 아니다 — 보안은 RLS가 담당. **`service_role` 키는 저장소에 두지 않는다.**
 > LLM·임베딩 키는 Vercel 서버 환경변수에만 둔다. `NEXT_PUBLIC_` 접두사를 사용하거나 코드에 하드코딩하지 않는다.
 
 ## 무료 한도 가드
 
-| 리소스       | 무료 한도                          | 이 프로젝트 대응                                                    |
-| ------------ | ---------------------------------- | ------------------------------------------------------------------- |
-| Firestore    | 읽기 5만/일, 쓰기 2만/일, 저장 1GB | 공개 페이지 ISR 캐싱으로 읽기 절약. 쓰기는 관리자만 허용            |
-| Storage      | 5GB, 다운로드 1GB/일               | 업로드 전 3단 WebP 압축. Vercel 최적화 없이 용도별 파생본 직접 전송 |
-| Vercel       | 100GB 대역폭/월                    | next/image 최적화                                                   |
-| 지도 (CARTO) | 무료 타일 (저트래픽)               | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드           |
+| 리소스           | 무료 한도            | 이 프로젝트 대응                                                               |
+| ---------------- | -------------------- | ------------------------------------------------------------------------------ |
+| Supabase DB      | 500MB                | 본문·메타는 텍스트뿐. 이미지는 Storage 로 분리                                 |
+| Supabase Storage | 1GB                  | 업로드 전 3단 WebP 압축. Vercel 최적화 없이 용도별 파생본 직접 전송            |
+| Supabase egress  | 5GB/월               | 공개 페이지 ISR 캐싱(1시간)으로 DB 읽기 절약. 쓰기는 관리자만                  |
+| Supabase 가동    | 무활동 시 일시정지   | `supabase-keepalive.yml` 이 3일 간격으로 깨운다. 실패가 이어지면 수동 dispatch |
+| Vercel           | 100GB 대역폭/월      | next/image 최적화                                                              |
+| 지도 (CARTO)     | 무료 타일 (저트래픽) | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드                      |
+| 챗 요청 수       | 제공자별 무료 티어   | IP 분당 10회, 전역 하루 `CHAT_DAILY_LIMIT` 회. 넘으면 429                      |
+| 챗 입력량        | 제공자별 토큰 과금   | 하루 `CHAT_DAILY_INPUT_CHAR_LIMIT` 자. 넘으면 문맥을 빼고 답한다               |
+
+> 상한이 둘인 이유는 요청 수만 세면 비용이 잡히지 않아서다. 글을 열어 둔 질문은 본문을 최대
+> 25,000자까지 함께 보내므로, 요청 수가 같아도 하루 비용이 몇 배로 벌어진다. 문자 예산을 넘기면
+> 요청을 거절하는 대신 화면 문맥과 RAG 검색을 건너뛴다. 두 카운터 모두 Upstash Redis 에 있고,
+> 자격증명이 없으면 문자 예산은 동작하지 않는다(프로덕션은 자격증명이 없으면 챗 자체가 비활성).
 
 ## 개발 명령어
 
 ```bash
-npm run dev          # 개발 서버 (port 3000)
-npm run build        # 프로덕션 빌드 (배포 전 필수 통과)
-npm run lint         # ESLint
-firebase emulators:start   # Rules 로컬 테스트 (Auth/Firestore/Storage)
-firebase deploy --only firestore:rules,storage   # Rules만 배포
+npm run dev            # 개발 서버 (port 3000)
+npm run build          # 프로덕션 빌드 (배포 전 필수 통과)
+npm run test:coverage  # Vitest + 커버리지 임계값 (CI quality 잡과 동일. npm run test 는 임계값 미강제)
+npm run check          # next typegen && tsc --noEmit
+npm run lint           # ESLint
+npm run deps:check     # dependency-cruiser (CI 게이트)
+npm run test:e2e:admin # 관리자 흐름 E2E (dev 서버 기준)
 ```
+
+> RLS 정책 변경은 Supabase 대시보드/마이그레이션으로 적용한다.
+> `npm run test:rules`(Firebase 에뮬레이터)는 **레거시** — 8/29 해체 시 로컬 Supabase 기반 RLS 통합 테스트로 대체한다
+> ([checklist 09](docs/checklist/09-supabase-observation-teardown.md) §2.1).
 
 ### ⚠️ 의존성 추가 시 lockfile은 npm 10으로 재생성 (CI 필수)
 
@@ -395,11 +439,11 @@ const getUser = (id: string): User | null => users.get(id) ?? null;
 
 ## .claude 구성
 
-| 종류     | 항목                                                                                                                          |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·Rules·인증) |
-| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                          |
-| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                  |
+| 종류     | 항목                                                                                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·RLS·인증 — 이름은 레거시, 8/29 개편 예정) |
+| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                                                        |
+| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                                                |
 
 ## Agent skills
 
@@ -417,13 +461,15 @@ const getUser = (id: string): User | null => users.get(id) ?? null;
 
 ## Phase 계획 (v2 — 통합 포트폴리오)
 
-> 사진 전용 v1(P1 디자인 이식 + P2 Firebase 연동)은 **대부분 완료**. 아래는 통합 확장 로드맵 요약이며 상세는 [`docs/plan/00-plan-v2.md`](docs/plan/00-plan-v2.md).
+> 사진 전용 v1(P1 디자인 이식 + P2 BaaS 연동)은 **대부분 완료**. 아래는 통합 확장 로드맵 요약이며 상세는 [`docs/plan/00-plan-v2.md`](docs/plan/00-plan-v2.md).
+> Phase A~D 이후 블로그(`dev_articles`)·AI 챗봇·RAG·Supabase 이관이 추가로 완료됐다
+> ([checklist 08](docs/checklist/08-supabase-migration.md)).
 
 - **Phase A — 셸 & 랜딩**: 라우트 재구성(사진 `/photo/*` 이동 + redirects), mega-menu SiteHeader(검색 우측·아바타 제거),
   섹션 액센트(`[data-section]`), 랜딩 허브, 모바일 탭바/메뉴 3섹션 대응.
-- **Phase B — 음악 섹션**: 타입·mock·getter·Firestore 컬렉션(musicWorks/awards/media + site/music) + Rules·인덱스 +
+- **Phase B — 음악 섹션**: 타입·mock·getter·테이블(music_works/awards/media + site/music) + RLS +
   공개 개별 페이지(연주·경력(학력·경력·수상)·영상·소개, 연주/수상 모달) + 관리자 CMS(`/admin/music/*`). (공연 일정 미채택)
-- **Phase C — 개발 섹션**: 타입·mock·getter·Firestore 컬렉션(devProjects + site/dev) + Rules·인덱스 +
+- **Phase C — 개발 섹션**: 타입·mock·getter·테이블(dev_projects + site/dev) + RLS +
   공개 개별 페이지(스택·프로젝트·경력·소개, 프로젝트 모달, reveal·타이핑) + 관리자 CMS(`/admin/dev/*`).
 - **Phase D — 마감**: 전 섹션 ko/en 번역 채움, 반응형·다크·접근성 점검, SEO/OG(섹션별), `/design-check`·`/deploy-check` 통과, 배포.
 - **Phase 3(선택)**: AI 태그 추천(브라우저 `transformers.js`), 지도 고도화, `/api/revalidate` 즉시 반영.

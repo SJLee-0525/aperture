@@ -28,18 +28,35 @@ const readSseStream = async (
     if (payload && payload !== "[DONE]") onPayload(payload);
   };
 
-  while (!signal.aborted) {
-    const { done, value } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done }).replaceAll("\r\n", "\n");
-    let boundary = buffer.indexOf("\n\n");
-    while (boundary >= 0) {
-      consume(buffer.slice(0, boundary));
-      buffer = buffer.slice(boundary + 2);
-      boundary = buffer.indexOf("\n\n");
+  let reachedEof = false;
+  try {
+    while (!signal.aborted) {
+      const { done, value } = await reader.read();
+      buffer += decoder.decode(value, { stream: !done }).replaceAll("\r\n", "\n");
+      let boundary = buffer.indexOf("\n\n");
+      while (boundary >= 0) {
+        consume(buffer.slice(0, boundary));
+        buffer = buffer.slice(boundary + 2);
+        boundary = buffer.indexOf("\n\n");
+      }
+      if (done) {
+        reachedEof = true;
+        break;
+      }
     }
-    if (done) break;
+    // 조각을 읽은 직후 중단되면 반복문이 예외 없이 끝난다. 호출부가 이것을 정상 완료로
+    // 읽으면 잘린 답변을 완성된 답변으로 내보낸다.
+    // 끝까지 읽은 뒤에 신호가 끊긴 경우는 손실이 없으므로 정상 완료로 둔다.
+    if (!reachedEof && signal.aborted) {
+      throw signal.reason instanceof Error
+        ? signal.reason
+        : new DOMException("Stream aborted", "AbortError");
+    }
+    if (buffer.trim()) consume(buffer);
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
   }
-  if (buffer.trim()) consume(buffer);
 };
 
 export { readSseStream };

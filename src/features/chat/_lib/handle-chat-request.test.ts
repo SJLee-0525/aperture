@@ -332,6 +332,159 @@ describe("handleChatRequest", () => {
     expect(response.status).toBe(400);
   });
 
+  it("Content-Length 없이 보낸 큰 본문도 상한에서 끊는다", async () => {
+    const provider = vi.fn();
+    const chunk = new TextEncoder().encode("x".repeat(8_000));
+    let pushed = 0;
+    // chunked 전송은 Content-Length 가 없어 선검사를 지나온다.
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pushed += 1;
+        controller.enqueue(chunk);
+        if (pushed >= 100) controller.close();
+      },
+    });
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: stream,
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+
+    const response = await handleChatRequest(request, { provider });
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.code).toBe("REQUEST_TOO_LARGE");
+    // 상한을 넘는 순간 멈추므로 본문 전체를 읽지 않는다.
+    expect(pushed).toBeLessThan(10);
+    expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("본문 상한 초과는 사용량 판정 전에 400 으로 끊는다", async () => {
+    const provider = vi.fn();
+    const rateLimiter = vi.fn(() => ({ allowed: true, retryAfterSeconds: 0 }));
+
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "x".repeat(30_000) }] }),
+      { provider, rateLimiter },
+    );
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.code).toBe("REQUEST_TOO_LARGE");
+    // 형식이 깨진 요청이 전역 일일 카운터를 올리지 않게 제한기까지 가지 않는다.
+    expect(rateLimiter).not.toHaveBeenCalled();
+    expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("깨진 JSON 은 사용량 카운터를 건드리지 않는다", async () => {
+    const provider = vi.fn();
+    const rateLimiter = vi.fn(() => ({ allowed: true, retryAfterSeconds: 0 }));
+
+    const response = await handleChatRequest(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{",
+      }),
+      { provider, rateLimiter },
+    );
+
+    expect(response.status).toBe(400);
+    expect(rateLimiter).not.toHaveBeenCalled();
+  });
+
+  it("하루 입력 문자 예산을 넘기면 문맥 조회 없이 답한다", async () => {
+    const provider = vi.fn(async (input: { instructions: string }) => {
+      instructions = input.instructions;
+      return { content: "답변", contactDraft: null };
+    });
+    const buildContext = vi.fn(async () => "context");
+    const recordTokenUsage = vi.fn<(chars: number) => Promise<void>>(async () => undefined);
+    let instructions = "";
+
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여 줘" }] }),
+      {
+        provider,
+        buildContext,
+        recordTokenUsage,
+        inputCharLimit: 1_000,
+        rateLimiter: () => ({ allowed: true, retryAfterSeconds: 0, dailyInputChars: 1_001 }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    // 문맥 조회와 벡터 검색을 모두 건너뛴다.
+    expect(buildContext).not.toHaveBeenCalled();
+    expect(instructions).toContain("No portfolio lookup was needed");
+    expect(instructions).not.toContain("SCREEN_CONTEXT");
+    // 강등 상태에서도 이번 요청의 입력은 예산에 더한다.
+    expect(recordTokenUsage).toHaveBeenCalledWith(expect.any(Number));
+    expect(recordTokenUsage.mock.lastCall?.[0]).toBeGreaterThan(0);
+  });
+
+  it("예산을 넘기면 조회하지 않으므로 검색 중 상태를 보내지 않는다", async () => {
+    const provider = vi.fn(async ({ onContentDelta }: { onContentDelta?: (d: string) => void }) => {
+      onContentDelta?.("답변");
+      return { content: "답변", contactDraft: null };
+    });
+
+    const response = await handleChatRequest(
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "사진 보여 줘" }] },
+        { accept: "application/x-ndjson" },
+      ),
+      {
+        provider,
+        buildContext: async () => "context",
+        recordTokenUsage: async () => undefined,
+        inputCharLimit: 1_000,
+        rateLimiter: () => ({ allowed: true, retryAfterSeconds: 0, dailyInputChars: 1_001 }),
+      },
+    );
+
+    const events = (await response.text())
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    expect(events.some((event) => event.status === "portfolio-search")).toBe(false);
+  });
+
+  it("기록 구현이 거부해도 응답을 막지 않는다", async () => {
+    const provider = vi.fn(async () => ({ content: "답변", contactDraft: null }));
+
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "질문" }] }),
+      {
+        provider,
+        buildContext: async () => "context",
+        recordTokenUsage: async () => {
+          throw new Error("기록 실패");
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+  });
+
+  it("예산 안에서는 문맥을 그대로 싣는다", async () => {
+    const provider = vi.fn(async () => ({ content: "답변", contactDraft: null }));
+    const buildContext = vi.fn(async () => "context");
+
+    await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여 줘" }] }),
+      {
+        provider,
+        buildContext,
+        recordTokenUsage: async () => undefined,
+        inputCharLimit: 1_000,
+        rateLimiter: () => ({ allowed: true, retryAfterSeconds: 0, dailyInputChars: 999 }),
+      },
+    );
+
+    expect(buildContext).toHaveBeenCalled();
+  });
+
   it("IP 요청 제한 시 provider 호출 없이 Retry-After를 반환한다", async () => {
     const provider = vi.fn();
     const response = await handleChatRequest(

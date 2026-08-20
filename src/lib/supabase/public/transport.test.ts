@@ -11,8 +11,12 @@ type FetchInit = RequestInit & { next?: { revalidate?: number; tags?: string[] }
 
 const okJson = (body: unknown) => ({ ok: true, status: 200, json: async () => body });
 
+/**
+ * 목록 조회는 빈 페이지를 받아야 끝난다. 같은 페이지를 계속 돌려주는 대역은
+ * offset 을 무시하는 서버와 같아 무한 반복 방어에 걸린다.
+ */
 const stubFetch = (response: unknown = okJson([])) => {
-  const fetchMock = vi.fn().mockResolvedValue(response);
+  const fetchMock = vi.fn().mockResolvedValueOnce(response).mockResolvedValue(okJson([]));
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 };
@@ -51,6 +55,39 @@ describe("supabase public transport", () => {
     expect(params.get("order")).toBe("sort_order.asc,id.asc");
     expect(params.get("published")).toBe("eq.true");
     expect(init.next).toEqual({ revalidate: 3600, tags: ["db:photos"] });
+  });
+
+  it("공개 목록은 max_rows 구간을 지정해 조용한 절단을 막는다", async () => {
+    const fetchMock = stubFetch();
+    await selectPublished("photos");
+
+    const params = new URL(lastCall(fetchMock)[0]).searchParams;
+    expect(params.get("limit")).toBe("1000");
+    expect(params.get("offset")).toBe("0");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("한 페이지가 꽉 차면 다음 구간을 이어 읽는다", async () => {
+    const page = (from: number, count: number) =>
+      Array.from({ length: count }, (_, index) => ({
+        id: `p${from + index}`,
+        published: true,
+        sort_order: from + index,
+        data: {},
+      }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(okJson(page(0, 1000)))
+      .mockResolvedValueOnce(okJson(page(1000, 2)))
+      .mockResolvedValue(okJson([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const rows = await selectPublished("photos");
+
+    expect(rows).toHaveLength(1002);
+    // 마지막 빈 페이지까지 확인해야 끝인 줄 안다.
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(new URL(lastCall(fetchMock)[0]).searchParams.get("offset")).toBe("1002");
   });
 
   it("fresh 는 no-store 로 캐시를 우회한다", async () => {

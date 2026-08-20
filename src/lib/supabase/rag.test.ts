@@ -226,7 +226,8 @@ describe("replaceRagDocuments", () => {
     await replaceRagDocuments("token", [chunk("a")], [vector512()], "m@512");
 
     const methods = calls(fetchMock).map(({ init }) => init.method ?? "GET");
-    expect(methods).toEqual(["GET", "POST", "DELETE"]);
+    // 두 번째 GET 은 더 읽을 행이 없다는 확인이다. 순서는 조회 → upsert → 삭제 그대로다.
+    expect(methods).toEqual(["GET", "GET", "POST", "DELETE"]);
   });
 
   it("stale 과 새 청크의 합이 상한을 넘으면 갱신을 거부한다", async () => {

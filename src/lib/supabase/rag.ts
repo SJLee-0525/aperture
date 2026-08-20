@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
+import { paginateAll } from "@/lib/supabase/paginate-all";
 import { fetchWithRetry } from "@/lib/supabase/public/retry-fetch";
 
 import type { RagChunk, RagSection, RagSyncTarget, StoredRagChunkMeta } from "@/types/rag";
@@ -17,9 +18,6 @@ const TABLE = "rag_documents";
  * 이름을 나눈다 — env 를 바꿔도 이 값과 어긋나면 저장 전에 거부해야 한다.
  */
 const RAG_STORAGE_DIMENSIONS = 512;
-
-/** PostgREST 서버 기본 max_rows. 이 단위로 Range 페이지네이션한다. */
-const PAGE_SIZE = 1000;
 
 /** upsert 한 요청의 행 수. 벡터 512차원 × 100행이면 본문이 수백 KB 수준에 머문다. */
 const UPSERT_CHUNK_SIZE = 100;
@@ -89,31 +87,31 @@ const replacementScopeFor = (target: RagSyncTarget): ReplacementScope => {
 const quoteInListValue = (value: string) => `"${value.replaceAll('"', '\\"')}"`;
 
 /**
- * id 프로젝션 행을 Range 헤더로 전량 읽는다. PostgREST 는 요청당 1,000행에서
- * 자르므로 안정 정렬(order=id.asc) 없이는 페이지 사이 순서가 보장되지 않는다.
- * 범위를 벗어난 Range 는 416 으로 응답하므로 종료로 처리한다.
+ * id 프로젝션 행을 Range 헤더로 전량 읽는다.
+ *
+ * 안정 정렬(order=id.asc)이 없으면 페이지 사이 순서가 보장되지 않는다.
+ * 범위를 벗어난 Range 는 416 으로 응답하므로 빈 페이지로 바꿔 종료 조건에 맞춘다.
+ * 종료 판정과 offset 규칙은 `paginateAll` 이 한 곳에서 관리한다.
  */
-const listAllRows = async <Row>(
+const listAllRows = <Row>(
   params: URLSearchParams,
   accessToken: string,
   label: string,
 ): Promise<Row[]> => {
   params.set("order", "id.asc");
-  const rows: Row[] = [];
-  for (let offset = 0; ; offset += PAGE_SIZE) {
+  return paginateAll<Row>(async (offset, size) => {
     const response = await fetch(restUrl(params), {
-      headers: { ...adminHeaders(accessToken), Range: `${offset}-${offset + PAGE_SIZE - 1}` },
+      // Range 의 끝은 포함이라 요청 크기에서 하나를 뺀다.
+      headers: { ...adminHeaders(accessToken), Range: `${offset}-${offset + size - 1}` },
       cache: "no-store",
     });
-    if (response.status === 416) return rows;
+    if (response.status === 416) return [];
     if (!response.ok) {
       await logUpstreamError(label, response);
       throw new Error(`기존 임베딩 조회 실패 (${response.status})`);
     }
-    const page = (await response.json()) as Row[];
-    rows.push(...page);
-    if (page.length < PAGE_SIZE) return rows;
-  }
+    return (await response.json()) as Row[];
+  });
 };
 
 /**

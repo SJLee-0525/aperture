@@ -3,6 +3,7 @@
 import { asText } from "@/lib/i18n/as-text";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { paginateAll } from "@/lib/supabase/paginate-all";
 
 import type {
   AdminAlbumListItem,
@@ -26,11 +27,15 @@ type Row = Record<string, unknown>;
 
 const listProjected = async (table: string, select: string, orderColumns: string[]) => {
   await requireAdminSession();
-  let query = getSupabaseClient().from(table).select(select);
-  for (const column of orderColumns) query = query.order(column);
-  const { data, error } = await query;
-  if (error) throw new Error("관리자 목록을 불러오지 못했습니다.");
-  return (data ?? []) as unknown as Row[];
+  // 페이지네이션이 없으면 PostgREST 가 max_rows 에서 조용히 잘라, 뒷부분 항목이 화면에서
+  // 사라진 채 재정렬이 그 상태를 저장한다. orderColumns 의 id 2차 키가 경계를 고정한다.
+  return paginateAll<Row>(async (offset, size) => {
+    let query = getSupabaseClient().from(table).select(select);
+    for (const column of orderColumns) query = query.order(column);
+    const { data, error } = await query.range(offset, offset + size - 1);
+    if (error) throw new Error("관리자 목록을 불러오지 못했습니다.");
+    return (data ?? []) as unknown as Row[];
+  });
 };
 
 /**

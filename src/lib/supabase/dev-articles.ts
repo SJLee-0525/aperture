@@ -6,6 +6,7 @@ import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
+import { paginateAll } from "@/lib/supabase/paginate-all";
 import { toDevArticle } from "@/lib/supabase/public/dev-articles";
 
 import type { DevArticle } from "@/types/dev-article";
@@ -88,11 +89,17 @@ const TAGS_CACHE_TAG = collectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
  *
  * @returns {Promise<DevArticleTag[]>} id 오름차순의 태그 사전.
  */
-const listDevArticleTagsAdmin = async (): Promise<DevArticleTag[]> => {
-  const { data, error } = await getSupabaseClient().from(TAGS_TABLE).select("id,ko,en").order("id");
-  if (error) throw new Error("태그 목록을 불러오지 못했습니다.");
-  return (data as DevArticleTag[]) ?? [];
-};
+const listDevArticleTagsAdmin = async (): Promise<DevArticleTag[]> =>
+  // 다른 관리자 목록과 같은 규칙으로 이어 읽는다. id 정렬이 페이지 경계를 고정한다.
+  paginateAll<DevArticleTag>(async (offset, size) => {
+    const { data, error } = await getSupabaseClient()
+      .from(TAGS_TABLE)
+      .select("id,ko,en")
+      .order("id")
+      .range(offset, offset + size - 1);
+    if (error) throw new Error("태그 목록을 불러오지 못했습니다.");
+    return (data as DevArticleTag[]) ?? [];
+  });
 
 /**
  * 태그 ID를 PK로 사용한다. 기존 문서 덮어쓰기는 PK 충돌(23505)로 막히므로

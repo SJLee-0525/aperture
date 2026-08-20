@@ -1,6 +1,8 @@
 import { MAX_RESPONSE_CHARS } from "@/features/chat/_lib/chat-tuning";
 import { parseContactDraft } from "@/features/chat/_lib/contact-draft";
 
+import { truncateUtf16Safely } from "@/lib/text/truncate-utf16-safely";
+
 import { CHAT_REFERENCE_TYPES } from "@/types/chat";
 
 import type { ChatProviderResult } from "@/features/chat/_lib/chat-provider";
@@ -110,7 +112,7 @@ const parseChatResult = (text: string): ChatProviderResult => {
   if (!isRecord(parsed) || typeof parsed.content !== "string") {
     throw new Error("Provider returned an invalid structured response");
   }
-  const content = parsed.content.trim().slice(0, MAX_RESPONSE_CHARS);
+  const content = truncateUtf16Safely(parsed.content.trim(), MAX_RESPONSE_CHARS);
   if (!content) throw new Error("Provider returned an empty response");
   return {
     content,
@@ -133,7 +135,7 @@ const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   try {
     return parseChatResult(text);
   } catch (error) {
-    const content = contentFromPartialJson(text).slice(0, MAX_RESPONSE_CHARS).trim();
+    const content = truncateUtf16Safely(contentFromPartialJson(text), MAX_RESPONSE_CHARS).trim();
     if (!content) throw error;
     // 잘린 JSON에서는 본문만 회수한다. 나머지 구조화 필드는 모두 버린다.
     return { content, contactDraft: null };
@@ -164,28 +166,195 @@ const contentFromPartialJson = (serialized: string): string => {
 };
 
 /**
+ * `"content"` 여는 따옴표를 찾을 때 조각 경계 앞으로 되짚는 길이.
+ * `"content"` 와 공백, 콜론, 여는 따옴표를 합친 최소 12자를 덮는다.
+ */
+const CONTENT_KEY_LOOKBACK = 32;
+
+/**
+ * 이스케이프 시퀀스를 자르지 않고 디코딩할 수 있는 앞부분의 길이.
+ * 조각 경계가 `\` 나 미완성 `\uXXXX` 한가운데에 놓이면 그 앞까지만 돌려준다.
+ *
+ * @param {string} value JSON 문자열 본문의 원문 조각.
+ * @returns {number} 지금 디코딩해도 되는 길이.
+ */
+const safeDecodeLength = (value: string): number => {
+  let index = 0;
+  let safe = 0;
+  while (index < value.length) {
+    if (value[index] !== "\\") {
+      index += 1;
+      safe = index;
+      continue;
+    }
+    const next = value[index + 1];
+    if (next === undefined) return safe;
+    if (next === "u") {
+      if (index + 6 > value.length) return safe;
+      index += 6;
+    } else {
+      index += 2;
+    }
+    safe = index;
+  }
+  return safe;
+};
+
+/**
+ * JSON 문자열 본문 조각을 디코딩한다.
+ *
+ * 실패를 빈 문자열이 아니라 `null` 로 구분한다. 호출부가 원문을 소비할지 정하려면
+ * "디코딩 결과가 비었다" 와 "디코딩이 깨졌다" 를 구분해야 한다.
+ *
+ * @param {string} raw 따옴표를 뺀 원문 조각.
+ * @returns {string | null} 디코딩 결과. 깨진 조각이면 `null`.
+ */
+const decodeJsonStringSegment = (raw: string): string | null => {
+  try {
+    return JSON.parse(`"${raw}"`) as string;
+  } catch {
+    return null;
+  }
+};
+
+const isHighSurrogate = (code: number): boolean => code >= 0xd800 && code <= 0xdbff;
+const isLowSurrogate = (code: number): boolean => code >= 0xdc00 && code <= 0xdfff;
+
+/**
+ * 짝이 맞는 서로게이트만 남기고, 끝에 걸린 상위 서로게이트는 다음 조각을 위해 보류한다.
+ *
+ * JSON 파서는 짝 없는 서로게이트도 문자열로 받아들이고, 모델이 이모지를 `\uD83D` 와
+ * `\uDE00` 두 이스케이프로 나눠 보내면 조각마다 반쪽이 온다. 반쪽을 그대로 방출하면
+ * 화면에 대체 문자가 남는다.
+ *
+ * 순회는 code unit 단위다. `for...of` 는 코드 포인트 단위라 이미 온전한 짝을 한 덩어리로
+ * 주어 판정이 어긋난다.
+ *
+ * @param {string} held 앞 조각에서 보류한 상위 서로게이트. 없으면 빈 문자열.
+ * @param {string} decoded 이번에 디코딩한 조각.
+ * @returns {{ text: string; held: string }} 방출할 문자열과 다음으로 넘길 보류분.
+ */
+const pairSurrogates = (held: string, decoded: string): { text: string; held: string } => {
+  let text = "";
+  let pending = held;
+  for (let index = 0; index < decoded.length; index += 1) {
+    const unit = decoded[index] ?? "";
+    const code = unit.charCodeAt(0);
+    if (pending) {
+      if (isLowSurrogate(code)) {
+        text += pending + unit;
+        pending = "";
+        continue;
+      }
+      // 짝을 만나지 못한 상위 서로게이트는 버리고 이 문자는 정상 처리한다.
+      pending = "";
+    }
+    if (isHighSurrogate(code)) {
+      pending = unit;
+      continue;
+    }
+    // 짝 없는 하위 서로게이트도 유효한 텍스트가 아니다.
+    if (isLowSurrogate(code)) continue;
+    text += unit;
+  }
+  return { text, held: pending };
+};
+
+/**
  * 스트리밍 조각을 누적하면서 아직 내보내지 않은 본문 증분만 전달한다.
  * 구조화 JSON 이 완성되기 전에도 content 값만 뽑아 보여주기 위한 공통 로직으로,
  * 두 제공자의 스트림 처리 차이를 이 한 곳으로 흡수한다.
  *
+ * 새로 도착한 조각만 훑는다. 매번 누적 문자열 전체를 다시 읽으면 답변 길이의 제곱에
+ * 비례해 서버 CPU 시간이 늘어 요청 제한 시간을 갉아먹는다.
+ *
+ * 원문 디코딩이 깨지면 `error` 에 사유를 남기고 이후 방출을 멈춘다. 호출부는 결과를
+ * 확정하기 전에 `error` 를 확인해야 한다. 이 값을 무시하면 깨진 구간이 빠진 답변이
+ * 완성된 답변으로 나간다.
+ *
  * @param {(delta: string) => void} onContentDelta
- * @returns {{ push(chunk: string): void; readonly serialized: string }}
+ * @returns {{ push(chunk: string): void; readonly serialized: string; readonly error: Error | null }}
  */
 const createStreamingContentCollector = (onContentDelta: (delta: string) => void) => {
   let serialized = "";
-  let emitted = "";
+  /** 여는 따옴표를 찾기 전까지 다시 훑기 시작할 위치. */
+  let searchFrom = 0;
+  /** content 문자열 본문에서 이미 훑은 위치. */
+  let scanned = -1;
+  let closed = false;
+  /** 디코딩이 깨진 사유. 정상 종료(`closed`)와 구분해야 한다. */
+  let invalidError: Error | null = null;
+  /** 이스케이프 경계 때문에 아직 디코딩하지 않은 원문 꼬리. */
+  let pendingRaw = "";
+  let escaped = false;
+  let emittedChars = 0;
+  /** 짝을 기다리는 상위 서로게이트. content 가 닫히면 버린다. */
+  let heldSurrogate = "";
+  /** 상한에 걸려 잘린 뒤로는 방출하지 않는다. 이어 붙이면 순서가 뒤섞인다. */
+  let capped = false;
+
+  /** content 문자열이 시작하는 위치를 찾는다. 못 찾으면 -1. */
+  const findContentStart = (): number => {
+    const match = /"content"\s*:\s*"/.exec(serialized.slice(searchFrom));
+    if (!match) {
+      searchFrom = Math.max(searchFrom, serialized.length - CONTENT_KEY_LOOKBACK);
+      return -1;
+    }
+    return searchFrom + match.index + match[0].length;
+  };
 
   return {
     push(chunk: string) {
       serialized += chunk;
-      const content = contentFromPartialJson(serialized).slice(0, MAX_RESPONSE_CHARS);
-      if (content.length > emitted.length) {
-        onContentDelta(content.slice(emitted.length));
-        emitted = content;
+      if (closed || invalidError || capped) return;
+      if (scanned < 0) {
+        scanned = findContentStart();
+        if (scanned < 0) return;
       }
+
+      let raw = "";
+      while (scanned < serialized.length) {
+        const character = serialized[scanned] ?? "";
+        if (!escaped && character === '"') {
+          closed = true;
+          break;
+        }
+        raw += character;
+        escaped = escaped ? false : character === "\\";
+        scanned += 1;
+      }
+
+      pendingRaw += raw;
+      const safe = safeDecodeLength(pendingRaw);
+      if (safe === 0) return;
+      const decoded = decodeJsonStringSegment(pendingRaw.slice(0, safe));
+      // 디코딩이 성공했을 때만 원문을 소비한다. 먼저 자르면 깨진 구간이 사라진 채
+      // 스트림이 이어져, 방문자에게는 조용히 빠진 답변이 완성된 것처럼 보인다.
+      if (decoded === null) {
+        invalidError = new Error("Upstream content contained an invalid JSON escape");
+        return;
+      }
+      pendingRaw = pendingRaw.slice(safe);
+
+      const paired = pairSurrogates(heldSurrogate, decoded);
+      // content 가 닫혔으면 짝을 기다릴 조각이 더 없다. 보류분은 버린다.
+      heldSurrogate = closed ? "" : paired.held;
+      if (!paired.text) return;
+
+      const room = MAX_RESPONSE_CHARS - emittedChars;
+      if (room <= 0) return;
+      const delta = truncateUtf16Safely(paired.text, room);
+      // 짝이 남은 자리에 다 들어가지 않으면 잘린 결과가 비어 있다.
+      if (delta.length < paired.text.length) capped = true;
+      if (!delta) return;
+      emittedChars += delta.length;
+      onContentDelta(delta);
     },
     get serialized() {
       return serialized;
+    },
+    get error() {
+      return invalidError;
     },
   };
 };

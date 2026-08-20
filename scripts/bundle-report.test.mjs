@@ -67,8 +67,9 @@ const singleRoute = ({ distName, chunkPaths }) =>
 
 describe("resolveChunkPath", () => {
   it("빌드 당시의 dist 이름을 대상 dist 로 바꾼다", () => {
+    // 결과는 실제로 읽을 파일 경로라 구분자가 OS 를 따른다. 기대값도 같은 규칙으로 만든다.
     expect(resolveChunkPath("/tmp/after", ".next-playwright-v7/static/chunks/x.js")).toBe(
-      "/tmp/after/static/chunks/x.js",
+      path.join("/tmp/after", "static/chunks/x.js"),
     );
   });
 

@@ -49,6 +49,30 @@ const normalizePublicHref = (value: unknown, options: PublicUrlOptions = {}): st
   }
 };
 
+/** 저장해도 되는 스킴. 나머지 스킴은 링크로 그려지는 순간 코드가 실행될 수 있다. */
+const STORABLE_SCHEMES = new Set(["http:", "https:", "mailto:"]);
+
+/**
+ * 저장 경계에서 거부해야 하는 주소인지 본다.
+ *
+ * 공개 표시 정책(https 전용)과 다른 기준이다. `http://` 는 표시할 수 없을 뿐 저장은
+ * 안전하므로 통과시킨다. 막는 것은 `javascript:` 처럼 관리자 화면에서 링크로 그려질 때
+ * 실행되는 스킴이다.
+ *
+ * @param {unknown} value 저장하려는 링크 값.
+ * @returns {boolean} 저장하면 안 되는 값이면 true. 빈 값과 상대 경로는 false.
+ */
+const isDangerousStoredHref = (value: unknown): boolean => {
+  if (typeof value !== "string") return false;
+  const href = value.trim();
+  if (!href) return false;
+  if (CONTROL_CHARACTERS.test(href)) return true;
+  if (href.startsWith("#") || href.startsWith("/")) return false;
+  const scheme = /^[a-z][a-z0-9+.-]*:/i.exec(href)?.[0];
+  // 스킴이 없으면 상대 경로다.
+  return scheme ? !STORABLE_SCHEMES.has(scheme.toLowerCase()) : false;
+};
+
 /**
  * Firestore의 알 수 없는 링크 배열에서 공개해도 안전한 항목만 남긴다.
  *
@@ -103,4 +127,10 @@ const mailtoAddress = (value: unknown): string => {
   return href.toLowerCase().startsWith("mailto:") ? href.slice("mailto:".length) : "";
 };
 
-export { mailtoAddress, normalizePublicHref, preparePublicLinks, sanitizePublicLinks };
+export {
+  isDangerousStoredHref,
+  mailtoAddress,
+  normalizePublicHref,
+  preparePublicLinks,
+  sanitizePublicLinks,
+};

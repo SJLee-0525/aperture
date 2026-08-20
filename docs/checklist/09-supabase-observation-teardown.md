@@ -31,7 +31,7 @@
 
 ### 2.2 문서 개정
 
-- [ ] `CLAUDE.md`: 스택 표(호스팅·인증·DB·이미지), 아키텍처 원칙(Rules 를 RLS 로), 데이터 모델(테이블 기준), 환경변수, 무료 한도 표, 개발 명령어(firebase CLI 제거)를 전면 개정한다
+- [x] `CLAUDE.md`: 스택 표(호스팅·인증·DB·이미지), 아키텍처 원칙(Rules 를 RLS 로), 데이터 모델(테이블 기준), 환경변수, 무료 한도 표, 개발 명령어(firebase CLI 제거)를 전면 개정한다 — 2026-08-20 완료. `test:rules`·firebase 에이전트는 해체 예정으로 표기만 남겼다
 - [ ] `docs/adr/0001-serverless-rag.md` 에 Supabase 전환 각주를 달고, ADR-0005 에 해체 완료를 기록한다
 - [ ] `.claude/agents/firebase.md` 를 supabase 에이전트로 개편하거나 삭제하고, `.claude/hooks` 의 Firebase 전제 규칙을 점검한다
 - [ ] troubleshooting 문서 2편과 `docs/agents/*` 의 Firebase 서술을 정리하고, `firestore-rules-deploy-gotcha` 메모리를 폐기한다

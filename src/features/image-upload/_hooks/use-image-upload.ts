@@ -43,11 +43,14 @@ const useImageUpload = (photoId: string) => {
           extractExif(file), // ① 압축 前 EXIF·GPS
           readDimensions(file), // ② 원본 크기
         ]);
-        const [compressed, preview, thumbnail] = await Promise.all([
-          compressToWebp(file),
-          compressPreviewToWebp(file),
-          compressThumbnailToWebp(file),
-        ]); // ③ 메인·카드용 프리뷰·작은 썸네일 webp 병렬 압축
+        // ③ 메인 webp 를 먼저 만들고 그것을 줄여 프리뷰·썸네일을 얻는다.
+        // 원본을 셋이 각자 디코딩하면 4천만 화소 사진에서 메모리가 세 배로 늘어,
+        // 모바일 Safari 가 탭을 종료하면서 업로드가 실패한다.
+        const compressed = await compressToWebp(file);
+        const [preview, thumbnail] = await Promise.all([
+          compressPreviewToWebp(compressed),
+          compressThumbnailToWebp(compressed),
+        ]);
         const [stored, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
           await Promise.all([
             readDimensions(compressed),

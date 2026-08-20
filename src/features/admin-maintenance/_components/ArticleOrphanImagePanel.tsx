@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import {
   deleteOrphanArticleImages,
+  OrphanConfirmationRequiredError,
+  orphanConfirmationToken,
   scanOrphanArticleImages,
   type OrphanDeleteResult,
   type OrphanScanResult,
@@ -82,12 +84,14 @@ const ArticleOrphanImagePanel = () => {
   };
 
   const removeAll = async () => {
-    const groups = scan?.groups ?? [];
-    const paths = groups.flatMap((group) => group.paths);
+    if (!scan) return;
+    const paths = scan.groups.flatMap((group) => group.paths);
     if (paths.length === 0) return;
+    // 참조 목록을 의심할 근거가 있으면 확인 문구에 이유를 먼저 보여준다.
+    const warning = scan.confirmationReason ? `⚠️ ${scan.confirmationReason}\n\n` : "";
     if (
       !window.confirm(
-        `사용되지 않는 이미지 ${groups.length}개(파일 ${paths.length}개)를 삭제할까요? 삭제한 파일은 복구할 수 없습니다.`,
+        `${warning}사용되지 않는 이미지 ${scan.groups.length}개(파일 ${paths.length}개)를 삭제할까요? 삭제한 파일은 복구할 수 없습니다.`,
       )
     ) {
       return;
@@ -96,9 +100,16 @@ const ArticleOrphanImagePanel = () => {
     setError(null);
     setCopied(false);
     try {
-      setDeletion(await deleteOrphanArticleImages(paths));
+      // 방금 확인한 화면의 근거를 그대로 넘긴다. 삭제 직전 재검사가 달라졌으면 거부된다.
+      setDeletion(
+        await deleteOrphanArticleImages(paths, {
+          confirmationToken: orphanConfirmationToken(scan),
+        }),
+      );
       setScan(await scanOrphanArticleImages());
     } catch (caught) {
+      // 재검사가 달라진 경우에는 최신 결과로 화면을 바꿔야 다음 확인이 새 내용을 담는다.
+      if (caught instanceof OrphanConfirmationRequiredError) setScan(caught.scan);
       setError((caught as Error).message);
     } finally {
       setPending(false);
@@ -146,7 +157,7 @@ const ArticleOrphanImagePanel = () => {
 
       {mock ? (
         <p className={base.status}>
-          mock 모드에서는 실행할 수 없습니다. 실제 Firestore·Storage 연결이 필요합니다. .env.local에
+          mock 모드에서는 실행할 수 없습니다. 실제 Supabase 연결이 필요합니다. .env.local에
           NEXT_PUBLIC_USE_MOCK=0을 두고 다시 실행하세요.
         </p>
       ) : null}

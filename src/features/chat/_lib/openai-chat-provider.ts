@@ -94,6 +94,8 @@ const createOpenAIChatProvider =
         }
       });
 
+      // 깨진 구간이 빠진 본문을 구제해 완성된 답변으로 내보내지 않는다.
+      if (collector.error) throw collector.error;
       const finalText = responseOutputText(completedResponse ?? {}) || collector.serialized;
       return parseOrSalvageChatResult(finalText.trim());
     }

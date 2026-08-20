@@ -5,6 +5,7 @@ import {
   createChatRateLimiter,
   createConfiguredChatRateLimiter,
   createUpstashChatRateLimiter,
+  recordChatInputChars,
 } from "@/features/chat/_lib/chat-rate-limit";
 
 const request = (ip: string) =>
@@ -89,9 +90,10 @@ describe("chat rate limiter", () => {
     expect(JSON.parse(String(init?.body))).toEqual([
       "EVAL",
       expect.any(String),
-      2,
+      3,
       expect.stringMatching(/^chat:rate:v1:[a-f0-9]{64}$/),
       expect.stringMatching(/^chat:daily:v1:\d{4}-\d{2}-\d{2}$/),
+      expect.stringMatching(/^chat:chars:v1:\d{4}-\d{2}-\d{2}$/),
       60_000,
       172_800_000,
       2,
@@ -116,6 +118,44 @@ describe("chat rate limiter", () => {
       allowed: false,
       retryAfterSeconds: 12 * 60 * 60,
       scope: "daily",
+    });
+  });
+
+  it("오늘까지 쓴 입력 문자 수를 함께 돌려준다", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ result: [1, 60_000, 5, 123_456] }));
+    const limit = createUpstashChatRateLimiter({
+      url: "https://example.upstash.io",
+      token: "secret",
+      fetcher,
+      now: () => Date.UTC(2026, 7, 5, 3, 0, 0),
+    });
+
+    await expect(limit(request("203.0.113.1"))).resolves.toEqual({
+      allowed: true,
+      retryAfterSeconds: 0,
+      dailyInputChars: 123_456,
+    });
+    // 문자 카운터 키는 스크립트에 박지 않고 KEYS[3] 으로 넘긴다.
+    const body = JSON.parse(String((fetcher.mock.calls[0]?.[1] as RequestInit).body));
+    expect(body[2]).toBe(3);
+    expect(body[5]).toBe("chat:chars:v1:2026-08-05");
+  });
+
+  it("문자 수 요소가 없는 응답도 요청 수 제한은 그대로 동작한다", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ result: [1, 60_000, 5] }));
+    const limit = createUpstashChatRateLimiter({
+      url: "https://example.upstash.io",
+      token: "secret",
+      fetcher,
+    });
+
+    await expect(limit(request("203.0.113.1"))).resolves.toEqual({
+      allowed: true,
+      retryAfterSeconds: 0,
     });
   });
 
@@ -239,5 +279,70 @@ describe("chat rate limiter", () => {
 
     await limit(request("203.0.113.1"));
     expect(fetcher).toHaveBeenCalledWith("https://marketplace.upstash.io", expect.any(Object));
+  });
+});
+
+describe("recordChatInputChars", () => {
+  const env = {
+    UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+    UPSTASH_REDIS_REST_TOKEN: "secret",
+  };
+
+  it("오늘 버킷에 입력 문자 수를 더한다", async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ result: 500 }));
+
+    await recordChatInputChars(500, { env, fetcher, now: () => Date.UTC(2026, 7, 5, 3, 0, 0) });
+
+    const body = JSON.parse(String((fetcher.mock.calls[0]?.[1] as RequestInit).body));
+    expect(body[2]).toBe(1);
+    expect(body[3]).toBe("chat:chars:v1:2026-08-05");
+    expect(body[4]).toBe(500);
+  });
+
+  it("공유 카운터 자격증명이 없으면 아무것도 보내지 않는다", async () => {
+    const fetcher = vi.fn<typeof fetch>();
+
+    await recordChatInputChars(500, { env: {}, fetcher });
+
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("기록 실패는 호출자에게 전파하지 않는다", async () => {
+    const fetcher = vi.fn<typeof fetch>().mockRejectedValue(new Error("network"));
+
+    await expect(recordChatInputChars(500, { env, fetcher })).resolves.toBeUndefined();
+  });
+
+  it("HTTP 실패를 성공처럼 넘기지 않고 경고를 남긴다", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 401 }));
+
+    await recordChatInputChars(500, { env, fetcher });
+
+    // 조용히 묻히면 카운터가 영원히 0 이라 예산이 발동하지 않는다.
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("401"));
+    // 자격증명은 로그에 남기지 않는다.
+    expect(warn.mock.calls.flat().join(" ")).not.toContain("secret");
+    warn.mockRestore();
+  });
+
+  it("200 이지만 Upstash 오류 페이로드면 경고를 남긴다", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ error: "ERR unknown command" }));
+
+    await recordChatInputChars(500, { env, fetcher });
+
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("0 이하는 기록하지 않는다", async () => {
+    const fetcher = vi.fn<typeof fetch>();
+
+    await recordChatInputChars(0, { env, fetcher });
+
+    expect(fetcher).not.toHaveBeenCalled();
   });
 });
