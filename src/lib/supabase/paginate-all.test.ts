@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { MAX_PAGES, POSTGREST_PAGE_SIZE, paginateAll } from "@/lib/supabase/paginate-all";
+import { MAX_PAGINATED_ROWS, POSTGREST_PAGE_SIZE, paginateAll } from "@/lib/supabase/paginate-all";
 
 /**
  * 지정한 개수만큼 행을 가진 서버 대역.
@@ -46,19 +46,38 @@ describe("paginateAll", () => {
     expect(fetchPage).toHaveBeenNthCalledWith(2, 500, POSTGREST_PAGE_SIZE);
   });
 
+  it("한 번에 한 행씩 줘도 상한 이하면 전량을 읽는다", async () => {
+    // 페이지 횟수로 막던 예전 구현은 이 경우 정상 데이터를 오류로 만들었다.
+    const fetchPage = sourceOf(30, 1);
+
+    await expect(paginateAll(fetchPage, { maxRows: 50 })).resolves.toHaveLength(30);
+  });
+
+  it("누적이 정확히 상한이면 성공한다", async () => {
+    const fetchPage = sourceOf(50, 10);
+
+    await expect(paginateAll(fetchPage, { maxRows: 50 })).resolves.toHaveLength(50);
+  });
+
+  it("상한보다 한 행이라도 많으면 오류를 낸다", async () => {
+    const fetchPage = sourceOf(51, 10);
+
+    await expect(paginateAll(fetchPage, { maxRows: 50 })).rejects.toThrow("안전 상한");
+  });
+
+  it("offset 을 무시하는 서버는 상한에서 멈춘다", async () => {
+    // 같은 행을 계속 돌려주면 종료 조건이 오지 않는다.
+    const fetchPage = vi.fn(async () => [{ id: 0 }]);
+
+    await expect(paginateAll(fetchPage, { maxRows: 10 })).rejects.toThrow("offset");
+    expect(fetchPage).toHaveBeenCalledTimes(11);
+  });
+
   it("첫 페이지가 비면 빈 배열이다", async () => {
     const fetchPage = sourceOf(0);
 
     await expect(paginateAll(fetchPage)).resolves.toEqual([]);
     expect(fetchPage).toHaveBeenCalledTimes(1);
-  });
-
-  it("offset 을 무시하는 서버에서는 무한 반복 대신 오류를 낸다", async () => {
-    // 같은 행을 계속 돌려주면 종료 조건이 오지 않는다.
-    const fetchPage = vi.fn(async () => [{ id: 0 }]);
-
-    await expect(paginateAll(fetchPage)).rejects.toThrow("offset");
-    expect(fetchPage).toHaveBeenCalledTimes(MAX_PAGES);
   });
 
   it("중간 페이지 조회 실패를 그대로 전달한다", async () => {
@@ -68,5 +87,9 @@ describe("paginateAll", () => {
     });
 
     await expect(paginateAll(fetchPage)).rejects.toThrow("읽기 실패");
+  });
+
+  it("기본 상한은 이 저장소의 테이블 규모를 넉넉히 덮는다", () => {
+    expect(MAX_PAGINATED_ROWS).toBeGreaterThan(100_000);
   });
 });

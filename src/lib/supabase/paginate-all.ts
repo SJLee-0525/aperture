@@ -2,10 +2,12 @@
 const POSTGREST_PAGE_SIZE = 1000;
 
 /**
- * 무한 반복 방어. 이 횟수를 넘으면 서버가 `offset` 을 무시하고 있다고 본다.
- * 1,000행씩 500번이면 50만 행이라, 이 저장소의 어떤 테이블도 정상 범위에서 닿지 않는다.
+ * 무한 반복 방어. 이 저장소의 어떤 테이블도 정상 범위에서 닿지 않는 누적 행 수다.
+ *
+ * 페이지 횟수가 아니라 행 수로 센다. 횟수로 막으면 서버가 한 번에 적게 돌려줄 때
+ * 정상 데이터를 오류로 만든다.
  */
-const MAX_PAGES = 500;
+const MAX_PAGINATED_ROWS = 500_000;
 
 /**
  * 빈 페이지를 만날 때까지 `fetchPage` 를 반복 호출해 전량을 모은다.
@@ -20,21 +22,27 @@ const MAX_PAGES = 500;
  * 요청이 한 번 더 나간다.
  *
  * @param {(offset: number, size: number) => Promise<T[]>} fetchPage 지정한 구간을 읽는 함수.
+ * @param {{ maxRows?: number }} [options] `maxRows` 는 안전 상한. 테스트가 낮춰 잡을 수 있다.
  * @returns {Promise<T[]>} 페이지를 이어 붙인 전체 행.
- * @throws {Error} 페이지 수가 상한을 넘을 때.
+ * @throws {Error} 누적 행 수가 상한을 넘을 때.
  */
 const paginateAll = async <T>(
   fetchPage: (offset: number, size: number) => Promise<T[]>,
+  options: { maxRows?: number } = {},
 ): Promise<T[]> => {
+  const maxRows = options.maxRows ?? MAX_PAGINATED_ROWS;
   const rows: T[] = [];
   let offset = 0;
-  for (let page = 0; page < MAX_PAGES; page += 1) {
+  for (;;) {
     const received = await fetchPage(offset, POSTGREST_PAGE_SIZE);
     if (received.length === 0) return rows;
+    // 담기 전에 본다. 뒤에 검사하면 상한을 넘는 데이터를 메모리에 올린 뒤에 던진다.
+    if (rows.length + received.length > maxRows) {
+      throw new Error("목록이 안전 상한을 넘었거나 서버가 offset 을 반영하지 않습니다.");
+    }
     rows.push(...received);
     offset += received.length;
   }
-  throw new Error("목록 조회가 끝나지 않습니다. 서버가 offset 을 반영하지 않는 것 같습니다.");
 };
 
-export { MAX_PAGES, POSTGREST_PAGE_SIZE, paginateAll };
+export { MAX_PAGINATED_ROWS, POSTGREST_PAGE_SIZE, paginateAll };
