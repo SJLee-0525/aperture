@@ -199,16 +199,19 @@ const safeDecodeLength = (value: string): number => {
 };
 
 /**
- * JSON 문자열 본문 조각을 디코딩한다. 깨진 조각은 빈 문자열로 본다.
+ * JSON 문자열 본문 조각을 디코딩한다.
+ *
+ * 실패를 빈 문자열이 아니라 `null` 로 구분한다. 호출부가 원문을 소비할지 정하려면
+ * "디코딩 결과가 비었다" 와 "디코딩이 깨졌다" 를 구분해야 한다.
  *
  * @param {string} raw 따옴표를 뺀 원문 조각.
- * @returns {string}
+ * @returns {string | null} 디코딩 결과. 깨진 조각이면 `null`.
  */
-const decodeJsonStringSegment = (raw: string): string => {
+const decodeJsonStringSegment = (raw: string): string | null => {
   try {
     return JSON.parse(`"${raw}"`) as string;
   } catch {
-    return "";
+    return null;
   }
 };
 
@@ -220,8 +223,12 @@ const decodeJsonStringSegment = (raw: string): string => {
  * 새로 도착한 조각만 훑는다. 매번 누적 문자열 전체를 다시 읽으면 답변 길이의 제곱에
  * 비례해 서버 CPU 시간이 늘어 요청 제한 시간을 갉아먹는다.
  *
+ * 원문 디코딩이 깨지면 `error` 에 사유를 남기고 이후 방출을 멈춘다. 호출부는 결과를
+ * 확정하기 전에 `error` 를 확인해야 한다. 이 값을 무시하면 깨진 구간이 빠진 답변이
+ * 완성된 답변으로 나간다.
+ *
  * @param {(delta: string) => void} onContentDelta
- * @returns {{ push(chunk: string): void; readonly serialized: string }}
+ * @returns {{ push(chunk: string): void; readonly serialized: string; readonly error: Error | null }}
  */
 const createStreamingContentCollector = (onContentDelta: (delta: string) => void) => {
   let serialized = "";
@@ -230,6 +237,8 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
   /** content 문자열 본문에서 이미 훑은 위치. */
   let scanned = -1;
   let closed = false;
+  /** 디코딩이 깨진 사유. 정상 종료(`closed`)와 구분해야 한다. */
+  let invalidError: Error | null = null;
   /** 이스케이프 경계 때문에 아직 디코딩하지 않은 원문 꼬리. */
   let pendingRaw = "";
   let escaped = false;
@@ -248,7 +257,7 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
   return {
     push(chunk: string) {
       serialized += chunk;
-      if (closed) return;
+      if (closed || invalidError) return;
       if (scanned < 0) {
         scanned = findContentStart();
         if (scanned < 0) return;
@@ -270,8 +279,13 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
       const safe = safeDecodeLength(pendingRaw);
       if (safe === 0) return;
       const decoded = decodeJsonStringSegment(pendingRaw.slice(0, safe));
+      // 디코딩이 성공했을 때만 원문을 소비한다. 먼저 자르면 깨진 구간이 사라진 채
+      // 스트림이 이어져, 방문자에게는 조용히 빠진 답변이 완성된 것처럼 보인다.
+      if (decoded === null) {
+        invalidError = new Error("Upstream content contained an invalid JSON escape");
+        return;
+      }
       pendingRaw = pendingRaw.slice(safe);
-      if (!decoded) return;
 
       const room = MAX_RESPONSE_CHARS - emittedChars;
       if (room <= 0) return;
@@ -281,6 +295,9 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
     },
     get serialized() {
       return serialized;
+    },
+    get error() {
+      return invalidError;
     },
   };
 };

@@ -121,6 +121,29 @@ describe("chat response contract", () => {
     expect(onContentDelta.mock.calls.flat().join("")).toBe("본문");
   });
 
+  it("깨진 이스케이프를 만나면 원문을 지우지 않고 방출을 멈춘다", () => {
+    const onContentDelta = vi.fn();
+    const collector = createStreamingContentCollector(onContentDelta);
+    const source = '{"content":"AAA \\x BBB"}';
+
+    for (const character of source) collector.push(character);
+
+    // 깨지기 전에 나간 델타는 회수할 수 없으므로 그대로 둔다.
+    expect(onContentDelta.mock.calls.flat().join("")).toBe("AAA ");
+    // 깨진 지점 이후로는 아무것도 내보내지 않는다.
+    expect(collector.error).toBeInstanceOf(Error);
+    // 진단을 위해 원문은 그대로 남는다.
+    expect(collector.serialized).toBe(source);
+  });
+
+  it("정상 종료는 error 를 남기지 않는다", () => {
+    const collector = createStreamingContentCollector(vi.fn());
+
+    collector.push('{"content":"본문","links":[]}');
+
+    expect(collector.error).toBeNull();
+  });
+
   it("긴 스트림도 누적 문자열을 다시 훑지 않는다", () => {
     const onContentDelta = vi.fn();
     const collector = createStreamingContentCollector(onContentDelta);

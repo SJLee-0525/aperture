@@ -44,6 +44,33 @@ describe("Gemini chat provider", () => {
     expect(vi.mocked(fetch).mock.calls[0]?.[0]).toContain("streamGenerateContent?alt=sse");
   });
 
+  it("본문 이스케이프가 깨지면 잘린 답변을 구제하지 않고 실패한다", async () => {
+    const event = (text: string) =>
+      `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] })}\n\n`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        // `\x` 는 JSON 문자열에서 허용되지 않는 이스케이프다.
+        new Response(event('{"content":"앞부분 \\x 뒷부분","links":[]}'), {
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+
+    await expect(
+      createGeminiChatProvider(
+        "secret",
+        "gemini-test",
+      )({
+        instructions: "context",
+        messages: [{ role: "user", content: "질문" }],
+        lang: "ko",
+        signal: new AbortController().signal,
+        onContentDelta: () => undefined,
+      }),
+    ).rejects.toThrow(/invalid JSON escape/);
+  });
+
   it("대화 역할과 구조화 응답 스키마를 Gemini 요청으로 변환한다", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       response({
