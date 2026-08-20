@@ -4,6 +4,7 @@ import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { asText } from "@/lib/i18n/as-text";
+import { normalizePublicHref } from "@/lib/security/public-url";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { listCrud } from "@/lib/supabase/list-crud";
@@ -42,7 +43,9 @@ const toMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
   program: (d.program as string[]) ?? [],
   description: asText(d.description),
   poster: (d.poster as MusicWork["poster"]) ?? { url: "", path: "", w: 0, h: 0 },
-  ticketUrl: (d.ticketUrl as string) ?? "",
+  // 공개 디코더와 같은 정화를 건다. 관리자 화면이 이 값을 링크로 그리고,
+  // 문서 전체를 다시 저장하는 경로가 정화되지 않은 값을 그대로 되쓴다.
+  ticketUrl: normalizePublicHref(d.ticketUrl),
   order: (d.order as number) ?? 0,
   published: (d.published as boolean) ?? false,
 });
