@@ -313,6 +313,31 @@ describe("recordChatInputChars", () => {
     await expect(recordChatInputChars(500, { env, fetcher })).resolves.toBeUndefined();
   });
 
+  it("HTTP 실패를 성공처럼 넘기지 않고 경고를 남긴다", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 401 }));
+
+    await recordChatInputChars(500, { env, fetcher });
+
+    // 조용히 묻히면 카운터가 영원히 0 이라 예산이 발동하지 않는다.
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("401"));
+    // 자격증명은 로그에 남기지 않는다.
+    expect(warn.mock.calls.flat().join(" ")).not.toContain("secret");
+    warn.mockRestore();
+  });
+
+  it("200 이지만 Upstash 오류 페이로드면 경고를 남긴다", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ error: "ERR unknown command" }));
+
+    await recordChatInputChars(500, { env, fetcher });
+
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it("0 이하는 기록하지 않는다", async () => {
     const fetcher = vi.fn<typeof fetch>();
 

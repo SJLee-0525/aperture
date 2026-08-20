@@ -363,7 +363,7 @@ const recordChatInputChars = async (
   const fetcher = options.fetcher ?? fetch;
   const now = options.now ?? Date.now;
   try {
-    await fetcher(credentials.url, {
+    const response = await fetcher(credentials.url, {
       method: "POST",
       headers: {
         authorization: `Bearer ${credentials.token}`,
@@ -380,8 +380,19 @@ const recordChatInputChars = async (
       signal: AbortSignal.timeout(1_000),
       cache: "no-store",
     });
+    // 상태를 보지 않으면 토큰 권한 문제나 Lua 오류에서 카운터가 영원히 0 에 머물고,
+    // 예산이 한 번도 발동하지 않는다. 자격증명은 로그에 넣지 않는다.
+    if (!response.ok) {
+      console.warn(`[chat-input] 입력 문자 기록 실패 (${response.status})`);
+      return;
+    }
+    const payload = (await response.json()) as { result?: unknown; error?: unknown };
+    if (payload.error || !Number.isFinite(Number(payload.result))) {
+      console.warn("[chat-input] 입력 문자 기록이 예상 밖 응답을 받았다");
+    }
   } catch {
-    // 예산 판정은 다음 요청의 조회값으로 이어진다.
+    // 기록 실패는 요청을 막지 않는다. 예산 판정은 다음 요청의 조회값으로 이어진다.
+    console.warn("[chat-input] 입력 문자 기록을 보내지 못했다");
   }
 };
 
