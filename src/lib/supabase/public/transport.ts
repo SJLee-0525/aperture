@@ -5,6 +5,7 @@ import {
 } from "@/constants/cache";
 import { SUPABASE_COLLECTIONS, type CollectionId } from "@/constants/collections";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
+import { paginateAll } from "@/lib/supabase/paginate-all";
 import { fetchWithRetry } from "@/lib/supabase/public/retry-fetch";
 
 /** 병합이 끝난 공개 행 — 기존 디코더의 `(id, data)` 계약과 같은 모양이다. */
@@ -85,6 +86,27 @@ const requestRows = async (
 };
 
 /**
+ * 목록 조회를 페이지로 나눠 전량을 읽는다.
+ *
+ * 한 번에 읽으면 PostgREST 가 `max_rows` 에서 조용히 잘라, 공개 갤러리·sitemap·검색이
+ * 뒷부분 콘텐츠를 잃는다. 서술자 정렬에 id 2차 키가 있어 페이지 경계가 고정된다.
+ * 페이지마다 URL 이 달라 Data Cache 엔트리는 나뉘지만 태그가 같아 함께 무효화된다.
+ */
+const requestAllRows = (
+  collection: CollectionId,
+  params: URLSearchParams,
+  cacheTag: string,
+  options?: { fresh?: boolean; signal?: AbortSignal },
+  label?: string,
+): Promise<Array<Record<string, unknown>>> =>
+  paginateAll(async (offset, size) => {
+    const paged = new URLSearchParams(params);
+    paged.set("limit", String(size));
+    paged.set("offset", String(offset));
+    return requestRows(collection, paged, cacheTag, options, label);
+  });
+
+/**
  * 컬렉션 행을 서술자 projection·정렬로 읽는다. published 게이트가 없는
  * 태그 사전·site 문서까지 다루는 범용 조회다.
  *
@@ -99,7 +121,7 @@ const selectRows = async (
   for (const [column, expression] of Object.entries(options?.filters ?? {})) {
     params.set(column, expression);
   }
-  const rows = await requestRows(collection, params, collectionCacheTag(collection), options);
+  const rows = await requestAllRows(collection, params, collectionCacheTag(collection), options);
   return rows.map((row) => mergeRow(collection, row));
 };
 
@@ -137,7 +159,7 @@ const selectProjectedPublished = async (
   if (!hasPublished) throw new Error(`published 게이트가 없는 컬렉션입니다: ${collection}`);
   const params = new URLSearchParams({ select, order });
   params.set("published", "eq.true");
-  return requestRows(collection, params, collectionCacheTag(collection), options);
+  return requestAllRows(collection, params, collectionCacheTag(collection), options);
 };
 
 /**

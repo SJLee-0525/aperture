@@ -53,6 +53,37 @@ describe("supabase public transport", () => {
     expect(init.next).toEqual({ revalidate: 3600, tags: ["db:photos"] });
   });
 
+  it("공개 목록은 max_rows 구간을 지정해 조용한 절단을 막는다", async () => {
+    const fetchMock = stubFetch();
+    await selectPublished("photos");
+
+    const params = new URL(lastCall(fetchMock)[0]).searchParams;
+    expect(params.get("limit")).toBe("1000");
+    expect(params.get("offset")).toBe("0");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("한 페이지가 꽉 차면 다음 구간을 이어 읽는다", async () => {
+    const page = (from: number, count: number) =>
+      Array.from({ length: count }, (_, index) => ({
+        id: `p${from + index}`,
+        published: true,
+        sort_order: from + index,
+        data: {},
+      }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(okJson(page(0, 1000)))
+      .mockResolvedValueOnce(okJson(page(1000, 2)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const rows = await selectPublished("photos");
+
+    expect(rows).toHaveLength(1002);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(new URL(lastCall(fetchMock)[0]).searchParams.get("offset")).toBe("1000");
+  });
+
   it("fresh 는 no-store 로 캐시를 우회한다", async () => {
     const fetchMock = stubFetch();
     await selectPublished("photos", { fresh: true });

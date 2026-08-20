@@ -6,6 +6,7 @@ import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session"
 import { rowEncoderFor } from "@/lib/supabase/admin/row-codec";
 import { updateSortOrders, type SortOrder } from "@/lib/supabase/admin/sort-rpc";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { paginateAll } from "@/lib/supabase/paginate-all";
 import { mergeRow } from "@/lib/supabase/public/transport";
 
 import type { RagSyncSourceType } from "@/types/rag";
@@ -108,17 +109,22 @@ const listCrud = <T extends WithId>(
      */
     list: async (): Promise<T[]> => {
       await requireAdminSession();
-      let query = from().select(select);
-      for (const part of order.split(",")) {
-        const [column, direction, nulls] = part.split(".");
-        query = query.order(column, {
-          ascending: direction !== "desc",
-          ...(nulls ? { nullsFirst: nulls === "nullsfirst" } : {}),
-        });
-      }
-      const { data, error } = await query;
-      if (error) throw new Error(`${label} 목록을 불러오지 못했습니다.`);
-      return (data as unknown as Array<Record<string, unknown>>).map((row) => {
+      // 페이지네이션이 없으면 PostgREST 가 max_rows 에서 조용히 잘라, 뒷부분 항목이 화면에서
+      // 사라진 채 재정렬이 그 상태를 저장한다. 서술자 order 의 id 2차 키가 경계를 고정한다.
+      const rows = await paginateAll<Record<string, unknown>>(async (offset, size) => {
+        let query = from().select(select);
+        for (const part of order.split(",")) {
+          const [column, direction, nulls] = part.split(".");
+          query = query.order(column, {
+            ascending: direction !== "desc",
+            ...(nulls ? { nullsFirst: nulls === "nullsfirst" } : {}),
+          });
+        }
+        const { data, error } = await query.range(offset, offset + size - 1);
+        if (error) throw new Error(`${label} 목록을 불러오지 못했습니다.`);
+        return (data ?? []) as unknown as Array<Record<string, unknown>>;
+      });
+      return rows.map((row) => {
         const merged = mergeRow(collection, row);
         return toEntity(merged.id, merged.data);
       });

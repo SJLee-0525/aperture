@@ -2,10 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   select: vi.fn(),
+  range: vi.fn(),
   rows: vi.fn(),
 }));
 
-/** supabase-js 쿼리 빌더 대역 — `listProjected` 가 쓰는 select·order 체인만 재현한다. */
+/** supabase-js 쿼리 빌더 대역 — `listProjected` 가 쓰는 select·order·range 체인만 재현한다. */
 const builder = () => {
   const chain = {
     select: (select: string) => {
@@ -13,6 +14,10 @@ const builder = () => {
       return chain;
     },
     order: () => chain,
+    range: (from: number, to: number) => {
+      mocks.range(from, to);
+      return chain;
+    },
     then: (
       resolve: (value: unknown) => unknown,
       reject: (reason: unknown) => unknown,
@@ -34,7 +39,17 @@ import { listDevArticleItemsAdmin } from "@/lib/supabase/admin-list";
 describe("listDevArticleItemsAdmin — 목록 projection", () => {
   beforeEach(() => {
     mocks.select.mockClear();
+    mocks.range.mockClear();
     mocks.rows.mockReset();
+  });
+
+  it("첫 페이지를 max_rows 구간으로 요청한다", async () => {
+    mocks.rows.mockReturnValue([]);
+
+    await listDevArticleItemsAdmin();
+
+    // 구간을 지정하지 않으면 PostgREST 가 max_rows 에서 조용히 자른다.
+    expect(mocks.range).toHaveBeenCalledWith(0, 999);
   });
 
   it("본문을 빼고 고정 여부를 함께 읽는다", async () => {
