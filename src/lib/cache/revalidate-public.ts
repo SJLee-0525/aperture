@@ -6,9 +6,9 @@ import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
 
 /**
- * 변경된 Firestore 데이터에 의존하는 공개 캐시만 무효화한다.
+ * 변경된 DB 데이터에 의존하는 공개 캐시만 무효화한다.
  *
- * 쓰기 자체는 브라우저의 클라 SDK(관리자 Auth 토큰 → Rules isAdmin)로 하므로
+ * 쓰기 자체는 브라우저의 supabase-js(관리자 세션 토큰 → RLS is_admin)로 하므로
  * 서버로 옮길 수 없다(원칙 #1·#5). 서버가 하는 일은 캐시 무효화 딱 하나다.
  * 클라이언트가 컬렉션/문서 태그를 보내면 해당 Data Cache와 이에 의존하는
  * Full Route Cache만 재검증한다.
@@ -16,8 +16,8 @@ import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
  * `paths`는 라우트 캐시에 남은 404 항목을 지운다. 발행 전에 렌더되어 캐시된 404는
  * 태그 무효화로 갱신되지 않아 revalidate 주기 동안 유지된다.
  *
- * Firebase Auth REST가 ID token을 검증하고 관리자 UID와 일치할 때만 실행해,
- * 공개 호출자가 캐시 무효화와 Firestore 재조회를 반복하는 비용 공격을 막는다.
+ * access token 의 서명·만료와 관리자 클레임을 검증한 뒤에만 실행해,
+ * 공개 호출자가 캐시 무효화와 DB 재조회를 반복하는 비용 공격을 막는다.
  *
  * @param {string} idToken
  * @param {string[]} tags

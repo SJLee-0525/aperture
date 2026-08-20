@@ -146,7 +146,7 @@ const ArticleOrphanImagePanel = () => {
 
       {mock ? (
         <p className={base.status}>
-          mock 모드에서는 실행할 수 없습니다. 실제 Firestore·Storage 연결이 필요합니다. .env.local에
+          mock 모드에서는 실행할 수 없습니다. 실제 Supabase 연결이 필요합니다. .env.local에
           NEXT_PUBLIC_USE_MOCK=0을 두고 다시 실행하세요.
         </p>
       ) : null}
