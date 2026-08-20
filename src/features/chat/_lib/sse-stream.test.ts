@@ -90,6 +90,47 @@ describe("readSseStream", () => {
     await expect(readSseStream(response, controller.signal, () => undefined)).rejects.toBe(reason);
   });
 
+  it("끝까지 읽은 뒤 중단되면 정상 완료로 두고 잔여 블록도 넘긴다", async () => {
+    const controller = new AbortController();
+    const encoder = new TextEncoder();
+    const payloads: string[] = [];
+    let sent = false;
+    // 마지막 조각에 빈 줄이 없어 잔여 버퍼 처리가 필요하다.
+    const response = new Response(
+      new ReadableStream<Uint8Array>({
+        pull(streamController) {
+          if (sent) {
+            // 스트림이 끝나는 순간 요청 정리로 신호가 끊긴 상황.
+            controller.abort();
+            streamController.close();
+            return;
+          }
+          sent = true;
+          streamController.enqueue(encoder.encode('data: {"a":1}\n\ndata: {"b":2}'));
+        },
+      }),
+    );
+
+    await readSseStream(response, controller.signal, (payload) => payloads.push(payload));
+
+    expect(payloads).toEqual(['{"a":1}', '{"b":2}']);
+  });
+
+  it("reader.read() 가 중단으로 거부하면 그대로 전달한다", async () => {
+    const failure = new DOMException("aborted", "AbortError");
+    const response = new Response(
+      new ReadableStream<Uint8Array>({
+        pull() {
+          return Promise.reject(failure);
+        },
+      }),
+    );
+
+    await expect(
+      readSseStream(response, new AbortController().signal, () => undefined),
+    ).rejects.toBe(failure);
+  });
+
   it("정상 종료에도 reader 를 정리한다", async () => {
     const response = responseOf(['data: {"a":1}\n\n']);
     const body = response.body;
