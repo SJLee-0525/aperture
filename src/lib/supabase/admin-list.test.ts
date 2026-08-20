@@ -6,6 +6,12 @@ const mocks = vi.hoisted(() => ({
   rows: vi.fn(),
 }));
 
+/**
+ * 이번 테스트에서 이미 내보낸 페이지 수. 페이지마다 `from()` 이 새로 불려
+ * 빌더 지역 변수로는 구간을 셀 수 없다.
+ */
+let pagesServed = 0;
+
 /** supabase-js 쿼리 빌더 대역 — `listProjected` 가 쓰는 select·order·range 체인만 재현한다. */
 const builder = () => {
   const chain = {
@@ -21,8 +27,12 @@ const builder = () => {
     then: (
       resolve: (value: unknown) => unknown,
       reject: (reason: unknown) => unknown,
-    ): Promise<unknown> =>
-      Promise.resolve({ data: mocks.rows(), error: null }).then(resolve, reject),
+    ): Promise<unknown> => {
+      // 목록 조회는 빈 페이지를 받아야 끝난다. 첫 구간만 행을 주고 그 뒤는 비운다.
+      const data = pagesServed === 0 ? mocks.rows() : [];
+      pagesServed += 1;
+      return Promise.resolve({ data, error: null }).then(resolve, reject);
+    },
   };
   return chain;
 };
@@ -41,6 +51,7 @@ describe("listDevArticleItemsAdmin — 목록 projection", () => {
     mocks.select.mockClear();
     mocks.range.mockClear();
     mocks.rows.mockReset();
+    pagesServed = 0;
   });
 
   it("첫 페이지를 max_rows 구간으로 요청한다", async () => {

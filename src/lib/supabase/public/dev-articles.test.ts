@@ -111,21 +111,24 @@ describe("챗·관계 projection — 본문을 전송에서 제외한다", () =>
   });
 
   it("챗 목록은 별칭 projection 을 요청하고 published_at 을 디코딩한다", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => [
-        {
-          id: "a1",
-          slug: "chunking",
-          published_at: "2026-08-01T00:00:00.000Z",
-          title: { ko: "청킹", en: "Chunking" },
-          summary: { ko: "요약", en: "Summary" },
-          cover: null,
-          tags: ["rag"],
-        },
-      ],
-    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [
+          {
+            id: "a1",
+            slug: "chunking",
+            published_at: "2026-08-01T00:00:00.000Z",
+            title: { ko: "청킹", en: "Chunking" },
+            summary: { ko: "요약", en: "Summary" },
+            cover: null,
+            tags: ["rag"],
+          },
+        ],
+      })
+      .mockResolvedValue({ ok: true, status: 200, json: async () => [] });
     vi.stubGlobal("fetch", fetchMock);
 
     const [article] = await fetchChatDevArticles();
@@ -147,19 +150,22 @@ describe("챗·관계 projection — 본문을 전송에서 제외한다", () =>
   });
 
   it("관계 목록의 jsonb 경로는 JSON 키의 camelCase 를 그대로 쓴다", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => [
-        {
-          id: "a1",
-          slug: "chunking",
-          published_at: null,
-          title: { ko: "청킹", en: "" },
-          relatedProjectIds: ["p1"],
-        },
-      ],
-    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [
+          {
+            id: "a1",
+            slug: "chunking",
+            published_at: null,
+            title: { ko: "청킹", en: "" },
+            relatedProjectIds: ["p1"],
+          },
+        ],
+      })
+      .mockResolvedValue({ ok: true, status: 200, json: async () => [] });
     vi.stubGlobal("fetch", fetchMock);
 
     const [link] = await fetchDevArticleProjectLinks();
