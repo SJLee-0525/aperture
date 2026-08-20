@@ -6,6 +6,8 @@ import {
 import { revalidatePublicPages } from "@/lib/cache/revalidate-public";
 import { getAdminAccessToken } from "@/lib/supabase/auth";
 
+import type { RevalidateFailure } from "@/lib/cache/revalidate-failure-store";
+
 /** 연속 저장(드래그 재정렬 = 문서 N개 병렬 쓰기)을 1회 호출로 합치는 지연. */
 const DEBOUNCE_MS = 300;
 
@@ -25,20 +27,58 @@ const revalidateAsCurrentAdmin = async (tags: string[], paths: string[]): Promis
 };
 
 /**
- * 성공한 묶음이 저장된 실패 기록을 모두 덮으면 기록을 지운다.
+ * 이탈 한 번에 묶인 재검증. 이 묶음이 전부 성공했을 때만 그때 남긴 기록을 되돌린다.
  *
- * 저장소가 tags·paths 를 하나의 합집합으로 보관해 묶음별 삭제가 없다. 부분집합일 때만
- * 지우므로, 다른 실패가 함께 남아 있으면 건드리지 않는다. 그 경우 이미 끝난 대상이
- * 배너에 남지만 재시도는 무해하다.
+ * 이탈 이후에 새로 생긴 요청은 넣지 않는다. 남의 진행 상황이 섞이면 정산 시점이 어긋난다.
  */
-const clearFailureCoveredBy = (batch: RevalidateBatch): void => {
-  const failure = readRevalidateFailure();
-  if (!failure) return;
-  const tags = new Set(batch.tags);
-  const paths = new Set(batch.paths);
-  const covered =
-    failure.tags.every((tag) => tags.has(tag)) && failure.paths.every((path) => paths.has(path));
-  if (covered) clearRevalidateFailure();
+type LeaveRevalidateCohort = {
+  batches: Set<RevalidateBatch>;
+  failed: boolean;
+  /** 기록 직후 읽어 둔 저장소 스냅샷. */
+  recorded: RevalidateFailure;
+};
+
+let leaveCohort: LeaveRevalidateCohort | null = null;
+
+/**
+ * 두 대상 목록이 같은지 본다. 저장 방식에 따라 순서가 달라질 수 있어 정렬해 비교한다.
+ * 구분자로 이어 붙여 비교하지 않는다. 값 안에 그 구분자가 들어가면 다른 목록이 같다고 나온다.
+ */
+const sameTargets = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false;
+  const left = [...a].sort();
+  const right = [...b].sort();
+  return left.every((value, index) => value === right[index]);
+};
+
+/** 저장소 두 값이 같은 기록인지 본다. */
+const sameFailure = (a: RevalidateFailure, b: RevalidateFailure): boolean =>
+  a.failedAt === b.failedAt &&
+  a.reason === b.reason &&
+  sameTargets(a.tags, b.tags) &&
+  sameTargets(a.paths, b.paths);
+
+/**
+ * 이탈 묶음이 다 끝났으면 그때 남긴 기록을 지운다.
+ *
+ * 저장소는 대상을 하나의 합집합으로 보관해 묶음별 삭제가 없다. 그래서 **우리가 남긴 기록이
+ * 그대로 있을 때만** 지운다. 다른 탭이나 이후 실패가 같은 키에 병합됐다면 스냅샷이 달라지므로
+ * 남의 실패를 지우지 않는다.
+ */
+const settleLeaveCohort = (): void => {
+  if (!leaveCohort || leaveCohort.batches.size > 0) return;
+  const { failed, recorded } = leaveCohort;
+  leaveCohort = null;
+  if (failed) return;
+  const current = readRevalidateFailure();
+  if (current && sameFailure(current, recorded)) clearRevalidateFailure();
+};
+
+/** 이 요청이 이탈 묶음에 속하면 결과를 반영한다. */
+const reportToLeaveCohort = (batch: RevalidateBatch, failed: boolean): void => {
+  if (!leaveCohort?.batches.delete(batch)) return;
+  if (failed) leaveCohort.failed = true;
+  settleLeaveCohort();
 };
 
 const sendBatch = (batch: RevalidateBatch): void => {
@@ -46,8 +86,7 @@ const sendBatch = (batch: RevalidateBatch): void => {
   revalidateAsCurrentAdmin(batch.tags, batch.paths)
     .then(() => {
       inFlight.delete(batch);
-      // 이탈 시 미리 남긴 기록을 이 성공이 덮으면 배너를 정리한다.
-      clearFailureCoveredBy(batch);
+      reportToLeaveCohort(batch, false);
     })
     .catch((error: unknown) => {
       inFlight.delete(batch);
@@ -58,6 +97,7 @@ const sendBatch = (batch: RevalidateBatch): void => {
         paths: batch.paths,
         reason: error instanceof Error ? error.message : String(error),
       });
+      reportToLeaveCohort(batch, true);
     });
 };
 
@@ -103,11 +143,17 @@ const flushPendingRevalidateToFailureStore = (options: { persisted?: boolean } =
 
   // 뒤로 가기 캐시로 들어가는 이동은 페이지가 살아 있다. 기록을 남기면 오탐이 된다.
   if (!options.persisted) {
+    // 저장소는 대상을 합쳐 보관한다. 이전 실패가 있으면 우리 기록에 섞여 들어가므로,
+    // 나중에 이 묶음이 다 성공해도 되돌리지 않는다. 남의 실패를 지우게 된다.
+    const hadPreviousFailure = readRevalidateFailure() !== null;
     recordRevalidateFailure({
       tags: [...new Set(outstanding.flatMap((batch) => batch.tags))],
       paths: [...new Set(outstanding.flatMap((batch) => batch.paths))],
       reason: "저장 직후 페이지를 떠나 재검증 결과를 확인하지 못했습니다.",
     });
+    const recorded = hadPreviousFailure ? null : readRevalidateFailure();
+    // 이번에 남긴 기록을 그대로 들고 있다가, 이 묶음이 다 성공하면 되돌린다.
+    if (recorded) leaveCohort = { batches: new Set(outstanding), failed: false, recorded };
   }
   // 대기 중이던 대상은 debounce 를 기다리지 않고 바로 보낸다.
   if (pending) sendBatch(pending);
