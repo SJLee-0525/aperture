@@ -1,6 +1,8 @@
 import { MAX_RESPONSE_CHARS } from "@/features/chat/_lib/chat-tuning";
 import { parseContactDraft } from "@/features/chat/_lib/contact-draft";
 
+import { truncateUtf16Safely } from "@/lib/text/truncate-utf16-safely";
+
 import { CHAT_REFERENCE_TYPES } from "@/types/chat";
 
 import type { ChatProviderResult } from "@/features/chat/_lib/chat-provider";
@@ -110,7 +112,7 @@ const parseChatResult = (text: string): ChatProviderResult => {
   if (!isRecord(parsed) || typeof parsed.content !== "string") {
     throw new Error("Provider returned an invalid structured response");
   }
-  const content = parsed.content.trim().slice(0, MAX_RESPONSE_CHARS);
+  const content = truncateUtf16Safely(parsed.content.trim(), MAX_RESPONSE_CHARS);
   if (!content) throw new Error("Provider returned an empty response");
   return {
     content,
@@ -133,7 +135,7 @@ const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   try {
     return parseChatResult(text);
   } catch (error) {
-    const content = contentFromPartialJson(text).slice(0, MAX_RESPONSE_CHARS).trim();
+    const content = truncateUtf16Safely(contentFromPartialJson(text), MAX_RESPONSE_CHARS).trim();
     if (!content) throw error;
     // 잘린 JSON에서는 본문만 회수한다. 나머지 구조화 필드는 모두 버린다.
     return { content, contactDraft: null };
@@ -289,7 +291,7 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
 
       const room = MAX_RESPONSE_CHARS - emittedChars;
       if (room <= 0) return;
-      const delta = decoded.slice(0, room);
+      const delta = truncateUtf16Safely(decoded, room);
       emittedChars += delta.length;
       onContentDelta(delta);
     },
