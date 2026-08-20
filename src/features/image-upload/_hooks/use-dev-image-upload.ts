@@ -31,10 +31,12 @@ const useDevImageUpload = (projectId: string) => {
   const upload = useCallback(
     async (file: File): Promise<ImageMeta> => {
       const imageStore = getAdminImageStore();
-      const [compressed, preview, thumbnail] = await Promise.all([
-        compressToWebp(file),
-        compressPreviewToWebp(file),
-        compressThumbnailToWebp(file),
+      // 배치 업로드는 파일 3장을 동시에 처리한다. 원본을 각자 셋씩 디코딩하면 워커 9개가
+      // 동시에 원본을 들고 있게 되므로, 메인 webp 를 만든 뒤 그것을 줄인다.
+      const compressed = await compressToWebp(file);
+      const [preview, thumbnail] = await Promise.all([
+        compressPreviewToWebp(compressed),
+        compressThumbnailToWebp(compressed),
       ]);
       const [size, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
         await Promise.all([
