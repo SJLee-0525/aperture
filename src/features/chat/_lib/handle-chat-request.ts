@@ -385,15 +385,41 @@ const handleChatRequest = async (
     inputCharLimit = configuredDailyInputCharLimit(),
   }: ChatHandlerDependencies,
 ): Promise<Response> => {
-  // 사용량 제한은 헤더의 IP 만 보므로 본문보다 먼저 판정한다. 제한에 걸린 요청이 본문을
-  // 메모리에 올리지 못하게 하려는 순서이며, 그 대가로 형식이 잘못된 요청도 횟수에 포함된다.
-  // 응답 언어는 아직 Accept-Language 기준이다.
   let responseLang = getHeaderLang(request);
   const contentLength = Number(request.headers.get("content-length"));
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
     return jsonError(400, "REQUEST_TOO_LARGE", responseLang);
   }
 
+  // 본문은 상한까지만 읽는다. 제한에 걸린 요청이 메모리를 쓰는 양은 이 절단이 정한다.
+  let rawBody: string | null;
+  try {
+    rawBody = await readLimitedBody(request, MAX_BODY_BYTES);
+  } catch {
+    return jsonError(400, "REQUEST_READ_FAILED", responseLang);
+  }
+  if (rawBody === null) {
+    return jsonError(400, "REQUEST_TOO_LARGE", responseLang);
+  }
+
+  let parsedBody: unknown;
+  try {
+    parsedBody = JSON.parse(rawBody);
+  } catch {
+    return jsonError(400, "INVALID_JSON", responseLang);
+  }
+  responseLang = getBodyLang(parsedBody, responseLang);
+
+  let chatRequest;
+  try {
+    chatRequest = parseChatRequest(parsedBody);
+  } catch (error) {
+    if (error instanceof ChatRequestError) return jsonError(400, error.code, responseLang);
+    return jsonError(400, "INVALID_BODY", responseLang);
+  }
+
+  // 사용량 판정은 형식 검증 뒤에 둔다. 제한기가 IP 창을 통과한 요청마다 전역 일일 카운터를
+  // 올리므로, 앞에 두면 잘못된 JSON 만으로도 그날의 전체 방문자 몫을 소진시킬 수 있다.
   /** 하루 입력 문자 예산을 넘긴 상태. 문맥 조회와 벡터 검색을 모두 건너뛴다. */
   let contextBudgetSpent = false;
   if (rateLimiter) {
@@ -420,32 +446,6 @@ const handleChatRequest = async (
         `[chat-input] 하루 입력 문자 예산 소진 (${rateLimit.dailyInputChars}/${inputCharLimit}) — 문맥 없이 답한다`,
       );
     }
-  }
-
-  let rawBody: string | null;
-  try {
-    rawBody = await readLimitedBody(request, MAX_BODY_BYTES);
-  } catch {
-    return jsonError(400, "REQUEST_READ_FAILED", responseLang);
-  }
-  if (rawBody === null) {
-    return jsonError(400, "REQUEST_TOO_LARGE", responseLang);
-  }
-
-  let parsedBody: unknown;
-  try {
-    parsedBody = JSON.parse(rawBody);
-  } catch {
-    return jsonError(400, "INVALID_JSON", responseLang);
-  }
-  responseLang = getBodyLang(parsedBody, responseLang);
-
-  let chatRequest;
-  try {
-    chatRequest = parseChatRequest(parsedBody);
-  } catch (error) {
-    if (error instanceof ChatRequestError) return jsonError(400, error.code, responseLang);
-    return jsonError(400, "INVALID_BODY", responseLang);
   }
 
   const controller = new AbortController();

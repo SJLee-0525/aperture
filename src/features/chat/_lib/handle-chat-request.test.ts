@@ -360,16 +360,37 @@ describe("handleChatRequest", () => {
     expect(provider).not.toHaveBeenCalled();
   });
 
-  it("사용량 제한이 본문 검사보다 먼저 판정된다", async () => {
+  it("본문 상한 초과는 사용량 판정 전에 400 으로 끊는다", async () => {
     const provider = vi.fn();
-    // 크기 상한도 넘고 제한에도 걸린 요청. 본문을 먼저 읽으면 400 이 나온다.
+    const rateLimiter = vi.fn(() => ({ allowed: true, retryAfterSeconds: 0 }));
+
     const response = await handleChatRequest(
       createRequest({ lang: "ko", messages: [{ role: "user", content: "x".repeat(30_000) }] }),
-      { provider, rateLimiter: () => ({ allowed: false, retryAfterSeconds: 42 }) },
+      { provider, rateLimiter },
     );
 
-    expect(response.status).toBe(429);
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.code).toBe("REQUEST_TOO_LARGE");
+    // 형식이 깨진 요청이 전역 일일 카운터를 올리지 않게 제한기까지 가지 않는다.
+    expect(rateLimiter).not.toHaveBeenCalled();
     expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("깨진 JSON 은 사용량 카운터를 건드리지 않는다", async () => {
+    const provider = vi.fn();
+    const rateLimiter = vi.fn(() => ({ allowed: true, retryAfterSeconds: 0 }));
+
+    const response = await handleChatRequest(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{",
+      }),
+      { provider, rateLimiter },
+    );
+
+    expect(response.status).toBe(400);
+    expect(rateLimiter).not.toHaveBeenCalled();
   });
 
   it("하루 입력 문자 예산을 넘기면 문맥 조회 없이 답한다", async () => {
@@ -465,12 +486,8 @@ describe("handleChatRequest", () => {
 
   it("공유 요청 제한 설정 오류는 provider를 호출하지 않고 503으로 닫는다", async () => {
     const provider = vi.fn();
-    // 제한 판정은 본문을 읽기 전이라 응답 언어가 Accept-Language 를 따른다.
     const response = await handleChatRequest(
-      createRequest(
-        { lang: "en", messages: [{ role: "user", content: "question" }] },
-        { "accept-language": "en-US,en;q=0.9" },
-      ),
+      createRequest({ lang: "en", messages: [{ role: "user", content: "question" }] }),
       {
         provider,
         rateLimiter: async () => {
