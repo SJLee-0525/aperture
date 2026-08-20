@@ -332,6 +332,46 @@ describe("handleChatRequest", () => {
     expect(response.status).toBe(400);
   });
 
+  it("Content-Length 없이 보낸 큰 본문도 상한에서 끊는다", async () => {
+    const provider = vi.fn();
+    const chunk = new TextEncoder().encode("x".repeat(8_000));
+    let pushed = 0;
+    // chunked 전송은 Content-Length 가 없어 선검사를 지나온다.
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pushed += 1;
+        controller.enqueue(chunk);
+        if (pushed >= 100) controller.close();
+      },
+    });
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: stream,
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+
+    const response = await handleChatRequest(request, { provider });
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.code).toBe("REQUEST_TOO_LARGE");
+    // 상한을 넘는 순간 멈추므로 본문 전체를 읽지 않는다.
+    expect(pushed).toBeLessThan(10);
+    expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("사용량 제한이 본문 검사보다 먼저 판정된다", async () => {
+    const provider = vi.fn();
+    // 크기 상한도 넘고 제한에도 걸린 요청. 본문을 먼저 읽으면 400 이 나온다.
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "x".repeat(30_000) }] }),
+      { provider, rateLimiter: () => ({ allowed: false, retryAfterSeconds: 42 }) },
+    );
+
+    expect(response.status).toBe(429);
+    expect(provider).not.toHaveBeenCalled();
+  });
+
   it("하루 입력 문자 예산을 넘기면 문맥 조회 없이 답한다", async () => {
     const provider = vi.fn(async (input: { instructions: string }) => {
       instructions = input.instructions;
@@ -425,8 +465,12 @@ describe("handleChatRequest", () => {
 
   it("공유 요청 제한 설정 오류는 provider를 호출하지 않고 503으로 닫는다", async () => {
     const provider = vi.fn();
+    // 제한 판정은 본문을 읽기 전이라 응답 언어가 Accept-Language 를 따른다.
     const response = await handleChatRequest(
-      createRequest({ lang: "en", messages: [{ role: "user", content: "question" }] }),
+      createRequest(
+        { lang: "en", messages: [{ role: "user", content: "question" }] },
+        { "accept-language": "en-US,en;q=0.9" },
+      ),
       {
         provider,
         rateLimiter: async () => {
