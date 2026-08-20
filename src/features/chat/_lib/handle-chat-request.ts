@@ -486,8 +486,11 @@ const handleChatRequest = async (
   const canUseOpenTarget =
     chatIntent.sections.length === 0 && !isStandaloneNonLookupInput(chatRequest.messages);
   // 스트림 상태 이벤트는 target 검증 전에 나가야 해서 조회 가능성만 본다.
+  // 예산을 넘긴 요청은 아무것도 조회하지 않으므로 "검색 중" 을 보여 주면 안 된다.
   const mayLoadProfile =
-    chatIntent.sections.length > 0 || Boolean(canUseOpenTarget && chatRequest.context?.openTarget);
+    !contextBudgetSpent &&
+    (chatIntent.sections.length > 0 ||
+      Boolean(canUseOpenTarget && chatRequest.context?.openTarget));
   // 분류기가 만든 독립 검색어·키워드를 우선 사용하고, 없으면 후속 질문 맥락을 복원한 휴리스틱 쿼리.
   const ragQuery: RagQuery = {
     text: chatIntent.searchQuery ?? buildRagQueryText(chatRequest.messages),
@@ -569,8 +572,9 @@ const handleChatRequest = async (
       `[chat-input] instructions=${instructions.length} profile=${profileContext.length} screen=${screenContext?.length ?? 0} messages=${messageChars}`,
     );
     // 입력 비용은 호출 시점에 확정되므로 응답을 기다리지 않고 먼저 적는다. 성공 후에 적으면
-    // 타임아웃된 요청의 입력이 예산에서 빠진다.
-    void recordTokenUsage(instructions.length + messageChars);
+    // 타임아웃된 요청의 입력이 예산에서 빠진다. 기본 구현은 실패를 안에서 처리하지만,
+    // 주입된 구현까지 그렇다는 보장이 없어 여기서도 받아 둔다.
+    void recordTokenUsage(instructions.length + messageChars).catch(() => undefined);
     const result = await provider({
       instructions,
       messages: chatRequest.messages,

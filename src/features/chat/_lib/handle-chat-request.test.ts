@@ -423,6 +423,50 @@ describe("handleChatRequest", () => {
     expect(recordTokenUsage.mock.lastCall?.[0]).toBeGreaterThan(0);
   });
 
+  it("예산을 넘기면 조회하지 않으므로 검색 중 상태를 보내지 않는다", async () => {
+    const provider = vi.fn(async ({ onContentDelta }: { onContentDelta?: (d: string) => void }) => {
+      onContentDelta?.("답변");
+      return { content: "답변", contactDraft: null };
+    });
+
+    const response = await handleChatRequest(
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "사진 보여 줘" }] },
+        { accept: "application/x-ndjson" },
+      ),
+      {
+        provider,
+        buildContext: async () => "context",
+        recordTokenUsage: async () => undefined,
+        inputCharLimit: 1_000,
+        rateLimiter: () => ({ allowed: true, retryAfterSeconds: 0, dailyInputChars: 1_001 }),
+      },
+    );
+
+    const events = (await response.text())
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    expect(events.some((event) => event.status === "portfolio-search")).toBe(false);
+  });
+
+  it("기록 구현이 거부해도 응답을 막지 않는다", async () => {
+    const provider = vi.fn(async () => ({ content: "답변", contactDraft: null }));
+
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "질문" }] }),
+      {
+        provider,
+        buildContext: async () => "context",
+        recordTokenUsage: async () => {
+          throw new Error("기록 실패");
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+  });
+
   it("예산 안에서는 문맥을 그대로 싣는다", async () => {
     const provider = vi.fn(async () => ({ content: "답변", contactDraft: null }));
     const buildContext = vi.fn(async () => "context");
