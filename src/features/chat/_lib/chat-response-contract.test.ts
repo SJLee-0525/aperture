@@ -144,6 +144,85 @@ describe("chat response contract", () => {
     expect(collector.error).toBeNull();
   });
 
+  describe("서로게이트 짝 처리", () => {
+    /** 남은 자리를 원하는 만큼 남기고 시작하는 수집기. */
+    const collectorWithRoom = (room: number) => {
+      const onContentDelta = vi.fn();
+      const collector = createStreamingContentCollector(onContentDelta);
+      collector.push('{"content":"');
+      if (MAX_RESPONSE_CHARS > room) collector.push("가".repeat(MAX_RESPONSE_CHARS - room));
+      onContentDelta.mockClear();
+      return { collector, onContentDelta };
+    };
+
+    it("두 이스케이프로 나뉜 이모지를 짝으로 묶어 방출한다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(10);
+
+      collector.push("\\uD83D");
+      // 상위 반쪽만으로는 아무것도 내보내지 않는다.
+      expect(onContentDelta).not.toHaveBeenCalled();
+      collector.push("\\uDE00");
+
+      expect(onContentDelta.mock.calls.flat().join("")).toBe("😀");
+    });
+
+    it("남은 자리에 짝이 다 들어가지 않으면 둘 다 내보내지 않는다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(1);
+
+      collector.push("\\uD83D");
+      collector.push("\\uDE00");
+
+      expect(onContentDelta).not.toHaveBeenCalled();
+    });
+
+    it("상한에 걸린 뒤에는 뒤따르는 조각도 내보내지 않는다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(1);
+
+      collector.push("\\uD83D");
+      collector.push("\\uDE00");
+      // 이모지만 빠지고 다음 문자가 이어지면 순서가 뒤섞인다.
+      collector.push("나");
+
+      expect(onContentDelta).not.toHaveBeenCalled();
+    });
+
+    it("짝을 만나지 못한 상위 서로게이트는 버리고 다음 문자는 살린다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(10);
+
+      collector.push("\\uD83D");
+      collector.push("가");
+
+      expect(onContentDelta.mock.calls.flat().join("")).toBe("가");
+    });
+
+    it("한 조각 안의 짝 없는 상위·하위 서로게이트를 버린다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(10);
+
+      // `\uD83DA` 는 상위 반쪽 뒤에 일반 문자가 붙은 값이다.
+      collector.push("\\uD83DA\\uDE00B");
+
+      expect(onContentDelta.mock.calls.flat().join("")).toBe("AB");
+    });
+
+    it("상위 서로게이트를 보류한 채 본문이 닫히면 버린다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(10);
+
+      collector.push('가\\uD83D","links":[]}');
+
+      expect(onContentDelta.mock.calls.flat().join("")).toBe("가");
+      expect(collector.error).toBeNull();
+    });
+
+    it("이모지 뒤 일반 문자의 순서를 지킨다", () => {
+      const { collector, onContentDelta } = collectorWithRoom(10);
+
+      collector.push("\\uD83D");
+      collector.push("\\uDE00나");
+
+      expect(onContentDelta.mock.calls.flat().join("")).toBe("😀나");
+    });
+  });
+
   it("긴 스트림도 누적 문자열을 다시 훑지 않는다", () => {
     const onContentDelta = vi.fn();
     const collector = createStreamingContentCollector(onContentDelta);

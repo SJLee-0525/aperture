@@ -217,6 +217,49 @@ const decodeJsonStringSegment = (raw: string): string | null => {
   }
 };
 
+const isHighSurrogate = (code: number): boolean => code >= 0xd800 && code <= 0xdbff;
+const isLowSurrogate = (code: number): boolean => code >= 0xdc00 && code <= 0xdfff;
+
+/**
+ * 짝이 맞는 서로게이트만 남기고, 끝에 걸린 상위 서로게이트는 다음 조각을 위해 보류한다.
+ *
+ * JSON 파서는 짝 없는 서로게이트도 문자열로 받아들이고, 모델이 이모지를 `\uD83D` 와
+ * `\uDE00` 두 이스케이프로 나눠 보내면 조각마다 반쪽이 온다. 반쪽을 그대로 방출하면
+ * 화면에 대체 문자가 남는다.
+ *
+ * 순회는 code unit 단위다. `for...of` 는 코드 포인트 단위라 이미 온전한 짝을 한 덩어리로
+ * 주어 판정이 어긋난다.
+ *
+ * @param {string} held 앞 조각에서 보류한 상위 서로게이트. 없으면 빈 문자열.
+ * @param {string} decoded 이번에 디코딩한 조각.
+ * @returns {{ text: string; held: string }} 방출할 문자열과 다음으로 넘길 보류분.
+ */
+const pairSurrogates = (held: string, decoded: string): { text: string; held: string } => {
+  let text = "";
+  let pending = held;
+  for (let index = 0; index < decoded.length; index += 1) {
+    const unit = decoded[index] ?? "";
+    const code = unit.charCodeAt(0);
+    if (pending) {
+      if (isLowSurrogate(code)) {
+        text += pending + unit;
+        pending = "";
+        continue;
+      }
+      // 짝을 만나지 못한 상위 서로게이트는 버리고 이 문자는 정상 처리한다.
+      pending = "";
+    }
+    if (isHighSurrogate(code)) {
+      pending = unit;
+      continue;
+    }
+    // 짝 없는 하위 서로게이트도 유효한 텍스트가 아니다.
+    if (isLowSurrogate(code)) continue;
+    text += unit;
+  }
+  return { text, held: pending };
+};
+
 /**
  * 스트리밍 조각을 누적하면서 아직 내보내지 않은 본문 증분만 전달한다.
  * 구조화 JSON 이 완성되기 전에도 content 값만 뽑아 보여주기 위한 공통 로직으로,
@@ -245,6 +288,10 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
   let pendingRaw = "";
   let escaped = false;
   let emittedChars = 0;
+  /** 짝을 기다리는 상위 서로게이트. content 가 닫히면 버린다. */
+  let heldSurrogate = "";
+  /** 상한에 걸려 잘린 뒤로는 방출하지 않는다. 이어 붙이면 순서가 뒤섞인다. */
+  let capped = false;
 
   /** content 문자열이 시작하는 위치를 찾는다. 못 찾으면 -1. */
   const findContentStart = (): number => {
@@ -259,7 +306,7 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
   return {
     push(chunk: string) {
       serialized += chunk;
-      if (closed || invalidError) return;
+      if (closed || invalidError || capped) return;
       if (scanned < 0) {
         scanned = findContentStart();
         if (scanned < 0) return;
@@ -289,9 +336,17 @@ const createStreamingContentCollector = (onContentDelta: (delta: string) => void
       }
       pendingRaw = pendingRaw.slice(safe);
 
+      const paired = pairSurrogates(heldSurrogate, decoded);
+      // content 가 닫혔으면 짝을 기다릴 조각이 더 없다. 보류분은 버린다.
+      heldSurrogate = closed ? "" : paired.held;
+      if (!paired.text) return;
+
       const room = MAX_RESPONSE_CHARS - emittedChars;
       if (room <= 0) return;
-      const delta = truncateUtf16Safely(decoded, room);
+      const delta = truncateUtf16Safely(paired.text, room);
+      // 짝이 남은 자리에 다 들어가지 않으면 잘린 결과가 비어 있다.
+      if (delta.length < paired.text.length) capped = true;
+      if (!delta) return;
       emittedChars += delta.length;
       onContentDelta(delta);
     },
