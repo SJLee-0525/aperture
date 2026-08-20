@@ -16,6 +16,30 @@ import type { ArticleImageGroup } from "@/features/admin-maintenance/_lib/group-
 /** 작성 중인 파일이 정리 대상에 포함되지 않도록 기다리는 시간. */
 const ORPHAN_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 
+/** 이 비율을 넘는 그룹이 한 번에 삭제 대상이 되면 참조 목록을 의심한다. */
+const ORPHAN_RATIO_LIMIT = 0.5;
+
+/**
+ * 참조 목록이 불완전할 수 있는 상태를 문장으로 돌려준다.
+ *
+ * 글 조회가 오류 없이 모자라게 오면(전량 조회 절단 등) 살아 있는 이미지가 통째로 삭제 대상이
+ * 된다. 비율의 분모는 글 수가 아니라 Storage 그룹 수라, 글이 적고 미참조 이미지가 많은
+ * 상태에서도 한도를 넘는다. 그래서 이 값은 삭제를 막는 조건이 아니라 확인을 요구하는 근거다.
+ *
+ * @returns {string | null} 확인이 필요한 이유. 정상이면 `null`.
+ */
+const confirmationReasonFor = (
+  articleCount: number,
+  orphanCount: number,
+  groupCount: number,
+): string | null => {
+  if (articleCount === 0) return "글이 한 편도 조회되지 않아 참조 목록을 신뢰할 수 없습니다.";
+  if (groupCount > 0 && orphanCount / groupCount > ORPHAN_RATIO_LIMIT) {
+    return `이미지 ${groupCount}개 중 ${orphanCount}개가 삭제 대상입니다.`;
+  }
+  return null;
+};
+
 /** 관리자 표의 한 행. 삭제 대상 그룹 하나를 표시용 값으로 줄인 것이다. */
 type OrphanGroup = {
   /** 원본·프리뷰·썸네일 순으로 정렬한 그룹 전체 경로. 삭제 대상이자 행의 식별자다. */
@@ -45,6 +69,11 @@ type OrphanScanResult = {
   keptFiles: Array<{ path: string; size: number }>;
   /** `keptFiles` 의 전체 크기. */
   keptBytes: number;
+  /**
+   * 참조 목록이 불완전할 수 있어 사람 확인이 필요한 이유. 정상이면 `null`.
+   * 삭제 함수는 이 값이 있을 때 `acknowledged` 없이는 실행하지 않는다.
+   */
+  confirmationReason: string | null;
 };
 
 type OrphanDeleteResult = {
@@ -121,6 +150,7 @@ const scanOrphanArticleImages = async (
     scannedCount: files.length,
     keptFiles,
     keptBytes: keptFiles.reduce((sum, file) => sum + file.size, 0),
+    confirmationReason: confirmationReasonFor(articles.length, orphanGroups.length, groups.length),
   };
 };
 
@@ -131,15 +161,23 @@ const scanOrphanArticleImages = async (
  * 단위라, 확인 화면 이후 그룹의 한 파일이 참조되면 같은 그룹의 나머지 파일도 지우지 않는다.
  * 새로 발견한 파일은 건드리지 않으며, 개별 파일 삭제 실패가 다른 파일의 삭제를 막지 않는다.
  *
+ * 재검사가 `confirmationReason` 을 내면 `acknowledged` 없이는 아무것도 지우지 않는다.
+ *
  * @param {string[]} paths 관리자가 dry run 에서 확인한 후보 경로.
- * @param {() => Date} [now] 재검증의 24시간 판정 기준 시각.
+ * @param {{ acknowledged?: boolean; now?: () => Date }} [options] `acknowledged` 는 사람이 확인
+ *   문구를 읽고 진행을 택했다는 뜻이다. `now` 는 재검증의 24시간 판정 기준 시각.
  * @returns {Promise<OrphanDeleteResult>} 경로별 성공·실패·제외 결과.
+ * @throws {Error} 확인이 필요한 상태인데 `acknowledged` 가 없을 때.
  */
 const deleteOrphanArticleImages = async (
   paths: string[],
-  now: () => Date = () => new Date(),
+  options: { acknowledged?: boolean; now?: () => Date } = {},
 ): Promise<OrphanDeleteResult> => {
+  const now = options.now ?? (() => new Date());
   const rescan = await scanOrphanArticleImages(now);
+  if (rescan.confirmationReason && !options.acknowledged) {
+    throw new Error(`${rescan.confirmationReason} 확인 후 다시 실행하세요.`);
+  }
   const eligible = new Set(rescan.groups.flatMap((group) => group.paths));
   const confirmed = [...new Set(paths)];
 

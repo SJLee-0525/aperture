@@ -85,9 +85,11 @@ const ArticleOrphanImagePanel = () => {
     const groups = scan?.groups ?? [];
     const paths = groups.flatMap((group) => group.paths);
     if (paths.length === 0) return;
+    // 참조 목록을 의심할 근거가 있으면 확인 문구에 이유를 먼저 보여준다.
+    const warning = scan?.confirmationReason ? `⚠️ ${scan.confirmationReason}\n\n` : "";
     if (
       !window.confirm(
-        `사용되지 않는 이미지 ${groups.length}개(파일 ${paths.length}개)를 삭제할까요? 삭제한 파일은 복구할 수 없습니다.`,
+        `${warning}사용되지 않는 이미지 ${groups.length}개(파일 ${paths.length}개)를 삭제할까요? 삭제한 파일은 복구할 수 없습니다.`,
       )
     ) {
       return;
@@ -96,7 +98,7 @@ const ArticleOrphanImagePanel = () => {
     setError(null);
     setCopied(false);
     try {
-      setDeletion(await deleteOrphanArticleImages(paths));
+      setDeletion(await deleteOrphanArticleImages(paths, { acknowledged: true }));
       setScan(await scanOrphanArticleImages());
     } catch (caught) {
       setError((caught as Error).message);
