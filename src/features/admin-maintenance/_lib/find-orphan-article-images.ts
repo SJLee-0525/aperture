@@ -83,6 +83,36 @@ type OrphanDeleteResult = {
   skipped: string[];
 };
 
+/**
+ * 관리자가 확인한 내용과 삭제 직전 재검사 결과가 어긋날 때 던진다.
+ *
+ * 최신 재검사 결과를 함께 실어, 화면이 옛 스캔을 그대로 두고 같은 값을 다시 보내지
+ * 않도록 한다. 사유만 문자열로 던지면 두 번째 시도도 같은 값으로 통과한다.
+ */
+class OrphanConfirmationRequiredError extends Error {
+  readonly reason: string;
+  readonly scan: OrphanScanResult;
+
+  constructor(reason: string, scan: OrphanScanResult) {
+    super(`${reason} 내용을 확인한 뒤 다시 실행하세요.`);
+    this.name = "OrphanConfirmationRequiredError";
+    this.reason = reason;
+    this.scan = scan;
+  }
+}
+
+/**
+ * 관리자가 확인한 내용을 대표하는 값.
+ *
+ * 사유뿐 아니라 삭제 대상 경로 집합까지 담는다. 문구가 같아도 대상이 달라졌으면
+ * 사람이 본 화면과 다른 삭제이므로 다시 확인해야 한다.
+ *
+ * @param {OrphanScanResult} scan 확인 화면이 근거로 삼은 스캔 결과.
+ * @returns {string} 비교용 토큰.
+ */
+const orphanConfirmationToken = (scan: OrphanScanResult): string =>
+  [scan.confirmationReason ?? "", ...scan.groups.flatMap((group) => group.paths).sort()].join("\n");
+
 const toOrphanGroup = (group: ArticleImageGroup): OrphanGroup => ({
   paths: group.files.map((file) => file.path),
   previewUrl: group.files[group.files.length - 1].url,
@@ -161,22 +191,28 @@ const scanOrphanArticleImages = async (
  * 단위라, 확인 화면 이후 그룹의 한 파일이 참조되면 같은 그룹의 나머지 파일도 지우지 않는다.
  * 새로 발견한 파일은 건드리지 않으며, 개별 파일 삭제 실패가 다른 파일의 삭제를 막지 않는다.
  *
- * 재검사가 `confirmationReason` 을 내면 `acknowledged` 없이는 아무것도 지우지 않는다.
+ * 재검사 결과가 관리자가 확인한 내용과 다르면 아무것도 지우지 않고
+ * `OrphanConfirmationRequiredError` 를 던진다. 사유가 없던 상태에서 새로 생긴 경우도 포함한다.
  *
  * @param {string[]} paths 관리자가 dry run 에서 확인한 후보 경로.
- * @param {{ acknowledged?: boolean; now?: () => Date }} [options] `acknowledged` 는 사람이 확인
- *   문구를 읽고 진행을 택했다는 뜻이다. `now` 는 재검증의 24시간 판정 기준 시각.
+ * @param {{ confirmationToken?: string; now?: () => Date }} [options] `confirmationToken` 은
+ *   확인 화면이 근거로 삼은 스캔의 `orphanConfirmationToken` 값이다.
+ *   `now` 는 재검증의 24시간 판정 기준 시각.
  * @returns {Promise<OrphanDeleteResult>} 경로별 성공·실패·제외 결과.
- * @throws {Error} 확인이 필요한 상태인데 `acknowledged` 가 없을 때.
+ * @throws {OrphanConfirmationRequiredError} 확인 내용과 재검사 결과가 어긋날 때.
  */
 const deleteOrphanArticleImages = async (
   paths: string[],
-  options: { acknowledged?: boolean; now?: () => Date } = {},
+  options: { confirmationToken?: string; now?: () => Date } = {},
 ): Promise<OrphanDeleteResult> => {
   const now = options.now ?? (() => new Date());
   const rescan = await scanOrphanArticleImages(now);
-  if (rescan.confirmationReason && !options.acknowledged) {
-    throw new Error(`${rescan.confirmationReason} 확인 후 다시 실행하세요.`);
+  // 사유가 없어도 대상이 바뀌었으면 사람이 본 화면과 다른 삭제다.
+  if (orphanConfirmationToken(rescan) !== options.confirmationToken) {
+    throw new OrphanConfirmationRequiredError(
+      rescan.confirmationReason ?? "삭제 대상이 확인 시점과 달라졌습니다.",
+      rescan,
+    );
   }
   const eligible = new Set(rescan.groups.flatMap((group) => group.paths));
   const confirmed = [...new Set(paths)];
@@ -202,5 +238,10 @@ const deleteOrphanArticleImages = async (
   return { deleted, failed, skipped };
 };
 
-export { deleteOrphanArticleImages, scanOrphanArticleImages };
+export {
+  deleteOrphanArticleImages,
+  OrphanConfirmationRequiredError,
+  orphanConfirmationToken,
+  scanOrphanArticleImages,
+};
 export type { OrphanDeleteResult, OrphanScanResult };
