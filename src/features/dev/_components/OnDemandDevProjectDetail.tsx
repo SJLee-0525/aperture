@@ -126,12 +126,13 @@ const OnDemandDevProjectDetail = ({ project, articles, open, onClose, endpoint }
         return (await response.json()) as DevProject;
       })
       .then((loadedProject) => {
-        setProjectsById((current) => {
-          const next = new Map(current);
-          next.set(loadedProject.id, loadedProject);
-          projectsByIdRef.current = next;
-          return next;
-        });
+        // ref 는 "이미 받아온 프로젝트" 판정의 단일 출처다. setState updater 안에서 바꾸면
+        // React 가 결과를 버릴 때 ref 만 앞서가고, 다음 열기에서 요청을 건너뛴 채 상세가
+        // 비어 모달이 스켈레톤에 머문다.
+        const next = new Map(projectsByIdRef.current);
+        next.set(loadedProject.id, loadedProject);
+        projectsByIdRef.current = next;
+        setProjectsById(next);
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
