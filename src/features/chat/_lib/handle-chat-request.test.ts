@@ -332,6 +332,54 @@ describe("handleChatRequest", () => {
     expect(response.status).toBe(400);
   });
 
+  it("하루 입력 문자 예산을 넘기면 문맥 조회 없이 답한다", async () => {
+    const provider = vi.fn(async (input: { instructions: string }) => {
+      instructions = input.instructions;
+      return { content: "답변", contactDraft: null };
+    });
+    const buildContext = vi.fn(async () => "context");
+    const recordTokenUsage = vi.fn<(chars: number) => Promise<void>>(async () => undefined);
+    let instructions = "";
+
+    const response = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여 줘" }] }),
+      {
+        provider,
+        buildContext,
+        recordTokenUsage,
+        inputCharLimit: 1_000,
+        rateLimiter: () => ({ allowed: true, retryAfterSeconds: 0, dailyInputChars: 1_001 }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    // 문맥 조회와 벡터 검색을 모두 건너뛴다.
+    expect(buildContext).not.toHaveBeenCalled();
+    expect(instructions).toContain("No portfolio lookup was needed");
+    expect(instructions).not.toContain("SCREEN_CONTEXT");
+    // 강등 상태에서도 이번 요청의 입력은 예산에 더한다.
+    expect(recordTokenUsage).toHaveBeenCalledWith(expect.any(Number));
+    expect(recordTokenUsage.mock.lastCall?.[0]).toBeGreaterThan(0);
+  });
+
+  it("예산 안에서는 문맥을 그대로 싣는다", async () => {
+    const provider = vi.fn(async () => ({ content: "답변", contactDraft: null }));
+    const buildContext = vi.fn(async () => "context");
+
+    await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "사진 보여 줘" }] }),
+      {
+        provider,
+        buildContext,
+        recordTokenUsage: async () => undefined,
+        inputCharLimit: 1_000,
+        rateLimiter: () => ({ allowed: true, retryAfterSeconds: 0, dailyInputChars: 999 }),
+      },
+    );
+
+    expect(buildContext).toHaveBeenCalled();
+  });
+
   it("IP 요청 제한 시 provider 호출 없이 Retry-After를 반환한다", async () => {
     const provider = vi.fn();
     const response = await handleChatRequest(

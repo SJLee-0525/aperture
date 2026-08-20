@@ -1,4 +1,4 @@
-import { articlePlainText } from "@/features/dev-blog/_lib/article-plain-text";
+import { articlePlainTextClipped } from "@/features/dev-blog/_lib/article-plain-text";
 
 import { devArticleRoute } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -22,12 +22,15 @@ const MAX_SCREEN_CONTEXT_CHARS = 1_500;
 
 /**
  * 열어 둔 글 본문을 프롬프트에 실을 때의 최대 문자 수.
- * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다. 현재 최장 글의
- * 코드 무절단 평문(실측 약 32,000자)을 여유 있게 덮는 크기다 — 여기서 잘리면
- * "글 마지막" 질문이 앞부분 내용으로 답해진다. 50,000자는 Gemini Flash-Lite
- * 1M 컨텍스트의 5% 수준이고 무료 티어 한도는 요청 수 기준이라 영향이 없다.
+ *
+ * 상한의 근거는 DB 읽기 비용이 아니라 LLM 입력 토큰 예산이다. 한국어는 문자당 토큰이
+ * 1개를 조금 넘어, 이 상한이 요청 한 건의 입력 토큰 상한을 결정한다. 사용량 제한은
+ * 요청 수만 세므로 상한이 없으면 하루 비용이 본문 길이에 비례해 늘어난다.
+ *
+ * 이 크기를 넘는 글은 앞부분만 실리고, 잘린 뒷부분은 RAG 우선 검색이 보완한다
+ * (`complete` 가 false 면 호출부가 같은 글의 청크를 제외하지 않는다).
  */
-const MAX_ARTICLE_BODY_CONTEXT_CHARS = 50_000;
+const MAX_ARTICLE_BODY_CONTEXT_CHARS = 25_000;
 
 /**
  * 공개된 항목만 남긴다.
@@ -179,18 +182,14 @@ type ArticleScreenContext = { text: string; complete: boolean };
  * @returns {ArticleScreenContext} provider에 전달할 화면 문맥 블록과 완전성 여부.
  */
 const formatArticleScreenContextBlock = (article: DevArticle, lang: Lang): ArticleScreenContext => {
-  const body = articlePlainText(article);
-  const complete = body.length <= MAX_ARTICLE_BODY_CONTEXT_CHARS;
-  const clipped = complete
-    ? body
-    : `${body.slice(0, MAX_ARTICLE_BODY_CONTEXT_CHARS)}\n[remainder truncated]`;
+  const { text: body, complete } = articlePlainTextClipped(article, MAX_ARTICLE_BODY_CONTEXT_CHARS);
   return {
     text: [
       "# SCREEN_CONTEXT",
       "The visitor currently has this item open on screen:",
       articleScreenEntry(article, lang),
       "Full article text (plain):",
-      clipped,
+      complete ? body : `${body}\n[remainder truncated]`,
     ].join("\n"),
     complete,
   };

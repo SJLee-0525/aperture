@@ -20,6 +20,8 @@ import {
 } from "@/features/chat/_lib/chat-provider";
 import {
   ChatRateLimitConfigurationError,
+  configuredDailyInputCharLimit,
+  recordChatInputChars,
   type ChatRateLimiter,
 } from "@/features/chat/_lib/chat-rate-limit";
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
@@ -122,6 +124,10 @@ type ChatHandlerDependencies = {
   rateLimiter?: ChatRateLimiter;
   intentClassifier?: ChatIntentClassifier;
   timeoutMs?: number;
+  /** 이번 요청의 입력 문자 수를 하루 예산에 더한다. 실패해도 요청을 막지 않는다. */
+  recordTokenUsage?: (chars: number) => Promise<void>;
+  /** 하루 입력 문자 예산. 넘기면 문맥 없이 답한다. */
+  inputCharLimit?: number;
 };
 
 /**
@@ -374,6 +380,8 @@ const handleChatRequest = async (
     rateLimiter,
     intentClassifier,
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    recordTokenUsage = recordChatInputChars,
+    inputCharLimit = configuredDailyInputCharLimit(),
   }: ChatHandlerDependencies,
 ): Promise<Response> => {
   let responseLang = getHeaderLang(request);
@@ -407,6 +415,8 @@ const handleChatRequest = async (
     if (error instanceof ChatRequestError) return jsonError(400, error.code, responseLang);
     return jsonError(400, "INVALID_BODY", responseLang);
   }
+  /** 하루 입력 문자 예산을 넘긴 상태. 문맥 조회와 벡터 검색을 모두 건너뛴다. */
+  let contextBudgetSpent = false;
   if (rateLimiter) {
     let rateLimit;
     try {
@@ -423,6 +433,13 @@ const handleChatRequest = async (
       return jsonError(429, code, responseLang, {
         "Retry-After": String(rateLimit.retryAfterSeconds),
       });
+    }
+    // 카운터가 없으면(공유 저장소 미설정) 판정하지 않는다.
+    if (rateLimit.dailyInputChars !== undefined && rateLimit.dailyInputChars > inputCharLimit) {
+      contextBudgetSpent = true;
+      console.warn(
+        `[chat-input] 하루 입력 문자 예산 소진 (${rateLimit.dailyInputChars}/${inputCharLimit}) — 문맥 없이 답한다`,
+      );
     }
   }
 
@@ -488,22 +505,27 @@ const handleChatRequest = async (
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
     // 해석은 섹션 선택, 화면 문맥, RAG 우선 검색 앞의 공통 단계다. 세 곳이 각자 판단하면
     // 확인되지 않은 target 이 한쪽으로 샌다.
-    const resolved = await resolveContextTarget(
-      chatRequest.context,
-      chatRequest.lang,
-      getArticle,
-      getSnapshot,
-      controller.signal,
-    );
+    // 입력 예산을 넘겼으면 해석 자체를 건너뛴다. 문서 조회와 벡터 검색이 모두 빠진다.
+    const resolved: ResolvedChatTarget = contextBudgetSpent
+      ? {}
+      : await resolveContextTarget(
+          chatRequest.context,
+          chatRequest.lang,
+          getArticle,
+          getSnapshot,
+          controller.signal,
+        );
     // 공개 데이터에서 찾은 target 만 섹션을 연다. 없는 id 로 조회를 유발할 수 없다.
     const openTargetSection =
       canUseOpenTarget && resolved.verified && resolved.openTarget
         ? TARGET_PROFILE_SECTIONS[resolved.openTarget.type]
         : null;
     // `profile` 은 섹션이 하나라도 잡히면 늘 함께 본다(`chat-intent` 의 `sectionsForText` 규약).
-    const profileSections: ProfileSection[] = openTargetSection
-      ? ["profile", openTargetSection]
-      : chatIntent.sections;
+    const profileSections: ProfileSection[] = contextBudgetSpent
+      ? []
+      : openTargetSection
+        ? ["profile", openTargetSection]
+        : chatIntent.sections;
     // 질문이 스스로 섹션을 고른 경우에는 열어 둔 원본도 최소 점수를 넘어야 자리를 차지한다.
     const prioritize: RagPrioritize | undefined = resolved.prioritize
       ? { ...resolved.prioritize, ignoreScoreFloor: openTargetSection !== null }
@@ -533,10 +555,17 @@ const handleChatRequest = async (
           }).catch(() => undefined),
     ]);
     const instructions = buildChatInstructions(chatRequest.lang, profileContext, screenContext);
+    const messageChars = chatRequest.messages.reduce(
+      (total, { content }) => total + content.length,
+      0,
+    );
     // 프롬프트 크기 계측 — 화면 본문·RAG 청크 예산 조정의 기준선 (checklist 08 M6 후속).
     console.info(
-      `[chat-input] instructions=${instructions.length} profile=${profileContext.length} screen=${screenContext?.length ?? 0} messages=${chatRequest.messages.reduce((total, { content }) => total + content.length, 0)}`,
+      `[chat-input] instructions=${instructions.length} profile=${profileContext.length} screen=${screenContext?.length ?? 0} messages=${messageChars}`,
     );
+    // 입력 비용은 호출 시점에 확정되므로 응답을 기다리지 않고 먼저 적는다. 성공 후에 적으면
+    // 타임아웃된 요청의 입력이 예산에서 빠진다.
+    void recordTokenUsage(instructions.length + messageChars);
     const result = await provider({
       instructions,
       messages: chatRequest.messages,

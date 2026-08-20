@@ -226,4 +226,18 @@ describe("formatArticleScreenContextBlock", () => {
     // 상한 + 항목 줄·헤더 여유. 본문만 잘리고 블록 전체가 다시 잘리지는 않는다.
     expect(block.text.length).toBeLessThanOrEqual(MAX_ARTICLE_BODY_CONTEXT_CHARS + 500);
   });
+
+  it("상한을 넘으면 문단 중간이 아니라 블록 경계에서 끊는다", () => {
+    const paragraph = "가".repeat(9_000);
+    const block = formatArticleScreenContextBlock(
+      articleOf([paragraph, paragraph, paragraph, "마지막 문단"].join("\n\n")),
+      "ko",
+    );
+
+    expect(block.complete).toBe(false);
+    // 9,000자 문단 두 개(구분자 포함 18,001자)까지만 들어가고 세 번째는 통째로 빠진다.
+    const body = block.text.split("Full article text (plain):\n")[1] ?? "";
+    expect(body.replace("\n[remainder truncated]", "")).toBe(`${paragraph}\n${paragraph}`);
+    expect(block.text).not.toContain("마지막 문단");
+  });
 });

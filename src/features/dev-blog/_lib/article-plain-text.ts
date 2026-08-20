@@ -131,5 +131,37 @@ const articlePlainText = (article: DevArticle, options: ArticlePlainTextOptions 
     .filter(Boolean)
     .join("\n");
 
-export { articleBlockText, articlePlainText };
+/**
+ * 예산 안에서 블록 경계까지만 담은 본문 평문.
+ *
+ * 문자 단위로 자르면 마크다운 토막과 반쪽 서로게이트 페어가 남는다. 첫 블록부터 예산을
+ * 넘으면(거대 코드 블록) 그 블록만 예산 길이로 자른다.
+ *
+ * @param {DevArticle} article 평문화할 글.
+ * @param {number} maxChars 담을 수 있는 최대 문자 수.
+ * @returns {{ text: string; complete: boolean }} 평문과 전문이 다 실렸는지 여부.
+ */
+const articlePlainTextClipped = (
+  article: DevArticle,
+  maxChars: number,
+): { text: string; complete: boolean } => {
+  const blocks = analyzeArticle(article)
+    .document.blocks.map((block) => articleBlockText(block))
+    .filter(Boolean);
+  const full = blocks.join("\n");
+  if (full.length <= maxChars) return { text: full, complete: true };
+
+  const kept: string[] = [];
+  let length = 0;
+  for (const block of blocks) {
+    const next = length + (kept.length > 0 ? 1 : 0) + block.length;
+    if (next > maxChars) break;
+    kept.push(block);
+    length = next;
+  }
+  if (kept.length === 0) kept.push((blocks[0] ?? "").slice(0, maxChars));
+  return { text: kept.join("\n"), complete: false };
+};
+
+export { articleBlockText, articlePlainText, articlePlainTextClipped };
 export type { ArticlePlainTextOptions };
