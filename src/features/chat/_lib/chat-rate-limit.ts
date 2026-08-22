@@ -405,5 +405,4 @@ export {
   createUpstashChatRateLimiter,
   recordChatInputChars,
 };
-export type { ChatRateLimitResult };
 export type { ChatRateLimiter };
