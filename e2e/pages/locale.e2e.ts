@@ -146,7 +146,7 @@ test.describe("경로 기반 i18n", () => {
       .locator(".legal-document-table-scroll")
       .first()
       .evaluate((tableScroll) => ({
-        table: getComputedStyle(tableScroll).getPropertyValue("--legal-scrollbar-accent").trim(),
+        table: getComputedStyle(tableScroll).getPropertyValue("--table-scrollbar-accent").trim(),
         blue: getComputedStyle(document.documentElement).getPropertyValue("--accent-photo").trim(),
       }));
     expect(tableColors.table).toBe(tableColors.blue);

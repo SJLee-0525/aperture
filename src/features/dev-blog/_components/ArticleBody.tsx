@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
+import { TableScrollRegion } from "@/components/TableScrollRegion";
 import { ArticleCodeBlock } from "@/features/dev-blog/_components/ArticleCodeBlock";
 import { ArticleYouTube } from "@/features/dev-blog/_components/ArticleYouTube";
 
@@ -163,14 +164,8 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
         return (
           // 표는 좁은 화면에서 본문 폭을 넘기므로 스스로 가로 스크롤한다. 스크롤되는 영역은
           // 포인터 없이도 닿아야 해서 포커스를 받는 region 으로 둔다(정책 지면과 같은 처리).
-          <div
-            key={index}
-            className={styles.tableScroll}
-            role="region"
-            aria-label={DICTIONARY[lang].articleTableLabel}
-            tabIndex={0}
-          >
-            <table className={styles.table}>
+          <TableScrollRegion key={index} label={DICTIONARY[lang].articleTableLabel}>
+            <table>
               <thead>
                 <tr>
                   {block.header.map((cell, cellIndex) => (
@@ -196,7 +191,7 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScrollRegion>
         );
 
       case "code":

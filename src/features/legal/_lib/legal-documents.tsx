@@ -1,3 +1,4 @@
+import { TableScrollRegion } from "@/components/TableScrollRegion";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 
 import { ROUTES } from "@/constants/routes";
@@ -30,18 +31,11 @@ const EXTERNAL_POLICY_URLS = {
 
 const SENTRY_ENABLED = Boolean(SENTRY_DSN);
 
-/**
- * 좁은 화면에서 표만 독립적으로 가로 스크롤하며 키보드 포커스도 받을 수 있게 한다.
- *
- * @param {{ children: ReactNode; label: string }} props 컴포넌트 속성.
- * @param {ReactNode} props.children 스크롤 영역에 표시할 표.
- * @param {string} props.label 스크린리더가 표 영역을 구분할 이름.
- * @returns {JSX.Element} 키보드로 접근할 수 있는 표 스크롤 영역.
- */
+/** 정책 문서의 기존 E2E 선택자와 기능별 바깥 여백을 유지한다. */
 const LegalTableScroll = ({ children, label }: { children: ReactNode; label: string }) => (
-  <div className="legal-document-table-scroll" role="region" aria-label={label} tabIndex={0}>
+  <TableScrollRegion className="legal-document-table-scroll" label={label}>
     {children}
-  </div>
+  </TableScrollRegion>
 );
 
 /** 개인정보 처리와 로컬 저장소 계약의 한국어·영어 원문. */

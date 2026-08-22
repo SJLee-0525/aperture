@@ -93,35 +93,6 @@
   border-top: 1px solid var(--line);
 }
 
-/* 표 규격도 정책 지면과 같다 — 좁은 화면에서는 표만 가로로 밀리고 지면은 밀리지 않는다. */
-.tableScroll {
-  max-width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-}
-.table {
-  width: 100%;
-  /* 칸이 뭉개지기 전에 가로 스크롤로 넘긴다. 줄바꿈으로 버티면 표가 읽히지 않는다. */
-  min-width: 620px;
-  border-collapse: collapse;
-  color: var(--text-2);
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-.table th,
-.table td {
-  min-width: 120px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-.table th {
-  background: var(--surface-2);
-  color: var(--text);
-  font-weight: 600;
-}
-
 /* 이미지·코드·영상은 글줄과 다른 덩어리라 문단 간격보다 조금 더 띄운다. */
 .body > pre,
 .body > .figure {

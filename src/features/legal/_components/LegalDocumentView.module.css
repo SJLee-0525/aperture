@@ -84,74 +84,7 @@
 }
 
 .section :global(.legal-document-table-scroll) {
-  --legal-scrollbar-accent: var(--accent-photo);
-
-  max-width: 100%;
   margin: var(--s-3) 0;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  scrollbar-color: var(--legal-scrollbar-accent) transparent;
-  scrollbar-width: thin;
-}
-
-.section :global(.legal-document-table-scroll:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar {
-  height: 10px;
-}
-
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar-track {
-  background: linear-gradient(
-    to bottom,
-    transparent calc(50% - 0.5px),
-    color-mix(in srgb, var(--text) 10%, transparent) calc(50% - 0.5px),
-    color-mix(in srgb, var(--text) 10%, transparent) calc(50% + 0.5px),
-    transparent calc(50% + 0.5px)
-  );
-}
-
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar-thumb {
-  border: 3px solid transparent;
-  border-radius: 999px;
-  background: var(--legal-scrollbar-accent);
-  background-clip: padding-box;
-}
-
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar-thumb:hover,
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar-thumb:active {
-  border-width: 2px;
-}
-
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar-button,
-.section :global(.legal-document-table-scroll)::-webkit-scrollbar-corner {
-  display: none;
-}
-
-.section table {
-  width: 100%;
-  min-width: 620px;
-  border-collapse: collapse;
-  color: var(--text-2);
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.section th,
-.section td {
-  min-width: 120px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-
-.section th {
-  background: var(--surface-2);
-  color: var(--text);
-  font-weight: 600;
 }
 
 @media (max-width: 560px) {

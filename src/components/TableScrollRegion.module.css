@@ -1,0 +1,71 @@
+.scroll {
+  --table-scrollbar-accent: var(--accent);
+
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-color: var(--table-scrollbar-accent) transparent;
+  scrollbar-width: thin;
+}
+
+.scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: linear-gradient(
+    to bottom,
+    transparent calc(50% - 0.5px),
+    color-mix(in srgb, var(--text) 10%, transparent) calc(50% - 0.5px),
+    color-mix(in srgb, var(--text) 10%, transparent) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  min-width: 44px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--table-scrollbar-accent);
+  background-clip: padding-box;
+}
+
+.scroll::-webkit-scrollbar-thumb:hover,
+.scroll::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+}
+
+.scroll::-webkit-scrollbar-button,
+.scroll::-webkit-scrollbar-corner {
+  display: none;
+}
+
+.scroll table {
+  width: 100%;
+  /* 칸이 뭉개지기 전에 표만 가로로 넘긴다. */
+  min-width: 620px;
+  border-collapse: collapse;
+  color: var(--text-2);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.scroll th,
+.scroll td {
+  min-width: 120px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.scroll th {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 600;
+}
