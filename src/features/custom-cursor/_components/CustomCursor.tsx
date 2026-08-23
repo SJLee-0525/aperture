@@ -4,7 +4,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { autoScrollDirection, autoScrollVelocity } from "@/features/custom-cursor/_lib/auto-scroll";
-import { applyCursorGeometry, type CursorMode } from "@/features/custom-cursor/_lib/cursor-mode";
+import {
+  applyCursorGeometry,
+  type CursorMode,
+  type ScrollbarAxis,
+} from "@/features/custom-cursor/_lib/cursor-mode";
 import { resolveCursorTarget } from "@/features/custom-cursor/_lib/cursor-target";
 
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
@@ -108,7 +112,8 @@ const CustomCursor = () => {
     let mapTargetHovered = false;
     let textTargetHovered = false;
     let rangeTargetHovered = false;
-    let scrollbarTargetHovered = false;
+    let customScrollbarTargetHovered = false;
+    let scrollbarAxis: ScrollbarAxis = "vertical";
     let scrolling = false;
     let loading = false;
     const loadingIds = new Set<string>();
@@ -171,7 +176,7 @@ const CustomCursor = () => {
       currentMode = next;
       cursor.dataset.mode = next;
 
-      applyCursorGeometry(cursor, next);
+      applyCursorGeometry(cursor, next, scrollbarAxis);
     };
 
     const setAccent = (element: Element | null) => {
@@ -309,7 +314,7 @@ const CustomCursor = () => {
         return;
       }
 
-      if (scrollbarTargetHovered) {
+      if (customScrollbarTargetHovered) {
         setSnapped(null);
         setMode("scrollbar");
         cursor.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
@@ -404,7 +409,17 @@ const CustomCursor = () => {
       const resolved = resolveCursorTarget(event.target);
       textTargetHovered = resolved.kind === "text";
       rangeTargetHovered = resolved.kind === "range";
-      scrollbarTargetHovered = resolved.kind === "scrollbar";
+      customScrollbarTargetHovered = resolved.kind === "scrollbar";
+      if (customScrollbarTargetHovered) {
+        const nextScrollbarAxis = resolved.scrollbarAxis ?? "vertical";
+        if (scrollbarAxis !== nextScrollbarAxis) {
+          scrollbarAxis = nextScrollbarAxis;
+          cursor.dataset.scrollbarAxis = scrollbarAxis;
+          if (currentMode === "scrollbar") {
+            applyCursorGeometry(cursor, "scrollbar", scrollbarAxis);
+          }
+        }
+      }
 
       if (["scrollbar", "text", "range", "passive"].includes(resolved.kind)) {
         target = null;

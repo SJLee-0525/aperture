@@ -23,4 +23,13 @@ describe("applyCursorGeometry", () => {
 
     expect(cursor.style.getPropertyValue("--cursor-width")).toBe("12px");
   });
+
+  it("가로 scrollbar에서는 세로 geometry의 폭과 높이를 바꿔 적용한다", () => {
+    const cursor = document.createElement("div");
+
+    applyCursorGeometry(cursor, "scrollbar", "horizontal");
+
+    expect(cursor.style.getPropertyValue("--cursor-width")).toBe("28px");
+    expect(cursor.style.getPropertyValue("--cursor-height")).toBe("20px");
+  });
 });

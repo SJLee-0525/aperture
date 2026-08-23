@@ -160,6 +160,10 @@
   stroke-linejoin: round;
 }
 
+.cursor[data-scrollbar-axis="horizontal"] .scrollbarIndicator {
+  transform: rotate(90deg);
+}
+
 .autoScrollDirection {
   top: -8px;
   left: -8px;

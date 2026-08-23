@@ -1,3 +1,5 @@
+import type { ScrollbarAxis } from "@/features/custom-cursor/_lib/cursor-mode";
+
 const INTERACTIVE_SELECTOR = 'a, button, [role="button"], summary, [data-cursor-target]';
 const TEXT_SELECTOR = [
   "input:not([type])",
@@ -14,6 +16,7 @@ const RANGE_CONTROL_SELECTOR = 'input[type="range"]';
 const CHOICE_CONTROL_SELECTOR = 'input[type="checkbox"], input[type="radio"]';
 const PASSIVE_CURSOR_SELECTOR = "[data-cursor-passive]";
 const CUSTOM_SCROLLBAR_SELECTOR = "[data-custom-scrollbar-ui]";
+const CUSTOM_HORIZONTAL_SCROLLBAR_SELECTOR = "[data-custom-horizontal-scrollbar-ui]";
 /**
  * 브라우저가 커서를 직접 그리는 영역 — 커스텀 커서를 숨기고 기본 커서에 넘긴다.
  * iframe 이 여기 포함되는 이유: 교차 출처 문서라 부모의 `cursor: none` 이 안으로 닿지 않고,
@@ -29,6 +32,7 @@ type CursorTarget = {
   element: Element | null;
   kind: CursorTargetKind;
   snapTarget: HTMLElement | null;
+  scrollbarAxis?: ScrollbarAxis;
 };
 
 /**
@@ -41,8 +45,25 @@ const resolveCursorTarget = (eventTarget: EventTarget | null): CursorTarget => {
   const element = eventTarget instanceof Element ? eventTarget : null;
   if (!element) return { element: null, kind: "none", snapTarget: null };
 
+  const horizontalScrollbar = element.closest(CUSTOM_HORIZONTAL_SCROLLBAR_SELECTOR);
+  if (horizontalScrollbar) {
+    return {
+      element: horizontalScrollbar,
+      kind: "scrollbar",
+      snapTarget: null,
+      scrollbarAxis: "horizontal",
+    };
+  }
+
   const scrollbar = element.closest(CUSTOM_SCROLLBAR_SELECTOR);
-  if (scrollbar) return { element: scrollbar, kind: "scrollbar", snapTarget: null };
+  if (scrollbar) {
+    return {
+      element: scrollbar,
+      kind: "scrollbar",
+      snapTarget: null,
+      scrollbarAxis: "vertical",
+    };
+  }
 
   const text = element.closest(TEXT_SELECTOR);
   if (text) return { element: text, kind: "text", snapTarget: null };

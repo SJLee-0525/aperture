@@ -31,6 +31,17 @@ describe("resolveCursorTarget", () => {
     expect(resolveCursorTarget(track)).toMatchObject({ kind: "scrollbar", element: track });
   });
 
+  it("DOM 가로 scrollbar를 방향이 있는 target으로 분류한다", () => {
+    const track = document.createElement("div");
+    track.dataset.customHorizontalScrollbarUi = "";
+
+    expect(resolveCursorTarget(track)).toMatchObject({
+      kind: "scrollbar",
+      element: track,
+      scrollbarAxis: "horizontal",
+    });
+  });
+
   it("checkbox는 label 전체를 custom cursor target으로 사용한다", () => {
     const label = document.createElement("label");
     label.dataset.cursorTarget = "";

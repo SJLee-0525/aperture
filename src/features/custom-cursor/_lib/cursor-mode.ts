@@ -12,6 +12,7 @@ type CursorMode =
   | "loading";
 
 type CursorGeometry = { width: string; height: string; radius: string };
+type ScrollbarAxis = "horizontal" | "vertical";
 
 const CURSOR_GEOMETRY: Partial<Record<CursorMode, CursorGeometry>> = {
   dot: { width: "12px", height: "12px", radius: "999px" },
@@ -25,8 +26,21 @@ const CURSOR_GEOMETRY: Partial<Record<CursorMode, CursorGeometry>> = {
   loading: { width: "22px", height: "22px", radius: "999px" },
 };
 
-const applyCursorGeometry = (cursor: HTMLElement, mode: CursorMode): void => {
-  const geometry = CURSOR_GEOMETRY[mode];
+const HORIZONTAL_SCROLLBAR_GEOMETRY: CursorGeometry = {
+  width: "28px",
+  height: "20px",
+  radius: "999px",
+};
+
+const applyCursorGeometry = (
+  cursor: HTMLElement,
+  mode: CursorMode,
+  scrollbarAxis: ScrollbarAxis = "vertical",
+): void => {
+  const geometry =
+    mode === "scrollbar" && scrollbarAxis === "horizontal"
+      ? HORIZONTAL_SCROLLBAR_GEOMETRY
+      : CURSOR_GEOMETRY[mode];
   if (!geometry) return;
   cursor.style.setProperty("--cursor-width", geometry.width);
   cursor.style.setProperty("--cursor-height", geometry.height);
@@ -34,4 +48,4 @@ const applyCursorGeometry = (cursor: HTMLElement, mode: CursorMode): void => {
 };
 
 export { applyCursorGeometry };
-export type { CursorMode };
+export type { CursorMode, ScrollbarAxis };
