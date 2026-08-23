@@ -95,6 +95,7 @@
 
 /* 이미지·코드·영상은 글줄과 다른 덩어리라 문단 간격보다 조금 더 띄운다. */
 .body > pre,
+.body > :global([data-code-block]),
 .body > .figure {
   margin-top: var(--s-5);
 }

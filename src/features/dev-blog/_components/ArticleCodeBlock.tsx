@@ -1,3 +1,5 @@
+import { HorizontalScrollArea } from "@/components/HorizontalScrollArea";
+
 import type { ArticleCodeLines } from "@/features/dev-blog/_lib/markdown-highlight-map";
 import type { CSSProperties } from "react";
 
@@ -24,7 +26,12 @@ type Props = {
  * @returns {JSX.Element}
  */
 const ArticleCodeBlock = ({ rawLanguage, value, tokens }: Props) => (
-  <pre className={styles.pre} data-language={rawLanguage || undefined}>
+  <HorizontalScrollArea
+    as="pre"
+    viewportClassName={styles.pre}
+    dataLanguage={rawLanguage}
+    codeBlock
+  >
     <code>
       {tokens
         ? tokens.map((line, lineIndex) => (
@@ -41,7 +48,7 @@ const ArticleCodeBlock = ({ rawLanguage, value, tokens }: Props) => (
           ))
         : value}
     </code>
-  </pre>
+  </HorizontalScrollArea>
 );
 
 export { ArticleCodeBlock };

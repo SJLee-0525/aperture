@@ -1,0 +1,57 @@
+.root {
+  --horizontal-scrollbar-accent: var(--accent);
+  min-width: 0;
+  max-width: 100%;
+}
+.viewport {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.viewport::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.viewport:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.track {
+  position: relative;
+  height: 8px;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+}
+.track[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.track::before {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  content: "";
+  transform: translateY(-50%);
+}
+.thumb {
+  position: absolute;
+  top: 2.5px;
+  left: 0;
+  min-width: 44px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--horizontal-scrollbar-accent);
+  transition:
+    top 0.18s var(--ease),
+    height 0.18s var(--ease);
+  will-change: transform;
+}
+.track:hover .thumb,
+.track[data-dragging="true"] .thumb {
+  top: 1px;
+  height: 6px;
+}

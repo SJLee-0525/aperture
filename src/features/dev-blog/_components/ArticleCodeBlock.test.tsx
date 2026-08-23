@@ -53,7 +53,9 @@ describe("ArticleCodeBlock", () => {
       <ArticleCodeBlock rawLanguage="js" value="const a = 1;" tokens={null} />,
     );
 
-    expect(container.querySelector("pre")?.dataset.language).toBe("js");
+    const codeBlock = container.querySelector("pre");
+    expect(codeBlock?.dataset.language).toBe("js");
+    expect(codeBlock?.tabIndex).toBe(0);
   });
 
   it("언어를 적지 않은 블록에는 라벨을 붙이지 않는다", () => {

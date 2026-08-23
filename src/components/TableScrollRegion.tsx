@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { HorizontalScrollArea } from "./HorizontalScrollArea";
 import styles from "./TableScrollRegion.module.css";
 
 type Props = {
@@ -16,14 +17,9 @@ type Props = {
  * 키보드 접근성과 섹션 액센트를 따르는 스크롤바·표 외형을 함께 제공한다.
  */
 const TableScrollRegion = ({ label, children, className }: Props) => (
-  <div
-    className={className ? `${styles.scroll} ${className}` : styles.scroll}
-    role="region"
-    aria-label={label}
-    tabIndex={0}
-  >
+  <HorizontalScrollArea className={className} viewportClassName={styles.scroll} label={label}>
     {children}
-  </div>
+  </HorizontalScrollArea>
 );
 
 export { TableScrollRegion };
