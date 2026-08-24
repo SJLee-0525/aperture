@@ -10,14 +10,16 @@ import type { SwipeDirection } from "@/hooks/use-overlay-drag";
 
 type Options = Parameters<typeof useOverlayDrag>[0];
 
-type ProbeProps = Omit<Options, "surfaceRef"> & {
+type ProbeProps = Omit<Options, "surfaceRef" | "scrimRef"> & {
   onClickResult?: (dragged: boolean) => void;
+  withScrim?: boolean;
 };
 
-const Probe = ({ onClickResult, ...options }: ProbeProps) => {
+const Probe = ({ onClickResult, withScrim, ...options }: ProbeProps) => {
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const { onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, consumeDragged, swipeSurfaceRef } =
-    useOverlayDrag({ ...options, surfaceRef });
+    useOverlayDrag({ ...options, surfaceRef, scrimRef: withScrim ? scrimRef : undefined });
 
   return (
     <div
@@ -28,6 +30,7 @@ const Probe = ({ onClickResult, ...options }: ProbeProps) => {
       onTouchCancel={onTouchCancel}
       onClick={() => onClickResult?.(consumeDragged())}
     >
+      <div data-testid="scrim" ref={scrimRef} />
       <div data-testid="surface" ref={surfaceRef}>
         <div data-testid="track" ref={swipeSurfaceRef} />
       </div>
@@ -301,6 +304,35 @@ describe("useOverlayDrag", () => {
       settle();
 
       expect(onDismiss).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("스크림 딤", () => {
+    it("드래그 거리만큼 딤을 낮추고 복귀하면 되돌린다", () => {
+      render(<Probe {...swipeProps()} withScrim />);
+
+      move([200, 100], [200, 200]);
+      expect(screen.getByTestId("scrim").style.opacity).toBe("0.8");
+
+      release();
+      expect(screen.getByTestId("scrim").style.opacity).toBe("1");
+    });
+
+    it("닫기 커밋 시 스크림을 완전히 걷는다", () => {
+      render(<Probe {...swipeProps()} withScrim />);
+
+      drag([200, 100], [200, 260]);
+
+      expect(screen.getByTestId("scrim").style.opacity).toBe("0");
+    });
+
+    it("스크림이 없으면 표면만 움직인다", () => {
+      render(<Probe {...swipeProps()} />);
+
+      move([200, 100], [200, 200]);
+
+      expect(screen.getByTestId("scrim").style.opacity).toBe("");
+      expect(screen.getByTestId("surface").style.opacity).toBe("0.8");
     });
   });
 

@@ -35,6 +35,7 @@ type Options = {
   enabled: boolean;
   onDismiss: () => void;
   surfaceRef: RefObject<HTMLElement | null>;
+  scrimRef?: RefObject<HTMLElement | null>;
   canStart?: (target: EventTarget | null) => boolean;
   canSwipeStart?: (target: EventTarget | null) => boolean;
   canSwipeCommit?: (direction: SwipeDirection) => boolean;
@@ -61,6 +62,7 @@ const prefersReducedMotion = () =>
  * @param {boolean} options.enabled
  * @param {() => void} options.onDismiss
  * @param {RefObject<HTMLElement | null>} options.surfaceRef 아래로 끌 때 움직일 요소.
+ * @param {RefObject<HTMLElement | null> | undefined} options.scrimRef 화면에 고정한 채 드래그 거리만큼 딤을 낮출 스크림. 오버레이 전체를 움직이면 뒤 지면이 매 프레임 다시 그려진다.
  * @param {((target: EventTarget | null) => boolean) | undefined} options.canStart
  * @param {((target: EventTarget | null) => boolean) | undefined} options.canSwipeStart
  * @param {((direction: SwipeDirection) => boolean) | undefined} options.canSwipeCommit 넘길 수 없으면 저항만 준다.
@@ -73,6 +75,7 @@ const useOverlayDrag = ({
   enabled,
   onDismiss,
   surfaceRef,
+  scrimRef,
   canStart,
   canSwipeStart,
   canSwipeCommit,
@@ -99,12 +102,20 @@ const useOverlayDrag = ({
   const resetSurface = useCallback(
     (animate: boolean) => {
       const surface = surfaceRef.current;
-      if (!surface) return;
-      surface.style.transition = animate ? RESET_TRANSITION : "none";
-      surface.style.transform = "translate3d(0, 0, 0)";
-      surface.style.opacity = "1";
+      if (surface) {
+        surface.style.transition = animate ? RESET_TRANSITION : "none";
+        surface.style.transform = "translate3d(0, 0, 0)";
+        surface.style.opacity = "1";
+      }
+      if (scrimRef) {
+        const scrim = scrimRef.current;
+        if (scrim) {
+          scrim.style.transition = animate ? RESET_TRANSITION : "none";
+          scrim.style.opacity = "1";
+        }
+      }
     },
-    [surfaceRef],
+    [scrimRef, surfaceRef],
   );
 
   const resetSwipeSurface = useCallback((animate: boolean) => {
@@ -251,6 +262,10 @@ const useOverlayDrag = ({
         dragged.current = true;
         surface.style.transform = `translate3d(0, ${current.distance}px, 0)`;
         surface.style.opacity = String(Math.max(0.45, 1 - current.distance / 500));
+        if (scrimRef) {
+          const scrim = scrimRef.current;
+          if (scrim) scrim.style.opacity = String(Math.max(0.45, 1 - current.distance / 500));
+        }
         return;
       }
 
@@ -266,7 +281,7 @@ const useOverlayDrag = ({
       surface.style.transition = "none";
       surface.style.transform = `translate3d(${offset}px, 0, 0)`;
     },
-    [abortGesture, canSwipeCommit, resetSurface, surfaceRef],
+    [abortGesture, canSwipeCommit, resetSurface, scrimRef, surfaceRef],
   );
 
   const onTouchEnd = useCallback(() => {
@@ -290,6 +305,13 @@ const useOverlayDrag = ({
         surface.style.transition = DISMISS_TRANSITION;
         surface.style.transform = "translate3d(0, 100dvh, 0)";
         surface.style.opacity = "0";
+      }
+      if (scrimRef) {
+        const scrim = scrimRef.current;
+        if (scrim) {
+          scrim.style.transition = DISMISS_TRANSITION;
+          scrim.style.opacity = "0";
+        }
       }
       dismissTimer.current = window.setTimeout(() => {
         dismissTimer.current = 0;
@@ -337,6 +359,7 @@ const useOverlayDrag = ({
     resetSurface,
     resetSwipeSurface,
     scheduleCommit,
+    scrimRef,
     surfaceRef,
   ]);
 

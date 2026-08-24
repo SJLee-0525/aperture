@@ -20,9 +20,15 @@
   animation: lbfade 0.25s linear;
 }
 
-.track {
+/* 닫기 드래그가 움직이는 표면. 스크림을 화면에 고정하기 위해 트랙만 감싼다. */
+.dismissSurface {
   position: absolute;
   z-index: 1;
+  inset: 0;
+}
+
+.track {
+  position: absolute;
   inset: 0;
   display: flex;
   overflow-x: auto;

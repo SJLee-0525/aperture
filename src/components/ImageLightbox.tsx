@@ -126,6 +126,8 @@ const ImageLightbox = ({
   const count = images.length;
   const containerRef = useFocusTrap(true);
   const trackRef = useRef<HTMLDivElement>(null);
+  const dismissSurfaceRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLButtonElement>(null);
   const reportedIndexRef = useRef(index);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(() => new Set());
   const [chromeVisible, setChromeVisible] = useState(true);
@@ -142,7 +144,10 @@ const ImageLightbox = ({
   } = useOverlayDrag({
     enabled: true,
     onDismiss: onClose,
-    surfaceRef: containerRef,
+    // 오버레이 전체를 내리면 뒤 지면(긴 본문·고정 TOC)이 매 프레임 다시 그려진다.
+    // 트랙 래퍼만 움직이고 스크림은 고정한 채 딤만 낮춘다.
+    surfaceRef: dismissSurfaceRef,
+    scrimRef,
     canStart: (target) => !(target instanceof Element && target.closest("button")),
   });
 
@@ -230,40 +235,48 @@ const ImageLightbox = ({
       onTouchEnd={onDismissTouchEnd}
       onTouchCancel={onDismissTouchCancel}
     >
-      <button type="button" className={styles.scrim} aria-label={closeLabel} onClick={onClose} />
-      <div
-        ref={trackRef}
-        className={styles.track}
-        data-image-lightbox-track
-        onScroll={(event) => {
-          const track = event.currentTarget;
-          if (track.clientWidth === 0) return;
-          const next = Math.max(
-            0,
-            Math.min(count - 1, Math.round(track.scrollLeft / track.clientWidth)),
-          );
-          if (next === reportedIndexRef.current) return;
-          reportedIndexRef.current = next;
-          setChromeVisible(true);
-          onNavigate(next);
-        }}
-      >
-        {images.map((item, itemIndex) => {
-          const itemKey = item.path || item.url;
-          return (
-            <LightboxSlide
-              key={itemKey}
-              item={item}
-              itemIndex={itemIndex}
-              alt={alt}
-              loaded={loadedImages.has(itemKey)}
-              rendered={Math.abs(itemIndex - index) <= 1}
-              onClose={onClose}
-              onLoaded={markLoaded}
-              onToggleChrome={toggleChrome}
-            />
-          );
-        })}
+      <button
+        ref={scrimRef}
+        type="button"
+        className={styles.scrim}
+        aria-label={closeLabel}
+        onClick={onClose}
+      />
+      <div ref={dismissSurfaceRef} className={styles.dismissSurface}>
+        <div
+          ref={trackRef}
+          className={styles.track}
+          data-image-lightbox-track
+          onScroll={(event) => {
+            const track = event.currentTarget;
+            if (track.clientWidth === 0) return;
+            const next = Math.max(
+              0,
+              Math.min(count - 1, Math.round(track.scrollLeft / track.clientWidth)),
+            );
+            if (next === reportedIndexRef.current) return;
+            reportedIndexRef.current = next;
+            setChromeVisible(true);
+            onNavigate(next);
+          }}
+        >
+          {images.map((item, itemIndex) => {
+            const itemKey = item.path || item.url;
+            return (
+              <LightboxSlide
+                key={itemKey}
+                item={item}
+                itemIndex={itemIndex}
+                alt={alt}
+                loaded={loadedImages.has(itemKey)}
+                rendered={Math.abs(itemIndex - index) <= 1}
+                onClose={onClose}
+                onLoaded={markLoaded}
+                onToggleChrome={toggleChrome}
+              />
+            );
+          })}
+        </div>
       </div>
 
       <AnimatePresence>
