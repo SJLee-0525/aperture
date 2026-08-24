@@ -39,6 +39,11 @@
 .track::-webkit-scrollbar {
   display: none;
 }
+/* 확대 중 표면 밖 여백에서 새로 시작하는 제스처가 트랙을 밀지 않게 하는 보조 잠금.
+   1차 방어는 줌 훅의 touchmove preventDefault 다. */
+.track[data-zoomed] {
+  overflow-x: hidden;
+}
 .slide {
   display: grid;
   flex: 0 0 100%;
@@ -53,6 +58,14 @@
   max-height: 88vh;
   animation: lbpop 0.3s var(--ease-spring);
   cursor: pointer;
+}
+/* 줌 transform 전용 표면. 진입 애니메이션(lbpop)을 소유한 .stage 와 transform
+   소유권을 나눈다. pan-x 는 브라우저 핀치줌을 막으면서 원배율의 트랙 가로
+   스크롤은 남긴다. */
+.zoomSurface {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-x;
 }
 .img {
   object-fit: contain;

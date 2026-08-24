@@ -9,11 +9,13 @@ import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useImageZoom } from "@/hooks/use-image-zoom";
 import { useOverlayDrag } from "@/hooks/use-overlay-drag";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import type { ImageMeta } from "@/types/image";
+import type { RefObject } from "react";
 
 import styles from "./ImageLightbox.module.css";
 
@@ -37,9 +39,10 @@ type SlideProps = {
   alt: string;
   loaded: boolean;
   rendered: boolean;
+  zoomSurfaceRef?: RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onLoaded: (key: string) => void;
-  onToggleChrome: () => void;
+  onStageClick: () => void;
 };
 
 const LightboxSlide = memo(function LightboxSlide({
@@ -48,9 +51,10 @@ const LightboxSlide = memo(function LightboxSlide({
   alt,
   loaded,
   rendered,
+  zoomSurfaceRef,
   onClose,
   onLoaded,
-  onToggleChrome,
+  onStageClick,
 }: SlideProps) {
   const itemKey = item.path || item.url;
   const itemRatio = item.w / item.h;
@@ -70,22 +74,26 @@ const LightboxSlide = memo(function LightboxSlide({
         }}
         onContextMenu={(event) => event.preventDefault()}
         onDragStart={(event) => event.preventDefault()}
-        onClick={onToggleChrome}
+        onClick={onStageClick}
       >
-        {rendered ? (
-          <Image
-            src={item.url}
-            alt={`${alt} — ${itemIndex + 1}`}
-            fill
-            sizes="100vw"
-            className={styles.img}
-            draggable={false}
-            onContextMenu={(event) => event.preventDefault()}
-            onDragStart={(event) => event.preventDefault()}
-            onLoad={() => onLoaded(itemKey)}
-            onError={() => onLoaded(itemKey)}
-          />
-        ) : null}
+        {/* 줌 transform 은 이 래퍼만 소유한다. .stage 의 진입 애니메이션(lbpop)과
+            같은 요소에 두면 CSS animation 이 인라인 transform 을 덮는다. */}
+        <div ref={zoomSurfaceRef} className={styles.zoomSurface}>
+          {rendered ? (
+            <Image
+              src={item.url}
+              alt={`${alt} — ${itemIndex + 1}`}
+              fill
+              sizes="100vw"
+              className={styles.img}
+              draggable={false}
+              onContextMenu={(event) => event.preventDefault()}
+              onDragStart={(event) => event.preventDefault()}
+              onLoad={() => onLoaded(itemKey)}
+              onError={() => onLoaded(itemKey)}
+            />
+          ) : null}
+        </div>
         {!rendered || loaded ? null : (
           <div className={styles.imgLoader} aria-hidden="true">
             <span className={styles.spinner} />
@@ -137,12 +145,37 @@ const ImageLightbox = ({
   useScrollLock(true);
   const isTopLayer = useOverlayLayer(true);
   const {
+    stageRef: zoomSurfaceRef,
+    zoomed,
+    reset: resetZoom,
+    handleStageClick,
+  } = useImageZoom({
+    enabled: isTopLayer,
+    resetKey: imageKey,
+    getMaxScale: (stage) => {
+      const surfaceWidth = stage.offsetWidth;
+      if (!image || surfaceWidth === 0) return 3;
+      // 저장 해상도를 넘는 확대는 뭉개진다. 픽셀 밀도까지만 열되 작은 이미지도
+      // 최소 2배는 볼 수 있게 한다.
+      return Math.min(4, Math.max(2, image.w / surfaceWidth));
+    },
+    onZoomChange: (nextZoomed) => {
+      if (!nextZoomed) return;
+      const track = trackRef.current;
+      if (!track || track.clientWidth === 0) return;
+      // 핀치 직전의 관성 스크롤이 남아 있으면 줌 해제 때 스냅이 옆 이미지로 넘긴다.
+      // 렌더 클로저의 index 는 방금 보고된 이동을 모를 수 있어 ref 가 기준이다.
+      const pinnedIndex = reportedIndexRef.current;
+      track.scrollTo({ left: pinnedIndex * track.clientWidth, behavior: "auto" });
+    },
+  });
+  const {
     onTouchStart: onDismissTouchStart,
     onTouchMove: onDismissTouchMove,
     onTouchEnd: onDismissTouchEnd,
     onTouchCancel: onDismissTouchCancel,
   } = useOverlayDrag({
-    enabled: true,
+    enabled: !zoomed,
     onDismiss: onClose,
     // 오버레이 전체를 내리면 뒤 지면(긴 본문·고정 TOC)이 매 프레임 다시 그려진다.
     // 트랙 래퍼만 움직이고 스크림은 고정한 채 딤만 낮춘다.
@@ -156,16 +189,25 @@ const ImageLightbox = ({
       if (!isTopLayer) return;
       if (event.key === "Escape") {
         event.stopImmediatePropagation();
+        // 확대 상태의 ESC 는 닫기 전에 원배율 복귀 단계를 거친다.
+        if (zoomed) {
+          resetZoom(true);
+          return;
+        }
         onClose();
         return;
       }
+      // 의도적 이동은 확대 중에도 허용한다. 원배율로 돌아온 뒤 이동해야
+      // onScroll 인덱스 보고가 살아난다.
       if (event.key === "ArrowLeft" && index > 0 && loaded) {
+        if (zoomed) resetZoom(false);
         trackRef.current?.scrollTo({
           left: (index - 1) * trackRef.current.clientWidth,
           behavior: "smooth",
         });
       }
       if (event.key === "ArrowRight" && index < count - 1 && loaded) {
+        if (zoomed) resetZoom(false);
         trackRef.current?.scrollTo({
           left: (index + 1) * trackRef.current.clientWidth,
           behavior: "smooth",
@@ -174,7 +216,7 @@ const ImageLightbox = ({
     };
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
-  }, [index, count, isTopLayer, loaded, onClose]);
+  }, [index, count, isTopLayer, loaded, onClose, resetZoom, zoomed]);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -208,6 +250,10 @@ const ImageLightbox = ({
     });
   }, []);
   const toggleChrome = useCallback(() => setChromeVisible((visible) => !visible), []);
+  const onStageClick = useCallback(
+    () => handleStageClick(toggleChrome),
+    [handleStageClick, toggleChrome],
+  );
 
   if (typeof document === "undefined") return null;
   if (!image) return null;
@@ -215,6 +261,9 @@ const ImageLightbox = ({
   const goTo = (next: number) => {
     const track = trackRef.current;
     if (!loaded || next < 0 || next >= count) return;
+    // 의도적 이동은 확대 중에도 허용한다. 원배율로 돌아온 뒤 이동해야
+    // onScroll 인덱스 보고가 살아난다.
+    if (zoomed) resetZoom(false);
     setChromeVisible(true);
     track?.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
   };
@@ -247,7 +296,9 @@ const ImageLightbox = ({
           ref={trackRef}
           className={styles.track}
           data-image-lightbox-track
+          data-zoomed={zoomed || undefined}
           onScroll={(event) => {
+            if (zoomed) return;
             const track = event.currentTarget;
             if (track.clientWidth === 0) return;
             const next = Math.max(
@@ -270,9 +321,10 @@ const ImageLightbox = ({
                 alt={alt}
                 loaded={loadedImages.has(itemKey)}
                 rendered={Math.abs(itemIndex - index) <= 1}
+                zoomSurfaceRef={itemIndex === index ? zoomSurfaceRef : undefined}
                 onClose={onClose}
                 onLoaded={markLoaded}
-                onToggleChrome={toggleChrome}
+                onStageClick={onStageClick}
               />
             );
           })}
