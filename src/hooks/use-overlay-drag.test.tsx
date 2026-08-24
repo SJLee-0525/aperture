@@ -304,6 +304,55 @@ describe("useOverlayDrag", () => {
     });
   });
 
+  describe("멀티터치", () => {
+    it("닫기 임계치를 넘긴 드래그도 두 번째 손가락이 닿으면 폐기한다", () => {
+      render(<Probe {...swipeProps()} />);
+
+      move([200, 100], [200, 260]);
+      fireEvent.touchStart(root(), { touches: [point(200, 260), point(240, 260)] });
+      release();
+      settle();
+
+      expect(onDismiss).not.toHaveBeenCalled();
+      expect(screen.getByTestId("surface").style.transform).toBe("translate3d(0, 0, 0)");
+    });
+
+    it("touchmove 로만 멀티터치가 관측돼도 드래그를 폐기한다", () => {
+      render(<Probe {...swipeProps()} />);
+
+      move([200, 100], [200, 260]);
+      fireEvent.touchMove(root(), { touches: [point(200, 260), point(240, 260)] });
+      release();
+      settle();
+
+      expect(onDismiss).not.toHaveBeenCalled();
+    });
+
+    it("좌우 드래그도 두 번째 손가락이 닿으면 폐기하고 원위치한다", () => {
+      render(<Probe {...swipeProps()} />);
+
+      move([240, 200], [100, 200]);
+      fireEvent.touchStart(root(), { touches: [point(100, 200), point(140, 200)] });
+      release();
+      settle();
+
+      expect(onSwipe).not.toHaveBeenCalled();
+      expect(screen.getByTestId("track").style.transform).toBe("translate3d(0, 0, 0)");
+    });
+
+    it("두 손가락으로 시작한 터치는 제스처를 만들지 않는다", () => {
+      render(<Probe {...swipeProps()} />);
+
+      fireEvent.touchStart(root(), { touches: [point(100, 200), point(200, 200)] });
+      fireEvent.touchMove(root(), { touches: [point(100, 300), point(200, 300)] });
+      release();
+      settle();
+
+      expect(onDismiss).not.toHaveBeenCalled();
+      expect(onSwipe).not.toHaveBeenCalled();
+    });
+  });
+
   describe("consumeDragged", () => {
     it("드래그 뒤 합성 click 만 걸러내고 다음 탭은 통과시킨다", () => {
       const onClickResult = vi.fn();

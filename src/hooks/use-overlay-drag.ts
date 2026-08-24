@@ -122,6 +122,21 @@ const useOverlayDrag = ({
     dismissTimer.current = 0;
   }, []);
 
+  // touches[0] 만 따라가는 추적이 핀치를 드래그로 오인한다. 두 번째 손가락이
+  // 닿으면 진행 중인 드래그를 버리고 이동값을 원위치해야 손을 떼는 순간
+  // 닫히거나 넘어가지 않는다.
+  const abortGesture = useCallback(() => {
+    const current = gesture.current;
+    if (!current.active) return;
+    current.active = false;
+    current.direction = "pending";
+    current.distance = 0;
+    current.offset = 0;
+    dragged.current = false;
+    resetSurface(true);
+    resetSwipeSurface(true);
+  }, [resetSurface, resetSwipeSurface]);
+
   // enabled 가 꺼지면(예: EXIF 패널이 펼쳐짐) 진행 중인 제스처까지 함께 버린다.
   // 제스처를 남기면 잠긴 뒤 손을 떼는 순간 닫히거나 넘어간다.
   useEffect(() => {
@@ -168,6 +183,11 @@ const useOverlayDrag = ({
       // 합성 click 이 오지 않은 환경에서 플래그가 남아 다음 탭을 삼키지 않도록 먼저 해제한다.
       dragged.current = false;
 
+      if (event.touches.length > 1) {
+        abortGesture();
+        return;
+      }
+
       const touch = event.touches[0];
       // 전환·닫기 애니메이션이 끝나기 전의 새 제스처는 받지 않는다.
       if (!enabled || !touch || pendingCommit.current || dismissTimer.current) return;
@@ -188,11 +208,18 @@ const useOverlayDrag = ({
         offset: 0,
       };
     },
-    [canStart, canSwipeStart, enabled, onSwipe],
+    [abortGesture, canStart, canSwipeStart, enabled, onSwipe],
   );
 
   const onTouchMove = useCallback(
     (event: React.TouchEvent<HTMLElement>) => {
+      // 두 번째 손가락이 다른 요소에 내려오면 touchstart 가 이 핸들러를 거치지
+      // 않으므로 move 에서도 같은 폐기를 수행한다.
+      if (event.touches.length > 1) {
+        abortGesture();
+        return;
+      }
+
       const current = gesture.current;
       const touch = event.touches[0];
       if (!current.active || !touch) return;
@@ -239,7 +266,7 @@ const useOverlayDrag = ({
       surface.style.transition = "none";
       surface.style.transform = `translate3d(${offset}px, 0, 0)`;
     },
-    [canSwipeCommit, resetSurface, surfaceRef],
+    [abortGesture, canSwipeCommit, resetSurface, surfaceRef],
   );
 
   const onTouchEnd = useCallback(() => {
