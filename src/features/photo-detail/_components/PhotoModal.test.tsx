@@ -233,6 +233,128 @@ describe("PhotoModal", () => {
     });
   });
 
+  describe("핀치 줌", () => {
+    /** 현재 슬라이드의 줌 표면. jsdom 에 없는 레이아웃 값을 함께 정의한다. */
+    const zoomSurface = () => {
+      const surface = images()[1]!.parentElement as HTMLElement;
+      Object.defineProperty(surface, "offsetWidth", { value: 400, configurable: true });
+      Object.defineProperty(surface, "offsetHeight", { value: 300, configurable: true });
+      const slide = surface.parentElement;
+      if (slide) {
+        slide.getBoundingClientRect = () =>
+          ({
+            left: 0,
+            top: 0,
+            width: 400,
+            height: 300,
+            right: 400,
+            bottom: 300,
+            x: 0,
+            y: 0,
+          }) as DOMRect;
+      }
+      return surface;
+    };
+
+    const pinchZoom = (surface: HTMLElement) => {
+      act(() => {
+        fireEvent.touchStart(surface, {
+          touches: [point(100, 100), point(200, 100)],
+          cancelable: true,
+        });
+        fireEvent.touchMove(surface, {
+          touches: [point(50, 100), point(250, 100)],
+          cancelable: true,
+        });
+        fireEvent.touchEnd(surface, { touches: [] });
+      });
+    };
+
+    it("확대 상태에서는 스와이프로 사진을 넘기지 않는다", () => {
+      vi.useFakeTimers();
+      setMobile(true);
+      vi.spyOn(window.history, "replaceState");
+      render(<PhotoModal photos={photos} tags={[]} photoIds={ALL_IDS} />);
+      act(() => loadAll());
+
+      const surface = zoomSurface();
+      pinchZoom(surface);
+      expect(surface.style.transform).toContain("scale(2)");
+
+      act(() => swipe(300, 100));
+      act(() => void vi.advanceTimersByTime(400));
+
+      expect(window.history.replaceState).not.toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+
+    it("확대 상태에서도 이동 버튼은 다음 사진으로 넘어간다", () => {
+      vi.spyOn(window.history, "replaceState");
+      render(<PhotoModal photos={photos} tags={[]} photoIds={ALL_IDS} />);
+      act(() => loadAll());
+
+      pinchZoom(zoomSurface());
+      act(() => screen.getByRole("button", { name: "다음 사진" }).click());
+
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        window.history.state,
+        "",
+        "/ko/photo?photo=p3",
+      );
+    });
+
+    it("재시도로 표면이 교체돼도 새 표면에서 핀치가 동작한다", () => {
+      render(<PhotoModal photos={photos} tags={[]} photoIds={ALL_IDS} />);
+      act(() => loadAll());
+
+      const oldSurface = zoomSurface();
+      act(() => fireEvent.error(images()[1]!));
+      act(() => screen.getByRole("button", { name: "다시 시도" }).click());
+
+      const newSurface = zoomSurface();
+      expect(newSurface).not.toBe(oldSurface);
+
+      pinchZoom(newSurface);
+      expect(newSurface.style.transform).toContain("scale(2)");
+
+      // 옛 표면은 리스너까지 정리돼 입력에 반응하지 않아야 한다.
+      pinchZoom(oldSurface);
+      expect(oldSurface.style.transform).toBe("");
+    });
+
+    it("패널이 펼쳐진 상태의 사진 탭은 보류 없이 패널을 접는다", () => {
+      vi.useFakeTimers();
+      setMobile(true);
+      render(<PhotoModal photos={photos} tags={[]} photoIds={ALL_IDS} />);
+      act(() => loadAll());
+      act(() => screen.getByRole("button", { name: "정보 펼치기" }).click());
+      expect(screen.getByRole("button", { name: "정보 접기" })).toBeTruthy();
+
+      const photoArea = document.querySelector("[data-photo-modal-image-area]") as HTMLElement;
+      act(() => void fireEvent.click(photoArea));
+
+      // 줌이 꺼진 상태라 더블탭 판정 보류 없이 즉시 접혀야 한다.
+      expect(screen.getByRole("button", { name: "정보 펼치기" })).toBeTruthy();
+      vi.useRealTimers();
+    });
+
+    it("확대 중 ESC 는 원배율로 돌아오고 다음 ESC 가 닫는다", () => {
+      const onClose = vi.fn();
+      render(<PhotoModal photos={photos} tags={[]} photoIds={ALL_IDS} onClose={onClose} />);
+      act(() => loadAll());
+
+      const surface = zoomSurface();
+      pinchZoom(surface);
+
+      act(() => void fireEvent.keyDown(document.body, { key: "Escape" }));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(surface.style.transform).toContain("scale(1)");
+
+      act(() => void fireEvent.keyDown(document.body, { key: "Escape" }));
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+  });
+
   describe("모바일 스와이프", () => {
     beforeEach(() => {
       vi.useFakeTimers();

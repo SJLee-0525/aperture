@@ -55,6 +55,11 @@
   /* 한 칸이 .photo 폭과 정확히 같아야 커밋 이동 거리와 어긋나지 않는다. */
   flex: 0 0 calc(100% / 3);
 }
+/* 줌 transform 전용 표면. 트랙의 스와이프 transform 과 소유권을 나눈다. */
+.zoomSurface {
+  position: absolute;
+  inset: 0;
+}
 .imgLoader {
   position: absolute;
   inset: 0;
@@ -164,13 +169,11 @@
 }
 
 @media (max-width: 900px) {
-  /* 한 손가락 이동은 JS 가 소유하고 두 손가락 확대는 브라우저에 남긴다.
+  /* 한 손가락 이동(스와이프·닫기)과 두 손가락 확대 모두 JS 가 소유한다.
      React 는 touchmove 를 passive 로 등록해 preventDefault 가 무시되므로
-     브라우저 기본 제스처 억제는 이 선언이 담당한다.
-     pinch-zoom 을 모르는 엔진에서는 앞 선언이 남아 제스처 소유권을 지킨다. */
+     브라우저 기본 제스처 억제는 이 선언이 담당한다. */
   .photo {
     touch-action: none;
-    touch-action: pinch-zoom;
   }
   /* 트랙은 모바일에서만 움직인다. 데스크톱까지 합성 레이어를 잡아 둘 이유가 없다. */
   .track {

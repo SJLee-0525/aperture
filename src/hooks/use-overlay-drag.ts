@@ -35,6 +35,7 @@ type Options = {
   enabled: boolean;
   onDismiss: () => void;
   surfaceRef: RefObject<HTMLElement | null>;
+  scrimRef?: RefObject<HTMLElement | null>;
   canStart?: (target: EventTarget | null) => boolean;
   canSwipeStart?: (target: EventTarget | null) => boolean;
   canSwipeCommit?: (direction: SwipeDirection) => boolean;
@@ -61,6 +62,7 @@ const prefersReducedMotion = () =>
  * @param {boolean} options.enabled
  * @param {() => void} options.onDismiss
  * @param {RefObject<HTMLElement | null>} options.surfaceRef 아래로 끌 때 움직일 요소.
+ * @param {RefObject<HTMLElement | null> | undefined} options.scrimRef 화면에 고정한 채 드래그 거리만큼 딤을 낮출 스크림. 오버레이 전체를 움직이면 뒤 지면이 매 프레임 다시 그려진다.
  * @param {((target: EventTarget | null) => boolean) | undefined} options.canStart
  * @param {((target: EventTarget | null) => boolean) | undefined} options.canSwipeStart
  * @param {((direction: SwipeDirection) => boolean) | undefined} options.canSwipeCommit 넘길 수 없으면 저항만 준다.
@@ -73,6 +75,7 @@ const useOverlayDrag = ({
   enabled,
   onDismiss,
   surfaceRef,
+  scrimRef,
   canStart,
   canSwipeStart,
   canSwipeCommit,
@@ -99,12 +102,20 @@ const useOverlayDrag = ({
   const resetSurface = useCallback(
     (animate: boolean) => {
       const surface = surfaceRef.current;
-      if (!surface) return;
-      surface.style.transition = animate ? RESET_TRANSITION : "none";
-      surface.style.transform = "translate3d(0, 0, 0)";
-      surface.style.opacity = "1";
+      if (surface) {
+        surface.style.transition = animate ? RESET_TRANSITION : "none";
+        surface.style.transform = "translate3d(0, 0, 0)";
+        surface.style.opacity = "1";
+      }
+      if (scrimRef) {
+        const scrim = scrimRef.current;
+        if (scrim) {
+          scrim.style.transition = animate ? RESET_TRANSITION : "none";
+          scrim.style.opacity = "1";
+        }
+      }
     },
-    [surfaceRef],
+    [scrimRef, surfaceRef],
   );
 
   const resetSwipeSurface = useCallback((animate: boolean) => {
@@ -121,6 +132,21 @@ const useOverlayDrag = ({
     window.clearTimeout(dismissTimer.current);
     dismissTimer.current = 0;
   }, []);
+
+  // touches[0] 만 따라가는 추적이 핀치를 드래그로 오인한다. 두 번째 손가락이
+  // 닿으면 진행 중인 드래그를 버리고 이동값을 원위치해야 손을 떼는 순간
+  // 닫히거나 넘어가지 않는다.
+  const abortGesture = useCallback(() => {
+    const current = gesture.current;
+    if (!current.active) return;
+    current.active = false;
+    current.direction = "pending";
+    current.distance = 0;
+    current.offset = 0;
+    dragged.current = false;
+    resetSurface(true);
+    resetSwipeSurface(true);
+  }, [resetSurface, resetSwipeSurface]);
 
   // enabled 가 꺼지면(예: EXIF 패널이 펼쳐짐) 진행 중인 제스처까지 함께 버린다.
   // 제스처를 남기면 잠긴 뒤 손을 떼는 순간 닫히거나 넘어간다.
@@ -168,6 +194,11 @@ const useOverlayDrag = ({
       // 합성 click 이 오지 않은 환경에서 플래그가 남아 다음 탭을 삼키지 않도록 먼저 해제한다.
       dragged.current = false;
 
+      if (event.touches.length > 1) {
+        abortGesture();
+        return;
+      }
+
       const touch = event.touches[0];
       // 전환·닫기 애니메이션이 끝나기 전의 새 제스처는 받지 않는다.
       if (!enabled || !touch || pendingCommit.current || dismissTimer.current) return;
@@ -188,11 +219,18 @@ const useOverlayDrag = ({
         offset: 0,
       };
     },
-    [canStart, canSwipeStart, enabled, onSwipe],
+    [abortGesture, canStart, canSwipeStart, enabled, onSwipe],
   );
 
   const onTouchMove = useCallback(
     (event: React.TouchEvent<HTMLElement>) => {
+      // 두 번째 손가락이 다른 요소에 내려오면 touchstart 가 이 핸들러를 거치지
+      // 않으므로 move 에서도 같은 폐기를 수행한다.
+      if (event.touches.length > 1) {
+        abortGesture();
+        return;
+      }
+
       const current = gesture.current;
       const touch = event.touches[0];
       if (!current.active || !touch) return;
@@ -224,6 +262,10 @@ const useOverlayDrag = ({
         dragged.current = true;
         surface.style.transform = `translate3d(0, ${current.distance}px, 0)`;
         surface.style.opacity = String(Math.max(0.45, 1 - current.distance / 500));
+        if (scrimRef) {
+          const scrim = scrimRef.current;
+          if (scrim) scrim.style.opacity = String(Math.max(0.45, 1 - current.distance / 500));
+        }
         return;
       }
 
@@ -239,7 +281,7 @@ const useOverlayDrag = ({
       surface.style.transition = "none";
       surface.style.transform = `translate3d(${offset}px, 0, 0)`;
     },
-    [canSwipeCommit, resetSurface, surfaceRef],
+    [abortGesture, canSwipeCommit, resetSurface, scrimRef, surfaceRef],
   );
 
   const onTouchEnd = useCallback(() => {
@@ -263,6 +305,13 @@ const useOverlayDrag = ({
         surface.style.transition = DISMISS_TRANSITION;
         surface.style.transform = "translate3d(0, 100dvh, 0)";
         surface.style.opacity = "0";
+      }
+      if (scrimRef) {
+        const scrim = scrimRef.current;
+        if (scrim) {
+          scrim.style.transition = DISMISS_TRANSITION;
+          scrim.style.opacity = "0";
+        }
       }
       dismissTimer.current = window.setTimeout(() => {
         dismissTimer.current = 0;
@@ -310,6 +359,7 @@ const useOverlayDrag = ({
     resetSurface,
     resetSwipeSurface,
     scheduleCommit,
+    scrimRef,
     surfaceRef,
   ]);
 
