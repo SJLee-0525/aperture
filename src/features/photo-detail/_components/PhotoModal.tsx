@@ -24,6 +24,7 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 import { PHOTO_QUERY_KEY } from "@/features/photo-detail/_hooks/use-photo-detail-session";
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useImageZoom } from "@/hooks/use-image-zoom";
 import { useMounted } from "@/hooks/use-mounted";
 import { useOverlayDrag } from "@/hooks/use-overlay-drag";
 import { useOverlayLayer } from "@/hooks/use-overlay-layer";
@@ -219,6 +220,27 @@ const PhotoModal = ({
   }, []);
 
   const {
+    stageRef: zoomSurfaceRef,
+    zoomed,
+    reset: resetZoom,
+    handleStageClick,
+  } = useImageZoom({
+    enabled: open && revealed && isTopLayer && !navigationLocked,
+    // 재시도는 슬라이드 key 를 바꿔 표면 노드를 교체하므로 재시도 횟수까지
+    // resetKey 에 포함해야 리스너가 새 노드로 옮겨 붙는다.
+    resetKey: photo ? `${photo.id}@${retryCounts.get(photo.id) ?? 0}` : "",
+    getMaxScale: (stage) => {
+      if (!photo) return 3;
+      const { w, h } = photo.image;
+      // contain 맞춤이라 실제 표시 폭은 표면 폭보다 작을 수 있다. 저장 해상도를
+      // 넘는 확대는 뭉개지므로 표시 폭 대비 픽셀 밀도까지만 열되 최소 2배는 허용한다.
+      const displayedWidth = Math.min(stage.offsetWidth, (stage.offsetHeight * w) / h);
+      if (!Number.isFinite(displayedWidth) || displayedWidth <= 0) return 3;
+      return Math.min(4, Math.max(2, w / displayedWidth));
+    },
+  });
+
+  const {
     onTouchStart,
     onTouchMove,
     onTouchEnd,
@@ -226,7 +248,7 @@ const PhotoModal = ({
     consumeDragged,
     swipeSurfaceRef: trackRef,
   } = useOverlayDrag({
-    enabled: mobile && open && revealed && !expanded,
+    enabled: mobile && open && revealed && !expanded && !zoomed,
     onDismiss: close,
     surfaceRef: dismissSurfaceRef,
     canStart: (target) => {
@@ -261,6 +283,19 @@ const PhotoModal = ({
       node.removeEventListener("selectstart", prevent, true);
     };
   }, [open, photo?.id]);
+
+  // usePhotoModal 의 닫기 리스너(window bubble)보다 먼저 받아, 확대 상태의 ESC 는
+  // 닫기 전에 원배율 복귀 단계를 거치게 한다.
+  useEffect(() => {
+    if (!zoomed || !isTopLayer) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopImmediatePropagation();
+      resetZoom(true);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [isTopLayer, resetZoom, zoomed]);
 
   // 온디맨드 경로의 pending 프레임은 이 신호로 걷힌다. 이미 로드된 이웃으로 넘어가면
   // onLoad 가 다시 뛰지 않으므로 로드 여부에서 파생해 알린다.
@@ -380,35 +415,42 @@ const PhotoModal = ({
                 // 드래그 뒤 브라우저가 합성하는 click 은 크롬 토글로 보지 않는다.
                 if (consumeDragged()) return;
                 if ((event.target as HTMLElement).closest("button")) return;
-                if (mobile && expanded && panelRef.current) {
-                  collapsePanel(panelRef.current);
-                } else {
-                  setPhotoChromeVisible((visible) => !visible);
-                }
+                // 더블탭 확대와 겹치지 않도록 단일탭 동작은 판정 시간만큼 보류된다.
+                handleStageClick(() => {
+                  if (mobile && expanded && panelRef.current) {
+                    collapsePanel(panelRef.current);
+                  } else {
+                    setPhotoChromeVisible((visible) => !visible);
+                  }
+                });
               }}
             >
               <div ref={trackRef} className={styles.track} data-photo-modal-track>
                 {slides.map(({ key, item, current }) => (
                   <div key={key} className={styles.slide} aria-hidden={current ? undefined : true}>
-                    {/* 실패한 이미지는 걷어 낸다. 깨진 그림 위에 오류 문구를 겹치지 않는다. */}
-                    {item && imageStatus.get(item.id) !== "failed" ? (
-                      <Image
-                        src={item.image.url}
-                        alt={current ? alt : ""}
-                        fill
-                        sizes="100vw"
-                        className={styles.img}
-                        draggable={false}
-                        onContextMenu={(event) => event.preventDefault()}
-                        onDragStart={(event) => event.preventDefault()}
-                        priority={current}
-                        // 이웃은 화면 밖이라 lazy 로 두면 엔진 휴리스틱에 따라 로드가 미뤄지고,
-                        // 그러면 스와이프 커밋 조건이 열리지 않는다.
-                        loading="eager"
-                        onLoad={() => markImage(item.id, "loaded")}
-                        onError={() => markImage(item.id, "failed")}
-                      />
-                    ) : null}
+                    {/* 줌 transform 은 이 래퍼만 소유한다. 트랙의 스와이프 transform 과
+                        같은 요소에 두면 서로 덮는다. */}
+                    <div ref={current ? zoomSurfaceRef : undefined} className={styles.zoomSurface}>
+                      {/* 실패한 이미지는 걷어 낸다. 깨진 그림 위에 오류 문구를 겹치지 않는다. */}
+                      {item && imageStatus.get(item.id) !== "failed" ? (
+                        <Image
+                          src={item.image.url}
+                          alt={current ? alt : ""}
+                          fill
+                          sizes="100vw"
+                          className={styles.img}
+                          draggable={false}
+                          onContextMenu={(event) => event.preventDefault()}
+                          onDragStart={(event) => event.preventDefault()}
+                          priority={current}
+                          // 이웃은 화면 밖이라 lazy 로 두면 엔진 휴리스틱에 따라 로드가 미뤄지고,
+                          // 그러면 스와이프 커밋 조건이 열리지 않는다.
+                          loading="eager"
+                          onLoad={() => markImage(item.id, "loaded")}
+                          onError={() => markImage(item.id, "failed")}
+                        />
+                      ) : null}
+                    </div>
                   </div>
                 ))}
               </div>
