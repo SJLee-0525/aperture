@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
-import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
+import { authorizeAdminToken } from "@/lib/auth/authorize-admin-token";
 
 /**
  * 변경된 DB 데이터에 의존하는 공개 캐시만 무효화한다.
@@ -29,7 +29,11 @@ const revalidatePublicPages = async (
   tags: string[],
   paths: string[] = [],
 ): Promise<void> => {
-  if (!(await verifyAdminIdToken(idToken))) {
+  const verdict = await authorizeAdminToken(idToken);
+  if (verdict.status === "throttled") {
+    throw new Error("Too many failed cache revalidation attempts");
+  }
+  if (verdict.status !== "ok") {
     throw new Error("Unauthorized cache revalidation");
   }
   for (const tag of new Set(tags)) updateTag(tag);

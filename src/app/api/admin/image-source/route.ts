@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
+import { authorizeAdminToken, bearerToken } from "@/lib/auth/authorize-admin-token";
 import { isAllowedStorageSourceUrl } from "@/lib/supabase/storage-source-url";
 
 const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 
 const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+const tooManyRequests = (retryAfterSeconds: number) =>
+  NextResponse.json(
+    { error: "Too many failed attempts" },
+    { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
+  );
 
 /**
  * 인증된 관리자가 요청한 Storage 원본 이미지를 프록시한다.
@@ -13,9 +19,9 @@ const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status
  * @returns {Promise<Response>} 이미지 응답 또는 인증·입력 오류 응답.
  */
 export async function POST(request: Request) {
-  const authorization = request.headers.get("authorization") ?? "";
-  const idToken = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
-  if (!(await verifyAdminIdToken(idToken))) return unauthorized();
+  const verdict = await authorizeAdminToken(bearerToken(request));
+  if (verdict.status === "throttled") return tooManyRequests(verdict.retryAfterSeconds);
+  if (verdict.status !== "ok") return unauthorized();
 
   const payload = (await request.json().catch(() => null)) as { url?: unknown } | null;
   const sourceUrl = typeof payload?.url === "string" ? payload.url : "";

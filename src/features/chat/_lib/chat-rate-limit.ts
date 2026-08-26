@@ -1,3 +1,4 @@
+import { clientAddress } from "@/lib/rate-limit/client-address";
 import {
   evalUpstashScript,
   resolveUpstashCredentials,
@@ -156,22 +157,7 @@ const secondsUntilNextUtcDay = (now: number): number => {
   return Math.max(1, Math.ceil((nextMidnight - now) / 1_000));
 };
 
-/**
- * Vercel 이 직접 채우는 `x-vercel-forwarded-for` 를 최우선으로 본다.
- * `x-forwarded-for` 는 클라이언트가 임의로 덧붙일 수 있어, 그 첫 항목을 키로 쓰면
- * 임의 헤더로 새 제한 버킷을 만들지 못하게 한다.
- *
- * @param {Request} request
- * @returns {string}
- */
-const clientKey = (request: Request): string => {
-  const address =
-    request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip")?.trim() ||
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown";
-  return address.slice(0, 128);
-};
+const clientKey = (request: Request): string => clientAddress(request.headers);
 
 const createChatRateLimiter = (options: Partial<RateLimitOptions> = {}) => {
   const config = { ...DEFAULT_OPTIONS, ...options };
