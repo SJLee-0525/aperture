@@ -23,7 +23,8 @@
   opacity: 0;
   transition: opacity var(--dur) var(--ease);
 }
-.tile:hover .ov {
+.tile:hover .ov,
+.tile:focus-visible .ov {
   opacity: 1;
 }
 .t {

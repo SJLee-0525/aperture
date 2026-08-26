@@ -342,6 +342,15 @@ h6 {
   margin: 0;
 }
 
+/* ===================== Focus ===================== */
+/* 공개 페이지 포커스 표시의 단일 출처. `:where()` 로 특이도가 0 이라 컴포넌트가 자기 링을
+   선언하면 그쪽이 이긴다. 어두운 사진 위 크롬은 액센트 대비가 보장되지 않아 각 모듈이
+   흰 링으로 덮는다. 관리자 화면 규칙은 docs/admin-ui-conventions.md 를 따른다. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ===================== Primitives ===================== */
 .u-label {
   font-family: var(--font-sans);

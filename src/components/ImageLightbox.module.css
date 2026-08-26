@@ -132,6 +132,12 @@
   opacity: 0.3;
   cursor: default;
 }
+/* 어두운 사진 위에 뜨는 크롬이라 globals 의 액센트 링은 대비를 보장하지 못한다. */
+.close:focus-visible,
+.nav:focus-visible {
+  outline: 2px solid var(--text-inverse);
+  outline-offset: 2px;
+}
 .prev {
   left: 16px;
 }
