@@ -114,7 +114,6 @@
 | --- | --- | --- |
 | `UI-P-10` | 스켈레톤과 카드의 규격 불일치(gap 12px 대 `clamp(16px,2.4vw,24px)`, padding, border 유무) | CLS 점수에 실제로 계상되는지. 스켈레톤에서 콘텐츠로의 교체는 라우트 전환 문맥이라 Lighthouse 실측이 필요하다 |
 | `UI-P-26` | `RangeSlider.tsx:106`·`:116` 의 `aria-label` 이 사전 미경유 영어이고 `aria-valuetext` 가 없다 | 두 `input[type=range]` thumb 이 겹칠 때 포인터 조작이 실제로 막히는지. 브라우저별 z-order 동작에 의존한다 |
-| `UI-P-27` | `DevStackSection.tsx:45` 가 관리자 입력값을 인라인 스타일(`background`·`color`·`borderColor`)로 그대로 쓰고 대비 검증도 다크 짝도 없다 | 실제 `site/dev` config 데이터의 칩 색 조합이 대비 기준을 넘는지. 구조적 보장 부재는 확정, 현재 위반 여부는 실데이터 확인 사항 |
 | `UI-S-04`, `UI-S-12`, `UI-S-18` | 코드 경로 확정. body 전체 서브트리 MutationObserver + 전역 셀렉터 스캔(`CustomScrollbar.tsx:229-232`), 휠마다 조상 체인 `getComputedStyle`(`CustomCursor.tsx:50-76`, `:572`), 제스처 프레임마다 layout read 후 즉시 write(`use-image-zoom.ts:123-129`) | 실제 프레임 비용. 프로파일링 없이는 "상시 마운트된 장식의 성능 부담"을 수치로 말할 수 없다 |
 | `UI-A-27` | `AdminChrome.module.css:19-31` 의 `.bar` 에 `min-width: 0`·`text-overflow` 가 없고 모바일에서 padding 만 줄어든다 | 320px 뷰포트에서 실제로 넘치는지. CSS 계산 추정만 있고 실측이 없다 |
 
@@ -188,6 +187,22 @@ Firebase 주석 64줄도 전량 삭제 대상이 아니다. 통합 검증관이 
 `ARCH-A-21` (`features/about` 이름)은 순수 명명이고 이동 비용이 이득을 넘는다. `ARCH-A-11` (`features/monitoring` pass-through)은 "삭제해도 복잡도가 늘지 않는다"가 삭제 근거로 약하다. 경계가 있는 편이 나중에 Sentry 를 바꿀 때 유리하다. `ARCH-A-17` (`sentry-triage` 위치)은 폴더 이동만으로 얻는 것이 없고, CLAUDE.md 구조도에 기재하면 탐색 문제는 해소된다. `ARCH-A-25`, `ARCH-A-26`, `ARCH-A-28`, `UI-A-28` 은 정리 수준이라 기계적 정리 단계에 끼워 넣거나 생략한다.
 
 `ARCH-A-21` 에 딸린 지적 하나는 별개로 유효하다. 첫 문장 분리 로직이 `AboutView.tsx:37-42`, `MusicAboutView.tsx:42-47`, `DevAboutView.tsx:53-58` 3벌로 복붙돼 있고 주석이 복붙 사실을 자백한다. `lib/text/split-lead.ts` 승격으로 독립 처리할 수 있다.
+
+### 4.7 공개 화면에서 유지하기로 한 것
+
+`03-public-ui.md` 에서 뺀 4건이다. 코드 사실은 아래로 옮겨 그대로 보존한다. 판정은 제품 결정이고, 어떤 조건에서 다시 보는지를 함께 적는다.
+
+`UI-P-04` (사진 그리드의 Tab 순서). `PhotoGrid.tsx:55-57` 이 `distributed[index % columnCount].push(...)` 로 사진을 열에 나눠 담고 `:95-101` 이 열마다 `div` 를 렌더한다. CSS 는 `PhotoGrid.module.css:1-5` 의 4열 grid 라 화면 첫 행은 0·1·2·3 인데 DOM 순서는 0·4·8 다음 1·5·9 다. 도달 불가가 아니라 순서 불일치다. 모든 타일에 Tab 으로 닿고 `?photo=` 딥링크도 그대로 열린다. 03 이 제시한 두 갈래(분배 알고리즘 교체, `square` 뷰를 기본값으로) 는 어느 쪽이든 메이슨리 레이아웃 결정을 함께 요구한다. 다시 볼 조건은 메이슨리를 다른 이유로 손댈 때다. 그때 함께 정리한다.
+
+`UI-P-14`, `UI-S-20` (24px 에 못 미치는 터치 타깃). `MapCanvas.module.css:98-101` 이 MapLibre 저작권 펼침 버튼을 16px 로 줄이고 모바일 미디어쿼리에서도 그대로다. `SiteFooter.module.css:121-133` 과 `:143-153` 의 `.copyright`·`.legalLink` 는 부모 `font-size` 11px 에 `padding: 4px 8px; line-height: 1` 이라 높이가 약 19px 이고, `:141` 의 `gap: 2px 12px` 때문에 세로로 줄바꿈되면 WCAG 2.5.8 의 간격 예외도 충족하지 못한다. 미달 자체는 확정이며 이 기록은 그것을 부정하지 않는다. 지금 유지하는 이유는 두 대상이 지도 출처 펼침과 푸터 법적 문서 링크라 방문 흐름의 주 경로가 아니라는 판단이다. 다시 볼 조건은 둘이다. WCAG 2.2 AA 를 명시 목표로 삼을 때, 또는 모바일에서 실제 오탭이 관찰될 때.
+
+`UI-P-27` (기술 스택 칩 색). `DevStackSection.tsx:45` 가 `style={{background:item.bg, color:item.fg, borderColor:item.bg}}` 로 `site/dev` config 값을 인라인 스타일에 그대로 넣는다. 대비 검증이 없고 다크모드 짝 색도 없으며, 칩이 통합검색으로 가는 링크라 비텍스트 대비 기준도 함께 걸린다. 구조적 보장이 없다는 사실은 확정이다. 유지하는 이유는 그 값을 넣는 사람이 관리자 본인 1명이라, 나쁜 조합이 나오면 코드가 아니라 데이터로 즉시 고칠 수 있다는 점이다. 다시 볼 조건은 실제 `site/dev` config 의 조합이 대비 기준에 미달하는 것이 확인될 때다. 그때는 관리자 폼의 대비 경고와 렌더 시점 토큰 폴백 중 하나를 넣는다. 이 항목은 §3.2 의 보류 목록에 있었고 여기로 옮겨 정리한다.
+
+`UI-P-31`, `UI-S-11` (IntroSplash). `IntroSplash.module.css:1-11` 의 `position:fixed; inset:0; z-index:1000` 오버레이가 `introDismiss 1.4s forwards` 로 재생되고, 키프레임(`:12-23`)이 0퍼센트부터 55퍼센트까지 완전 불투명이라 콘텐츠가 드러나기 시작하는 시점이 0.77초다. 새로고침·직접 URL 진입·외부 링크 유입마다 재생되며 클릭이나 키 입력으로 건너뛸 경로가 없다. 원 보고서의 두 주장(1.4초 입력 차단, LCP 하한 1초)은 §1.2 의 4·5번에서 이미 반증됐다. 남는 것은 매번 0.77초를 기다리는 체감과 건너뛸 수 없다는 점뿐이고, 이는 결함이 아니라 의도한 진입 연출이다.
+
+여기에 03 의 서술 하나를 정정해 둔다. 03 은 이 항목이 `UI-S-01`·`UI-P-24` 와 한 덩어리라 따로 손대면 안 된다고 적었는데, 그 결합은 **스플래시 재생 시간을 줄이는 경우에만** 성립한다. 스플래시를 그대로 두는 지금 판정에서는 두 항목이 독립이다. `UI-S-01` 의 수정은 `theme-script.ts` 가 로케일 프리픽스를 벗기고 매칭하게 만드는 것이라 스플래시와 무관하고, 오히려 고치고 나면 스플래시가 flash 를 가려 주던 역할 자체가 없어진다. `UI-P-24` 의 수정도 초기 `opacity:0` 을 hydration 이후에만 적용하는 것이라 스플래시 종료 시점에 의존하지 않는다. 두 항목은 03 에 남아 있고 각각 독립으로 진행할 수 있다.
+
+`z-index:1000` 이 `CustomCursor.module.css:15` 와 같은 값이라 스택 순서가 DOM 순서에 의존한다는 지적은 스플래시 유지와 무관하게 유효하다. 정리 대상으로 남긴다.
 
 ---
 

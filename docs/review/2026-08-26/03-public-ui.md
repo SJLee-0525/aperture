@@ -44,14 +44,6 @@
 
 `MapView` 의 최상위를 `<main>` 으로 바꾸고 위치 목록 헤더(`LocationList.tsx:74`)를 `<h1>` 으로 승격한다. `loading.tsx` 셸도 같이 맞춘다. 난이도는 작다.
 
-### 사진 그리드의 Tab 순서가 눈으로 읽는 순서와 다르다 (UI-P-04)
-
-`PhotoGrid.tsx:55-57` 이 `distributed[index % columnCount].push(...)` 로 사진을 열에 나눠 담고 `:95-101` 에서 열마다 `div` 를 렌더한다. CSS 는 `PhotoGrid.module.css:1-5` 에서 `grid-template-columns: repeat(4, …)` 다. 화면 첫 행은 0, 1, 2, 3 인데 DOM 순서는 0, 4, 8 다음 1, 5, 9 다.
-
-키보드 사용자가 Tab 을 누르면 포커스가 왼쪽 열을 세로로 끝까지 내려간 뒤 다시 맨 위로 올라온다. 스크린리더 낭독 순서도 같다. 무한 스크롤이 24장씩 붙이므로 열이 길어질수록 괴리가 커진다. `/photo` 와 앨범 상세 두 화면에 해당한다.
-
-분배 알고리즘을 바꾸거나 단일 grid 인 `square` 뷰를 기본값으로 두는 두 갈래가 있고, 어느 쪽이든 레이아웃 결정이 함께 걸려 난이도는 크다.
-
 ### 사진 타일의 제목과 노출값이 hover 에서만 보인다 (UI-P-08)
 
 `PhotoTile.module.css:23` 이 `.ov{opacity:0}` 이고 `:26-28` 의 `.tile:hover .ov` 에서만 1이 된다. 같은 파일에 `:focus-visible` 도 `:focus-within` 도 `@media (hover:none)` 도 없다.
@@ -150,14 +142,6 @@ WCAG 위반은 아니다. `--accent`(#0066cc)와 `--surface-2`(#f3f3f5)의 대�
 
 스피너를 `aria-hidden="true"` 로 두면 된다. `PhotoModal.tsx:470` 과 `ImageLightbox.tsx:98` 이 이미 그렇게 한다. 난이도는 작다.
 
-### 터치 타깃이 24px 에 못 미치는 두 곳 (UI-P-14, UI-S-20)
-
-`MapCanvas.module.css:98-101` 이 MapLibre 저작권 펼침 버튼을 `width/height: 16px` 로 줄인다. 모바일 미디어쿼리에서도 그대로다. 같은 파일의 줌 컨트롤은 38px 과 36px 로 충분하니 이 버튼만 예외다. 손가락으로 지도 출처를 펼치기 어렵고, 핵심 기능이 아니라 심각도는 낮다.
-
-`SiteFooter.module.css:121-133` 과 `:143-153` 의 `.copyright`·`.legalLink` 는 `padding: 4px 8px; line-height: 1; font: inherit` 이고 부모 `font-size` 가 11px 이라 높이가 약 19px 이다. `:141` 의 `gap: 2px 12px` 때문에 세로로 줄바꿈되면 간격 예외도 충족하지 못한다. 모바일에서 Privacy·Terms·Accessibility 를 자주 헛누른다. 모바일 규칙(`:180-191`)이 사이트맵 링크 padding 도 4px 로 유지한다.
-
-`min-height: 24px` 와 `display:inline-flex; align-items:center` 를 주고 세로 gap 을 8px 이상으로 올린다. 두 건 다 난이도가 작다.
-
 ### 이미지 보호가 사진 제목과 EXIF 텍스트까지 복사 불가로 만든다 (UI-S-23)
 
 `use-image-protection.ts:24` 가 `document` 캡처 단계에서 `[data-protected-image]` 하위의 `contextmenu`·`dragstart`·`selectstart` 를 모두 `preventDefault()` 하고, `globals.css:280` 이 같은 범위에 `user-select: none` 을 건다.
@@ -203,12 +187,6 @@ WCAG 위반은 아니다. `--accent`(#0066cc)와 `--surface-2`(#f3f3f5)의 대�
 `DevProjectsView.module.css:197-200` 의 `.tsProblemLabel` 이 `--accent-music` 을 배경과 글자색에 쓰고 `:201-203` 에서 다크 보정까지 한다. CLAUDE.md 아키텍처 원칙 9 의 "컴포넌트는 항상 `--accent` 변수만 참조"와 충돌한다. 음악 섹션 색을 조정하면 개발 섹션의 무관한 라벨 색이 함께 바뀐다.
 
 `--danger` 가 `globals.css:63` 과 `:144` 에 라이트·다크 짝으로 준비돼 있어 바로 대체할 수 있다. 난이도는 작다.
-
-### 기술 스택 칩 색이 관리자 입력값 그대로다 (UI-P-27)
-
-`DevStackSection.tsx:45` 가 `style={{background:item.bg, color:item.fg, borderColor:item.bg}}` 로 `site/dev` config 값을 인라인 스타일에 그대로 넣는다. 대비 검증이 없고 다크모드 짝 색도 없다. 라이트 기준으로 고른 색이 다크에서 더 나빠질 수 있다. 칩은 통합검색으로 가는 링크라 비텍스트 대비 기준도 함께 걸린다.
-
-구조적으로 보장 장치가 없다는 것은 확정이다. 실제 데이터가 기준을 넘는지는 `site/dev` config 를 열어 봐야 하는 보류 항목이다. 관리자 폼에 대비 계산과 경고를 넣거나, 렌더 시점에 대비가 부족하면 토큰 폴백으로 떨어뜨린다. 난이도는 중간이다.
 
 ### 참조되지 않는 키프레임과 남은 `will-change` (UI-P-28)
 
@@ -367,16 +345,6 @@ hydration 실패나 JS 차단 환경에서 랜딩의 유일한 내비게이션�
 그런데 실제로는 대부분의 사용자가 flash 를 보지 않는다. `IntroSplash` 가 `(public)/layout.tsx:53` 에서 불투명 배경으로 첫 0.77초를 가리기 때문이다. 문제는 `IntroSplash.module.css:25-29` 가 `prefers-reduced-motion: reduce` 에서 스플래시를 `display:none` 으로 만든다는 점이다. 모션 최소화를 켠 사용자에게만 음악·개발·연락 페이지가 파랑으로 그려졌다가 제 색으로 튄다.
 
 테스트가 회귀를 못 잡는다. `theme-script.test.ts:48,59` 가 `next.config` 의 308 대상인 무-로케일 경로만 검증한다. 스크립트 안에서 첫 세그먼트가 `ko` 나 `en` 이면 잘라낸 뒤 매칭하고, 테스트 경로를 `/ko/music` 계열로 바꿔 계약을 고정한다. 난이도는 작다.
-
-### IntroSplash 가 매 하드 로드마다 재생되고 건너뛸 수 없다 (UI-P-31, UI-S-11)
-
-`IntroSplash.module.css:1-11` 의 `position:fixed; inset:0; z-index:1000; background:var(--bg)` 오버레이가 `introDismiss 1.4s forwards` 로 재생된다. 키프레임(`:12-23`)은 0퍼센트부터 55퍼센트까지 완전 불투명이라 콘텐츠가 드러나기 시작하는 시점이 0.77초다. 새로고침, 직접 URL 진입, 외부 링크 유입마다 재생되고 클릭이나 키 입력으로 건너뛸 경로가 없다. 랜딩 진입 애니메이션이 여기에 종속돼 있다(`use-intro-ready.ts:23` 이 `animationend` 를 기다린다).
-
-원 보고서의 두 주장은 정정이 필요하다. 첫째, "1.4초 동안 입력이 막힌다"는 틀렸다. `pointer-events: none` 이 100퍼센트 키프레임에만 있어 암묵 0퍼센트 키프레임과 discrete 보간이 적용되고, 진행률 0.5 즉 0.7초에 `none` 으로 전환된다. 콘텐츠가 드러나기 시작하는 시점과 거의 겹친다. 둘째, "모든 하드 내비게이션에 LCP 하한 1초가 생긴다"도 근거가 없다. Chrome 의 LCP 는 가림 판정을 하지 않으므로 불투명 레이어 뒤 요소도 페인트로 계상된다.
-
-남는 것은 매번 0.77초를 기다리는 체감과 건너뛸 수 없다는 점이다. `z-index:1000` 이 `CustomCursor.module.css:15` 와 같은 값이라 스택 순서가 DOM 순서에 의존하는 것도 정리 대상이다.
-
-이 항목은 앞의 UI-S-01, 그리고 랜딩의 UI-P-24 와 한 덩어리다. 스플래시가 섹션 flash 를 가려 주고, 랜딩 진입 애니메이션이 스플래시 종료에 종속돼 있다. 재생 시간을 줄이면 세 항목이 함께 움직이므로 따로 손대면 안 된다. 난이도는 중간이다.
 
 ### CustomScrollbar 가 body 전체 서브트리를 관찰한다 (UI-S-04)
 
