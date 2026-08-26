@@ -18,6 +18,8 @@ export default defineConfig({
         "src/lib/auth/admin-auth-throttle.ts",
         "src/lib/auth/authorize-admin-token.ts",
         "src/lib/admin/clear-admin-workspace.ts",
+        "src/lib/auth/assert-deployable-admin-session.ts",
+        "src/lib/http/*.ts",
         "src/lib/contact-draft-storage.ts",
         "src/lib/search/*.ts",
         "src/lib/i18n/*.ts",

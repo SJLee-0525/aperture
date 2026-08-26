@@ -98,7 +98,7 @@ describe("sendDiscordCard", () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
-  it("embeds 배열로 감싸 POST 한다", async () => {
+  it("embeds 배열로 감싸고 멘션을 닫아 POST 한다", async () => {
     const fetcher = vi.fn(async () => response(204));
 
     const result = await sendDiscordCard(WEBHOOK, embed, { fetcher: fetcher as typeof fetch });
@@ -107,7 +107,11 @@ describe("sendDiscordCard", () => {
     const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe(WEBHOOK);
     expect(init.method).toBe("POST");
-    expect(JSON.parse(init.body as string)).toEqual({ embeds: [embed] });
+    // allowed_mentions 가 빠지면 트리아지 입력에 심긴 @everyone 이 실제 핑이 될 수 있다.
+    expect(JSON.parse(init.body as string)).toEqual({
+      embeds: [embed],
+      allowed_mentions: { parse: [] },
+    });
   });
 
   describe("429", () => {

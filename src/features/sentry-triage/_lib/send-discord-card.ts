@@ -62,7 +62,9 @@ const sendDiscordCard = async (
     fetcher(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [embed] }),
+      // 지금 body 는 embed 뿐이라 멘션이 발생하지 않는다. content 한 줄이 추가되는 순간
+      // 트리아지 입력에 심긴 @everyone 이 실제 핑이 되므로 미리 닫아 둔다.
+      body: JSON.stringify({ embeds: [embed], allowed_mentions: { parse: [] } }),
       signal: AbortSignal.timeout(Math.max(1, timeoutMs)),
     });
 

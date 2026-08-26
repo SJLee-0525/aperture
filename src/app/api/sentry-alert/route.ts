@@ -7,7 +7,10 @@ import {
 import {
   declaredBodyTooLarge,
   verifySentrySignature,
+  MAX_WEBHOOK_BODY_BYTES,
 } from "@/features/sentry-triage/_lib/verify-sentry-signature";
+
+import { readLimitedBody } from "@/lib/http/read-limited-body";
 
 /** `node:crypto` 의 `timingSafeEqual` 이 필요하다. */
 export const runtime = "nodejs";
@@ -30,10 +33,13 @@ export async function POST(request: Request): Promise<Response> {
     return new Response(null, { status: 413 });
   }
 
-  const raw = await request.text();
+  // Content-Length 선검사는 chunked 요청에 헤더가 없어 통과시킨다. 본문을 통째로 읽은 뒤
+  // 크기를 재면 그 사이에 상한을 넘는 본문이 이미 메모리에 올라간다.
+  const raw = await readLimitedBody(request, MAX_WEBHOOK_BODY_BYTES);
+  if (raw === null) return new Response(null, { status: 413 });
+
   const gate = verifySentrySignature(raw, request.headers, process.env.SENTRY_ALERT_WEBHOOK_SECRET);
   if (!gate.ok) {
-    // chunked 요청은 Content-Length 가 없어 위 선검사를 지나온다. 크기 거절은 여기서 나온다.
     if (gate.reason === "body-too-large") return new Response(null, { status: 413 });
     // 시크릿 미설정은 배포 실수라 인증 실패와 구분해 로그에 남긴다.
     if (gate.reason === "missing-secret") {

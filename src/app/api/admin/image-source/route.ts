@@ -29,7 +29,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "허용되지 않은 이미지 URL입니다." }, { status: 400 });
   }
 
-  const source = await fetch(sourceUrl, { cache: "no-store", redirect: "follow" }).catch(
+  // 리다이렉트를 따라가면 최종 URL 을 재검증하기 전에 중간 홉으로 요청이 이미 나간다.
+  // Storage 공개 객체는 리다이렉트를 쓰지 않으므로 첫 응답이 리다이렉트면 그대로 실패다.
+  const source = await fetch(sourceUrl, { cache: "no-store", redirect: "error" }).catch(
     () => null,
   );
   if (!source?.ok) {
@@ -38,7 +40,8 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
-  // redirect 를 따라간 최종 URL 재검증 — 허용 원본이 다른 호스트로 넘기는 SSRF 를 막는다.
+  // fetch 가 리다이렉트를 거부하므로 여기 도달한 응답의 URL 은 요청 URL 과 같다.
+  // 계약이 바뀌었을 때 조용히 넘어가지 않도록 한 번 더 확인한다.
   if (!isAllowedStorageSourceUrl(source.url)) {
     return NextResponse.json({ error: "허용되지 않은 리디렉션입니다." }, { status: 502 });
   }

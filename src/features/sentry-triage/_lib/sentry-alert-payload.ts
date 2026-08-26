@@ -11,8 +11,17 @@ const ALLOWED_TAGS = ["app_runtime", "area", "transaction"] as const;
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+/**
+ * 한 필드가 프롬프트로 나갈 수 있는 최대 길이.
+ *
+ * Sentry SDK 가 `maxValueLength`(기본 250자)로 message 와 exception value 를 이미 자르므로
+ * 이 상한에 닿는 일은 거의 없다. 그 기본값을 올리거나 다른 필드가 길어져도 프롬프트 크기가
+ * 따라 늘지 않게 하는 방어선이다.
+ */
+const MAX_FIELD_CHARS = 500;
+
 const text = (value: unknown): string | undefined => {
-  if (typeof value === "string") return value.trim() || undefined;
+  if (typeof value === "string") return value.trim().slice(0, MAX_FIELD_CHARS) || undefined;
   if (typeof value === "number" && Number.isFinite(value)) return String(value);
   return undefined;
 };

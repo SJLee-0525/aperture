@@ -20,6 +20,10 @@ type WebhookGate = { ok: true } | { ok: false; reason: WebhookRejection };
  * `Content-Length` 가 없으면 판단하지 않고 통과시킨다. 그 경우는 본문을 읽은 뒤
  * 길이로 다시 확인한다.
  *
+ * 서명 대상은 본문뿐이다. Sentry 가 함께 보내는 `sentry-hook-timestamp` 는 HMAC 밖에 있어
+ * 재생하는 쪽이 임의로 고쳐 쓸 수 있다. 신선도 검사를 붙여도 재생을 막지 못하므로 두지 않는다.
+ * 같은 전달을 두 번 처리하지 않게 하는 것은 `claimSentryAlert` 의 멱등 키다.
+ *
  * @param headers 요청 헤더.
  * @param max 허용 바이트 수.
  * @returns 선언된 크기가 상한을 넘으면 true.
@@ -52,6 +56,10 @@ const equalsSignature = (expected: string, received: string): boolean => {
  * 헤더 검사만으로는 상한이 강제되지 않고, 비인증 요청이 전량 버퍼링과 HMAC 계산까지 도달한다.
  *
  * @param rawBody `request.text()` 로 받은 원문.
+ * 서명 대상은 본문뿐이다. Sentry 가 함께 보내는 `sentry-hook-timestamp` 는 HMAC 밖에 있어
+ * 재생하는 쪽이 임의로 고쳐 쓸 수 있다. 신선도 검사를 붙여도 재생을 막지 못하므로 두지 않는다.
+ * 같은 전달을 두 번 처리하지 않게 하는 것은 `claimSentryAlert` 의 멱등 키다.
+ *
  * @param headers 요청 헤더.
  * @param secret 통합의 Client Secret.
  * @param max 허용 바이트 수.

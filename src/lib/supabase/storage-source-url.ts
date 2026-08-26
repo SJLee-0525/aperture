@@ -24,6 +24,8 @@ const isAllowedStorageSourceUrl = (value: string): boolean => {
   } catch {
     return false;
   }
+  // 포트가 붙은 URL 은 전부 거부한다. 배포 Storage 는 기본 포트만 쓰므로 남는 것은
+  // 로컬 스택(`http://127.0.0.1:54321`)뿐이고, 그 환경에서 이 프록시는 항상 400 을 낸다.
   if (url.username || url.password || url.port) return false;
   if (url.origin !== origin) return false;
   return url.pathname.startsWith(PUBLIC_OBJECT_PREFIX);

@@ -110,10 +110,10 @@ export async function POST(request: Request) {
       ),
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "임베딩 생성에 실패했습니다." },
-      { status: 502 },
-    );
+    // 업스트림 원문은 서버 로그로만 보낸다. 제공자 오류 메시지에는 모델명·엔드포인트·
+    // 요청 형태가 섞여 나오고, `lib/supabase/rag.ts` 도 같은 규약을 쓴다.
+    console.error("[portfolio-embeddings] 임베딩 생성 실패:", error);
+    return NextResponse.json({ error: "임베딩 생성에 실패했습니다." }, { status: 502 });
   }
 }
 
@@ -146,9 +146,7 @@ export async function GET(request: Request) {
       total,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "임베딩 상태 확인에 실패했습니다." },
-      { status: 502 },
-    );
+    console.error("[portfolio-embeddings] 임베딩 상태 확인 실패:", error);
+    return NextResponse.json({ error: "임베딩 상태 확인에 실패했습니다." }, { status: 502 });
   }
 }

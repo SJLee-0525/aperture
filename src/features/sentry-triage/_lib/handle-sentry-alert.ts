@@ -87,6 +87,8 @@ const handleSentryAlert = async (raw: string, deps: SentryAlertDependencies): Pr
 
     // 선점하지 못하면 같은 전달을 두 번 처리하는 것을 막을 수단이 없다. 그 구간에서는
     // 판정을 건너뛰어 재전송이 유료 호출로 이어지지 않게 하고, 카드만 보낸다.
+    // `SENTRY_ALERT_LOG_SECRET` 이 없으면 이 상태가 상시가 되어 멱등 키 자체가 꺼진다.
+    // 유효 서명이 붙은 본문을 확보한 쪽이 같은 요청을 반복하면 카드가 그 횟수만큼 나간다.
     const alertId = claim.status === "claimed" ? claim.alertId : null;
     const outcome: TriageOutcome = alertId
       ? await runTriage(summary, deps)

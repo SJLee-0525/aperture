@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 
 import packageJson from "./package.json" with { type: "json" };
 import { SECURITY_HEADERS } from "./src/constants/security-headers";
+import { assertDeployableAdminSession } from "./src/lib/auth/assert-deployable-admin-session";
 import { assertDeployableContentSource } from "./src/lib/content/assert-deployable-content-source";
 import { supabaseUrl } from "./src/lib/supabase/config";
 
@@ -116,6 +117,7 @@ const sentryConfig = withSentryConfig(nextConfig, {
  */
 const config = (phase: string): NextConfig => {
   assertDeployableContentSource(phase);
+  assertDeployableAdminSession(phase);
   return sentryConfig;
 };
 

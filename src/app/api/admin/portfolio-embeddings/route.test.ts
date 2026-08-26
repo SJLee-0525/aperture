@@ -319,8 +319,10 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     const result = (await response.json()) as { error: string };
 
     expect(response.status).toBe(502);
-    expect(result.error).toBe("임베딩 저장 실패 (500)");
+    // 상태 코드도 업스트림 상세를 드러내지 않는다. 제공자 오류 메시지에는 모델명·엔드포인트가 섞인다.
+    expect(result.error).toBe("임베딩 생성에 실패했습니다.");
     expect(result.error).not.toContain("secret");
+    expect(result.error).not.toContain("500");
     expect(errorSpy.mock.calls.some(([line]) => String(line).includes("secret"))).toBe(true);
     errorSpy.mockRestore();
   });

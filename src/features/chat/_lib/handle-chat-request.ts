@@ -26,7 +26,6 @@ import {
 } from "@/features/chat/_lib/chat-rate-limit";
 import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
-import { readLimitedBody } from "@/features/chat/_lib/read-limited-body";
 import {
   buildScreenContextLookup,
   entryOf,
@@ -37,6 +36,7 @@ import {
 import { matchDevArticleSlug, ROUTES } from "@/constants/routes";
 import { getChatProfileData, type ChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
+import { readLimitedBody } from "@/lib/http/read-limited-body";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
 import {
   buildPhotoFilterHref,
