@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
       { source: "/music/:path*", destination: "/ko/music/:path*", permanent: true },
       { source: "/dev/:path*", destination: "/ko/dev/:path*", permanent: true },
       { source: "/contact", destination: "/ko/contact", permanent: true },
+      // 법적 문서는 외부(스토어·서비스 등록)에 무-로케일 URL 로 등록될 수 있다.
+      {
+        source: "/:legalDoc(privacy|terms|accessibility)",
+        destination: "/ko/:legalDoc",
+        permanent: true,
+      },
       { source: "/search", destination: "/ko/search", permanent: true },
       { source: "/albums", destination: "/ko/photo/albums", permanent: true },
       { source: "/albums/:id", destination: "/ko/photo/albums/:id", permanent: true },
