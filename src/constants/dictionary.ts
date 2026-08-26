@@ -74,6 +74,7 @@ type UIDict = {
   musicBook: string;
   musicProgram: string;
   primaryNavLabel: string;
+  skipToContent: string;
   footerSitemapLabel: string;
   menuOpenLabel: string;
   menuCloseLabel: string;
@@ -280,6 +281,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicBook: "예매하기",
     musicProgram: "프로그램",
     primaryNavLabel: "주요 메뉴",
+    skipToContent: "본문 바로가기",
     footerSitemapLabel: "사이트맵",
     menuOpenLabel: "메뉴 열기",
     menuCloseLabel: "메뉴 닫기",
@@ -492,6 +494,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicBook: "Book tickets",
     musicProgram: "Programme",
     primaryNavLabel: "Primary navigation",
+    skipToContent: "Skip to content",
     footerSitemapLabel: "Sitemap",
     menuOpenLabel: "Open menu",
     menuCloseLabel: "Close menu",

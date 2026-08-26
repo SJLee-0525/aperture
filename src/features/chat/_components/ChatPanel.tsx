@@ -283,7 +283,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
                         <i />
                         <i />
                       </span>
-                      <span className={message.pendingStatus ? undefined : styles.srOnly}>
+                      <span className={message.pendingStatus ? undefined : "sr-only"}>
                         {message.pendingStatus === "portfolio-search" ? (
                           <PortfolioSearchStatus key={lang} lang={lang} />
                         ) : (
@@ -373,7 +373,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
           {announcement}
         </div>
 

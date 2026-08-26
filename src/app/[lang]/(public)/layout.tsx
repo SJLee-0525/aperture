@@ -13,6 +13,7 @@ import { WebMcpTools } from "@/features/webmcp/_components/WebMcpTools";
 
 import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
 
+import { DICTIONARY } from "@/constants/dictionary";
 import { toLang } from "@/constants/langs";
 import { getSite } from "@/lib/content/site";
 import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
@@ -47,6 +48,11 @@ const PublicLayout = async ({ children, params }: Props) => {
       monitoringEnabled={Boolean(SENTRY_DSN)}
       forceBanner={forceConsentBanner}
     >
+      {/* 셸의 어떤 컨트롤보다 먼저 오는 포커스 대상이어야 한다. 데스크톱 탭 경로가
+          워드마크·mega-menu 세 그룹·연락·언어·테마·검색으로 길어 본문이 뒤에 있다. */}
+      <a href="#page-content" className="sr-only u-skip-link">
+        {DICTIONARY[lang].skipToContent}
+      </a>
       <PublicImageProtection />
       <MobileNavigationVisibility />
       <SectionAccent />

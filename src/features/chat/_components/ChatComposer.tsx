@@ -39,7 +39,7 @@ const ChatComposer = memo(
 
     return (
       <form className={styles.composer} onSubmit={submit}>
-        <label className={styles.srOnly} htmlFor="chat-message">
+        <label className="sr-only" htmlFor="chat-message">
           {inputLabel}
         </label>
         {contextToken ? (
