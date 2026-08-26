@@ -218,6 +218,58 @@ test.describe("개발 블로그 상세", () => {
     await expect(lightbox).toBeHidden();
   });
 
+  /**
+   * 포커스 트랩이 가시성을 offsetParent 로 판정하면 fixed 요소가 전부 빠진다.
+   * 라이트박스의 닫기·이전·다음 버튼이 모두 fixed 라, 그때 Tab 은 스크림 하나만
+   * 오가고 키보드 사용자는 어떤 버튼에도 닿지 못한다(BUG-C-02).
+   *
+   * jsdom 에는 레이아웃이 없어 getClientRects 가 늘 비어 있다. 이 결함은 실제 브라우저
+   * 에서만 재현되므로 단위 테스트가 아니라 여기서 고정한다.
+   *
+   * 양 끝 이미지에서는 넘길 수 없는 쪽 버튼이 disabled 라 순환 대상이 아니다.
+   * 그래서 첫 이미지와 두 번째 이미지에서 각각 열어 세 버튼을 모두 확인한다.
+   */
+  test("라이트박스 안에서 Tab 이 fixed 버튼들에 닿는다", async ({ page }) => {
+    await page.goto(ARTICLE);
+
+    const zoom = page.getByRole("button", { name: /크게 보기/ });
+    await expect(zoom.first()).toBeAttached();
+    const lightbox = page.getByRole("dialog");
+
+    /** 트랩이 순환하므로 한 바퀴 안에 나오는 라벨을 모은다. */
+    const tabThroughTrap = async (): Promise<string[]> => {
+      const labels = new Set<string>();
+      for (let step = 0; step < 8; step += 1) {
+        await page.keyboard.press("Tab");
+        const label = await page.evaluate(
+          () => document.activeElement?.getAttribute("aria-label") ?? "",
+        );
+        if (label) labels.add(label);
+      }
+      return [...labels];
+    };
+
+    const labelsAfterOpening = async (nth: number): Promise<string[]> => {
+      await zoom.nth(nth).scrollIntoViewIfNeeded();
+      await zoom.nth(nth).click();
+      await expect(lightbox).toBeVisible();
+      const labels = await tabThroughTrap();
+      await page.keyboard.press("Escape");
+      await expect(lightbox).toBeHidden();
+      return labels;
+    };
+
+    // 첫 이미지: 닫기와 다음 버튼이 활성이다.
+    const fromFirst = await labelsAfterOpening(0);
+    expect(fromFirst).toContain("닫기");
+    expect(fromFirst).toContain("다음 이미지");
+
+    // 마지막 이미지: 이전 버튼이 활성이다.
+    const fromLast = await labelsAfterOpening((await zoom.count()) - 1);
+    expect(fromLast).toContain("닫기");
+    expect(fromLast).toContain("이전 이미지");
+  });
+
   // 프리렌더 목록 밖 경로는 요청-시 렌더되고, 그 응답의 상태 코드는 스트리밍이 시작된 뒤라
   // 200 으로 남는다. 계약은 상태 코드가 아니라 "내용이 보이지 않고 색인되지 않는다" 로 고정한다.
   test("없는 slug 는 404 화면을 보여주고 색인을 막는다", async ({ page }) => {
