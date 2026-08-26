@@ -67,7 +67,7 @@ const moveItem = <T>(list: T[], index: number, offset: MoveOffset): T[] => {
 };
 
 /**
- * 관리자 개발 설정의 모든 편집 규칙. React·Firebase와 무관한 순수 command reducer.
+ * 관리자 개발 설정의 모든 편집 규칙. React·저장소와 무관한 순수 command reducer.
  *
  * @param {DevConfig} config
  * @param {DevConfigEdit} edit

@@ -1,5 +1,5 @@
 /**
- * mock 단계에서 Firebase Storage 를 대신하는 브라우저 이미지 저장소.
+ * mock 단계에서 Supabase Storage 를 대신하는 브라우저 이미지 저장소.
  *
  * 업로드 파이프라인(EXIF 추출·webp 3단 압축)은 mock 에서도 실제로 돌고, 이 파일은 마지막
  * 압축한 이미지를 object URL로 보관해 미리보기와 폼 저장에 사용한다.

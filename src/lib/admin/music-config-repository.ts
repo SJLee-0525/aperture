@@ -21,7 +21,7 @@ const STORE_VERSION = 1;
 /**
  * 현재 콘텐츠 소스에 맞는 site/music 저장소. 첫 호출 결과를 재사용한다.
  *
- * @returns {MusicConfigRepository} mock 이면 브라우저 로컬, live 면 Firestore 구현.
+ * @returns {MusicConfigRepository} mock 이면 브라우저 로컬, live 면 Supabase 구현.
  */
 const getMusicConfigRepository = selectRepository<MusicConfigRepository>(
   () => {

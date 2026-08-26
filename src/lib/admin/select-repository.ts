@@ -10,7 +10,7 @@ import { shouldUseMockContent } from "@/lib/content/content-source";
  * 바뀌지 않으니 첫 결과를 계속 써도 안전하다.
  *
  * @param {() => T} createMock mock 구현을 만드는 함수.
- * @param {() => T} createLive live(Firestore) 구현을 만드는 함수.
+ * @param {() => T} createLive live(Supabase) 구현을 만드는 함수.
  * @returns {() => T} 현재 콘텐츠 소스에 맞는 저장소를 돌려주는 getter.
  */
 const selectRepository = <T>(createMock: () => T, createLive: () => T): (() => T) => {

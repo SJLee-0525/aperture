@@ -34,7 +34,7 @@ const awardProject = (seed: AwardProjectSeed): DevProject => ({
 
 /**
  * 개발 섹션 mock — design/ver_2/dev.js 이식(ko) + en 번역. 콘텐츠 원본: github.com/SJLee-0525/portfolio.
- * Firebase 미설정(로컬 dev·데모)에서만 폴백. 실운영 데이터는 관리자 CMS(Phase C2)로 입력.
+ * Supabase 미설정(로컬 dev·데모)에서만 폴백. 실운영 데이터는 관리자 CMS(Phase C2)로 입력.
  */
 const MOCK_DEV_PROJECTS: DevProject[] = [
   {

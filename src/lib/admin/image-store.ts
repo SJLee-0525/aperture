@@ -13,7 +13,7 @@ import {
   uploadPhotoThumbnail,
 } from "@/lib/supabase/storage";
 
-/** 업로드 결과 — Firestore 문서가 저장하는 다운로드 URL 과 Storage 객체 경로. */
+/** 업로드 결과 — 행에 저장하는 공개 URL 과 Storage 객체 경로. */
 type StoredImage = { url: string; path: string };
 
 /**
@@ -63,7 +63,7 @@ const createMockImageStore = (): AdminImageStore => ({
 /**
  * 현재 콘텐츠 소스에 맞는 이미지 저장소. live 는 `lib/supabase/storage` 함수 그대로다.
  *
- * @returns {AdminImageStore} mock 이면 objectURL, live 면 Firebase Storage 구현.
+ * @returns {AdminImageStore} mock 이면 objectURL, live 면 Supabase Storage 구현.
  */
 const getAdminImageStore = selectRepository<AdminImageStore>(createMockImageStore, () => ({
   uploadPhotoImage,

@@ -110,7 +110,7 @@ const assertPublishableLive = async (id: string, input: DevArticleInput): Promis
 };
 
 /**
- * Firestore 에 붙는 블로그 글 저장소. 기반 CRUD(`devArticlesCrud`)는 저장·캐시 갱신·RAG
+ * Supabase 에 붙는 블로그 글 저장소. 기반 CRUD(`devArticlesCrud`)는 저장·캐시 갱신·RAG
  * 정책만 알고, 도메인 규칙 — slug 유일성·최초 발행 스탬프·발행 조건 — 은 mock 구현과
  * 같은 `dev-article-domain` 모듈을 여기서 얹는다. 검사 지점도 mock 과 같다:
  * 발행 상태로 저장되는 모든 경로(`create`/`update`/`setPublished`).
@@ -119,7 +119,7 @@ const assertPublishableLive = async (id: string, input: DevArticleInput): Promis
  * 관리자 1명·저장 빈도 기준으로 수용하는 이중 읽기다.
  *
  * @param {() => Date} [now] 시스템 시각. 테스트가 고정할 수 있게 주입받는다.
- * @returns {DevArticleRepository} Firestore 에 붙은 관리자 CRUD.
+ * @returns {DevArticleRepository} Supabase 에 붙은 관리자 CRUD.
  */
 const createLiveDevArticleRepository = (
   now: () => Date = () => new Date(),

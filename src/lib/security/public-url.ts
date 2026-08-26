@@ -12,7 +12,7 @@ const EMAIL_ADDRESS = /^[^\s@/?#]+@[^\s@/?#]+\.[^\s@/?#]+$/;
  * 공개 콘텐츠 링크를 실행 가능한 안전한 스킴으로 제한한다.
  * 외부 링크는 HTTPS만, 내부 링크는 절대 경로와 해시만 허용한다.
  *
- * @param {unknown} value Firestore 또는 관리자 폼에서 전달된 링크 후보 값.
+ * @param {unknown} value DB 또는 관리자 폼에서 전달된 링크 후보 값.
  * @param {PublicUrlOptions} [options] 링크 스킴 허용 범위.
  * @param {boolean} [options.allowMailto] 단순 이메일 주소만 포함한 `mailto:` 링크를 허용할지 여부.
  * @returns {string} 공백을 정리한 안전한 링크. 값이나 스킴이 허용되지 않으면 빈 문자열.
@@ -74,9 +74,9 @@ const isDangerousStoredHref = (value: unknown): boolean => {
 };
 
 /**
- * Firestore의 알 수 없는 링크 배열에서 공개해도 안전한 항목만 남긴다.
+ * DB 의 알 수 없는 링크 배열에서 공개해도 안전한 항목만 남긴다.
  *
- * @param {unknown} value Firestore에서 디코딩한 링크 배열 후보 값.
+ * @param {unknown} value DB 에서 디코딩한 링크 배열 후보 값.
  * @param {PublicUrlOptions} [options] 각 링크에 적용할 스킴 허용 범위.
  * @param {boolean} [options.allowMailto] 단순 `mailto:` 링크를 허용할지 여부.
  * @returns {SiteLink[]} 라벨과 주소가 모두 유효한 정규화된 공개 링크 목록.

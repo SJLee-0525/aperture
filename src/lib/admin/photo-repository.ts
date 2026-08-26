@@ -100,10 +100,10 @@ const createMockPhotoRepository = (): PhotoRepository => {
 };
 
 /**
- * Firestore CRUD와 Storage 정리를 묶은 live 사진 저장소.
+ * Supabase CRUD와 Storage 정리를 묶은 live 사진 저장소.
  * Storage 정리에 실패해도 문서 삭제 결과는 유지한다.
  *
- * @returns {PhotoRepository} Firestore 에 붙은 사진 CRUD.
+ * @returns {PhotoRepository} Supabase 에 붙은 사진 CRUD.
  */
 const createLivePhotoRepository = (): PhotoRepository => ({
   newId: newPhotoId,
@@ -122,7 +122,7 @@ const createLivePhotoRepository = (): PhotoRepository => ({
 /**
  * 현재 콘텐츠 소스에 맞는 사진 저장소. 첫 호출 결과를 재사용한다.
  *
- * @returns {PhotoRepository} mock 이면 브라우저 로컬, live 면 Firestore 구현.
+ * @returns {PhotoRepository} mock 이면 브라우저 로컬, live 면 Supabase 구현.
  */
 const getPhotoRepository = selectRepository<PhotoRepository>(
   createMockPhotoRepository,

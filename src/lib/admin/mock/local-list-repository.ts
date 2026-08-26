@@ -11,7 +11,7 @@ type ListEntity = { id: string; order: number; published: boolean };
 /**
  * `order`가 같을 때 문서 ID로 정렬한다.
  *
- * Firestore 는 문서 경로를 코드 포인트 순으로 비교한다. `localeCompare` 는 로케일에 따라
+ * live 정렬은 id 를 코드 포인트 순으로 비교한다. `localeCompare` 는 로케일에 따라
  * 대소문자·기호 순서가 달라져 같은 데이터가 브라우저마다 다른 순서로 보일 수 있다.
  *
  * @param {string} a 앞 문서 ID.
@@ -64,7 +64,7 @@ const toDate = (value: unknown): Date | null => {
 };
 
 /**
- * Firestore 를 대신하는 목록 컬렉션 mock 저장소 팩토리.
+ * live 저장소를 대신하는 목록 컬렉션 mock 저장소 팩토리.
  *
  * 컬렉션마다 다른 키, seed, 목록 투영을 받아 공통 CRUD를 제공한다. 검증은
  * 최소 불변조건만 확인한다.

@@ -43,7 +43,7 @@ const coverImage = (file: string, path: string) => ({
 });
 
 /**
- * 개발 블로그 mock — Firebase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
+ * 개발 블로그 mock — Supabase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
  *
  * 글 목록은 Markdown 계약의 경계 사례를 나눠 담는다. 한 글에 몰아넣으면
  * 어느 규칙이 깨졌는지 실패 메시지에서 구분되지 않는다.

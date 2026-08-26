@@ -12,7 +12,7 @@ import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 
 /**
- * mock 단계에서 Firestore 를 대신하는 브라우저 저장소의 읽기·쓰기.
+ * mock 단계에서 Supabase 를 대신하는 브라우저 저장소의 읽기·쓰기.
  *
  * 버전 봉투·JSON 직렬화·용량 초과 처리는 관리자 mock 공용 봉투(`lib/admin/mock/local-store`)가
  * 맡고, 이 파일은 담긴 값의 형 검증만 갖는다. JSON 은 Date 를 담지 못하므로 시각을 ISO

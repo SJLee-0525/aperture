@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 type ContentSource = "mock" | "live";
 
 /**
- * 콘텐츠 소스 스위치. getter 들이 실 Firestore 대신 mock 을 쓸지 결정한다.
+ * 콘텐츠 소스 스위치. getter 들이 실데이터 대신 mock 을 쓸지 결정한다.
  *
  * - 기본: **개발(`npm run dev`)에선 mock 우선** — 실 컬렉션이 비어도 UI가 채워져 테스트가 쉽다.
  *   음악·개발 섹션이 완성되기 전까지의 편의 (사용자 요청).

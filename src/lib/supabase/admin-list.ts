@@ -16,7 +16,7 @@ import type { ImageMeta } from "@/types/image";
 
 /**
  * 관리자 목록 projection — 목록 화면이 받는 양을 계약으로 잠근다(`AdminListRepository`
- * 주석의 "Firestore 로 바뀌어도 읽는 양이 그대로" 계약).
+ * 주석의 "저장소 구현이 바뀌어도 읽는 양이 그대로" 계약).
  *
  * select 별칭 규칙: 객체·배열은 `->`(JSON 타입 보존), 텍스트는 `->>`(Postgres text 추출) —
  * 응답 타입을 명시적으로 고정하기 위한 선택이다.

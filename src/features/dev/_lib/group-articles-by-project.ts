@@ -13,7 +13,7 @@ import type { DevArticleProjectLink } from "@/types/dev-article";
 const groupArticlesByProject = (
   articles: readonly DevArticleProjectLink[],
 ): Record<string, DevArticleProjectLink[]> => {
-  // 프로젝트 id 는 관리자가 정하는 Firestore 문서 ID 다. `__proto__`·`constructor` 를 객체
+  // 프로젝트 id 는 관리자가 정하는 행 ID 다. `__proto__`·`constructor` 를 객체
   // 리터럴 키로 쓰면 프로토타입 값을 읽거나 대입하게 되므로 Map 으로 모은다.
   const grouped = new Map<string, DevArticleProjectLink[]>();
 

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 /**
  * 클라이언트 윈도잉 무한스크롤 — 이미 로드된 배열을 화면에 점진 렌더한다(추가 fetch 없음).
  * 서버가 ISR 로 전체를 한 번 받고(방문자당 read 0), 여기선 pageSize 만큼만 렌더 → 하단 sentinel 이
- * 뷰포트에 들어오면 count 를 늘린다. 진짜 Firestore 페이지네이션이 아니라 DOM 마운트만 점진화한 것 —
+ * 뷰포트에 들어오면 count 를 늘린다. 진짜 DB 페이지네이션이 아니라 DOM 마운트만 점진화한 것 —
  * 클라 필터·검색(전체 배열 대상)의 즉각성과 무료 한도(읽기)를 그대로 지킨다.
  *
  * @param {T[]} items

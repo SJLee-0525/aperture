@@ -54,9 +54,9 @@ const seedStore = async (): Promise<DevArticleStore> => {
 };
 
 /**
- * 브라우저 로컬 저장소를 Firestore 대신 쓰는 관리자 저장소.
+ * 브라우저 로컬 저장소를 Supabase 대신 쓰는 관리자 저장소.
  *
- * 개발 중에는 Firebase 대신 브라우저 저장소를 사용한다. 여기 저장한 글은
+ * 개발 중에는 Supabase 대신 브라우저 저장소를 사용한다. 여기 저장한 글은
  * 브라우저에만 남고 공개 페이지(서버가 `mocks/dev-articles.ts` 를 읽는다)에는 나타나지 않는다.
  *
  * `firstPublishedAt` 스탬프를 여기서 찍는다. 발행은 폼 저장과 목록 토글 두 경로로 들어오는데,

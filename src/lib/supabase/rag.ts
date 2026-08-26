@@ -117,7 +117,6 @@ const listAllRows = <Row>(
 /**
  * 전체 저장 청크의 id·모델키를 읽는다. 벡터 컬럼을 projection 에서 빼는 것이
  * 핵심이다 — 포함하면 응답이 문서당 수 KB 로 커진다.
- * Firestore 시절의 full resource name 대신 행 id 를 그대로 비교 키로 쓴다.
  */
 const listRagDocumentMeta = async (accessToken: string): Promise<ExistingDocument[]> => {
   const params = new URLSearchParams({ select: "id,embedding_model" });

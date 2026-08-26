@@ -27,7 +27,7 @@ type SupabaseCollectionDescriptor = {
   table: string;
   /** PostgREST select 목록. 테이블마다 스칼라 구성이 달라 공통 기본값을 두지 않는다. */
   select: string;
-  /** PostgREST order 파라미터. 기존 Firestore 쿼리의 정렬 계약과 같다. */
+  /** PostgREST order 파라미터. 정렬에는 항상 id 2차 키가 붙는다. */
   order: string;
   /** published 게이트 컬럼 존재 여부. site 문서·태그 사전에는 없다. */
   hasPublished: boolean;

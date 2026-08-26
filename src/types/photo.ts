@@ -17,7 +17,7 @@ type Exif = {
 type Photo = {
   id: string;
   title: LocalizedText;
-  shotAt: Date; // 촬영일시 (표시 포맷은 렌더 시). Firestore Timestamp ↔ 래퍼가 변환
+  shotAt: Date; // 촬영일시 (표시 포맷은 렌더 시). ISO 문자열 ↔ 디코더가 변환
   camera: string;
   lens: string;
   exif: Exif;

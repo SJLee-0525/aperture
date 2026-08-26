@@ -13,7 +13,7 @@ import { shouldUseMockContent } from "@/lib/content/content-source";
 import styles from "./ImageMigrationPanel.module.css";
 
 const ImageMigrationPanel = () => {
-  // 썸네일 마이그레이션은 실제 Firestore·Storage 연결을 요구한다 — mock 모드에서는 잠근다.
+  // 썸네일 마이그레이션은 실제 DB·Storage 연결을 요구한다 — mock 모드에서는 잠근다.
   const mock = shouldUseMockContent();
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState<MigrationProgress | null>(null);

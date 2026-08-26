@@ -9,7 +9,7 @@ import type { DevArticleInput } from "@/features/admin-dev-articles/_lib/dev-art
 
 /**
  * `assertArticlePublishable` 이 저장소 종류와 무관하게 받는 주변 데이터.
- * mock 은 localStorage 봉투에서, live 는 Firestore projection 에서 같은 모양을 만든다.
+ * mock 은 localStorage 봉투에서, live 는 PostgREST projection 에서 같은 모양을 만든다.
  */
 type ArticlePublishGuardContext = {
   /** slug 중복 검사 대상. 편집 중인 글이 들어 있어도 된다. */

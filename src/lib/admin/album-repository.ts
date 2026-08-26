@@ -41,7 +41,7 @@ const toListItem = ({
 /**
  * live 구현 — 지금까지 훅이 조립하던 함수를 같은 계약으로 모은 것. 함수 자체는 바꾸지 않는다.
  *
- * @returns {AlbumRepository} Firestore 에 붙은 앨범 CRUD.
+ * @returns {AlbumRepository} Supabase 에 붙은 앨범 CRUD.
  */
 const createLiveAlbumRepository = (): AlbumRepository => ({
   newId: newAlbumId,
@@ -57,7 +57,7 @@ const createLiveAlbumRepository = (): AlbumRepository => ({
 /**
  * 현재 콘텐츠 소스에 맞는 앨범 저장소. 첫 호출 결과를 재사용한다.
  *
- * @returns {AlbumRepository} mock 이면 브라우저 로컬, live 면 Firestore 구현.
+ * @returns {AlbumRepository} mock 이면 브라우저 로컬, live 면 Supabase 구현.
  */
 const getAlbumRepository = selectRepository<AlbumRepository>(
   () =>

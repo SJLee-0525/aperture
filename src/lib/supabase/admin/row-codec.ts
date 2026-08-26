@@ -26,8 +26,8 @@ type ArticleRow = {
 
 /**
  * jsonb 에 넣을 값을 JSON 왕복으로 정규화한다. `Date` 는 ISO 문자열이 되고(읽기의
- * `toDate`/`toNullableDate` 와 왕복 무손실), `undefined` 키는 떨어진다 — Firestore 는
- * undefined 필드를 거부해 `fileName` 없는 사진 재저장이 실패할 수 있었는데 여기서 해소된다.
+ * `toDate`/`toNullableDate` 와 왕복 무손실), `undefined` 키는 떨어진다.
+ * 값이 없는 선택 필드(`fileName` 등)를 담은 문서도 그대로 재저장된다.
  * 입력 객체는 변경하지 않는다.
  */
 const toJson = (value: Record<string, unknown>): Record<string, unknown> =>
