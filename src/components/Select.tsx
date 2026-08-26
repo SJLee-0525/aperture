@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useEscapeKey } from "@/hooks/use-escape-key";
+
 import styles from "./Select.module.css";
 
 type Option = { value: string; label: string };
@@ -44,20 +46,15 @@ const Select = ({ value, options, onChange, ariaLabel }: Props) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const current = options.find((option) => option.value === value) ?? options[0];
 
+  useEscapeKey(open, () => setOpen(false));
+
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
   return (

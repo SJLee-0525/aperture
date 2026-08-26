@@ -54,6 +54,9 @@ const usePhotoModal = (
     [navigationEnabled, index, navigationIds, onNavigateStart, goto],
   );
 
+  // Escape 와 좌우 이동이 같은 리스너에 있고 게이트가 top-layer 가 아니라 `keyboardEnabled`
+  // 다. 모달이 스스로 키보드를 넘기는 구간(모바일 패널 펼침)을 표현하므로 `useEscapeKey` 로
+  // 옮기면 그 조건이 사라진다.
   useEffect(() => {
     if (!open || !keyboardEnabled) return;
     const onKey = (event: KeyboardEvent) => {

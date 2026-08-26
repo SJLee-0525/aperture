@@ -7,9 +7,9 @@ import { CloseIcon } from "@/components/CloseIcon";
 import { ArticleTocList } from "@/features/dev-blog/_components/ArticleTocList";
 
 import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import { DICTIONARY } from "@/constants/dictionary";
@@ -57,7 +57,7 @@ const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSel
   const dict = DICTIONARY[lang];
   const mounted = useMounted();
   const panelRef = useFocusTrap(open);
-  const isTopLayer = useOverlayLayer(open);
+  useEscapeKey(open, onClose);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   useScrollLock(open);
@@ -78,16 +78,6 @@ const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSel
     current.focus({ preventScroll: true });
   }, [open, activeId, panelRef]);
 
-  useEffect(() => {
-    if (!open || !isTopLayer) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.stopImmediatePropagation();
-      onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, isTopLayer, onClose]);
 
   if (!mounted || !open) return null;
 

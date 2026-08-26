@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { ShareButton } from "@/components/ShareButton";
 
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import styles from "./Modal.module.css";
@@ -57,20 +56,8 @@ const Modal = ({
   children,
 }: Props) => {
   useScrollLock(open);
-  const isTopLayer = useOverlayLayer(open);
+  useEscapeKey(open, onClose);
   const panelRef = useFocusTrap(open);
-
-  useEffect(() => {
-    if (!open || !isTopLayer) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [isTopLayer, open, onClose]);
 
   // 모달은 클라 상호작용으로만 열린다(초기 SSR·hydration 시 open=false) → typeof 가드로 충분.
   if (!open || typeof document === "undefined") return null;

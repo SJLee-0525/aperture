@@ -540,6 +540,8 @@ const CustomCursor = () => {
       event.preventDefault();
       event.stopPropagation();
     };
+    // 자동 스크롤은 오버레이가 아니라 커서 상태다. `useEscapeKey` 로 옮기면 전역 stack 에
+    // 등록되어 열려 있는 모달의 Escape 를 가로챈다.
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") stopAutoScroll();
     };

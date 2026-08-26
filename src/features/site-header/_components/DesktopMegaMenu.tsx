@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
@@ -109,6 +110,8 @@ const DesktopMegaMenu = () => {
     [],
   );
 
+  useEscapeKey(pinned != null, closeMenu);
+
   useEffect(() => {
     if (!pinned) return;
 
@@ -117,17 +120,10 @@ const DesktopMegaMenu = () => {
         setPinned(null);
       }
     };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMenu();
-    };
 
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [closeMenu, pinned]);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [pinned]);
 
   return (
     <nav ref={navRef} className={styles.mega} aria-label={dict.primaryNavLabel}>

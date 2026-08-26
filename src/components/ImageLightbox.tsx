@@ -184,6 +184,8 @@ const ImageLightbox = ({
     canStart: (target) => !(target instanceof Element && target.closest("button")),
   });
 
+  // Escape 와 방향키를 한 리스너에서 다룬다. `useEscapeKey` 로 Escape 만 떼면 확대 상태에서
+  // 원배율 복귀와 이동의 순서가 갈리므로 자체 리스너를 유지한다.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (!isTopLayer) return;

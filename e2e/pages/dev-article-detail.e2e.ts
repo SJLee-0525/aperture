@@ -191,7 +191,11 @@ test.describe("개발 블로그 상세", () => {
     await page.goto(ARTICLE);
 
     // 이 행은 링크가 아니라 현재 위치 표시다. hover 배경이 다시 깔리면 두 상태를 구분할 수 없다.
-    const current = page.locator('[aria-current="page"]');
+    // 셸 내비도 현재 위치에 aria-current 를 붙이므로 표 안으로 범위를 좁힌다.
+    const table = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "다른 글" }) });
+    const current = table.locator('[aria-current="page"]');
     const before = await current.evaluate((element) => getComputedStyle(element).paddingLeft);
     await current.hover();
     await expect

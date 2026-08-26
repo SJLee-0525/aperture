@@ -17,8 +17,8 @@ import { useChat } from "@/features/chat/_hooks/use-chat";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
 import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import { ROUTES } from "@/constants/routes";
@@ -119,18 +119,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
     )?.content ?? "";
 
   useScrollLock(open, { fixBodyOnMobile: false });
-  const isTopLayer = useOverlayLayer(open);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (open && isTopLayer && event.key === "Escape") {
-        event.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isTopLayer, onClose, open]);
+  useEscapeKey(open, onClose);
 
   useEffect(() => {
     if (!open) return;

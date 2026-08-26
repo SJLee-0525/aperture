@@ -13,6 +13,7 @@ import {
 } from "@/features/site-header/_components/MobileNavigationVisibility";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
@@ -61,15 +62,7 @@ const MobileMenu = () => {
   };
   const close = () => setOpen(false);
 
-  // Escape 로 닫기
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  useEscapeKey(open, close);
 
   // 데스크톱 폭으로 전환되면 자동으로 닫는다 — 데스크톱은 mega-menu 가 담당하고
   // 버거가 CSS 로 숨겨져 시트를 닫을 수단이 없어진다(스크롤 잠금도 걸린 채 남는다).
