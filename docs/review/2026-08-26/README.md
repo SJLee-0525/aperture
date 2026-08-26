@@ -12,6 +12,7 @@
 | [01-resolution.md](01-resolution.md) | 위 계획의 처리 결과 — 리뷰와 달랐던 것, 남은 C7 |
 | [02-correctness.md](02-correctness.md) | 실제로 잘못 동작하는 코드 |
 | [03-public-ui.md](03-public-ui.md) | 방문자가 보는 화면의 접근성·반응형·i18n |
+| [03-plan.md](03-plan.md) | 위 48개 섹션의 실행 계획 — 항목별 판정과 커밋 단위 |
 | [04-admin-cms.md](04-admin-cms.md) | 관리자 CMS |
 | [05-architecture.md](05-architecture.md) | 구조, 중복, 경계 |
 | [06-conventions-and-tests.md](06-conventions-and-tests.md) | 주석 규칙, 컨벤션, 테스트 범위 |
