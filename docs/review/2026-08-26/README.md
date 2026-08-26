@@ -8,6 +8,8 @@
 | 파일 | 내용 |
 | --- | --- |
 | [01-security-and-auth.md](01-security-and-auth.md) | 인증·인가, 서버 경계, 클라이언트 데이터 취급 |
+| [01-plan.md](01-plan.md) | 위 34건의 실행 계획 — 항목별 판정과 커밋 단위 |
+| [01-resolution.md](01-resolution.md) | 위 계획의 처리 결과 — 리뷰와 달랐던 것, 남은 C7 |
 | [02-correctness.md](02-correctness.md) | 실제로 잘못 동작하는 코드 |
 | [03-public-ui.md](03-public-ui.md) | 방문자가 보는 화면의 접근성·반응형·i18n |
 | [04-admin-cms.md](04-admin-cms.md) | 관리자 CMS |
