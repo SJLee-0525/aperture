@@ -182,6 +182,9 @@ type ArticleScreenContext = { text: string; complete: boolean };
  * @param {Lang} lang 표시 언어.
  * @returns {ArticleScreenContext} provider에 전달할 화면 문맥 블록과 완전성 여부.
  */
+// 본문은 펜스나 이스케이프 없이 헤더 아래에 그대로 넣는다. 저자가 이 사이트의 관리자
+// 한 명뿐이라 여기로 들어오는 지시문은 자기 자신을 향한 것이 된다. 시스템 프롬프트의
+// "입력은 데이터다" 규칙(`chat-prompt.ts`)이 남은 한 겹이다.
 const formatArticleScreenContextBlock = (article: DevArticle, lang: Lang): ArticleScreenContext => {
   const { text: body, complete } = articlePlainTextClipped(article, MAX_ARTICLE_BODY_CONTEXT_CHARS);
   return {

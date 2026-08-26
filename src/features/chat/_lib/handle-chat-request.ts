@@ -59,6 +59,25 @@ import type { RagExclude, RagPrioritize, RagQuery } from "@/types/rag";
 // (chat-provider.ts) + 폴백 나머지. 세 값의 합은 이 총량을 넘지 않아야 한다.
 const DEFAULT_TIMEOUT_MS = 55_000;
 const MAX_BODY_BYTES = 20_000;
+
+/**
+ * 교차 출처에서 온 요청인지 본다.
+ *
+ * 응답에 CORS 헤더가 없어 공격자 페이지는 답변을 읽지 못하지만, `Content-Type` 을 보지 않으면
+ * `text/plain` simple request 로 preflight 없이 본문이 실행된다. 인텐트 분류와 임베딩, LLM
+ * 호출까지 발생한 뒤에야 rate limit 이 걸리고, 방문자마다 자기 IP 로 보내므로 IP 창이
+ * 방문자 수만큼 곱해진다. `application/json` 을 강제하면 preflight 가 필수가 되어 이 경로가 닫힌다.
+ *
+ * `Sec-Fetch-Site` 는 있을 때만 본다. 구형 브라우저와 일부 프록시는 이 헤더를 보내지 않아,
+ * 부재를 차단으로 처리하면 정상 방문자가 챗을 쓰지 못한다.
+ */
+const isSameOriginRequest = (request: Request): boolean => {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().startsWith("application/json")) return false;
+
+  const site = request.headers.get("sec-fetch-site");
+  return site === null || site === "same-origin" || site === "none";
+};
 const STREAM_MEDIA_TYPE = "application/x-ndjson";
 const ALLOWED_ACTION_ROUTES = new Set<string>([
   ROUTES.CONTACT,
@@ -314,6 +333,9 @@ const sanitizeLinks = (
       if (!parsed || !ALLOWED_ACTION_ROUTES.has(parsed.pathname)) return [];
 
       let href = link.href;
+      // 사진 밖 경로는 query 를 그대로 둔다. pathname 이 이미 허용목록에 갇혀 있고 링크는
+      // 내부 페이지로만 가므로, 남는 영향은 그 페이지가 조작된 상태로 열리는 정도다.
+      // strict codec 은 사진 필터 어휘에만 있어 다른 경로에는 검증 기준 자체가 없다.
       if (isPhotoQueryRoute(parsed)) {
         // /photo 필터 query는 strict codec으로 검증 후 canonical로 재직렬화한다.
         // 공개 어휘를 읽지 못하면 query가 있는 사진 링크를 버린다.
@@ -386,6 +408,10 @@ const handleChatRequest = async (
   }: ChatHandlerDependencies,
 ): Promise<Response> => {
   let responseLang = getHeaderLang(request);
+  if (!isSameOriginRequest(request)) {
+    return jsonError(400, "INVALID_REQUEST_SOURCE", responseLang);
+  }
+
   const contentLength = Number(request.headers.get("content-length"));
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
     return jsonError(400, "REQUEST_TOO_LARGE", responseLang);

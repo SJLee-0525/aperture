@@ -237,7 +237,10 @@ describe("handleChatRequest", () => {
     const response = await handleChatRequest(
       new Request("http://localhost/api/chat", {
         method: "POST",
-        headers: { "accept-language": "en-US,en;q=0.9" },
+        headers: {
+          "content-type": "application/json",
+          "accept-language": "en-US,en;q=0.9",
+        },
         body: "not-json",
       }),
       { provider: vi.fn() },
@@ -323,13 +326,55 @@ describe("handleChatRequest", () => {
     const response = await handleChatRequest(
       new Request("http://localhost/api/chat", {
         method: "POST",
-        headers: { "content-length": String(MAX_BODY_BYTES + 1) },
+        headers: {
+          "content-type": "application/json",
+          "content-length": String(MAX_BODY_BYTES + 1),
+        },
         body: "{}",
       }),
       { provider: vi.fn() },
     );
 
     expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: { code: "REQUEST_TOO_LARGE", message: "요청이 너무 큽니다." },
+    });
+  });
+
+  it("JSON 이 아닌 Content-Type 은 본문을 읽기 전에 막는다", async () => {
+    const provider = vi.fn();
+    const response = await handleChatRequest(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        headers: { "content-type": "text/plain;charset=UTF-8" },
+        body: JSON.stringify({ lang: "ko", messages: [{ role: "user", content: "안녕" }] }),
+      }),
+      { provider },
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: { code: "INVALID_REQUEST_SOURCE", message: "이 요청은 처리할 수 없습니다." },
+    });
+    expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("교차 출처 Sec-Fetch-Site 는 막고, 헤더가 없으면 통과시킨다", async () => {
+    const crossSite = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "안녕" }] }, {
+        "sec-fetch-site": "cross-site",
+      }),
+      { provider: vi.fn() },
+    );
+    expect(crossSite.status).toBe(400);
+
+    const sameOrigin = await handleChatRequest(
+      createRequest({ lang: "ko", messages: [{ role: "user", content: "안녕" }] }, {
+        "sec-fetch-site": "same-origin",
+      }),
+      { provider: vi.fn().mockResolvedValue({ content: "네" }) },
+    );
+    expect(sameOrigin.status).not.toBe(400);
   });
 
   it("Content-Length 없이 보낸 큰 본문도 상한에서 끊는다", async () => {
