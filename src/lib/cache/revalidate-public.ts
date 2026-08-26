@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag, updateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { authorizeAdminToken } from "@/lib/auth/authorize-admin-token";
@@ -58,7 +58,12 @@ const revalidatePublicPages = async (
       revalidatePath(path);
     }
   }
-  revalidateTag(CHAT_PROFILE_CACHE_TAG, "max");
+  // 컬렉션 태그와 같은 즉시 만료를 쓴다. revalidateTag(tag, "max") 는 stale 표시라
+  // 다음 요청이 낡은 값을 그대로 쓰는데, 이 자리는 관리자가 방금 비공개로 바꾼 항목이
+  // 챗 답변에 실리지 않아야 하는 read-your-own-writes 경로다.
+  // Route Handler 는 updateTag 를 쓸 수 없어(Next 제약) RAG 재생성 경로는 여전히
+  // revalidateTag 다. 그쪽은 배경 갱신이라 즉시성이 필요 없다.
+  updateTag(CHAT_PROFILE_CACHE_TAG);
 };
 
 export { revalidatePublicPages };

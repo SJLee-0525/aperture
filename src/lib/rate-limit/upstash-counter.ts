@@ -6,6 +6,9 @@
  * 분류된 결과로 무엇을 할지는 호출부가 정한다.
  */
 
+/** 재시도해도 같은 결과가 나오는 상태 코드. 나머지 4xx 는 일시적 장애로 다룬다. */
+const PERMANENT_CLIENT_STATUSES = new Set([401, 403, 404]);
+
 type UpstashEnvironment = Record<string, string | undefined>;
 
 type UpstashCredentials = { url: string; token: string };
@@ -13,8 +16,10 @@ type UpstashCredentials = { url: string; token: string };
 /**
  * EVAL 한 번의 결과.
  *
- * `client` 와 `server` 를 나누는 이유는 4xx 가 자격증명이나 토큰 권한 문제여서 재시도해도
- * 같은 결과가 나오는 반면, 5xx 와 `network` 는 일시적 장애이기 때문이다.
+ * `client` 와 `server` 를 나누는 기준은 재시도로 달라지는가다. 401·403·404 는 자격증명이나
+ * 토큰 권한 문제라 같은 요청이 계속 실패하지만, 429(무료 티어 일일 명령 상한)와 나머지
+ * 4xx 는 시간이 지나면 풀리므로 5xx 와 같은 일시적 장애로 분류한다. 429 를 `client` 에
+ * 넣으면 챗을 전역 차단하는 호출부가 자격증명이 멀쩡한데도 그날 남은 시간 챗을 끈다.
  */
 type UpstashEvalResult =
   | { ok: true; value: unknown }
@@ -81,7 +86,7 @@ const evalUpstashScript = async (options: UpstashEvalOptions): Promise<UpstashEv
     return { ok: false, reason: "network" };
   }
 
-  if (response.status >= 400 && response.status < 500) {
+  if (PERMANENT_CLIENT_STATUSES.has(response.status)) {
     return { ok: false, reason: "client", status: response.status };
   }
   if (!response.ok) return { ok: false, reason: "server", status: response.status };

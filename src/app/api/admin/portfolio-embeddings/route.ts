@@ -96,6 +96,9 @@ export async function POST(request: Request) {
     );
     await replaceRagDocuments(idToken, chunks, vectors, model, target);
     // 프로필 스냅샷 캐시 무효화. maintenance 의 전체 재생성이 콘텐츠 반영을 보는 유일한 서버측 경로다.
+    // 여기서는 updateTag 를 쓸 수 없다. Next 가 Server Action 전용으로 제한한다.
+    // 관리자 쓰기 직후 무효화(revalidate-public.ts)는 즉시 만료를 쓰지만, RAG 재생성 뒤
+    // 갱신은 배경 작업이라 stale-while-revalidate 로 충분하다.
     revalidateTag(CHAT_PROFILE_CACHE_TAG, "max");
     return NextResponse.json({
       count: chunks.length,

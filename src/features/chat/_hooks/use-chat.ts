@@ -77,25 +77,32 @@ const readEventStream = async (response: Response, onEvent: (event: ChatStreamEv
     onEvent(event);
   };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      const event: unknown = JSON.parse(line);
+  // 서버가 스트림 도중 오류 이벤트를 보내는 정상 경로에서도 여기서 예외가 나간다.
+  // reader 를 풀지 않으면 그 스트림이 잠긴 채 남는다. sse-stream.ts 와 같은 형태다.
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      buffer += decoder.decode(value, { stream: !done });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const event: unknown = JSON.parse(line);
+        if (!isStreamEvent(event)) throw new Error("Invalid chat stream event");
+        emit(event);
+      }
+      if (done) break;
+    }
+    if (buffer.trim()) {
+      const event: unknown = JSON.parse(buffer);
       if (!isStreamEvent(event)) throw new Error("Invalid chat stream event");
       emit(event);
     }
-    if (done) break;
+    if (!terminalSeen) throw new Error("Chat stream ended before a terminal event");
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
   }
-  if (buffer.trim()) {
-    const event: unknown = JSON.parse(buffer);
-    if (!isStreamEvent(event)) throw new Error("Invalid chat stream event");
-    emit(event);
-  }
-  if (!terminalSeen) throw new Error("Chat stream ended before a terminal event");
 };
 
 /**
@@ -248,6 +255,9 @@ const useChat = (
           });
         })
         .catch((error: unknown) => {
+          // 요청을 끊지 않으면 서버의 cancel 훅이 호출되지 않아, 방문자가 이미 오류
+          // 화면을 보는 동안에도 진행 중인 LLM 요청이 끝까지 토큰을 소비한다.
+          controller.abort();
           if (error instanceof DOMException && error.name === "AbortError") return;
           const content =
             error instanceof ChatPublicError ? error.message : DICTIONARY[lang].chatErrorFallback;
@@ -266,6 +276,9 @@ const useChat = (
           setMessages(messagesRef.current);
         })
         .finally(() => {
+          // 참조를 버리기 전에 끊는다. 순서를 바꾸면 언마운트 abort 가 null 을 보고
+          // 아무것도 중단하지 못한다.
+          controller.abort();
           if (requestRef.current === controller) requestRef.current = null;
           replyingRef.current = false;
           setIsReplying(false);

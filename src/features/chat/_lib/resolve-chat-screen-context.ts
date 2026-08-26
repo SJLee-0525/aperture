@@ -217,9 +217,39 @@ const entryOf = (
 };
 
 /**
- * 열린 모달의 화면 문맥을 찾는다. 대상이 없으면 데이터를 읽지 않는다. live 환경에서는
- * 사진 위치처럼 수정될 수 있는 필드가 오래된 RAG 스냅샷에 남지 않도록 최신 조회를 우선한다.
- * 최신 조회가 실패하거나 항목이 없을 때만 캐시된 스냅샷으로 물러난다.
+ * 최신 공개 데이터에서 항목을 찾은 결과.
+ *
+ * `found: false` 와 조회 실패를 반드시 구분한다. 둘을 합치면 관리자가 방금 비공개로 바꾼
+ * 항목이 캐시 스냅샷에서 되살아나 프롬프트에 실린다.
+ */
+type FreshEntry = { queried: true; entry: string | undefined } | { queried: false };
+
+/**
+ * 최신 공개 데이터에서 열린 항목을 찾는다. 로더가 없으면(mock) 조회하지 않는다.
+ *
+ * @param {ChatContextOpenTarget} openTarget 현재 열린 target.
+ * @param {(() => Promise<ScreenContextLookup>) | undefined} getFreshScreenLookup 최신 lookup 로더.
+ * @returns {Promise<FreshEntry>} 조회 성공 여부와 찾은 항목.
+ */
+const lookupFreshEntry = async (
+  openTarget: ChatContextOpenTarget,
+  getFreshScreenLookup?: () => Promise<ScreenContextLookup>,
+): Promise<FreshEntry> => {
+  if (!getFreshScreenLookup) return { queried: false };
+  try {
+    return { queried: true, entry: entryOf(await getFreshScreenLookup(), openTarget) };
+  } catch {
+    // 최신 조회 장애가 채팅 전체 장애가 되지 않도록 캐시로 계속한다.
+    return { queried: false };
+  }
+};
+
+/**
+ * 열린 모달의 화면 문맥을 찾는다. 대상이 없으면 데이터를 읽지 않는다.
+ *
+ * live 환경에서는 최신 조회가 판정의 기준이다. 조회에 성공했는데 항목이 없으면 그 항목은
+ * 더 이상 공개가 아니므로 문맥을 만들지 않는다. 캐시된 스냅샷으로 물러나는 것은 조회
+ * 자체가 실패했을 때뿐이다. 글 경로(`handle-chat-request`)도 같은 계약이다.
  *
  * @param {ChatContextOpenTarget | undefined} openTarget 현재 열린 target.
  * @param {{ getScreenLookup: () => Promise<ScreenContextLookup>; getFreshScreenLookup?: () => Promise<ScreenContextLookup> }} deps lookup 로더.
@@ -234,15 +264,8 @@ const resolveScreenContext = async (
 ): Promise<string | undefined> => {
   if (!openTarget) return undefined;
 
-  let fresh: string | undefined;
-  if (deps.getFreshScreenLookup) {
-    try {
-      fresh = entryOf(await deps.getFreshScreenLookup(), openTarget);
-    } catch {
-      // 최신 조회 장애가 채팅 전체 장애가 되지 않도록 캐시로 계속한다.
-    }
-  }
-  const entry = fresh ?? entryOf(await deps.getScreenLookup(), openTarget);
+  const fresh = await lookupFreshEntry(openTarget, deps.getFreshScreenLookup);
+  const entry = fresh.queried ? fresh.entry : entryOf(await deps.getScreenLookup(), openTarget);
   return entry ? formatScreenContextBlock(entry) : undefined;
 };
 
@@ -250,7 +273,9 @@ export {
   buildScreenContextLookup,
   entryOf,
   formatArticleScreenContextBlock,
+  lookupFreshEntry,
   MAX_ARTICLE_BODY_CONTEXT_CHARS,
   MAX_SCREEN_CONTEXT_CHARS,
   resolveScreenContext,
 };
+export type { ScreenContextLookup };

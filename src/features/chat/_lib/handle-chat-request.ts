@@ -24,12 +24,17 @@ import {
   recordChatInputChars,
   type ChatRateLimiter,
 } from "@/features/chat/_lib/chat-rate-limit";
-import { ChatRequestError, parseChatRequest } from "@/features/chat/_lib/chat-schema";
+import {
+  ChatRequestError,
+  MAX_BODY_BYTES,
+  parseChatRequest,
+} from "@/features/chat/_lib/chat-schema";
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
 import {
   buildScreenContextLookup,
   entryOf,
   formatArticleScreenContextBlock,
+  lookupFreshEntry,
   resolveScreenContext,
 } from "@/features/chat/_lib/resolve-chat-screen-context";
 
@@ -47,6 +52,7 @@ import { fetchDevArticleById } from "@/lib/supabase/public/dev-articles";
 
 import type { ChatContext, ChatContextOpenTarget } from "@/features/chat/_lib/chat-context";
 import type { ChatIntentClassifier } from "@/features/chat/_lib/openai-intent-classifier";
+import type { ScreenContextLookup } from "@/features/chat/_lib/resolve-chat-screen-context";
 import type { ChatReference, ChatReferenceRequest, ChatReferenceType } from "@/types/chat";
 import type { ChatLink } from "@/types/chat";
 import type { DevArticle } from "@/types/dev-article";
@@ -58,7 +64,6 @@ import type { RagExclude, RagPrioritize, RagQuery } from "@/types/rag";
 // 예산 배분: 인텐트 분류(CHAT_INTENT_TIMEOUT_MS) + primary 무응답 상한
 // (chat-provider.ts) + 폴백 나머지. 세 값의 합은 이 총량을 넘지 않아야 한다.
 const DEFAULT_TIMEOUT_MS = 55_000;
-const MAX_BODY_BYTES = 20_000;
 
 /**
  * 교차 출처에서 온 요청인지 본다.
@@ -229,10 +234,11 @@ const isPhotoQueryRoute = (parsed: { pathname: string; searchParams: URLSearchPa
  * 채팅은 그대로 이어 간다(글은 fail-closed, 채팅은 fail-open).
  * 검증에 읽은 문서로 화면 문맥까지 만들어 돌려준다. 같은 글을 두 번 읽지 않는다.
  *
- * 나머지 종류는 캐시된 스냅샷의 화면 문맥 lookup 에 그 id 가 있는지로 확인한다.
- * 스냅샷에 없어도 target 을 버리지는 않는다. 방금 공개한 항목이 캐시에 아직 없을 수 있고
- * `resolveScreenContext` 의 최신 조회가 그 경우를 처리한다. 확인되지 않은 target 은
- * `verified` 가 거짓이라 프로필 섹션을 열지 못한다.
+ * 나머지 종류는 최신 공개 데이터의 화면 문맥 lookup 에 그 id 가 있는지로 확인한다.
+ * 최신 조회에 성공했는데 없으면 더 이상 공개가 아니므로 target 을 버린다. 조회 자체가
+ * 실패하거나 mock 이라 로더가 없을 때만 캐시된 스냅샷을 본다. `resolveScreenContext` 와
+ * 같은 lookup 을 쓰므로 화면 문맥과 섹션 게이트가 다른 판정을 내지 않는다.
+ * 확인되지 않은 target 은 `verified` 가 거짓이라 프로필 섹션을 열지 못한다.
  *
  * @param {ChatContext | undefined} context 파싱을 마친 요청 문맥.
  * @param {Lang} lang 화면 문맥을 표시할 언어.
@@ -247,11 +253,15 @@ const resolveContextTarget = async (
   loadArticle: ((id: string, signal?: AbortSignal) => Promise<DevArticle | null>) | undefined,
   getSnapshot: () => Promise<ProfileSnapshot>,
   signal: AbortSignal,
+  getFreshScreenLookup?: () => Promise<ScreenContextLookup>,
 ): Promise<ResolvedChatTarget> => {
   const openTarget = context?.openTarget;
   if (!openTarget) return {};
 
   if (openTarget.type !== "article") {
+    const fresh = await lookupFreshEntry(openTarget, getFreshScreenLookup);
+    // 최신 조회가 항목을 못 찾았다면 방금 비공개로 바뀐 것이다. 캐시로 되살리지 않는다.
+    if (fresh.queried) return fresh.entry === undefined ? {} : { openTarget, verified: true };
     try {
       return {
         openTarget,
@@ -535,6 +545,15 @@ const handleChatRequest = async (
       : undefined;
   // 열린 글 검증은 문서 한 건만 읽는다. mock 은 캐시된 스냅샷의 대조표를 쓴다.
   const getArticle = contentSource === "live" ? loadArticle : undefined;
+  // 섹션 게이트(verified)와 화면 문맥이 같은 조회 결과를 보도록 하나의 promise 를 공유한다.
+  // 나뉘면 한쪽만 비공개를 반영해 누수가 반만 닫힌다.
+  let freshLookupPromise: Promise<ScreenContextLookup> | undefined;
+  const getFreshScreenLookup = getFreshData
+    ? () =>
+        (freshLookupPromise ??= getFreshData().then((data) =>
+          buildScreenContextLookup(data, chatRequest.lang),
+        ))
+    : undefined;
 
   const generateMessage = async (onContentDelta?: (delta: string) => void) => {
     // 해석은 섹션 선택, 화면 문맥, RAG 우선 검색 앞의 공통 단계다. 세 곳이 각자 판단하면
@@ -548,6 +567,7 @@ const handleChatRequest = async (
           getArticle,
           getSnapshot,
           controller.signal,
+          getFreshScreenLookup,
         );
     // 공개 데이터에서 찾은 target 만 섹션을 연다. 없는 id 로 조회를 유발할 수 없다.
     const openTargetSection =
@@ -583,9 +603,7 @@ const handleChatRequest = async (
         ? Promise.resolve(resolved.screenContext)
         : resolveScreenContext(resolved.openTarget, {
             getScreenLookup: async () => (await getSnapshot()).screenLookup,
-            getFreshScreenLookup: getFreshData
-              ? async () => buildScreenContextLookup(await getFreshData(), chatRequest.lang)
-              : undefined,
+            getFreshScreenLookup,
           }).catch(() => undefined),
     ]);
     const instructions = buildChatInstructions(chatRequest.lang, profileContext, screenContext);
@@ -710,4 +728,4 @@ const handleChatRequest = async (
   }
 };
 
-export { handleChatRequest, MAX_BODY_BYTES };
+export { handleChatRequest };

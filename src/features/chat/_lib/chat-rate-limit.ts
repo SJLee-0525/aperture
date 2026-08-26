@@ -231,11 +231,18 @@ const createUpstashChatRateLimiter = (options: Partial<UpstashRateLimitOptions> 
       return config.fallback(request);
     }
 
-    // 4xx 는 자격증명이나 토큰 권한 문제라 재시도해도 같은 결과다. 인스턴스 제한기로 물러나면
-    // 배포 설정 오류가 드러나지 않으므로 채팅을 비활성화한다.
+    // client 는 401·403·404 뿐이다. 자격증명이나 토큰 권한 문제라 인스턴스 제한기로
+    // 물러나면 배포 설정 오류가 드러나지 않으므로 채팅을 비활성화한다.
     if (!outcome.ok && outcome.reason === "client") throw new ChatRateLimitConfigurationError();
-    // 그 밖의 실패는 일시적 장애로 보고 인스턴스 제한기로 전환한다.
-    if (!outcome.ok || !Array.isArray(outcome.value)) return config.fallback(request);
+    // 429(무료 티어 일일 명령 상한)를 포함한 그 밖의 실패는 일시적 장애로 보고
+    // 인스턴스 제한기로 전환한다. 로그에 남겨 조용한 성능 저하로 묻히지 않게 한다.
+    if (!outcome.ok) {
+      console.warn(
+        `[chat-rate-limit] upstash ${outcome.reason}${"status" in outcome ? ` ${outcome.status}` : ""}; falling back to in-memory limiter`,
+      );
+      return config.fallback(request);
+    }
+    if (!Array.isArray(outcome.value)) return config.fallback(request);
 
     const count = Number(outcome.value[0]);
     const ttlMs = Number(outcome.value[1]);

@@ -29,16 +29,30 @@ const byOrder = <T extends { order: number }>(items: T[]) =>
     .filter((item) => !("published" in item) || item.published === true)
     .toSorted((a, b) => a.order - b.order);
 
-const line = (label: string, value: string) => (value ? `${label}: ${value}` : null);
-const section = (title: string, lines: Array<string | null>) =>
-  [`## ${title}`, ...lines.filter((item): item is string => Boolean(item))].join("\n");
+/**
+ * 프로필 문맥의 한 덩어리. 문자열 구분자로 나누지 않는다.
+ *
+ * 블록 경계를 `"\n\n"` 에 맡기면 관리자가 소개 글에서 Enter 를 두 번 누른 순간 값 안에
+ * 같은 구분자가 들어가 섹션이 그 자리에서 쪼개진다. 뒷조각은 `##` 로 시작하지 않으니
+ * 필터가 통째로 버리고, 챗봇은 연락처나 프로젝트 목록을 모른다고 답한다.
+ */
+type ProfileBlock = { section: string; text: string };
+
+/** 값의 개행을 눌러 담는다. 한 줄 = 한 항목이라는 형식을 관리자 입력이 깨지 않게 한다. */
+const line = (label: string, value: string) =>
+  value ? `${label}: ${value.replace(/\s*\n\s*/g, " ")}` : null;
+
+const section = (title: string, lines: Array<string | null>): ProfileBlock => ({
+  section: title,
+  text: [`## ${title}`, ...lines.filter((item): item is string => Boolean(item))].join("\n"),
+});
 
 const preview = (image: ImageMeta | null | undefined): ChatReference["image"] => {
   const source = image?.thumbnail ?? image?.preview ?? image;
   return source?.url ? { url: source.url, width: source.w, height: source.h } : null;
 };
 
-const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
+const formatProfileContext = (data: ChatProfileData, lang: Lang): ProfileBlock[] => {
   const tagById = new Map(data.site.tags.map((tag) => [tag.id, pickText(tag, lang)]));
   const articleTagById = new Map(data.articleTags.map((tag) => [tag.id, pickText(tag, lang)]));
   const publicProjects = byOrder(data.devProjects);
@@ -49,7 +63,7 @@ const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
   const publicAlbums = byOrder(data.albums);
 
   return [
-    "# PROFILE_CONTEXT",
+    { section: HEADER_SECTION, text: "# PROFILE_CONTEXT" },
     section("Profile", [
       line("Name", pickText(data.site.name, lang)),
       line("Tagline", pickText(data.site.tagline, lang)),
@@ -138,8 +152,11 @@ const formatProfileContext = (data: ChatProfileData, lang: Lang): string => {
           .join(" | "),
       ),
     ]),
-  ].join("\n\n");
+  ];
 };
+
+/** 섹션 필터가 항상 남기는 머리글 블록. 프롬프트가 문맥의 시작을 이 줄로 식별한다. */
+const HEADER_SECTION = "__header__";
 
 const PROFILE_SECTION_TITLES: Record<ProfileSection, string> = {
   profile: "Profile",
@@ -148,17 +165,26 @@ const PROFILE_SECTION_TITLES: Record<ProfileSection, string> = {
   photography: "Photography",
 };
 
-const selectFormattedProfileContext = (context: string, sections: ProfileSection[]): string => {
-  const headings = new Set(
-    sections.map((sectionName) => `## ${PROFILE_SECTION_TITLES[sectionName]}`),
+/**
+ * 의도 분류가 고른 섹션만 남긴다. 블록 배열을 다루므로 값 안의 개행이 경계에 영향을 주지 않는다.
+ *
+ * @param {ProfileBlock[]} blocks 전체 프로필 블록.
+ * @param {ProfileSection[]} sections 남길 섹션.
+ * @returns {ProfileBlock[]} 머리글과 선택된 섹션.
+ */
+const selectProfileBlocks = (
+  blocks: ProfileBlock[],
+  sections: ProfileSection[],
+): ProfileBlock[] => {
+  const titles = new Set(sections.map((name) => PROFILE_SECTION_TITLES[name]));
+  return blocks.filter(
+    (block) => block.section === HEADER_SECTION || titles.has(block.section),
   );
-  return context
-    .split("\n\n")
-    .filter(
-      (block) => block.startsWith("# PROFILE_CONTEXT") || headings.has(block.split("\n")[0] ?? ""),
-    )
-    .join("\n\n");
 };
+
+/** 프롬프트에 실을 문자열로 합친다. 블록을 문자열로 되돌리는 곳은 여기 하나다. */
+const renderProfileBlocks = (blocks: ProfileBlock[]): string =>
+  blocks.map((block) => block.text).join("\n\n");
 
 /**
  * 사진 링크의 query를 검증할 공개 태그, 카메라, 사진 id를 만든다.
@@ -233,7 +259,8 @@ const buildProfileSnapshot = unstable_cache(
   // v6: 링크 검증용 linkVocabulary 추가.
   // v7: 블로그 글 projection · article 참조 카드 · article 화면 문맥 추가.
   // v8: 글 목록 상한(최근 12건) · 글 줄에 문서 ID 표기.
-  ["chat-profile-context-v8-content-source"],
+  // v9: context 가 문자열에서 섹션 블록 배열로 바뀜.
+  ["chat-profile-context-v9-content-source"],
   { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS, tags: [CHAT_PROFILE_CACHE_TAG] },
 );
 
@@ -250,12 +277,15 @@ type ProfileSnapshot = Awaited<ReturnType<typeof buildProfileSnapshot>>;
 const loadProfileSnapshot = (lang: Lang, source: ContentSource): Promise<ProfileSnapshot> =>
   buildProfileSnapshot(lang, source);
 
-const appendRagChunks = (baseContext: string, chunks: StoredRagChunkMeta[]): string => {
-  if (chunks.length === 0) return baseContext;
-  return `${baseContext}\n\n${section(
-    "Highly Relevant Portfolio Context (Vector Search)",
-    chunks.map((item) => `[${item.sourceType}:${item.sourceId}] ${item.text}`),
-  )}`;
+const appendRagChunks = (blocks: ProfileBlock[], chunks: StoredRagChunkMeta[]): ProfileBlock[] => {
+  if (chunks.length === 0) return blocks;
+  return [
+    ...blocks,
+    section(
+      "Highly Relevant Portfolio Context (Vector Search)",
+      chunks.map((item) => `[${item.sourceType}:${item.sourceId}] ${item.text}`),
+    ),
+  ];
 };
 
 /**
@@ -289,9 +319,9 @@ const buildProfileContextFromSnapshot = async (
   exclude?: RagExclude,
 ): Promise<string> => {
   const source = getContentSource();
-  const context = (await getSnapshot()).context;
+  const blocks = (await getSnapshot()).context;
   // 벡터 검색 결과가 없어도 섹션 요약은 유지한다.
-  const formatted = sections?.length ? selectFormattedProfileContext(context, sections) : context;
+  const selected = sections?.length ? selectProfileBlocks(blocks, sections) : blocks;
 
   if (source === "live" && sections?.length && query?.text) {
     try {
@@ -300,13 +330,13 @@ const buildProfileContextFromSnapshot = async (
       console.info(
         `[chat-rag] sections=${sections.join(",")} ${ragQueryLogFields(query)} prioritize=${prioritize ? `${prioritize.sourceType}:${prioritize.sourceId}` : "none"} exclude=${exclude ? `${exclude.sourceType}:${exclude.sourceId}` : "none"} chunks=${relevant.length}`,
       );
-      return appendRagChunks(formatted, relevant);
+      return renderProfileBlocks(appendRagChunks(selected, relevant));
     } catch (error) {
       console.warn("RAG vector search failed during context build:", error);
     }
   }
 
-  return formatted;
+  return renderProfileBlocks(selected);
 };
 
 const resolveReferencesWithRefresh = async (
@@ -344,7 +374,8 @@ export {
   formatProfileContext,
   formatProfileReferences,
   loadProfileSnapshot,
+  renderProfileBlocks,
   resolveReferencesWithRefresh,
-  selectFormattedProfileContext,
+  selectProfileBlocks,
 };
-export type { ProfileSnapshot };
+export type { ProfileBlock, ProfileSnapshot };

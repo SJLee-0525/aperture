@@ -2,8 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ChatProviderUnavailableError } from "@/features/chat/_lib/chat-provider";
 import { ChatRateLimitConfigurationError } from "@/features/chat/_lib/chat-rate-limit";
+import { MAX_BODY_BYTES } from "@/features/chat/_lib/chat-schema";
 import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
-import { handleChatRequest, MAX_BODY_BYTES } from "@/features/chat/_lib/handle-chat-request";
+import { handleChatRequest } from "@/features/chat/_lib/handle-chat-request";
+
+import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 
 import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
 import type { ChatReference } from "@/types/chat";
@@ -17,12 +20,26 @@ const createRequest = (body: unknown, headers?: HeadersInit) =>
   });
 
 const EMPTY_LOOKUP = { photo: {}, work: {}, award: {}, project: {}, article: {} };
+/** 관리자가 방금 비공개로 바꿔 최신 조회에 아무 항목도 없는 상태. */
+const FRESH_WITHOUT_PHOTO = {
+  site: EMPTY_SITE_CONFIG,
+  devConfig: EMPTY_DEV_CONFIG,
+  devProjects: [],
+  musicConfig: EMPTY_MUSIC_CONFIG,
+  musicWorks: [],
+  musicAwards: [],
+  musicMedia: [],
+  photos: [],
+  albums: [],
+  articles: [],
+  articleTags: [],
+};
 const createSnapshot = (overrides?: Partial<ReturnType<typeof baseSnapshot>>) => ({
   ...baseSnapshot(),
   ...overrides,
 });
 const baseSnapshot = () => ({
-  context: "# PROFILE_CONTEXT\ncontext",
+  context: [{ section: "__header__", text: "# PROFILE_CONTEXT\ncontext" }],
   references: [] as ChatReference[],
   screenLookup: EMPTY_LOOKUP,
   articleSlugById: {} as Record<string, string>,
@@ -410,7 +427,10 @@ describe("handleChatRequest", () => {
     const rateLimiter = vi.fn(() => ({ allowed: true, retryAfterSeconds: 0 }));
 
     const response = await handleChatRequest(
-      createRequest({ lang: "ko", messages: [{ role: "user", content: "x".repeat(30_000) }] }),
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "x".repeat(MAX_BODY_BYTES + 1) }],
+      }),
       { provider, rateLimiter },
     );
 
@@ -791,6 +811,45 @@ describe("handleChatRequest", () => {
 
     expect(response.status).toBe(200);
     expect(buildContext).not.toHaveBeenCalled();
+  });
+
+  /**
+   * 관리자가 사진을 비공개로 바꾼 직후, 그 딥링크를 열어 둔 방문자가 질문하는 경우.
+   * 섹션 게이트(verified)와 화면 문맥이 서로 다른 판정을 보면 누수가 반만 닫힌다.
+   * 화면 문맥이 빠져도 그 섹션의 RAG 검색이 열리면 같은 항목이 다른 경로로 나온다.
+   */
+  it("최신 조회에서 사라진 항목은 섹션 조회도 열지 못한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_USE_MOCK", "0");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    const provider = vi.fn().mockResolvedValue({ content: "무엇을 도와드릴까요?" });
+    const buildContext = vi.fn(async () => "context");
+    // 최신 데이터에는 그 사진이 없다. 캐시 스냅샷에는 아직 남아 있다.
+    const loadFreshData = vi.fn(async () => FRESH_WITHOUT_PHOTO);
+
+    const response = await handleChatRequest(
+      createRequest({
+        lang: "ko",
+        messages: [{ role: "user", content: "asdf" }],
+        context: { pathname: "/ko/photo", openTarget: { type: "photo", id: "p01" } },
+      }),
+      {
+        provider,
+        loadSnapshot: async () =>
+          createSnapshot({
+            screenLookup: { ...EMPTY_LOOKUP, photo: { p01: "Photo: 새벽의 항구" } },
+          }),
+        buildContext,
+        loadFreshData,
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(loadFreshData).toHaveBeenCalled();
+    // 섹션이 열리지 않아 프로필 조회 자체가 없다.
+    expect(buildContext).not.toHaveBeenCalled();
+    expect(provider.mock.calls[0]?.[0].instructions).not.toContain("# SCREEN_CONTEXT");
+    vi.unstubAllEnvs();
   });
 
   it("스냅샷에서 찾은 열린 항목은 그 섹션으로 조회한다", async () => {
