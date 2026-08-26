@@ -1,0 +1,202 @@
+# 기각·보류 편
+
+작성일 2026-08-26 / 대상 `refactor/code-review-2` (5a9f279)
+입력: 교차 검증 보고서 4벌 (보안·인증, 아키텍처·정확성, UI, 규약·테스트 통합)
+
+이 문서는 수정 계획에 들어가면 안 되는 것을 모은다. 1차 리뷰가 올렸지만 코드로 반증된 주장, 집계가 틀린 수치, 코드만으로는 판정할 수 없어 실측이 필요한 것, 그리고 사실이지만 이 프로젝트에서 고칠 이유가 없는 것이다.
+
+전건 기각은 1건(`BUG-S-20`)뿐이다. 나머지는 발견 자체는 실재하되 그 안의 특정 하위 주장이 무너진 경우다. 그래서 "이 발견은 없던 일"이 아니라 "이 근거는 쓰지 말라"로 읽어야 한다.
+
+---
+
+## 1. 코드로 반증된 주장
+
+### 1.1 전건 기각
+
+`BUG-S-20` (`splitOversized` 의 빈 문자열 push). 코드 사실은 맞다. `article-rag-chunks.ts:53` 의 `parts.push(rest.slice(0, cut).trim())` 는 trim 결과가 빈 문자열이어도 push 한다. 그러나 그 상태에 도달할 수 없다.
+
+1. 첫 이터레이션 이후 `rest = rest.slice(cut).trim()`(`:54`)이라 `rest[0]` 은 항상 비공백이다.
+2. `cut` 은 `boundary > 0 ? boundary : safeLimit`(`:51`)이라 항상 1 이상이므로 `rest.slice(0, cut)` 은 `rest[0]` 을 포함한다.
+3. 따라서 빈 push 는 첫 이터레이션에서 입력이 1,200자 이상의 연속 공백으로 시작할 때만 가능하다.
+4. 입력 `piece` 는 `articleBlockText` 를 거쳐 `normalizeWhitespace`(`article-plain-text.ts:28-33`)를 통과한다. 이 함수가 줄마다 `.trim()` 하고 `.filter(Boolean)` 으로 빈 줄을 버리므로 선두 공백이 남지 않는다.
+
+1차 보고는 호출 체인을 끝까지 따라가지 않았다. 방어 한 줄(`if (piece) parts.push(piece)`)은 값싸지만, 지적된 "무의미한 재임베딩"은 현재 일어나지 않는다.
+
+### 1.2 UI 하위 주장 9건
+
+| # | 무너진 주장 | 반증한 코드 |
+| --- | --- | --- |
+| 1 | `UI-P-07` "포커스 표시가 없는 인터랙티브 요소 19종" | `outline: none` 선언은 저장소 전체에서 7곳뿐이다(`AdminInput:11`, `ImageLightbox:7`, `ChatPanel:495`, `ContactView:112`, `CustomScrollbar:15`, `MobileMenu:162`, `SearchBox:27`). 나열된 `PhotoTile .tile`·`Chip`·`ViewToggle`·`Select .trigger`·`FilterBar .filterBtn`·`PhotoModal .nav`·`LocationList .item`·`SearchResults .hit`·`DetailHero .back` 은 UA 기본 `:focus-visible` 링을 그대로 받는다. WCAG 2.4.7 위반으로 볼 근거가 없다. |
+| 2 | `UI-P-11` "세 모달 모두 첫 Tab 이 스크림에 걸린다" | `Modal.tsx:86` 의 `panelRef=useFocusTrap` 는 `.panel` 에 붙고 스크림(`:84`)은 그 형제다. `use-focus-trap.ts:31` 의 `container.querySelectorAll` 수집 범위 밖이고, `:41-47` 의 순환 로직상 Tab 으로 닿을 수도 없다. 해당하는 것은 `PhotoModal`·`ImageLightbox` 둘뿐이다. |
+| 3 | `UI-S-10` "`LocationList`·`Select` 의 스크롤 컨테이너에 id 가 없어 `aria-controls=""` 가 된다" | `LocationList.tsx:66` 에 `id="map-location-scroll-container"`, `Select.tsx:79` 에 `id="filter-select-scroll-container"` 가 있다. `Modal.tsx:81`·`PhotoModal.tsx:539`·`OnDemandPhotoModal.tsx:141`·`ChatPanel.tsx:250` 도 전부 id 를 갖는다. id 가 없는 것은 `ArticleTocList` 하나뿐이다. |
+| 4 | `UI-S-11` / `UI-P-31` "IntroSplash 가 1.4초 동안 입력을 막는다" | `pointer-events` 가 100% 키프레임에만 선언돼 있어 암묵 0% 키프레임(computed `auto`)과의 discrete 보간이 적용된다. 진행률 0.5, 즉 0.7초에 `none` 으로 전환된다. 콘텐츠가 드러나기 시작하는 0.77초와 거의 겹치지 않는다. |
+| 5 | `UI-S-11` "모든 하드 내비게이션에 LCP 하한 1초가 생긴다" | Chrome 의 LCP 는 가림(occlusion) 판정을 하지 않는다. 불투명 레이어 뒤 요소도 페인트로 계상되므로 스플래시가 LCP 를 지연시킨다는 근거가 코드에 없다. |
+| 6 | `UI-S-22` "`.controls > :not([data-mobile-menu-trigger]):not([data-mobile-menu-layer])` 는 죽은 규칙" | `:not()` 은 제외 조건이므로 매칭 대상이 없어도 규칙 자체는 정상 동작한다. 잉여 조건일 뿐 기능이 죽지 않는다. 같은 항목의 다른 셀렉터(`html[data-mobile-navigation-hidden] .header [data-mobile-menu-layer]`)는 실제로 죽은 규칙이 맞다(`MobileMenu.tsx:134` 가 `document.body` 로 포털한다). |
+| 7 | `UI-S-25` / `UI-P-30` "1px 테두리 포커스 표시가 WCAG 1.4.11 의 3:1 을 못 맞춘다" | 상대휘도 직접 계산 결과 `--accent` `#0066cc` 대 `--surface-2` `#f3f3f5` 가 5.02:1, 대 `--surface-1` `#fafafa` 가 약 5.0:1 이다. 통과한다. 함께 인용된 SC 2.4.13 은 AAA 라 AA 판정 대상이 아니고, SC 2.4.11 은 대비와 무관한 기준이다. |
+| 8 | `UI-A-07` "`.srLabel` 은 `globals.css` 의 전역 `.sr-only` 하나로 대체할 수 있다" | `globals.css:346-357` 의 프리미티브는 `.u-label`·`.u-mono` 둘뿐이고 `.sr-only` 는 저장소에 존재하지 않는다. sr-only 는 `ChatPanel.module.css:538` 의 로컬 `.srOnly` 가 유일하다. 스킵 링크 작업(`UI-S-03`)도 이 유틸 신설이 선행돼야 한다. |
+| 9 | `UI-A-10` "raw input 의 모서리가 프리미티브와 다르다" / `UI-A-19` "빈 값에서 NaN 이 저장된다" | 전자는 `globals.css:30` 의 `--r-sm: 0px` 이라 raw input 계산값과 동일하다. 후자는 `<input type="number">` 의 값 위생 알고리즘상 유효한 부동소수가 아닌 입력에서 `.value` 가 빈 문자열을 돌려주므로 `Number("") === 0` 이 되고 NaN 이 되지 않는다. 다만 `UI-A-19` 의 "빈 값이 0 으로 저장된다"는 부분은 실재한다. |
+
+7번 항목만 파급이 넓다. 포커스 표시 관련 3건(`UI-P-07`·`UI-P-30`·`UI-S-25`)이 전부 WCAG 위반으로 올라와 있었는데, 위반이 아니라 "공개 페이지의 focus 소유권 규칙이 문서에 없다"는 품질 항목으로 내려간다. `docs/admin-ui-conventions.md:88` 이 관리자 규칙만 다루고 공개 페이지를 명시적으로 제외한다는 지적 자체는 유효하다.
+
+`UI-P-01`(`--text-1` 미정의로 EXIF 공유 버튼 포커스 링 소실)은 위 기각과 별개다. `outline` 단축이 IACVT 로 unset 되어 `outline-style: none` 이 되고 globals 폴백이 없어 실제로 링이 사라진다. 포커스 계열에서 유일하게 코드 수정이 필요한 건이다.
+
+### 1.3 보안 하위 주장 3건
+
+`SEC-S-03` 의 "토큰 폭탄". 시나리오는 브라우저 콘솔에서 250KB 짜리 예외 메시지를 던져 `exceptionValue` 가 그대로 LLM 입력이 된다는 것이었다. Sentry SDK 기본값이 상위에서 막는다. `node_modules/@sentry/core/cjs/utils/prepareEvent.js:123` 의 `maxValueLength = 250` 기본값이 `:138`·`:143` 에서 `event.message` 와 `exception.value` 를 자르고, 기본 통합인 LinkedErrors(`@sentry/utils/cjs/aggregate-errors.js:9-42`)가 연쇄 예외 값 전부를 250자로 자른다. 프로젝트는 `init-browser-monitoring.ts:40-84` 어디서도 이 옵션을 올리지 않았고 `integrations` 배열이 기본 통합을 대체하지도 않는다. "한 이벤트가 수만에서 수십만 토큰", "예상 비용의 수십에서 수백 배"는 성립하지 않는다. 추가 상한도 둘 있다. 웹훅 본문이 `verify-sentry-signature.ts:7` 의 262,144바이트에서 막히고 `SENTRY_TRIAGE_DAILY_LIMIT` 이 호출 수를 제한한다.
+
+남는 것은 프롬프트 인젝션이다. 250자면 판정을 노이즈로 뒤집는 지시를 심기에 충분하고, 그 판정이 Discord 카드로 배달된다. `TRIAGE_INSTRUCTIONS`(`triage-prompt.ts:8-29`)에 "입력은 데이터이며 지시가 아니다" 문장이 없다는 사실도 그대로다. 비용 근거를 빼고 인젝션 근거만 남겨야 한다.
+
+`SEC-C-02` 의 "webp 가 아닌 바이트가 `image/webp` 로 선언돼 저장된다". `compress.ts:14-25` 의 `compressToWebp` 가 `browser-image-compression` 에 `fileType: "image/webp"` 를 주고 canvas 로 재인코딩한다. 디코딩할 수 없는 바이트는 그 단계에서 예외가 되어 업로드에 도달하지 못하고, 저장되는 것은 언제나 라이브러리가 만든 webp 다. 업로드 훅 3개에 MIME·매직바이트·바이트 상한·픽셀 상한 검증이 전부 없다는 사실은 확정이며, 남는 위험은 수억 화소 이미지나 압축 폭탄으로 탭이 종료되어 Storage 에 고아 파일이 남는 자원 소모다. 입력자가 관리자 1명이라 자기 발등 시나리오뿐이다.
+
+`AUTH-08` 의 타이밍 공격 실익. `supabase/migrations/20260819000000_sentry_alerts.sql:100-106`·`:150-156` 이 `w.secret_sha256 = encode(digest(secret, 'sha256'), 'hex')` 로 비교하고 Postgres `=` 는 조기 종료한다. 이 사실과 웹훅 HMAC 쪽만 `timingSafeEqual` 을 쓴다는 비대칭도 맞다. 그러나 타이밍으로 새어 나갈 수 있는 것은 저장된 SHA-256 hex 이고 인증에 필요한 것은 원문 시크릿이다. 해시는 역산할 수 없으므로 이 누출로는 RPC 를 통과할 수 없다. 네트워크 왕복 노이즈까지 감안하면 관측 자체가 어렵다. 남는 가치는 같은 저장소에 시크릿 비교 규칙이 두 벌이라는 점이고, 누가 이 패턴을 해시가 아닌 값에 복사하면 그때 실제 취약점이 된다. 근거 주석 한 줄로 닫힌다.
+
+### 1.4 E2E 미검증 주장 2건
+
+`TEST-06` 이 든 E2E 빈칸 5건 중 2건이 사실과 다르다.
+
+308 redirects 미검증은 기각한다. `locale.e2e.ts:5-15` 가 `/albums` 에서 `/ko/photo/albums` 로의 직행을 단언하고, `:44-57` 이 `/dev/about` 에서 `/dev` 로의 308 을 무-로케일 포함 3케이스로 검증한다. `:17-41` 은 307 협상과 `cache-control: private, no-store`, set-cookie 부재, query 보존까지 단언한다.
+
+테마 토글 미검증도 기각한다. `public-pages.e2e.ts:11` 이 `public-page.assertions.ts:16` 의 `themeCanBeChanged()` 를 호출하고, 이 함수가 버튼 클릭 후 `html[data-theme]` 변경을 단언한다.
+
+남은 3건(`/photo/map` 전용 스펙 부재, 앨범 상세 `photoIds` 수동 순서 미검증, 언어 메뉴 전환 UI 미검증)은 확정이다.
+
+---
+
+## 2. 집계 오류
+
+수치를 근거로 우선순위를 매긴 항목이 있어서 따로 남긴다. 특히 `ARCH-A-04` 는 잘못된 수치 때문에 우선순위 높음으로 올라갔다가 중간으로 내려왔다.
+
+| 항목 | 1차 보고 | 실측 | 오차 원인 |
+| --- | --- | --- | --- |
+| Firebase 잔재 주석 | 61줄 | 64줄 / 44파일 | `constants/security-headers.ts` 를 1줄(43)로 셌으나 실제로는 41~46 블록 4줄에 Firebase 서술이 걸쳐 있다 |
+| `.module.css` 하드코딩 `rgba()` | 49건 / 16파일 | 45 occurrence / 44라인 / 15파일 | `CustomCursor.module.css` 5건은 존재하지 않는다. 그 파일은 `rgb(255 255 255 / 72%)` 슬래시 알파 문법을 쓰고 그마저 `--cursor-contrast-light/dark` 로컬 토큰에 담아 뒀다. 위반이 아니라 모범 사례다 |
+| 계획 단계 참조 | 33줄 | 41줄 (`계획 §` 27 + `B*`/`M*`/`Phase*` 14) | `계획 §N` 은 30파일이 아니라 27줄 / 25파일, 반대로 단계 토큰은 5건만 열거했으나 실제 14줄이다. 그중 `checklist 08 M6` 2건은 실존 문서 인용이라 제거 대상이 아니다 |
+| coverage.include 범위 | 약 176파일 (28%) | 158파일 (25.4%) / 15,284줄 (27.8%) | 파일 수는 과다. 다만 임계값이 걸리는 단위가 줄·구문이므로 "약 28%"라는 결론은 줄 기준으로 정확하다 |
+| 관리자 `_components`/`_hooks` 무테스트 | 45파일 | 61파일 / 24디렉토리 | 13개 디렉토리만 열거했다. 방향은 맞고 규모가 과소평가됐다 |
+| `"use client"` 비율 (`ARCH-A-04`) | 235 / 271 = 87% | 161 / 273 = 59% | `grep -rl '"use client"' src --include=*.tsx` 에서 테스트 제외 161. 전체 tsx 340개 기준으로도 47%. 홑따옴표 `'use client'` 는 0건이라 누락도 아니다. 87% 는 근거를 찾을 수 없다 |
+| `ARCH-A-04` 의 피해 사례 | `RevealWords.tsx` 가 `useLang` 때문에 클라이언트가 됐다 | `RevealWords.tsx` 는 `useLang` 을 쓰지 않는다 | 파일 전체가 훅 0개, 순수 props 에서 JSX 다. `"use client"` 가 붙은 이유는 다른 데 있다. 확정 사례는 `DevStackSection.tsx:1,28` 쪽이고 `useLang` 소비 파일은 47개다 |
+| Escape 처리 중복 (`ARCH-A-08`) | 9곳 | 13곳 | 누락: `dev-blog/_components/ArticleToc.tsx:107`, `site-header/_components/SearchBox.tsx:58`, `custom-cursor/_components/CustomCursor.tsx:544` |
+| `moveItem` 복사 (`ARCH-A-18`) | 3곳 | 5곳 | 변형 2곳 누락: `ArticleRelatedProjectsField.tsx:31`, `DevImageField.tsx:75` |
+| `max-width: 1180px` CSS 모듈 (`ARCH-A-28`) | 9개 | 15개 | 전수 grep 결과 |
+| revalidate 리터럴 (`ARCH-D-09`) | 3벌 | 2벌 | 상수 정의 1개(`constants/cache.ts:4`) + 라우트 리터럴 2개(`app/[lang]/(public)/layout.tsx:23`, `app/api/search-index/route.ts:8`) |
+| `--s-0` 사용처 (`UI-P-19`) | 1곳 | 3곳 | 공개 보고서는 `SearchResults.module.css:40` 만, 셸 보고서는 하나도 못 찾았다. 실제로는 `SiteFooter.module.css:34`, `AnalyticsConsentBanner.module.css:12` 에도 있다. 후자는 flex `gap` 이 `normal` 로 떨어져 의도한 간격이 실제로 사라진 상태일 수 있다 |
+| `--text-4` 다크 대비 | 3.3:1 | 3.07:1 | sRGB 상대휘도 직접 계산 (`#5a5a62` on `#000000`) |
+| `--text-3` 라이트 대비 | 6.0:1 | 5.52:1 | 같은 방식 (`#686871` on `#ffffff`). 두 토큰 모두 결론(`--text-4` 본문 부적합, `--text-3` 적합)은 유지된다 |
+
+`security-client.md` 의 줄번호는 4건이 파일 길이를 넘을 만큼 어긋났다. 현상 자체는 전부 실재하므로 판정에는 영향이 없지만 인용 위치는 재확인 없이 쓰면 안 된다.
+
+| 보고된 위치 | 실제 위치 |
+| --- | --- |
+| `lib/supabase/public/music.ts:155` (poster 무검증 캐스팅) | `:36` (파일은 37행) |
+| `constants/security-headers.ts:113` (CSP `img-src`) | `:121` |
+| `next.config.ts:33` (`images.unoptimized`) | `:35` |
+| `analytics/_lib/gtag.ts:351-356`, `:311-343` | `:70-73`, `:88-101` (파일은 117행) |
+
+---
+
+## 3. 실측이 필요해 보류
+
+코드로는 사실을 확정했지만 판정에 브라우저 실측, 배포 환경 정보, 외부 콘솔 설정이 필요한 것들이다.
+
+### 3.1 조건부 항목으로 재분류: SEC-C-07 (연락 폼 캡차 우회)
+
+통합 보고서는 이 건을 "연락 폼이 mailto 라 서버 제출 경로가 없다"는 이유로 기각했다. 이 기각 근거는 틀렸다.
+
+`src/features/contact/_hooks/use-contact-form.ts` 를 직접 읽으면 mailto 는 폴백이지 기본 경로가 아니다. `:9` 가 `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` 를 읽고, `:65` 의 `if (!ACCESS_KEY)` 분기가 참일 때만 `window.location.href` 로 메일 앱을 연다. 키가 있으면 `:81-95` 가 `https://api.web3forms.com/submit` 으로 실제 POST 를 보낸다. 즉 서버 제출 경로는 존재하며, 키를 설정한 배포에서는 실재한다.
+
+캡차 검사(`:73-78`)와 허니팟(`:56-62`)이 전부 클라이언트에 있고 access key 는 `NEXT_PUBLIC_` 이라 브라우저 번들에 노출된다는 원 지적도 그대로 성립한다. 엔드포인트를 직접 호출하면 두 방어를 모두 건너뛴다. 저장소 자신도 이를 알고 `ContactView.tsx:152-155` 에 주석으로 적어 뒀다.
+
+따라서 이 건은 기각이 아니라 보류다. 실제 스팸 경계는 Web3Forms 대시보드의 hCaptcha 필수 설정이고, 그 값은 SaaS 콘솔에 있어 저장소에서 확인할 수 없다. 켜져 있으면 위험이 없고 꺼져 있으면 메일함 스팸이다. 확인해야 할 것은 두 가지다. 프로덕션에 `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` 가 설정돼 있는지, 그리고 대시보드에서 캡차가 필수로 걸려 있는지. 이 키가 CLAUDE.md 환경변수 목록에 없다는 지적도 확인됐으므로, 키와 함께 "경계는 코드가 아니라 대시보드"라는 사실을 문서에 적고 `/deploy-check` 항목으로 올리는 편이 맞다.
+
+### 3.2 UI
+
+| ID | 코드로 확정한 사실 | 실측이 필요한 것 |
+| --- | --- | --- |
+| `UI-P-10` | 스켈레톤과 카드의 규격 불일치(gap 12px 대 `clamp(16px,2.4vw,24px)`, padding, border 유무) | CLS 점수에 실제로 계상되는지. 스켈레톤에서 콘텐츠로의 교체는 라우트 전환 문맥이라 Lighthouse 실측이 필요하다 |
+| `UI-P-26` | `RangeSlider.tsx:106`·`:116` 의 `aria-label` 이 사전 미경유 영어이고 `aria-valuetext` 가 없다 | 두 `input[type=range]` thumb 이 겹칠 때 포인터 조작이 실제로 막히는지. 브라우저별 z-order 동작에 의존한다 |
+| `UI-P-27` | `DevStackSection.tsx:45` 가 관리자 입력값을 인라인 스타일(`background`·`color`·`borderColor`)로 그대로 쓰고 대비 검증도 다크 짝도 없다 | 실제 `site/dev` config 데이터의 칩 색 조합이 대비 기준을 넘는지. 구조적 보장 부재는 확정, 현재 위반 여부는 실데이터 확인 사항 |
+| `UI-S-04`, `UI-S-12`, `UI-S-18` | 코드 경로 확정. body 전체 서브트리 MutationObserver + 전역 셀렉터 스캔(`CustomScrollbar.tsx:229-232`), 휠마다 조상 체인 `getComputedStyle`(`CustomCursor.tsx:50-76`, `:572`), 제스처 프레임마다 layout read 후 즉시 write(`use-image-zoom.ts:123-129`) | 실제 프레임 비용. 프로파일링 없이는 "상시 마운트된 장식의 성능 부담"을 수치로 말할 수 없다 |
+| `UI-A-27` | `AdminChrome.module.css:19-31` 의 `.bar` 에 `min-width: 0`·`text-overflow` 가 없고 모바일에서 padding 만 줄어든다 | 320px 뷰포트에서 실제로 넘치는지. CSS 계산 추정만 있고 실측이 없다 |
+
+### 3.3 보안
+
+`SEC-C-06` (GA `_ga` 쿠키 삭제). `gtag.ts:70-73` 의 `expireCookie` 가 `:88-101` 에서 이름만으로 한 번, `window.location.hostname` 을 붙여 한 번, 총 두 번만 시도한다. GA4 는 `_ga` 를 eTLD+1(`.example.com`)에 심으므로 apex 배포면 삭제되고 `www.` 같은 서브도메인 배포면 남는다. 실제 프로덕션 도메인 형태가 저장소에 없어 판정할 수 없다. `consent update denied` 는 어느 경우든 걸리므로 이후 측정은 멈춘다.
+
+`SEC-S-06` (rate limit 키의 `x-real-ip` 폴백). `chat-rate-limit.ts:161-168` 이 `x-vercel-forwarded-for`, `x-real-ip`, `x-forwarded-for` 순으로 본다. 주석은 `x-forwarded-for` 만 위험하다고 설명하는데 `x-real-ip` 도 동일한 클라이언트 제어 헤더다. Vercel 배포에서는 플랫폼이 두 헤더를 덮어쓰므로 위험이 없고, self-host 나 프록시 미설정 환경으로 옮기는 순간 IP 창 제한이 헤더 한 줄로 무력화된다. 통합 보고서는 "Vercel 밖 배포는 계획에 없다"며 이 건을 조치 불필요로 분류했다. 그 전제가 유지되는 동안만 옳다.
+
+### 3.4 아키텍처
+
+`BUG-S-16` (챗 프로필 스냅샷 무효화가 SWR). 코드 사실은 확정이다. `revalidate-public.ts:35` 는 컬렉션 태그에 `updateTag`(즉시 만료)를 쓰고 `:48` 은 `CHAT_PROFILE_CACHE_TAG` 에 `revalidateTag(tag, "max")` 를 쓴다. 같은 함수 안에서 두 태그의 무효화 API 가 다르다. 문제는 그 다음이다. "`revalidateTag(tag, profile)` 은 만료가 아니라 stale 표시이고 `max` 프로필의 expire 는 365일"이라는 Next 내부 시맨틱 주장을 검증관이 `node_modules` 로 대조하지 않았다. 그 주장이 참이어야 이 건이 버그가 된다. 정책 불일치 자체가 의도인지 사고인지도 주석에 없다.
+
+`ARCH-A-22` (`constants/dictionary.ts` 640줄 분할). 두 하위 에이전트의 판정이 정면으로 충돌한다. `arch-features.md` 는 SRP 위반이라며 7파일 분할을 제안하고, `arch-data.md` 의 「확인했으나 문제 없던 항목」은 같은 파일에 대해 "UI 문자열 사전이라는 단일 책임이 유지되고 분할 이득이 크지 않다"고 판정했다. 사실 확인은 양쪽 다 통과한다. 640줄, 섹션 구분 주석 10개, `useLang` 기준 소비 47파일이다. 어느 쪽도 코드로 반증되지 않았다.
+
+통합 검증관은 유지 쪽으로 기울었다. 사전은 단일 출처가 목적이고 `CONV-06`(300줄 초과 파일 목록) 판정도 유지 타당 쪽이었기 때문이다. 다만 `ARCH-A-04`(서버 컴포넌트화)를 실제로 진행하기로 하면 분할이 의미를 얻는다. 그 결정 전에는 착수하지 않는다. 두 보고서를 나란히 읽는 사람에게 이 모순이 보이지 않는다는 점도 기록해 둔다.
+
+---
+
+## 4. 사실이지만 고치지 않아도 되는 것
+
+관리자 1명, 상시 서버 0대, 무료 티어, 방문자 인증 없음이라는 맥락에서 과잉이라고 판단한 것들이다. 사실 자체를 부정하지는 않는다.
+
+### 4.1 규약 문서 한 줄로 닫히는 것
+
+`CONV-05` (관리자 UI 문자열 191건 사전 미경유). 관리자는 본인 1명이고 한국어 고정이다. 사전 경유는 번역 대상이 없는 문자열에 간접층을 더하는 것뿐이다. CLAUDE.md 에 예외를 명문화하면 191건이 위반에서 사양으로 바뀐다. 함께 지적된 `<span>관리 →</span>` 4개소는 스크린리더가 "관리 오른쪽 화살표"로 읽는 접근성 문제라 별개로 수정한다.
+
+`CONV-01` 중 38건 이상. `DetailHero`(7), `PhotoTile`(2), `ImageLightbox`(9) 등 사진 위 그라디언트는 테마 무관 고정색이 정당하다. 사진은 테마를 따라 바뀌지 않는다. 토큰화하면 오히려 의도가 흐려진다. 실제 조치 대상은 `Modal.module.css:25` 와 `AlbumCard.module.css:29` 의 `rgba(0,0,0,0.5)` 2줄이다. 이 둘은 `--scrim`(light `.55` / dark `.7`)을 무시해 다크모드 대응이 빠져 있다.
+
+`CONV-04` (`../` 금지와 barrel 금지에 CI 게이트 없음). 현재 위반이 0건이고 Claude Code hook 이 경고한다. `eslint.config.mjs` 에 `no-restricted-imports patterns: ["../*"]` 한 줄로 넣을 수 있으니 넣되, 별도 과제로 삼을 이유는 없다.
+
+### 4.2 위협 모델이 성립하지 않는 것
+
+| ID | 사유 |
+| --- | --- |
+| `AUTH-04` | Supabase 프로젝트가 1개이고 발급자가 고정이다. 다중 테넌트가 없으면 `iss` 혼동 공격 경로가 없다. JWKS 를 우리 프로젝트 `/auth/v1` 에서만 받고 HS 폴백도 우리 프로젝트 `/auth/v1/user` 로 검증하므로 암묵적으로 발급자에 묶여 있다 |
+| `AUTH-08` | §1.3 참조. 해시 비교라 타이밍 누출이 인증 우회로 이어지지 않는다. `timingSafeEqual` 교체가 한 줄이라 다른 작업에 끼워 넣는 것은 반대하지 않는다 |
+| `AUTH-06`, `AUTH-07`, `AUTH-09`, `AUTH-10` | 전부 낮음이고 관리자 1명, 브라우저 1대 환경에서 실질 노출이 없다. `auth-authz.md` 스스로 최고 심각도를 중간으로 매긴 이유이기도 하다. 단 `AUTH-06` 은 범위가 넓어졌다. `use-article-recovery.ts:48-57` 이 mock/live 구분 없이 글 복구본을 localStorage 에 쓰므로 실데이터 모드의 미발행 본문이 로그아웃 후에도 남는다. 공용 브라우저를 쓴다면 이 한 건은 처리 대상이다 |
+| `SEC-C-09` (사진 GPS 좌표 공개) | 촬영 위치를 지도에 핀으로 찍는 것이 `/photo/map` 의 기능 그 자체다. 데이터 주체가 사이트 소유자 본인이라 제3자 피해도 없다. 통합 보고서는 "경고와 정밀도 축소는 제품 의도와 충돌한다"고 판단했다. 보안 검증관은 다르게 봤다. 기본값이 수집·공개이고 자동으로 채웠다는 표시가 없다는 점, 그리고 이 저장소가 챗·오류·분석에 들이는 동의·최소수집 기준과 이 경로만 방향이 반대라는 점이다. 자동 채움 배지는 취향 판단이지만 `parseCoords`(`photo-draft.ts:63-69`)가 `NaN` 만 거르고 `±90/±180` 범위도 `Infinity` 도 통과시킨다는 부분은 별개의 작은 수정 대상이다 |
+
+`AUTH-01` (관리자 표면에 인증 실패 제한 없음)은 두 보고서의 판정이 갈린다. 통합 보고서는 관리자 계정 1개에 경계가 RLS 이므로 무차별 대입으로 얻을 것이 없다고 봤다. 보안 검증관은 인증 우회가 아니라 쿼터 소모를 근거로 확정했다. `verify-admin-id-token.ts:24-35` 가 형태 선검사 없이 바로 `getClaims(idToken)` 을 부르고, `kid` 가 캐시에 없으면 요청마다 JWKS 조회가 나간다. 호출부 4곳 전부 rate limit 이 없다. 무료 티어를 명시적 설계 제약으로 못박은 프로젝트라 쿼터 소모가 실질 피해로 환산된다는 것이 그쪽 논지다. 정규식 선검사 한 줄이라 비용이 거의 없으므로, 조치할 이유가 없다기보다 우선순위 판단 문제로 남긴다.
+
+### 4.3 무료 티어와 소량 콘텐츠에서 실익이 없는 것
+
+`BUG-S-05`, `BUG-S-06` (임베딩 전량 단일 요청, 문서 수 상한 검사 순서). 콘텐츠가 수십 건 규모이고 관리자가 수동으로 트리거한다. 배치화의 이득이 코드 복잡도를 넘지 못한다. 문서 수가 수백 건이 되면 그때 다시 본다. 다만 `rag.ts:29` 의 `MAX_DOCUMENTS = 1_000` 이 전제하는 규모에 도달하면 전체 재생성이 막히고, 그것이 모델·차원 변경의 유일한 이행 경로라는 점은 기록해 둔다.
+
+`ARCH-D-17` (`cache()` 미적용). ISR 1시간 캐시가 이미 read 를 흡수한다. live 경로는 Next 의 fetch 메모이제이션이 받쳐 주므로 실효 이득이 mock 모드에 한정된다.
+
+`UI-P-29`, `UI-S-24`, `UI-S-16`, `UI-S-18`. 마이크로 최적화다. 측정된 사용자 영향이 보고서에 없다.
+
+### 4.4 보고서 스스로 문제없음으로 결론지은 것
+
+`TEST-07`(단언 1개짜리 테스트)과 `TEST-08`(mock 호출 검증 비중). 두 건 모두 1차 보고서가 파일을 직접 열어 본 뒤 정당하다고 적었고 상위 검수도 동의했다. 조치 항목이 아니라 확인 기록으로 남긴다.
+
+### 4.5 일괄 교정을 권하지 않는 것
+
+주석 문체 규칙 위반은 수치가 크지만 일괄 교정의 위험이 이득을 넘는다.
+
+em-dash 627줄과 화살표 82줄. CLAUDE.md 원칙 5는 "대시로 문장을 길게 잇지 않는다"이지 대시 금지가 아니다. 627줄 상당수는 짧은 동격 표기라 규칙 위반이 아니다. 전수 교정은 diff 627줄에 의미 변화가 0 이고, 그 과정에서 정당한 근거 문장이 잘려 나갈 위험이 있다. 새로 쓰거나 이미 손대는 주석에만 적용한다. Firebase 주석 64줄을 정리할 때 그 줄들의 대시는 함께 정리된다.
+
+비유 27건 중 "사라진다" 계열 14건. 1차 보고서 스스로 "실제 데이터 손실을 뜻하므로 상당수 허용 가능"이라 적었다. 실제 위반은 "붙들어 둔다", "놓아 준다", "회수한다", "가라앉으면" 8건이다.
+
+`AboutSection.tsx` props JSDoc 9건. 표본 검증 결과 오판이다. 9건 중 7건은 타입에 없는 정보를 담는다. `lang` 은 "검색 링크의 로케일을 정할", `summary` 는 "소개 첫 문장에서 만든", `collapsedItemCount` 는 "접었을 때 노출할 항목 수", `children` 은 "(예: 개발 소개의 인터뷰 Q&A)" 다. 지우면 정보가 사라지므로 CLAUDE.md 완료 점검 1번을 통과한다. 실질 위반은 `body` 와 `cols` 2건뿐이다.
+
+`@param`/`@returns` 타입 반복 2,220건 중 설명이 있는 1,277건. 이쪽은 삭제가 아니라 `{Type}` 부분만 제거다. 설명까지 지우면 안 된다. 설명이 아예 없는 943건만 삭제 대상이다.
+
+Firebase 주석 64줄도 전량 삭제 대상이 아니다. 통합 검증관이 CLAUDE.md 완료 점검 1번을 각 건에 적용한 결과 대략 삭제 30줄, 치환 28줄, 보존 6줄이다. 보존 대상에는 코드에서 알 수 없는 근거가 들어 있다. `use-infinite-scroll.ts:5-9` 의 "왜 윈도잉인가(무료 한도)", `dev-article-sort.ts:9-12` 의 "초안은 publishedAt 이 없어 정렬 축이 없다", `security-headers.ts:41-46` 의 "mock 업로더가 Firebase URL 을 쓴다"가 그것이다. 이 셋은 삭제가 아니라 "Firestore" 라는 단어를 "Supabase" 나 "PostgREST" 로 바꾸는 작업이다.
+
+### 4.6 아키텍처 취향에 가까운 것
+
+`ARCH-A-21` (`features/about` 이름)은 순수 명명이고 이동 비용이 이득을 넘는다. `ARCH-A-11` (`features/monitoring` pass-through)은 "삭제해도 복잡도가 늘지 않는다"가 삭제 근거로 약하다. 경계가 있는 편이 나중에 Sentry 를 바꿀 때 유리하다. `ARCH-A-17` (`sentry-triage` 위치)은 폴더 이동만으로 얻는 것이 없고, CLAUDE.md 구조도에 기재하면 탐색 문제는 해소된다. `ARCH-A-25`, `ARCH-A-26`, `ARCH-A-28`, `UI-A-28` 은 정리 수준이라 기계적 정리 단계에 끼워 넣거나 생략한다.
+
+`ARCH-A-21` 에 딸린 지적 하나는 별개로 유효하다. 첫 문장 분리 로직이 `AboutView.tsx:37-42`, `MusicAboutView.tsx:42-47`, `DevAboutView.tsx:53-58` 3벌로 복붙돼 있고 주석이 복붙 사실을 자백한다. `lib/text/split-lead.ts` 승격으로 독립 처리할 수 있다.
+
+---
+
+## 5. 이 기록이 왜 필요한가
+
+두 가지를 막는다.
+
+첫째, 같은 주장의 재상정이다. 1차 리뷰 11개 보고서 중 둘(`SEC-C-12`, `BUG-S-19`)은 2026-08-20 이전 리뷰의 지적이 부분만 반영됐다고 스스로 적었다. 즉 이 저장소는 이미 "고치려다 만 항목이 다음 리뷰에서 다시 올라오는" 이력을 갖고 있다. 반증된 주장도 같은 경로를 탈 수 있다. `outline: none` 이 7곳뿐이라는 사실이나 `Modal` 스크림이 트랩 밖 형제라는 구조는 다음 리뷰가 다시 확인하지 않으면 또 19종 목록으로 돌아온다.
+
+둘째, 수정 계획 오염이다. 기각된 하위 주장을 근거로 삼으면 실제로 잘못된 작업이 나간다. `.sr-only` 가 있다고 전제하고 `.srLabel` 을 지우면 관리자 폼의 라벨이 사라진다. WCAG 1.4.11 미달을 근거로 포커스 표시를 바꾸면 통과하는 것을 바꾸느라 실제 문제(`--text-1` 미정의)를 지나친다. 87% 라는 수치로 서버 컴포넌트화를 높음으로 올리면 59% 짜리 문제에 잘못된 시간이 들어간다.
+
+보류 항목도 같은 목적이다. 실측 없이 "판정 불가"를 "문제 없음"으로 바꾸는 순간, `SEC-C-07` 처럼 조건이 붙은 실재 항목이 기각으로 사라진다.
