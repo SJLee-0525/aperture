@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useModelContextTool } from "@/hooks/use-model-context-tool";
 
-import { filterPhotos } from "@/features/gallery/_lib/filter-photos";
+import { buildSearchIndex, filterPhotos } from "@/features/gallery/_lib/filter-photos";
 
 import { ROUTES } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
@@ -183,6 +185,9 @@ const useGalleryTools = (
   cameras: string[],
 ): void => {
   const { lang } = useLang();
+  // 화면(use-photo-filter)과 같은 메모된 인덱스를 쓴다. 넘기지 않으면 도구를 부를 때마다
+  // 전체 사진의 검색 문자열을 다시 만든다.
+  const searchIndex = useMemo(() => buildSearchIndex(photos), [photos]);
 
   useModelContextTool(FILTER_TOOL, (args) => {
     // URL이 상태의 단일 출처이고 pushState는 동기라, 재렌더 전 연속 도구 호출도
@@ -240,7 +245,7 @@ const useGalleryTools = (
 
     // 화면과 같은 함수로 결과를 즉시 계산한다.
     const query = new URLSearchParams(window.location.search).get("q") ?? "";
-    const visible = filterPhotos(photos, { tag, query, camera, focalMin, focalMax });
+    const visible = filterPhotos(photos, { tag, query, camera, focalMin, focalMax }, searchIndex);
 
     // 누적된 필터를 결과에 포함한다.
     const state = { tag, camera, focalMin, focalMax, query };

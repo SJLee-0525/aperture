@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  assertWithinDocumentLimit,
   listRagDocumentMeta,
   matchRagChunks,
   replaceRagDocuments,
@@ -246,5 +247,43 @@ describe("replaceRagDocuments", () => {
       replaceRagDocuments("token", [chunk("a")], [vector512()], "m@512"),
     ).rejects.toThrow("1000개를 초과");
     expect(calls(fetchMock).every(({ init }) => init.method === undefined)).toBe(true);
+  });
+});
+
+/**
+ * route 가 임베딩 전에 부르는 선검사. 상한 판정이 `staleIds`(DB 조회) 없이는 나오지
+ * 않으므로 청크 수만 세는 검사로 대체할 수 없다.
+ */
+describe("assertWithinDocumentLimit", () => {
+  it("상한을 넘으면 던지고 쓰기를 시도하지 않는다", async () => {
+    const fullPage = Array.from({ length: 1000 }, (_, index) => ({
+      id: `old-${index}`,
+      embedding_model: "m@512",
+    }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(fullPage))
+      .mockResolvedValueOnce(jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(assertWithinDocumentLimit("token", [chunk("a")])).rejects.toThrow(
+      "1000개를 초과",
+    );
+    expect(calls(fetchMock).every(({ init }) => init.method === undefined)).toBe(true);
+  });
+
+  it("상한 안이면 이번 갱신으로 사라질 문서 ID 를 돌려준다", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse([
+          { id: "a", embedding_model: "m@512" },
+          { id: "gone", embedding_model: "m@512" },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(assertWithinDocumentLimit("token", [chunk("a")])).resolves.toEqual(["gone"]);
   });
 });

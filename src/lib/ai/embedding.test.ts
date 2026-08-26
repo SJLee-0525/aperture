@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { embeddingModelKey, generateEmbedding, EmbeddingError } from "@/lib/ai/embedding";
+import {
+  embeddingModelKey,
+  EmbeddingError,
+  generateEmbedding,
+  generateEmbeddings,
+} from "@/lib/ai/embedding";
 
 describe("generateEmbedding", () => {
   afterEach(() => {
@@ -114,5 +119,57 @@ describe("embeddingModelKey", () => {
     vi.stubEnv("EMBEDDING_PROVIDER_MODEL", "");
     vi.stubEnv("EMBEDDING_PROVIDER_DIMENSIONS", "");
     expect(embeddingModelKey()).toBe("text-embedding-3-small@512");
+  });
+});
+
+describe("generateEmbeddings — 배치", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  /**
+   * 배치가 없으면 청크 전량이 한 요청에 실려 콘텐츠가 늘었을 때 전체 재생성이 통째로
+   * 실패한다. 그 경로가 임베딩 모델·차원을 바꿀 수 있는 유일한 수단이다.
+   */
+  it("100개 단위로 나눠 순차 호출하고 순서를 보존한다", async () => {
+    vi.stubEnv("EMBEDDING_PROVIDER_API_KEY", "key");
+    const texts = Array.from({ length: 250 }, (_, index) => `문장 ${index}`);
+    let call = 0;
+    const fetchMock = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as { input: string[] };
+      const batchIndex = call++;
+      // 응답 순서를 뒤집어 보낸다. index 정렬이 없으면 결과가 섞인다.
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          data: body.input
+            .map((text, index) => ({
+              embedding: [batchIndex, index, Number(text.split(" ")[1])],
+              index,
+            }))
+            .toReversed(),
+        }),
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const vectors = await generateEmbeddings(texts);
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1].body)).input).toHaveLength(100);
+    expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1].body)).input).toHaveLength(50);
+    expect(vectors).toHaveLength(250);
+    // 각 벡터의 세 번째 값이 원래 문장 번호다. 순서가 유지되면 0..249 가 그대로 나온다.
+    expect(vectors.map((vector) => vector[2])).toEqual(texts.map((_, index) => index));
+  });
+
+  it("빈 입력에는 요청을 보내지 않는다", async () => {
+    vi.stubEnv("EMBEDDING_PROVIDER_API_KEY", "key");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(generateEmbeddings([])).resolves.toEqual([]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

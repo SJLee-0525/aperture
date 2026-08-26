@@ -9,7 +9,11 @@ import { embeddingModelKey, generateEmbeddings } from "@/lib/ai/embedding";
 import { buildRagChunks } from "@/lib/ai/rag-chunks";
 import { authorizeAdminToken, bearerToken } from "@/lib/auth/authorize-admin-token";
 import { getRagSourceData, getRagSourceDataForTarget } from "@/lib/content/rag-source";
-import { listRagDocumentMeta, replaceRagDocuments } from "@/lib/supabase/rag";
+import {
+  assertWithinDocumentLimit,
+  listRagDocumentMeta,
+  replaceRagDocuments,
+} from "@/lib/supabase/rag";
 
 import type { RagSourceData } from "@/lib/content/rag-source";
 import type { RagChunk, RagSyncTarget } from "@/types/rag";
@@ -90,11 +94,14 @@ export async function POST(request: Request) {
         })
       : allChunks;
     const model = embeddingModelKey();
+    // 상한 검사를 임베딩 앞에 둔다. 뒤에 두면 상한을 넘긴 요청이 전부 유료로 임베딩된
+    // 뒤 거절되고 저장은 한 건도 되지 않는다.
+    const staleIds = await assertWithinDocumentLimit(idToken, chunks, target);
     const vectors = await generateEmbeddings(
       chunks.map(({ text }) => text),
       { signal: request.signal },
     );
-    await replaceRagDocuments(idToken, chunks, vectors, model, target);
+    await replaceRagDocuments(idToken, chunks, vectors, model, target, staleIds);
     // 프로필 스냅샷 캐시 무효화. maintenance 의 전체 재생성이 콘텐츠 반영을 보는 유일한 서버측 경로다.
     // 여기서는 updateTag 를 쓸 수 없다. Next 가 Server Action 전용으로 제한한다.
     // 관리자 쓰기 직후 무효화(revalidate-public.ts)는 즉시 만료를 쓰지만, RAG 재생성 뒤

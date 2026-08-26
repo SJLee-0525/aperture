@@ -166,14 +166,25 @@ const assertStorableVectors = (chunks: RagChunk[], vectors: number[][]) => {
  * @param accessToken 관리자 access token — 인가는 RLS 가 한다.
  * @param target 증분 갱신 대상. 없으면 전체 색인을 교체한다.
  */
-const replaceRagDocuments = async (
+/**
+ * 갱신 후 문서 수가 상한을 넘는지 임베딩 전에 확인한다.
+ *
+ * 단순히 청크 수만 세면 되는 검사가 아니다. 교체 범위에서 사라질 기존 문서(`staleIds`)를
+ * 알아야 최종 개수가 나오고, 그 목록은 DB 조회가 필요하다. 그래서 route 가 직접 세지 않고
+ * 이 함수를 부른다. 임베딩 뒤에 부르면 상한을 넘긴 요청이 전부 유료로 임베딩된 뒤
+ * 거절되고 저장은 한 건도 되지 않는다.
+ *
+ * @param accessToken 관리자 access token — 인가는 RLS 가 한다.
+ * @param chunks 저장할 청크.
+ * @param target 증분 갱신 대상. 없으면 전체 색인을 교체한다.
+ * @returns 이번 갱신으로 사라질 기존 문서 ID. 호출부가 그대로 삭제에 쓴다.
+ * @throws {Error} 갱신 후 문서 수가 `MAX_DOCUMENTS` 를 넘을 때.
+ */
+const assertWithinDocumentLimit = async (
   accessToken: string,
   chunks: RagChunk[],
-  vectors: number[][],
-  model: string,
   target?: RagSyncTarget,
-): Promise<void> => {
-  assertStorableVectors(chunks, vectors);
+): Promise<string[]> => {
   const existingIds = target
     ? await listScopedIds(accessToken, replacementScopeFor(target))
     : (await listRagDocumentMeta(accessToken)).map(({ id }) => id);
@@ -182,6 +193,21 @@ const replaceRagDocuments = async (
   if (staleIds.length + chunks.length > MAX_DOCUMENTS) {
     throw new Error(`RAG 문서가 ${MAX_DOCUMENTS}개를 초과해 한 번에 갱신할 수 없습니다.`);
   }
+  return staleIds;
+};
+
+const replaceRagDocuments = async (
+  accessToken: string,
+  chunks: RagChunk[],
+  vectors: number[][],
+  model: string,
+  target?: RagSyncTarget,
+  /** 이미 계산한 삭제 대상. 호출부가 임베딩 전에 상한을 검사했다면 그 결과를 넘겨 조회를 아낀다. */
+  precomputedStaleIds?: string[],
+): Promise<void> => {
+  assertStorableVectors(chunks, vectors);
+  const staleIds =
+    precomputedStaleIds ?? (await assertWithinDocumentLimit(accessToken, chunks, target));
   for (let start = 0; start < chunks.length; start += UPSERT_CHUNK_SIZE) {
     const rows = chunks.slice(start, start + UPSERT_CHUNK_SIZE).map((chunk, index) => ({
       id: chunk.id,
@@ -280,4 +306,10 @@ const matchRagChunks = async (input: {
   }));
 };
 
-export { listRagDocumentMeta, matchRagChunks, replaceRagDocuments, replacementScopeFor };
+export {
+  assertWithinDocumentLimit,
+  listRagDocumentMeta,
+  matchRagChunks,
+  replaceRagDocuments,
+  replacementScopeFor,
+};
