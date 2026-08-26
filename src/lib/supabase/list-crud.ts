@@ -1,9 +1,9 @@
-import { collectionCacheTag } from "@/constants/cache";
-import { SUPABASE_COLLECTIONS, type CollectionId } from "@/constants/collections";
+import { collectionCacheTag, documentCacheTag } from "@/constants/cache";
+import { SUPABASE_COLLECTIONS, type TableCollectionId } from "@/constants/collections";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
-import { rowEncoderFor } from "@/lib/supabase/admin/row-codec";
+import { rowEncoderFor, toJson } from "@/lib/supabase/admin/row-codec";
 import { updateSortOrders, type SortOrder } from "@/lib/supabase/admin/sort-rpc";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { paginateAll } from "@/lib/supabase/paginate-all";
@@ -46,7 +46,7 @@ const assertNoError = (error: QueryError, message: string): void => {
  * @returns {{ newId: () => string; list: () => Promise<T[]>; get: (id: string) => Promise<T | null>; create: (id: string, input: Omit<T, 'id'>) => Promise<void>; update: (id: string, input: Omit<T, 'id'>) => Promise<void>; updateOrder: (orders: SortOrder[]) => Promise<void>; setPublished: (id: string, published: boolean) => Promise<void>; remove: (id: string) => Promise<void> }} 해당 컬렉션에 묶인 관리자 CRUD 함수.
  */
 const listCrud = <T extends WithId>(
-  collection: CollectionId,
+  collection: TableCollectionId,
   toEntity: (id: string, d: Record<string, unknown>) => T,
   label: string,
   ragSourceType?: RagSyncSourceType,
@@ -56,11 +56,14 @@ const listCrud = <T extends WithId>(
   /** 쓰기 직전 스냅샷과 조회 성공 여부. 실패와 "문서 없음"을 구분해야 fallback 이 성립한다. */
   type BeforeSnapshot = { before: T | null; failed: boolean };
 
-  const descriptor = SUPABASE_COLLECTIONS[collection];
-  if (!descriptor) throw new Error(`Supabase 컬렉션 서술자가 없습니다: ${collection}`);
-  const { table, select, order } = descriptor;
+  const { table, select, order } = SUPABASE_COLLECTIONS[collection];
   const encode = rowEncoderFor(collection);
   const cacheTag = collectionCacheTag(collection);
+  /**
+   * 컬렉션 태그만 지우면 `fetchRow` 가 붙인 단건 태그가 남는다. 그 태그를 지우는 쓰기가
+   * 없으면 단건 조회가 재검증 주기까지 stale 값을 돌려준다.
+   */
+  const tagsFor = (id: string): [string, string] => [cacheTag, documentCacheTag(collection, id)];
   const from = () => getSupabaseClient().from(table);
 
   const fetchEntity = async (id: string): Promise<T | null> => {
@@ -149,7 +152,7 @@ const listCrud = <T extends WithId>(
     create: async (id: string, input: Input): Promise<void> => {
       const { error } = await from().insert(encode(id, input));
       assertNoError(error, `${label} 저장에 실패했습니다.`);
-      requestPublicRevalidate(cacheTag);
+      requestPublicRevalidate(...tagsFor(id));
       // 생성 전 상태는 문서 없음으로 처리한다.
       await syncAfterWrite(id, { before: null, failed: false }, { id, ...input } as T);
     },
@@ -165,8 +168,31 @@ const listCrud = <T extends WithId>(
       const snapshot = await readBeforeWrite(id);
       const { data, error } = await from().update(encode(id, input)).eq("id", id).select("id");
       if (error || !data?.length) throw new Error(`${label} 수정에 실패했습니다.`);
-      requestPublicRevalidate(cacheTag);
+      requestPublicRevalidate(...tagsFor(id));
       await syncAfterWrite(id, snapshot, { id, ...input } as T);
+    },
+    /**
+     * 일부 필드만 갱신한다. 저장된 data jsonb 를 그대로 읽어 병합하므로 디코더를 거치지 않는다.
+     *
+     * 전체 문서를 되쓰는 경로는 디코더가 결측 필드에 채운 폴백까지 함께 저장한다.
+     * 이미지 파생본 마이그레이션처럼 한 필드만 바꾸는 작업이 공연일·촬영일을 덮어쓰는
+     * 것을 막는다. 이 함수가 모르는 필드도 원본 그대로 남는다.
+     *
+     * @param {string} id 수정할 문서 ID.
+     * @param {Partial<Input>} patch 덮어쓸 도메인 필드.
+     * @returns {Promise<void>} 수정과 후속 갱신이 끝나면 완료된다.
+     */
+    patchData: async (id: string, patch: Partial<Input>): Promise<void> => {
+      const { data: row, error: readError } = await from().select("data").eq("id", id).maybeSingle();
+      if (readError || !row) throw new Error(`${label} 수정에 실패했습니다.`);
+      const current = (row as { data: Record<string, unknown> | null }).data ?? {};
+      const next = { ...current, ...toJson(patch as Record<string, unknown>) };
+      const { data, error } = await from().update({ data: next }).eq("id", id).select("id");
+      if (error || !data?.length) throw new Error(`${label} 수정에 실패했습니다.`);
+      requestPublicRevalidate(...tagsFor(id));
+      // 병합 결과를 도메인 모델로 되돌리지 않으므로 정책에 넘길 전후 상태가 없다.
+      // 스냅샷 없음은 강제 동기화로 처리된다.
+      await syncAfterWrite(id, null, null);
     },
     /**
      * 드래그 정렬 결과를 RPC 1회로 저장한다. 정렬은 검색 본문과 무관해 RAG 동기화가 없다.
@@ -190,7 +216,7 @@ const listCrud = <T extends WithId>(
       const snapshot = await readBeforeWrite(id);
       const { data, error } = await from().update({ published }).eq("id", id).select("id");
       if (error || !data?.length) throw new Error("공개 상태 변경에 실패했습니다.");
-      requestPublicRevalidate(cacheTag);
+      requestPublicRevalidate(...tagsFor(id));
       // 이전 스냅샷의 published 값만 바꿔 정책에 전달한다. 스냅샷이 없으면
       // syncAfterWrite 가 정책을 묻지 않으므로 after 는 쓰이지 않는다.
       const after = snapshot?.before ? ({ ...snapshot.before, published } as T) : null;
@@ -209,7 +235,7 @@ const listCrud = <T extends WithId>(
       const snapshot = await readBeforeWrite(id);
       const { data, error } = await from().delete().eq("id", id).select("id");
       if (error || !data?.length) throw new Error(`${label} 삭제에 실패했습니다.`);
-      requestPublicRevalidate(cacheTag);
+      requestPublicRevalidate(...tagsFor(id));
       await syncAfterWrite(id, snapshot, null);
     },
   };

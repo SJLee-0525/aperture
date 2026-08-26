@@ -14,6 +14,8 @@ export default defineConfig({
         "src/lib/admin/mock/*.ts",
         "src/lib/admin/select-repository.ts",
         "src/lib/photo-filter-query.ts",
+        // 컬렉션 디코더는 순수 함수라 폴백 규칙을 테스트로 고정하기 싸다.
+        "src/lib/supabase/decode/*.ts",
         "src/lib/rate-limit/*.ts",
         "src/lib/auth/admin-auth-throttle.ts",
         "src/lib/auth/authorize-admin-token.ts",

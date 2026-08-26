@@ -61,6 +61,27 @@ describe("row-codec — 목록 컬렉션", () => {
     expect(merged.data.title).toEqual(input.title);
     expect(merged.data.tags).toEqual(input.tags);
   });
+  // 디코더가 결측 날짜에 쓰는 epoch 를 그대로 저장하면 편집 한 번으로 1970-01-01 이
+  // 공연일·촬영일로 영속된다. 키를 빼서 원래의 결측을 보존한다.
+  it("epoch 날짜는 키를 생략해 원래의 결측을 보존한다", () => {
+    const row = encodeListRow("w1", {
+      order: 0,
+      published: false,
+      performedAt: new Date(0),
+      title: { ko: "제목", en: "Title" },
+    });
+
+    expect("performedAt" in row.data).toBe(false);
+    expect(row.data.title).toEqual({ ko: "제목", en: "Title" });
+  });
+
+  it("유효한 날짜는 그대로 저장한다", () => {
+    const performedAt = new Date("2026-03-14T10:30:00.000Z");
+
+    const row = encodeListRow("w1", { order: 0, published: false, performedAt });
+
+    expect(row.data.performedAt).toBe(performedAt.toISOString());
+  });
 });
 
 describe("row-codec — dev_articles", () => {

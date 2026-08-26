@@ -1,11 +1,14 @@
 import { COLLECTIONS, SITE_MUSIC_DOC } from "@/constants/collections";
-import { asText } from "@/lib/i18n/as-text";
-import { normalizePublicHref } from "@/lib/security/public-url";
-import { fetchRow, selectPublished, toDate } from "@/lib/supabase/public/transport";
+import {
+  decodeMusicAward,
+  decodeMusicConfig,
+  decodeMusicMedia,
+  decodeMusicWork,
+} from "@/lib/supabase/decode/music";
+import { sanitizeMusicWorkForPublic } from "@/lib/supabase/decode/public-sanitize";
+import { fetchRow, selectPublished } from "@/lib/supabase/public/transport";
 
-import type { ImageMeta } from "@/types/image";
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
-import type { TimelineEntry } from "@/types/timeline";
 
 type ChatMusicWork = Pick<
   MusicWork,
@@ -14,75 +17,13 @@ type ChatMusicWork = Pick<
 type ChatMusicAward = Pick<MusicAward, "id" | "year" | "name" | "place" | "order" | "published">;
 type ChatMusicMedia = Pick<MusicMedia, "id" | "title" | "source" | "order" | "published">;
 
-const EMPTY_IMAGE: ImageMeta = { url: "", path: "", w: 0, h: 0 };
+/** 공개 연주 모델. 저장된 예매 링크는 여기서만 표시용으로 정화한다. */
+const toMusicWork = (id: string, data: Record<string, unknown>): MusicWork =>
+  sanitizeMusicWorkForPublic(decodeMusicWork(id, data));
 
-/**
- * PostgREST 행에서 병합된 연주 문서를 공개 페이지 모델로 변환한다.
- *
- * @param {string} id 문서 ID.
- * @param {Record<string, unknown>} data 병합된 연주 문서 필드.
- * @returns {MusicWork} 기본값과 다국어 필드가 정규화된 연주 모델.
- */
-const toMusicWork = (id: string, data: Record<string, unknown>): MusicWork => ({
-  id,
-  title: asText(data.title),
-  subtitle: asText(data.subtitle),
-  performedAt: toDate(data.performedAt),
-  time: (data.time as string) ?? "",
-  venue: asText(data.venue),
-  category: asText(data.category),
-  program: (data.program as string[]) ?? [],
-  description: asText(data.description),
-  poster: (data.poster as ImageMeta) ?? EMPTY_IMAGE,
-  ticketUrl: normalizePublicHref(data.ticketUrl),
-  order: (data.order as number) ?? 0,
-  published: (data.published as boolean) ?? false,
-});
-
-/**
- * PostgREST 행에서 병합된 수상 문서를 공개 페이지 모델로 변환한다.
- *
- * @param {string} id 문서 ID.
- * @param {Record<string, unknown>} data 병합된 수상 문서 필드.
- * @returns {MusicAward} 기본값과 다국어 필드가 정규화된 수상 모델.
- */
-const toMusicAward = (id: string, data: Record<string, unknown>): MusicAward => ({
-  id,
-  year: (data.year as number) ?? 0,
-  name: asText(data.name),
-  place: (data.place as string) ?? "",
-  description: asText(data.description),
-  order: (data.order as number) ?? 0,
-  published: (data.published as boolean) ?? false,
-});
-
-/**
- * PostgREST 행에서 병합된 영상 문서를 공개 페이지 모델로 변환한다.
- *
- * @param {string} id 문서 ID.
- * @param {Record<string, unknown>} data 병합된 영상 문서 필드.
- * @returns {MusicMedia} 기본값과 다국어 필드가 정규화된 영상 모델.
- */
-const toMusicMedia = (id: string, data: Record<string, unknown>): MusicMedia => ({
-  id,
-  title: asText(data.title),
-  source: asText(data.source),
-  youtubeId: (data.youtubeId as string) ?? "",
-  order: (data.order as number) ?? 0,
-  published: (data.published as boolean) ?? false,
-});
-
-/**
- * PostgREST 행에서 병합된 음악 설정 필드를 공개 페이지 모델로 변환한다.
- *
- * @param {Record<string, unknown>} data 병합된 음악 설정 필드.
- * @returns {MusicConfig} 소개와 경력·학력 목록이 정규화된 설정.
- */
-const toMusicConfig = (data: Record<string, unknown>): MusicConfig => ({
-  intro: asText(data.intro),
-  career: (data.career as TimelineEntry[]) ?? [],
-  education: (data.education as TimelineEntry[]) ?? [],
-});
+const toMusicAward = decodeMusicAward;
+const toMusicMedia = decodeMusicMedia;
+const toMusicConfig = decodeMusicConfig;
 
 /**
  * 공개된 연주 목록을 정렬 순서대로 읽는다.

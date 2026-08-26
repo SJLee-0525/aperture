@@ -1,5 +1,5 @@
-import { collectionCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { collectionCacheTag, documentCacheTag } from "@/constants/cache";
+import { COLLECTIONS, tableFor } from "@/constants/collections";
 import { MAX_PINNED_ARTICLES, PIN_LIMIT_MESSAGE } from "@/constants/dev-article-pin";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
@@ -12,8 +12,8 @@ import { toDevArticle } from "@/lib/supabase/public/dev-articles";
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
-const ARTICLES_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.DEV_ARTICLES]?.table ?? "dev_articles";
-const TAGS_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.DEV_ARTICLE_TAGS]?.table ?? "dev_article_tags";
+const ARTICLES_TABLE = tableFor(COLLECTIONS.DEV_ARTICLES);
+const TAGS_TABLE = tableFor(COLLECTIONS.DEV_ARTICLE_TAGS);
 
 /**
  * 블로그 글 CRUD. 행 병합 결과의 정규화는 공개 디코더 `toDevArticle` 을 그대로 쓴다 —
@@ -79,7 +79,10 @@ const setDevArticlePinned = async (id: string, pinned: boolean): Promise<void> =
   });
   if (error?.code === "23514") throw new Error(PIN_LIMIT_MESSAGE);
   if (error || data !== true) throw new Error("고정 상태 변경에 실패했습니다.");
-  requestPublicRevalidate(collectionCacheTag(COLLECTIONS.DEV_ARTICLES));
+  requestPublicRevalidate(
+    collectionCacheTag(COLLECTIONS.DEV_ARTICLES),
+    documentCacheTag(COLLECTIONS.DEV_ARTICLES, id),
+  );
 };
 
 const TAGS_CACHE_TAG = collectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);

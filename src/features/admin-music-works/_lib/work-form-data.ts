@@ -4,7 +4,9 @@ import { normalizePublicHref } from "@/lib/security/public-url";
 import type { MusicWorkInput } from "@/lib/supabase/music";
 import type { MusicWork } from "@/types/music";
 
+/** epoch 는 디코더가 "값 없음"에 쓰는 표현이라 빈 입력란으로 그린다. */
 const toDateValue = (date: Date): string => {
+  if (Number.isNaN(date.getTime()) || date.getTime() === 0) return "";
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");

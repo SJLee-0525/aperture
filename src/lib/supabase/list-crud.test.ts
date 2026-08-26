@@ -188,6 +188,46 @@ describe("listCrud — 정책 주입", () => {
   });
 });
 
+describe("listCrud — patchData", () => {
+  // 전체 문서를 되쓰면 디코더가 결측 필드에 채운 폴백까지 저장된다. 한 필드만 바꾸는
+  // 작업이 공연일·촬영일을 덮어쓰는 것을 이 경로가 막는다.
+  it("저장된 data 를 그대로 읽어 병합하므로 모르는 필드가 남는다", async () => {
+    const crud = listCrud<Entity>("devProjects", toEntity, "프로젝트");
+    mocks.maybeSingle.mockReturnValue({
+      data: { data: { body: "a", legacyField: 7, performedAt: "2020-01-01T00:00:00.000Z" } },
+      error: null,
+    });
+    mocks.updateSelect.mockReturnValue({ data: [{ id: "doc-1" }], error: null });
+
+    await crud.patchData("doc-1", { body: "b" });
+
+    expect(mocks.updateSelect).toHaveBeenCalledWith({
+      data: { body: "b", legacyField: 7, performedAt: "2020-01-01T00:00:00.000Z" },
+    });
+  });
+
+  it("공개 캐시 무효화와 RAG 동기화를 함께 요청한다", async () => {
+    const crud = listCrud<Entity>("devProjects", toEntity, "프로젝트", "project");
+    mocks.maybeSingle.mockReturnValue({ data: { data: {} }, error: null });
+    mocks.updateSelect.mockReturnValue({ data: [{ id: "doc-1" }], error: null });
+
+    await crud.patchData("doc-1", { body: "b" });
+
+    expect(mocks.requestPublicRevalidate).toHaveBeenCalled();
+    expect(mocks.requestRagSync).toHaveBeenCalledWith("project", "doc-1");
+  });
+
+  it("문서가 없으면 쓰기를 시도하지 않는다", async () => {
+    const crud = listCrud<Entity>("devProjects", toEntity, "프로젝트");
+    mocks.maybeSingle.mockReturnValue({ data: null, error: null });
+
+    await expect(crud.patchData("doc-1", { body: "b" })).rejects.toThrow(
+      "프로젝트 수정에 실패했습니다.",
+    );
+    expect(mocks.updateSelect).not.toHaveBeenCalled();
+  });
+});
+
 describe("listCrud — supabase 오류·0행 처리", () => {
   it("insert 오류는 던지고 재검증·동기화를 호출하지 않는다", async () => {
     const crud = listCrud<Entity>("devProjects", toEntity, "프로젝트", "project");

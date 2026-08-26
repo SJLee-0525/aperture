@@ -1,15 +1,15 @@
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { COLLECTIONS, SITE_DOC, tableFor } from "@/constants/collections";
 import { EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { decodeSiteConfig } from "@/lib/supabase/decode/site";
 
 import type { SiteConfig } from "@/types/site";
 
-const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
+const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 
 /**
  * 관리자 site/config 읽기. 문서가 없으면(첫 저장 전) **빈 폼**으로 부트스트랩 —
@@ -26,16 +26,7 @@ const getSiteConfig = async (): Promise<SiteConfig> => {
     .maybeSingle();
   if (error) throw new Error("사이트 설정을 불러오지 못했습니다.");
   if (!data) return EMPTY_SITE_CONFIG;
-  const d = (data.data as Record<string, unknown> | null) ?? {};
-  return {
-    name: (d.name as SiteConfig["name"]) ?? EMPTY_SITE_CONFIG.name,
-    tagline: (d.tagline as SiteConfig["tagline"]) ?? EMPTY_SITE_CONFIG.tagline,
-    landingLead: (d.landingLead as SiteConfig["landingLead"]) ?? EMPTY_SITE_CONFIG.landingLead,
-    contactLead: (d.contactLead as SiteConfig["contactLead"]) ?? EMPTY_SITE_CONFIG.contactLead,
-    bio: (d.bio as SiteConfig["bio"]) ?? EMPTY_TEXT,
-    links: (d.links as SiteConfig["links"]) ?? [],
-    tags: (d.tags as SiteConfig["tags"]) ?? [],
-  };
+  return decodeSiteConfig((data.data as Record<string, unknown> | null) ?? {});
 };
 
 /**

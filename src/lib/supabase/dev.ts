@@ -1,19 +1,17 @@
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_DEV_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { COLLECTIONS, SITE_DEV_DOC, tableFor } from "@/constants/collections";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { normalizeDevAwards } from "@/lib/content/normalize-dev-awards";
-import { normalizeTroubleshooting } from "@/lib/content/normalize-troubleshooting";
-import { asText } from "@/lib/i18n/as-text";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { decodeDevConfig, decodeDevProject } from "@/lib/supabase/decode/dev";
 import { listCrud } from "@/lib/supabase/list-crud";
 import { deleteDevProjectImages } from "@/lib/supabase/storage";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 
-const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
+const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 
 /**
  * 프로젝트 행의 다국어 필드와 배열 기본값을 정규화한다.
@@ -22,30 +20,10 @@ const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_docume
  * @param {Record<string, unknown>} d 병합된 프로젝트 문서 필드.
  * @returns {DevProject} 관리자 화면에서 사용하는 프로젝트 모델.
  */
-const toDevProject = (id: string, d: Record<string, unknown>): DevProject => ({
-  id,
-  title: asText(d.title),
-  category: asText(d.category),
-  year: (d.year as string) ?? "",
-  period: asText(d.period),
-  position: asText(d.position),
-  summary: asText(d.summary),
-  overview: asText(d.overview),
-  features: (d.features as DevProject["features"]) ?? [],
-  roles: (d.roles as DevProject["roles"]) ?? [],
-  troubleshooting: normalizeTroubleshooting(d.troubleshooting),
-  achievements: (d.achievements as DevProject["achievements"]) ?? [],
-  techTags: (d.techTags as string[]) ?? [],
-  links: (d.links as DevProject["links"]) ?? [],
-  cover: (d.cover as DevProject["cover"]) ?? null,
-  images: (d.images as DevProject["images"]) ?? [],
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
 const devProjectsCrud = listCrud<DevProject>(
   COLLECTIONS.DEV_PROJECTS,
-  toDevProject,
+  decodeDevProject,
   "프로젝트",
   "project",
 );
@@ -76,15 +54,7 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
     .maybeSingle();
   if (error) throw new Error("개발 설정을 불러오지 못했습니다.");
   if (!data) return EMPTY_DEV_CONFIG;
-  const d = (data.data as Record<string, unknown> | null) ?? {};
-  return {
-    heroLead: asText(d.heroLead),
-    interview: (d.interview as DevConfig["interview"]) ?? [],
-    stack: (d.stack as DevConfig["stack"]) ?? [],
-    education: (d.education as DevConfig["education"]) ?? [],
-    timeline: (d.timeline as DevConfig["timeline"]) ?? [],
-    awards: normalizeDevAwards(d.awards),
-  };
+  return decodeDevConfig((data.data as Record<string, unknown> | null) ?? {});
 };
 
 /**

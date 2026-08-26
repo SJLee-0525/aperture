@@ -1,17 +1,21 @@
 import { COLLECTIONS } from "@/constants/collections";
-import { asText } from "@/lib/i18n/as-text";
+import { decodeDevArticle } from "@/lib/supabase/decode/dev-article";
+import {
+  readImageOrNull,
+  readNullableDate,
+  readString,
+  readStringArray,
+  readText,
+} from "@/lib/supabase/decode/field";
 import {
   fetchRow,
   selectProjectedPublished,
   selectPublished,
   selectRows,
-  toDate,
-  toNullableDate,
 } from "@/lib/supabase/public/transport";
 
 import type { DevArticle, DevArticleProjectLink } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
-import type { ImageMeta } from "@/types/image";
 
 /**
  * 챗봇 문맥과 참조 카드가 쓰는 글 투영.
@@ -35,23 +39,7 @@ type ChatDevArticle = Pick<DevArticle, "id" | "slug" | "title" | "summary" | "co
  * @param {Record<string, unknown>} data 병합된 문서 필드.
  * @returns {DevArticle} 다국어 필드와 날짜가 정규화된 글 모델.
  */
-const toDevArticle = (id: string, data: Record<string, unknown>): DevArticle => ({
-  id,
-  slug: (data.slug as string) ?? "",
-  title: asText(data.title),
-  summary: asText(data.summary),
-  body: (data.body as string) ?? "",
-  cover: (data.cover as ImageMeta | null) ?? null,
-  coverAlt: data.coverAlt ? asText(data.coverAlt) : null,
-  tags: (data.tags as string[]) ?? [],
-  relatedProjectIds: (data.relatedProjectIds as string[]) ?? [],
-  pinned: (data.pinned as boolean) ?? false,
-  published: (data.published as boolean) ?? false,
-  publishedAt: toNullableDate(data.publishedAt),
-  firstPublishedAt: toNullableDate(data.firstPublishedAt),
-  createdAt: toDate(data.createdAt),
-  updatedAt: toDate(data.updatedAt),
-});
+const toDevArticle = decodeDevArticle;
 
 /**
  * 챗 목록 projection — 본문 Markdown(`data->body`)을 전송에서 제외하는 것이 목적이다.
@@ -69,12 +57,12 @@ const PROJECT_LINK_SELECT =
  */
 const toChatDevArticle = (row: Record<string, unknown>): ChatDevArticle => ({
   id: String(row.id),
-  slug: (row.slug as string) ?? "",
-  title: asText(row.title),
-  summary: asText(row.summary),
-  cover: (row.cover as ImageMeta | null) ?? null,
-  tags: (row.tags as string[]) ?? [],
-  publishedAt: toNullableDate(row.published_at),
+  slug: readString(row.slug),
+  title: readText(row.title),
+  summary: readText(row.summary),
+  cover: readImageOrNull(row.cover),
+  tags: readStringArray(row.tags),
+  publishedAt: readNullableDate(row.published_at),
 });
 
 /**
@@ -151,10 +139,10 @@ const fetchDevArticleProjectLinks = async (options?: {
   (await selectProjectedPublished(COLLECTIONS.DEV_ARTICLES, PROJECT_LINK_SELECT, options)).map(
     (row) => ({
       id: String(row.id),
-      slug: (row.slug as string) ?? "",
-      title: asText(row.title),
-      publishedAt: toNullableDate(row.published_at),
-      relatedProjectIds: (row.relatedProjectIds as string[]) ?? [],
+      slug: readString(row.slug),
+      title: readText(row.title),
+      publishedAt: readNullableDate(row.published_at),
+      relatedProjectIds: readStringArray(row.relatedProjectIds),
     }),
   );
 

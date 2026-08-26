@@ -1,18 +1,23 @@
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_MUSIC_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { COLLECTIONS, SITE_MUSIC_DOC, tableFor } from "@/constants/collections";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { asText } from "@/lib/i18n/as-text";
 import { isDangerousStoredHref } from "@/lib/security/public-url";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import {
+  decodeMusicAward,
+  decodeMusicConfig,
+  decodeMusicMedia,
+  decodeMusicWork,
+} from "@/lib/supabase/decode/music";
 import { listCrud } from "@/lib/supabase/list-crud";
 import { deleteMusicWorkImages } from "@/lib/supabase/storage";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
-const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
+const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 
 /**
  * 병합된 행의 날짜 값을 화면 모델의 `Date`로 맞춘다.
@@ -20,10 +25,6 @@ const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_docume
  * @param {unknown} v 변환할 ISO 문자열 또는 `Date` 값.
  * @returns {Date} 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
  */
-const asDate = (v: unknown): Date => {
-  if (typeof v === "string" || typeof v === "number") return new Date(v);
-  return v instanceof Date ? v : new Date();
-};
 
 /**
  * 연주 행의 누락 필드를 기본값으로 채워 `MusicWork`로 변환한다.
@@ -32,24 +33,6 @@ const asDate = (v: unknown): Date => {
  * @param {Record<string, unknown>} d 병합된 연주 문서 필드.
  * @returns {MusicWork} 관리자 화면에서 사용하는 연주 모델.
  */
-const toMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
-  id,
-  title: asText(d.title),
-  subtitle: asText(d.subtitle),
-  performedAt: asDate(d.performedAt),
-  time: (d.time as string) ?? "",
-  venue: asText(d.venue),
-  category: asText(d.category),
-  program: (d.program as string[]) ?? [],
-  description: asText(d.description),
-  poster: (d.poster as MusicWork["poster"]) ?? { url: "", path: "", w: 0, h: 0 },
-  // 읽기에서 정화하지 않는다. https 가 아닌 주소를 빈 값으로 바꾸면 폼이 그 빈 값을
-  // 그대로 저장하고, 전체 문서를 되쓰는 마이그레이션도 원본을 지운다.
-  // 정책(https 전용)은 폼이, 위험 스킴 차단은 저장 경계가 본다.
-  ticketUrl: (d.ticketUrl as string) ?? "",
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
 /**
  * 수상 행의 다국어 필드와 기본값을 정규화한다.
@@ -58,15 +41,6 @@ const toMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
  * @param {Record<string, unknown>} d 병합된 수상 문서 필드.
  * @returns {MusicAward} 관리자 화면에서 사용하는 수상 모델.
  */
-const toMusicAward = (id: string, d: Record<string, unknown>): MusicAward => ({
-  id,
-  year: (d.year as number) ?? 0,
-  name: asText(d.name),
-  place: (d.place as string) ?? "",
-  description: asText(d.description),
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
 /**
  * 영상 행의 다국어 필드와 기본값을 정규화한다.
@@ -75,18 +49,10 @@ const toMusicAward = (id: string, d: Record<string, unknown>): MusicAward => ({
  * @param {Record<string, unknown>} d 병합된 영상 문서 필드.
  * @returns {MusicMedia} 관리자 화면에서 사용하는 영상 모델.
  */
-const toMusicMedia = (id: string, d: Record<string, unknown>): MusicMedia => ({
-  id,
-  title: asText(d.title),
-  source: asText(d.source),
-  youtubeId: (d.youtubeId as string) ?? "",
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
 const musicWorksCrud = listCrud<MusicWork>(
   COLLECTIONS.MUSIC_WORKS,
-  toMusicWork,
+  decodeMusicWork,
   "연주",
   "musicWork",
 );
@@ -104,6 +70,10 @@ const assertStorableTicketUrl = (input: MusicWorkInput): void => {
   }
 };
 
+/**
+ * 예매 링크 검증은 `create`·`update` 에만 얹는다. spread 로 함께 노출되는 `patchData` 는
+ * 이미지 파생본 마이그레이션이 포스터만 바꿀 때 쓰므로 링크를 건드리지 않는다.
+ */
 const musicWorks = {
   ...musicWorksCrud,
   create: async (id: string, input: MusicWorkInput): Promise<void> => {
@@ -127,13 +97,13 @@ const musicWorks = {
 };
 const musicAwards = listCrud<MusicAward>(
   COLLECTIONS.MUSIC_AWARDS,
-  toMusicAward,
+  decodeMusicAward,
   "수상",
   "musicAward",
 );
 const musicMediaCrud = listCrud<MusicMedia>(
   COLLECTIONS.MUSIC_MEDIA,
-  toMusicMedia,
+  decodeMusicMedia,
   "영상",
   "musicMedia",
 );
@@ -177,12 +147,7 @@ const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
     .maybeSingle();
   if (error) throw new Error("음악 설정을 불러오지 못했습니다.");
   if (!data) return EMPTY_MUSIC_CONFIG;
-  const d = (data.data as Record<string, unknown> | null) ?? {};
-  return {
-    intro: asText(d.intro),
-    career: (d.career as MusicConfig["career"]) ?? [],
-    education: (d.education as MusicConfig["education"]) ?? [],
-  };
+  return decodeMusicConfig((data.data as Record<string, unknown> | null) ?? {});
 };
 
 /**

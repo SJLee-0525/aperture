@@ -1,8 +1,18 @@
 "use client";
 
-import { asText } from "@/lib/i18n/as-text";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import {
+  readBoolean,
+  readDate,
+  readImage,
+  readImageOrNull,
+  readNullableDate,
+  readNumber,
+  readString,
+  readStringArray,
+  readText,
+} from "@/lib/supabase/decode/field";
 import { paginateAll } from "@/lib/supabase/paginate-all";
 
 import type {
@@ -39,13 +49,10 @@ const listProjected = async (table: string, select: string, orderColumns: string
 };
 
 /**
- * 알 수 없는 이미지 값을 목록 카드용 이미지 메타데이터로 맞춘다.
- *
- * @param {unknown} value 읽은 이미지 값.
- * @returns {ImageMeta} 이미지 메타데이터. 값이 없으면 빈 이미지다.
+ * 목록 projection 은 도메인 엔티티가 아니라 화면 카드용 축약 행이라 컬렉션 디코더를
+ * 쓰지 않는다. 대신 같은 필드 리더를 공유해 "관리자 목록은 1970, 편집기는 오늘" 같은
+ * 폴백 불일치가 생기지 않게 한다.
  */
-const image = (value: unknown): ImageMeta =>
-  (value as ImageMeta) ?? { url: "", path: "", w: 0, h: 0 };
 
 /** @returns {Promise<AdminPhotoListItem[]>} 관리자 목록에 필요한 필드만 담은 사진 목록. */
 const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
@@ -55,11 +62,11 @@ const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
       "id",
     ])
   ).map((row) => ({
-    id: row.id as string,
-    title: asText(row.title),
-    image: image(row.image),
-    order: (row.sort_order as number) ?? 0,
-    published: (row.published as boolean) ?? false,
+    id: readString(row.id),
+    title: readText(row.title),
+    image: readImage(row.image),
+    order: readNumber(row.sort_order),
+    published: readBoolean(row.published),
   }));
 
 /** @returns {Promise<AdminAlbumListItem[]>} 관리자 목록에 필요한 필드만 담은 앨범 목록. */
@@ -71,13 +78,13 @@ const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
       ["sort_order", "id"],
     )
   ).map((row) => ({
-    id: row.id as string,
-    title: asText(row.title),
-    coverPhotoId: (row.coverPhotoId as string) ?? "",
-    cover: (row.cover as ImageMeta | null) ?? null,
-    photoIds: (row.photoIds as string[]) ?? [],
-    order: (row.sort_order as number) ?? 0,
-    published: (row.published as boolean) ?? false,
+    id: readString(row.id),
+    title: readText(row.title),
+    coverPhotoId: readString(row.coverPhotoId),
+    cover: readImageOrNull(row.cover),
+    photoIds: readStringArray(row.photoIds),
+    order: readNumber(row.sort_order),
+    published: readBoolean(row.published),
   }));
 
 /** @returns {Promise<AdminDevProjectListItem[]>} 관리자 목록에 필요한 필드만 담은 프로젝트 목록. */
@@ -89,12 +96,12 @@ const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
       ["sort_order", "id"],
     )
   ).map((row) => ({
-    id: row.id as string,
-    title: asText(row.title),
-    year: (row.year as string) ?? "",
-    cover: (row.cover as ImageMeta | null) ?? null,
-    order: (row.sort_order as number) ?? 0,
-    published: (row.published as boolean) ?? false,
+    id: readString(row.id),
+    title: readText(row.title),
+    year: readString(row.year),
+    cover: readImageOrNull(row.cover),
+    order: readNumber(row.sort_order),
+    published: readBoolean(row.published),
   }));
 
 /** @returns {Promise<AdminMusicWorkListItem[]>} 관리자 목록에 필요한 필드만 담은 연주 목록. */
@@ -106,12 +113,12 @@ const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
       ["sort_order", "id"],
     )
   ).map((row) => ({
-    id: row.id as string,
-    title: asText(row.title),
-    performedAt: new Date((row.performedAt as string) ?? 0),
-    poster: image(row.poster),
-    order: (row.sort_order as number) ?? 0,
-    published: (row.published as boolean) ?? false,
+    id: readString(row.id),
+    title: readText(row.title),
+    performedAt: readDate(row.performedAt),
+    poster: readImage(row.poster),
+    order: readNumber(row.sort_order),
+    published: readBoolean(row.published),
   }));
 
 /**
@@ -130,14 +137,14 @@ const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
       ["id"],
     )
   ).map((row) => ({
-    id: row.id as string,
-    slug: (row.slug as string) ?? "",
-    title: asText(row.title),
-    tags: (row.tags as string[]) ?? [],
-    pinned: (row.pinned as boolean) ?? false,
-    published: (row.published as boolean) ?? false,
-    publishedAt: row.published_at ? new Date(row.published_at as string) : null,
-    updatedAt: new Date((row.updated_at as string) ?? 0),
+    id: readString(row.id),
+    slug: readString(row.slug),
+    title: readText(row.title),
+    tags: readStringArray(row.tags),
+    pinned: readBoolean(row.pinned),
+    published: readBoolean(row.published),
+    publishedAt: readNullableDate(row.published_at),
+    updatedAt: readDate(row.updated_at),
   }));
 
 /**
@@ -151,8 +158,8 @@ const listDevArticleImageRefsAdmin = async (): Promise<
 > =>
   (await listProjected("dev_articles", "id,cover:data->cover,body:data->>body", ["id"])).map(
     (row) => ({
-      cover: (row.cover as ImageMeta | null) ?? null,
-      body: (row.body as string) ?? "",
+      cover: readImageOrNull(row.cover),
+      body: readString(row.body),
     }),
   );
 

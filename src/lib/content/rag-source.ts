@@ -30,7 +30,7 @@ import {
 import { fetchSiteConfig, toSiteConfig } from "@/lib/supabase/public/site";
 import { fetchRowAsUser } from "@/lib/supabase/public/transport";
 
-import type { CollectionId } from "@/constants/collections";
+import type { TableCollectionId } from "@/constants/collections";
 import type { RagSyncTarget } from "@/types/rag";
 
 /**
@@ -40,7 +40,7 @@ import type { RagSyncTarget } from "@/types/rag";
  */
 const FRESH = { fresh: true } as const;
 
-const targetCollection: Partial<Record<RagSyncTarget["sourceType"], CollectionId>> = {
+const targetCollection: Partial<Record<RagSyncTarget["sourceType"], TableCollectionId>> = {
   photo: "photos",
   album: "albums",
   project: "devProjects",

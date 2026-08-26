@@ -1,3 +1,5 @@
+import { isMissingDate } from "@/lib/supabase/decode/field";
+
 import type { CollectionId } from "@/constants/collections";
 
 /**
@@ -33,14 +35,24 @@ type ArticleRow = {
 const toJson = (value: Record<string, unknown>): Record<string, unknown> =>
   JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
 
-/** 수동 정렬 목록 컬렉션 공통 인코딩. `order`·`published` 를 스칼라로 분리한다. */
+/**
+ * 수동 정렬 목록 컬렉션 공통 인코딩. `order`·`published` 를 스칼라로 분리한다.
+ *
+ * 값이 없던 날짜는 디코더가 epoch 로 읽어 온다. 그 값을 그대로 저장하면 편집 한 번으로
+ * 1970-01-01 이 공연일·촬영일로 영속되므로 해당 키를 뺀다. 폼도 epoch 를 빈 입력란으로
+ * 보여 주므로 화면과 저장 결과가 갈리지 않는다.
+ */
 const encodeListRow = (id: string, input: Record<string, unknown>): ListRow => {
   const { order, published, ...rest } = input;
+  const data = toJson(rest);
+  for (const [key, value] of Object.entries(rest)) {
+    if (isMissingDate(value)) delete data[key];
+  }
   return {
     id,
     published: published === true,
     sort_order: typeof order === "number" ? order : 0,
-    data: toJson(rest),
+    data,
   };
 };
 

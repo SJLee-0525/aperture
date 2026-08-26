@@ -1,26 +1,13 @@
 import { COLLECTIONS, SITE_DOC } from "@/constants/collections";
-import { asText } from "@/lib/i18n/as-text";
-import { sanitizePublicLinks } from "@/lib/security/public-url";
+import { sanitizeSiteConfigForPublic } from "@/lib/supabase/decode/public-sanitize";
+import { decodeSiteConfig } from "@/lib/supabase/decode/site";
 import { fetchRow } from "@/lib/supabase/public/transport";
 
 import type { SiteConfig } from "@/types/site";
-import type { Tag } from "@/types/tag";
 
-/**
- * PostgREST 행에서 병합된 사이트 설정 필드를 공개 페이지 모델로 변환한다.
- *
- * @param {Record<string, unknown>} data 병합된 사이트 설정 필드.
- * @returns {SiteConfig} 다국어 문구, 링크와 태그가 정규화된 설정.
- */
-const toSiteConfig = (data: Record<string, unknown>): SiteConfig => ({
-  name: asText(data.name),
-  tagline: asText(data.tagline),
-  landingLead: asText(data.landingLead),
-  contactLead: asText(data.contactLead),
-  bio: asText(data.bio),
-  links: sanitizePublicLinks(data.links, { allowMailto: true }),
-  tags: (data.tags as Tag[]) ?? [],
-});
+/** 공개 사이트 설정. 저장된 연락 링크는 여기서만 표시용으로 정화한다(mailto 허용). */
+const toSiteConfig = (data: Record<string, unknown>): SiteConfig =>
+  sanitizeSiteConfigForPublic(decodeSiteConfig(data));
 
 /**
  * 공개 페이지에서 사용할 사이트 설정 문서를 읽는다.

@@ -6,11 +6,11 @@ import {
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 
-import { listAlbumsAdmin, updateAlbum } from "@/lib/supabase/albums";
+import { listAlbumsAdmin, patchAlbum } from "@/lib/supabase/albums";
 import { getAdminAccessToken } from "@/lib/supabase/auth";
 import { devProjects } from "@/lib/supabase/dev";
 import { musicWorks } from "@/lib/supabase/music";
-import { listPhotosAdmin, updatePhoto } from "@/lib/supabase/photos";
+import { listPhotosAdmin, patchPhoto } from "@/lib/supabase/photos";
 import {
   uploadDevThumbnail,
   uploadDevPreview,
@@ -137,9 +137,9 @@ const migrateImageThumbnails = async (
       (blob) => uploadPhotoPreview(photo.id, blob),
       (blob) => uploadPhotoThumbnail(photo.id, blob),
     );
-    const { id, ...input } = photo;
-    await updatePhoto(id, { ...input, image });
-    photoImages.set(id, image);
+    // 전체 문서를 되쓰면 디코더가 결측 필드에 채운 값까지 함께 저장된다.
+    await patchPhoto(photo.id, { image });
+    photoImages.set(photo.id, image);
   }
 
   for (const [index, work] of works.entries()) {
@@ -152,8 +152,7 @@ const migrateImageThumbnails = async (
       (blob) => uploadMusicPosterPreview(work.id, blob),
       (blob) => uploadMusicPosterThumbnail(work.id, blob),
     );
-    const { id, ...input } = work;
-    await musicWorks.update(id, { ...input, poster });
+    await musicWorks.patchData(work.id, { poster });
   }
 
   for (const [index, project] of projects.entries()) {
@@ -177,8 +176,7 @@ const migrateImageThumbnails = async (
       project.cover ? migrate(project.cover) : Promise.resolve(null),
       ...project.images.map(migrate),
     ]);
-    const { id, ...input } = project;
-    await devProjects.update(id, { ...input, cover, images });
+    await devProjects.patchData(project.id, { cover, images });
   }
 
   for (const [index, album] of albums.entries()) {
@@ -195,8 +193,7 @@ const migrateImageThumbnails = async (
       continue;
     result.albums += 1;
     if (dryRun) continue;
-    const { id, ...input } = album;
-    await updateAlbum(id, { ...input, cover });
+    await patchAlbum(album.id, { cover });
   }
 
   result.pending = dryRun

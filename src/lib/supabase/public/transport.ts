@@ -3,7 +3,7 @@ import {
   collectionCacheTag,
   documentCacheTag,
 } from "@/constants/cache";
-import { SUPABASE_COLLECTIONS, type CollectionId } from "@/constants/collections";
+import { SUPABASE_COLLECTIONS, type TableCollectionId } from "@/constants/collections";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import { paginateAll } from "@/lib/supabase/paginate-all";
 import { fetchWithRetry } from "@/lib/supabase/public/retry-fetch";
@@ -20,11 +20,7 @@ type SelectOptions = {
   signal?: AbortSignal;
 };
 
-const descriptor = (collection: CollectionId) => {
-  const found = SUPABASE_COLLECTIONS[collection];
-  if (!found) throw new Error(`Supabase 공개 컬렉션 서술자가 없습니다: ${collection}`);
-  return found;
-};
+const descriptor = (collection: TableCollectionId) => SUPABASE_COLLECTIONS[collection];
 
 /**
  * REST 타임스탬프 또는 숫자 값을 `Date`로 변환한다.
@@ -53,7 +49,7 @@ const toNullableDate = (value: unknown): Date | null =>
  * data 를 먼저 펼치고 스칼라 컬럼으로 덮는다 — 마이그레이션 이전 데이터에 남은
  * `data.published`·`data.slug` 잔존값이 DB 스칼라를 이기지 못하게 하는 계약이다.
  */
-const mergeRow = (collection: CollectionId, row: Record<string, unknown>): PublicRow => {
+const mergeRow = (collection: TableCollectionId, row: Record<string, unknown>): PublicRow => {
   const { hasData, scalars } = descriptor(collection);
   const raw = hasData ? (row.data as Record<string, unknown> | null) : null;
   const data: Record<string, unknown> = { ...(raw ?? {}) };
@@ -65,7 +61,7 @@ const mergeRow = (collection: CollectionId, row: Record<string, unknown>): Publi
 const baseHeaders = (): Record<string, string> => ({ apikey: supabasePublishableKey() });
 
 const requestRows = async (
-  collection: CollectionId,
+  collection: TableCollectionId,
   params: URLSearchParams,
   cacheTag: string,
   options?: { fresh?: boolean; signal?: AbortSignal },
@@ -93,7 +89,7 @@ const requestRows = async (
  * 페이지마다 URL 이 달라 Data Cache 엔트리는 나뉘지만 태그가 같아 함께 무효화된다.
  */
 const requestAllRows = (
-  collection: CollectionId,
+  collection: TableCollectionId,
   params: URLSearchParams,
   cacheTag: string,
   options?: { fresh?: boolean; signal?: AbortSignal },
@@ -113,7 +109,7 @@ const requestAllRows = (
  * @returns {Promise<PublicRow[]>} 병합된 행 목록.
  */
 const selectRows = async (
-  collection: CollectionId,
+  collection: TableCollectionId,
   options?: SelectOptions,
 ): Promise<PublicRow[]> => {
   const { select, order } = descriptor(collection);
@@ -132,7 +128,7 @@ const selectRows = async (
  * @returns {Promise<PublicRow[]>} 병합된 공개 행 목록.
  */
 const selectPublished = async (
-  collection: CollectionId,
+  collection: TableCollectionId,
   options?: { fresh?: boolean },
 ): Promise<PublicRow[]> => {
   if (!descriptor(collection).hasPublished)
@@ -151,7 +147,7 @@ const selectPublished = async (
  * @returns {Promise<Array<Record<string, unknown>>>} projection 그대로의 행 목록.
  */
 const selectProjectedPublished = async (
-  collection: CollectionId,
+  collection: TableCollectionId,
   select: string,
   options?: { fresh?: boolean },
 ): Promise<Array<Record<string, unknown>>> => {
@@ -171,7 +167,7 @@ const selectProjectedPublished = async (
  * @returns {Promise<Record<string, unknown> | null>} 병합된 문서. 없으면 `null`.
  */
 const fetchRow = async (
-  collection: CollectionId,
+  collection: TableCollectionId,
   documentId: string,
   label: string,
   options?: { fresh?: boolean; signal?: AbortSignal },
@@ -198,7 +194,7 @@ const fetchRow = async (
  * @returns {Promise<Record<string, unknown> | null>} 병합된 문서. 없으면 `null`.
  */
 const fetchRowAsUser = async (
-  collection: CollectionId,
+  collection: TableCollectionId,
   documentId: string,
   accessToken: string,
 ): Promise<Record<string, unknown> | null> => {
