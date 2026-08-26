@@ -88,7 +88,7 @@
   font-weight: 600;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--text-4);
+  color: var(--text-3);
 }
 .triVal {
   font-size: 2.2rem;

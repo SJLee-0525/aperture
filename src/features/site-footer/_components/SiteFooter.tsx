@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { SocialGlyph } from "@/components/SocialGlyph";
+import { SitemapLink } from "@/features/site-footer/_components/SitemapLink";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { CONTACT_NAV, MEGA_MENU } from "@/constants/navigation";
@@ -72,24 +73,24 @@ const SiteFooter = ({
         <nav className={styles.sitemap} aria-label={dict.footerSitemapLabel}>
           {MEGA_MENU.map((section) => (
             <div key={section.section} className={styles.col} data-section={section.section}>
-              <Link href={localizePath(lang, section.href)} className={styles.colTitle}>
+              <SitemapLink lang={lang} href={section.href} className={styles.colTitle}>
                 {dict[section.labelKey]}
-              </Link>
+              </SitemapLink>
               <ul className={styles.colLinks}>
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={localizePath(lang, link.href)} className={styles.colLink}>
+                    <SitemapLink lang={lang} href={link.href} className={styles.colLink}>
                       {dict[link.labelKey]}
-                    </Link>
+                    </SitemapLink>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
           <div className={styles.col} data-section="contact">
-            <Link href={localizePath(lang, CONTACT_NAV.href)} className={styles.colTitle}>
+            <SitemapLink lang={lang} href={CONTACT_NAV.href} className={styles.colTitle}>
               {dict[CONTACT_NAV.labelKey]}
-            </Link>
+            </SitemapLink>
           </div>
         </nav>
       </div>

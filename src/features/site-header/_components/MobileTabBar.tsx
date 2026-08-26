@@ -35,16 +35,20 @@ const MobileTabBar = () => {
 
   return (
     <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel}>
-      {MOBILE_TABS[section].map((tab) => (
-        <LocalizedLink
-          key={tab.href}
-          href={tab.href}
-          className={`${styles.tab} ${isTabActive(tab.href, pathname) ? styles.active : ""}`}
-        >
-          <Icon name={tab.icon} size={22} />
-          <span>{dict[tab.labelKey]}</span>
-        </LocalizedLink>
-      ))}
+      {MOBILE_TABS[section].map((tab) => {
+        const active = isTabActive(tab.href, pathname);
+        return (
+          <LocalizedLink
+            key={tab.href}
+            href={tab.href}
+            aria-current={active ? "page" : undefined}
+            className={`${styles.tab} ${active ? styles.active : ""}`}
+          >
+            <Icon name={tab.icon} size={22} />
+            <span>{dict[tab.labelKey]}</span>
+          </LocalizedLink>
+        );
+      })}
     </nav>
   );
 };

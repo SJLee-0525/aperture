@@ -57,6 +57,7 @@ const MegaMenuGroup = memo(
         type="button"
         className={styles.megaBtn}
         aria-expanded={isOpen}
+        aria-current={isCurrent ? "true" : undefined}
         onClick={() => onPinToggle(group.section)}
       >
         {dict[group.labelKey]}
@@ -88,6 +89,7 @@ const DesktopMegaMenu = () => {
   const { dict } = useLang();
   const pathname = usePathname();
   const section = sectionFromPath(pathname);
+  const contactCurrent = stripLangPrefix(pathname).startsWith(ROUTES.CONTACT);
   const [hovered, setHovered] = useState<NavSection | null>(null);
   const [pinned, setPinned] = useState<NavSection | null>(null);
   const shown = pinned ?? hovered;
@@ -144,11 +146,14 @@ const DesktopMegaMenu = () => {
       ))}
       <div
         data-section="contact"
-        className={`${styles.megaItem} ${
-          stripLangPrefix(pathname).startsWith(ROUTES.CONTACT) ? styles.current : ""
-        }`}
+        className={`${styles.megaItem} ${contactCurrent ? styles.current : ""}`}
       >
-        <LocalizedLink href={CONTACT_NAV.href} className={styles.megaBtn} onClick={closeMenu}>
+        <LocalizedLink
+          href={CONTACT_NAV.href}
+          className={styles.megaBtn}
+          aria-current={contactCurrent ? "page" : undefined}
+          onClick={closeMenu}
+        >
           {dict[CONTACT_NAV.labelKey]}
         </LocalizedLink>
       </div>

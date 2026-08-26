@@ -240,7 +240,7 @@
 }
 .rowCta {
   font-size: 14px;
-  color: var(--text-4);
+  color: var(--text-3);
   transition: color 0.2s;
 }
 .row:hover {
