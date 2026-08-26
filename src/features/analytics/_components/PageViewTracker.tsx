@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
+import { analyticsQuery } from "@/features/analytics/_lib/analytics-query";
 import { sendPageView } from "@/features/analytics/_lib/gtag";
 
 /**
@@ -29,7 +30,8 @@ export function PageViewTracker() {
   useEffect(() => {
     if (!isTrackablePath(pathname)) return;
 
-    const query = searchParams.toString();
+    // 허용 목록 밖 파라미터는 GA 로 보내지 않는다. 검색어가 page_location 에 실리던 경로다.
+    const query = analyticsQuery(searchParams);
     sendPageView(query ? `${pathname}?${query}` : pathname);
   }, [pathname, searchParams]);
 

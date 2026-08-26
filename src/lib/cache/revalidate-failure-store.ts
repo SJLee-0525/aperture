@@ -63,7 +63,13 @@ const recordRevalidateFailure = (failure: {
     failedAt: new Date().toISOString(),
     reason: failure.reason,
   };
-  localStorage.setItem(STORAGE_KEYS.ADMIN_REVALIDATE_FAILURE, JSON.stringify(merged));
+  try {
+    localStorage.setItem(STORAGE_KEYS.ADMIN_REVALIDATE_FAILURE, JSON.stringify(merged));
+  } catch {
+    // Safari 프라이빗 모드와 쿼터 초과에서 던진다. 이 함수는 이탈 핸들러에서도 불리므로
+    // 미처리 예외가 되면 그 흐름이 끊긴다. 기록이 없으면 배너만 뜨지 않는다.
+    return;
+  }
   notify();
 };
 

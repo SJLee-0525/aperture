@@ -131,12 +131,38 @@ const musicAwards = listCrud<MusicAward>(
   "수상",
   "musicAward",
 );
-const musicMedia = listCrud<MusicMedia>(
+const musicMediaCrud = listCrud<MusicMedia>(
   COLLECTIONS.MUSIC_MEDIA,
   toMusicMedia,
   "영상",
   "musicMedia",
 );
+
+/**
+ * YouTube 영상 ID 는 11자의 base64url 문자다.
+ *
+ * 블로그 본문의 `::youtube` 디렉티브(`markdown-directives.ts`)가 같은 형태를 강제한다.
+ * 여기만 열어 두면 두 경로의 규칙이 갈리고, 폼을 거치지 않는 재저장이 임의 경로를 심을 수 있다.
+ */
+const YOUTUBE_ID_PATTERN = /^[\w-]{11}$/;
+
+const assertStorableYoutubeId = (input: { youtubeId: string }): void => {
+  if (!YOUTUBE_ID_PATTERN.test(input.youtubeId)) {
+    throw new Error("YouTube 영상 ID 형식이 올바르지 않습니다.");
+  }
+};
+
+const musicMedia = {
+  ...musicMediaCrud,
+  create: async (id: string, input: Omit<MusicMedia, "id">): Promise<void> => {
+    assertStorableYoutubeId(input);
+    await musicMediaCrud.create(id, input);
+  },
+  update: async (id: string, input: Omit<MusicMedia, "id">): Promise<void> => {
+    assertStorableYoutubeId(input);
+    await musicMediaCrud.update(id, input);
+  },
+};
 
 /**
  * 소개와 경력·학력 타임라인을 담은 음악 설정 문서를 읽는다.

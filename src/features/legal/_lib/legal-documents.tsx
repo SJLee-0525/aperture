@@ -136,6 +136,20 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                   </tr>
                   <tr>
                     <td>
+                      <code>ap-lang:v1</code>
+                    </td>
+                    <td>직접 선택한 언어 기억</td>
+                    <td>localStorage · 직접 지울 때까지</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>ap-theme:v1</code>
+                    </td>
+                    <td>밝은 화면·어두운 화면 선택 기억</td>
+                    <td>localStorage · 직접 지울 때까지</td>
+                  </tr>
+                  <tr>
+                    <td>
                       <code>ap-consent:v3</code>
                     </td>
                     <td>방문 분석과 오류 보고의 개별 허용·거부 선택 기억</td>
@@ -471,6 +485,20 @@ const PRIVACY: Record<Lang, LegalDocument> = {
                     </td>
                     <td>Remember an explicit language choice</td>
                     <td>Functional first-party cookie · 30 days</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>ap-lang:v1</code>
+                    </td>
+                    <td>Remember an explicit language choice</td>
+                    <td>localStorage · until you clear it</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>ap-theme:v1</code>
+                    </td>
+                    <td>Remember the light or dark appearance you chose</td>
+                    <td>localStorage · until you clear it</td>
                   </tr>
                   <tr>
                     <td>

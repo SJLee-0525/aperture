@@ -5,6 +5,11 @@ import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { authorizeAdminToken } from "@/lib/auth/authorize-admin-token";
 
+/** 캐시 태그로 쓸 수 있는 형태. 컬렉션·문서 ID 가 쓰는 문자 집합에 맞춘다. */
+const REVALIDATABLE_TAG_PATTERN = /^[\w:-]{1,256}$/;
+
+const isRevalidatableTag = (tag: string): boolean => REVALIDATABLE_TAG_PATTERN.test(tag);
+
 /**
  * 변경된 DB 데이터에 의존하는 공개 캐시만 무효화한다.
  *
@@ -36,7 +41,11 @@ const revalidatePublicPages = async (
   if (verdict.status !== "ok") {
     throw new Error("Unauthorized cache revalidation");
   }
-  for (const tag of new Set(tags)) updateTag(tag);
+  for (const tag of new Set(tags)) {
+    // 값의 출처는 관리자 브라우저의 localStorage 다. 경로가 받는 것과 같은 수준으로 형태를
+    // 확인해, 한쪽만 검사가 없어 다음에 이 코드를 읽는 사람이 의도된 차이로 읽지 않게 한다.
+    if (isRevalidatableTag(tag)) updateTag(tag);
+  }
   for (const path of new Set(paths)) {
     // 경로 형태가 아닌 값과 동적 라우트 패턴은 버린다.
     if (

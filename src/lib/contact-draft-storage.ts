@@ -49,7 +49,7 @@ const isValidFields = (name: string, email: string, message: string): boolean =>
  * @returns {boolean} 저장 성공 여부.
  */
 const writeContactDraft = (
-  storage: Pick<Storage, "setItem">,
+  storage: Pick<Storage, "setItem" | "removeItem">,
   draft: ContactDraft,
   now = Date.now(),
 ): boolean => {
@@ -67,10 +67,35 @@ const writeContactDraft = (
   };
   try {
     storage.setItem(SESSION_STORAGE_KEYS.CONTACT_DRAFT, JSON.stringify(stored));
-    return true;
   } catch {
     return false;
   }
+  scheduleContactDraftExpiry(storage);
+  return true;
+};
+
+/**
+ * TTL 이 지나면 초안을 실제로 지운다.
+ *
+ * `parseStored` 의 만료 검사는 읽는 시점에만 돈다. 방문자가 연락 페이지로 가지 않으면 이름과
+ * 이메일, 본문이 담긴 JSON 이 탭을 닫을 때까지 남아, 처리방침이 적은 "최대 10분" 과 어긋난다.
+ * 탭을 떠날 때도 지워 타이머가 돌기 전에 화면을 닫는 경우를 함께 덮는다.
+ *
+ * 서버 렌더에는 `window` 가 없으므로 아무것도 예약하지 않는다.
+ */
+const scheduleContactDraftExpiry = (storage: Pick<Storage, "removeItem">): void => {
+  if (typeof window === "undefined") return;
+
+  const drop = () => {
+    try {
+      storage.removeItem(SESSION_STORAGE_KEYS.CONTACT_DRAFT);
+    } catch {
+      // 저장소를 쓸 수 없으면 남는 값도 없다.
+    }
+  };
+
+  window.setTimeout(drop, CONTACT_DRAFT_TTL_MS);
+  window.addEventListener("pagehide", drop, { once: true });
 };
 
 /**

@@ -52,6 +52,7 @@ describe("writeContactDraft", () => {
       setItem: () => {
         throw new DOMException("blocked", "SecurityError");
       },
+      removeItem: () => undefined,
     };
 
     expect(writeContactDraft(storage, { name: null, email: null, message: "문의" }, NOW)).toBe(
