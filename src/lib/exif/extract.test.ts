@@ -18,7 +18,9 @@ describe("extractExif", () => {
   });
 
   it("원본 파일의 EXIF를 관리자 사진 초안 형식으로 변환한다", async () => {
-    const shotAt = new Date("2026-04-05T06:30:00+09:00");
+    // exifr 는 DateTimeOriginal 을 실행 환경 로컬로 해석한 Date 로 돌려준다.
+    // 추출은 그 벽시계 값을 사이트 기준(KST)으로 다시 읽으므로 실행 TZ 와 무관하다.
+    const shotAt = new Date(2026, 3, 5, 6, 30);
     parseMock.mockResolvedValue({
       Make: " SONY ",
       Model: " ILCE-7M4 ",
@@ -47,7 +49,7 @@ describe("extractExif", () => {
       wb: "Auto",
       metering: "Pattern",
       flash: "Off",
-      shotAt,
+      shotAt: new Date("2026-04-05T06:30:00+09:00"),
       coords: { lat: 35.1796, lng: 129.0756 },
       fileName: "harbor.jpg",
     });
@@ -108,5 +110,14 @@ describe("extractExif", () => {
     parseMock.mockResolvedValue({ DateTimeOriginal: "2026-01-01" });
 
     await expect(extractExif(file)).resolves.toMatchObject({ shotAt: null });
+  });
+
+  // 같은 사진을 다른 타임존 기기에서 올려도 저장되는 인스턴트가 같아야 한다.
+  it("촬영일시를 업로드 기기가 아니라 사이트 타임존으로 해석한다", async () => {
+    parseMock.mockResolvedValue({ DateTimeOriginal: new Date(2026, 0, 2, 3, 4, 5) });
+
+    const result = await extractExif(file);
+
+    expect(result.shotAt?.toISOString()).toBe("2026-01-01T18:04:05.000Z");
   });
 });

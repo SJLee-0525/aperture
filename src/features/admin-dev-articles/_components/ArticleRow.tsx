@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icon";
 
 import { adminDevArticleRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD, formatLocalYMD } from "@/lib/format/format-date";
 
 import type { AdminDevArticleListItem } from "@/types/admin";
 
@@ -61,8 +61,8 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
 
       <span className={styles.date}>
         {article.publishedAt
-          ? formatYMD(article.publishedAt)
-          : `수정 ${formatYMD(article.updatedAt)}`}
+          ? formatEventYMD(article.publishedAt)
+          : `수정 ${formatLocalYMD(article.updatedAt)}`}
       </span>
 
       {/* 아이콘만 두고 색으로 상태를 나눈다. 이름은 고정하고 상태는 aria-pressed 가 전한다.

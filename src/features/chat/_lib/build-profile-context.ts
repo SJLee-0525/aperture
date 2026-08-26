@@ -7,7 +7,7 @@ import { albumRoute, devArticleRoute, devProjectRoute, ROUTES } from "@/constant
 import { searchRagChunks } from "@/lib/ai/rag-search";
 import { getChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
@@ -207,7 +207,7 @@ const formatProfileReferences = (data: ChatProfileData, lang: Lang): ChatReferen
     title: pickText(article.title, lang),
     // 카드에는 부제 한 줄뿐이라 발행일과 요약을 한 자리에 담는다.
     subtitle: article.publishedAt
-      ? `${formatYMD(article.publishedAt)} · ${pickText(article.summary, lang)}`
+      ? `${formatEventYMD(article.publishedAt)} · ${pickText(article.summary, lang)}`
       : pickText(article.summary, lang),
     href: devArticleRoute(article.slug),
     image: preview(article.cover),

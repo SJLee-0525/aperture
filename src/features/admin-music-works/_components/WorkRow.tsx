@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { adminMusicWorkRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 
 import { imageThumbnailUrl } from "@/types/image";
 
@@ -73,7 +73,7 @@ const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
 
       <span className={styles.title}>{work.title.ko || "제목 없음"}</span>
 
-      <span className={styles.date}>{formatYMD(work.performedAt)}</span>
+      <span className={styles.date}>{formatEventYMD(work.performedAt)}</span>
 
       <button
         type="button"

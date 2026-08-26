@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icon";
 
 import { devArticleRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 
@@ -123,7 +123,7 @@ const ArticleCard = ({
         <div className={styles.cardBody}>
           <div className={styles.meta}>
             <time dateTime={article.publishedAt.toISOString()}>
-              {formatYMD(article.publishedAt)}
+              {formatEventYMD(article.publishedAt)}
             </time>
             <span>{readingLabel}</span>
           </div>

@@ -4,7 +4,7 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useModelContextTool } from "@/hooks/use-model-context-tool";
 
 import { devArticleRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { resolveCurrentArticleSlug } from "@/lib/webmcp/current-target";
@@ -111,7 +111,7 @@ const useBlogTools = (articles: ArticleToolData[], tags: DevArticleTag[]): void 
     const list = formatToolItems(matched, args.limit, (article) =>
       [
         pickText(article.title, lang),
-        formatYMD(article.publishedAt),
+        formatEventYMD(article.publishedAt),
         `${article.readingMinutes} min read`,
         article.id,
         article.slug,
@@ -145,7 +145,7 @@ const useBlogTools = (articles: ArticleToolData[], tags: DevArticleTag[]): void 
     return clampToolText(
       [
         pickText(article.title, lang),
-        `${article.id} · ${article.slug} · ${formatYMD(article.publishedAt)} · ${article.readingMinutes} min read`,
+        `${article.id} · ${article.slug} · ${formatEventYMD(article.publishedAt)} · ${article.readingMinutes} min read`,
         pickText(article.summary, lang),
         article.tagLabels.length > 0 ? `Tags: ${article.tagLabels.join(", ")}` : "",
         article.headings.length > 0 ? `Outline: ${article.headings.join(" / ")}` : "",

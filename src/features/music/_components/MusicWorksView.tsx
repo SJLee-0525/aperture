@@ -9,7 +9,7 @@ import { useMusicWorkTools } from "@/features/music/_hooks/use-music-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -81,7 +81,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                 <div className={styles.wt}>{pickText(work.title, lang)}</div>
                 <div className={styles.ws}>{pickText(work.subtitle, lang)}</div>
                 <div className={styles.wm}>
-                  {formatYMD(work.performedAt)} · {pickText(work.venue, lang)}
+                  {formatEventYMD(work.performedAt)} · {pickText(work.venue, lang)}
                 </div>
               </div>
             </button>
@@ -120,7 +120,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
               <div className={styles.rt}>{pickText(selected.title, lang)}</div>
               <div className={styles.rsub}>{pickText(selected.subtitle, lang)}</div>
               <div className={styles.rmeta}>
-                {formatYMD(selected.performedAt)} · {selected.time}
+                {formatEventYMD(selected.performedAt)} · {selected.time}
               </div>
               <div className={styles.rv}>{pickText(selected.venue, lang)}</div>
               {selected.ticketUrl.trim() ? (

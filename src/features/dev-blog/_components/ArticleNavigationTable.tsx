@@ -8,7 +8,7 @@ import { Icon } from "@/components/Icon";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { devArticleRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
@@ -91,7 +91,7 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
                     <div aria-current="page" className={styles.currentRow}>
                       <span className={styles.currentTitle}>{title}</span>
                       <time className={styles.date} dateTime={article.publishedAt.toISOString()}>
-                        {formatYMD(article.publishedAt)}
+                        {formatEventYMD(article.publishedAt)}
                       </time>
                     </div>
                   ) : (
@@ -102,7 +102,7 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
                     >
                       <span className={styles.title}>{title}</span>
                       <time className={styles.date} dateTime={article.publishedAt.toISOString()}>
-                        {formatYMD(article.publishedAt)}
+                        {formatEventYMD(article.publishedAt)}
                       </time>
                     </Link>
                   )}

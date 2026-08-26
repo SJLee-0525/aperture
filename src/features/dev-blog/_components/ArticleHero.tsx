@@ -6,7 +6,7 @@ import { ARTICLE_HERO_MIN_HEIGHT } from "@/features/dev-blog/_lib/article-hero-h
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -92,7 +92,7 @@ const ArticleHero = ({
           <div className={styles.metaGroup}>
             <p className={styles.meta}>
               {publishedAt ? (
-                <time dateTime={publishedAt.toISOString()}>{formatYMD(publishedAt)}</time>
+                <time dateTime={publishedAt.toISOString()}>{formatEventYMD(publishedAt)}</time>
               ) : (
                 <span>{dict.articleDraftLabel}</span>
               )}

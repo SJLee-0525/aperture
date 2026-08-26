@@ -22,7 +22,7 @@ import {
 import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-article-id";
 
 import { adminDevArticlePreviewRoute, ROUTES } from "@/constants/routes";
-import { formatShotAt } from "@/lib/format/format-date";
+import { formatLocalTimestamp } from "@/lib/format/format-date";
 
 import type { DevArticle } from "@/types/dev-article";
 
@@ -76,14 +76,14 @@ const ArticleForm = ({ articleId, initial }: Props) => {
         <h1 className={styles.title}>{editor.isEdit ? "글 수정" : "새 글"}</h1>
         <div className={styles.headState}>
           {editor.dirty ? <span>저장하지 않은 변경</span> : null}
-          {editor.savedAt ? <span>저장 {formatShotAt(editor.savedAt)}</span> : null}
+          {editor.savedAt ? <span>저장 {formatLocalTimestamp(editor.savedAt)}</span> : null}
         </div>
       </header>
 
       {recovery.pending ? (
         <div className={`${styles.panel} ${styles.recovery}`}>
           <p className={styles.recoveryNote}>
-            저장하지 않은 편집본이 있습니다 ({formatShotAt(new Date(recovery.pending.savedAt))}).
+            저장하지 않은 편집본이 있습니다 ({formatLocalTimestamp(new Date(recovery.pending.savedAt))}).
           </p>
           <div className={styles.recoveryActions}>
             <AdminButton
