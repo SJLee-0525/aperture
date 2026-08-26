@@ -259,6 +259,18 @@ const appendRagChunks = (baseContext: string, chunks: StoredRagChunkMeta[]): str
 };
 
 /**
+ * RAG 로그에 실을 질의 정보.
+ *
+ * 프로덕션에서는 질의 원문을 남기지 않는다. 개인정보처리방침이 고지한 호스팅 로그 항목은
+ * IP, 요청 시각, 요청 경로, 사용자 에이전트뿐이고 방문자가 챗에 적은 내용은 그 목록에 없다.
+ * 검색 누락은 `chunks=0` 빈도로 탐지하고, 어떤 질의였는지는 개발 환경에서 재현해 확인한다.
+ */
+const ragQueryLogFields = (query: RagQuery): string =>
+  process.env.NODE_ENV === "production"
+    ? `queryLen=${query.text.length} keywordCount=${query.keywords?.length ?? 0}`
+    : `query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])}`;
+
+/**
  * 캐시된 프로필에서 필요한 섹션을 고르고 관련 RAG 청크를 덧붙인다.
  *
  * @param {() => Promise<ProfileSnapshot>} getSnapshot 요청 안에서 공유하는 스냅샷 로더.
@@ -286,7 +298,7 @@ const buildProfileContextFromSnapshot = async (
       const relevant = await searchRagChunks(query, sections, signal, { prioritize, exclude });
       // chunks=0과 우선 검색 대상을 Vercel 로그에 남겨 검색 누락을 확인한다.
       console.info(
-        `[chat-rag] sections=${sections.join(",")} query=${JSON.stringify(query.text)} keywords=${JSON.stringify(query.keywords ?? [])} prioritize=${prioritize ? `${prioritize.sourceType}:${prioritize.sourceId}` : "none"} exclude=${exclude ? `${exclude.sourceType}:${exclude.sourceId}` : "none"} chunks=${relevant.length}`,
+        `[chat-rag] sections=${sections.join(",")} ${ragQueryLogFields(query)} prioritize=${prioritize ? `${prioritize.sourceType}:${prioritize.sourceId}` : "none"} exclude=${exclude ? `${exclude.sourceType}:${exclude.sourceId}` : "none"} chunks=${relevant.length}`,
       );
       return appendRagChunks(formatted, relevant);
     } catch (error) {
