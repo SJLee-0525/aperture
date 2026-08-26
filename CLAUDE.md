@@ -244,6 +244,10 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=  # apikey 헤더 전용. 공개돼도 위�
 # DISCORD_ALERT_WEBHOOK_URL=          # (서버 전용) AI 트리아지 카드를 받을 채널 웹훅
 # TRIAGE_PROVIDER=openai|gemini|mock  # 트리아지 LLM. 챗봇과 같은 규약 (_API_KEY·_MODEL + TRIAGE_FALLBACK_* 3종)
 # SENTRY_TRIAGE_DAILY_LIMIT=50        # (선택) 하루 LLM 호출 상한. 초과 시 판정만 건너뛰고 기본 카드는 전송
+# NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY=   # (선택) 연락 폼 제출용 공개 키. 없으면 mailto 폴백
+#   ⚠️ 스팸 경계는 코드가 아니라 Web3Forms 대시보드의 hCaptcha 필수 설정이다.
+#   허니팟과 캡차 토큰 검사는 브라우저 안에서만 돌고, 이 키는 설계상 번들에 노출되므로
+#   번들에서 키를 꺼내 curl 로 엔드포인트를 직접 때리면 두 검사를 모두 건너뛴다.
 # NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER=0|1 # (개발 전용) 저장 상태와 무관하게 동의 배너 미리보기
 # NEXT_PUBLIC_USE_MOCK=0|1            # (선택) 콘텐츠 소스 강제. 미설정 시 dev=mock·prod=real 자동. 프로덕션 빌드에 '1'이면 next.config가 즉시 throw
 # NEXT_PUBLIC_ADMIN_TEST_SESSION=0|1  # (개발·E2E 전용) AuthGuard 우회 — 프로덕션 빌드에서 '1'이면 즉시 throw. mock 여부와 무관한 별도 플래그

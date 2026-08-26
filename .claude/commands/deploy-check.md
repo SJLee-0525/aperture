@@ -29,7 +29,12 @@ npm run lint
 
 ### Step 3 — 환경변수·시크릿
 
-- [ ] `.env.local` 의 `NEXT_PUBLIC_*` 키(Firebase 6개 + `ADMIN_UID`)가 Vercel env 에도 등록됨
+- [ ] `.env.local` 의 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 가 Vercel env 에도 등록됨
+- [ ] **Vercel env 에 `NEXT_PUBLIC_FIREBASE_*`·`NEXT_PUBLIC_ADMIN_UID` 가 남아 있지 않음** — 코드 참조가 0건이라 동작에는 영향이 없지만, 남아 있으면 다음 사람이 살아 있는 설정으로 읽는다
+- [ ] **`NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` 를 설정했다면 Web3Forms 대시보드에서 hCaptcha 가 필수로 켜져 있음** (🔴). 이 키는 설계상 번들에 노출되므로 허니팟과 캡차 토큰 검사는 `curl` 로 건너뛸 수 있다. 실제 경계는 대시보드 설정 하나뿐이고, 꺼져 있으면 메일함이 스팸에 열린다
+- [ ] **Upstash/KV 자격증명이 프로덕션에 있음** — 없으면 챗이 비활성이고, 관리자 인증 실패 제한(`lib/auth/admin-auth-throttle.ts`)이 fail-open 이라 아무것도 세지 않는다
+- [ ] 동의 철회 시 `_ga`·`_ga_*` 쿠키가 **실제 배포 도메인에서** 지워지는지 확인 — 쿠키 도메인이 어긋나면 삭제가 조용히 실패한다. 코드만으로는 판정할 수 없다
+- [ ] rate limit 의 클라이언트 주소(`lib/rate-limit/client-address.ts`)가 배포 환경에서 위조 가능한지 확인 — Vercel 뒤가 아니면 `x-real-ip` 를 요청자가 직접 넣을 수 있어 IP 창이 무력화된다
 - [ ] 번들에 들어가면 안 되는 값이 `NEXT_PUBLIC_` 접두사를 달고 있지 않음
 - [ ] **진짜 시크릿(LLM/비전 API 키 등)이 코드·env 에 없음** (아키텍처 원칙 #8 — 이 프로젝트엔 애초에 없어야 함)
 - [ ] **`SENTRY_AUTH_TOKEN` 이 코드·`NEXT_PUBLIC_*`·git 에 없음**. `.env.sentry-build-plugin`(로컬)과 Vercel Sensitive env에만 존재(ADR-0004)
