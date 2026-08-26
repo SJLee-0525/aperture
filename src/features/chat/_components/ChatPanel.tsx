@@ -106,9 +106,9 @@ const ChatPanel = ({ open, onClose }: Props) => {
     getScreenTarget,
   );
   const titleId = useId();
-  useDialogIsolation(open, "[data-chat-overlay]");
   const panelRef = useFocusTrap(open);
   const overlayRef = useRef<HTMLDivElement>(null);
+  useDialogIsolation(open, overlayRef);
   const listRef = useRef<HTMLDivElement>(null);
   const messageListAtBottomRef = useRef(true);
   const viewportTransitionRef = useRef(false);

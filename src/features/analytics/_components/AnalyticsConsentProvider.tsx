@@ -14,6 +14,7 @@ import { AnalyticsConsentBanner } from "@/features/analytics/_components/Analyti
 
 import {
   type TrackingConsent,
+  cleanupStoredAnalyticsConsent,
   getAnalyticsConsentSnapshot,
   setBrowserAnalyticsConsent,
   subscribeAnalyticsConsent,
@@ -116,6 +117,12 @@ const AnalyticsConsentProvider = ({
     clientHydratedSnapshot,
     serverHydratedSnapshot,
   );
+
+  // 저장소 정리는 getSnapshot 이 아니라 여기서 한다. getSnapshot 은 순수해야 한다.
+  useEffect(() => {
+    if (!consentUiEnabled) return;
+    cleanupStoredAnalyticsConsent();
+  }, [consentUiEnabled]);
 
   // 오류 보고를 허용하면 public 모드로 시작한다. 철회하거나 선택하지 않으면 중지한다.
   // 컨트롤러가 중복 시작·전환 경쟁을 직렬화하므로 여기서는 상태만 전달한다.

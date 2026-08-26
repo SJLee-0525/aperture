@@ -144,20 +144,39 @@ const getAnalyticsConsentSnapshot = (): TrackingConsent | null => {
     volatileExpiresAt = 0;
   }
   try {
-    if (!legacyConsentChecked) {
-      removeLegacyConsent(window.localStorage);
-      legacyConsentChecked = true;
-    }
     const raw = window.localStorage.getItem(STORAGE_KEYS.CONSENT);
     if (raw === cachedRaw && Date.now() < cachedExpiresAt) return cachedParsed;
     cachedRaw = raw;
     const parsed = parseStoredTrackingConsent(raw);
     cachedParsed = parsed?.consent ?? null;
     cachedExpiresAt = parsed?.expiresAt ?? 0;
-    if (!cachedParsed && raw != null) window.localStorage.removeItem(STORAGE_KEYS.CONSENT);
     return cachedParsed;
   } catch {
     return null;
+  }
+};
+
+/**
+ * 구형 키와 손상·만료된 항목을 저장소에서 지운다.
+ *
+ * `useSyncExternalStore` 의 getSnapshot 은 순수해야 하므로 이 정리는 그쪽이 아니라
+ * provider 의 mount effect 가 한 번 호출한다.
+ *
+ * @returns {void}
+ */
+const cleanupStoredAnalyticsConsent = (): void => {
+  try {
+    if (!legacyConsentChecked) {
+      removeLegacyConsent(window.localStorage);
+      legacyConsentChecked = true;
+    }
+    const raw = window.localStorage.getItem(STORAGE_KEYS.CONSENT);
+    if (raw != null && !parseStoredTrackingConsent(raw)) {
+      window.localStorage.removeItem(STORAGE_KEYS.CONSENT);
+      cachedRaw = undefined;
+    }
+  } catch {
+    // 저장소를 막은 브라우저에서는 정리할 것도 없다.
   }
 };
 
@@ -220,6 +239,7 @@ const resetAnalyticsConsentCache = (): void => {
 
 export {
   ANALYTICS_CONSENT_MAX_AGE_MS,
+  cleanupStoredAnalyticsConsent,
   getAnalyticsConsentSnapshot,
   parseAnalyticsConsent,
   readAnalyticsConsent,

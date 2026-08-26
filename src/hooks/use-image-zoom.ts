@@ -91,8 +91,12 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
 
   const readMaxScale = useCallback(() => {
     const node = stageRef.current;
-    const raw = (node && latestRef.current.getMaxScale?.(node)) || MAX_SCALE_DEFAULT;
-    return Number.isFinite(raw) ? Math.max(1, raw) : MAX_SCALE_DEFAULT;
+    // `||` 는 0 과 NaN 을 기본값으로 바꿔 버려 아래 유한성 검사가 무한대만 잡게 된다.
+    // 이미지 dimension 이 0 인 데이터에서 배율이 조용히 3 이 되는 것을 막는다.
+    const raw = node ? latestRef.current.getMaxScale?.(node) : undefined;
+    return typeof raw === "number" && Number.isFinite(raw)
+      ? Math.max(1, raw)
+      : MAX_SCALE_DEFAULT;
   }, []);
 
   const clearPendingSingleTap = useCallback(() => {
@@ -421,6 +425,10 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
 
     const onMouseDown = (event: MouseEvent) => {
       if (event.button !== 0 || transformRef.current.scale <= ZOOM_EPSILON) return;
+      // 창 밖에서 버튼을 놓아 mouseup 이 유실되면 직전 팬의 리스너가 window 에 남는다.
+      // 새 리스너를 얹기 전에 걷어내지 않으면 두 클로저가 각자의 시작점으로
+      // commitTransform 을 불러 이미지가 두 위치 사이를 오간다.
+      removeWindowListeners();
       // 이미지 드래그·텍스트 선택 대신 팬을 시작한다.
       event.preventDefault();
       const start = { ...transformRef.current };

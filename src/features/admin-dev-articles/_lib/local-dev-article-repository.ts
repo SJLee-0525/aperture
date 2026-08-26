@@ -129,6 +129,23 @@ const createLocalDevArticleRepository = (
       publishableProjectIds: input.relatedProjectIds,
     });
 
+  /**
+   * slug 중복을 발행 여부와 무관하게 막는다. live 저장소가 같은 시점에 같은 검사를 한다.
+   * 발행할 때만 보면 초안 두 개를 같은 slug 로 만들 수 있어, 개발과 E2E 에서 오류가
+   * 나는 시점이 실제 배포와 달라진다.
+   *
+   * @param {string} slug 저장하려는 slug.
+   * @param {string} selfId 편집 중인 글의 문서 ID.
+   * @param {DevArticleStore} store 현재 저장소.
+   * @returns {void}
+   * @throws {Error} 다른 글이 이미 쓰는 slug 일 때.
+   */
+  const assertSlugAvailable = (slug: string, selfId: string, store: DevArticleStore): void => {
+    if (store.articles.some((article) => article.id !== selfId && article.slug === slug)) {
+      throw new Error(`이미 사용 중인 slug 입니다: ${slug}`);
+    }
+  };
+
   return {
     newId: () => crypto.randomUUID(),
 
@@ -142,6 +159,7 @@ const createLocalDevArticleRepository = (
         if (store.articles.some((article) => article.id === id)) {
           throw new Error("같은 ID의 글이 이미 있습니다.");
         }
+        assertSlugAvailable(input.slug, id, store);
         if (input.published) assertPublishable(id, input, store);
         const stamped = now();
         save({
@@ -165,6 +183,7 @@ const createLocalDevArticleRepository = (
         const store = await load();
         const previous = store.articles.find((article) => article.id === id);
         if (!previous) throw new Error("수정할 글을 찾지 못했습니다.");
+        assertSlugAvailable(input.slug, id, store);
         if (input.published) assertPublishable(id, input, store);
         save({
           ...store,

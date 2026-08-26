@@ -58,6 +58,11 @@ const encodeArticleRow = (id: string, input: Record<string, unknown>): ArticleRo
   void pinned;
   void createdAt;
   void updatedAt;
+  // publishedAt 이 Date 가 아닐 때 조용히 null 로 강등하면, 발행 조건 검사를 이미
+  // 통과한 글이 published_at NULL 로 저장되어 정렬 맨 뒤로 가라앉고 어디에도 오류가 없다.
+  if (published === true && !(publishedAt instanceof Date)) {
+    throw new Error("발행된 글에는 Date 형식의 publishedAt 이 필요합니다.");
+  }
   return {
     id,
     published: published === true,

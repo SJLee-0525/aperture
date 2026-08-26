@@ -51,7 +51,7 @@ vi.mock("@/lib/cache/request-revalidate", () => ({
 
 import { listCrud, type PostSyncPolicy } from "@/lib/supabase/list-crud";
 
-type Entity = { id: string; published: boolean; body: string };
+type Entity = { id: string; published: boolean; publishedAt?: Date; body: string };
 
 const toEntity = (id: string, d: Record<string, unknown>): Entity => ({
   id,
@@ -102,6 +102,9 @@ describe("listCrud — 정책 미주입 (기존 컬렉션 경로)", () => {
   });
 });
 
+/** dev_articles 인코더는 발행 글에 Date 형식 publishedAt 을 요구한다. */
+const PUBLISHED_AT = new Date("2026-02-01T00:00:00.000Z");
+
 describe("listCrud — 정책 주입", () => {
   it("skip 을 돌려주면 동기화를 요청하지 않는다", async () => {
     const policy = vi.fn<PostSyncPolicy<Entity>>().mockReturnValue("skip");
@@ -125,7 +128,7 @@ describe("listCrud — 정책 주입", () => {
     const crud = listCrud<Entity>("devArticles", toEntity, "글", "project", policy);
     mocks.maybeSingle.mockReturnValue(rowOf({ published: true, body: "a" }));
 
-    await crud.update("doc-1", { published: true, body: "b" });
+    await crud.update("doc-1", { published: true, publishedAt: PUBLISHED_AT, body: "b" });
     await crud.remove("doc-1");
 
     expect(mocks.requestRagSync).toHaveBeenCalledTimes(2);
@@ -135,10 +138,15 @@ describe("listCrud — 정책 주입", () => {
     const policy = vi.fn<PostSyncPolicy<Entity>>().mockReturnValue("sync");
     const crud = listCrud<Entity>("devArticles", toEntity, "글", "project", policy);
 
-    await crud.create("doc-1", { published: true, body: "a" });
+    await crud.create("doc-1", { published: true, publishedAt: PUBLISHED_AT, body: "a" });
 
     expect(mocks.maybeSingle).not.toHaveBeenCalled();
-    expect(policy).toHaveBeenCalledWith(null, { id: "doc-1", published: true, body: "a" });
+    expect(policy).toHaveBeenCalledWith(null, {
+      id: "doc-1",
+      published: true,
+      publishedAt: PUBLISHED_AT,
+      body: "a",
+    });
   });
 
   it("setPublished 는 스냅샷에 published 만 얹어 정책에 전달한다", async () => {
@@ -170,8 +178,8 @@ describe("listCrud — 정책 주입", () => {
     const policy = vi.fn<PostSyncPolicy<Entity>>().mockReturnValue("sync");
     const crud = listCrud<Entity>("devArticles", toEntity, "글", undefined, policy);
 
-    await crud.create("doc-1", { published: true, body: "a" });
-    await crud.update("doc-1", { published: true, body: "b" });
+    await crud.create("doc-1", { published: true, publishedAt: PUBLISHED_AT, body: "a" });
+    await crud.update("doc-1", { published: true, publishedAt: PUBLISHED_AT, body: "b" });
     await crud.setPublished("doc-1", false);
     await crud.remove("doc-1");
 

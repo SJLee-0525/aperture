@@ -1,7 +1,7 @@
 "use client";
 
 import { arrayMove } from "@dnd-kit/sortable";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 
@@ -18,6 +18,9 @@ type Status = "loading" | "ready" | "error";
  */
 const useTagsAdmin = () => {
   const [tags, setTags] = useState<Tag[]>([]);
+  // 중복 검사가 봐야 하는 값은 직전 렌더의 tags 가 아니라 지금까지 적용된 목록이다.
+  // setTags 의 updater 는 렌더 단계에 호출될 수 있어 결과를 곧바로 읽을 수 없다.
+  const tagsRef = useRef<Tag[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -29,6 +32,7 @@ const useTagsAdmin = () => {
       .get()
       .then((loaded) => {
         if (!alive) return;
+        tagsRef.current = loaded.tags;
         setTags(loaded.tags);
         setStatus("ready");
       })
@@ -44,43 +48,60 @@ const useTagsAdmin = () => {
 
   const markDirty = () => setSaved(false);
 
-  /** id 는 사진이 참조하는 키라 수정 불가 — ko/en 만 편집. */
-  const editLabel = useCallback((id: string, field: "ko" | "en", value: string) => {
-    setTags((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
-    markDirty();
+  /** tagsRef 와 상태를 함께 갱신한다. 두 값이 갈리면 중복 검사가 잘못된 목록을 본다. */
+  const applyTags = useCallback((next: (prev: Tag[]) => Tag[]) => {
+    const value = next(tagsRef.current);
+    tagsRef.current = value;
+    setTags(value);
   }, []);
+
+  /** id 는 사진이 참조하는 키라 수정 불가 — ko/en 만 편집. */
+  const editLabel = useCallback(
+    (id: string, field: "ko" | "en", value: string) => {
+      applyTags((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
+      markDirty();
+    },
+    [applyTags],
+  );
 
   /** 새 태그 추가 — id 슬러그 필수·중복 금지. 실패 시 한국어 사유를 반환. */
   const addTag = useCallback(
     (draft: Tag): string | null => {
       const id = draft.id.trim();
       if (id === "") return "태그 id(영문 슬러그)를 입력하세요.";
-      if (tags.some((t) => t.id === id)) return `이미 "${id}" 태그가 있습니다.`;
+      // 엔터 연타처럼 한 틱에 두 번 호출돼도 두 번째가 첫 번째 추가를 본다.
+      if (tagsRef.current.some((t) => t.id === id)) return `이미 "${id}" 태그가 있습니다.`;
 
-      setTags((prev) => [...prev, { id, ko: draft.ko.trim(), en: draft.en.trim() }]);
+      applyTags((prev) => [...prev, { id, ko: draft.ko.trim(), en: draft.en.trim() }]);
       markDirty();
       return null;
     },
-    [tags],
+    [applyTags],
   );
 
   /** 태그 삭제 — 사진의 tags 배열엔 남을 수 있음(경고는 UI 에서). */
-  const removeTag = useCallback((id: string) => {
-    setTags((prev) => prev.filter((t) => t.id !== id));
-    markDirty();
-  }, []);
+  const removeTag = useCallback(
+    (id: string) => {
+      applyTags((prev) => prev.filter((t) => t.id !== id));
+      markDirty();
+    },
+    [applyTags],
+  );
 
   /** 드래그 종료 → 배열 순서 재배열(공개 필터 칩 표시 순서 = 이 순서). */
-  const reorder = useCallback((activeId: string, overId: string) => {
-    if (activeId === overId) return;
-    setTags((prev) => {
-      const from = prev.findIndex((t) => t.id === activeId);
-      const to = prev.findIndex((t) => t.id === overId);
-      if (from < 0 || to < 0) return prev;
-      return arrayMove(prev, from, to);
-    });
-    markDirty();
-  }, []);
+  const reorder = useCallback(
+    (activeId: string, overId: string) => {
+      if (activeId === overId) return;
+      applyTags((prev) => {
+        const from = prev.findIndex((t) => t.id === activeId);
+        const to = prev.findIndex((t) => t.id === overId);
+        if (from < 0 || to < 0) return prev;
+        return arrayMove(prev, from, to);
+      });
+      markDirty();
+    },
+    [applyTags],
+  );
 
   /** 이 화면이 소유한 tags만 저장한다. */
   const save = useCallback(async () => {

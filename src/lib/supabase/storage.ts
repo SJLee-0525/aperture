@@ -187,7 +187,9 @@ const listFolderFiles = async (folder: string): Promise<StorageFileInfo[]> => {
     .map((entry) => ({
       path: `${folder}/${entry.name}`,
       size: Number(entry.metadata?.size) || 0,
-      createdAt: new Date(entry.created_at ?? 0),
+      // created_at 이 없을 때 epoch 를 쓰면 24시간 보호창이 항상 참이 되어,
+      // 방금 올려 아직 본문에 넣지 않은 이미지가 미사용 정리의 최우선 삭제 대상이 된다.
+      createdAt: entry.created_at ? new Date(entry.created_at) : new Date(),
     }));
   const nested = await Promise.all(
     entries

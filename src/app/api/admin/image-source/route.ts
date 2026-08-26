@@ -7,6 +7,40 @@ const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 
 const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+/**
+ * 응답 본문을 상한까지만 읽는다. `Content-Length` 가 없는 응답에도 상한이 걸린다.
+ * 헤더 선검사만으로는 `Number(null) === 0` 이라 길이를 밝히지 않는 응답이 통과하고,
+ * `arrayBuffer()` 가 상한 없이 전부 버퍼링한 뒤에야 거절된다.
+ *
+ * @param {Response} response 원본 이미지 응답.
+ * @param {number} limit 허용할 최대 바이트 수.
+ * @returns {Promise<Uint8Array | null>} 상한 이내면 본문, 넘으면 `null`.
+ */
+const readLimitedBody = async (response: Response, limit: number): Promise<Uint8Array | null> => {
+  const reader = response.body?.getReader();
+  if (!reader) return new Uint8Array();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) return null;
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+  }
+  const body = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return body;
+};
+
 const tooManyRequests = (retryAfterSeconds: number) =>
   NextResponse.json(
     { error: "Too many failed attempts" },
@@ -47,17 +81,20 @@ export async function POST(request: Request) {
   }
 
   const contentType = source.headers.get("content-type") ?? "";
-  const contentLength = Number(source.headers.get("content-length") ?? 0);
-  if (!contentType.startsWith("image/") || contentLength > MAX_SOURCE_BYTES) {
+  const declaredLength = source.headers.get("content-length");
+  if (
+    !contentType.startsWith("image/") ||
+    (declaredLength !== null && Number(declaredLength) > MAX_SOURCE_BYTES)
+  ) {
     return NextResponse.json({ error: "지원하지 않는 이미지 응답입니다." }, { status: 502 });
   }
 
-  const bytes = await source.arrayBuffer();
-  if (bytes.byteLength > MAX_SOURCE_BYTES) {
+  const bytes = await readLimitedBody(source, MAX_SOURCE_BYTES);
+  if (!bytes) {
     return NextResponse.json({ error: "원본 이미지가 10MB를 초과합니다." }, { status: 413 });
   }
 
-  return new Response(bytes, {
+  return new Response(bytes.buffer as ArrayBuffer, {
     headers: {
       "Cache-Control": "private, no-store",
       "Content-Length": String(bytes.byteLength),

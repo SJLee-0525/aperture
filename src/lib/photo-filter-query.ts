@@ -88,7 +88,10 @@ const parsePhotoFilterQuery = (
 
   const parseFocal = (raw: string | null, fallback: number): number => {
     if (raw === null || !raw.trim()) return fallback;
-    const value = Math.round(Number(raw));
+    // 엄격 파서(parseStrictPhotoFilterQuery)와 같은 규칙을 쓴다. Number 는 "0x20"·"1e2" 도
+    // 받아들여, 직접 진입한 URL 과 챗봇이 만든 링크가 같은 값에 다른 결과를 낸다.
+    if (!/^\d+$/.test(raw.trim())) return fallback;
+    const value = Number(raw.trim());
     if (!Number.isFinite(value)) return fallback;
     // clamp하면 focalMin=9999가 300으로 남으므로 범위 밖 값에는 기본값을 쓴다.
     return value >= FOCAL_MIN && value <= FOCAL_MAX ? value : fallback;

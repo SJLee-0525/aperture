@@ -179,15 +179,18 @@ describe("listFolderFiles", () => {
     expect(files).toHaveLength(1001);
   });
 
-  it("메타 누락값은 0 크기·epoch 시각으로 폴백한다", async () => {
+  // epoch 로 폴백하면 미사용 이미지 정리의 24시간 보호창이 항상 참이 되어,
+  // 방금 올려 아직 본문에 넣지 않은 파일이 최우선 삭제 대상이 된다.
+  it("메타 누락값은 0 크기로 폴백하고 업로드 시각은 지금으로 본다", async () => {
     mocks.list.mockResolvedValueOnce(
       page([{ name: "broken.webp", id: "id-broken", created_at: null, metadata: null }]),
     );
+    const before = Date.now();
 
     const [file] = await listFolderFiles("dev-blog");
 
     expect(file.size).toBe(0);
-    expect(file.createdAt.getTime()).toBe(0);
+    expect(file.createdAt.getTime()).toBeGreaterThanOrEqual(before);
   });
 
   it("list 오류는 빈 결과로 위장하지 않고 던진다", async () => {

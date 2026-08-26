@@ -127,7 +127,12 @@ describe("Modal", () => {
     const dialog = screen.getByRole("dialog", { name: "프로젝트 상세" });
     const buttons = within(dialog).getAllByRole("button");
     for (const button of buttons) {
-      Object.defineProperty(button, "offsetParent", { configurable: true, value: dialog });
+      // jsdom 에는 레이아웃이 없어 getClientRects 가 늘 빈 배열이다.
+      // 포커스 트랩의 가시성 판정을 태우려면 이 자리에서 값을 만들어야 한다.
+      Object.defineProperty(button, "getClientRects", {
+        configurable: true,
+        value: () => [{ width: 10, height: 10 }],
+      });
     }
     const lastButton = buttons.at(-1);
     lastButton?.focus();
@@ -157,7 +162,10 @@ describe("Modal", () => {
     const disabled = screen.getByRole("textbox", { name: "사용 불가" });
     const closeButton = within(dialog).getAllByRole("button")[0];
     for (const element of [closeButton, enabled, disabled]) {
-      Object.defineProperty(element, "offsetParent", { configurable: true, value: dialog });
+      Object.defineProperty(element, "getClientRects", {
+        configurable: true,
+        value: () => [{ width: 10, height: 10 }],
+      });
     }
     enabled.focus();
     fireEvent.keyDown(enabled, { key: "Tab" });

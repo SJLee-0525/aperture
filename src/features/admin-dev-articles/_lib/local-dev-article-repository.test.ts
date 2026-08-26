@@ -237,18 +237,29 @@ describe("createLocalDevArticleRepository", () => {
     expect((await repo.get("fresh"))?.published).toBe(false);
   });
 
-  it("발행 상태의 저장도 폼을 거치지 않은 slug 중복을 거부한다", async () => {
-    // 폼의 중복 검사는 다른 글 목록이 아직 로드 중이면 지나칠 수 있다. 저장소가 최종 방어선이다.
+  // 폼의 중복 검사는 다른 글 목록이 아직 로드 중이면 지나칠 수 있다. 저장소가 최종 방어선이다.
+  // live 저장소는 발행 여부와 무관하게 같은 시점에 거부하므로 mock 도 같은 시점이어야
+  // 개발·E2E 에서 오류가 나는 지점이 실제 배포와 같아진다.
+  it("초안 저장도 폼을 거치지 않은 slug 중복을 거부한다", async () => {
+    const repo = repository();
+    const [existing] = await repo.list();
+
+    await expect(repo.create("fresh", input({ slug: existing.slug }))).rejects.toThrow(
+      "이미 사용 중인 slug 입니다",
+    );
+    await repo.create("fresh", input());
+    await expect(repo.update("fresh", input({ slug: existing.slug }))).rejects.toThrow(
+      "이미 사용 중인 slug 입니다",
+    );
+  });
+
+  it("발행 상태의 저장도 slug 중복을 거부한다", async () => {
     const repo = repository();
     const [existing] = await repo.list();
 
     await expect(
       repo.create("fresh", input({ slug: existing.slug, published: true, publishedAt: NOW })),
-    ).rejects.toThrow("발행 조건을 만족하지 않습니다");
-    await repo.create("fresh", input());
-    await expect(
-      repo.update("fresh", input({ slug: existing.slug, published: true, publishedAt: NOW })),
-    ).rejects.toThrow("발행 조건을 만족하지 않습니다");
+    ).rejects.toThrow("이미 사용 중인 slug 입니다");
   });
 
   it("겹쳐 시작한 쓰기도 서로의 변경을 덮어쓰지 않는다", async () => {

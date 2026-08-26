@@ -155,8 +155,12 @@ const useOverlayDrag = ({
     gesture.current.active = false;
     gesture.current.direction = "pending";
     cancelScheduled();
+    // 닫기 애니메이션 도중 enabled 가 꺼지면 예약만 사라지고 화면 밖으로 옮겨 둔
+    // 인라인 transform 이 남는다. 오버레이가 보이지 않는 채 마운트되어 스크롤 잠금이
+    // 유지되고 onDismiss 도 호출되지 않는다.
+    resetSurface(false);
     resetSwipeSurface(false);
-  }, [enabled, cancelScheduled, resetSwipeSurface]);
+  }, [enabled, cancelScheduled, resetSurface, resetSwipeSurface]);
 
   // 언마운트 뒤 예약이 실행되면 사라진 오버레이의 닫기·이동이 호출된다.
   useEffect(() => cancelScheduled, [cancelScheduled]);

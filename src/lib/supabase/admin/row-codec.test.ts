@@ -87,12 +87,25 @@ describe("row-codec — dev_articles", () => {
       published: true,
       pinned: true,
       slug: "chunking",
-      publishedAt: null,
+      publishedAt: new Date("2026-02-01T00:00:00.000Z"),
       body: "# 본문",
     });
 
     expect("pinned" in row).toBe(false);
     expect("pinned" in row.data).toBe(false);
+  });
+
+  // 발행 조건 검사는 메모리 상의 Date 로 이미 통과한 뒤다. 여기서 조용히 null 로
+  // 강등하면 published 인데 published_at 이 NULL 인 글이 정렬 맨 뒤로 가라앉는다.
+  it("발행 상태인데 publishedAt 이 Date 가 아니면 던진다", () => {
+    expect(() =>
+      encodeArticleRow("a1", {
+        published: true,
+        slug: "chunking",
+        publishedAt: "2026-02-01T00:00:00.000Z",
+        body: "# 본문",
+      }),
+    ).toThrow("publishedAt");
   });
 
   it("초안의 publishedAt null 을 보존하고 DB 소유 타임스탬프는 쓰지 않는다", () => {

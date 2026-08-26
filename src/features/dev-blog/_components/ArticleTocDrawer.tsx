@@ -19,9 +19,6 @@ import type { Lang } from "@/types/lang";
 
 import styles from "./ArticleTocDrawer.module.css";
 
-/** 격리 대상에서 제외할 오버레이 표식 — 나머지 body 자식은 열린 동안 inert 가 된다. */
-const OVERLAY_SELECTOR = "[data-article-toc-drawer]";
-
 type Props = {
   items: ArticleTocItem[];
   activeId: string | null;
@@ -62,8 +59,9 @@ const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSel
   const panelRef = useFocusTrap(open);
   const isTopLayer = useOverlayLayer(open);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   useScrollLock(open);
-  useDialogIsolation(open, OVERLAY_SELECTOR);
+  useDialogIsolation(open, overlayRef);
 
   useEffect(() => {
     if (!open) return;
@@ -94,7 +92,7 @@ const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSel
   if (!mounted || !open) return null;
 
   return createPortal(
-    <div className={styles.overlay} data-article-toc-drawer>
+    <div ref={overlayRef} className={styles.overlay} data-article-toc-drawer>
       <button
         type="button"
         className={styles.backdrop}

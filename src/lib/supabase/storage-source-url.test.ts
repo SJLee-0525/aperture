@@ -19,6 +19,28 @@ describe("isAllowedStorageSourceUrl", () => {
     expect(isAllowedStorageSourceUrl(`${PUBLIC}/dev-blog/a1/%ED%95%9C%EA%B8%80.webp`)).toBe(true);
   });
 
+  // config.ts 의 supabaseUrl 은 로컬 스택(http://127.0.0.1:54321)을 그대로 돌려준다.
+  // origin 비교가 포트를 포함하므로 포트를 따로 거부하면 개발 환경 전량이 400 이 된다.
+  it("env 와 같은 포트를 가진 로컬 스택 origin 을 허용한다", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+
+    expect(
+      isAllowedStorageSourceUrl(
+        "http://127.0.0.1:54321/storage/v1/object/public/media/photos/p1/a.webp",
+      ),
+    ).toBe(true);
+  });
+
+  it("env 와 포트가 다르면 거부한다", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+
+    expect(
+      isAllowedStorageSourceUrl(
+        "http://127.0.0.1:9999/storage/v1/object/public/media/photos/p1/a.webp",
+      ),
+    ).toBe(false);
+  });
+
   it("다른 origin·다른 버킷을 거부한다", () => {
     expect(
       isAllowedStorageSourceUrl("https://evil.supabase.co/storage/v1/object/public/media/a.webp"),

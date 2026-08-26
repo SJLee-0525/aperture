@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
 
+import { sectionFromPath } from "@/constants/sections";
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
 
 const runThemeScript = (storage: Storage | Pick<Storage, "getItem"> = localStorage) => {
@@ -68,5 +69,26 @@ describe("THEME_INIT_SCRIPT", () => {
     expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe(
       "#ffffff",
     );
+  });
+
+  // 공개 URL 은 전부 로케일 프리픽스를 달고 온다. 프리픽스를 벗기지 않으면 어떤 경로도
+  // 매칭되지 않아 첫 페인트가 기본 섹션 색으로 그려지고 hydration 후 액센트가 튄다.
+  it.each([
+    ["/ko/photo", "photo"],
+    ["/ko/music", "music"],
+    ["/en/music/career", "music"],
+    ["/en/dev/projects", "dev"],
+    ["/ko/contact", "contact"],
+    ["/ko/privacy", "legal"],
+    ["/ko", "home"],
+    ["/en", "home"],
+  ])("로케일 프리픽스가 붙은 %s 를 %s 섹션으로 판정한다", (pathname, expected) => {
+    window.history.replaceState(null, "", pathname);
+
+    runThemeScript();
+
+    expect(document.documentElement.dataset.section).toBe(expected);
+    // 런타임 판정(sectionFromPath)과 인라인 스크립트가 갈리면 첫 페인트와 hydration 이 어긋난다.
+    expect(document.documentElement.dataset.section).toBe(sectionFromPath(pathname));
   });
 });

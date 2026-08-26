@@ -7,6 +7,9 @@
  */
 const MAX_STREAM_CHARS = 200_000;
 
+/** SSE 이벤트 종결자. 제공자와 중간 프록시가 LF·CRLF 중 어느 쪽을 쓰든 받는다. */
+const EVENT_BOUNDARY = /\r?\n\r?\n/;
+
 /**
  * text/event-stream 본문을 이벤트 블록 단위로 읽어 `data:` 페이로드만 넘긴다.
  * OpenAI Responses API 와 Gemini streamGenerateContent 가 같은 SSE 형식을 쓰므로
@@ -32,7 +35,7 @@ const readSseStream = async (
 
   const consume = (eventBlock: string) => {
     const payload = eventBlock
-      .split("\n")
+      .split(/\r?\n/)
       .filter((line) => line.startsWith("data:"))
       .map((line) => line.slice(5).trimStart())
       .join("\n");
@@ -43,7 +46,7 @@ const readSseStream = async (
   try {
     while (!signal.aborted) {
       const { done, value } = await reader.read();
-      const chunk = decoder.decode(value, { stream: !done }).replaceAll("\r\n", "\n");
+      const chunk = decoder.decode(value, { stream: !done });
       totalChars += chunk.length;
       // 부분 응답을 정상 완료로 넘기지 않는다. 이 파일은 잘린 답변이 완성된 답변으로
       // 나가는 것을 이미 오류로 다루므로, 상한 초과도 같은 방식으로 알린다.
@@ -51,11 +54,13 @@ const readSseStream = async (
         throw new Error(`Upstream stream exceeded ${MAX_STREAM_CHARS} characters`);
       }
       buffer += chunk;
-      let boundary = buffer.indexOf("\n\n");
-      while (boundary >= 0) {
-        consume(buffer.slice(0, boundary));
-        buffer = buffer.slice(boundary + 2);
-        boundary = buffer.indexOf("\n\n");
+      // 조각마다 "\r\n" 을 치환하면 종결자가 조각 경계에 걸릴 때 정규화를 놓쳐
+      // 이벤트 두 개가 합쳐지고 JSON.parse 가 던진다. 경계를 정규식으로 찾는다.
+      let match = EVENT_BOUNDARY.exec(buffer);
+      while (match) {
+        consume(buffer.slice(0, match.index));
+        buffer = buffer.slice(match.index + match[0].length);
+        match = EVENT_BOUNDARY.exec(buffer);
       }
       if (done) {
         reachedEof = true;
