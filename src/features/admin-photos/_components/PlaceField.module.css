@@ -133,3 +133,18 @@
   font-size: var(--t-small);
   color: var(--text-2);
 }
+
+/* EXIF 자동 입력 표시와 좌표 지우기는 두 탭 모두에서 보여야 해 선택 요약 줄에 둔다. */
+.exifBadge {
+  flex: none;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  font-size: var(--t-label);
+  letter-spacing: var(--tracking-label);
+  color: var(--accent);
+}
+.clearCoords {
+  flex: none;
+  margin-left: auto;
+}

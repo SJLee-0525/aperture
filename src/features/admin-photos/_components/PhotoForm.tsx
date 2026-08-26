@@ -44,6 +44,8 @@ const EXIF_FIELDS: { key: keyof Photo["exif"]; label: string; placeholder: strin
 const PhotoForm = ({ photoId, initial }: Props) => {
   const {
     cancel,
+    clearCoords,
+    coordsFromExif,
     error,
     form,
     isEdit,
@@ -135,6 +137,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
           place={form.place}
           latStr={lat}
           lngStr={lng}
+          fromExif={coordsFromExif}
+          onClearCoords={clearCoords}
           onPlaceChange={(place) => patch({ place })}
           onLatChange={setLat}
           onLngChange={setLng}

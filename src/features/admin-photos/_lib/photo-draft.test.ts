@@ -123,6 +123,27 @@ describe("parseCoords", () => {
   it("0 좌표를 유효한 값으로 보존한다", () => {
     expect(parseCoords("0", "0")).toEqual({ lat: 0, lng: 0 });
   });
+
+  it("경계값은 그대로 통과시킨다", () => {
+    expect(parseCoords("90", "180")).toEqual({ lat: 90, lng: 180 });
+    expect(parseCoords("-90", "-180")).toEqual({ lat: -90, lng: -180 });
+  });
+
+  it.each([
+    ["90.1", "127"],
+    ["-90.1", "127"],
+    ["37", "180.1"],
+    ["37", "-180.1"],
+  ])("범위를 벗어난 좌표(%j, %j)는 거부한다", (lat, lng) => {
+    expect(parseCoords(lat, lng)).toBeNull();
+  });
+
+  it.each([
+    ["Infinity", "127"],
+    ["37", "-Infinity"],
+  ])("무한값(%j, %j)은 거부한다 — Number('Infinity') 는 NaN 이 아니다", (lat, lng) => {
+    expect(parseCoords(lat, lng)).toBeNull();
+  });
 });
 
 describe("validatePhotoInput", () => {

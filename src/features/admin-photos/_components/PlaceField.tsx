@@ -16,9 +16,12 @@ type Props = {
   place: LocalizedText;
   latStr: string;
   lngStr: string;
+  /** 방금 올린 파일의 EXIF 에서 좌표가 채워졌는지. */
+  fromExif: boolean;
   onPlaceChange: (place: LocalizedText) => void;
   onLatChange: (value: string) => void;
   onLngChange: (value: string) => void;
+  onClearCoords: () => void;
   /** 검색 결과 선택 → 장소명(ko/en) + 좌표를 한 번에 채운다. */
   onPickResult: (place: LocalizedText, lat: number, lng: number) => void;
 };
@@ -36,6 +39,7 @@ type Mode = "search" | "manual";
  * @param {(place: LocalizedText) => void} props.onPlaceChange
  * @param {(value: string) => void} props.onLatChange
  * @param {(value: string) => void} props.onLngChange
+ * @param {() => void} props.onClearCoords
  * @param {(place: LocalizedText, lat: number, lng: number) => void} props.onPickResult - 검색 결과 선택 → 장소명(ko/en) + 좌표를 한 번에 채운다.
  * @returns {JSX.Element}
  */
@@ -43,9 +47,11 @@ const PlaceField = ({
   place,
   latStr,
   lngStr,
+  fromExif,
   onPlaceChange,
   onLatChange,
   onLngChange,
+  onClearCoords,
   onPickResult,
 }: Props) => {
   const [mode, setMode] = useState<Mode>("search");
@@ -202,6 +208,17 @@ const PlaceField = ({
           {place.ko || place.en || "장소 없음"}
           {hasCoords ? ` · ${latStr}, ${lngStr}` : " · 좌표 없음"}
         </span>
+        {fromExif ? <span className={styles.exifBadge}>EXIF 자동 입력</span> : null}
+        {hasCoords ? (
+          <AdminButton
+            variant="secondary"
+            size="sm"
+            className={styles.clearCoords}
+            onClick={onClearCoords}
+          >
+            좌표 지우기
+          </AdminButton>
+        ) : null}
       </div>
     </div>
   );

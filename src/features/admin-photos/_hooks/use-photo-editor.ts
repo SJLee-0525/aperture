@@ -24,6 +24,9 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const [form, setForm] = useState<PhotoInput>(() => createPhotoInput(initial));
   const [lat, setLat] = useState(() => (initial?.coords ? String(initial.coords.lat) : ""));
   const [lng, setLng] = useState(() => (initial?.coords ? String(initial.coords.lng) : ""));
+  // 방금 올린 파일의 EXIF 에서 좌표가 채워졌는지. 표시하지 않으면 관리자가 촬영 위치를
+  // 공개한다는 사실을 모른 채 저장하게 된다.
+  const [coordsFromExif, setCoordsFromExif] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -47,7 +50,23 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
     if (result.exif.coords) {
       setLat(String(result.exif.coords.lat));
       setLng(String(result.exif.coords.lng));
+      setCoordsFromExif(true);
     }
+  }, []);
+
+  // 관리자가 직접 고친 값은 더 이상 EXIF 자동 입력이 아니다.
+  const editLat = useCallback((value: string) => {
+    setCoordsFromExif(false);
+    setLat(value);
+  }, []);
+  const editLng = useCallback((value: string) => {
+    setCoordsFromExif(false);
+    setLng(value);
+  }, []);
+  const clearCoords = useCallback(() => {
+    setCoordsFromExif(false);
+    setLat("");
+    setLng("");
   }, []);
   const onUploadPendingChange = useCallback((pending: boolean) => setUploading(pending), []);
   const cancel = useCallback(async () => {
@@ -64,7 +83,15 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
       return;
     }
 
-    const input = { ...form, coords: parseCoords(lat, lng) };
+    const coords = parseCoords(lat, lng);
+    // 값을 적었는데 좌표로 읽히지 않으면 조용히 버리지 않는다. 저장 후에 지도에 핀이
+    // 없는 이유를 관리자가 알 수 없게 된다.
+    if (coords === null && (lat.trim() !== "" || lng.trim() !== "")) {
+      setError("좌표는 위도 -90~90, 경도 -180~180 범위의 숫자여야 합니다.");
+      return;
+    }
+
+    const input = { ...form, coords };
     setSaving(true);
     try {
       const photoRepository = getPhotoRepository();
@@ -84,6 +111,8 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
 
   return {
     cancel,
+    clearCoords,
+    coordsFromExif,
     error,
     form,
     isEdit,
@@ -95,8 +124,8 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
     patchExif,
     saving,
     uploading,
-    setLat,
-    setLng,
+    setLat: editLat,
+    setLng: editLng,
     submit,
   };
 };

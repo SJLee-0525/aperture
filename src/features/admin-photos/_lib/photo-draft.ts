@@ -60,11 +60,20 @@ const applyUploadResult = (input: PhotoInput, result: UploadResult): PhotoInput 
   coords: result.exif.coords ?? input.coords,
 });
 
+/**
+ * 폼의 위·경도 문자열을 좌표로 바꾼다.
+ *
+ * `Number.isFinite` 로 거르는 이유는 `Number("Infinity")` 가 `NaN` 이 아니기 때문이다.
+ * 범위를 벗어난 값은 지도에서 엉뚱한 곳에 찍히거나 투영 계산을 깨뜨린다.
+ *
+ * @returns 비었거나 좌표로 읽을 수 없으면 `null`.
+ */
 const parseCoords = (lat: string, lng: string): Coords | null => {
   if (lat.trim() === "" || lng.trim() === "") return null;
   const parsedLat = Number(lat);
   const parsedLng = Number(lng);
-  if (Number.isNaN(parsedLat) || Number.isNaN(parsedLng)) return null;
+  if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) return null;
+  if (Math.abs(parsedLat) > 90 || Math.abs(parsedLng) > 180) return null;
   return { lat: parsedLat, lng: parsedLng };
 };
 
