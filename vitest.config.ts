@@ -14,6 +14,7 @@ export default defineConfig({
         "src/lib/admin/mock/*.ts",
         "src/lib/admin/select-repository.ts",
         "src/lib/photo-filter-query.ts",
+        "src/lib/rate-limit/*.ts",
         "src/lib/contact-draft-storage.ts",
         "src/lib/search/*.ts",
         "src/lib/i18n/*.ts",

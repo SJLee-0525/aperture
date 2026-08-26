@@ -1,3 +1,9 @@
+import {
+  evalUpstashScript,
+  resolveUpstashCredentials,
+  type UpstashCredentials,
+} from "@/lib/rate-limit/upstash-counter";
+
 type TriageRateLimitResult = {
   allowed: boolean;
   /** 오늘 몇 번째 호출인지. 자격증명이 없어 세지 못했으면 0. */
@@ -9,9 +15,7 @@ type TriageRateLimiter = () => Promise<TriageRateLimitResult>;
 /** `process.env` 를 그대로 받을 수 있도록 색인 시그니처를 포함한다. */
 type TriageRateLimitEnvironment = Record<string, string | undefined>;
 
-type UpstashOptions = {
-  url: string;
-  token: string;
+type UpstashOptions = UpstashCredentials & {
   limit: number;
   timeoutMs: number;
   fetcher: typeof fetch;
@@ -57,45 +61,20 @@ const createUpstashTriageRateLimiter = (options: UpstashOptions): TriageRateLimi
   const { url, token, limit, timeoutMs, fetcher, now } = options;
 
   return async () => {
-    let response: Response;
-    try {
-      response = await fetcher(url, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${token}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(["EVAL", UPSTASH_SCRIPT, 1, dailyKey(now()), KEY_TTL_MS]),
-        signal: AbortSignal.timeout(timeoutMs),
-        cache: "no-store",
-      });
-    } catch {
-      return ALLOW_WITHOUT_COUNT;
-    }
+    const outcome = await evalUpstashScript({
+      credentials: { url, token },
+      script: UPSTASH_SCRIPT,
+      keys: [dailyKey(now())],
+      args: [KEY_TTL_MS],
+      timeoutMs,
+      fetcher,
+    });
+    if (!outcome.ok) return ALLOW_WITHOUT_COUNT;
 
-    if (!response.ok) return ALLOW_WITHOUT_COUNT;
-
-    try {
-      const payload = (await response.json()) as { result?: unknown; error?: unknown };
-      const count = Number(payload.result);
-      if (payload.error || !Number.isFinite(count)) return ALLOW_WITHOUT_COUNT;
-      return { allowed: count <= limit, count };
-    } catch {
-      return ALLOW_WITHOUT_COUNT;
-    }
+    const count = Number(outcome.value);
+    if (!Number.isFinite(count)) return ALLOW_WITHOUT_COUNT;
+    return { allowed: count <= limit, count };
   };
-};
-
-const resolveCredentials = (env: TriageRateLimitEnvironment) => {
-  const upstash = {
-    url: env.UPSTASH_REDIS_REST_URL?.trim(),
-    token: env.UPSTASH_REDIS_REST_TOKEN?.trim(),
-  };
-  if (upstash.url && upstash.token) return { url: upstash.url, token: upstash.token };
-  const marketplace = { url: env.KV_REST_API_URL?.trim(), token: env.KV_REST_API_TOKEN?.trim() };
-  if (marketplace.url && marketplace.token)
-    return { url: marketplace.url, token: marketplace.token };
-  return null;
 };
 
 /**
@@ -109,7 +88,7 @@ const getTriageRateLimiter = (
   env: TriageRateLimitEnvironment = process.env,
   overrides: Partial<UpstashOptions> = {},
 ): TriageRateLimiter => {
-  const credentials = resolveCredentials(env);
+  const credentials = resolveUpstashCredentials(env);
   if (!credentials) {
     console.warn(
       "[triage-rate-limit] no shared counter is configured; running without a daily cap",
