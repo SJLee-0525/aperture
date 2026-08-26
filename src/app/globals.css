@@ -74,6 +74,15 @@
   /* --- 스테이지 (사진 라이트박스·영상 프레임) — 테마 무관 항상 어둡게 (다크 --surface-inset 동일값) --- */
   --stage-bg: #0a0a0c;
 
+  /* --- 사진 위 글래스 크롬 (모달 닫기·이전·다음) — 사진 위라 테마와 무관하게 어둡다 --- */
+  --glass-chrome-bg: rgba(0, 0, 0, 0.35);
+  --glass-chrome-bg-hover: rgba(0, 0, 0, 0.6);
+  --glass-chrome-line: rgba(255, 255, 255, 0.2);
+
+  /* --- 트러블슈팅 카드의 "문제" 톤 — 아래 "결과"가 쓰는 --accent 와 대비되는 고정 붉은 톤.
+         섹션 액센트가 아니므로 음악 섹션 색을 조정해도 따라 움직이지 않는다. --- */
+  --trouble-accent: #b4232d;
+
   /* --- Motion --- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
@@ -105,7 +114,11 @@
   --neutral-solid: #18181b;
   --neutral-solid-contrast: #ffffff;
   --neutral-solid-hover: #303036;
+  /* 스크림 3층 — 위에 겹치는 오버레이일수록 아래를 강하게 덮는다.
+     기본(모달·시트) < 사진 상세 < 라이트박스. */
   --scrim: rgba(0, 0, 0, 0.55);
+  --scrim-strong: rgba(0, 0, 0, 0.66);
+  --scrim-stage: rgba(0, 0, 0, 0.82);
   --map-land: #eceef0;
   --map-road: #ffffff;
   --map-water: #dfe6ee;
@@ -135,6 +148,8 @@
   --neutral-solid-contrast: #18181b;
   --neutral-solid-hover: #dedee3;
   --scrim: rgba(0, 0, 0, 0.7);
+  --scrim-strong: rgba(0, 0, 0, 0.81);
+  --scrim-stage: rgba(0, 0, 0, 0.9);
   --map-land: #161618;
   --map-road: #2a2a30;
   --map-water: #10171f;
@@ -150,6 +165,7 @@
   --accent-music: #ff5b60;
   --accent-dev: #2ecc71;
   --accent-contact: #fb923c;
+  --trouble-accent: #ff5b60;
   color-scheme: dark;
 }
 

@@ -193,13 +193,14 @@
   color: var(--text-2);
   transform: translateY(3px);
 }
-/* 문제=음악 섹션 레드, 결과=현재 섹션 액센트 — 대비되는 두 톤으로 흐름을 읽게 한다. */
+/* 문제=고정 붉은 톤, 결과=현재 섹션 액센트. 대비되는 두 톤으로 흐름을 읽게 한다.
+   다른 섹션의 액센트를 참조하면 그 섹션 색을 조정할 때 여기가 함께 움직인다. */
 .tsProblemLabel {
-  background: color-mix(in srgb, var(--accent-music) 11%, transparent);
-  color: var(--accent-music);
+  background: color-mix(in srgb, var(--trouble-accent) 11%, transparent);
+  color: var(--trouble-accent);
 }
 :global(html[data-theme="dark"]) .tsProblemLabel {
-  background: color-mix(in srgb, var(--accent-music) 16%, transparent);
+  background: color-mix(in srgb, var(--trouble-accent) 16%, transparent);
 }
 .tsResultLabel {
   background: var(--accent-soft);
