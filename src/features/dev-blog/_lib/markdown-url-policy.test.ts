@@ -42,12 +42,12 @@ describe("resolveArticleLink", () => {
 describe("resolveArticleImageSource", () => {
   it("관리자 Storage 주소만 통과시킨다", () => {
     const storage =
-      "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
+      "https://mock-storage.aperture.invalid/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
 
     expect(resolveArticleImageSource(storage)).toBe(storage);
-    expect(resolveArticleImageSource("https://storage.googleapis.com/demo/a.webp")).toBe(
-      "https://storage.googleapis.com/demo/a.webp",
-    );
+    // storage.googleapis.com 은 모든 GCS 버킷이 공유한다. 통과시키면 "관리자 Storage 로
+    // 제한한다"는 이 함수의 계약이 임의의 버킷까지 넓어진다.
+    expect(resolveArticleImageSource("https://storage.googleapis.com/demo/a.webp")).toBeNull();
   });
 
   it("허용 호스트가 CSP img-src 와 어긋나지 않는다", () => {
@@ -63,8 +63,8 @@ describe("resolveArticleImageSource", () => {
   it("외부 이미지와 잘못된 주소를 거부한다", () => {
     [
       "https://example.com/a.png",
-      "http://firebasestorage.googleapis.com/a.webp",
-      "https://user:pass@firebasestorage.googleapis.com/a.webp",
+      "http://mock-storage.aperture.invalid/a.webp",
+      "https://user:pass@mock-storage.aperture.invalid/a.webp",
       "/local/a.webp",
       "",
     ].forEach((source) => expect(resolveArticleImageSource(source)).toBeNull());

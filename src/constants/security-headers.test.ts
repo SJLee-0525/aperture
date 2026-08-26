@@ -46,7 +46,7 @@ describe("Content-Security-Policy", () => {
     expect(directive(policy, "script-src")).toContain("https://*.hcaptcha.com");
     expect(directive(policy, "frame-src")).toContain("https://*.hcaptcha.com");
     // 공개 사진은 Storage 파생본을 그대로 전송한다.
-    expect(directive(policy, "img-src")).toContain("https://firebasestorage.googleapis.com");
+    expect(directive(policy, "img-src")).toContain("https://mock-storage.aperture.invalid");
   });
 
   it("업로드 이미지 호스트를 img-src 에 모두 연다", () => {

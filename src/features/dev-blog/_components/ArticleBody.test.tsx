@@ -12,7 +12,7 @@ import { buildArticleToc } from "@/features/dev-blog/_lib/markdown-toc";
 import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 
 const STORAGE_IMAGE =
-  "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
+  "https://mock-storage.aperture.invalid/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
 
 const renderMarkdown = (
   markdown: string,

@@ -1,4 +1,4 @@
-import { STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
+import { LEGACY_FIREBASE_STORAGE_HOST } from "@/constants/security-headers";
 import { supabaseUrl } from "@/lib/supabase/config";
 
 /**
@@ -44,7 +44,7 @@ const supabaseObjectPath = (candidate: string): string | null => {
  * @returns {string | null} 디코딩된 객체 경로. 허용 호스트가 아니면 `null`.
  */
 const firebaseObjectPath = (candidate: string): string | null => {
-  if (!STORAGE_IMAGE_HOSTS.some((host) => candidate.startsWith(`${host}/`))) return null;
+  if (!candidate.startsWith(`${LEGACY_FIREBASE_STORAGE_HOST}/`)) return null;
   const encoded = FIREBASE_OBJECT_PATH_PATTERN.exec(candidate)?.[1];
   if (!encoded) return null;
   try {

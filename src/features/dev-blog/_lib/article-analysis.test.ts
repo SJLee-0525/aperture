@@ -27,7 +27,7 @@ describe("analyzeArticle", () => {
           "const heading = 1;",
           "```",
           "",
-          "![다이어그램](https://firebasestorage.googleapis.com/a.webp)",
+          "![다이어그램](https://mock-storage.aperture.invalid/a.webp)",
         ].join("\n"),
       ),
     );

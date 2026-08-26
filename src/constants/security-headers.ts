@@ -4,16 +4,6 @@
  * X-Frame-Options는 관리자 로그인 화면을 이용한 클릭재킹을 차단한다.
  */
 
-/** CSP와 preconnect가 공유하는 외부 호스트 목록. */
-const FIREBASE_HOSTS = [
-  "https://firestore.googleapis.com",
-  "https://identitytoolkit.googleapis.com",
-  "https://securetoken.googleapis.com",
-  "https://firebasestorage.googleapis.com",
-  "https://storage.googleapis.com",
-  "https://www.googleapis.com",
-] as const;
-
 /**
  * MapLibre 스타일과 타일, sprite, glyph를 제공하는 CARTO 호스트.
  * style.json 은 `basemaps.cartocdn.com`, 실제 벡터 타일(.mvt)은 샤딩된
@@ -37,17 +27,45 @@ const supabaseHost = (): string | null => {
 };
 
 /**
+ * mock 콘텐츠가 이미지 주소로 쓰는 origin.
+ *
+ * 실제 파일은 없다. mock 은 정책을 통과하는 형태의 주소만 있으면 되고, 이 origin 이
+ * 허용 목록에 없으면 본문 이미지가 렌더 전에 버려져 레이아웃을 확인할 수 없다.
+ * `.invalid` 는 예약 TLD 라 어떤 요청도 나가지 않는다.
+ */
+const MOCK_STORAGE_ORIGIN = "https://mock-storage.aperture.invalid";
+
+/**
+ * mock origin 을 허용 목록에 넣을지 결정한다.
+ *
+ * `NODE_ENV` 로 가르면 안 된다. E2E 와 시각 회귀(`package.json` 의 `test:e2e`·`test:visual`)는
+ * 프로덕션 빌드 위에서 mock 콘텐츠로 돌기 때문에, 프로덕션에서 이 origin 을 빼면 두 스위트의
+ * 본문 이미지가 전부 차단된다.
+ *
+ * Supabase origin 이 없을 때도 넣는다. 그렇지 않으면 단위 테스트와 자격증명 없는 로컬 개발에서
+ * 허용 목록이 비어 모든 본문 이미지가 버려진다.
+ */
+const allowsMockStorage = (): boolean =>
+  process.env.NEXT_PUBLIC_USE_MOCK === "1" || supabaseHost() === null;
+
+/**
  * 관리자가 올린 이미지가 실제로 저장되는 호스트.
  * 블로그 본문 Markdown 의 이미지 출처 정책(`features/dev-blog/_lib/markdown-url-policy.ts`)이
  * 같은 목록을 사용해 CSP와 렌더 정책이 어긋나지 않게 한다.
- * Firebase 호스트는 이전 완료(M8) 전까지 유지한다. mock 업로더가 [0]의 Firebase URL 형태를
- * 쓰므로 Supabase 는 끝에 붙인다.
  */
 const STORAGE_IMAGE_HOSTS = [
-  "https://firebasestorage.googleapis.com",
-  "https://storage.googleapis.com",
+  ...(allowsMockStorage() ? [MOCK_STORAGE_ORIGIN] : []),
   ...(supabaseHost() ? [supabaseHost() as string] : []),
 ];
+
+/**
+ * Supabase 이전 전에 올라간 본문 이미지의 호스트.
+ *
+ * 읽기 전용이다. `article-body-storage-paths.ts` 가 본문에서 참조 중인 객체 경로를 찾을 때만
+ * 쓰고, CSP 와 이미지 출처 정책에는 넣지 않는다. 이 상수를 지우면 구형 URL 을 담은 글의
+ * 참조 집합이 비어 그 글의 이미지 전부가 미사용 삭제 후보가 된다.
+ */
+const LEGACY_FIREBASE_STORAGE_HOST = "https://firebasestorage.googleapis.com";
 
 const IMAGE_HOSTS = [...STORAGE_IMAGE_HOSTS, "https://i.ytimg.com", ...CARTO_HOSTS] as const;
 
@@ -121,7 +139,7 @@ const buildContentSecurityPolicy = (isDevelopment: boolean) => {
     `img-src 'self' data: blob: ${[...new Set([...IMAGE_HOSTS, ...supabaseHosts, ...ANALYTICS_CONNECT_HOSTS])].join(" ")}`,
     // blob: 은 업로드 전 압축본(browser-image-compression)·내보내기 canvas 결과를 다시 읽는 경로.
     // data: 는 어느 경로도 fetch 하지 않아 넣지 않는다.
-    `connect-src 'self' blob: ${[...FIREBASE_HOSTS, ...supabaseHosts, ...CARTO_HOSTS, ...GEOCODING_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
+    `connect-src 'self' blob: ${[...supabaseHosts, ...CARTO_HOSTS, ...GEOCODING_HOSTS, "https://api.web3forms.com", ...CAPTCHA_HOSTS, ...ANALYTICS_CONNECT_HOSTS].join(" ")}`,
     `frame-src ${[...YOUTUBE_FRAME_HOSTS, ...CAPTCHA_HOSTS].join(" ")}`,
     // MapLibre 워커가 사용하는 blob: URL을 허용한다.
     "worker-src 'self' blob:",
@@ -157,4 +175,10 @@ const SECURITY_HEADERS = [
   { key: CSP_HEADER_NAME, value: CONTENT_SECURITY_POLICY },
 ] as const;
 
-export { buildContentSecurityPolicy, SECURITY_HEADERS, STORAGE_IMAGE_HOSTS };
+export {
+  buildContentSecurityPolicy,
+  LEGACY_FIREBASE_STORAGE_HOST,
+  MOCK_STORAGE_ORIGIN,
+  SECURITY_HEADERS,
+  STORAGE_IMAGE_HOSTS,
+};

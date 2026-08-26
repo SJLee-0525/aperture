@@ -1,3 +1,5 @@
+import { MOCK_STORAGE_ORIGIN } from "@/constants/security-headers";
+
 import type { DevArticle } from "@/types/dev-article";
 
 /**
@@ -14,7 +16,7 @@ const body = (...rows: string[]): string => rows.join("\n");
  * 본문 이미지는 관리자 Storage origin 만 통과하므로(`markdown-url-policy`) 로컬 파일로 바꿀 수 없다.
  */
 const storageImage = (articleId: string, name: string) =>
-  `https://firebasestorage.googleapis.com/v0/b/aperture-demo.appspot.com/o/dev-blog%2F${articleId}%2F${name}.webp?alt=media`;
+  `${MOCK_STORAGE_ORIGIN}/dev-blog/${articleId}/${name}.webp`;
 
 /**
  * 본문 이미지 한 줄. title 자리의 크기는 실제 업로드가 적어 주는 값과 같은 형식이라,
