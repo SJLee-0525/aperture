@@ -17,6 +17,7 @@ export default defineConfig({
         "src/lib/rate-limit/*.ts",
         "src/lib/auth/admin-auth-throttle.ts",
         "src/lib/auth/authorize-admin-token.ts",
+        "src/lib/admin/clear-admin-workspace.ts",
         "src/lib/contact-draft-storage.ts",
         "src/lib/search/*.ts",
         "src/lib/i18n/*.ts",

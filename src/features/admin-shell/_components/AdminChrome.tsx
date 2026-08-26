@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+
+import { useIdleSignOut } from "@/features/admin-shell/_hooks/use-idle-sign-out";
 
 import { ROUTES } from "@/constants/routes";
 import { signOutAdmin } from "@/lib/supabase/auth";
@@ -21,10 +24,12 @@ import { MockModeBadge } from "./MockModeBadge";
 const AdminChrome = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
-  const onLogout = async () => {
+  const onLogout = useCallback(async () => {
     await signOutAdmin();
     router.replace(ROUTES.LOGIN);
-  };
+  }, [router]);
+
+  useIdleSignOut(onLogout);
 
   return (
     <div className={styles.shell}>

@@ -48,4 +48,10 @@ const LEGACY_STORAGE_KEYS = {
   COMBINED_CONSENT: "ap-consent:v2",
 } as const;
 
-export { adminDevArticleDraftKey, LEGACY_STORAGE_KEYS, SESSION_STORAGE_KEYS, STORAGE_KEYS };
+export {
+  ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX,
+  adminDevArticleDraftKey,
+  LEGACY_STORAGE_KEYS,
+  SESSION_STORAGE_KEYS,
+  STORAGE_KEYS,
+};

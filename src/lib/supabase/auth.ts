@@ -1,3 +1,4 @@
+import { clearAdminWorkspace } from "@/lib/admin/clear-admin-workspace";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
 import type { User } from "@supabase/supabase-js";
@@ -35,9 +36,17 @@ const signIn = async (email: string, password: string): Promise<User> => {
   return data.user;
 };
 
-/** @returns {Promise<void>} 로컬 세션 정리가 끝나면 완료된다. 서버 측 해지 실패는 무시한다. */
+/**
+ * 세션과 함께 편집 중 작업본까지 지운다.
+ *
+ * 세션만 끊으면 아직 저장하지 않은 글 본문이 브라우저에 남는다. 공용·공유 브라우저에서
+ * 다음 사용자가 그 값을 읽을 수 있다.
+ *
+ * @returns {Promise<void>} 로컬 세션 정리가 끝나면 완료된다. 서버 측 해지 실패는 무시한다.
+ */
 const signOutAdmin = async (): Promise<void> => {
   await getSupabaseClient().auth.signOut();
+  clearAdminWorkspace(window.localStorage, window.sessionStorage);
 };
 
 /**
