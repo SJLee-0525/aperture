@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useId, useRef } from "react";
 
-import { useEscapeKey } from "@/hooks/use-escape-key";
+import { usePopupDisclosure } from "@/hooks/use-popup-disclosure";
+import { useRovingListFocus } from "@/hooks/use-roving-list-focus";
 
 import styles from "./Select.module.css";
 
@@ -42,30 +43,37 @@ const chevron = (
  * @returns {JSX.Element}
  */
 const Select = ({ value, options, onChange, ariaLabel }: Props) => {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const { open, triggerRef, rootRef, toggle, close } = usePopupDisclosure<
+    HTMLButtonElement,
+    HTMLDivElement
+  >();
+  const listRef = useRef<HTMLUListElement>(null);
+  // 한 지면에 Select 가 둘 이상이면 고정 id 는 ARIA 트리와 CustomScrollbar 의 IDREF 를
+  // 동시에 깨뜨린다. 스크롤 막대가 이 id 를 aria-controls 로 참조한다.
+  const listId = useId();
   const current = options.find((option) => option.value === value) ?? options[0];
+  const currentIndex = Math.max(
+    options.findIndex((option) => option.value === value),
+    0,
+  );
+  const onListKeyDown = useRovingListFocus(open, listRef, { activeIndex: currentIndex });
 
-  useEscapeKey(open, () => setOpen(false));
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
+  const pick = (next: string) => {
+    onChange(next);
+    close();
+  };
 
   return (
     <div className={styles.root} ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
         className={styles.trigger}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={open ? listId : undefined}
         aria-label={ariaLabel}
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggle}
       >
         <span className={styles.value}>{current?.label}</span>
         {chevron}
@@ -73,28 +81,29 @@ const Select = ({ value, options, onChange, ariaLabel }: Props) => {
 
       {open ? (
         <ul
-          id="filter-select-scroll-container"
+          ref={listRef}
+          id={listId}
           className={styles.list}
           role="listbox"
+          aria-label={ariaLabel}
           data-accent-scrollbar
           data-custom-scroll-container
           data-custom-scroll-scope="local"
+          onKeyDown={onListKeyDown}
         >
+          {/* listbox 가 소유하는 것은 option 뿐이다. 중간에 li 를 두면 그 관계가 끊어진다. */}
           {options.map((option) => (
-            <li key={option.value}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={option.value === value}
-                className={option.value === value ? styles.optActive : styles.opt}
-                onClick={() => {
-                  onChange(option.value);
-                  setOpen(false);
-                }}
-              >
-                {option.label}
-              </button>
-            </li>
+            <button
+              key={option.value}
+              data-list-item
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              className={option.value === value ? styles.optActive : styles.opt}
+              onClick={() => pick(option.value)}
+            >
+              {option.label}
+            </button>
           ))}
         </ul>
       ) : null}

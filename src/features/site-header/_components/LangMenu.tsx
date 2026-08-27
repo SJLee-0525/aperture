@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useId, useRef } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { usePopupDisclosure } from "@/hooks/use-popup-disclosure";
+import { useRovingListFocus } from "@/hooks/use-roving-list-focus";
 
 import { langFromPath, switchLangPath } from "@/lib/i18n/locale-path";
 
@@ -25,11 +27,21 @@ const OPTIONS: { code: Lang; label: string }[] = [
 const LangMenu = () => {
   const { dict, lang, setLang } = useLang();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const { open, triggerRef, rootRef, toggle, close, dismiss } = usePopupDisclosure<
+    HTMLButtonElement,
+    HTMLDivElement
+  >();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+  const currentIndex = Math.max(
+    OPTIONS.findIndex((option) => option.code === lang),
+    0,
+  );
+  const onMenuKeyDown = useRovingListFocus(open, menuRef, { activeIndex: currentIndex });
 
   const pick = (next: Lang) => {
     setLang(next); // 선호 저장 — 로케일 밖(관리자)에선 이것만으로 전환 완료
-    setOpen(false);
+    close();
     // 공개 트리(/ko·/en)에선 같은 페이지의 다른 언어 경로로 이동한다 (구글 권장 — 언어별 별도 URL).
     const { pathname, search, hash } = window.location;
     if (langFromPath(pathname)) {
@@ -38,13 +50,15 @@ const LangMenu = () => {
   };
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen((isOpen) => !isOpen)}
+        onClick={toggle}
         aria-label={dict.languageLabel}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
         className={styles.btn}
       >
         <svg
@@ -62,18 +76,15 @@ const LangMenu = () => {
       </button>
       {open ? (
         <>
-          <button
-            type="button"
-            className={styles.backdrop}
-            aria-hidden="true"
-            tabIndex={-1}
-            onClick={() => setOpen(false)}
-          />
+          {/* 바깥 클릭은 usePopupDisclosure 가 받는다. 이 층은 뒤 콘텐츠의 hover 를 막는
+              시각 요소일 뿐이라 접근성 트리에 넣지 않는다. */}
+          <div className={styles.backdrop} aria-hidden="true" onPointerDown={dismiss} />
           <div className={styles.panel}>
-            <div role="menu">
+            <div id={menuId} ref={menuRef} role="menu" onKeyDown={onMenuKeyDown}>
               {OPTIONS.map((option) => (
                 <button
                   key={option.code}
+                  data-list-item
                   type="button"
                   role="menuitemradio"
                   aria-checked={lang === option.code}
