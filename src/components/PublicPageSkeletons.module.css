@@ -1,10 +1,7 @@
 .main {
-  max-width: 1180px;
   height: var(--public-content-height);
   max-height: var(--public-content-height);
-  margin: 0 auto;
   overflow: hidden;
-  padding: var(--s-8) var(--s-6) var(--s-16);
 }
 
 .titleSlot {

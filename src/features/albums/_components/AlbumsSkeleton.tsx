@@ -10,7 +10,7 @@ const CARD_COUNT = 8;
  * @returns {JSX.Element}
  */
 const AlbumsSkeleton = () => (
-  <main className={styles.main} aria-busy="true">
+  <main className={`u-page-main ${styles.main}`} aria-busy="true">
     <div className={styles.title}>
       <Skeleton width={150} height={34} />
     </div>

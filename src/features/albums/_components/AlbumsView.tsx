@@ -43,7 +43,7 @@ const AlbumsView = ({ albums }: Props) => {
 
   if (albums.length === 0) {
     return (
-      <main className={styles.main}>
+      <main className="u-page-main">
         <h1 className={styles.title}>{dict.albumsNav}</h1>
         <p className={styles.empty}>{dict.emptyAlbums}</p>
       </main>
@@ -51,7 +51,7 @@ const AlbumsView = ({ albums }: Props) => {
   }
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.albumsNav}</h1>
       <m.div className={styles.grid} variants={GRID} initial="hidden" animate="show">
         {albums.map((album, index) => {

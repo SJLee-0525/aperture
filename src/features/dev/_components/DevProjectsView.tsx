@@ -52,7 +52,7 @@ const DevProjectsView = ({ projects, articlesByProject }: Props) => {
       : NO_ARTICLES;
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.devProjectsNav}</h1>
       {projects.length === 0 ? (
         <p className={styles.empty}>{dict.comingSoon}</p>

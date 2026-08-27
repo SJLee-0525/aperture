@@ -27,7 +27,7 @@ const MusicMediaView = ({ media }: { media: MusicMedia[] }) => {
   const [playing, setPlaying] = useState<string | null>(null);
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.musicMediaNav}</h1>
       {media.length === 0 ? (
         <p className={styles.empty}>{dict.comingSoon}</p>

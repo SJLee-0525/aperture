@@ -40,7 +40,7 @@ const MusicCareerView = ({ config, awards }: Props) => {
     entries.map((entry) => ({ period: entry.period, text: pickText(entry.title, lang) }));
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.musicCareerNav}</h1>
 
       <TimelineList label={dict.musicEducationLabel} rows={toRows(config.education)} />

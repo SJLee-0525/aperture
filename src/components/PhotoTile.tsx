@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { PHOTO_GRID_IMAGE_SIZES } from "@/constants/breakpoints";
 import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 import { openDetailQuery } from "@/lib/navigation/detail-query-url";
@@ -73,7 +74,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }:
         alt={title}
         fill
         priority={priority}
-        sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
+        sizes={PHOTO_GRID_IMAGE_SIZES}
         className={styles.photo}
         draggable={false}
       />

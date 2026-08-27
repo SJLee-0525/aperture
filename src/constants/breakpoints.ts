@@ -15,4 +15,35 @@ const MOBILE_NAVIGATION_MAX_WIDTH = 899;
 /** 위 폭의 미디어 쿼리 형태. `matchMedia` 소비자가 같은 문자열을 쓰게 한다. */
 const MOBILE_NAVIGATION_QUERY = `(max-width: ${MOBILE_NAVIGATION_MAX_WIDTH}px)`;
 
-export { MOBILE_NAVIGATION_MAX_WIDTH, MOBILE_NAVIGATION_QUERY };
+/**
+ * 사진 그리드의 열 수 경계. 좁은 쪽부터 적는다.
+ *
+ * `PhotoGrid.module.css` 의 `@media` 와 같은 값이어야 한다. 그리드는 열마다 div 를 만들고
+ * CSS 가 열 수를 정하므로, 둘이 어긋나면 사진이 빈 칸에 그려지거나 한 열이 비어 보인다.
+ * CSS 는 이 상수를 읽을 수 없어 숫자가 두 곳에 남는다.
+ *
+ * `next/image` 의 `sizes` 도 같은 경계를 쓴다. 열 수가 곧 뷰포트 대비 타일 폭이다.
+ */
+const PHOTO_GRID_BREAKPOINTS = [
+  { maxWidth: 760, columns: 2 },
+  { maxWidth: 1100, columns: 3 },
+] as const;
+
+/** 위 경계를 모두 넘겼을 때의 열 수. */
+const PHOTO_GRID_DESKTOP_COLUMNS = 4;
+
+/** 열 수를 뷰포트 대비 타일 폭으로 옮긴 `next/image` sizes 문자열. */
+const PHOTO_GRID_IMAGE_SIZES = [
+  ...PHOTO_GRID_BREAKPOINTS.map(
+    ({ maxWidth, columns }) => `(max-width: ${maxWidth}px) ${Math.round(100 / columns)}vw`,
+  ),
+  `${Math.round(100 / PHOTO_GRID_DESKTOP_COLUMNS)}vw`,
+].join(", ");
+
+export {
+  MOBILE_NAVIGATION_MAX_WIDTH,
+  MOBILE_NAVIGATION_QUERY,
+  PHOTO_GRID_BREAKPOINTS,
+  PHOTO_GRID_DESKTOP_COLUMNS,
+  PHOTO_GRID_IMAGE_SIZES,
+};

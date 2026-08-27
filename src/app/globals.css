@@ -48,6 +48,8 @@
   /* --- 고정 UI 치수 ---
      모바일 하단 탭바 높이와 챗봇 런처 크기는 두 컴포넌트만의 값이 아니다. 런처 offset,
      지도 높이 계산, 블로그 목차 인디케이터가 같은 값을 기준으로 자리를 잡으므로 한곳에 둔다. */
+  /* 공개 지면의 열 폭. 헤더·푸터·본문·히어로가 같은 선에서 시작해야 한다. */
+  --page-max: 1180px;
   --mobile-tab-bar-height: 62px;
   --chat-launcher-size: 48px;
   /* 글에서 "읽고 있는 줄"로 보는 화면 상단 offset. 고정 헤더(58·76px)보다 아래여야 제목이
@@ -389,6 +391,13 @@ h6 {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+}
+/* 공개 지면의 본문 열. 폭·가운데 정렬·상하 여백이 열두 화면에서 같은 값이었다.
+   높이나 overflow 처럼 화면마다 다른 것은 각자의 모듈이 갖는다. */
+.u-page-main {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-16);
 }
 /* 화면에서 감추고 낭독기에는 남긴다. `display: none` 이나 `visibility: hidden` 은
    접근성 트리에서도 빠지므로 쓸 수 없다. */

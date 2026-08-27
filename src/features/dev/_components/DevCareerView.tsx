@@ -35,7 +35,7 @@ const DevCareerView = ({ config }: { config: DevConfig }) => {
   useDevAwardTools(config.awards);
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.devCareerNav}</h1>
 
       {config.education.length > 0 ? (

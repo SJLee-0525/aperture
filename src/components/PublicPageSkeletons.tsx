@@ -28,7 +28,7 @@ const CardGridPageSkeleton = ({ kind }: { kind: GridKind }) => {
   const config = GRID_CONFIG[kind];
 
   return (
-    <main className={styles.main} aria-busy="true">
+    <main className={`u-page-main ${styles.main}`} aria-busy="true">
       <PageTitleSkeleton />
       <div className={`${styles.cardGrid} ${config.gridClass}`}>
         {Array.from({ length: config.count }).map((_, index) => (
@@ -88,7 +88,7 @@ const StackGroupsSkeleton = () => (
  * @returns {JSX.Element}
  */
 const TimelinePageSkeleton = ({ withStack = false }: { withStack?: boolean }) => (
-  <main className={styles.main} aria-busy="true">
+  <main className={`u-page-main ${styles.main}`} aria-busy="true">
     <PageTitleSkeleton />
     <div className={styles.timeline}>
       {TIMELINE_SECTIONS.map((rowCount, sectionIndex) => (

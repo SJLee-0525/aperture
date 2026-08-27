@@ -1,9 +1,9 @@
-/* 히어로 안의 요소는 모두 같은 선에서 시작한다. 사이트 헤더와 같은 1180px 열이고
+/* 히어로 안의 요소는 모두 같은 선에서 시작한다. 사이트 헤더와 같은 --page-max 열이고
    그 안쪽에 좌우 var(--s-6) 패딩을 둔다. 배경만 전폭이라 껍데기에는 좌우 패딩이 없다.
    버튼은 absolute 라 시작선을 직접 계산하고 텍스트는 같은 값을 min() 으로 얻는다.
    두 식이 어긋나면 제목과 버튼의 왼쪽 선이 갈린다. */
 .hero {
-  --detail-hero-column: 1180px;
+  --detail-hero-column: var(--page-max);
   --detail-hero-gutter: calc(max(0px, (100% - var(--detail-hero-column)) / 2) + var(--s-6));
 
   position: relative;

@@ -65,7 +65,7 @@ const GalleryContent = memo(function GalleryContent({
   const { visible: windowed, hasMore, attachSentinel } = useInfiniteScroll(filter.visible);
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <PageToolbar title={dict.workNav} count={countLabel(filter.visible.length, "photo")} countLive>
         <ViewToggle
           options={[

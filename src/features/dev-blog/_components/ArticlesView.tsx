@@ -112,7 +112,7 @@ const ArticlesView = ({ articles, tags }: Props) => {
   const visible = sliceArticlesPage(filtered, page);
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <PageToolbar title={dict.devArticlesNav} count={countLabel(filtered.length, "article")} countLive>
         <ViewToggle
           options={[

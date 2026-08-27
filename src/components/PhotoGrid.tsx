@@ -5,6 +5,11 @@ import { useMemo, useSyncExternalStore } from "react";
 
 import { PhotoTile } from "@/components/PhotoTile";
 
+import {
+  PHOTO_GRID_BREAKPOINTS,
+  PHOTO_GRID_DESKTOP_COLUMNS,
+} from "@/constants/breakpoints";
+
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Lang } from "@/types/lang";
 
@@ -21,13 +26,10 @@ type Props = {
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/* PhotoGrid.module.css 의 그리드 열 수와 같은 경계여야 한다. 열 div 개수와 CSS 열 수가
-   어긋나면 사진이 잘못된 자리에 그려진다. */
-const COLUMN_QUERIES = [
-  { query: "(max-width: 760px)", columns: 2 },
-  { query: "(max-width: 1100px)", columns: 3 },
-] as const;
-const DESKTOP_COLUMNS = 4;
+const COLUMN_QUERIES = PHOTO_GRID_BREAKPOINTS.map(({ maxWidth, columns }) => ({
+  query: `(max-width: ${maxWidth}px)`,
+  columns,
+}));
 
 const subscribeColumns = (onChange: () => void) => {
   const lists = COLUMN_QUERIES.map(({ query }) => window.matchMedia(query));
@@ -35,9 +37,10 @@ const subscribeColumns = (onChange: () => void) => {
   return () => lists.forEach((list) => list.removeEventListener("change", onChange));
 };
 const readColumns = () =>
-  COLUMN_QUERIES.find(({ query }) => window.matchMedia(query).matches)?.columns ?? DESKTOP_COLUMNS;
+  COLUMN_QUERIES.find(({ query }) => window.matchMedia(query).matches)?.columns ??
+  PHOTO_GRID_DESKTOP_COLUMNS;
 /* 서버는 폭을 모른다. hydration 직후 실제 폭으로 교정되므로 SSR 값은 데스크톱으로 둔다. */
-const readServerColumns = () => DESKTOP_COLUMNS;
+const readServerColumns = () => PHOTO_GRID_DESKTOP_COLUMNS;
 
 /**
  * 사진 그리드 — 행 우선 메이슨리 또는 정사각(grid).

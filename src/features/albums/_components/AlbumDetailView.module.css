@@ -29,7 +29,7 @@
   color: var(--text-3);
 }
 .main {
-  max-width: 1180px;
+  max-width: var(--page-max);
   margin: 0 auto;
   padding: 0 var(--s-6) var(--s-16);
 }

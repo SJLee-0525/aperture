@@ -48,7 +48,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   );
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.musicWorksNav}</h1>
       {works.length === 0 ? (
         <p className={styles.empty}>{dict.comingSoon}</p>

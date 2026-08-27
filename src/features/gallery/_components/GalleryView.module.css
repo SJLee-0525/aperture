@@ -1,8 +1,3 @@
-.main {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: var(--s-8) var(--s-6) var(--s-16);
-}
 /* 무한스크롤 트리거 — 화면 밖에서도 rootMargin(600px)으로 미리 걸리도록 하단에 둔 얇은 감시 대상. */
 .sentinel {
   height: 1px;

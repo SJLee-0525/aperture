@@ -15,7 +15,7 @@ const CARD_COUNT = 4;
  * @returns {JSX.Element}
  */
 const ArticlesListSkeleton = () => (
-  <main className={styles.main} aria-busy="true">
+  <main className="u-page-main" aria-busy="true">
     <div className={styles.toolbar}>
       <Skeleton width={76} height={32} />
       <div className={styles.tools}>

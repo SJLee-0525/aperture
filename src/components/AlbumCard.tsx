@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { PHOTO_GRID_IMAGE_SIZES } from "@/constants/breakpoints";
 import { countLabel } from "@/lib/format/count-label";
+
 
 import styles from "./AlbumCard.module.css";
 
@@ -44,7 +46,7 @@ const AlbumCard = ({
           src={coverUrl}
           alt={coverAlt}
           fill
-          sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
+          sizes={PHOTO_GRID_IMAGE_SIZES}
           className={styles.img}
           draggable={false}
           priority={priority}
