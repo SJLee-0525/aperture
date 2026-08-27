@@ -5,9 +5,9 @@ import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { decodeDevArticle } from "@/lib/supabase/decode/dev-article";
 import { listCrud } from "@/lib/supabase/list-crud";
 import { paginateAll } from "@/lib/supabase/paginate-all";
-import { toDevArticle } from "@/lib/supabase/public/dev-articles";
 
 import type { DevArticle } from "@/types/dev-article";
 import type { DevArticleTag } from "@/types/dev-article-tag";
@@ -16,7 +16,7 @@ const ARTICLES_TABLE = tableFor(COLLECTIONS.DEV_ARTICLES);
 const TAGS_TABLE = tableFor(COLLECTIONS.DEV_ARTICLE_TAGS);
 
 /**
- * 블로그 글 CRUD. 행 병합 결과의 정규화는 공개 디코더 `toDevArticle` 을 그대로 쓴다 —
+ * 블로그 글 CRUD. 행 병합 결과의 정규화는 컬렉션 디코더 `decodeDevArticle` 을 그대로 쓴다 —
  * 기본값·날짜 계약(발행 필드 null 보존, createdAt/updatedAt epoch 폴백)이 같다. 발행 조건·firstPublishedAt 스탬프 같은 도메인 규칙은 여기 없고
  * 도메인 검증은 live 저장소가 이 CRUD를 감싸서 적용한다.
  *
@@ -25,7 +25,7 @@ const TAGS_TABLE = tableFor(COLLECTIONS.DEV_ARTICLE_TAGS);
  */
 const devArticlesCrud = listCrud<DevArticle>(
   COLLECTIONS.DEV_ARTICLES,
-  toDevArticle,
+  decodeDevArticle,
   "블로그 글",
   "article",
   devArticleRagPolicy,

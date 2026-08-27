@@ -7,7 +7,7 @@ import { rowEncoderFor, toJson } from "@/lib/supabase/admin/row-codec";
 import { updateSortOrders, type SortOrder } from "@/lib/supabase/admin/sort-rpc";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { paginateAll } from "@/lib/supabase/paginate-all";
-import { mergeRow } from "@/lib/supabase/public/transport";
+import { mergeRow } from "@/lib/supabase/row-merge";
 
 import type { RagSyncSourceType } from "@/types/rag";
 
@@ -34,7 +34,7 @@ const assertNoError = (error: QueryError, message: string): void => {
 /**
  * 목록형 컬렉션의 공통 관리자 CRUD 팩토리 (Supabase).
  *
- * 인코딩은 `rowEncoderFor` 가, 읽기 병합은 공개 transport 의 `mergeRow` 가 맡아
+ * 인코딩은 `rowEncoderFor` 가, 읽기 병합은 `row-merge` 의 `mergeRow` 가 맡아
  * 쓰기와 읽기가 같은 왕복 계약을 쓴다. 정렬·projection 은 `SUPABASE_COLLECTIONS`
  * 서술자가 단일 출처다. `created_at`/`updated_at` 은 DB 기본값·트리거 소유라 쓰지 않는다.
  *

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { encodeArticleRow, encodeListRow } from "@/lib/supabase/admin/row-codec";
-import { mergeRow } from "@/lib/supabase/public/transport";
+import { mergeRow } from "@/lib/supabase/row-merge";
 
 describe("row-codec — 목록 컬렉션", () => {
   it("order·published 를 스칼라로 분리하고 data 에 남기지 않는다", () => {

@@ -5,7 +5,7 @@ import type { CollectionId } from "@/constants/collections";
 /**
  * 도메인 입력을 Supabase 행으로 바꾸는 인코더 단일 출처.
  *
- * 읽기 병합(`lib/supabase/public/transport`의 mergeRow — data 를 먼저 펼치고 행 스칼라로
+ * 읽기 병합(`lib/supabase/row-merge`의 mergeRow — data 를 먼저 펼치고 행 스칼라로
  * 덮는다)의 정확한 역함수여야 한다. 스칼라로 나가는 필드는 data 에서 제거해 이중 저장을
  * 막는다 — data 안에 남으면 정렬 RPC 가 컬럼만 갱신할 때 즉시 stale 이 되고, 마이그레이션
  * 잔존값과 구분할 수 없는 쓰레기가 쌓인다.
