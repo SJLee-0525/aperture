@@ -198,6 +198,11 @@
   gap: 14px;
   margin: clamp(28px, 3.5vw, 40px) 0 0;
 }
+/* 진입 애니메이션의 시작 상태. `html[data-js]` 아래로 게이트하지 않으면 스크립트가 실행되지
+   않는 환경에서 이 지면의 유일한 내비게이션이 화면에 나타나지 않는다. */
+:global(html[data-js]) .row {
+  opacity: 0;
+}
 .row {
   display: inline-flex;
   align-items: center;
@@ -206,7 +211,6 @@
   border: 1px solid var(--line-strong);
   color: var(--text);
   font-family: var(--font-sans);
-  opacity: 0;
   transform: translateY(16px);
   transition:
     border-color 0.2s,

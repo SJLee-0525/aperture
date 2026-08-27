@@ -65,7 +65,8 @@ const LandingTyping = ({
   roles: string[];
   started: boolean;
 }) => {
-  const { text: typed, index } = useTyping(started ? roles : NO_ROLES);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const { text: typed, index } = useTyping(started ? roles : NO_ROLES, lineRef);
   const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
 
   useEffect(() => {
@@ -74,6 +75,7 @@ const LandingTyping = ({
 
   return (
     <m.div
+      ref={lineRef}
       className={styles.type}
       initial={{ opacity: 0, y: 14 }}
       animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * 타이핑 효과 — words 를 한 글자씩 타이핑 → 잠시 멈춤 → 삭제 → 다음 단어 순환.
@@ -9,16 +9,34 @@ import { useEffect, useState } from "react";
  * `index`(현재 단어 인덱스)를 함께 반환 → 호출부가 단어별 색상 등을 매길 수 있다.
  * ⚠️ words 는 안정 참조여야 함(매 렌더 새 배열이면 effect 재시작 → 첫 글자에서 멈춤). 호출부에서 useMemo.
  *
+ * `targetRef` 를 주면 그 요소가 화면 밖일 때 순환을 멈춘다. 정지 조건이 언마운트뿐이면
+ * 지면을 내린 뒤에도 초당 12~22회의 리렌더가 계속된다. 다시 보이면 같은 단어부터 잇는다.
+ *
  * @param {string[]} words
+ * @param {React.RefObject<Element | null>} [targetRef]
  * @returns {{ text: string; index: number }}
  */
-const useTyping = (words: string[]): { text: string; index: number } => {
+const useTyping = (
+  words: string[],
+  targetRef?: React.RefObject<Element | null>,
+): { text: string; index: number } => {
   const [text, setText] = useState("");
   const [index, setIndex] = useState(0);
+  const [onScreen, setOnScreen] = useState(true);
+  /** 화면 밖으로 나갔다 돌아왔을 때 이어 갈 단어. */
+  const resumeWordIndex = useRef(0);
 
   useEffect(() => {
-    if (words.length === 0) return;
-    let wordIndex = 0;
+    const target = targetRef?.current;
+    if (!target) return;
+    const observer = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting));
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [targetRef]);
+
+  useEffect(() => {
+    if (words.length === 0 || !onScreen) return;
+    let wordIndex = resumeWordIndex.current % words.length;
     let charIndex = 0;
     let deleting = false;
 
@@ -34,6 +52,7 @@ const useTyping = (words: string[]): { text: string; index: number } => {
     let timer = setTimeout(tick, 400);
 
     function tick() {
+      resumeWordIndex.current = wordIndex;
       const chars = [...words[wordIndex]];
       setText(chars.slice(0, charIndex).join(""));
       setIndex(wordIndex);
@@ -54,7 +73,7 @@ const useTyping = (words: string[]): { text: string; index: number } => {
     }
 
     return () => clearTimeout(timer);
-  }, [words]);
+  }, [words, onScreen]);
 
   return { text, index };
 };

@@ -20,6 +20,7 @@ describe("THEME_INIT_SCRIPT", () => {
     localStorage.clear();
     delete document.documentElement.dataset.theme;
     delete document.documentElement.dataset.section;
+    delete document.documentElement.dataset.js;
     document.querySelector('meta[name="theme-color"]')?.remove();
     window.history.replaceState(null, "", "/");
   });
@@ -90,5 +91,16 @@ describe("THEME_INIT_SCRIPT", () => {
     expect(document.documentElement.dataset.section).toBe(expected);
     // 런타임 판정(sectionFromPath)과 인라인 스크립트가 갈리면 첫 페인트와 hydration 이 어긋난다.
     expect(document.documentElement.dataset.section).toBe(sectionFromPath(pathname));
+  });
+
+  // 랜딩의 진입 애니메이션은 초기 opacity:0 으로 시작한다. 이 표식이 없으면 그 선언이
+  // 걸리지 않아 스크립트가 실행되지 않는 환경에서도 콘텐츠가 보인다.
+  it("스크립트가 실행되면 문서에 data-js 를 남긴다", () => {
+    window.history.replaceState(null, "", "/ko");
+    expect(document.documentElement.dataset.js).toBeUndefined();
+
+    runThemeScript();
+
+    expect(document.documentElement.dataset.js).toBe("");
   });
 });

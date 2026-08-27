@@ -101,16 +101,18 @@ const useOverlayDrag = ({
 
   const resetSurface = useCallback(
     (animate: boolean) => {
+      // 모션 최소화에서는 복귀도 즉시다. 같은 훅의 resetSwipeSurface 와 규칙이 갈리면 안 된다.
+      const withTransition = animate && !prefersReducedMotion();
       const surface = surfaceRef.current;
       if (surface) {
-        surface.style.transition = animate ? RESET_TRANSITION : "none";
+        surface.style.transition = withTransition ? RESET_TRANSITION : "none";
         surface.style.transform = "translate3d(0, 0, 0)";
         surface.style.opacity = "1";
       }
       if (scrimRef) {
         const scrim = scrimRef.current;
         if (scrim) {
-          scrim.style.transition = animate ? RESET_TRANSITION : "none";
+          scrim.style.transition = withTransition ? RESET_TRANSITION : "none";
           scrim.style.opacity = "1";
         }
       }
@@ -304,23 +306,29 @@ const useOverlayDrag = ({
         resetSurface(true);
         return;
       }
+      // 닫기 연출을 생략하면 기다릴 이유도 없다. 애니메이션 없이 지연만 남기면
+      // 아무 일도 일어나지 않는 170ms 가 그대로 체감된다.
+      const animated = !prefersReducedMotion();
       const surface = surfaceRef.current;
       if (surface) {
-        surface.style.transition = DISMISS_TRANSITION;
+        surface.style.transition = animated ? DISMISS_TRANSITION : "none";
         surface.style.transform = "translate3d(0, 100dvh, 0)";
         surface.style.opacity = "0";
       }
       if (scrimRef) {
         const scrim = scrimRef.current;
         if (scrim) {
-          scrim.style.transition = DISMISS_TRANSITION;
+          scrim.style.transition = animated ? DISMISS_TRANSITION : "none";
           scrim.style.opacity = "0";
         }
       }
-      dismissTimer.current = window.setTimeout(() => {
-        dismissTimer.current = 0;
-        onDismiss();
-      }, DISMISS_DELAY);
+      dismissTimer.current = window.setTimeout(
+        () => {
+          dismissTimer.current = 0;
+          onDismiss();
+        },
+        animated ? DISMISS_DELAY : 0,
+      );
       return;
     }
 
