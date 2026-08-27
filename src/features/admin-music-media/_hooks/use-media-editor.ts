@@ -16,6 +16,7 @@ import { validateMediaInput } from "@/features/admin-music-media/_lib/validate-m
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { formFingerprint } from "@/lib/admin/form-fingerprint";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -34,7 +35,7 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery("musicMedia", mediaId, form, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("musicMedia", mediaId), form, dirty);
   const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
 

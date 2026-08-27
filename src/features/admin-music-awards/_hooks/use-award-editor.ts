@@ -16,6 +16,7 @@ import { validateAwardInput } from "@/features/admin-music-awards/_lib/validate-
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { formFingerprint } from "@/lib/admin/form-fingerprint";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
 
 import type { AwardFormValue } from "@/features/admin-music-awards/_lib/award-form-data";
@@ -34,7 +35,7 @@ const useAwardEditor = (awardId: string, initial?: MusicAward) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery("musicAwards", awardId, form, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("musicAwards", awardId), form, dirty);
   const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicConfigRepository } from "@/lib/admin/music-config-repository";
 import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -34,8 +35,7 @@ const useMusicConfigAdmin = () => {
   const [saved, setSaved] = useState(false);
   const { dirty, confirmLeave, markSaved } = useConfigDirty({ intro, career, education });
   const recovery = useFormRecovery(
-    "musicConfig",
-    "musicConfig",
+    formRecoverySlot("musicConfig", "musicConfig"),
     { intro, career, education },
     dirty,
   );

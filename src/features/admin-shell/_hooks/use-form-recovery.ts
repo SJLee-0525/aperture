@@ -6,6 +6,8 @@ import { useMounted } from "@/hooks/use-mounted";
 
 import { clearFormRecovery, readFormRecovery, writeFormRecovery } from "@/lib/admin/form-recovery";
 
+import type { RecoverySlot } from "@/lib/admin/form-recovery";
+
 /** 입력이 멈춘 뒤 복구본을 뜨기까지 기다리는 시간. 타자 중에 매번 쓰지 않기 위한 값이다. */
 const FORM_RECOVERY_DEBOUNCE_MS = 5_000;
 
@@ -25,14 +27,12 @@ type Options<T> = {
  * 수 있고 어느 쪽을 쓸지는 관리자가 안다. 저장소는 서버 렌더에 없으므로 마운트 이후에 읽고,
  * 그 뒤로는 다시 읽지 않는다. 편집 중에 다시 읽으면 방금 쓴 자기 복구본이 제안된다.
  *
- * @param collection 컬렉션 이름. 문서 ID 와 함께 키를 이룬다.
- * @param id 편집 중인 문서 ID. 설정 편집기처럼 문서가 하나면 컬렉션 이름을 그대로 쓴다.
+ * @param slot 저장 자리. `formRecoverySlot(collection, id)` 또는 폼 전용 슬롯.
  * @param form 현재 폼 값.
  * @param dirty 저장 이후 바뀐 것이 있는지. false 면 뜨지 않는다.
  */
 const useFormRecovery = <T>(
-  collection: string,
-  id: string,
+  slot: RecoverySlot,
   form: T,
   dirty: boolean,
   options: Options<T> = {},
@@ -43,6 +43,10 @@ const useFormRecovery = <T>(
   const readRef = useRef(false);
   const timerRef = useRef<number | null>(null);
   const optionsRef = useRef(options);
+  // 편집을 버린 뒤에는 예약을 다시 잡지 않는다. `clear` 는 저장 성공에도 불리므로
+  // 그 경로에서 자동 저장이 멈추지 않도록 종료 신호를 따로 둔다.
+  const stoppedRef = useRef(false);
+  const { key, version } = slot;
 
   useEffect(() => {
     optionsRef.current = options;
@@ -53,30 +57,39 @@ const useFormRecovery = <T>(
     readRef.current = true;
     const revive = optionsRef.current.revive;
     setFound(
-      readFormRecovery<T>(window.localStorage, collection, id, (input) =>
+      readFormRecovery<T>(window.localStorage, { key, version }, (input) =>
         revive ? revive(input) : (input as T),
       ),
     );
-  }, [mounted, collection, id]);
+  }, [mounted, key, version]);
 
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty || stoppedRef.current) return;
     timerRef.current = window.setTimeout(() => {
       timerRef.current = null;
-      writeFormRecovery(window.localStorage, collection, id, form);
+      writeFormRecovery(window.localStorage, { key, version }, form);
     }, FORM_RECOVERY_DEBOUNCE_MS);
     return () => {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [collection, id, dirty, form]);
+  }, [key, version, dirty, form]);
 
   const clear = useCallback(() => {
     if (timerRef.current !== null) window.clearTimeout(timerRef.current);
     timerRef.current = null;
-    clearFormRecovery(window.localStorage, collection, id);
+    clearFormRecovery(window.localStorage, { key, version });
     setHandled(true);
-  }, [collection, id]);
+  }, [key, version]);
+
+  /**
+   * 편집을 버릴 때 부른다. 복구본을 지우고 이후 예약도 잡지 않는다.
+   * `clear` 는 저장 성공 때도 불리므로 종료 의사를 이 함수로 구분한다.
+   */
+  const abandon = useCallback(() => {
+    stoppedRef.current = true;
+    clear();
+  }, [clear]);
 
   const restore = useCallback((): T | null => {
     if (!found) return null;
@@ -84,7 +97,7 @@ const useFormRecovery = <T>(
     return found.input;
   }, [clear, found]);
 
-  return { pending: handled ? null : found, restore, discard: clear, clear };
+  return { pending: handled ? null : found, restore, discard: clear, clear, abandon };
 };
 
 export { FORM_RECOVERY_DEBOUNCE_MS, useFormRecovery };

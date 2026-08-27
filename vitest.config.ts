@@ -24,6 +24,7 @@ export default defineConfig({
         "src/lib/auth/authorize-admin-token.ts",
         "src/lib/auth/admin-gate.ts",
         "src/lib/admin/clear-admin-workspace.ts",
+        "src/lib/admin/form-recovery.ts",
         "src/lib/collection/move-item.ts",
         "src/lib/admin/field-issue.ts",
         "src/lib/admin/form-fingerprint.ts",

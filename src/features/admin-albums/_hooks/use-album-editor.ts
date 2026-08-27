@@ -18,6 +18,7 @@ import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { formFingerprint } from "@/lib/admin/form-fingerprint";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -42,7 +43,7 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery("albums", albumId, form, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("albums", albumId), form, dirty);
   const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
@@ -27,7 +28,7 @@ const useSiteAdmin = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const { dirty, confirmLeave, markSaved } = useConfigDirty(bio);
-  const recovery = useFormRecovery("siteBio", "siteBio", bio, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("siteBio", "siteBio"), bio, dirty);
   const { clear: clearRecovery } = recovery;
 
   useEffect(() => {

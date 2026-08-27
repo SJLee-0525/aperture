@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 
+import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+
 import {
   articleToInput,
   emptyArticleInput,
@@ -18,6 +20,7 @@ import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-articl
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 import { adminDevArticleRoute } from "@/constants/routes";
+import { formFingerprint } from "@/lib/admin/form-fingerprint";
 
 import type { useArticleReferences } from "@/features/admin-dev-articles/_hooks/use-article-references";
 import type { DevArticle } from "@/types/dev-article";
@@ -30,8 +33,6 @@ type References = ReturnType<typeof useArticleReferences>;
  * @param {DevArticleInput} input 비교할 폼 값.
  * @returns {string} 직렬화한 값.
  */
-const fingerprint = (input: DevArticleInput): string => JSON.stringify(input);
-
 /**
  * 글 편집 폼의 상태와 저장.
  *
@@ -62,7 +63,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   // 마지막으로 저장한 값의 지문. ref 가 아니라 state 다 — `dirty` 를 렌더 중 파생값으로
   // 계산하려면 이 값이 바뀔 때 다시 렌더돼야 한다.
   const [savedFingerprint, setSavedFingerprint] = useState(() =>
-    fingerprint(initial ? articleToInput(initial) : emptyArticleInput()),
+    formFingerprint(initial ? articleToInput(initial) : emptyArticleInput()),
   );
 
   const slugLocked = Boolean(initial?.firstPublishedAt);
@@ -83,7 +84,13 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
 
   // 저장 여부는 상태가 아니라 두 값의 차이다. updater 안에서 setDirty 를 부르면 렌더 도중
   // 다른 상태를 갱신하게 되고, 복구본 적용·저장처럼 두 값이 함께 움직이는 경로에서 어긋난다.
-  const dirty = useMemo(() => fingerprint(form) !== savedFingerprint, [form, savedFingerprint]);
+  const dirty = useMemo(
+    () => formFingerprint(form) !== savedFingerprint,
+    [form, savedFingerprint],
+  );
+  // 열한 개 폼과 같은 가드에 등록한다. 등록하지 않으면 셸 헤더의 워드마크·사이트 보기·
+  // 로그아웃이 편집 중에도 경고 없이 이동한다.
+  const confirmLeave = useUnsavedForm(dirty);
 
   const onSlugChange = useCallback(
     (value: string) => {
@@ -114,7 +121,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   );
 
   const markSaved = useCallback((input: DevArticleInput) => {
-    setSavedFingerprint(fingerprint(input));
+    setSavedFingerprint(formFingerprint(input));
   }, []);
 
   const save = useCallback(async (): Promise<boolean> => {
@@ -171,6 +178,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
     markdownIssues,
     publishIssues,
     dirty,
+    confirmLeave,
     saving,
     savedAt,
     error,

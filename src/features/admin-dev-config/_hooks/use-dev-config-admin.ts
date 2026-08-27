@@ -5,12 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
+
 import {
   editDevConfig,
   type DevConfigEdit,
 } from "@/features/admin-dev-config/_lib/edit-dev-config";
 
 import { getDevConfigRepository } from "@/lib/admin/dev-config-repository";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { DevConfig } from "@/types/dev";
@@ -39,7 +41,7 @@ const useDevConfigAdmin = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const { dirty, confirmLeave, markSaved } = useConfigDirty(config);
-  const recovery = useFormRecovery("devConfig", "devConfig", config, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("devConfig", "devConfig"), config, dirty);
   const { clear: clearRecovery } = recovery;
 
   useEffect(() => {

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 
@@ -30,7 +31,7 @@ const useTagsAdmin = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const { dirty, confirmLeave, markSaved } = useConfigDirty(tags);
-  const recovery = useFormRecovery("photoTags", "photoTags", tags, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("photoTags", "photoTags"), tags, dirty);
   const { clear: clearRecovery } = recovery;
   // 사전에 없는 id 가 사진에 남으면 공개 필터 칩과 사진 데이터가 어긋난다.
   // 블로그 태그 패널과 같은 정책으로, 쓰이는 태그는 삭제를 잠근다.

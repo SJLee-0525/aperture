@@ -8,7 +8,7 @@ import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetail
 import { useMounted } from "@/hooks/use-mounted";
 
 import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
-import { readArticleRecovery } from "@/features/admin-dev-articles/_lib/dev-article-recovery";
+import { fromStoredArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-recovery";
 import { getDevArticleRepository } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 import {
   previewArticleMarkdown,
@@ -17,6 +17,7 @@ import {
 import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
 import { adminDevArticleRoute } from "@/constants/routes";
+import { articleRecoverySlot, readFormRecovery } from "@/lib/admin/form-recovery";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { DevArticle } from "@/types/dev-article";
@@ -50,7 +51,14 @@ const ArticleFullPreview = ({ articleId }: Props) => {
   const [error, setError] = useState<string | null>(null);
 
   const unsaved = useMemo(
-    () => (mounted ? readArticleRecovery(window.localStorage, articleId) !== null : false),
+    () =>
+      mounted
+        ? readFormRecovery(
+            window.localStorage,
+            articleRecoverySlot(articleId),
+            fromStoredArticleInput,
+          ) !== null
+        : false,
     [mounted, articleId],
   );
 

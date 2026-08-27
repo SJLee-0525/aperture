@@ -16,6 +16,8 @@ import styles from "./ArticleRow.module.css";
 type Props = {
   article: AdminDevArticleListItem;
   pinBusy: boolean;
+  /** 이 행의 공개 토글이 저장 중이다. 형제 행 여섯과 같은 가드다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onTogglePinned: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
@@ -33,6 +35,7 @@ type Props = {
  *
  * @param {Props} props
  * @param {AdminDevArticleListItem} props.article 본문을 뺀 목록 행.
+ * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
  * @param {boolean} props.pinBusy 이 행의 고정 요청이 진행 중이다. 낙관적 갱신이라 연타하면
  *   화면과 서버 상태가 어긋난다.
  * @param {(id: string, next: boolean) => void} props.onTogglePublished 공개 상태를 바꾼다.
@@ -40,7 +43,14 @@ type Props = {
  * @param {(id: string) => void} props.onDelete 확인 후 글을 지운다.
  * @returns {JSX.Element}
  */
-const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDelete }: Props) => {
+const ArticleRow = ({
+  article,
+  pinBusy,
+  publishBusy,
+  onTogglePublished,
+  onTogglePinned,
+  onDelete,
+}: Props) => {
   const title = article.title.ko || "제목 없음";
   const onDeleteClick = () => {
     if (window.confirm(`"${title}" 글을 삭제할까요?`)) {
@@ -51,6 +61,7 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
   return (
     <AdminRow
       published={article.published}
+      publishedBusy={publishBusy}
       publishedLabels={{ on: "공개", off: "초안" }}
       onTogglePublished={(next) => onTogglePublished(article.id, next)}
       editHref={adminDevArticleRoute(article.id)}

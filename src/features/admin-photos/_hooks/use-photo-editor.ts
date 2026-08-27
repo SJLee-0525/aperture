@@ -18,6 +18,7 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { formFingerprint } from "@/lib/admin/form-fingerprint";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
@@ -40,7 +41,7 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery("photos", photoId, form, dirty, {
+  const recovery = useFormRecovery(formRecoverySlot("photos", photoId), form, dirty, {
     // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
     revive: (input) => ({
       ...(input as unknown as PhotoInput),

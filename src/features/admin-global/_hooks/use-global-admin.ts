@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -40,8 +41,7 @@ const useGlobalAdmin = () => {
     links,
   });
   const recovery = useFormRecovery(
-    "globalConfig",
-    "globalConfig",
+    formRecoverySlot("globalConfig", "globalConfig"),
     { tagline, landingLead, contactLead, links },
     dirty,
   );

@@ -17,6 +17,7 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { formFingerprint } from "@/lib/admin/form-fingerprint";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -36,7 +37,7 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery("musicWorks", workId, form, dirty, {
+  const recovery = useFormRecovery(formRecoverySlot("musicWorks", workId), form, dirty, {
     // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
     revive: (input) => ({
       ...(input as unknown as MusicWorkInput),

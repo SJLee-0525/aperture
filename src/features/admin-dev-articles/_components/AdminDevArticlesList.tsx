@@ -40,6 +40,7 @@ const AdminDevArticlesPage = () => {
     togglePublished,
     togglePinned,
     pendingPinIds,
+    pendingPublishIds,
     remove,
   } = useDevArticlesAdmin();
 
@@ -101,6 +102,7 @@ const AdminDevArticlesPage = () => {
               key={article.id}
               article={article}
               pinBusy={pendingPinIds.has(article.id)}
+              publishBusy={pendingPublishIds.has(article.id)}
               onTogglePublished={togglePublished}
               onTogglePinned={togglePinned}
               onDelete={remove}

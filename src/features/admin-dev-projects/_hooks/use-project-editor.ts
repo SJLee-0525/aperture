@@ -18,6 +18,7 @@ import { ROUTES } from "@/constants/routes";
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { formFingerprint } from "@/lib/admin/form-fingerprint";
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -41,7 +42,7 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery("devProjects", projectId, form, dirty);
+  const recovery = useFormRecovery(formRecoverySlot("devProjects", projectId), form, dirty);
   const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);

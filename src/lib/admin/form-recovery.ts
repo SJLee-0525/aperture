@@ -1,4 +1,4 @@
-import { adminFormDraftKey } from "@/constants/storage-keys";
+import { adminDevArticleDraftKey, adminFormDraftKey } from "@/constants/storage-keys";
 
 /**
  * 편집 중 잃지 않기 위한 로컬 복구본.
@@ -15,6 +15,14 @@ import { adminFormDraftKey } from "@/constants/storage-keys";
 const FORM_RECOVERY_VERSION = 1;
 
 /**
+ * 블로그 편집기의 복구본 버전. 다른 폼과 따로 센다.
+ *
+ * 블로그는 이 공용 모듈보다 먼저 자체 저장소를 갖고 세 번 형식을 올렸다. 기본 버전으로
+ * 바꾸면 관리자 브라우저에 남아 있는 복구본이 전부 형식 불일치로 버려진다.
+ */
+const DEV_ARTICLE_RECOVERY_VERSION = 3;
+
+/**
  * 복구본 수명. 지난달에 덮어 둔 값이 오늘 편집을 덮어쓰는 일이 없게 짧게 잡되,
  * 주말을 넘겨 이어 쓰는 경우는 살린다.
  */
@@ -26,6 +34,21 @@ type StoredRecovery<T> = {
   input: T;
 };
 
+/** 복구본이 놓이는 자리. 키와 형식 버전이 한 쌍으로 움직인다. */
+type RecoverySlot = { key: string; version: number };
+
+/** 엔티티 폼과 설정 편집기가 쓰는 기본 슬롯. */
+const formRecoverySlot = (collection: string, id: string): RecoverySlot => ({
+  key: adminFormDraftKey(collection, id),
+  version: FORM_RECOVERY_VERSION,
+});
+
+/** 블로그 편집기 전용 슬롯. 접두사와 버전이 공용과 다른 이유는 위 상수 주석에 있다. */
+const articleRecoverySlot = (articleId: string): RecoverySlot => ({
+  key: adminDevArticleDraftKey(articleId),
+  version: DEV_ARTICLE_RECOVERY_VERSION,
+});
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -33,24 +56,22 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  * 폼 값을 복구본으로 떠 둔다.
  *
  * @param storage 쓸 저장소.
- * @param collection 컬렉션 이름. 문서 ID 와 함께 키를 이룬다.
- * @param id 편집 중인 문서 ID.
+ * @param slot 저장 자리(키와 형식 버전).
  * @param input 현재 폼 값.
  * @param now 저장 시각(ms).
  * @returns 저장 성공 여부. 실패해도 편집은 계속한다.
  */
 const writeFormRecovery = <T>(
   storage: Pick<Storage, "setItem">,
-  collection: string,
-  id: string,
+  slot: RecoverySlot,
   input: T,
   now: number = Date.now(),
 ): boolean => {
   try {
     storage.setItem(
-      adminFormDraftKey(collection, id),
+      slot.key,
       JSON.stringify({
-        version: FORM_RECOVERY_VERSION,
+        version: slot.version,
         savedAt: now,
         input,
       } satisfies StoredRecovery<T>),
@@ -69,14 +90,13 @@ const writeFormRecovery = <T>(
  */
 const readFormRecovery = <T>(
   storage: Pick<Storage, "getItem">,
-  collection: string,
-  id: string,
+  slot: RecoverySlot,
   revive: (input: Record<string, unknown>) => T,
   now: number = Date.now(),
 ): { savedAt: number; input: T } | null => {
   let raw: string | null;
   try {
-    raw = storage.getItem(adminFormDraftKey(collection, id));
+    raw = storage.getItem(slot.key);
   } catch {
     return null;
   }
@@ -88,7 +108,7 @@ const readFormRecovery = <T>(
   } catch {
     return null;
   }
-  if (!isRecord(parsed) || parsed.version !== FORM_RECOVERY_VERSION) return null;
+  if (!isRecord(parsed) || parsed.version !== slot.version) return null;
 
   const { savedAt, input } = parsed;
   if (typeof savedAt !== "number" || !Number.isFinite(savedAt)) return null;
@@ -102,22 +122,22 @@ const readFormRecovery = <T>(
 /**
  * 복구본을 지운다. 저장에 성공했거나 관리자가 복구를 거절했을 때 부른다.
  */
-const clearFormRecovery = (
-  storage: Pick<Storage, "removeItem">,
-  collection: string,
-  id: string,
-): void => {
+const clearFormRecovery = (storage: Pick<Storage, "removeItem">, slot: RecoverySlot): void => {
   try {
-    storage.removeItem(adminFormDraftKey(collection, id));
+    storage.removeItem(slot.key);
   } catch {
     // 지우지 못해도 편집을 막지 않는다. 다음 저장이 같은 키를 덮어쓴다.
   }
 };
 
 export {
+  articleRecoverySlot,
   clearFormRecovery,
+  DEV_ARTICLE_RECOVERY_VERSION,
   FORM_RECOVERY_TTL_MS,
   FORM_RECOVERY_VERSION,
+  formRecoverySlot,
   readFormRecovery,
   writeFormRecovery,
 };
+export type { RecoverySlot };

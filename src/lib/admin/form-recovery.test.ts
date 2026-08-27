@@ -5,6 +5,7 @@ import {
   clearFormRecovery,
   FORM_RECOVERY_TTL_MS,
   FORM_RECOVERY_VERSION,
+  formRecoverySlot,
   readFormRecovery,
   writeFormRecovery,
 } from "@/lib/admin/form-recovery";
@@ -28,11 +29,13 @@ const NOW = 1_700_000_000_000;
 const stored = (over: Record<string, unknown> = {}) =>
   JSON.stringify({ version: FORM_RECOVERY_VERSION, savedAt: NOW, input: { title: "가" }, ...over });
 
+const SLOT = formRecoverySlot("photos", "p1");
+
 describe("writeFormRecovery", () => {
   it("컬렉션과 문서 ID 로 키를 만든다", () => {
     const storage = storageOf();
 
-    expect(writeFormRecovery(storage, "photos", "p1", { title: "가" }, NOW)).toBe(true);
+    expect(writeFormRecovery(storage, SLOT, { title: "가" }, NOW)).toBe(true);
     expect(storage.raw.has(KEY)).toBe(true);
   });
 
@@ -43,20 +46,20 @@ describe("writeFormRecovery", () => {
       },
     };
 
-    expect(writeFormRecovery(blocked, "photos", "p1", {}, NOW)).toBe(false);
+    expect(writeFormRecovery(blocked, SLOT, {}, NOW)).toBe(false);
   });
 });
 
 describe("readFormRecovery", () => {
   const read = (raw: string, now = NOW) =>
-    readFormRecovery(storageOf({ [KEY]: raw }), "photos", "p1", (input) => input, now);
+    readFormRecovery(storageOf({ [KEY]: raw }), SLOT, (input) => input, now);
 
   it("떠 둔 값을 그대로 돌려준다", () => {
     expect(read(stored())).toEqual({ savedAt: NOW, input: { title: "가" } });
   });
 
   it("값이 없으면 null 이다", () => {
-    expect(readFormRecovery(storageOf(), "photos", "p1", (input) => input, NOW)).toBeNull();
+    expect(readFormRecovery(storageOf(), SLOT, (input) => input, NOW)).toBeNull();
   });
 
   it("JSON 이 깨졌으면 null 이다", () => {
@@ -79,8 +82,7 @@ describe("readFormRecovery", () => {
     const at = new Date(NOW).toISOString();
     const result = readFormRecovery(
       storageOf({ [KEY]: stored({ input: { shotAt: at } }) }),
-      "photos",
-      "p1",
+      SLOT,
       (input) => ({ shotAt: new Date(input.shotAt as string) }),
       NOW,
     );
@@ -96,7 +98,7 @@ describe("readFormRecovery", () => {
       },
     };
 
-    expect(readFormRecovery(blocked, "photos", "p1", (input) => input, NOW)).toBeNull();
+    expect(readFormRecovery(blocked, SLOT, (input) => input, NOW)).toBeNull();
   });
 });
 
@@ -105,7 +107,7 @@ describe("clearFormRecovery", () => {
     const other = adminFormDraftKey("photos", "p2");
     const storage = storageOf({ [KEY]: stored(), [other]: stored() });
 
-    clearFormRecovery(storage, "photos", "p1");
+    clearFormRecovery(storage, SLOT);
 
     expect([...storage.raw.keys()]).toEqual([other]);
   });
@@ -118,8 +120,7 @@ describe("clearFormRecovery", () => {
             throw new Error("blocked");
           },
         },
-        "photos",
-        "p1",
+        SLOT,
       ),
     ).not.toThrow();
   });

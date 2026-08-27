@@ -10,6 +10,7 @@ import { ArticleIssueList } from "@/features/admin-dev-articles/_components/Arti
 import { ArticleMetaFields } from "@/features/admin-dev-articles/_components/ArticleMetaFields";
 import { ArticleRelatedProjectsField } from "@/features/admin-dev-articles/_components/ArticleRelatedProjectsField";
 import { ArticleTagsField } from "@/features/admin-dev-articles/_components/ArticleTagsField";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useArticleEditor } from "@/features/admin-dev-articles/_hooks/use-article-editor";
 import { useArticleRecovery } from "@/features/admin-dev-articles/_hooks/use-article-recovery";
@@ -64,7 +65,7 @@ const ArticleForm = ({ articleId, initial }: Props) => {
   // 취소는 편집을 버리는 동작이다. 링크로 두면 복구본과 이 탭이 잡아 둔 새 글 ID가 남아
   // 다음에 새 글을 열 때 버린 편집본이 다시 제안된다.
   const cancelEditing = () => {
-    if (editor.dirty && !window.confirm("저장하지 않은 변경을 버릴까요?")) return;
+    if (!editor.confirmLeave()) return;
     recovery.abandon();
     if (!editor.isEdit) clearNewArticleId(window.sessionStorage);
     router.replace(ROUTES.ADMIN_DEV_ARTICLES);
@@ -81,27 +82,14 @@ const ArticleForm = ({ articleId, initial }: Props) => {
       </header>
 
       {recovery.pending ? (
-        <div className={`${styles.panel} ${styles.recovery}`}>
-          <p className={styles.recoveryNote}>
-            저장하지 않은 편집본이 있습니다 (
-            {formatLocalTimestamp(new Date(recovery.pending.savedAt))}).
-          </p>
-          <div className={styles.recoveryActions}>
-            <AdminButton
-              variant="secondary"
-              size="xs"
-              onClick={() => {
-                const restored = recovery.restore();
-                if (restored) editor.applyForm(restored);
-              }}
-            >
-              복구하기
-            </AdminButton>
-            <button type="button" className={styles.remove} onClick={recovery.discard}>
-              버리기
-            </button>
-          </div>
-        </div>
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) editor.applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
       ) : null}
 
       {references.error ? (
