@@ -129,7 +129,6 @@
   color: var(--text-3);
   font: inherit;
   transition: color 0.2s;
-  padding: 4px 8px;
   font-weight: 500;
 }
 .copyright:hover {

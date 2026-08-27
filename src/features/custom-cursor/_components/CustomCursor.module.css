@@ -40,7 +40,6 @@
     background-color 0.44s var(--ease),
     transform 0.3s cubic-bezier(0.2, 1.25, 0.4, 1);
   contain: layout style;
-  will-change: width, height;
 }
 
 .shape::after {

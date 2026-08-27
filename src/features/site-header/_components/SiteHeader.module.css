@@ -186,8 +186,8 @@
     opacity: 0;
     visibility: hidden;
   }
-  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-trigger],
-  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-layer] {
+  /* 시트(포털)는 body 직속이라 `.header` 하위 선택자로 매칭되지 않는다. 버거만 남는다. */
+  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-trigger] {
     pointer-events: auto;
   }
 }

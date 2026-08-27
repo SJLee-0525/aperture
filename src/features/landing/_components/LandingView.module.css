@@ -75,18 +75,7 @@
     transparent 78%
   );
   opacity: var(--glow-opacity);
-  /* 위치(--glow-x/y)와 별개인 transform 이라 이동 중에도 부유가 끊기지 않는다. */
   transition: opacity var(--glow-travel);
-  will-change: transform;
-}
-/* 평상시의 넘실거림 — 아주 느리게 부풀었다 기울었다 한다. */
-@keyframes glowDrift {
-  from {
-    transform: translate3d(-2.5%, 2%, 0) scale(1);
-  }
-  to {
-    transform: translate3d(2.5%, -2.5%, 0) scale(1);
-  }
 }
 
 .inner {
@@ -277,12 +266,9 @@
   .charFlash {
     animation: none;
   }
-  /* 글로우는 남기되 부유·이동·색 전환은 끈다 — 배경이 움직이는 대신 즉시 바뀐다. */
+  /* 글로우는 남기되 색 전환은 끈다. 배경이 움직이는 대신 즉시 바뀐다. */
   .hero,
   .glow {
     transition: none;
-  }
-  .glow {
-    animation: none;
   }
 }
