@@ -34,7 +34,7 @@ const MobileTabBar = () => {
   if (section !== "photo" && section !== "music" && section !== "dev") return null;
 
   return (
-    <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel}>
+    <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel} data-mobile-tab-bar>
       {MOBILE_TABS[section].map((tab) => {
         const active = isTabActive(tab.href, pathname);
         return (

@@ -4,8 +4,11 @@ import { useEffect, useRef } from "react";
 
 import styles from "./CustomScrollbar.module.css";
 
+/* 막대가 그려지는 조건. globals.css 의 네이티브 스크롤바 제거 규칙,
+   CustomScrollbar.module.css 의 .track 미디어 쿼리와 같은 조건이어야 한다.
+   하나만 좁으면 그 구간에서 스크롤 위치를 알려 주는 단서가 하나도 남지 않는다. */
 const ENABLE_QUERY =
-  "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
+  "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (min-width: 901px)";
 const MIN_THUMB_HEIGHT = 44;
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);

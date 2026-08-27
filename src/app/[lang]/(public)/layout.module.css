@@ -1,12 +1,16 @@
 .content {
-  --public-content-height: calc(100svh - 58px);
+  /* 고정 헤더 높이. 지도처럼 뷰포트를 꽉 채우는 지면이 같은 값을 빼야 하는데,
+     그쪽은 주소창 변화를 따라가려고 dvh 를 쓰므로 높이 자체가 아니라 이 값을 나눠 쓴다.
+     (SiteHeader.module.css 의 .header 높이와 같은 값) */
+  --public-header-height: 58px;
+  --public-content-height: calc(100svh - var(--public-header-height));
 
   min-height: var(--public-content-height);
 }
 
 @media (min-width: 768px) {
   .content {
-    --public-content-height: calc(100svh - 76px);
+    --public-header-height: 76px;
   }
 }
 /* 모바일 하단 고정 탭바(62px) 클리어런스는 전역 푸터(SiteFooter)가 담당 —

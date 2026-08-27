@@ -17,13 +17,21 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  /* AlbumsView.module.css .grid 와 같은 값. 어긋나면 데이터가 도착하는 순간 카드 간격이
+     벌어진다. */
+  gap: clamp(16px, 2.4vw, 24px);
+}
+/* AlbumCard.module.css .card — 테두리 두께만큼 세로로 밀리므로 셸도 같이 두른다. */
+.cell {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
 }
 .info {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px 2px 0;
+  padding: var(--s-4);
 }
 @media (max-width: 1100px) {
   .grid {

@@ -16,7 +16,7 @@ const AlbumsSkeleton = () => (
     </div>
     <div className={styles.grid}>
       {Array.from({ length: CARD_COUNT }).map((_, index) => (
-        <div key={`album-${index}`}>
+        <div key={`album-${index}`} className={styles.cell}>
           <Skeleton aspectRatio={1} />
           <div className={styles.info}>
             <Skeleton width="70%" height={18} />

@@ -257,6 +257,12 @@ body {
     cursor: auto !important;
   }
 
+}
+
+/* 네이티브 스크롤바를 없애는 조건은 커스텀 막대가 실제로 그려지는 조건과 문자 그대로
+   같아야 한다. 위 커서 블록에 폭 조건을 더하면 900px 이하에서 커스텀 커서까지 꺼진다.
+   (CustomScrollbar.module.css 의 .track 미디어 쿼리, CustomScrollbar.tsx 의 ENABLE_QUERY) */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (min-width: 901px) {
   html:has([data-custom-scrollbar-ui]),
   html:has([data-custom-scrollbar-ui]) body {
     scrollbar-width: none;

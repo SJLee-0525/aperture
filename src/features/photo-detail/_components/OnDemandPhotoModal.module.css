@@ -113,7 +113,7 @@
   .panel {
     position: relative;
     gap: var(--s-3);
-    max-height: 30vh;
+    max-height: 30dvh;
     padding-top: var(--s-8);
     border-top: 1px solid var(--line);
     border-left: 0;

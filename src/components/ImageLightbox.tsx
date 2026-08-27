@@ -69,7 +69,7 @@ const LightboxSlide = memo(function LightboxSlide({
       <div
         className={styles.stage}
         style={{
-          width: `min(94vw, 1400px, ${88 * itemRatio}vh)`,
+          width: `min(94vw, 1400px, ${88 * itemRatio}dvh)`,
           aspectRatio: `${item.w} / ${item.h}`,
         }}
         onContextMenu={(event) => event.preventDefault()}
