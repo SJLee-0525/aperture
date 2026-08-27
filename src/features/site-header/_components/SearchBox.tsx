@@ -80,7 +80,8 @@ const SearchBox = () => {
         autoComplete="off"
         role="combobox"
         aria-expanded={showList}
-        aria-controls={listboxId}
+        // 닫힌 동안에는 그 id 를 가진 요소가 없다. ARIA 1.2 는 팝업이 없을 때 생략을 허용한다.
+        aria-controls={showList ? listboxId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={active >= 0 ? optionId(listboxId, active) : undefined}
         placeholder={dict.searchPlaceholder}

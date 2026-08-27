@@ -144,12 +144,21 @@ const getAnalyticsConsentSnapshot = (): TrackingConsent | null => {
     volatileExpiresAt = 0;
   }
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEYS.CONSENT);
-    if (raw === cachedRaw && Date.now() < cachedExpiresAt) return cachedParsed;
-    cachedRaw = raw;
-    const parsed = parseStoredTrackingConsent(raw);
-    cachedParsed = parsed?.consent ?? null;
-    cachedExpiresAt = parsed?.expiresAt ?? 0;
+    // 저장소 읽기는 캐시가 비었을 때만 한다. 비교를 읽기 뒤에 두면 아직 아무것도 고르지
+    // 않은 방문자에게는 매 호출이 실제 읽기가 된다. useSyncExternalStore 는 렌더마다,
+    // 렌더당 여러 번 이 함수를 부르고 provider 는 공개 트리 최상단이라 라우트 전환마다
+    // 재평가된다. 무효화는 subscribeAnalyticsConsent 와 저장·정리 경로가 맡는다.
+    if (cachedRaw === undefined) {
+      cachedRaw = window.localStorage.getItem(STORAGE_KEYS.CONSENT);
+      const parsed = parseStoredTrackingConsent(cachedRaw);
+      cachedParsed = parsed?.consent ?? null;
+      cachedExpiresAt = parsed?.expiresAt ?? 0;
+    }
+    // 보관 기간이 지나면 선택이 없는 상태로 돌아간다. 만료는 이벤트 없이 시간만으로 온다.
+    if (cachedParsed != null && Date.now() >= cachedExpiresAt) {
+      cachedParsed = null;
+      cachedExpiresAt = 0;
+    }
     return cachedParsed;
   } catch {
     return null;
