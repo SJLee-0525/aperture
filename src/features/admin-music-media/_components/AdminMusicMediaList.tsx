@@ -22,7 +22,7 @@ const AdminMusicMediaList = () => {
     <AdminListShell
       title="영상"
       hint="드래그하거나 핸들에서 스페이스바를 눌러 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다."
-      newHref={`${ROUTES.ADMIN_MUSIC_MEDIA}/new`}
+      newHref={ROUTES.ADMIN_MUSIC_MEDIA_NEW}
       newLabel="+ 새 영상"
       emptyLabel="아직 영상이 없습니다."
       emptyCtaLabel="+ 첫 영상 만들기"

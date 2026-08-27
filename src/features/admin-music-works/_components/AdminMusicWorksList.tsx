@@ -22,7 +22,7 @@ const AdminMusicWorksList = () => {
     <AdminListShell
       title="연주"
       hint="드래그하거나 핸들에서 스페이스바를 눌러 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다."
-      newHref={`${ROUTES.ADMIN_MUSIC_WORKS}/new`}
+      newHref={ROUTES.ADMIN_MUSIC_WORK_NEW}
       newLabel="+ 새 연주"
       emptyLabel="아직 연주가 없습니다."
       emptyCtaLabel="+ 첫 연주 만들기"

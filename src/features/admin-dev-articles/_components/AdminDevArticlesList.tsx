@@ -19,8 +19,6 @@ const STATUS_FILTERS: { value: AdminArticleStatusFilter; label: string }[] = [
   { value: "published", label: "공개" },
 ];
 
-const NEW_ARTICLE_HREF = `${ROUTES.ADMIN_DEV_ARTICLES}/new`;
-
 /**
  * 관리자 블로그 목록 — 검색·상태 필터·공개 토글·삭제. 조립만 하고 상태는 훅이 갖는다.
  *
@@ -49,7 +47,7 @@ const AdminDevArticlesPage = () => {
     <AdminListShell
       title="블로그"
       hint="초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다."
-      newHref={NEW_ARTICLE_HREF}
+      newHref={ROUTES.ADMIN_DEV_ARTICLE_NEW}
       newLabel="+ 새 글"
       emptyLabel="아직 쓴 글이 없습니다."
       emptyCtaLabel="+ 첫 글 쓰기"

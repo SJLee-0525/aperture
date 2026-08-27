@@ -121,7 +121,7 @@ const AdminTagsPage = () => {
             </AdminButton>
             <AdminButton
               variant="secondary"
-              href={ROUTES.ADMIN}
+              href={ROUTES.ADMIN_PHOTO}
               disabled={saving}
               onNavigate={(event) => {
                 if (!confirmLeave()) event.preventDefault();
