@@ -21,6 +21,7 @@ import styles from "./AdminMusicConfigEditor.module.css";
  */
 const AdminMusicConfigPage = () => {
   const {
+    confirmLeave,
     intro,
     career,
     education,
@@ -131,7 +132,14 @@ const AdminMusicConfigPage = () => {
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN_MUSIC} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_MUSIC}
+              disabled={saving}
+              onNavigate={(event) => {
+                if (!confirmLeave()) event.preventDefault();
+              }}
+            >
               취소
             </AdminButton>
           </div>

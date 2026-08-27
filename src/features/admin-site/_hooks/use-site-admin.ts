@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
@@ -23,6 +25,7 @@ const useSiteAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { confirmLeave, markSaved } = useConfigDirty(bio);
 
   useEffect(() => {
     let alive = true;
@@ -31,6 +34,7 @@ const useSiteAdmin = () => {
       .then((loaded) => {
         if (!alive) return;
         setBio(loaded.bio);
+        markSaved(loaded.bio);
         setStatus("ready");
       })
       .catch((caught: Error) => {
@@ -41,7 +45,7 @@ const useSiteAdmin = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [markSaved]);
 
   const editBio = useCallback((field: "ko" | "en", value: string) => {
     setBio((prev) => ({ ...prev, [field]: value }));
@@ -55,14 +59,15 @@ const useSiteAdmin = () => {
     try {
       await getSiteConfigRepository().updateFields({ bio });
       setSaved(true);
+      markSaved(bio);
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [bio]);
+  }, [bio, markSaved]);
 
-  return { bio, status, error, saving, saved, editBio, save };
+  return { confirmLeave, bio, status, error, saving, saved, editBio, save };
 };
 
 export { useSiteAdmin };

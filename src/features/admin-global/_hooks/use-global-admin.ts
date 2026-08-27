@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
@@ -29,6 +31,7 @@ const useGlobalAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { confirmLeave, markSaved } = useConfigDirty({ tagline, landingLead, contactLead, links });
 
   useEffect(() => {
     let alive = true;
@@ -40,6 +43,12 @@ const useGlobalAdmin = () => {
         setLandingLead(loaded.landingLead);
         setContactLead(loaded.contactLead);
         setLinks(loaded.links);
+        markSaved({
+          tagline: loaded.tagline,
+          landingLead: loaded.landingLead,
+          contactLead: loaded.contactLead,
+          links: loaded.links,
+        });
         setStatus("ready");
       })
       .catch((caught: Error) => {
@@ -50,7 +59,7 @@ const useGlobalAdmin = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [markSaved]);
 
   const editTagline = useCallback((field: "ko" | "en", value: string) => {
     setTagline((prev) => ({ ...prev, [field]: value }));
@@ -103,14 +112,16 @@ const useGlobalAdmin = () => {
       });
       setLinks(preparedLinks);
       setSaved(true);
+      markSaved({ tagline, landingLead, contactLead, links });
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [tagline, landingLead, contactLead, links]);
+  }, [tagline, landingLead, contactLead, links, markSaved]);
 
   return {
+    confirmLeave,
     tagline,
     landingLead,
     contactLead,

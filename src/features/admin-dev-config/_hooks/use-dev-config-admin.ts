@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+
 import {
   editDevConfig,
   type DevConfigEdit,
 } from "@/features/admin-dev-config/_lib/edit-dev-config";
+
 
 import { getDevConfigRepository } from "@/lib/admin/dev-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -35,6 +38,7 @@ const useDevConfigAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { confirmLeave, markSaved } = useConfigDirty(config);
 
   useEffect(() => {
     let alive = true;
@@ -43,6 +47,7 @@ const useDevConfigAdmin = () => {
       .then((loaded) => {
         if (!alive) return;
         setConfig(loaded);
+        markSaved(loaded);
         setStatus("ready");
       })
       .catch((caught: Error) => {
@@ -53,7 +58,7 @@ const useDevConfigAdmin = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [markSaved]);
 
   const edit = useCallback((command: DevConfigEdit) => {
     setConfig((current) => editDevConfig(current, command));
@@ -66,14 +71,16 @@ const useDevConfigAdmin = () => {
     try {
       await getDevConfigRepository().set(config);
       setSaved(true);
+      markSaved(config);
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [config]);
+  }, [config, markSaved]);
 
   return {
+    confirmLeave,
     config,
     status,
     error,

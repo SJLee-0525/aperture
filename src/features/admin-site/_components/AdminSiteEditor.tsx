@@ -15,7 +15,7 @@ import styles from "./AdminSiteEditor.module.css";
  * @returns {JSX.Element}
  *  이름·연락 링크는 about 에 노출되지 않으므로 여기 없음(전역/연락 CMS 추가 시 그쪽에서 편집). */
 const AdminSitePage = () => {
-  const { bio, status, error, saving, saved, editBio, save } = useSiteAdmin();
+  const { confirmLeave, bio, status, error, saving, saved, editBio, save } = useSiteAdmin();
 
   return (
     <div className={styles.page}>
@@ -70,7 +70,14 @@ const AdminSitePage = () => {
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN_PHOTO} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_PHOTO}
+              disabled={saving}
+              onNavigate={(event) => {
+                if (!confirmLeave()) event.preventDefault();
+              }}
+            >
               취소
             </AdminButton>
           </div>

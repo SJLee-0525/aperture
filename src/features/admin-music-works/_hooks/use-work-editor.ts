@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
+import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+
 import { validateWorkInput } from "@/features/admin-music-works/_lib/validate-work-input";
 import {
   emptyWorkInput,
@@ -11,8 +13,10 @@ import {
 } from "@/features/admin-music-works/_lib/work-form-data";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
+
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
+import { formFingerprint } from "@/lib/admin/form-fingerprint";
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -29,6 +33,9 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
+  const dirty = formFingerprint(form) !== savedFingerprint;
+  const confirmLeave = useUnsavedForm(dirty);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.poster])));
@@ -56,6 +63,7 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   };
   const onUploadPendingChange = useCallback((pending: boolean) => setUploading(pending), []);
   const cancel = async () => {
+    if (!confirmLeave()) return;
     await removeUnreferencedImages(uploadedPaths.current, []).catch(() => undefined);
     router.replace(ROUTES.ADMIN_MUSIC_WORKS);
   };
@@ -79,6 +87,7 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.poster]),
       ).catch(() => undefined);
+      setSavedFingerprint(formFingerprint(form));
       router.replace(ROUTES.ADMIN_MUSIC_WORKS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -87,6 +96,7 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   };
 
   return {
+    dirty,
     form,
     issues,
     formRef,

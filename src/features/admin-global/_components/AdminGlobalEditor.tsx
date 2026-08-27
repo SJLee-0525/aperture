@@ -18,6 +18,7 @@ import styles from "./AdminGlobalEditor.module.css";
  */
 const AdminGlobalPage = () => {
   const {
+    confirmLeave,
     tagline,
     landingLead,
     contactLead,
@@ -164,7 +165,14 @@ const AdminGlobalPage = () => {
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN}
+              disabled={saving}
+              onNavigate={(event) => {
+                if (!confirmLeave()) event.preventDefault();
+              }}
+            >
               취소
             </AdminButton>
           </div>

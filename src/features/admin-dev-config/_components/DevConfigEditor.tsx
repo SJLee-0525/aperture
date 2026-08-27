@@ -20,7 +20,7 @@ import styles from "./DevConfigEditor.module.css";
  * @returns {JSX.Element}
  *  (연락처·소셜은 /contact, 히어로 타이핑은 랜딩 소관 → 여기 없음.) */
 const DevConfigEditor = () => {
-  const { config, status, error, saving, saved, edit, save } = useDevConfigAdmin();
+  const { confirmLeave, config, status, error, saving, saved, edit, save } = useDevConfigAdmin();
 
   return (
     <div className={styles.page}>
@@ -295,7 +295,14 @@ const DevConfigEditor = () => {
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN_DEV} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_DEV}
+              disabled={saving}
+              onNavigate={(event) => {
+                if (!confirmLeave()) event.preventDefault();
+              }}
+            >
               취소
             </AdminButton>
           </div>

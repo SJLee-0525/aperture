@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
+import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+
 import {
   applyUploadResult,
   createPhotoInput,
@@ -12,8 +14,10 @@ import {
 import { validatePhotoInput } from "@/features/admin-photos/_lib/validate-photo-input";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
+
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
+import { formFingerprint } from "@/lib/admin/form-fingerprint";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
@@ -33,6 +37,9 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
+  const dirty = formFingerprint(form) !== savedFingerprint;
+  const confirmLeave = useUnsavedForm(dirty);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.image])));
@@ -75,9 +82,12 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   }, []);
   const onUploadPendingChange = useCallback((pending: boolean) => setUploading(pending), []);
   const cancel = useCallback(async () => {
+    if (!confirmLeave()) return;
+    // 확인을 통과한 뒤에만 지운다. 지우는 대상은 이번 세션에 올린 파일뿐이고
+    // 저장된 문서가 참조하는 이미지는 uploadedPaths 에 들어오지 않는다.
     await removeUnreferencedImages(uploadedPaths.current, []).catch(() => undefined);
     router.replace(ROUTES.ADMIN_PHOTOS);
-  }, [router]);
+  }, [confirmLeave, router]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -108,6 +118,7 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.image]),
       ).catch(() => undefined);
+      setSavedFingerprint(formFingerprint(form));
       router.replace(ROUTES.ADMIN_PHOTOS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -116,6 +127,7 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   };
 
   return {
+    dirty,
     formRef,
     issues,
     cancel,

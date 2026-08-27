@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useMounted } from "@/hooks/use-mounted";
+import { useUnsavedGuard } from "@/hooks/use-unsaved-guard";
 
 import {
   clearArticleRecovery,
@@ -34,6 +35,8 @@ const ARTICLE_RECOVERY_DEBOUNCE_MS = 5_000;
  */
 const useArticleRecovery = (articleId: string, form: DevArticleInput, dirty: boolean) => {
   const mounted = useMounted();
+
+  useUnsavedGuard(dirty);
   const [handled, setHandled] = useState(false);
   const timerRef = useRef<number | null>(null);
   // 편집을 버린 뒤에는 예약도 다시 잡지 않는다. `clear` 는 저장 성공 때도 불리므로
@@ -56,16 +59,6 @@ const useArticleRecovery = (articleId: string, form: DevArticleInput, dirty: boo
       timerRef.current = null;
     };
   }, [articleId, dirty, form]);
-
-  useEffect(() => {
-    if (!dirty) return;
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      // 최신 브라우저는 문구를 무시하고 자체 확인창을 띄운다. preventDefault 만이 조건이다.
-      event.preventDefault();
-    };
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [dirty]);
 
   const clear = useCallback(() => {
     clearArticleRecovery(window.localStorage, articleId);

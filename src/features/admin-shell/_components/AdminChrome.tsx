@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 
 import styles from "./AdminChrome.module.css";
 import { MockModeBadge } from "./MockModeBadge";
+import { UnsavedGuardProvider, useUnsavedGuardContext } from "./UnsavedGuardProvider";
 
 /**
  * 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + mock 안내 + 컨텐츠 영역.
@@ -21,24 +22,37 @@ import { MockModeBadge } from "./MockModeBadge";
  * @param {ReactNode} props.children
  * @returns {JSX.Element}
  */
-const AdminChrome = ({ children }: { children: ReactNode }) => {
+const AdminChromeBar = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
+  const guard = useUnsavedGuardContext();
 
   const onLogout = useCallback(async () => {
+    if (guard && !guard.confirmLeave()) return;
     await signOutAdmin();
     router.replace(ROUTES.LOGIN);
-  }, [router]);
+  }, [guard, router]);
 
-  useIdleSignOut(onLogout);
+  // 유휴 자동 로그아웃은 확인창을 띄우지 않는다. 자리를 비운 사이에 뜬 확인창은
+  // 아무도 누르지 않아 세션이 그대로 열려 있게 된다.
+  useIdleSignOut(
+    useCallback(async () => {
+      await signOutAdmin();
+      router.replace(ROUTES.LOGIN);
+    }, [router]),
+  );
+
+  const blockIfDirty = (event: { preventDefault: () => void }) => {
+    if (guard && !guard.confirmLeave()) event.preventDefault();
+  };
 
   return (
     <div className={styles.shell}>
       <header className={styles.bar}>
-        <Link href={ROUTES.ADMIN} className={styles.brand}>
+        <Link href={ROUTES.ADMIN} className={styles.brand} onNavigate={blockIfDirty}>
           Sungjoon Lee.<span className={styles.tag}>관리자</span>
         </Link>
         <div className={styles.right}>
-          <Link href={ROUTES.LANDING} className={styles.link}>
+          <Link href={ROUTES.LANDING} className={styles.link} onNavigate={blockIfDirty}>
             사이트 보기 ↗
           </Link>
           <button type="button" className={styles.logout} onClick={onLogout}>
@@ -51,5 +65,11 @@ const AdminChrome = ({ children }: { children: ReactNode }) => {
     </div>
   );
 };
+
+const AdminChrome = ({ children }: { children: ReactNode }) => (
+  <UnsavedGuardProvider>
+    <AdminChromeBar>{children}</AdminChromeBar>
+  </UnsavedGuardProvider>
+);
 
 export { AdminChrome };

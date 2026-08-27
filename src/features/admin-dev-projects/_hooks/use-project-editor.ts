@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
+import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+
 import {
   emptyProjectInput,
   prepareProjectInput,
@@ -11,9 +13,11 @@ import {
 import { validateProjectInput } from "@/features/admin-dev-projects/_lib/validate-project-input";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
+
 import { ROUTES } from "@/constants/routes";
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
+import { formFingerprint } from "@/lib/admin/form-fingerprint";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -34,6 +38,9 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
+  const dirty = formFingerprint(form) !== savedFingerprint;
+  const confirmLeave = useUnsavedForm(dirty);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.cover, ...(initial?.images ?? [])])));
@@ -117,6 +124,7 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   };
   const onUploadPendingChange = useCallback((pending: boolean) => setUploading(pending), []);
   const cancel = async () => {
+    if (!confirmLeave()) return;
     await removeUnreferencedImages(uploadedPaths.current, []).catch(() => undefined);
     router.replace(ROUTES.ADMIN_DEV_PROJECTS);
   };
@@ -140,6 +148,7 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.cover, ...input.images]),
       ).catch(() => undefined);
+      setSavedFingerprint(formFingerprint(form));
       router.replace(ROUTES.ADMIN_DEV_PROJECTS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -148,6 +157,7 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   };
 
   return {
+    dirty,
     form,
     issues,
     formRef,

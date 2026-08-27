@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+
 import { getMusicConfigRepository } from "@/lib/admin/music-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
@@ -28,6 +30,7 @@ const useMusicConfigAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { confirmLeave, markSaved } = useConfigDirty({ intro, career, education });
 
   useEffect(() => {
     let alive = true;
@@ -38,6 +41,7 @@ const useMusicConfigAdmin = () => {
         setIntro(loaded.intro);
         setCareer(loaded.career);
         setEducation(loaded.education);
+        markSaved({ intro: loaded.intro, career: loaded.career, education: loaded.education });
         setStatus("ready");
       })
       .catch((caught: Error) => {
@@ -48,7 +52,7 @@ const useMusicConfigAdmin = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [markSaved]);
 
   const markDirty = () => setSaved(false);
 
@@ -107,14 +111,16 @@ const useMusicConfigAdmin = () => {
       const next: MusicConfig = { intro, career, education };
       await getMusicConfigRepository().set(next);
       setSaved(true);
+      markSaved({ intro, career, education });
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [intro, career, education]);
+  }, [intro, career, education, markSaved]);
 
   return {
+    confirmLeave,
     intro,
     career,
     education,

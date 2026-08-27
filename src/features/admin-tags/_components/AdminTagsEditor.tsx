@@ -26,8 +26,19 @@ import styles from "./AdminTagsEditor.module.css";
  * @returns {JSX.Element}
  */
 const AdminTagsPage = () => {
-  const { tags, status, error, saving, saved, editLabel, addTag, removeTag, reorder, save } =
-    useTagsAdmin();
+  const {
+    confirmLeave,
+    tags,
+    status,
+    error,
+    saving,
+    saved,
+    editLabel,
+    addTag,
+    removeTag,
+    reorder,
+    save,
+  } = useTagsAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -85,7 +96,14 @@ const AdminTagsPage = () => {
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN}
+              disabled={saving}
+              onNavigate={(event) => {
+                if (!confirmLeave()) event.preventDefault();
+              }}
+            >
               취소
             </AdminButton>
           </div>

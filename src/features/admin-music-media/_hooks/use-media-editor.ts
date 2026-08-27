@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 
+import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+
 import {
   emptyMediaInput,
   mediaToInput,
@@ -10,8 +12,10 @@ import {
 } from "@/features/admin-music-media/_lib/media-form-data";
 import { validateMediaInput } from "@/features/admin-music-media/_lib/validate-media-input";
 
+
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
+import { formFingerprint } from "@/lib/admin/form-fingerprint";
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -27,12 +31,18 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
+  const dirty = formFingerprint(form) !== savedFingerprint;
+  const confirmLeave = useUnsavedForm(dirty);
   const [saving, setSaving] = useState(false);
 
   const patch = (next: Partial<MusicMediaInput>) =>
     setForm((previous) => ({ ...previous, ...next }));
 
-  const cancel = () => router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
+  const cancel = () => {
+    if (!confirmLeave()) return;
+    router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -50,6 +60,7 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
       const mediaRepository = getMusicMediaRepository();
       if (isEdit) await mediaRepository.update(mediaId, input);
       else await mediaRepository.create(mediaId, input);
+      setSavedFingerprint(formFingerprint(form));
       router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
     } catch (caught) {
       setError((caught as Error).message);
@@ -57,7 +68,7 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
     }
   };
 
-  return { form, issues, formRef, isEdit, error, saving, patch, cancel, submit };
+  return { dirty, form, issues, formRef, isEdit, error, saving, patch, cancel, submit };
 };
 
 export { useMediaEditor };
