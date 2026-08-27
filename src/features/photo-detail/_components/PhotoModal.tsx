@@ -45,6 +45,7 @@ type Props = {
   tags: Tag[];
   photoIds?: string[];
   onClose?: () => void;
+  /** 배경을 페이드로 띄울지. 패널은 이 값과 무관하게 `revealed` 를 따라 들어온다. */
   animateOnOpen?: boolean;
   revealed?: boolean;
   onImageReady?: (id: string) => void;
@@ -379,8 +380,8 @@ const PhotoModal = ({
           aria-hidden={revealed ? undefined : true}
           inert={!revealed}
           initial={animateOnOpen ? { opacity: 0 } : false}
-          // 온디맨드 경로는 별도 pending 프레임이 로딩 전환을 소유한다.
-          // 그 아래 모달까지 투명하게 만들면 pending 제거 직후 페이지가 비친다.
+          // 배경(스크림)에만 걸리는 플래그다. 온디맨드 경로는 pending 프레임이 로딩 전환을
+          // 소유하므로, 그 아래 배경까지 투명하게 만들면 pending 제거 직후 페이지가 비친다.
           animate={{ opacity: animateOnOpen ? (revealed ? 1 : 0) : 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
@@ -397,12 +398,10 @@ const PhotoModal = ({
             ref={dismissSurfaceRef}
             className={styles.inner}
             data-photo-modal-frame
-            initial={animateOnOpen ? { opacity: 0, scale: 0.985 } : false}
-            animate={
-              animateOnOpen
-                ? { opacity: revealed ? 1 : 0, scale: revealed ? 1 : 0.985 }
-                : { opacity: 1, y: 0 }
-            }
+            /* 패널의 등장·퇴장은 두 경로가 같다. `animateOnOpen` 이 가르는 것은 배경뿐이다.
+               온디맨드 경로의 배경은 로딩 프레임이 이미 띄워 둔 상태라 다시 페이드하지 않는다. */
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={{ opacity: revealed ? 1 : 0, scale: revealed ? 1 : 0.985 }}
             exit={{ opacity: 0, scale: 0.985 }}
             transition={{ duration: 0.28, ease: EASE }}
           >
