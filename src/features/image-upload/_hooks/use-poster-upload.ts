@@ -8,9 +8,11 @@ import {
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+import { checkUploadSize } from "@/features/image-upload/_lib/upload-progress";
 
 import { getAdminImageStore } from "@/lib/admin/image-store";
 
+import type { UploadStage } from "@/features/image-upload/_lib/upload-progress";
 import type { ImageMeta } from "@/types/image";
 
 /**
@@ -19,15 +21,22 @@ import type { ImageMeta } from "@/types/image";
  * workId 는 문서 저장 전에 선발급된 ID(musicWorks.newId) — Storage 경로 확정용.
  *
  * @param {string} workId
- * @returns {{ process: (file: File) => Promise<ImageMeta | null>; pending: boolean; error: string | null }}
+ * @returns {{ process: (file: File) => Promise<ImageMeta | null>; pending: boolean; stage: UploadStage; completed: number; total: number; error: string | null }}
  */
 const usePosterUpload = (workId: string) => {
   const [pending, setPending] = useState(false);
+  const [stage, setStage] = useState<UploadStage>("idle");
   const [error, setError] = useState<string | null>(null);
 
   const process = useCallback(
     async (file: File): Promise<ImageMeta | null> => {
+      const tooLarge = checkUploadSize(file);
+      if (tooLarge) {
+        setError(tooLarge);
+        return null;
+      }
       setPending(true);
+      setStage("compressing");
       setError(null);
       try {
         const imageStore = getAdminImageStore();
@@ -37,6 +46,7 @@ const usePosterUpload = (workId: string) => {
           compressPreviewToWebp(compressed),
           compressThumbnailToWebp(compressed),
         ]);
+        setStage("uploading");
         const [size, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
           await Promise.all([
             readDimensions(compressed),
@@ -57,12 +67,13 @@ const usePosterUpload = (workId: string) => {
         return null;
       } finally {
         setPending(false);
+        setStage("idle");
       }
     },
     [workId],
   );
 
-  return { process, pending, error };
+  return { process, pending, stage, completed: 0, total: 0, error };
 };
 
 export { usePosterUpload };

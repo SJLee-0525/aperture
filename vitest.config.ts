@@ -51,6 +51,7 @@ export default defineConfig({
         "src/features/admin-shell/_components/AdminSortableList.tsx",
         "src/features/admin-shell/_components/AdminSortableRow.tsx",
         "src/features/admin-shell/_components/sort-announcements.ts",
+        "src/features/image-upload/_components/UploadProgress.tsx",
         "src/components/DetailHero.tsx",
         "src/components/LocalizedFieldPair.tsx",
         "src/components/Modal.tsx",

@@ -9,9 +9,11 @@ import {
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 import { runLimited } from "@/features/image-upload/_lib/run-limited";
+import { checkUploadSize } from "@/features/image-upload/_lib/upload-progress";
 
 import { getAdminImageStore } from "@/lib/admin/image-store";
 
+import type { UploadStage } from "@/features/image-upload/_lib/upload-progress";
 import type { ImageMeta } from "@/types/image";
 
 const DEV_UPLOAD_CONCURRENCY = 3;
@@ -27,6 +29,8 @@ const DEV_UPLOAD_CONCURRENCY = 3;
 const useDevImageUpload = (projectId: string) => {
   const [pendingCount, setPendingCount] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
+  const [completed, setCompleted] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const upload = useCallback(
     async (file: File): Promise<ImageMeta> => {
@@ -59,6 +63,13 @@ const useDevImageUpload = (projectId: string) => {
 
   const process = useCallback(
     async (file: File): Promise<ImageMeta | null> => {
+      const tooLarge = checkUploadSize(file);
+      if (tooLarge) {
+        setErrors([tooLarge]);
+        return null;
+      }
+      setTotal(1);
+      setCompleted(0);
       setPendingCount((count) => count + 1);
       setErrors([]);
       try {
@@ -67,6 +78,7 @@ const useDevImageUpload = (projectId: string) => {
         setErrors([(caught as Error).message || "이미지 처리에 실패했습니다."]);
         return null;
       } finally {
+        setCompleted((done) => done + 1);
         setPendingCount((count) => count - 1);
       }
     },
@@ -76,12 +88,20 @@ const useDevImageUpload = (projectId: string) => {
   const processBatch = useCallback(
     async (files: File[]): Promise<ImageMeta[]> => {
       if (files.length === 0) return [];
+      const tooLarge = files.map(checkUploadSize).filter((message): message is string => !!message);
+      if (tooLarge.length > 0) {
+        setErrors(tooLarge);
+        return [];
+      }
+      setTotal(files.length);
+      setCompleted(0);
       setPendingCount((count) => count + files.length);
       setErrors([]);
       const results = await runLimited(files, DEV_UPLOAD_CONCURRENCY, async (file) => {
         try {
           return await upload(file);
         } finally {
+          setCompleted((done) => done + 1);
           setPendingCount((count) => count - 1);
         }
       });
@@ -100,7 +120,11 @@ const useDevImageUpload = (projectId: string) => {
     process,
     processBatch,
     pending: pendingCount > 0,
-    pendingCount,
+    // 배치는 압축과 업로드가 파일마다 겹쳐 흘러 단계를 하나로 말할 수 없다.
+    // 진행은 completed/total 이 전한다.
+    stage: pendingCount > 0 ? ("uploading" as UploadStage) : ("idle" as UploadStage),
+    completed,
+    total,
     error: errors.length > 0 ? `${errors.length}개 파일 처리 실패: ${errors[0]}` : null,
   };
 };

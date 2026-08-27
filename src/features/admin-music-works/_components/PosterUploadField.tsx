@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
+import { UploadProgress } from "@/features/image-upload/_components/UploadProgress";
 
 import { usePosterUpload } from "@/features/image-upload/_hooks/use-poster-upload";
 
@@ -31,7 +32,7 @@ type Props = {
  * @returns {JSX.Element}
  */
 const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props) => {
-  const { process, pending, error } = usePosterUpload(workId);
+  const { process, pending, stage, error } = usePosterUpload(workId);
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrl = imageThumbnailUrl(poster);
 
@@ -62,12 +63,7 @@ const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props)
         ) : (
           <span className={styles.placeholder}>미리보기</span>
         )}
-        {pending ? (
-          <span className={styles.pending}>
-            <span className={styles.spinner} aria-hidden="true" />
-            처리 중…
-          </span>
-        ) : null}
+        {pending ? <span className={styles.spinner} aria-hidden="true" /> : null}
       </div>
 
       <div className={styles.controls}>
@@ -98,6 +94,7 @@ const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props)
           </button>
         ) : null}
         <p className={styles.note}>포스터 이미지를 업로드합니다. (webp 압축)</p>
+        <UploadProgress stage={stage} />
         {error ? (
           <p className={styles.error} role="alert">
             {error}

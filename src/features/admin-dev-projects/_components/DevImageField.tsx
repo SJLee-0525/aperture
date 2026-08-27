@@ -5,6 +5,7 @@ import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
 import { Icon } from "@/components/Icon";
+import { UploadProgress } from "@/features/image-upload/_components/UploadProgress";
 
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
 
@@ -44,7 +45,8 @@ const DevImageField = ({
   onImagesChange,
   onPendingChange,
 }: Props) => {
-  const { process, processBatch, pending, pendingCount, error } = useDevImageUpload(projectId);
+  const { process, processBatch, pending, stage, completed, total, error } =
+    useDevImageUpload(projectId);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const coverPreviewUrl = imageThumbnailUrl(cover);
@@ -197,11 +199,7 @@ const DevImageField = ({
         )}
       </div>
 
-      {pending ? (
-        <p className={styles.note} aria-live="polite">
-          이미지 처리 중… 남은 파일 {pendingCount}개
-        </p>
-      ) : null}
+      <UploadProgress stage={stage} completed={completed} total={total} />
       {error ? (
         <p className={styles.error} role="alert">
           {error}

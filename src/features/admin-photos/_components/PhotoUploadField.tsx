@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
+import { UploadProgress } from "@/features/image-upload/_components/UploadProgress";
 
 import { useImageUpload, type UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 
@@ -32,7 +33,7 @@ type Props = {
  * @returns {JSX.Element}
  */
 const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props) => {
-  const { process, pending, error } = useImageUpload(photoId);
+  const { process, pending, stage, error } = useImageUpload(photoId);
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrl = imageThumbnailUrl(image);
 
@@ -63,12 +64,7 @@ const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props
         ) : (
           <span className={styles.placeholder}>미리보기</span>
         )}
-        {pending ? (
-          <span className={styles.pending}>
-            <span className={styles.spinner} aria-hidden="true" />
-            처리 중…
-          </span>
-        ) : null}
+        {pending ? <span className={styles.spinner} aria-hidden="true" /> : null}
       </div>
 
       <div className={styles.controls}>
@@ -89,6 +85,7 @@ const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props
           onChange={onSelect}
         />
         <p className={styles.note}>업로드 시 EXIF 를 추출해 아래 항목을 자동으로 채웁니다.</p>
+        <UploadProgress stage={stage} />
         {error ? (
           <p className={styles.error} role="alert">
             {error}
