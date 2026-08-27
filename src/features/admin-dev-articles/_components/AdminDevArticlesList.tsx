@@ -1,9 +1,9 @@
 "use client";
 
-import { AdminButton } from "@/components/AdminButton";
 import { AdminInput } from "@/components/AdminInput";
 import { ArticleRow } from "@/features/admin-dev-articles/_components/ArticleRow";
 import base from "@/features/admin-shell/_components/admin-list.module.css";
+import { AdminListShell } from "@/features/admin-shell/_components/AdminListShell";
 
 import { useDevArticlesAdmin } from "@/features/admin-dev-articles/_hooks/use-dev-articles-admin";
 
@@ -24,7 +24,8 @@ const NEW_ARTICLE_HREF = `${ROUTES.ADMIN_DEV_ARTICLES}/new`;
 /**
  * 관리자 블로그 목록 — 검색·상태 필터·공개 토글·삭제. 조립만 하고 상태는 훅이 갖는다.
  *
- * 초안이 목록 위에 오고 발행 글이 발행일 내림차순으로 뒤따른다(`dev-article-sort`).
+ * 정렬이 없어 목록 셸만 쓴다. 초안이 목록 위에 오고 발행 글이 발행일 내림차순으로
+ * 뒤따른다(`dev-article-sort`).
  *
  * @returns {JSX.Element}
  */
@@ -45,78 +46,57 @@ const AdminDevArticlesPage = () => {
   } = useDevArticlesAdmin();
 
   return (
-    <div className={base.page}>
-      <header className={base.head}>
-        <div className={base.headText}>
-          <h1 className={base.title}>블로그</h1>
-          <p className={base.hint}>초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다.</p>
-        </div>
-        <AdminButton variant="primary" size="sm" href={NEW_ARTICLE_HREF} className={base.newBtn}>
-          + 새 글
-        </AdminButton>
-      </header>
+    <AdminListShell
+      title="블로그"
+      hint="초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다."
+      newHref={NEW_ARTICLE_HREF}
+      newLabel="+ 새 글"
+      emptyLabel="아직 쓴 글이 없습니다."
+      emptyCtaLabel="+ 첫 글 쓰기"
+      status={status}
+      error={error}
+      errorFallback="글을 불러오지 못했습니다."
+      isEmpty={total === 0}
+      toolbar={
+        status === "ready" ? (
+          <div className={styles.toolbar}>
+            <AdminInput
+              type="search"
+              size="sm"
+              className={styles.searchInput}
+              aria-label="검색"
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder="제목 또는 주소"
+            />
 
-      {status === "ready" ? (
-        <div className={styles.toolbar}>
-          <AdminInput
-            type="search"
-            size="sm"
-            className={styles.searchInput}
-            aria-label="검색"
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-            placeholder="제목 또는 주소"
-          />
-
-          <div className={styles.filters} role="group" aria-label="상태 필터">
-            {STATUS_FILTERS.map((filter) => (
-              <button
-                key={filter.value}
-                type="button"
-                className={styles.filter}
-                aria-pressed={statusFilter === filter.value}
-                onClick={() => setStatusFilter(filter.value)}
-              >
-                {filter.label}
-              </button>
-            ))}
+            <div className={styles.filters} role="group" aria-label="상태 필터">
+              {STATUS_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  className={styles.filter}
+                  aria-pressed={statusFilter === filter.value}
+                  onClick={() => setStatusFilter(filter.value)}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : null}
-
-      {status === "loading" ? <p className={base.state}>불러오는 중…</p> : null}
-
-      {status === "error" ? (
-        <p className={base.stateError} role="alert">
-          {error ?? "글을 불러오지 못했습니다."}
-        </p>
-      ) : null}
-
-      {status === "ready" && error ? (
+        ) : null
+      }
+    >
+      {/* 목록을 불러온 뒤에도 저장이 실패할 수 있다. 그 오류는 목록을 감추지 않는다. */}
+      {error ? (
         <p className={base.stateError} role="alert">
           {error}
         </p>
       ) : null}
 
-      {status === "ready" && total === 0 ? (
-        <div className={base.empty}>
-          <p>아직 쓴 글이 없습니다.</p>
-          <AdminButton
-            variant="primary"
-            size="sm"
-            href={NEW_ARTICLE_HREF}
-            className={base.newBtn}
-          >
-            + 첫 글 쓰기
-          </AdminButton>
-        </div>
-      ) : null}
-
-      {status === "ready" && total > 0 && articles.length === 0 ? (
+      {articles.length === 0 ? (
         <p className={base.state}>조건에 맞는 글이 없습니다.</p>
-      ) : null}
-
-      {articles.length > 0 ? (
+      ) : (
         <ul className={base.list}>
           {articles.map((article) => (
             <ArticleRow
@@ -129,8 +109,8 @@ const AdminDevArticlesPage = () => {
             />
           ))}
         </ul>
-      ) : null}
-    </div>
+      )}
+    </AdminListShell>
   );
 };
 

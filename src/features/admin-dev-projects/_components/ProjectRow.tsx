@@ -1,11 +1,8 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import Link from "next/link";
 
-import row from "@/features/admin-shell/_components/admin-row.module.css";
+import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { adminDevProjectRoute } from "@/constants/routes";
 
@@ -32,16 +29,6 @@ type Props = {
  */
 const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(project.cover);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: project.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   const onDeleteClick = () => {
     if (window.confirm(`"${project.title.ko || "제목 없음"}" 프로젝트를 삭제할까요?`)) {
       onDelete(project.id);
@@ -49,17 +36,13 @@ const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={row.row}>
-      <button
-        type="button"
-        className={row.handle}
-        aria-label="순서 이동"
-        {...attributes}
-        {...listeners}
-      >
-        ⠿
-      </button>
-
+    <AdminSortableRow
+      id={project.id}
+      published={project.published}
+      onTogglePublished={(next) => onTogglePublished(project.id, next)}
+      editHref={adminDevProjectRoute(project.id)}
+      onDelete={onDeleteClick}
+    >
       <span className={styles.thumb}>
         {previewUrl ? (
           <Image
@@ -75,24 +58,7 @@ const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
       <span className={styles.title}>{project.title.ko || "제목 없음"}</span>
 
       <span className={styles.year}>{project.year || "—"}</span>
-
-      <button
-        type="button"
-        className={`${row.badge} ${project.published ? row.badgeOn : ""}`}
-        onClick={() => onTogglePublished(project.id, !project.published)}
-      >
-        {project.published ? "공개" : "비공개"}
-      </button>
-
-      <span className={row.actions}>
-        <Link href={adminDevProjectRoute(project.id)} className={row.edit}>
-          수정
-        </Link>
-        <button type="button" className={row.delete} onClick={onDeleteClick}>
-          삭제
-        </button>
-      </span>
-    </li>
+    </AdminSortableRow>
   );
 };
 

@@ -10,6 +10,11 @@
   list-style: none;
 }
 
+/* 인라인 입력이 두 칸 들어가는 행(태그 사전)은 간격을 한 단계 좁힌다. */
+.rowDense {
+  gap: var(--s-3);
+}
+
 .handle {
   flex: none;
   width: 28px;
@@ -135,5 +140,10 @@
   .row {
     gap: var(--s-3);
     padding: var(--s-3);
+  }
+  /* 좁은 화면에서는 인라인 입력이 줄을 넘겨야 한다. */
+  .rowDense {
+    flex-wrap: wrap;
+    gap: var(--s-2);
   }
 }

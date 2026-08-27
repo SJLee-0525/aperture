@@ -1,10 +1,6 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import Link from "next/link";
-
-import row from "@/features/admin-shell/_components/admin-row.module.css";
+import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { adminMusicMediaRoute } from "@/constants/routes";
 
@@ -28,16 +24,6 @@ type Props = {
  * @returns {JSX.Element}
  */
 const MediaRow = ({ media, onTogglePublished, onDelete }: Props) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: media.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   const onDeleteClick = () => {
     if (window.confirm(`"${media.title.ko || "제목 없음"}" 영상을 삭제할까요?`)) {
       onDelete(media.id);
@@ -45,38 +31,17 @@ const MediaRow = ({ media, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={row.row}>
-      <button
-        type="button"
-        className={row.handle}
-        aria-label="순서 이동"
-        {...attributes}
-        {...listeners}
-      >
-        ⠿
-      </button>
-
+    <AdminSortableRow
+      id={media.id}
+      published={media.published}
+      onTogglePublished={(next) => onTogglePublished(media.id, next)}
+      editHref={adminMusicMediaRoute(media.id)}
+      onDelete={onDeleteClick}
+    >
       <span className={styles.title}>{media.title.ko || "제목 없음"}</span>
 
       <span className={styles.ytId}>{media.youtubeId || "—"}</span>
-
-      <button
-        type="button"
-        className={`${row.badge} ${media.published ? row.badgeOn : ""}`}
-        onClick={() => onTogglePublished(media.id, !media.published)}
-      >
-        {media.published ? "공개" : "비공개"}
-      </button>
-
-      <span className={row.actions}>
-        <Link href={adminMusicMediaRoute(media.id)} className={row.edit}>
-          수정
-        </Link>
-        <button type="button" className={row.delete} onClick={onDeleteClick}>
-          삭제
-        </button>
-      </span>
-    </li>
+    </AdminSortableRow>
   );
 };
 

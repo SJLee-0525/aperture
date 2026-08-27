@@ -1,11 +1,8 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import Link from "next/link";
 
-import row from "@/features/admin-shell/_components/admin-row.module.css";
+import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { adminAlbumRoute } from "@/constants/routes";
 
@@ -32,16 +29,6 @@ type Props = {
  * @returns {JSX.Element}
  */
 const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: album.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   const onDeleteClick = () => {
     if (
       window.confirm(
@@ -53,17 +40,13 @@ const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={row.row}>
-      <button
-        type="button"
-        className={row.handle}
-        aria-label="순서 이동"
-        {...attributes}
-        {...listeners}
-      >
-        ⠿
-      </button>
-
+    <AdminSortableRow
+      id={album.id}
+      published={album.published}
+      onTogglePublished={(next) => onTogglePublished(album.id, next)}
+      editHref={adminAlbumRoute(album.id)}
+      onDelete={onDeleteClick}
+    >
       <span className={styles.thumb}>
         {coverUrl ? (
           <Image
@@ -79,24 +62,7 @@ const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
       <span className={styles.title}>{album.title.ko || "제목 없음"}</span>
 
       <span className={styles.count}>{album.photoIds.length}장</span>
-
-      <button
-        type="button"
-        className={`${row.badge} ${album.published ? row.badgeOn : ""}`}
-        onClick={() => onTogglePublished(album.id, !album.published)}
-      >
-        {album.published ? "공개" : "비공개"}
-      </button>
-
-      <span className={row.actions}>
-        <Link href={adminAlbumRoute(album.id)} className={row.edit}>
-          수정
-        </Link>
-        <button type="button" className={row.delete} onClick={onDeleteClick}>
-          삭제
-        </button>
-      </span>
-    </li>
+    </AdminSortableRow>
   );
 };
 

@@ -1,100 +1,53 @@
 "use client";
 
-import {
-  DndContext,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-
-import { AdminButton } from "@/components/AdminButton";
 import { AlbumRow } from "@/features/admin-albums/_components/AlbumRow";
-import styles from "@/features/admin-shell/_components/admin-list.module.css";
+import { AdminListShell } from "@/features/admin-shell/_components/AdminListShell";
+import { AdminSortableList } from "@/features/admin-shell/_components/AdminSortableList";
 
-import { useAlbumsAdmin } from "@/features/admin-albums/_hooks/use-albums-admin";
+
+import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
 
 import { ROUTES } from "@/constants/routes";
+import { getAlbumRepository } from "@/lib/admin/album-repository";
 
 import { imageThumbnailUrl } from "@/types/image";
 
-
 /**
- * 관리자 앨범 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useAlbumsAdmin.
+ * 관리자 앨범 목록 — 드래그·키보드 정렬, 공개 토글, 수정/삭제. 조립만 한다.
  *
  * @returns {JSX.Element}
  */
-const AdminAlbumsPage = () => {
-  const { albums, status, error, reorder, togglePublished, remove } = useAlbumsAdmin();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
-
-  const onDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over) reorder(String(active.id), String(over.id));
-  };
+const AdminAlbumsList = () => {
+  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
+    getAlbumRepository(),
+  );
 
   return (
-    <div className={styles.page}>
-      <header className={styles.head}>
-        <div className={styles.headText}>
-          <h1 className={styles.title}>앨범</h1>
-          <p className={styles.hint}>
-            드래그로 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다.
-          </p>
-        </div>
-        <AdminButton
-          variant="primary"
-          size="sm"
-          href={ROUTES.ADMIN_ALBUM_NEW}
-          className={styles.newBtn}
-        >
-          + 새 앨범
-        </AdminButton>
-      </header>
-
-      {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
-
-      {status === "error" ? (
-        <p className={styles.stateError} role="alert">
-          {error ?? "앨범을 불러오지 못했습니다."}
-        </p>
-      ) : null}
-
-      {status === "ready" && albums.length === 0 ? (
-        <div className={styles.empty}>
-          <p>아직 앨범이 없습니다.</p>
-          <AdminButton
-            variant="primary"
-            size="sm"
-            href={ROUTES.ADMIN_ALBUM_NEW}
-            className={styles.newBtn}
-          >
-            + 첫 앨범 만들기
-          </AdminButton>
-        </div>
-      ) : null}
-
-      {status === "ready" && albums.length > 0 ? (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-          <SortableContext items={albums.map((a) => a.id)} strategy={verticalListSortingStrategy}>
-            <ul className={styles.list}>
-              {albums.map((album) => (
-                <AlbumRow
-                  key={album.id}
-                  album={album}
-                  coverUrl={imageThumbnailUrl(album.cover)}
-                  onTogglePublished={togglePublished}
-                  onDelete={remove}
-                />
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
-      ) : null}
-    </div>
+    <AdminListShell
+      title="앨범"
+      hint="드래그하거나 핸들에서 스페이스바를 눌러 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다."
+      newHref={ROUTES.ADMIN_ALBUM_NEW}
+      newLabel="+ 새 앨범"
+      emptyLabel="아직 앨범이 없습니다."
+      emptyCtaLabel="+ 첫 앨범 만들기"
+      status={status}
+      error={error}
+      errorFallback="앨범을 불러오지 못했습니다."
+      isEmpty={items.length === 0}
+    >
+      <AdminSortableList ids={items.map((item) => item.id)} onReorder={reorder}>
+        {items.map((item) => (
+          <AlbumRow
+            key={item.id}
+            album={item}
+              coverUrl={imageThumbnailUrl(item.cover)}
+            onTogglePublished={togglePublished}
+            onDelete={remove}
+          />
+        ))}
+      </AdminSortableList>
+    </AdminListShell>
   );
 };
 
-export default AdminAlbumsPage;
+export default AdminAlbumsList;

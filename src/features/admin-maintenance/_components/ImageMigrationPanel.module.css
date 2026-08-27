@@ -56,7 +56,6 @@
   gap: var(--s-3);
 }
 
-
 .error {
   color: var(--danger);
 }

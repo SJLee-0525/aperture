@@ -1,97 +1,49 @@
 "use client";
 
-import {
-  DndContext,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-
-import { AdminButton } from "@/components/AdminButton";
 import { WorkRow } from "@/features/admin-music-works/_components/WorkRow";
-import styles from "@/features/admin-shell/_components/admin-list.module.css";
+import { AdminListShell } from "@/features/admin-shell/_components/AdminListShell";
+import { AdminSortableList } from "@/features/admin-shell/_components/AdminSortableList";
 
-import { useMusicWorksAdmin } from "@/features/admin-music-works/_hooks/use-music-works-admin";
+import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
 
 import { ROUTES } from "@/constants/routes";
-
+import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
 /**
- * 관리자 연주 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicWorksAdmin.
+ * 관리자 연주 목록 — 드래그·키보드 정렬, 공개 토글, 수정/삭제. 조립만 한다.
  *
  * @returns {JSX.Element}
  */
-const AdminMusicWorksPage = () => {
-  const { works, status, error, reorder, togglePublished, remove } = useMusicWorksAdmin();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
-
-  const onDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over) reorder(String(active.id), String(over.id));
-  };
+const AdminMusicWorksList = () => {
+  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
+    getMusicWorkRepository(),
+  );
 
   return (
-    <div className={styles.page}>
-      <header className={styles.head}>
-        <div className={styles.headText}>
-          <h1 className={styles.title}>연주</h1>
-          <p className={styles.hint}>
-            드래그로 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다.
-          </p>
-        </div>
-        <AdminButton
-          variant="primary"
-          size="sm"
-          href={`${ROUTES.ADMIN_MUSIC_WORKS}/new`}
-          className={styles.newBtn}
-        >
-          + 새 연주
-        </AdminButton>
-      </header>
-
-      {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
-
-      {status === "error" ? (
-        <p className={styles.stateError} role="alert">
-          {error ?? "연주를 불러오지 못했습니다."}
-        </p>
-      ) : null}
-
-      {status === "ready" && works.length === 0 ? (
-        <div className={styles.empty}>
-          <p>아직 연주가 없습니다.</p>
-          <AdminButton
-            variant="primary"
-            size="sm"
-            href={`${ROUTES.ADMIN_MUSIC_WORKS}/new`}
-            className={styles.newBtn}
-          >
-            + 첫 연주 만들기
-          </AdminButton>
-        </div>
-      ) : null}
-
-      {status === "ready" && works.length > 0 ? (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-          <SortableContext items={works.map((w) => w.id)} strategy={verticalListSortingStrategy}>
-            <ul className={styles.list}>
-              {works.map((work) => (
-                <WorkRow
-                  key={work.id}
-                  work={work}
-                  onTogglePublished={togglePublished}
-                  onDelete={remove}
-                />
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
-      ) : null}
-    </div>
+    <AdminListShell
+      title="연주"
+      hint="드래그하거나 핸들에서 스페이스바를 눌러 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다."
+      newHref={`${ROUTES.ADMIN_MUSIC_WORKS}/new`}
+      newLabel="+ 새 연주"
+      emptyLabel="아직 연주가 없습니다."
+      emptyCtaLabel="+ 첫 연주 만들기"
+      status={status}
+      error={error}
+      errorFallback="연주를 불러오지 못했습니다."
+      isEmpty={items.length === 0}
+    >
+      <AdminSortableList ids={items.map((item) => item.id)} onReorder={reorder}>
+        {items.map((item) => (
+          <WorkRow
+            key={item.id}
+            work={item}
+            onTogglePublished={togglePublished}
+            onDelete={remove}
+          />
+        ))}
+      </AdminSortableList>
+    </AdminListShell>
   );
 };
 
-export default AdminMusicWorksPage;
+export default AdminMusicWorksList;
