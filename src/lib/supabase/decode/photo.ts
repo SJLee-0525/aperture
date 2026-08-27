@@ -1,4 +1,5 @@
 import {
+  asRecord,
   readBoolean,
   readDate,
   readImage,
@@ -25,8 +26,8 @@ const EMPTY_EXIF: Photo["exif"] = {
 };
 
 const readExif = (value: unknown): Photo["exif"] => {
-  if (typeof value !== "object" || value === null) return EMPTY_EXIF;
-  const raw = value as Record<string, unknown>;
+  const raw = asRecord(value);
+  if (!raw) return EMPTY_EXIF;
   return {
     aperture: readString(raw.aperture),
     shutter: readString(raw.shutter),
@@ -40,8 +41,8 @@ const readExif = (value: unknown): Photo["exif"] => {
 };
 
 const readCoords = (value: unknown): Coords | null => {
-  if (typeof value !== "object" || value === null) return null;
-  const raw = value as Record<string, unknown>;
+  const raw = asRecord(value);
+  if (!raw) return null;
   if (typeof raw.lat !== "number" || typeof raw.lng !== "number") return null;
   return { lat: raw.lat, lng: raw.lng };
 };

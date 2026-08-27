@@ -2,6 +2,8 @@ import { asText } from "@/lib/i18n/as-text";
 
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
+import type { SiteLink } from "@/types/site";
+import type { TimelineEntry } from "@/types/timeline";
 
 /**
  * 병합된 jsonb 행에서 도메인 필드를 읽는 최소 리더 집합.
@@ -23,9 +25,24 @@ const readBoolean = (value: unknown, fallback = false): boolean =>
 const readStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 
+/** 객체 하나를 필드 조회가 가능한 형태로 좁힌다. 배열과 `null` 은 객체가 아니다. */
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+/** 객체 배열. 배열이 아니거나 객체가 아닌 원소는 버린다. */
+const readObjects = (value: unknown): Record<string, unknown>[] =>
+  Array.isArray(value)
+    ? value.filter(
+        (item): item is Record<string, unknown> => typeof item === "object" && item !== null,
+      )
+    : [];
+
 /** 이중언어 값. `asText` 가 이 집합의 멤버다 — 다른 리더와 같은 폴백 규칙을 따른다. */
 const readText = (value: unknown): LocalizedText => asText(value);
 
+/** `readImage` 의 폴백. 소비처는 이 값을 직접 쓰지 않고 `url` 유무로 분기한다. */
 const EMPTY_IMAGE: ImageMeta = { url: "", path: "", w: 0, h: 0 };
 
 const readImageOrNull = (value: unknown): ImageMeta | null => {
@@ -81,21 +98,41 @@ const readNullableDate = (value: unknown): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+/**
+ * 저장된 링크를 원문 그대로 읽는다. 공개 표시용 정화는 `decode/public-sanitize` 가 한다 —
+ * 읽기에서 정화하면 관리자 폼이 그 빈 값을 다시 저장한다.
+ */
+const readLinks = (value: unknown): SiteLink[] =>
+  readObjects(value).map((item) => ({
+    label: readString(item.label),
+    href: readString(item.href),
+  }));
+
+/** `{period, title}` 항목 배열. 음악 경력·학력과 개발 학력이 같은 모양이다. */
+const readTimeline = (value: unknown): TimelineEntry[] =>
+  readObjects(value).map((item) => ({
+    period: readString(item.period),
+    title: readText(item.title),
+  }));
+
 /** `readDate` 가 결측에 쓰는 값인지 판별한다. 인코더가 키 생략 여부를 정할 때 본다. */
 const isMissingDate = (value: unknown): boolean =>
   value instanceof Date && value.getTime() === 0;
 
 export {
-  EMPTY_IMAGE,
+  asRecord,
   isMissingDate,
   readBoolean,
   readDate,
   readImage,
   readImageArray,
   readImageOrNull,
+  readLinks,
   readNullableDate,
   readNumber,
+  readObjects,
   readString,
   readStringArray,
   readText,
+  readTimeline,
 };

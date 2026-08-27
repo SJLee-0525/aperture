@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  asRecord,
   isMissingDate,
   readBoolean,
   readDate,
   readImage,
   readImageArray,
   readImageOrNull,
+  readLinks,
   readNullableDate,
   readNumber,
+  readObjects,
   readString,
   readStringArray,
   readText,
+  readTimeline,
 } from "@/lib/supabase/decode/field";
 
 describe("field readers", () => {
@@ -91,5 +95,35 @@ describe("field readers", () => {
       expect(isMissingDate(new Date(1))).toBe(false);
       expect(isMissingDate(0)).toBe(false);
     });
+  });
+});
+
+describe("객체·배열 리더", () => {
+  it("asRecord 는 배열과 null 을 객체로 보지 않는다", () => {
+    expect(asRecord({ a: 1 })).toEqual({ a: 1 });
+    expect(asRecord([1, 2])).toBeNull();
+    expect(asRecord(null)).toBeNull();
+    expect(asRecord("문자열")).toBeNull();
+  });
+
+  it("readObjects 는 배열이 아니거나 객체가 아닌 원소를 버린다", () => {
+    expect(readObjects([{ a: 1 }, null, "x", 3, { b: 2 }])).toEqual([{ a: 1 }, { b: 2 }]);
+    expect(readObjects("배열 아님")).toEqual([]);
+    expect(readObjects(undefined)).toEqual([]);
+  });
+
+  it("readLinks 는 label·href 가 아닌 값을 빈 문자열로 읽는다", () => {
+    expect(readLinks([{ label: "GitHub", href: "https://example.com" }, { label: 3 }])).toEqual([
+      { label: "GitHub", href: "https://example.com" },
+      { label: "", href: "" },
+    ]);
+    expect(readLinks({ label: "객체" })).toEqual([]);
+  });
+
+  it("readTimeline 은 period 를 평면 문자열로, title 을 이중언어로 읽는다", () => {
+    expect(readTimeline([{ period: "2024", title: { ko: "한", en: "en" } }])).toEqual([
+      { period: "2024", title: { ko: "한", en: "en" } },
+    ]);
+    expect(readTimeline([{}])).toEqual([{ period: "", title: { ko: "", en: "" } }]);
   });
 });

@@ -6,23 +6,16 @@ import {
   readString,
   readStringArray,
   readText,
+  readTimeline,
 } from "@/lib/supabase/decode/field";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
-import type { TimelineEntry } from "@/types/timeline";
-
-const readTimeline = (value: unknown): TimelineEntry[] =>
-  Array.isArray(value)
-    ? value
-        .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
-        .map((item) => ({ period: readString(item.period), title: readText(item.title) }))
-    : [];
 
 /**
  * 병합된 연주 행을 도메인 모델로 바꾼다.
  *
  * `ticketUrl` 은 저장된 원문 그대로 둔다. 읽기에서 정화하면 폼이 그 빈 값을 저장하고
- * 전체 문서를 되쓰는 경로도 원본을 지운다. 공개 표시용 정화는 `sanitizeForPublic` 이 한다.
+ * 전체 문서를 되쓰는 경로도 원본을 지운다. 공개 표시용 정화는 `decode/public-sanitize` 가 한다.
  *
  * @param {string} id 연주 문서 ID.
  * @param {Record<string, unknown>} data 병합된 연주 문서 필드.
