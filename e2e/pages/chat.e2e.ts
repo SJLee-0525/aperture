@@ -553,7 +553,10 @@ test.describe("Chat", () => {
       .evaluate((element) => getComputedStyle(element, "::before").content);
     expect(desktopBackplate).toBe("none");
     const customScrollbar = page.locator("[data-custom-scrollbar-ui]");
-    await expect(customScrollbar).toHaveAttribute("aria-controls", "chat-message-scroll-container");
+    await expect(customScrollbar).toHaveAttribute(
+      "data-scroll-target",
+      "chat-message-scroll-container",
+    );
     await expect(customScrollbar).toHaveAttribute("data-visible", "false");
     await expect(
       page.getByText("Please don’t share sensitive personal information."),

@@ -2,10 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-import { useLang } from "@/features/lang/_hooks/use-lang";
-
-import type { UIDict } from "@/constants/dictionary";
-
 import styles from "./CustomScrollbar.module.css";
 
 const ENABLE_QUERY =
@@ -15,15 +11,8 @@ const MIN_THUMB_HEIGHT = 44;
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const CustomScrollbar = () => {
-  const { dict } = useLang();
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
-  // 라벨은 rAF 갱신 루프(이펙트 1회 설치)에서 읽으므로 ref 로 최신 사전을 전달한다.
-  const dictRef = useRef<UIDict>(dict);
-
-  useEffect(() => {
-    dictRef.current = dict;
-  }, [dict]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -149,20 +138,11 @@ const CustomScrollbar = () => {
       track.style.setProperty("--track-right", `${trackRight}px`);
       track.style.setProperty("--track-bottom", `${trackBottom}px`);
       track.dataset.scrollScope = scrollScope;
+      // 어느 컨테이너를 몰고 있는지와 그 위치. 장식이라 ARIA 로 내보내지 않지만 스크롤러
+      // 해석 결과가 화면 밖에서 관측 가능해야 회귀를 잡을 수 있다.
+      track.dataset.scrollTarget = scrollScope === "page" ? "page-content" : scroller.id;
+      track.dataset.scrollTop = String(Math.round(scrollTop));
       track.dataset.visible = String(visible);
-      track.tabIndex = visible ? 0 : -1;
-      track.setAttribute("aria-hidden", String(!visible));
-      track.setAttribute("aria-controls", scrollScope === "page" ? "page-content" : scroller.id);
-      track.setAttribute(
-        "aria-label",
-        scrollScope === "modal"
-          ? dictRef.current.scrollModalLabel
-          : scrollScope === "local"
-            ? dictRef.current.scrollListLabel
-            : dictRef.current.scrollPageLabel,
-      );
-      track.setAttribute("aria-valuemax", String(Math.round(maxScroll)));
-      track.setAttribute("aria-valuenow", String(Math.round(scrollTop)));
       thumb.style.height = `${thumbHeight}px`;
       thumb.style.transform = `translate3d(0, ${thumbTop}px, 0)`;
     };
@@ -207,24 +187,6 @@ const CustomScrollbar = () => {
       activePointerId = -1;
     };
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      const scroller = activeScroller;
-      const viewportStep = Math.max(scroller.clientHeight * 0.82, 1);
-      let nextTop: number | null = null;
-
-      if (event.key === "ArrowUp") nextTop = scroller.scrollTop - 48;
-      else if (event.key === "ArrowDown") nextTop = scroller.scrollTop + 48;
-      else if (event.key === "PageUp") nextTop = scroller.scrollTop - viewportStep;
-      else if (event.key === "PageDown" || event.key === " ") {
-        nextTop = scroller.scrollTop + viewportStep;
-      } else if (event.key === "Home") nextTop = 0;
-      else if (event.key === "End") nextTop = maxScroll;
-
-      if (nextTop === null) return;
-      event.preventDefault();
-      scroller.scrollTo({ top: clamp(nextTop, 0, maxScroll), behavior: "smooth" });
-    };
-
     const resizeObserver = new ResizeObserver(scheduleUpdate);
     const mutationObserver = new MutationObserver(scheduleUpdate);
     resizeObserver.observe(root);
@@ -235,7 +197,6 @@ const CustomScrollbar = () => {
     track.addEventListener("pointermove", onPointerMove);
     track.addEventListener("pointerup", stopDragging);
     track.addEventListener("pointercancel", stopDragging);
-    track.addEventListener("keydown", onKeyDown);
     document.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });
     window.addEventListener("resize", scheduleUpdate, { passive: true });
     media.addEventListener("change", scheduleUpdate);
@@ -249,7 +210,6 @@ const CustomScrollbar = () => {
       track.removeEventListener("pointermove", onPointerMove);
       track.removeEventListener("pointerup", stopDragging);
       track.removeEventListener("pointercancel", stopDragging);
-      track.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("scroll", scheduleUpdate, true);
       window.removeEventListener("resize", scheduleUpdate);
       media.removeEventListener("change", scheduleUpdate);
@@ -266,14 +226,6 @@ const CustomScrollbar = () => {
       data-visible="false"
       data-dragging="false"
       aria-hidden="true"
-      role="scrollbar"
-      aria-controls="page-content"
-      aria-label={dict.scrollPageLabel}
-      aria-orientation="vertical"
-      aria-valuemin={0}
-      aria-valuemax={0}
-      aria-valuenow={0}
-      tabIndex={-1}
     >
       <div ref={thumbRef} className={styles.thumb} data-custom-scrollbar-thumb>
         <span className={styles.thumbShape} />

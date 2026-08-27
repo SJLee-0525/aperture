@@ -13,7 +13,7 @@ test.describe("Custom cursor", () => {
     await page.goto("/ko/photo/map");
     await expect(page.locator("aside[data-accent-scrollbar]")).toBeVisible();
     await expect(page.locator("[data-custom-scrollbar-ui]")).toHaveAttribute(
-      "aria-controls",
+      "data-scroll-target",
       "map-location-scroll-container",
     );
 
@@ -25,9 +25,10 @@ test.describe("Custom cursor", () => {
     const listboxOverflows = await listbox.evaluate(
       (element) => element.scrollHeight > element.clientHeight + 1,
     );
+    const listboxId = await listbox.getAttribute("id");
     await expect(page.locator("[data-custom-scrollbar-ui]")).toHaveAttribute(
-      "aria-controls",
-      listboxOverflows ? "filter-select-scroll-container" : "page-content",
+      "data-scroll-target",
+      listboxOverflows && listboxId ? listboxId : "page-content",
     );
   });
 
@@ -49,7 +50,7 @@ test.describe("Custom cursor", () => {
       .poll(async () => {
         const [scrollTop, ariaValue] = await Promise.all([
           page.evaluate(() => window.scrollY),
-          track.getAttribute("aria-valuenow"),
+          track.getAttribute("data-scroll-top"),
         ]);
         return Math.abs(scrollTop - Number(ariaValue));
       })
@@ -105,7 +106,7 @@ test.describe("Custom cursor", () => {
 
     const track = page.locator("[data-custom-scrollbar-ui]");
     await expect(track).toHaveAttribute("data-scroll-scope", "modal");
-    await expect(track).toHaveAttribute("aria-controls", "photo-modal-scroll-container");
+    await expect(track).toHaveAttribute("data-scroll-target", "photo-modal-scroll-container");
   });
 
   test("가운데 클릭 자동 스크롤을 시작하고 Esc로 종료한다", async ({ page }, testInfo) => {

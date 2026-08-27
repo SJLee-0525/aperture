@@ -106,10 +106,10 @@ test.describe("개발 블로그 상세", () => {
     await list.evaluate((node) => node.scrollTo(0, node.scrollHeight));
     expect(await list.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
 
-    // 막대는 저장소 공용 CustomScrollbar 가 그린다 — 라벨이 목록 스코프로 바뀐다.
+    // 막대는 저장소 공용 CustomScrollbar 가 그린다 — 스코프가 목록으로 바뀐다.
     await expect(page.locator("[data-custom-scrollbar-ui]")).toHaveAttribute(
-      "aria-label",
-      "내부 목록 스크롤",
+      "data-scroll-scope",
+      "local",
     );
   });
 

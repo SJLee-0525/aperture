@@ -150,9 +150,6 @@ type UIDict = {
   chatWelcome: string;
   chatErrorFallback: string;
   // 커스텀 스크롤바 aria
-  scrollPageLabel: string;
-  scrollModalLabel: string;
-  scrollListLabel: string;
   allTag: string;
   filterLabel: string;
   cameraLabel: string;
@@ -368,9 +365,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     ],
     chatWelcome: "안녕하세요. 사진, 음악, 개발 작업에 관해 무엇이든 물어보세요.",
     chatErrorFallback: "답변을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-    scrollPageLabel: "페이지 스크롤",
-    scrollModalLabel: "모달 스크롤",
-    scrollListLabel: "내부 목록 스크롤",
     allTag: "전체",
     filterLabel: "필터",
     cameraLabel: "카메라",
@@ -581,9 +575,6 @@ const DICTIONARY: Record<Lang, UIDict> = {
     ],
     chatWelcome: "Hello. Ask me anything about the photography, music, or development work.",
     chatErrorFallback: "The response could not be loaded. Please try again shortly.",
-    scrollPageLabel: "Page scroll",
-    scrollModalLabel: "Modal scroll",
-    scrollListLabel: "List scroll",
     allTag: "All",
     filterLabel: "Filter",
     cameraLabel: "Camera",
