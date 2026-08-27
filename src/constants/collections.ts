@@ -29,16 +29,13 @@ type TableCollectionId = Exclude<CollectionId, typeof COLLECTIONS.RAG_DOCUMENTS>
  * (`devArticles` 는 발행일, `site`·`devArticleTags` 는 목록 화면이 없다).
  * 이 타입이 정렬 RPC 이름의 존재를 타입으로 보장한다.
  */
-const SORTABLE_COLLECTIONS = [
-  COLLECTIONS.PHOTOS,
-  COLLECTIONS.ALBUMS,
-  COLLECTIONS.MUSIC_WORKS,
-  COLLECTIONS.MUSIC_AWARDS,
-  COLLECTIONS.MUSIC_MEDIA,
-  COLLECTIONS.DEV_PROJECTS,
-] as const;
-
-type SortableCollectionId = (typeof SORTABLE_COLLECTIONS)[number];
+type SortableCollectionId =
+  | typeof COLLECTIONS.PHOTOS
+  | typeof COLLECTIONS.ALBUMS
+  | typeof COLLECTIONS.MUSIC_WORKS
+  | typeof COLLECTIONS.MUSIC_AWARDS
+  | typeof COLLECTIONS.MUSIC_MEDIA
+  | typeof COLLECTIONS.DEV_PROJECTS;
 
 /** site 컬렉션의 고정 문서 ID */
 const SITE_DOC = "config"; // 전역 + 사진
