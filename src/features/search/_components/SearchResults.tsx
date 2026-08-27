@@ -44,7 +44,7 @@ const SearchResults = ({ q, lang, groups, total }: Props) => {
         groups.map((group) => (
           <section key={group.key} className={styles.group} data-section={group.section}>
             <div className={styles.groupHead}>
-              <span className="u-label">{group.label}</span>
+              <h2 className="u-label">{group.label}</h2>
               <span className={styles.gcount}>{group.hits.length}</span>
             </div>
             <ul className={styles.list}>

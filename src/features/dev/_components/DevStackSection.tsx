@@ -34,7 +34,7 @@ const DevStackSection = ({ stack, className }: Props) => {
       <div className={styles.groups}>
         {stack.map((group) => (
           <div key={group.category} className={styles.group}>
-            <div className="u-label">{group.category}</div>
+            <h3 className="u-label">{group.category}</h3>
             <div className={styles.chips}>
               {group.items.map((item) => (
                 <LocalizedLink

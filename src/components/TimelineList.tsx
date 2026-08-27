@@ -16,7 +16,7 @@ type Props = { label: string; rows: Row[]; className?: string };
  */
 const TimelineList = ({ label, rows, className }: Props) => (
   <div className={`${styles.list} ${className ?? ""}`.trim()}>
-    <div className={styles.label}>{label}</div>
+    <h2 className={styles.label}>{label}</h2>
     {rows.map((row, index) => (
       <div key={row.id ?? `${row.period}-${row.text}-${index}`} className={styles.row}>
         <span className={styles.period}>{row.period}</span>

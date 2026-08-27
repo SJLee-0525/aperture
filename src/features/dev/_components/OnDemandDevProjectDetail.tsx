@@ -41,18 +41,18 @@ const DetailSkeleton = ({ hasMedia = true, label }: { hasMedia?: boolean; label?
       <Skeleton width={88} height={39} radius={6} />
     </div>
 
-    <div className={detailStyles.secL}>
+    <h3 className={detailStyles.secL}>
       <Skeleton width={96} height={20} />
-    </div>
+    </h3>
     <div className={styles.skeletonCopy}>
       <Skeleton height={14} />
       <Skeleton width="94%" height={14} />
       <Skeleton width="72%" height={14} />
     </div>
 
-    <div className={detailStyles.secL}>
+    <h3 className={detailStyles.secL}>
       <Skeleton width={76} height={20} />
-    </div>
+    </h3>
     <div className={detailStyles.mtags}>
       {[72, 94, 64, 86].map((width) => (
         <Skeleton key={width} width={width} height={27} radius={999} />

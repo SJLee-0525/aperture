@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
 
@@ -26,6 +28,7 @@ type Props = { config: MusicConfig; awards: MusicAward[] };
  * @returns {JSX.Element}
  */
 const MusicCareerView = ({ config, awards }: Props) => {
+  const awardsHeadingId = useId();
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("award", awards);
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
@@ -49,8 +52,10 @@ const MusicCareerView = ({ config, awards }: Props) => {
         className={styles.stacked}
       />
 
-      <section className={styles.awards}>
-        <div className={styles.awLabel}>{dict.musicAwardsNav}</div>
+      <section className={styles.awards} aria-labelledby={awardsHeadingId}>
+        <h2 id={awardsHeadingId} className={styles.awLabel}>
+          {dict.musicAwardsNav}
+        </h2>
         {awards.map((award) => (
           <button
             type="button"

@@ -71,7 +71,7 @@ const LocationList = ({ locations }: Props) => {
       data-custom-scroll-scope="local"
     >
       <div className={styles.head}>
-        <span className="u-label">{dict.locationsLabel}</span>
+        <h2 className="u-label">{dict.locationsLabel}</h2>
         <span className={styles.count}>{locations.length} spots</span>
       </div>
       {locations.map((location) => (

@@ -78,12 +78,12 @@ const DevProjectDetailContent = ({ project, articles }: Props) => {
         </div>
       ) : null}
 
-      <div className={styles.secL}>{dict.devOverviewLabel}</div>
+      <h3 className={styles.secL}>{dict.devOverviewLabel}</h3>
       <p className={styles.p}>{pickText(project.overview, lang)}</p>
 
       {project.features.length > 0 ? (
         <>
-          <div className={styles.secL}>{dict.devFeaturesLabel}</div>
+          <h3 className={styles.secL}>{dict.devFeaturesLabel}</h3>
           <ul className={styles.ul}>
             {project.features.map((feature, index) => (
               <li key={index}>{pickText(feature, lang)}</li>
@@ -94,7 +94,7 @@ const DevProjectDetailContent = ({ project, articles }: Props) => {
 
       {project.roles.length > 0 ? (
         <>
-          <div className={styles.secL}>{dict.devRolesLabel}</div>
+          <h3 className={styles.secL}>{dict.devRolesLabel}</h3>
           <ul className={styles.ul}>
             {project.roles.map((role, index) => (
               <li key={index}>{pickText(role, lang)}</li>
@@ -105,7 +105,7 @@ const DevProjectDetailContent = ({ project, articles }: Props) => {
 
       {project.troubleshooting.length > 0 ? (
         <>
-          <div className={styles.secL}>{dict.devTroubleLabel}</div>
+          <h3 className={styles.secL}>{dict.devTroubleLabel}</h3>
           <div className={styles.tsList}>
             {project.troubleshooting.map((item, index) => (
               <div key={index} className={styles.tsItem}>
@@ -142,7 +142,7 @@ const DevProjectDetailContent = ({ project, articles }: Props) => {
 
       {project.achievements.length > 0 ? (
         <>
-          <div className={styles.secL}>{dict.devAchievementsLabel}</div>
+          <h3 className={styles.secL}>{dict.devAchievementsLabel}</h3>
           <ul className={styles.ul}>
             {project.achievements.map((achievement, index) => (
               <li key={index}>{pickText(achievement, lang)}</li>
@@ -151,7 +151,7 @@ const DevProjectDetailContent = ({ project, articles }: Props) => {
         </>
       ) : null}
 
-      <div className={styles.secL}>{dict.devStackLabel}</div>
+      <h3 className={styles.secL}>{dict.devStackLabel}</h3>
       <div className={styles.mtags}>
         {project.techTags.map((tag) => (
           <span key={tag}>{tag}</span>
@@ -160,7 +160,7 @@ const DevProjectDetailContent = ({ project, articles }: Props) => {
 
       {articles.length > 0 ? (
         <>
-          <div className={styles.secL}>{dict.devRelatedArticlesLabel}</div>
+          <h3 className={styles.secL}>{dict.devRelatedArticlesLabel}</h3>
           <DevProjectRelatedArticles articles={articles} lang={lang} />
         </>
       ) : null}

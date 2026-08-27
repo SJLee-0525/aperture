@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { Modal } from "@/components/Modal";
 import { TimelineList } from "@/components/TimelineList";
 import { DevStackSection } from "@/features/dev/_components/DevStackSection";
@@ -27,6 +29,7 @@ import styles from "./DevCareerView.module.css";
  * @returns {JSX.Element}
  */
 const DevCareerView = ({ config }: { config: DevConfig }) => {
+  const awardsHeadingId = useId();
   const { dict, lang } = useLang();
   const { active: selectedAward, open, select, close } = useQueryModal("award", config.awards);
 
@@ -65,8 +68,10 @@ const DevCareerView = ({ config }: { config: DevConfig }) => {
       )}
 
       {config.awards.length > 0 ? (
-        <section className={`${styles.awards} ${styles.stacked}`}>
-          <div className={styles.sectionLabel}>{dict.devAwardsLabel}</div>
+        <section className={`${styles.awards} ${styles.stacked}`} aria-labelledby={awardsHeadingId}>
+          <h2 id={awardsHeadingId} className={styles.sectionLabel}>
+            {dict.devAwardsLabel}
+          </h2>
           {config.awards.map((award) => (
             <button
               type="button"

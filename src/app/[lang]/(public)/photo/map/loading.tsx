@@ -11,7 +11,7 @@ const SPOT_COUNT = 7;
  */
 export default function MapLoading() {
   return (
-    <div className={styles.view} aria-busy="true">
+    <main className={styles.view} aria-busy="true">
       <aside className={styles.list}>
         <div className={styles.head}>
           <Skeleton width={80} height={11} />
@@ -29,6 +29,6 @@ export default function MapLoading() {
       </aside>
       {/* 지도 stage는 MapCanvas 로딩과 동일하게 정적 map-land 블록(펄스 없음) */}
       <div className={styles.stage} aria-hidden />
-    </div>
+    </main>
   );
 }
