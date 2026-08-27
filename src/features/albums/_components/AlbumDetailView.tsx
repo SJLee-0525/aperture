@@ -9,6 +9,7 @@ import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { ROUTES } from "@/constants/routes";
+import { countLabel } from "@/lib/format/count-label";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 
@@ -58,7 +59,7 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
           <div className={styles.heroText} data-variant={coverUrl ? "image" : "plain"}>
             <h1 className={styles.heroTitle}>{title}</h1>
             <div className={styles.heroMeta}>
-              {pickText(album.subtitle, lang)} · {photos.length} photos
+              {pickText(album.subtitle, lang)} · {countLabel(photos.length, "photo")}
             </div>
           </div>
         </DetailHero>

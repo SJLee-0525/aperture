@@ -22,6 +22,8 @@ const Harness = ({ onChangeEnd, onChangeCancel }: Callbacks) => {
       low={range.low}
       high={range.high}
       unit="mm"
+      minLabel="초점거리 최솟값"
+      maxLabel="초점거리 최댓값"
       onChange={(low, high) => setRange({ low, high })}
       onChangeEnd={onChangeEnd}
       onChangeCancel={onChangeCancel}
@@ -110,5 +112,16 @@ describe("RangeSlider", () => {
     expect(onChangeCancel).toHaveBeenCalledTimes(1);
     expect(onChangeEnd).toHaveBeenCalledTimes(1);
     expect(onChangeEnd).toHaveBeenCalledWith(50, 300);
+  });
+
+  it("각 손잡이가 무엇의 최소·최대인지 이름과 값으로 알린다", () => {
+    render(<Harness onChangeEnd={vi.fn()} onChangeCancel={vi.fn()} />);
+
+    const [lowInput, highInput] = screen.getAllByRole("slider");
+    expect(lowInput.getAttribute("aria-label")).toBe("초점거리 최솟값");
+    expect(highInput.getAttribute("aria-label")).toBe("초점거리 최댓값");
+    // 단위가 없으면 "24" 로만 읽혀 무엇의 값인지 알 수 없다.
+    expect(lowInput.getAttribute("aria-valuetext")).toBe("16mm");
+    expect(highInput.getAttribute("aria-valuetext")).toBe("300mm");
   });
 });

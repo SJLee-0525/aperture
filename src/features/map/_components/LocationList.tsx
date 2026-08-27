@@ -8,6 +8,7 @@ import { preloadPhotoModal } from "@/features/photo-detail/_components/OnDemandP
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
+import { countLabel } from "@/lib/format/count-label";
 import { formatCoords } from "@/lib/format/format-coords";
 import { pickText } from "@/lib/i18n/pick-text";
 
@@ -72,7 +73,7 @@ const LocationList = ({ locations }: Props) => {
     >
       <div className={styles.head}>
         <h2 className="u-label">{dict.locationsLabel}</h2>
-        <span className={styles.count}>{locations.length} spots</span>
+        <span className={styles.count}>{countLabel(locations.length, "spot")}</span>
       </div>
       {locations.map((location) => (
         <LocalizedLink

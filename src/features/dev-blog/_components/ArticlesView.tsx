@@ -19,6 +19,7 @@ import {
   sliceArticlesPage,
 } from "@/features/dev-blog/_lib/article-list-query";
 
+import { countLabel } from "@/lib/format/count-label";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 
@@ -112,7 +113,7 @@ const ArticlesView = ({ articles, tags }: Props) => {
 
   return (
     <main className={styles.main}>
-      <PageToolbar title={dict.devArticlesNav} count={`${filtered.length} articles`} countLive>
+      <PageToolbar title={dict.devArticlesNav} count={countLabel(filtered.length, "article")} countLive>
         <ViewToggle
           options={[
             { id: "grid", label: dict.viewGrid, icon: "square" },

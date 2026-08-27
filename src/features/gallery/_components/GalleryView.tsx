@@ -17,6 +17,7 @@ import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
+import { countLabel } from "@/lib/format/count-label";
 import { parsePhotoFilterQuery } from "@/lib/photo-filter-query";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";
@@ -65,7 +66,7 @@ const GalleryContent = memo(function GalleryContent({
 
   return (
     <main className={styles.main}>
-      <PageToolbar title={dict.workNav} count={`${filter.visible.length} photos`} countLive>
+      <PageToolbar title={dict.workNav} count={countLabel(filter.visible.length, "photo")} countLive>
         <ViewToggle
           options={[
             { id: "mason", label: dict.viewMasonry, icon: "mason" },

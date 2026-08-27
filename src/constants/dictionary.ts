@@ -155,6 +155,8 @@ type UIDict = {
   filterLabel: string;
   cameraLabel: string;
   focalLabel: string;
+  rangeMinLabel: string;
+  rangeMaxLabel: string;
   resetLabel: string;
   emptyResults: string;
   emptyAlbums: string;
@@ -371,6 +373,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     filterLabel: "필터",
     cameraLabel: "카메라",
     focalLabel: "초점거리",
+    rangeMinLabel: "{name} 최솟값",
+    rangeMaxLabel: "{name} 최댓값",
     resetLabel: "초기화",
     emptyResults: "검색 결과가 없습니다",
     emptyAlbums: "아직 등록된 앨범이 없습니다",
@@ -583,6 +587,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     filterLabel: "Filter",
     cameraLabel: "Camera",
     focalLabel: "Focal length",
+    rangeMinLabel: "Minimum {name}",
+    rangeMaxLabel: "Maximum {name}",
     resetLabel: "Reset",
     emptyResults: "No results found",
     emptyAlbums: "No albums yet",

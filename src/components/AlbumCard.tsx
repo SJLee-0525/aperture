@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { countLabel } from "@/lib/format/count-label";
+
 import styles from "./AlbumCard.module.css";
 
 type Props = {
@@ -53,7 +55,7 @@ const AlbumCard = ({
     <div className={styles.info}>
       <div className={styles.title}>{title}</div>
       <div className={styles.meta}>
-        {subtitle} · {count} photos
+        {subtitle} · {countLabel(count, "photo")}
       </div>
     </div>
   </Link>

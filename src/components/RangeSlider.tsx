@@ -10,6 +10,10 @@ type Props = {
   low: number;
   high: number;
   unit?: string;
+  /** 낮은 쪽 손잡이의 접근 이름. "min mm" 처럼 무엇의 최소인지 없는 이름을 막는다. */
+  minLabel: string;
+  /** 높은 쪽 손잡이의 접근 이름. */
+  maxLabel: string;
   onChange: (low: number, high: number) => void;
   /** pointerup, keyup, blur에서 현재 범위를 전달한다. */
   onChangeEnd?: (low: number, high: number) => void;
@@ -38,6 +42,8 @@ const RangeSlider = ({
   low,
   high,
   unit = "",
+  minLabel,
+  maxLabel,
   onChange,
   onChangeEnd,
   onChangeCancel,
@@ -103,7 +109,8 @@ const RangeSlider = ({
           value={low}
           onChange={changeOf("low")}
           className={styles.input}
-          aria-label={`min ${unit}`}
+          aria-label={minLabel}
+          aria-valuetext={`${low}${unit}`}
           {...endHandlers("low")}
         />
         <input
@@ -113,7 +120,8 @@ const RangeSlider = ({
           value={high}
           onChange={changeOf("high")}
           className={styles.input}
-          aria-label={`max ${unit}`}
+          aria-label={maxLabel}
+          aria-valuetext={`${high}${unit}`}
           {...endHandlers("high")}
         />
       </div>

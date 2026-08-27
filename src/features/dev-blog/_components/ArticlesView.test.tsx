@@ -96,7 +96,7 @@ describe("ArticlesView", () => {
     mocks.search = new URLSearchParams("tag=testing");
     renderView();
 
-    expect(screen.getByText("1 articles")).toBeTruthy();
+    expect(screen.getByText("1 article")).toBeTruthy();
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
   });
 

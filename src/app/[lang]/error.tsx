@@ -14,18 +14,18 @@ type Props = {
 };
 
 /**
- * 로케일 세그먼트 밖 에러 바운더리 — 렌더 중 오류를 잡는다(루트 레이아웃은 유지).
- * 스토어 모드 LangProvider 를 읽는다. 공개 트리에서 던진 오류는 URL 언어로 렌더하는
- * `[lang]/error.tsx` 가 먼저 받는다.
- * 바운더리가 오류를 삼키면 전역 핸들러가 못 보므로 여기서 직접 전송한다 —
- * 단, 동의 뒤 로드된 SDK가 있을 때만이고 미로드 시 콘솔 기록만 남는다(ADR-0004).
+ * 로케일 안의 에러 바운더리. `[lang]/layout` 의 경로 모드 LangProvider 아래라 저장된 선호가
+ * 아니라 URL 의 언어로 렌더된다. 공개 트리에서 던진 오류가 여기로 온다.
+ *
+ * 바운더리가 오류를 삼키면 전역 핸들러가 못 보므로 여기서 직접 전송한다.
+ * 단, 동의 뒤 로드된 SDK 가 있을 때만이고 미로드 시 콘솔 기록만 남는다(ADR-0004).
  *
  * @param {Props} props 오류 정보와 재시도 동작.
  * @param {Error & { digest?: string }} props.error 렌더링 중 포착한 오류.
  * @param {() => void} props.reset 오류 경계를 다시 렌더링하는 콜백.
- * @returns {JSX.Element} 현재 언어의 오류 안내 화면.
+ * @returns {JSX.Element} URL 언어의 오류 안내 화면.
  */
-export default function Error({ error, reset }: Props) {
+export default function LocaleError({ error, reset }: Props) {
   const { dict } = useLang();
 
   useEffect(() => {

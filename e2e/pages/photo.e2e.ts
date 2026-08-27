@@ -243,7 +243,7 @@ test.describe("Photo", () => {
     await page.getByRole("button", { name: "필터" }).click();
     const historyLength = await page.evaluate(() => window.history.length);
 
-    const minSlider = page.getByLabel("min mm");
+    const minSlider = page.getByLabel("초점거리 최솟값");
     await minSlider.focus();
     await page.keyboard.press("ArrowRight");
 

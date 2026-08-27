@@ -108,6 +108,8 @@ const FilterBar = (props: Props) => {
                     low={props.focalMin}
                     high={props.focalMax}
                     unit="mm"
+                    minLabel={dict.rangeMinLabel.replace("{name}", dict.focalLabel)}
+                    maxLabel={dict.rangeMaxLabel.replace("{name}", dict.focalLabel)}
                     onChange={props.onFocal}
                     onChangeEnd={props.onFocalCommit}
                     onChangeCancel={props.onFocalCancel}
