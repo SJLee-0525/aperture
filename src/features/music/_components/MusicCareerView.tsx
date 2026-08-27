@@ -1,8 +1,7 @@
 "use client";
 
-import { useId } from "react";
-
-import { Modal } from "@/components/Modal";
+import { AwardDetailModal } from "@/components/AwardDetailModal";
+import { AwardList } from "@/components/AwardList";
 import { TimelineList } from "@/components/TimelineList";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -28,7 +27,6 @@ type Props = { config: MusicConfig; awards: MusicAward[] };
  * @returns {JSX.Element}
  */
 const MusicCareerView = ({ config, awards }: Props) => {
-  const awardsHeadingId = useId();
   const { dict, lang } = useLang();
   const { active: selected, open, select, close } = useQueryModal("award", awards);
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
@@ -52,42 +50,33 @@ const MusicCareerView = ({ config, awards }: Props) => {
         className={styles.stacked}
       />
 
-      <section className={styles.awards} aria-labelledby={awardsHeadingId}>
-        <h2 id={awardsHeadingId} className={styles.awLabel}>
-          {dict.musicAwardsNav}
-        </h2>
-        {awards.map((award) => (
-          <button
-            type="button"
-            key={award.id}
-            className={styles.row}
-            onClick={() => select(award.id)}
-          >
-            <span className={styles.yr}>{award.year}</span>
-            <span className={styles.an}>{pickText(award.name, lang)}</span>
-            <span className={styles.ap}>{award.place}</span>
-          </button>
-        ))}
-        <div className={styles.awEnd} />
-      </section>
+      <AwardList
+        label={dict.musicAwardsNav}
+        awards={awards.map((award) => ({
+          id: award.id,
+          year: award.year,
+          name: pickText(award.name, lang),
+          place: award.place,
+        }))}
+        onSelect={select}
+      />
 
-      <Modal
+      <AwardDetailModal
+        award={
+          selected
+            ? {
+                year: selected.year,
+                name: pickText(selected.name, lang),
+                place: selected.place,
+                description: pickText(selected.description, lang),
+              }
+            : null
+        }
+        label={dict.musicAwardsNav}
+        closeLabel={dict.closeLabel}
         open={open}
         onClose={close}
-        closeLabel={dict.closeLabel}
-        maxWidth={600}
-        crumb={selected ? `${dict.musicAwardsNav} · ${selected.year}` : ""}
-        label={selected ? pickText(selected.name, lang) : ""}
-      >
-        {selected ? (
-          <div className={styles.award}>
-            <div className={styles.ay}>{selected.year}</div>
-            <div className={styles.awName}>{pickText(selected.name, lang)}</div>
-            <div className={styles.awPlace}>{selected.place}</div>
-            <p className={styles.ad}>{pickText(selected.description, lang)}</p>
-          </div>
-        ) : null}
-      </Modal>
+      />
     </main>
   );
 };
