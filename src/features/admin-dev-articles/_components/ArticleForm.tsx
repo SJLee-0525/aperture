@@ -83,7 +83,8 @@ const ArticleForm = ({ articleId, initial }: Props) => {
       {recovery.pending ? (
         <div className={`${styles.panel} ${styles.recovery}`}>
           <p className={styles.recoveryNote}>
-            저장하지 않은 편집본이 있습니다 ({formatLocalTimestamp(new Date(recovery.pending.savedAt))}).
+            저장하지 않은 편집본이 있습니다 (
+            {formatLocalTimestamp(new Date(recovery.pending.savedAt))}).
           </p>
           <div className={styles.recoveryActions}>
             <AdminButton

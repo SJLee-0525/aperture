@@ -8,6 +8,8 @@ import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useMediaEditor } from "@/features/admin-music-media/_hooks/use-media-editor";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { MusicMedia } from "@/types/music";
 
 type Props = {
@@ -25,10 +27,13 @@ type Props = {
  * @returns {JSX.Element}
  */
 const MediaForm = ({ mediaId, initial }: Props) => {
-  const { form, isEdit, error, saving, patch, cancel, submit } = useMediaEditor(mediaId, initial);
+  const { form, issues, formRef, isEdit, error, saving, patch, cancel, submit } = useMediaEditor(
+    mediaId,
+    initial,
+  );
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
+    <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "영상 수정" : "새 영상"}</h1>
       </header>
@@ -40,6 +45,8 @@ const MediaForm = ({ mediaId, initial }: Props) => {
           value={form.title}
           onChange={(next) => patch({ title: next })}
           required
+          field="title"
+          error={issueFor(issues, "title.ko")}
         />
       </section>
 

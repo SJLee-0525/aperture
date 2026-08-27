@@ -13,9 +13,11 @@ import { validatePhotoInput } from "@/features/admin-photos/_lib/validate-photo-
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
 import { ROUTES } from "@/constants/routes";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { PhotoInput } from "@/lib/supabase/photos";
 import type { Photo } from "@/types/photo";
 
@@ -29,6 +31,8 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   // 공개한다는 사실을 모른 채 저장하게 된다.
   const [coordsFromExif, setCoordsFromExif] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.image])));
@@ -78,9 +82,10 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    const validationError = validatePhotoInput(form);
-    if (validationError) {
-      setError(validationError);
+    const nextIssues = validatePhotoInput(form);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -111,6 +116,8 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   };
 
   return {
+    formRef,
+    issues,
     cancel,
     clearCoords,
     coordsFromExif,

@@ -12,8 +12,10 @@ import {
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
 import { ROUTES } from "@/constants/routes";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { MusicWorkInput } from "@/lib/supabase/music";
 import type { ImageMeta } from "@/types/image";
 import type { MusicWork } from "@/types/music";
@@ -25,6 +27,8 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
     initial ? workToInput(initial) : emptyWorkInput(),
   );
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.poster])));
@@ -58,9 +62,10 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    const validationError = validateWorkInput(form);
-    if (validationError) {
-      setError(validationError);
+    const nextIssues = validateWorkInput(form);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -83,6 +88,8 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
 
   return {
     form,
+    issues,
+    formRef,
     isEdit,
     error,
     saving,

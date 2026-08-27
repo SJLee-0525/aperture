@@ -10,6 +10,8 @@ import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor"
 
 import { fromDatetimeLocal, toDatetimeLocal } from "@/features/admin-photos/_lib/datetime-local";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { Photo } from "@/types/photo";
 
 import styles from "./PhotoForm.module.css";
@@ -49,6 +51,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
     clearCoords,
     coordsFromExif,
     error,
+    formRef,
+    issues,
     form,
     isEdit,
     lat,
@@ -65,7 +69,7 @@ const PhotoForm = ({ photoId, initial }: Props) => {
   } = usePhotoEditor(photoId, initial);
 
   return (
-    <form className={base.form} onSubmit={submit} noValidate>
+    <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
       <header className={base.head}>
         <h1 className={base.title}>{isEdit ? "사진 수정" : "새 사진"}</h1>
       </header>
@@ -87,6 +91,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
           value={form.title}
           onChange={(next) => patch({ title: next })}
           required
+          field="title"
+          error={issueFor(issues, "title.ko")}
         />
       </section>
 

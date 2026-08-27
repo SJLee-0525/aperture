@@ -5,13 +5,13 @@ import { validatePhotoInput } from "@/features/admin-photos/_lib/validate-photo-
 
 describe("validatePhotoInput", () => {
   it("한국어 제목을 먼저 요구한다", () => {
-    expect(validatePhotoInput(createPhotoInput())).toBe("제목(한국어)을 입력하세요.");
+    expect(validatePhotoInput(createPhotoInput())).toContainEqual(expect.objectContaining({ message: "제목(한국어)을 입력하세요." }));
   });
 
   it("제목이 있으면 업로드된 이미지를 요구한다", () => {
     const input = { ...createPhotoInput(), title: { ko: "사진", en: "" } };
 
-    expect(validatePhotoInput(input)).toBe("이미지를 먼저 업로드하세요.");
+    expect(validatePhotoInput(input)).toContainEqual(expect.objectContaining({ message: "이미지를 먼저 업로드하세요." }));
   });
 
   it("한국어 제목과 이미지가 있으면 저장할 수 있다", () => {
@@ -21,6 +21,6 @@ describe("validatePhotoInput", () => {
       image: { url: "/photo.webp", path: "photos/photo.webp", w: 100, h: 100 },
     };
 
-    expect(validatePhotoInput(input)).toBeNull();
+    expect(validatePhotoInput(input)).toEqual([]);
   });
 });

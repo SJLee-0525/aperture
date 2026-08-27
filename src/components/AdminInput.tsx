@@ -47,6 +47,7 @@ const AdminInput = (props: AdminInputProps) => {
     id: field?.controlId,
     "aria-describedby": field?.describedBy,
     "aria-invalid": isInvalid ? true : undefined,
+    "data-field": field?.field,
   };
 
   if (multiline) {

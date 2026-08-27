@@ -2,7 +2,7 @@
 
 import { arrayMove } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   albumToInput,
@@ -13,8 +13,10 @@ import { validateAlbumInput } from "@/features/admin-albums/_lib/validate-album-
 
 import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { AlbumInput } from "@/lib/supabase/albums";
 import type { AdminPhotoListItem } from "@/types/admin";
 import type { Album } from "@/types/album";
@@ -31,6 +33,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   const [photoStatus, setPhotoStatus] = useState<PhotoStatus>("loading");
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -103,9 +107,10 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
       ...normalized,
       cover: photos.find((photo) => photo.id === normalized.coverPhotoId)?.image ?? null,
     };
-    const validationError = validateAlbumInput(input);
-    if (validationError) {
-      setError(validationError);
+    const nextIssues = validateAlbumInput(input);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -123,6 +128,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   };
 
   return {
+    formRef,
+    issues,
     cancel,
     error,
     form,

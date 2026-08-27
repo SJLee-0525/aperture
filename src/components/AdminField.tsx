@@ -10,6 +10,8 @@ type AdminFieldContextValue = {
   controlId: string;
   describedBy?: string;
   invalid: boolean;
+  /** 검증 결과가 이 이름으로 필드를 찾는다. 제출 실패 시 포커스 대상이기도 하다. */
+  field?: string;
 };
 
 const AdminFieldContext = createContext<AdminFieldContextValue | null>(null);
@@ -25,6 +27,8 @@ type AdminFieldProps = {
   hint?: ReactNode;
   /** 검증 실패 문구. 있으면 입력이 aria-invalid 를 받는다. */
   error?: ReactNode;
+  /** 검증 결과의 field 이름. 감싼 입력이 data-field 로 받아 포커스 대상이 된다. */
+  field?: string;
 } & Omit<ComponentProps<"div">, "children"> & { children?: ReactNode };
 
 /**
@@ -39,6 +43,7 @@ const AdminField = ({
   required,
   hint,
   error,
+  field,
   className,
   children,
   ...rest
@@ -56,7 +61,7 @@ const AdminField = ({
         {required ? " *" : null}
       </label>
       <AdminFieldContext.Provider
-        value={{ controlId, describedBy: describedBy || undefined, invalid: error != null }}
+        value={{ controlId, describedBy: describedBy || undefined, invalid: error != null, field }}
       >
         {children}
       </AdminFieldContext.Provider>

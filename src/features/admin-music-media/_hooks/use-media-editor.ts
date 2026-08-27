@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import {
   emptyMediaInput,
@@ -11,8 +11,10 @@ import {
 import { validateMediaInput } from "@/features/admin-music-media/_lib/validate-media-input";
 
 import { ROUTES } from "@/constants/routes";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { MusicMediaInput } from "@/lib/supabase/music";
 import type { MusicMedia } from "@/types/music";
 
@@ -23,6 +25,8 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
     initial ? mediaToInput(initial) : emptyMediaInput(),
   );
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
 
   const patch = (next: Partial<MusicMediaInput>) =>
@@ -33,9 +37,10 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    const validationError = validateMediaInput(form);
-    if (validationError) {
-      setError(validationError);
+    const nextIssues = validateMediaInput(form);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -52,7 +57,7 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
     }
   };
 
-  return { form, isEdit, error, saving, patch, cancel, submit };
+  return { form, issues, formRef, isEdit, error, saving, patch, cancel, submit };
 };
 
 export { useMediaEditor };

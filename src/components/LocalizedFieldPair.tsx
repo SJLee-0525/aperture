@@ -19,6 +19,10 @@ type Props = {
   size?: AdminInputSize;
   disabled?: boolean;
   placeholder?: LocalizedText;
+  /** 검증 결과의 field 이름 어간. 한국어 쪽이 `{field}.ko` 를 받는다. */
+  field?: string;
+  /** 한국어 쪽에 붙는 검증 문구. 저장 조건이 ko 기준이라 en 은 오류를 갖지 않는다. */
+  error?: string;
 };
 
 import styles from "./LocalizedFieldPair.module.css";
@@ -39,6 +43,8 @@ const LocalizedFieldPair = ({
   size,
   disabled,
   placeholder,
+  field,
+  error,
 }: Props) => {
   const side = (lang: Lang) => {
     const shared = {
@@ -64,7 +70,12 @@ const LocalizedFieldPair = ({
 
   return (
     <div className={styles.pair}>
-      <AdminField label={`${label} (한국어)`} required={required}>
+      <AdminField
+        label={`${label} (한국어)`}
+        required={required}
+        field={field ? `${field}.ko` : undefined}
+        error={error}
+      >
         {side("ko")}
       </AdminField>
       <AdminField label={`${label} (English)`}>{side("en")}</AdminField>

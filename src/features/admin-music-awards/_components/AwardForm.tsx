@@ -8,6 +8,8 @@ import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useAwardEditor } from "@/features/admin-music-awards/_hooks/use-award-editor";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { MusicAward } from "@/types/music";
 
 type Props = {
@@ -25,10 +27,13 @@ type Props = {
  * @returns {JSX.Element}
  */
 const AwardForm = ({ awardId, initial }: Props) => {
-  const { form, isEdit, error, saving, patch, cancel, submit } = useAwardEditor(awardId, initial);
+  const { form, issues, formRef, isEdit, error, saving, patch, cancel, submit } = useAwardEditor(
+    awardId,
+    initial,
+  );
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
+    <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "수상 수정" : "새 수상"}</h1>
       </header>
@@ -36,7 +41,7 @@ const AwardForm = ({ awardId, initial }: Props) => {
       <section className={styles.section}>
         <h2 className={styles.legend}>연도 · 장소</h2>
         <div className={styles.grid2}>
-          <AdminField label="연도" required>
+          <AdminField label="연도" required field="year" error={issueFor(issues, "year")}>
             <AdminInput
               type="number"
               value={form.year}
@@ -62,6 +67,8 @@ const AwardForm = ({ awardId, initial }: Props) => {
           value={form.name}
           onChange={(next) => patch({ name: next })}
           required
+          field="name"
+          error={issueFor(issues, "name.ko")}
         />
       </section>
 

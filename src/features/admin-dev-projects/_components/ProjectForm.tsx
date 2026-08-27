@@ -9,6 +9,8 @@ import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { DevProject } from "@/types/dev";
 
 import { DevImageField } from "./DevImageField";
@@ -33,6 +35,8 @@ type Props = {
 const ProjectForm = ({ projectId, initial }: Props) => {
   const {
     form,
+    issues,
+    formRef,
     isEdit,
     tagDraft,
     setTagDraft,
@@ -57,7 +61,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
   } = useProjectEditor(projectId, initial);
 
   return (
-    <form className={base.form} onSubmit={submit} noValidate>
+    <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
       <header className={base.head}>
         <h1 className={base.title}>{isEdit ? "프로젝트 수정" : "새 프로젝트"}</h1>
       </header>
@@ -69,6 +73,8 @@ const ProjectForm = ({ projectId, initial }: Props) => {
           value={form.title}
           onChange={(next) => patch({ title: next })}
           required
+          field="title"
+          error={issueFor(issues, "title.ko")}
         />
       </section>
 

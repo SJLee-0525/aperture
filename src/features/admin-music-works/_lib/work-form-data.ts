@@ -13,7 +13,9 @@ const toDateValue = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+/** 빈 입력은 epoch 로 돌려준다. toDateValue 가 그것을 다시 빈 칸으로 그린다. */
 const fromDateValue = (value: string): Date => {
+  if (!value) return new Date(0);
   const [year, month, day] = value.split("-").map(Number);
   return new Date(year, (month || 1) - 1, day || 1);
 };

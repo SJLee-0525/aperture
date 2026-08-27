@@ -13,8 +13,10 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 
 import { ROUTES } from "@/constants/routes";
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { DevProjectInput } from "@/lib/supabase/dev";
 import type { DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
@@ -30,6 +32,8 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   );
   const [tagDraft, setTagDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.cover, ...(initial?.images ?? [])])));
@@ -119,9 +123,10 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    const validationError = validateProjectInput(form);
-    if (validationError) {
-      setError(validationError);
+    const nextIssues = validateProjectInput(form);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -144,6 +149,8 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
 
   return {
     form,
+    issues,
+    formRef,
     isEdit,
     tagDraft,
     setTagDraft,

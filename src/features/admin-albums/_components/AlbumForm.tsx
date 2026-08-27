@@ -6,6 +6,8 @@ import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { Album } from "@/types/album";
 
 import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
@@ -28,6 +30,8 @@ const AlbumForm = ({ albumId, initial }: Props) => {
   const {
     cancel,
     error,
+    formRef,
+    issues,
     form,
     isEdit,
     patch,
@@ -43,7 +47,7 @@ const AlbumForm = ({ albumId, initial }: Props) => {
   } = useAlbumEditor(albumId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
+    <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "앨범 수정" : "새 앨범"}</h1>
       </header>
@@ -55,6 +59,8 @@ const AlbumForm = ({ albumId, initial }: Props) => {
           value={form.title}
           onChange={(next) => patch({ title: next })}
           required
+          field="title"
+          error={issueFor(issues, "title.ko")}
         />
       </section>
 

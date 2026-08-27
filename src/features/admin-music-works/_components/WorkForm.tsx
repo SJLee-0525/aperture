@@ -10,6 +10,8 @@ import { useWorkEditor } from "@/features/admin-music-works/_hooks/use-work-edit
 
 import { fromDateValue, toDateValue } from "@/features/admin-music-works/_lib/work-form-data";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { MusicWork } from "@/types/music";
 
 import { PosterUploadField } from "./PosterUploadField";
@@ -32,6 +34,8 @@ type Props = {
 const WorkForm = ({ workId, initial }: Props) => {
   const {
     form,
+    issues,
+    formRef,
     isEdit,
     error,
     saving,
@@ -47,7 +51,7 @@ const WorkForm = ({ workId, initial }: Props) => {
   } = useWorkEditor(workId, initial);
 
   return (
-    <form className={base.form} onSubmit={submit} noValidate>
+    <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
       <header className={base.head}>
         <h1 className={base.title}>{isEdit ? "연주 수정" : "새 연주"}</h1>
       </header>
@@ -59,6 +63,8 @@ const WorkForm = ({ workId, initial }: Props) => {
           value={form.title}
           onChange={(next) => patch({ title: next })}
           required
+          field="title"
+          error={issueFor(issues, "title.ko")}
         />
       </section>
 
@@ -74,13 +80,17 @@ const WorkForm = ({ workId, initial }: Props) => {
       <section className={base.section}>
         <h2 className={base.legend}>일시</h2>
         <div className={base.grid2}>
-          <AdminField label="공연 날짜">
+          <AdminField
+            label="공연 날짜"
+            required
+            field="performedAt"
+            error={issueFor(issues, "performedAt")}
+          >
             <AdminInput
               type="date"
               value={toDateValue(form.performedAt)}
-              onChange={(e) =>
-                e.target.value ? patch({ performedAt: fromDateValue(e.target.value) }) : null
-              }
+              onChange={(e) => patch({ performedAt: fromDateValue(e.target.value) })}
+              required
             />
           </AdminField>
           <AdminField label="시각">
