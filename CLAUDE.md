@@ -21,13 +21,13 @@
 | 섹션     | 경로       | 액센트 (라이트 / 다크)          | 정체성 / 콘텐츠                                                                           |
 | -------- | ---------- | ------------------------------- | ----------------------------------------------------------------------------------------- |
 | **랜딩** | `/`        | 사진과 같은 블루                | 3섹션 진입 허브 — 개발 행은 프로젝트(`/dev/projects`), 사진·음악 행은 각 섹션 루트로 이동 |
-| **사진** | `/photo/*` | **블루** `#0066cc` / `#4da3ff` | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달 + 프레임 내보내기                |
+| **사진** | `/photo/*` | **블루** `#0066cc` / `#4da3ff` | 서브브랜드 `Aperture.` — 작업·앨범·지도·소개 + 상세 모달                                  |
 | **음악** | `/music/*` | **레드** `#b4232d` / `#ff5b60` | 피아니스트 — 연주·경력(학력·경력·수상)·영상·소개 (개별 페이지 + 연주/수상 모달)           |
 | **개발** | `/dev/*`   | **그린** `#087a32` / `#2ecc71` | 프론트엔드 개발자 — 소개·경력(기술 스택 포함)·프로젝트 (개별 페이지, Phase C)             |
 | **연락** | `/contact` | **주황** `#a84d00` / `#fb923c` | 전역 연락 페이지 — mailto 폼 + 인스타·깃헙·메일 링크 (섹션 아니지만 자체 액센트)          |
 
 - **방문자**: 로그인 없음, **ko/en 토글**, 다크모드. 각 섹션을 자유 열람.
-  - 사진: EXIF·촬영 위치·태그·**프레임 내보내기**.
+  - 사진: EXIF·촬영 위치·태그.
   - 음악: 연주 프로그램·예매 정보·영상 임베드.
   - 개발: 프로젝트 상세(개요·담당·트러블슈팅·스택·링크).
 - **관리자(본인 1명)**: 로그인 후 **세 섹션 모두** 콘텐츠 관리(CMS). 사진 업로드 시 **EXIF 자동 추출**, **드래그로 수동 정렬**.
@@ -45,7 +45,6 @@
 | i18n        | 자체 구현 (라이브러리 X)                          | **경로 기반 /ko·/en** (`app/[lang]/`, 구글 권장) + `pickText` 폴백. **전 섹션 이중언어**. [ADR-0002](docs/adr/0002-path-based-i18n.md) |
 | 지도        | **MapLibre GL + CARTO**                           | 사진 좌표를 실제 지도에 핀. 무료 타일·**키/카드 없음**, 테마 연동(Positron/Dark Matter)                                                |
 | EXIF        | `exifr`                                           | 업로드 시 **압축 前** 자동 추출 (조리개·셔터·ISO·초점·렌즈·카메라·촬영일시·GPS)                                                        |
-| 내보내기    | 클라이언트 canvas                                 | 프레임 6종 + EXIF 각인 → webp. **저장 해상도 기준**(원본 미보관)                                                                       |
 | 애니메이션  | CSS + `motion`                                    | 랜딩/개발 reveal-on-scroll, 타이핑 효과, 페이지 전환. 무거운 라이브러리 회피                                                           |
 | 블로그 본문 | `mdast-util-from-markdown` (+gfm-table·directive) | 파싱만 라이브러리, 렌더는 **허용 노드 → React element 직접 매핑**. HTML 문자열 단계가 없어 sanitizer·`dangerouslySetInnerHTML` 불필요  |
 | 코드 색칠   | `shiki` **서버 전용**                             | 문법·테마를 브라우저에 보내지 않는다. 토큰만 넘기고 라이트·다크는 CSS 변수 한 쌍(`--shiki-light`/`--shiki-dark`)                       |
@@ -185,11 +184,17 @@ src/
 │   ├── gallery/                # 예) _components/{GalleryView,FilterBar}.tsx(+.module.css) · _hooks/use-photo-filter · _lib/filter-photos
 │   ├── landing/                # _components/LandingView (reveal-on-scroll, 3섹션 진입)
 │   ├── photo-detail/           # _components/{PhotoModal(라이트박스/바텀시트),ExifPanel,미니맵} · _hooks/use-photo-modal
-│   ├── albums/  map/  about/   # 사진 섹션 뷰 (_components/)
-│   ├── export/                 # 프레임 내보내기
+│   ├── albums/  map/  photo-about/  # 사진 섹션 뷰 (_components/)
 │   ├── contact/                # _components/ContactView (mailto 폼 + 소셜 링크)
+│   ├── search/                 # 통합 검색 결과 (_components/) · _lib/(문서 수집·그룹·본문 매치)
+│   ├── chat/                   # AI 챗봇 — _components/ChatPanel · _lib/(요청 처리·의도·프롬프트·RAG 문맥)
 │   ├── analytics/              # 분석 동의 상태·배너·GA 동적 로딩과 철회 처리
-│   ├── legal/                  # _components/LegalDocumentView 공용 레이아웃 · _lib/legal-documents.tsx 한·영 정책 원문
+│   ├── monitoring/  status/    # Sentry 동의 게이트 · 상태 페이지
+│   ├── webmcp/                 # 브라우저 에이전트 도구 등록 (ADR-0003)
+│   ├── motion/                 # LazyMotion 경계 — reveal·전환이 쓰는 최소 번들
+│   ├── pointer-chrome/         # ★ 횡단(platform) — 커스텀 커서 + 커스텀 스크롤바. _lib/pointer-chrome-contract 가 둘의 DOM 계약
+│   ├── site-footer/            # 푸터 + 동의 철회 진입
+│   ├── legal/                  # _components/LegalDocumentView 공용 레이아웃 · _lib/legal-registry(라우팅) · _lib/legal/(종류·언어별 원문 6벌)
 │   ├── music/                  # 음악 섹션: 연주(Works)·경력(학력·경력·수상)·영상·소개 개별 뷰 + 연주/수상 모달 (_components/)
 │   ├── dev/                    # 개발 섹션: 소개·경력(+기술 스택)·프로젝트 뷰 + 프로젝트 모달 (_components/)
 │   ├── dev-blog/               # ★ 횡단(platform) — 공개 상세와 관리자 편집기가 공유. _lib/markdown-*(파서·검증·목차·읽기 시간·서버 색칠) · _components/{ArticleDocumentView,ArticleBody,ArticleCodeBlock,ArticleYouTube}
@@ -198,6 +203,8 @@ src/
 │   ├── auth/                   # _components/{LoginForm,AuthGuard} · _hooks/use-auth
 │   ├── image-upload/           # _hooks/{use-image-upload,use-poster-upload,use-dev-image-upload} · _lib/{compress,read-dimensions}
 │   ├── admin-dev-articles/     # 블로그 CMS: _lib/(저장소 경계·slug·발행 조건·복구본·미리보기 action) · _hooks/ · _components/
+│   ├── admin-shell/            # ★ 횡단(platform) — 목록·폼·행·문서 게이트 공용 골격을 admin-* 전부가 쓴다
+│   ├── admin-global/  admin-maintenance/  # 전역 설정 편집기 · 유지보수 도구
 │   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·DB 접근 금지, props만
 │   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css
@@ -206,12 +213,17 @@ src/
 │   └── admin/                  # require-admin-session, row-codec, sort-rpc
 ├── lib/admin/                  # 관리자 저장소 경계 — 컬렉션별 *-repository.ts 가 mock(로컬)↔live(Supabase) 선택 ★ + mock/(로컬 저장 구현)
 ├── lib/content/                # 공개 페이지 getter — mock↔Supabase 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
-├── lib/i18n/                   # pick-text.ts (ko/en 폴백)
+├── lib/i18n/                   # pick-text.ts (ko/en 폴백) · locale-path.ts
 ├── lib/exif/                   # exifr 래퍼 (사진 전용)
+├── lib/sentry-triage/          # Sentry 웹훅 → LLM 판정 → Discord 카드 (ADR-0006, UI 없음)
+├── lib/monitoring/  lib/http/  lib/rate-limit/  lib/auth/  # DSN 판정 · 본문 상한 · Upstash 카운터 · 관리자 게이트
 ├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
-├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES, STORAGE_KEYS, FRAME_STYLES, SECTIONS(액센트)
-├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-scroll-lock)
-└── types/                      # photo, album, music(work/award/media/config), dev(project), dev-article(+tag), site, tag, localized, timeline, lang, image, coords
+├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES(+DETAIL_QUERY_KEYS), STORAGE_KEYS, BREAKPOINTS, SECTIONS(액센트)
+├── hooks/                      # 2개 이상 feature가 공유하는 hook만 (use-dialog, use-scroll-lock, use-detail-query-session)
+├── assets/                     # 폰트·정적 자산
+├── types/                      # photo, album, music(work/award/media/config), dev(project), dev-article(+tag), site, tag, localized, timeline, lang, image, coords
+├── proxy.ts                    # 무-로케일 루트 `/` 만 조건부 307 (ADR-0002)
+└── instrumentation.ts · instrumentation-client.ts  # Sentry 서버·엣지·브라우저 초기화
 ```
 
 의존 방향: `app → features → components` (역방향 금지). barrel export(index.ts) 금지 — 직접 경로 import.
@@ -341,6 +353,7 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
   (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
 - **features/ 내부 = 타입별 하위폴더**(`_components/`·`_hooks/`·`_lib/`) — 위 「디렉토리 구조」 섹션 참조.
 - **관리자 UI = 공용 프리미티브(AdminButton·AdminInput·AdminField) + 용어·치수 규칙** — [docs/admin-ui-conventions.md](docs/admin-ui-conventions.md)
+- **공개 화면 = 지면 열(`--page-max`·`.u-page-main`)·스크림 3층·포커스 링 소유권·`.sr-only`** — [docs/public-ui-conventions.md](docs/public-ui-conventions.md)
 
 ### 코드 주석과 JSDoc 작성 규칙 ★
 

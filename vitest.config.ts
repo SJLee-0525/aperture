@@ -10,7 +10,7 @@ export default defineConfig({
       reporter: ["text", "html"],
       include: [
         "src/features/**/_lib/*.ts",
-        // 관리자 mock 저장소 — repository 조립 모듈은 firebase 를 끌고 오므로 순수 구현만 잰다.
+        // 관리자 mock 저장소 — 로컬 저장 구현과 mock/live 선택만 잰다.
         "src/lib/admin/mock/*.ts",
         "src/lib/admin/select-repository.ts",
         "src/lib/photo/filter-query.ts",

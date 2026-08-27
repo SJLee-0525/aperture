@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Accepted. 저장 계층은 [ADR-0005](0005-supabase-migration.md) 가 대체했다 — 벡터는 Firestore
+`ragDocuments` 가 아니라 Supabase 의 `rag_documents` 에 있고, 관리자 인가는 Firebase ID token
+이 아니라 Supabase access token 의 `app_metadata.role` 이다. 서버리스 경계, 모델·차원 규약,
+증분 동기화 결정은 그대로 유효하다.
 
 ## Context
 
