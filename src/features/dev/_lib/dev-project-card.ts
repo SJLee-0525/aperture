@@ -20,4 +20,19 @@ const toDevProjectCard = (project: DevProject): DevProjectCardData => ({
 const toDevProjectCards = (projects: DevProject[]): DevProjectCardData[] =>
   projects.map(toDevProjectCard);
 
-export { toDevProjectCard, toDevProjectCards };
+/**
+ * 지정한 순서대로 프로젝트 카드를 만든다. 글의 연관 프로젝트 목록이 쓴다.
+ * 공개 목록에 없는 프로젝트(비공개·삭제)는 빠진다.
+ *
+ * @param ids 화면에 놓을 순서.
+ * @param projects 공개 프로젝트 전체.
+ */
+const toDevProjectCardsByIds = (
+  ids: readonly string[],
+  projects: DevProject[],
+): DevProjectCardData[] => {
+  const cardById = new Map(toDevProjectCards(projects).map((card) => [card.id, card]));
+  return ids.map((id) => cardById.get(id)).filter((card) => card !== undefined);
+};
+
+export { toDevProjectCard, toDevProjectCards, toDevProjectCardsByIds };

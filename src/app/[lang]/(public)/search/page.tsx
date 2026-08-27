@@ -5,6 +5,7 @@ import { SearchResults } from "@/features/search/_components/SearchResults";
 
 import { buildSearchGroups } from "@/features/search/_lib/build-search-groups";
 import { fetchSearchDocuments } from "@/features/search/_lib/fetch-search-documents";
+import { readSearchQuery } from "@/features/search/_lib/read-search-query";
 import { searchArticleBodies } from "@/features/search/_lib/search-article-bodies";
 
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -52,9 +53,7 @@ const SearchResultsContent = async ({
   searchParamsPromise: Props["searchParams"];
 }) => {
   const [{ lang }, searchParams] = await Promise.all([paramsPromise, searchParamsPromise]);
-  // `?q=a&q=b` 는 배열로 들어온다. 검색창이 만드는 형태가 아니므로 첫 값만 쓴다.
-  const rawQuery = searchParams.q;
-  const q = (Array.isArray(rawQuery) ? (rawQuery[0] ?? "") : (rawQuery ?? "")).trim();
+  const q = readSearchQuery(searchParams.q);
 
   const [documents, bodyMatches] = await Promise.all([
     fetchSearchDocuments(),

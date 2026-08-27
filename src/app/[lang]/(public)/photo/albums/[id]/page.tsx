@@ -3,6 +3,7 @@ import { cache, Suspense } from "react";
 
 import { AlbumDetailView } from "@/features/albums/_components/AlbumDetailView";
 
+import { albumPageDescription } from "@/features/albums/_lib/album-page-copy";
 import {
   resolveAlbumCover,
   resolveAlbumCoverPreview,
@@ -50,18 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = pickText(album.title, lang);
-  const koSubtitle = pickText(album.subtitle, "ko");
-  const enSubtitle = pickText(album.subtitle, "en");
-  const koTitle = pickText(album.title, "ko");
-  const enTitle = pickText(album.title, "en");
-  const description = {
-    ko: koSubtitle
-      ? `${koTitle} — ${koSubtitle}. 사진작가 이성준의 사진 앨범.`
-      : `${koTitle} — 사진작가 이성준의 사진 앨범.`,
-    en: enSubtitle
-      ? `${enTitle} — ${enSubtitle}. A photo album by photographer Sungjoon Lee.`
-      : `${enTitle} — a photo album by photographer Sungjoon Lee.`,
-  };
+  const description = albumPageDescription(album);
   const coverUrl = resolveAlbumCover(album, photos);
   const pathname = `/photo/albums/${id}`;
   const base = pageMetadata({ lang, title: album.title, description, pathname });

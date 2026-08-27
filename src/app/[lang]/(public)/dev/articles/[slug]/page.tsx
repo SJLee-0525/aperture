@@ -7,13 +7,14 @@ import { ArticleRelatedProjects } from "@/features/dev-blog/_components/ArticleR
 import { ArticleScreenTarget } from "@/features/dev-blog/_components/ArticleScreenTarget";
 import { BlogTools } from "@/features/dev-blog/_components/BlogTools";
 
-import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
+import { toDevProjectCardsByIds } from "@/features/dev/_lib/dev-project-card";
 import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
 import {
   buildArticleJsonLd,
   serializeJsonLdScript,
 } from "@/features/dev-blog/_lib/article-json-ld";
 import {
+  resolveArticleTagLabels,
   toDevArticleSummaries,
   toDevArticleSummary,
 } from "@/features/dev-blog/_lib/article-projection";
@@ -114,18 +115,14 @@ export default async function DevArticlePage({ params }: Props) {
   const { article, document, highlights, readingMinutes } = data;
   const summary = toDevArticleSummary(article);
   const canonicalUrl = absoluteUrl(localizePath("ko", devArticleRoute(slug)));
-  const tagLabels = article.tags.map((id) => tags.find((tag) => tag.id === id)?.[lang] ?? id);
-  // 지정 순서를 지키되 공개 목록에 없는 프로젝트(비공개·삭제)는 빠진다.
-  const projectById = new Map(toDevProjectCards(projects).map((card) => [card.id, card]));
-  const relatedProjects = article.relatedProjectIds
-    .map((id) => projectById.get(id))
-    .filter((card) => card !== undefined);
+  const tagLabels = resolveArticleTagLabels(article.tags, tags, lang);
+  const relatedProjects = toDevProjectCardsByIds(article.relatedProjectIds, projects);
 
   const jsonLd = buildArticleJsonLd({
     article,
     canonicalUrl,
     imageUrl: article.cover ? absoluteUrl(article.cover.url) : null,
-    tagLabels: article.tags.map((id) => tags.find((tag) => tag.id === id)?.ko ?? id),
+    tagLabels: resolveArticleTagLabels(article.tags, tags, "ko"),
   });
 
   return (

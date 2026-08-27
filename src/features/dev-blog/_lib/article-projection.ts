@@ -1,6 +1,7 @@
 import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
 
 import type { DevArticle } from "@/types/dev-article";
+import type { DevArticleTag } from "@/types/dev-article-tag";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 
@@ -60,5 +61,17 @@ const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
 const toDevArticleSummaries = (articles: readonly DevArticle[]): DevArticleSummary[] =>
   articles.map(toDevArticleSummary);
 
-export { toDevArticleSummaries, toDevArticleSummary };
+/**
+ * 태그 id 를 화면에 쓸 라벨로 바꾼다. 사전에 없는 id 는 그대로 둔다.
+ *
+ * 상세 화면은 이 함수를 두 번 부른다. 하나는 방문자 언어로, 하나는 JSON-LD 용 한국어로다.
+ * `lang` 이 인자인 이유가 그것이다.
+ */
+const resolveArticleTagLabels = (
+  tagIds: readonly string[],
+  tags: readonly DevArticleTag[],
+  lang: "ko" | "en",
+): string[] => tagIds.map((id) => tags.find((tag) => tag.id === id)?.[lang] ?? id);
+
+export { resolveArticleTagLabels, toDevArticleSummaries, toDevArticleSummary };
 export type { DevArticleSummary };
