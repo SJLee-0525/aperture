@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect } from "react";
 
+import { MOBILE_NAVIGATION_MAX_WIDTH } from "@/constants/breakpoints";
+
 const useBrowserLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 type NormalizedScrollLockOptions = Required<ScrollLockOptions>;
@@ -56,7 +58,7 @@ const applyActiveLock = () => {
     return;
   }
 
-  const mobile = window.innerWidth <= 767;
+  const mobile = window.innerWidth <= MOBILE_NAVIGATION_MAX_WIDTH;
   const shouldFixBody = mobile && options.fixBodyOnMobile;
   const wasFixed = bodyIsFixed;
 

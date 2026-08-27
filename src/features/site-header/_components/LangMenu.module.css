@@ -23,7 +23,7 @@
   width: 18px;
   height: 18px;
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .btn {
     width: 34px;
     height: 34px;

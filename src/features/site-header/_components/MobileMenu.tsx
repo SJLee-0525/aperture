@@ -19,6 +19,7 @@ import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
+import { MOBILE_NAVIGATION_QUERY } from "@/constants/breakpoints";
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
 import { sectionFromPath } from "@/constants/sections";
@@ -31,8 +32,7 @@ import styles from "./MobileMenu.module.css";
  * 데스크톱은 CSS로 버거 숨김(mega-menu 사용). 버거 + 오버레이를 한 컴포넌트로 캡슐화.
  * 검색은 제출로 /search 만 연다 — 자동완성 드롭다운은 데스크톱(SearchBox) 전용.
  */
-/** CSS 브레이크포인트(767px)와 동기 — 버거·시트가 표시되는 폭. */
-const MOBILE_QUERY = "(max-width: 767px)";
+
 
 const MobileMenu = () => {
   const { dict, lang } = useLang();
@@ -70,7 +70,7 @@ const MobileMenu = () => {
   // 버거가 CSS 로 숨겨져 시트를 닫을 수단이 없어진다(스크롤 잠금도 걸린 채 남는다).
   useEffect(() => {
     if (!open) return;
-    const media = window.matchMedia(MOBILE_QUERY);
+    const media = window.matchMedia(MOBILE_NAVIGATION_QUERY);
     const onChange = () => {
       if (!media.matches) setOpen(false);
     };

@@ -34,7 +34,7 @@
   min-height: 340px;
   background: var(--map-land);
 }
-@media (max-width: 767px) {
+@media (max-width: 899px) {
   .view {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(240px, 52%) minmax(0, 48%);
