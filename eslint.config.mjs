@@ -47,16 +47,18 @@ const config = [
           // 여러 feature가 소비하는 횡단 기능. 일반 feature와 달리 다른 feature를 참조할 수 없다.
           // dev-blog: 공개 상세와 관리자 편집기가 같은 Markdown 계약·본문 렌더러를 쓴다.
           // admin-shell: 관리자 셸과 목록·수정 라우트의 공용 골격을 열네 개 admin feature 가 쓴다.
-          type: "platform",
           // pointer-chrome: 커서와 스크롤바가 지도·상세·글 어디에서든 같은 계약으로 뜬다.
+          type: "platform",
           pattern:
             "src/features/(lang|theme|image-upload|photo-detail|dev-blog|admin-shell|pointer-chrome)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {
+          // src 최상위의 실제 폴더만 적는다. 없는 이름을 적어 두면 목록이 늘 맞아 보이지만,
+          // 빠진 폴더는 어느 element 에도 매칭되지 않아 default: "allow" 로 떨어진다.
+          // lib 이 그 상태였다 — 역방향 import 를 막는 규칙이 lib 을 보지 못했다.
           type: "shared",
-          pattern:
-            "src/(components|hooks|utils|stores|api|services|constants|schemas|providers|i18n|types|assets|styles)",
+          pattern: "src/(components|hooks|constants|types|assets|lib|mocks)",
         },
       ],
     },
