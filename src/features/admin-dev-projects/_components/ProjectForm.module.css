@@ -70,12 +70,13 @@
   font-size: var(--t-small);
   font-family: var(--font-mono);
 }
+/* 칩 안 조작이지만 24px 미만이면 누르기 어렵다. 칩 높이(32px) 안에 들어가는 최대치를 쓴다. */
 .chipRemove {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   background: transparent;
   border: none;
   border-radius: var(--r-pill);

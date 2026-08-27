@@ -70,7 +70,7 @@
   gap: var(--s-2);
 }
 .chip {
-  height: 30px;
+  height: 32px;
   padding: 0 var(--s-3);
   background: var(--surface-1);
   border: 1px solid var(--line);

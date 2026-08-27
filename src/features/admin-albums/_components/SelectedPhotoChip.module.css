@@ -48,7 +48,7 @@
 
 .coverBtn {
   flex: 1;
-  height: 26px;
+  height: 28px;
   background: var(--surface-3);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -70,7 +70,7 @@
 
 .removeBtn {
   flex: none;
-  height: 26px;
+  height: 28px;
   padding: 0 var(--s-2);
   background: transparent;
   border: 1px solid var(--line);
