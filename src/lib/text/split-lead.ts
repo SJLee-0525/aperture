@@ -18,4 +18,3 @@ const splitLead = (text: string): Lead => {
 };
 
 export { splitLead };
-export type { Lead };

@@ -1,4 +1,4 @@
-import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
 
 import type { DetailQueryKey } from "@/constants/routes";
 
@@ -34,10 +34,4 @@ const openDetailQuery = (key: DetailQueryKey, id: string): void => {
   pushCurrentUrl(detailQueryHref(window.location, key, id));
 };
 
-/** 열려 있는 상세를 다른 항목으로 바꾸거나 닫는다. entry 를 쌓지 않는다. */
-const replaceDetailQuery = (key: DetailQueryKey, id: string | null): void => {
-  replaceCurrentUrl(detailQueryHref(window.location, key, id));
-};
-
-export { detailQueryHref, openDetailQuery, replaceDetailQuery };
-export type { CurrentUrl };
+export { detailQueryHref, openDetailQuery };

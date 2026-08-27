@@ -37,4 +37,3 @@ const CardGridPageSkeleton = ({ kind }: { kind: GridKind }) => {
 };
 
 export { CardGridPageSkeleton };
-export type { GridKind };
