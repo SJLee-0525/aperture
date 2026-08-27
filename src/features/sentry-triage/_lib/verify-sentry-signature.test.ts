@@ -3,7 +3,6 @@ import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import {
-  declaredBodyTooLarge,
   MAX_WEBHOOK_BODY_BYTES,
   verifySentrySignature,
 } from "@/features/sentry-triage/_lib/verify-sentry-signature";
@@ -136,32 +135,3 @@ describe("verifySentrySignature", () => {
   });
 });
 
-describe("declaredBodyTooLarge", () => {
-  it("선언된 크기가 상한을 넘으면 참이다", () => {
-    const headers = new Headers({ "content-length": String(MAX_WEBHOOK_BODY_BYTES + 1) });
-
-    expect(declaredBodyTooLarge(headers)).toBe(true);
-  });
-
-  it("상한과 같으면 통과시킨다", () => {
-    const headers = new Headers({ "content-length": String(MAX_WEBHOOK_BODY_BYTES) });
-
-    expect(declaredBodyTooLarge(headers)).toBe(false);
-  });
-
-  it("Content-Length 가 없으면 판단하지 않는다", () => {
-    expect(declaredBodyTooLarge(new Headers())).toBe(false);
-  });
-
-  it("숫자가 아닌 값도 판단하지 않는다", () => {
-    const headers = new Headers({ "content-length": "lots" });
-
-    expect(declaredBodyTooLarge(headers)).toBe(false);
-  });
-
-  it("상한을 인자로 낮출 수 있다", () => {
-    const headers = new Headers({ "content-length": "100" });
-
-    expect(declaredBodyTooLarge(headers, 50)).toBe(true);
-  });
-});

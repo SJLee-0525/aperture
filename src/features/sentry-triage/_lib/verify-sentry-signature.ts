@@ -14,26 +14,6 @@ type WebhookRejection =
 type WebhookGate = { ok: true } | { ok: false; reason: WebhookRejection };
 
 /**
- * 본문을 읽기 전에 선언된 크기만 보고 거절할지 정한다.
- *
- * 본문을 다 받은 뒤 길이를 재면 이미 전부 버퍼링한 뒤라 서명 계산만 아끼게 된다.
- * `Content-Length` 가 없으면 판단하지 않고 통과시킨다. 그 경우는 본문을 읽은 뒤
- * 길이로 다시 확인한다.
- *
- * 서명 대상은 본문뿐이다. Sentry 가 함께 보내는 `sentry-hook-timestamp` 는 HMAC 밖에 있어
- * 재생하는 쪽이 임의로 고쳐 쓸 수 있다. 신선도 검사를 붙여도 재생을 막지 못하므로 두지 않는다.
- * 같은 전달을 두 번 처리하지 않게 하는 것은 `claimSentryAlert` 의 멱등 키다.
- *
- * @param headers 요청 헤더.
- * @param max 허용 바이트 수.
- * @returns 선언된 크기가 상한을 넘으면 true.
- */
-const declaredBodyTooLarge = (headers: Headers, max = MAX_WEBHOOK_BODY_BYTES): boolean => {
-  const declared = Number(headers.get("content-length"));
-  return Number.isFinite(declared) && declared > max;
-};
-
-/**
  * hex 문자열 두 개를 길이 정보만 노출하는 방식으로 비교한다.
  * 길이가 다르면 `timingSafeEqual` 이 예외를 던지므로 먼저 거른다.
  */
@@ -71,7 +51,10 @@ const verifySentrySignature = (
   secret: string | undefined,
   max = MAX_WEBHOOK_BODY_BYTES,
 ): WebhookGate => {
-  // 상한은 바이트 기준이다. String.length 는 UTF-16 코드 유닛 수라 한글 본문을 1/3 로 센다.
+  // 모듈 불변식이다. 지금 유일한 호출부(sentry-alert route)는 readLimitedBody 로 이미
+  // 절단한 본문을 넘기므로 여기서 참이 되지 않는다. 다른 호출자가 생겨도 서명 계산 전에
+  // 걸리도록 남긴다. 상한은 바이트 기준이다 — String.length 는 UTF-16 코드 유닛 수라
+  // 한글 본문을 1/3 로 센다.
   if (Buffer.byteLength(rawBody, "utf8") > max) return { ok: false, reason: "body-too-large" };
 
   const normalizedSecret = secret?.trim();
@@ -87,4 +70,4 @@ const verifySentrySignature = (
     : { ok: false, reason: "signature-mismatch" };
 };
 
-export { declaredBodyTooLarge, MAX_WEBHOOK_BODY_BYTES, verifySentrySignature };
+export { MAX_WEBHOOK_BODY_BYTES, verifySentrySignature };

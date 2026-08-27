@@ -41,7 +41,7 @@ import {
 import { matchDevArticleSlug, ROUTES } from "@/constants/routes";
 import { getChatProfileData, type ChatProfileData } from "@/lib/content/chat";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
-import { readLimitedBody } from "@/lib/http/read-limited-body";
+import { declaredBodyTooLarge, readLimitedBody } from "@/lib/http/read-limited-body";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
 import {
   buildPhotoFilterHref,
@@ -422,8 +422,7 @@ const handleChatRequest = async (
     return jsonError(400, "INVALID_REQUEST_SOURCE", responseLang);
   }
 
-  const contentLength = Number(request.headers.get("content-length"));
-  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+  if (declaredBodyTooLarge(request.headers, MAX_BODY_BYTES)) {
     return jsonError(400, "REQUEST_TOO_LARGE", responseLang);
   }
 

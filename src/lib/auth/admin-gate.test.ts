@@ -41,7 +41,7 @@ describe("adminGateResponse", () => {
     const denied = await adminGateResponse(requestWith("t"));
 
     expect(denied?.status).toBe(401);
-    await expect(denied?.json()).resolves.toEqual({ error: "Unauthorized" });
+    await expect(denied?.json()).resolves.toEqual({ error: "관리자 인증이 필요합니다." });
   });
 
   it("스로틀은 429 와 Retry-After 를 함께 낸다", async () => {

@@ -41,6 +41,10 @@ const checkAdminToken = async (
  * 실패 응답 형태를 여기서만 정한다. 호출부마다 접으면 401 본문이 경로마다 달라지고
  * 429 의 `Retry-After` 를 빠뜨린 곳이 생긴다.
  *
+ * 문구가 한국어인 이유는 관리자 화면이 이 본문을 그대로 보여 주기 때문이다
+ * (`generate-portfolio-embeddings.ts:22` 외 2곳이 `payload.error` 를 오류 문구로 쓴다).
+ * 예외를 던지는 `requireAdminToken` 쪽은 서버 로그가 독자라 영어 레이블을 쓴다.
+ *
  * @param {Request} request `Authorization: Bearer` 를 담은 요청.
  * @param {AdminGateOptions} [options] 표면별 예외 설정.
  * @returns {Promise<Response | null>} 거절 응답. 통과하면 `null`.
@@ -53,14 +57,14 @@ const adminGateResponse = async (
   if (verdict.ok) return null;
   if (verdict.retryAfterSeconds !== undefined) {
     return NextResponse.json(
-      { error: "Too many failed attempts" },
+      { error: "인증 실패가 반복돼 잠시 차단되었습니다." },
       {
         status: 429,
         headers: { "Retry-After": String(verdict.retryAfterSeconds) },
       },
     );
   }
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
 };
 
 /**
