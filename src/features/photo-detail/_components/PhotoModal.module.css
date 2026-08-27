@@ -144,6 +144,12 @@
   right: 22px;
   transform: translateY(-50%);
 }
+/* 이미지 로딩 중과 모바일에서 EXIF 패널을 펼친 동안 이동이 잠긴다. 후자는 지속 상태라
+   버튼이 정상처럼 보이면서 반응하지 않으면 고장으로 읽힌다. */
+.nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
 /* 어두운 사진 위에 뜨는 크롬이라 globals 의 액센트 링은 대비를 보장하지 못한다. */
 .nav:focus-visible {
   outline: 2px solid var(--text-inverse);

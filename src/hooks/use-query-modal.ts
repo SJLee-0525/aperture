@@ -69,6 +69,13 @@ const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
     [pathname, param],
   );
 
+  // 비공개로 바뀐 항목의 공유 링크처럼 매칭되는 항목이 없으면 모달이 열리지 않는데 쿼리는
+  // URL 에 남는다. 목록만 보이는 화면에서 왜 안 열리는지 알 수 없고 뒤로가기 동작도 어긋난다.
+  useEffect(() => {
+    if (activeId == null || active != null) return;
+    select(null);
+  }, [activeId, active, select]);
+
   const close = useCallback(() => {
     if (openedHere.current) {
       openedHere.current = false;

@@ -107,6 +107,8 @@ const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) =
           <m.p
             key="empty"
             className={styles.empty}
+            // 필터로 결과가 0 이 되는 순간 삽입되므로 낭독기가 그때 읽는다.
+            role="status"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

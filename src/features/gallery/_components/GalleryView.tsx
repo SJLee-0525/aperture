@@ -65,7 +65,7 @@ const GalleryContent = memo(function GalleryContent({
 
   return (
     <main className={styles.main}>
-      <PageToolbar title={dict.workNav} count={`${filter.visible.length} photos`}>
+      <PageToolbar title={dict.workNav} count={`${filter.visible.length} photos`} countLive>
         <ViewToggle
           options={[
             { id: "mason", label: dict.viewMasonry, icon: "mason" },

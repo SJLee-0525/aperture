@@ -97,6 +97,7 @@ type UIDict = {
   accessibilityNav: string;
   cookieSettingsLabel: string;
   analyticsConsentLabel: string;
+  analyticsConsentAnnounce: string;
   analyticsConsentTitle: string;
   analyticsConsentBody: string;
   analyticsConsentAnalyticsLabel: string;
@@ -301,6 +302,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     accessibilityNav: "접근성",
     cookieSettingsLabel: "개인정보 및 쿠키 설정",
     analyticsConsentLabel: "선택적 데이터 수집 설정",
+    analyticsConsentAnnounce: "선택적 데이터 수집 설정 안내가 화면 아래에 나타났습니다.",
     analyticsConsentTitle: "선택적 데이터 수집 설정",
     analyticsConsentBody:
       "아래 항목은 서로 독립적으로 선택할 수 있습니다. 모두 거부해도 사이트의 모든 기능을 이용할 수 있습니다.",
@@ -511,6 +513,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     accessibilityNav: "Accessibility",
     cookieSettingsLabel: "Privacy & cookie settings",
     analyticsConsentLabel: "Optional data collection settings",
+    analyticsConsentAnnounce:
+      "A notice about optional data collection appeared at the bottom of the page.",
     analyticsConsentTitle: "Optional data collection settings",
     analyticsConsentBody:
       "Choose each item independently. You can use every site feature if you decline both.",

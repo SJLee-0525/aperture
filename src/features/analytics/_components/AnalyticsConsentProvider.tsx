@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -84,6 +85,8 @@ const AnalyticsConsentProvider = ({
   forceBanner = false,
 }: AnalyticsConsentProviderProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** 설정 버튼으로 연 경우의 복귀 대상. 자동 노출에서는 비어 있다. */
+  const settingsTriggerRef = useRef<HTMLElement | null>(null);
   const [previewDismissed, setPreviewDismissed] = useState(false);
   const consentUiEnabled = gaEnabled || monitoringEnabled || forceBanner;
 
@@ -145,11 +148,17 @@ const AnalyticsConsentProvider = ({
     setSettingsOpen(false);
     setPreviewDismissed(true);
     setBrowserAnalyticsConsent(value);
+    // 설정 버튼으로 연 배너를 닫으면 그 버튼으로 돌아간다. 배너가 사라지면서 포커스가
+    // body 로 떨어지면 다음 Tab 이 지면 처음부터 다시 시작한다.
+    settingsTriggerRef.current?.focus();
+    settingsTriggerRef.current = null;
   }, []);
 
   /** @returns {void} 동의 UI가 구성된 경우 설정 배너를 다시 연다. */
   const openSettings = useCallback(() => {
     if (consentUiEnabled) {
+      settingsTriggerRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setPreviewDismissed(false);
       setSettingsOpen(true);
     }
@@ -172,6 +181,7 @@ const AnalyticsConsentProvider = ({
           gaEnabled={gaEnabled}
           monitoringEnabled={monitoringEnabled}
           initialConsent={consent}
+          reopened={settingsOpen}
           onDecide={decide}
         />
       ) : null}
