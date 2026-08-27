@@ -147,3 +147,4 @@ const useScrollLock = (locked: boolean, options: ScrollLockOptions = {}) => {
 };
 
 export { isScrollLockFixingBody, useScrollLock };
+export type { ScrollLockOptions };

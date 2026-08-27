@@ -157,6 +157,9 @@ const PhotoModal = ({
     setExpanded(false);
     setPhotoChromeVisible(true);
   }
+  // useDialog 를 쓰지 않는다. 셋의 활성 조건이 서로 다르다 — 트랩은 진입 애니메이션이
+  // 끝난 뒤(open && revealed), 스크롤 잠금은 열리는 즉시(open), 최상위 판정은 사진이
+  // 있는 동안(photos.length)이다. 하나로 묶으면 셋 중 둘의 시점이 바뀐다.
   const trapRef = useFocusTrap(open && revealed);
   const mounted = useMounted();
   useScrollLock(open);

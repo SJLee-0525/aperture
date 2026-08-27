@@ -15,9 +15,7 @@ import {
 import { ThemeToggleButton } from "@/features/site-header/_components/ThemeToggleButton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useEscapeKey } from "@/hooks/use-escape-key";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
 import { MOBILE_NAVIGATION_QUERY } from "@/constants/breakpoints";
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
@@ -44,11 +42,12 @@ const MobileMenu = () => {
   const [expanded, setExpanded] = useState<NavSection | null>(null);
   const [query, setQuery] = useState("");
   const restoreHiddenChromeRef = useRef(false);
-  const panelRef = useFocusTrap(open);
-
   // body fixed·root overflow 잠금은 둘 다 sticky 헤더를 문서 최상단(-scrollY)으로 밀어낸다.
   // 메뉴는 헤더(로고·토글)가 시트 위에 계속 보여야 하므로 body overflow 승격 잠금만 사용한다.
-  useScrollLock(open, { fixBodyOnMobile: false, lockRootOnMobile: false });
+  const { panelRef } = useDialog(open, {
+    scrollLock: { fixBodyOnMobile: false, lockRootOnMobile: false },
+    escape: () => setOpen(false),
+  });
 
   const openMenu = () => {
     // 그룹(아코디언)이 있는 섹션만 펼친 채로 연다 — home·contact 는 그룹 없음.
@@ -63,8 +62,6 @@ const MobileMenu = () => {
     setOpen(true);
   };
   const close = () => setOpen(false);
-
-  useEscapeKey(open, close);
 
   // 데스크톱 폭으로 전환되면 자동으로 닫는다 — 데스크톱은 mega-menu 가 담당하고
   // 버거가 CSS 로 숨겨져 시트를 닫을 수단이 없어진다(스크롤 잠금도 걸린 채 남는다).

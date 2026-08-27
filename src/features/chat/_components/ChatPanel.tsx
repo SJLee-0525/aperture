@@ -16,10 +16,7 @@ import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useChat } from "@/features/chat/_hooks/use-chat";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
-import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
-import { useEscapeKey } from "@/hooks/use-escape-key";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -106,9 +103,11 @@ const ChatPanel = ({ open, onClose }: Props) => {
     getScreenTarget,
   );
   const titleId = useId();
-  const panelRef = useFocusTrap(open);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  useDialogIsolation(open, overlayRef);
+  const { panelRef, overlayRef } = useDialog(open, {
+    scrollLock: { fixBodyOnMobile: false },
+    isolate: true,
+    escape: onClose,
+  });
   const listRef = useRef<HTMLDivElement>(null);
   const messageListAtBottomRef = useRef(true);
   const viewportTransitionRef = useRef(false);
@@ -118,8 +117,6 @@ const ChatPanel = ({ open, onClose }: Props) => {
       (message) => message.id !== "welcome" && message.role === "assistant" && !message.pending,
     )?.content ?? "";
 
-  useScrollLock(open, { fixBodyOnMobile: false });
-  useEscapeKey(open, onClose);
 
   useEffect(() => {
     if (!open) return;
@@ -193,7 +190,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
       body.style.height = bodyHeight;
       window.scrollTo(scrollX, scrollY);
     };
-  }, [open]);
+  }, [open, overlayRef]);
 
   if (!open || typeof document === "undefined") return null;
 

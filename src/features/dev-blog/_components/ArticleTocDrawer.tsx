@@ -6,11 +6,7 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { ArticleTocList } from "@/features/dev-blog/_components/ArticleTocList";
 
-import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
-import { useEscapeKey } from "@/hooks/use-escape-key";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useMounted } from "@/hooks/use-mounted";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
 import { DICTIONARY } from "@/constants/dictionary";
 
@@ -55,13 +51,8 @@ type Props = {
  */
 const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSelect }: Props) => {
   const dict = DICTIONARY[lang];
-  const mounted = useMounted();
-  const panelRef = useFocusTrap(open);
-  useEscapeKey(open, onClose);
+  const { panelRef, overlayRef, mounted } = useDialog(open, { isolate: true, escape: onClose });
   const restoreFocusRef = useRef<HTMLElement | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  useScrollLock(open);
-  useDialogIsolation(open, overlayRef);
 
   useEffect(() => {
     if (!open) return;

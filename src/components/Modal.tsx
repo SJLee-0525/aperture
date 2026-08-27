@@ -5,9 +5,7 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { ShareButton } from "@/components/ShareButton";
 
-import { useEscapeKey } from "@/hooks/use-escape-key";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
 import styles from "./Modal.module.css";
 
@@ -55,9 +53,7 @@ const Modal = ({
   shareLabel,
   children,
 }: Props) => {
-  useScrollLock(open);
-  useEscapeKey(open, onClose);
-  const panelRef = useFocusTrap(open);
+  const { panelRef } = useDialog(open, { escape: onClose });
 
   // 모달은 클라 상호작용으로만 열린다(초기 SSR·hydration 시 open=false) → typeof 가드로 충분.
   if (!open || typeof document === "undefined") return null;

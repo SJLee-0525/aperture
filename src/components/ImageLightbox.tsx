@@ -8,11 +8,9 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 
-import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useDialog } from "@/hooks/use-dialog";
 import { useImageZoom } from "@/hooks/use-image-zoom";
 import { useOverlayDrag } from "@/hooks/use-overlay-drag";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import type { ImageMeta } from "@/types/image";
 import type { RefObject } from "react";
@@ -132,7 +130,6 @@ const ImageLightbox = ({
   onNavigate,
 }: Props) => {
   const count = images.length;
-  const containerRef = useFocusTrap(true);
   const trackRef = useRef<HTMLDivElement>(null);
   const dismissSurfaceRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
@@ -142,8 +139,9 @@ const ImageLightbox = ({
   const image = images[index];
   const imageKey = image ? image.path || image.url : "";
   const loaded = imageKey ? loadedImages.has(imageKey) : false;
-  useScrollLock(true);
-  const isTopLayer = useOverlayLayer(true);
+  // Escape 는 방향키·확대 복귀와 한 리스너에 있다(:190 이하). 나누면 확대 상태에서
+  // 복귀와 이동의 순서가 갈려 동작이 바뀐다. 그래서 조립만 빌리고 키는 직접 다룬다.
+  const { panelRef: containerRef, isTopLayer } = useDialog(true, { escape: false });
   const {
     stageRef: zoomSurfaceRef,
     zoomed,
