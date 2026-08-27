@@ -6,7 +6,6 @@ import { Icon } from "@/components/Icon";
 import row from "@/features/admin-shell/_components/admin-row.module.css";
 import { AdminRow } from "@/features/admin-shell/_components/AdminRow";
 
-
 import { adminDevArticleRoute } from "@/constants/routes";
 import { formatEventYMD, formatLocalYMD } from "@/lib/format/format-date";
 

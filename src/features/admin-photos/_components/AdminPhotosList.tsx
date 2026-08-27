@@ -15,9 +15,8 @@ import { getPhotoRepository } from "@/lib/admin/photo-repository";
  * @returns {JSX.Element}
  */
 const AdminPhotosList = () => {
-  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
-    getPhotoRepository(),
-  );
+  const { items, status, error, reorder, togglePublished, remove } =
+    useOrderedAdmin(getPhotoRepository());
 
   return (
     <AdminListShell

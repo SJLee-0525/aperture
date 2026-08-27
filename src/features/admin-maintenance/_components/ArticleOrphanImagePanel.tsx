@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
 
-
 import {
   deleteOrphanArticleImages,
   OrphanConfirmationRequiredError,
@@ -136,7 +135,7 @@ const ArticleOrphanImagePanel = () => {
 
   return (
     <section className={base.panel}>
-      <h1 className={base.title}>사용되지 않는 블로그 이미지</h1>
+      <h2 className={base.title}>사용되지 않는 블로그 이미지</h2>
       <p className={base.description}>
         한 이미지의 원본·프리뷰·썸네일을 한 벌로 묶어, <strong>셋 다 어디에도 쓰이지 않고</strong>{" "}
         업로드한 지 24시간이 지났을 때만 정리 대상으로 봅니다. 하나라도 쓰이고 있으면 그 이미지는

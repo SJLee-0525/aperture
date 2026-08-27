@@ -4,7 +4,6 @@ import { AlbumRow } from "@/features/admin-albums/_components/AlbumRow";
 import { AdminListShell } from "@/features/admin-shell/_components/AdminListShell";
 import { AdminSortableList } from "@/features/admin-shell/_components/AdminSortableList";
 
-
 import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
 
 import { ROUTES } from "@/constants/routes";
@@ -18,9 +17,8 @@ import { imageThumbnailUrl } from "@/types/image";
  * @returns {JSX.Element}
  */
 const AdminAlbumsList = () => {
-  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
-    getAlbumRepository(),
-  );
+  const { items, status, error, reorder, togglePublished, remove } =
+    useOrderedAdmin(getAlbumRepository());
 
   return (
     <AdminListShell
@@ -40,7 +38,7 @@ const AdminAlbumsList = () => {
           <AlbumRow
             key={item.id}
             album={item}
-              coverUrl={imageThumbnailUrl(item.cover)}
+            coverUrl={imageThumbnailUrl(item.cover)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

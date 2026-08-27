@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+
 import { usePosterUpload } from "@/features/image-upload/_hooks/use-poster-upload";
 
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
@@ -69,17 +71,22 @@ const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props)
       </div>
 
       <div className={styles.controls}>
-        <label className={styles.button}>
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          disabled={pending}
+          onClick={() => inputRef.current?.click()}
+        >
           {poster?.url ? "포스터 교체" : "포스터 선택"}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className={styles.input}
-            disabled={pending}
-            onChange={onSelect}
-          />
-        </label>
+        </AdminButton>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          disabled={pending}
+          onChange={onSelect}
+        />
         {poster?.url ? (
           <button
             type="button"

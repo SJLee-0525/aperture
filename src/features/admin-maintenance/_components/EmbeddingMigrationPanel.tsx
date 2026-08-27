@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
 
-
 import {
   generatePortfolioEmbeddings,
   type PortfolioEmbeddingResult,

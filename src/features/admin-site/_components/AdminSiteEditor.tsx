@@ -16,7 +16,18 @@ import styles from "./AdminSiteEditor.module.css";
  * @returns {JSX.Element}
  *  이름·연락 링크는 about 에 노출되지 않으므로 여기 없음(전역/연락 CMS 추가 시 그쪽에서 편집). */
 const AdminSitePage = () => {
-  const { confirmLeave, recovery, applyRecovered, bio, status, error, saving, saved, editBio, save } = useSiteAdmin();
+  const {
+    confirmLeave,
+    recovery,
+    applyRecovered,
+    bio,
+    status,
+    error,
+    saving,
+    saved,
+    editBio,
+    save,
+  } = useSiteAdmin();
 
   return (
     <div className={styles.page}>
@@ -75,7 +86,10 @@ const AdminSitePage = () => {
             </p>
           ) : null}
 
-          {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
+          {/* 저장 후 화면이 바뀌지 않아 이 문구가 유일한 성공 신호다. */}
+          <p className={styles.state} role="status">
+            {saved ? "저장되었습니다." : ""}
+          </p>
 
           <div className={styles.actions}>
             <AdminButton variant="primary" onClick={save} disabled={saving}>

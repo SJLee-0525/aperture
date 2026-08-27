@@ -15,9 +15,8 @@ import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
  * @returns {JSX.Element}
  */
 const AdminMusicAwardsList = () => {
-  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
-    getMusicAwardRepository(),
-  );
+  const { items, status, error, reorder, togglePublished, remove } =
+    useOrderedAdmin(getMusicAwardRepository());
 
   return (
     <AdminListShell

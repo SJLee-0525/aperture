@@ -15,7 +15,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-
 import type { ReactNode } from "react";
 
 import styles from "./admin-list.module.css";

@@ -15,9 +15,9 @@
 
 ### 프리미티브를 쓰지 않는 것 (의도적 예외)
 
-- Row 소형 텍스트 액션(`edit`·`delete`·`move`·`handle`·공개 배지) — 13곳 동일한 로컬 패턴 유지
+- Row 소형 텍스트 액션(`edit`·`delete`·`move`·`handle`·공개 배지) — `admin-shell`의 `admin-row.module.css`가 소유
+- 파일 선택은 `hidden` input + `AdminButton`이 `.click()`으로 연다. 라벨로 감싸는 clip 패턴은 포커스 링이 1px 영역에 그려져 쓰지 않는다
 - 공개 체크박스(`공개 (방문자에게 표시)`) — 로컬 `.checkbox` 패턴 유지
-- 숨김 파일 input (clip 패턴 — PhotoUploadField·PosterUploadField·DevImageField)
 - `ArticleForm.module.css`의 `.remove` (36px 보더 버튼, hover 시 danger) — 블로그 인라인 취소·삭제 전용
 - `ArticleTagManagerPanel`의 `.action`·`.field`·`.label` — 컴팩트(micro) 패널 밀도 유지. 입력만 `AdminInput size="sm"`
 - 배너 두 종(`RagStaleBanner`·`RevalidateFailureBanner`)의 `.action` — 좁은 알림 줄 전용 36px. 두 배너가 같은 CSS 파일을 공유하므로 한쪽만 보고 고치지 않는다

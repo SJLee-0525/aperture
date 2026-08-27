@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
 import { Icon } from "@/components/Icon";
 
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
@@ -95,17 +96,22 @@ const DevImageField = ({
           )}
         </div>
         <div className={styles.controls}>
-          <label className={styles.button}>
+          <AdminButton
+            variant="secondary"
+            size="sm"
+            disabled={pending}
+            onClick={() => coverInputRef.current?.click()}
+          >
             {cover?.url ? "대표 교체" : "대표 선택"}
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              className={styles.input}
-              disabled={pending}
-              onChange={onCoverSelect}
-            />
-          </label>
+          </AdminButton>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            disabled={pending}
+            onChange={onCoverSelect}
+          />
           {cover?.url ? (
             <button
               type="button"
@@ -123,18 +129,23 @@ const DevImageField = ({
       <div className={styles.galleryBlock}>
         <div className={styles.galleryHead}>
           <span className={styles.subLabel}>갤러리 (상세 모달)</span>
-          <label className={styles.button}>
+          <AdminButton
+            variant="secondary"
+            size="xs"
+            disabled={pending}
+            onClick={() => galleryInputRef.current?.click()}
+          >
             + 이미지 추가
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className={styles.input}
-              disabled={pending}
-              onChange={onGallerySelect}
-            />
-          </label>
+          </AdminButton>
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            disabled={pending}
+            onChange={onGallerySelect}
+          />
         </div>
 
         {images.length === 0 ? (

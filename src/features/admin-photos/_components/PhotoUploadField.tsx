@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+
 import { useImageUpload, type UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
@@ -70,17 +72,22 @@ const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props
       </div>
 
       <div className={styles.controls}>
-        <label className={styles.button}>
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          disabled={pending}
+          onClick={() => inputRef.current?.click()}
+        >
           {image?.url ? "이미지 교체" : "이미지 선택"}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className={styles.input}
-            disabled={pending}
-            onChange={onSelect}
-          />
-        </label>
+        </AdminButton>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          disabled={pending}
+          onChange={onSelect}
+        />
         <p className={styles.note}>업로드 시 EXIF 를 추출해 아래 항목을 자동으로 채웁니다.</p>
         {error ? (
           <p className={styles.error} role="alert">

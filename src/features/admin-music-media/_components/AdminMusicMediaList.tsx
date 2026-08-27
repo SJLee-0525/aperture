@@ -15,9 +15,8 @@ import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
  * @returns {JSX.Element}
  */
 const AdminMusicMediaList = () => {
-  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
-    getMusicMediaRepository(),
-  );
+  const { items, status, error, reorder, togglePublished, remove } =
+    useOrderedAdmin(getMusicMediaRepository());
 
   return (
     <AdminListShell

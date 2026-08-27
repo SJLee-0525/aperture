@@ -28,10 +28,19 @@ type Props = {
  * @returns {JSX.Element}
  */
 const AwardForm = ({ awardId, initial }: Props) => {
-  const { recovery, applyForm, form, issues, formRef, isEdit, error, saving, patch, cancel, submit } = useAwardEditor(
-    awardId,
-    initial,
-  );
+  const {
+    recovery,
+    applyForm,
+    form,
+    issues,
+    formRef,
+    isEdit,
+    error,
+    saving,
+    patch,
+    cancel,
+    submit,
+  } = useAwardEditor(awardId, initial);
 
   return (
     <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>

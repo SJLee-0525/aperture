@@ -15,9 +15,8 @@ import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
  * @returns {JSX.Element}
  */
 const AdminMusicWorksList = () => {
-  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
-    getMusicWorkRepository(),
-  );
+  const { items, status, error, reorder, togglePublished, remove } =
+    useOrderedAdmin(getMusicWorkRepository());
 
   return (
     <AdminListShell

@@ -15,9 +15,8 @@ import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
  * @returns {JSX.Element}
  */
 const AdminDevProjectsList = () => {
-  const { items, status, error, reorder, togglePublished, remove } = useOrderedAdmin(
-    getDevProjectRepository(),
-  );
+  const { items, status, error, reorder, togglePublished, remove } =
+    useOrderedAdmin(getDevProjectRepository());
 
   return (
     <AdminListShell

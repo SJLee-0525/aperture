@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
 
-
 import {
   migrateImageThumbnails,
   type MigrationProgress,
@@ -54,13 +53,18 @@ const ImageMigrationPanel = () => {
 
   return (
     <section className={styles.panel}>
-      <h1 className={styles.title}>이미지 데이터 마이그레이션</h1>
+      <h2 className={styles.title}>이미지 데이터 마이그레이션</h2>
       <p className={styles.description}>
         사진·음악 포스터·개발 이미지에 누락된 960px 프리뷰와 320px 썸네일 WebP를 생성하고, 앨범 커버
         스냅샷을 보강합니다. 이미 완료된 파생본은 건너뛰므로 다시 실행해도 안전합니다.
       </p>
       <div className={styles.actions}>
-        <AdminButton variant="primary" size="sm" disabled={pending || mock} onClick={() => run(true)}>
+        <AdminButton
+          variant="primary"
+          size="sm"
+          disabled={pending || mock}
+          onClick={() => run(true)}
+        >
           변경 대상 확인
         </AdminButton>
         <AdminButton

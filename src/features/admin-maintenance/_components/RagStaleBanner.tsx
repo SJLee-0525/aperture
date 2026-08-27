@@ -33,7 +33,12 @@ const RagStaleBanner = () => {
         <button type="button" className={styles.action} onClick={dismiss} disabled={syncing}>
           나중에
         </button>
-        <button type="button" className={`${styles.action} ${styles.sync}`} onClick={sync} disabled={syncing}>
+        <button
+          type="button"
+          className={`${styles.action} ${styles.sync}`}
+          onClick={sync}
+          disabled={syncing}
+        >
           {syncing ? "동기화 중…" : "지금 동기화"}
         </button>
       </div>

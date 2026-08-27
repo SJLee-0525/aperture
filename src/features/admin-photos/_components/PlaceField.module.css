@@ -112,7 +112,7 @@
 
 .attribution {
   font-size: var(--t-micro);
-  color: var(--text-4);
+  color: var(--text-3);
 }
 
 .current {
@@ -127,7 +127,7 @@
   font-size: var(--t-label);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--text-4);
+  color: var(--text-3);
 }
 .currentValue {
   font-size: var(--t-small);

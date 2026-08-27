@@ -28,10 +28,19 @@ type Props = {
  * @returns {JSX.Element}
  */
 const MediaForm = ({ mediaId, initial }: Props) => {
-  const { recovery, applyForm, form, issues, formRef, isEdit, error, saving, patch, cancel, submit } = useMediaEditor(
-    mediaId,
-    initial,
-  );
+  const {
+    recovery,
+    applyForm,
+    form,
+    issues,
+    formRef,
+    isEdit,
+    error,
+    saving,
+    patch,
+    cancel,
+    submit,
+  } = useMediaEditor(mediaId, initial);
 
   return (
     <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
