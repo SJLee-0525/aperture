@@ -68,6 +68,23 @@
 .headerSpace {
   height: 58px;
 }
+.sheetControls {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-4) 0 var(--s-6);
+  border-top: 1px solid var(--line);
+}
+.sheetClose {
+  margin-left: auto;
+  padding: 9px 16px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
 .scrim {
   flex: 1;
   width: 100%;

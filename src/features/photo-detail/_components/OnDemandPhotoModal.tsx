@@ -133,7 +133,7 @@ const OnDemandPhotoModal = ({
                         ) : null}
                       </>
                     ) : (
-                      <span className={styles.spinner} aria-label={dict.photoLoadingLabel} />
+                      <span className={styles.spinner} aria-hidden="true" />
                     )}
                   </div>
                 </div>

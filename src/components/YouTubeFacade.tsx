@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 
 import styles from "./YouTubeFacade.module.css";
 
@@ -44,11 +45,21 @@ type Props = {
  */
 const YouTubeFacade = ({ videoId, title, source, playing, onPlay, className }: Props) => {
   const playable = videoId.length > 0;
+  const playerRef = useRef<HTMLIFrameElement>(null);
+  const started = playing && playable;
+
+  // 재생하면 포커스를 가진 버튼이 iframe 으로 교체된다. 옮기지 않으면 포커스가 body 로
+  // 떨어져 다음 Tab 이 지면 처음부터 다시 시작한다. 영상 카드가 여럿이라 매번 반복된다.
+  useEffect(() => {
+    if (!started) return;
+    playerRef.current?.focus({ preventScroll: true });
+  }, [started]);
 
   return (
     <div className={className ? `${styles.frame} ${className}` : styles.frame}>
-      {playing && playable ? (
+      {started ? (
         <iframe
+          ref={playerRef}
           className={styles.player}
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
           title={title}

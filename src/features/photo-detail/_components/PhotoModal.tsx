@@ -386,12 +386,10 @@ const PhotoModal = ({
           onTouchEnd={onTouchEnd}
           onTouchCancel={onTouchCancel}
         >
-          <button
-            type="button"
-            className={styles.scrim}
-            aria-label={dict.closeLabel}
-            onClick={close}
-          />
+          {/* 화면 전체를 덮는 요소라 button 이면 트랩의 첫 탭 스톱이 되고, 헤더 닫기 버튼과
+              이름이 같아 낭독기의 버튼 목록에 "닫기"가 둘 나온다. 닫기 수단은 그 버튼과
+              Escape 가 이미 제공한다. */}
+          <div className={styles.scrim} aria-hidden="true" onClick={close} />
           <m.div
             ref={dismissSurfaceRef}
             className={styles.inner}

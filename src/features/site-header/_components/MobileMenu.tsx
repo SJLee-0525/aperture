@@ -7,10 +7,12 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+import { LangMenu } from "@/features/site-header/_components/LangMenu";
 import {
   MOBILE_MENU_OPEN_ATTRIBUTE,
   MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE,
 } from "@/features/site-header/_components/MobileNavigationVisibility";
+import { ThemeToggleButton } from "@/features/site-header/_components/ThemeToggleButton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useEscapeKey } from "@/hooks/use-escape-key";
@@ -197,14 +199,20 @@ const MobileMenu = () => {
                   >
                     {dict[CONTACT_NAV.labelKey]}
                   </LocalizedLink>
+
+                  {/* 헤더의 언어·테마 토글은 시트가 열리면 시트 위에 보이지만 트랩 밖이라
+                      키보드로 닿을 수 없었다. 시트가 여는 동안은 이쪽이 그 둘을 갖는다. */}
+                  <div className={styles.sheetControls}>
+                    <LangMenu />
+                    <ThemeToggleButton />
+                    <button type="button" className={styles.sheetClose} onClick={close}>
+                      {dict.menuCloseLabel}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                className={styles.scrim}
-                aria-label={dict.menuCloseLabel}
-                onClick={close}
-              />
+              {/* 시트 아래 남은 지면. 닫기 수단은 위 버튼과 헤더 버거, Escape 가 갖는다. */}
+              <div className={styles.scrim} aria-hidden="true" onClick={close} />
             </div>,
             document.body,
           )

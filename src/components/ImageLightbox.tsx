@@ -135,7 +135,7 @@ const ImageLightbox = ({
   const containerRef = useFocusTrap(true);
   const trackRef = useRef<HTMLDivElement>(null);
   const dismissSurfaceRef = useRef<HTMLDivElement>(null);
-  const scrimRef = useRef<HTMLButtonElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const reportedIndexRef = useRef(index);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(() => new Set());
   const [chromeVisible, setChromeVisible] = useState(true);
@@ -286,13 +286,9 @@ const ImageLightbox = ({
       onTouchEnd={onDismissTouchEnd}
       onTouchCancel={onDismissTouchCancel}
     >
-      <button
-        ref={scrimRef}
-        type="button"
-        className={styles.scrim}
-        aria-label={closeLabel}
-        onClick={onClose}
-      />
+      {/* 화면 전체를 덮는 요소라 button 이면 트랩의 첫 탭 스톱이 되고, 닫기 버튼과 이름이
+          같아 낭독기의 버튼 목록에 "닫기"가 둘 나온다. */}
+      <div ref={scrimRef} className={styles.scrim} aria-hidden="true" onClick={onClose} />
       <div ref={dismissSurfaceRef} className={styles.dismissSurface}>
         <div
           ref={trackRef}
