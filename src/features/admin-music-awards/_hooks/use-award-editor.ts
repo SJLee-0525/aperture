@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 
-import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
-import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import {
   awardToInput,
@@ -15,8 +14,6 @@ import { validateAwardInput } from "@/features/admin-music-awards/_lib/validate-
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
-import { formFingerprint } from "@/lib/admin/form-fingerprint";
-import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
 
 import type { AwardFormValue } from "@/features/admin-music-awards/_lib/award-form-data";
@@ -32,11 +29,11 @@ const useAwardEditor = (awardId: string, initial?: MusicAward) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
-  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
-  const dirty = formFingerprint(form) !== savedFingerprint;
-  const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery(formRecoverySlot("musicAwards", awardId), form, dirty);
-  const { clear: clearRecovery } = recovery;
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "musicAwards",
+    awardId,
+    form,
+  );
   const [saving, setSaving] = useState(false);
 
   const applyForm = (next: typeof form) => setForm(next);
@@ -66,7 +63,7 @@ const useAwardEditor = (awardId: string, initial?: MusicAward) => {
       const awardRepository = getMusicAwardRepository();
       if (isEdit) await awardRepository.update(awardId, input);
       else await awardRepository.create(awardId, input);
-      setSavedFingerprint(formFingerprint(form));
+      markSaved(form);
       clearRecovery();
       router.replace(ROUTES.ADMIN_MUSIC_AWARDS);
     } catch (caught) {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormDirty } from "@/features/admin-shell/_hooks/use-form-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 
@@ -40,7 +40,7 @@ const useDevConfigAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { dirty, confirmLeave, markSaved } = useConfigDirty(config);
+  const { dirty, confirmLeave, markSaved } = useFormDirty(config);
   const recovery = useFormRecovery(formRecoverySlot("devConfig", "devConfig"), config, dirty);
   const { clear: clearRecovery } = recovery;
 

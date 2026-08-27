@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormDirty } from "@/features/admin-shell/_hooks/use-form-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { formRecoverySlot } from "@/lib/admin/form-recovery";
@@ -33,7 +33,7 @@ const useMusicConfigAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { dirty, confirmLeave, markSaved } = useConfigDirty({ intro, career, education });
+  const { dirty, confirmLeave, markSaved } = useFormDirty({ intro, career, education });
   const recovery = useFormRecovery(
     formRecoverySlot("musicConfig", "musicConfig"),
     { intro, career, education },

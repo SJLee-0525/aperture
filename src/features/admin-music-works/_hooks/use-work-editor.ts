@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
-import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
-import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import { validateWorkInput } from "@/features/admin-music-works/_lib/validate-work-input";
 import {
@@ -16,8 +15,6 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
-import { formFingerprint } from "@/lib/admin/form-fingerprint";
-import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -34,17 +31,18 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
-  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
-  const dirty = formFingerprint(form) !== savedFingerprint;
-  const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery(formRecoverySlot("musicWorks", workId), form, dirty, {
-    // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
-    revive: (input) => ({
-      ...(input as unknown as MusicWorkInput),
-      performedAt: new Date(input.performedAt as string),
-    }),
-  });
-  const { clear: clearRecovery } = recovery;
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "musicWorks",
+    workId,
+    form,
+    {
+      // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
+      revive: (input) => ({
+        ...(input as unknown as MusicWorkInput),
+        performedAt: new Date(input.performedAt as string),
+      }),
+    },
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.poster])));
@@ -99,7 +97,7 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.poster]),
       ).catch(() => undefined);
-      setSavedFingerprint(formFingerprint(form));
+      markSaved(form);
       clearRecovery();
       router.replace(ROUTES.ADMIN_MUSIC_WORKS);
     } catch (caught) {

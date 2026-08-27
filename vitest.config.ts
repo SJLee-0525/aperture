@@ -54,6 +54,7 @@ export default defineConfig({
         "src/hooks/use-overlay-drag.ts",
         "src/hooks/use-scroll-lock.ts",
         "src/hooks/use-unsaved-guard.ts",
+        "src/features/admin-shell/_lib/*.ts",
         "src/features/contact/_hooks/use-contact-form.ts",
         "src/features/contact/_hooks/use-contact-draft.ts",
         "src/features/dev-blog/_components/ArticlesView.tsx",

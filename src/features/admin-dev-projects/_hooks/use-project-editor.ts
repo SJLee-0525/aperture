@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
-import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
-import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import {
   emptyProjectInput,
@@ -17,8 +16,6 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 import { ROUTES } from "@/constants/routes";
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
-import { formFingerprint } from "@/lib/admin/form-fingerprint";
-import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -39,11 +36,11 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
-  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
-  const dirty = formFingerprint(form) !== savedFingerprint;
-  const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery(formRecoverySlot("devProjects", projectId), form, dirty);
-  const { clear: clearRecovery } = recovery;
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "devProjects",
+    projectId,
+    form,
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.cover, ...(initial?.images ?? [])])));
@@ -154,7 +151,7 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.cover, ...input.images]),
       ).catch(() => undefined);
-      setSavedFingerprint(formFingerprint(form));
+      markSaved(form);
       clearRecovery();
       router.replace(ROUTES.ADMIN_DEV_PROJECTS);
     } catch (caught) {

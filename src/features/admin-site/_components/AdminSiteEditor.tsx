@@ -7,6 +7,10 @@ import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotic
 
 import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
 
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
+
+
+
 import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminSiteEditor.module.css";
@@ -99,9 +103,7 @@ const AdminSitePage = () => {
               variant="secondary"
               href={ROUTES.ADMIN_PHOTO}
               disabled={saving}
-              onNavigate={(event) => {
-                if (!confirmLeave()) event.preventDefault();
-              }}
+              onNavigate={guardedNavigate(confirmLeave)}
             >
               취소
             </AdminButton>

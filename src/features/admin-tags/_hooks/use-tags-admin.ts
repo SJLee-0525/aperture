@@ -3,7 +3,7 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormDirty } from "@/features/admin-shell/_hooks/use-form-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { formRecoverySlot } from "@/lib/admin/form-recovery";
@@ -30,7 +30,7 @@ const useTagsAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { dirty, confirmLeave, markSaved } = useConfigDirty(tags);
+  const { dirty, confirmLeave, markSaved } = useFormDirty(tags);
   const recovery = useFormRecovery(formRecoverySlot("photoTags", "photoTags"), tags, dirty);
   const { clear: clearRecovery } = recovery;
   // 사전에 없는 id 가 사진에 남으면 공개 필터 칩과 사진 데이터가 어긋난다.

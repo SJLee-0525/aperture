@@ -4,8 +4,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
-import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
-import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import {
   albumToInput,
@@ -17,8 +16,6 @@ import { validateAlbumInput } from "@/features/admin-albums/_lib/validate-album-
 import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
-import { formFingerprint } from "@/lib/admin/form-fingerprint";
-import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -40,11 +37,11 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
-  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
-  const dirty = formFingerprint(form) !== savedFingerprint;
-  const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery(formRecoverySlot("albums", albumId), form, dirty);
-  const { clear: clearRecovery } = recovery;
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "albums",
+    albumId,
+    form,
+  );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -118,6 +115,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
     event.preventDefault();
     setError(null);
 
+    // 형제 다섯은 폼 값을 그대로 검증하는데 앨범만 정규화 뒤를 본다. 검증 대상인
+    // photoIds 가 폼이 아니라 선택 상태에서 오고, coverPhotoId 보정도 그 뒤에 확정된다.
     const normalized = prepareAlbumInput({ ...form, photoIds: selectedPhotoIds });
     const input = {
       ...normalized,
@@ -136,7 +135,7 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
       await (isEdit
         ? albumRepository.update(albumId, input)
         : albumRepository.create(albumId, input));
-      setSavedFingerprint(formFingerprint(form));
+      markSaved(form);
       clearRecovery();
       router.replace(ROUTES.ADMIN_ALBUMS);
     } catch (caught) {

@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
-import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
-import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import {
   applyUploadResult,
@@ -17,8 +16,6 @@ import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_l
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
-import { formFingerprint } from "@/lib/admin/form-fingerprint";
-import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
@@ -38,17 +35,18 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
-  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
-  const dirty = formFingerprint(form) !== savedFingerprint;
-  const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery(formRecoverySlot("photos", photoId), form, dirty, {
-    // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
-    revive: (input) => ({
-      ...(input as unknown as PhotoInput),
-      shotAt: new Date(input.shotAt as string),
-    }),
-  });
-  const { clear: clearRecovery } = recovery;
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "photos",
+    photoId,
+    form,
+    {
+      // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
+      revive: (input) => ({
+        ...(input as unknown as PhotoInput),
+        shotAt: new Date(input.shotAt as string),
+      }),
+    },
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.image])));
@@ -130,7 +128,7 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.image]),
       ).catch(() => undefined);
-      setSavedFingerprint(formFingerprint(form));
+      markSaved(form);
       clearRecovery();
       router.replace(ROUTES.ADMIN_PHOTOS);
     } catch (caught) {

@@ -8,6 +8,10 @@ import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotic
 
 import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin";
 
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
+
+
+
 import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminGlobalEditor.module.css";
@@ -185,9 +189,7 @@ const AdminGlobalPage = () => {
               variant="secondary"
               href={ROUTES.ADMIN}
               disabled={saving}
-              onNavigate={(event) => {
-                if (!confirmLeave()) event.preventDefault();
-              }}
+              onNavigate={guardedNavigate(confirmLeave)}
             >
               취소
             </AdminButton>

@@ -12,6 +12,10 @@ import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotic
 
 import { useDevConfigAdmin } from "@/features/admin-dev-config/_hooks/use-dev-config-admin";
 
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
+
+
+
 import { ROUTES } from "@/constants/routes";
 
 import styles from "./DevConfigEditor.module.css";
@@ -324,9 +328,7 @@ const DevConfigEditor = () => {
               variant="secondary"
               href={ROUTES.ADMIN_DEV}
               disabled={saving}
-              onNavigate={(event) => {
-                if (!confirmLeave()) event.preventDefault();
-              }}
+              onNavigate={guardedNavigate(confirmLeave)}
             >
               취소
             </AdminButton>

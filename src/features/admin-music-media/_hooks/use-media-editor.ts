@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 
-import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
-import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import {
   emptyMediaInput,
@@ -15,8 +14,6 @@ import { validateMediaInput } from "@/features/admin-music-media/_lib/validate-m
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
-import { formFingerprint } from "@/lib/admin/form-fingerprint";
-import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
 import type { FieldIssue } from "@/lib/admin/field-issue";
@@ -32,11 +29,11 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<FieldIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
-  const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
-  const dirty = formFingerprint(form) !== savedFingerprint;
-  const confirmLeave = useUnsavedForm(dirty);
-  const recovery = useFormRecovery(formRecoverySlot("musicMedia", mediaId), form, dirty);
-  const { clear: clearRecovery } = recovery;
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "musicMedia",
+    mediaId,
+    form,
+  );
   const [saving, setSaving] = useState(false);
 
   const applyForm = (next: typeof form) => setForm(next);
@@ -66,7 +63,7 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
       const mediaRepository = getMusicMediaRepository();
       if (isEdit) await mediaRepository.update(mediaId, input);
       else await mediaRepository.create(mediaId, input);
-      setSavedFingerprint(formFingerprint(form));
+      markSaved(form);
       clearRecovery();
       router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
     } catch (caught) {

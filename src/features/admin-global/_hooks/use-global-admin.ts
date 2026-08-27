@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormDirty } from "@/features/admin-shell/_hooks/use-form-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { formRecoverySlot } from "@/lib/admin/form-recovery";
@@ -34,7 +34,7 @@ const useGlobalAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { dirty, confirmLeave, markSaved } = useConfigDirty({
+  const { dirty, confirmLeave, markSaved } = useFormDirty({
     tagline,
     landingLead,
     contactLead,

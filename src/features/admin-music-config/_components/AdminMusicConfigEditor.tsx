@@ -8,6 +8,10 @@ import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotic
 
 import { useMusicConfigAdmin } from "@/features/admin-music-config/_hooks/use-music-config-admin";
 
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
+
+
+
 import { ROUTES } from "@/constants/routes";
 
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
@@ -152,9 +156,7 @@ const AdminMusicConfigPage = () => {
               variant="secondary"
               href={ROUTES.ADMIN_MUSIC}
               disabled={saving}
-              onNavigate={(event) => {
-                if (!confirmLeave()) event.preventDefault();
-              }}
+              onNavigate={guardedNavigate(confirmLeave)}
             >
               취소
             </AdminButton>
