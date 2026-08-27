@@ -23,6 +23,8 @@ const CHAT_ERROR_MESSAGES = {
     RATE_LIMIT_UNAVAILABLE: "요청 보호 서비스를 확인하고 있습니다. 잠시 후 다시 시도해 주세요.",
     CONTENT_BLOCKED: "이 요청에는 답변할 수 없습니다. 다른 방식으로 질문해 주세요.",
     UPSTREAM_ERROR: "답변을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    UPSTREAM_REQUEST_REJECTED: "이 요청은 처리할 수 없습니다. 질문을 조금 바꿔 보세요.",
+    RESPONSE_TOO_LONG: "답변이 너무 길어져 중단했습니다. 질문을 나눠서 물어봐 주세요.",
     TIMEOUT: "답변 시간이 초과되었습니다. 다시 시도해 주세요.",
   },
   en: {
@@ -48,6 +50,8 @@ const CHAT_ERROR_MESSAGES = {
       "The request protection service is being checked. Please try again shortly.",
     CONTENT_BLOCKED: "This request cannot be answered. Please try asking another way.",
     UPSTREAM_ERROR: "A response could not be generated. Please try again shortly.",
+    UPSTREAM_REQUEST_REJECTED: "This request could not be processed. Please try rephrasing it.",
+    RESPONSE_TOO_LONG: "The answer grew too long and was stopped. Please ask in smaller parts.",
     TIMEOUT: "The response timed out. Please try again.",
   },
 } as const;

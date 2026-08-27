@@ -645,7 +645,9 @@ describe("handleChatRequest", () => {
     [new ChatUpstreamError("rate-limit", "rate limited"), 429, "RATE_LIMIT"],
     [new ChatUpstreamError("blocked", "blocked"), 422, "CONTENT_BLOCKED"],
     [new ChatUpstreamError("unavailable", "unavailable"), 503, "UPSTREAM_ERROR"],
-    [new ChatUpstreamError("invalid", "invalid"), 502, "UPSTREAM_ERROR"],
+    // 상류가 요청을 거절한 것과 응답이 상한을 넘은 것은 방문자가 할 수 있는 일이 다르다.
+    [new ChatUpstreamError("invalid", "invalid"), 502, "UPSTREAM_REQUEST_REJECTED"],
+    [new ChatUpstreamError("too-long", "too long"), 502, "RESPONSE_TOO_LONG"],
   ] as const)("제공자 오류 kind를 공개 오류로 변환한다", async (error, status, code) => {
     const response = await handleChatRequest(
       createRequest({ lang: "en", messages: [{ role: "user", content: "question" }] }),

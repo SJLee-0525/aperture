@@ -3,7 +3,14 @@
  * 라우트 핸들러는 kind 만 보고 공개 오류를 결정하므로, 제공자를 교체하거나
  * 새로 추가해도 핸들러를 고칠 필요가 없다.
  */
-type ChatUpstreamErrorKind = "rate-limit" | "unavailable" | "blocked" | "invalid";
+type ChatUpstreamErrorKind =
+  | "rate-limit"
+  | "unavailable"
+  | "blocked"
+  /** 상류가 우리 요청을 거절했다. 같은 요청을 다시 보내도 결과가 같다. */
+  | "invalid"
+  /** 응답이 상한을 넘어 중단했다. 질문을 나누면 답이 나올 수 있다. */
+  | "too-long";
 
 class ChatUpstreamError extends Error {
   readonly kind: ChatUpstreamErrorKind;

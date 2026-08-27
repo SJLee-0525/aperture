@@ -284,6 +284,8 @@ describe("assertWithinDocumentLimit", () => {
       .mockResolvedValueOnce(jsonResponse([]));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(assertWithinDocumentLimit("token", [chunk("a")])).resolves.toEqual(["gone"]);
+    await expect(assertWithinDocumentLimit("token", [chunk("a")])).resolves.toMatchObject({
+      staleIds: ["gone"],
+    });
   });
 });

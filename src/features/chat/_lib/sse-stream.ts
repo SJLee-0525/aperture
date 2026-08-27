@@ -5,6 +5,8 @@
  * 제공자가 종료 이벤트를 보내지 않거나 같은 청크를 반복하면 이 파일의 버퍼가 무한히 늘어나고,
  * 유일한 상한이 요청 타임아웃이 된다. 정상 응답의 수십 배로 잡아 오작동에서만 걸리게 한다.
  */
+import { ChatUpstreamError } from "@/features/chat/_lib/chat-upstream-error";
+
 const MAX_STREAM_CHARS = 200_000;
 
 /** SSE 이벤트 종결자. 제공자와 중간 프록시가 LF·CRLF 중 어느 쪽을 쓰든 받는다. */
@@ -51,7 +53,12 @@ const readSseStream = async (
       // 부분 응답을 정상 완료로 넘기지 않는다. 이 파일은 잘린 답변이 완성된 답변으로
       // 나가는 것을 이미 오류로 다루므로, 상한 초과도 같은 방식으로 알린다.
       if (totalChars > MAX_STREAM_CHARS) {
-        throw new Error(`Upstream stream exceeded ${MAX_STREAM_CHARS} characters`);
+        // 상한 초과와 알 수 없는 실패를 같은 응답으로 내보내면 방문자가 질문을 나눠 보면
+        // 된다는 사실을 알 수 없다. kind 로 구분해 공개 코드를 따로 준다.
+        throw new ChatUpstreamError(
+          "too-long",
+          `Upstream stream exceeded ${MAX_STREAM_CHARS} characters`,
+        );
       }
       buffer += chunk;
       // 조각마다 "\r\n" 을 치환하면 종결자가 조각 경계에 걸릴 때 정규화를 놓쳐

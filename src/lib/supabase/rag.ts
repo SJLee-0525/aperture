@@ -158,6 +158,22 @@ const assertStorableVectors = (chunks: RagChunk[], vectors: number[][]) => {
  * @param target 증분 갱신 대상. 없으면 전체 색인을 교체한다.
  */
 /**
+ * 상한 검사가 만든 교체 계획.
+ *
+ * `staleIds` 만 넘기면 다른 청크로 계산한 목록이 들어와도 타입이 막지 못한다. 계획이 어떤
+ * 청크에서 나왔는지를 함께 들고 다녀 그 상태를 오류로 바꾼다.
+ */
+type RagReplacementPlan = {
+  readonly staleIds: string[];
+  readonly chunkIds: ReadonlySet<string>;
+};
+
+/** 계획을 만든 청크와 지금 저장하려는 청크가 같은지. */
+const sameChunkIds = (chunkIds: ReadonlySet<string>, chunks: RagChunk[]): boolean =>
+  chunkIds.size === new Set(chunks.map(({ id }) => id)).size &&
+  chunks.every(({ id }) => chunkIds.has(id));
+
+/**
  * 갱신 후 문서 수가 상한을 넘는지 임베딩 전에 확인한다.
  *
  * 단순히 청크 수만 세면 되는 검사가 아니다. 교체 범위에서 사라질 기존 문서(`staleIds`)를
@@ -168,14 +184,14 @@ const assertStorableVectors = (chunks: RagChunk[], vectors: number[][]) => {
  * @param accessToken 관리자 access token — 인가는 RLS 가 한다.
  * @param chunks 저장할 청크.
  * @param target 증분 갱신 대상. 없으면 전체 색인을 교체한다.
- * @returns 이번 갱신으로 사라질 기존 문서 ID. 호출부가 그대로 삭제에 쓴다.
+ * @returns 이번 갱신의 교체 계획. `replaceRagDocuments` 에 그대로 넘겨 조회를 아낀다.
  * @throws {Error} 갱신 후 문서 수가 `MAX_DOCUMENTS` 를 넘을 때.
  */
 const assertWithinDocumentLimit = async (
   accessToken: string,
   chunks: RagChunk[],
   target?: RagSyncTarget,
-): Promise<string[]> => {
+): Promise<RagReplacementPlan> => {
   const existingIds = target
     ? await listScopedIds(accessToken, replacementScopeFor(target))
     : (await listRagDocumentMeta(accessToken)).map(({ id }) => id);
@@ -184,21 +200,30 @@ const assertWithinDocumentLimit = async (
   if (staleIds.length + chunks.length > MAX_DOCUMENTS) {
     throw new Error(`RAG 문서가 ${MAX_DOCUMENTS}개를 초과해 한 번에 갱신할 수 없습니다.`);
   }
-  return staleIds;
+  return { staleIds, chunkIds: nextIds };
 };
 
+/**
+ * 청크와 벡터를 저장하고 이번 갱신으로 사라진 문서를 지운다.
+ *
+ * @param plan 임베딩 앞에서 미리 검사했다면 그 결과. 없으면 여기서 다시 센다.
+ * @throws {Error} 계획이 지금 저장하려는 청크와 다를 때. 그대로 쓰면 상한 검사가
+ *   건너뛰어지고 삭제 대상도 틀린다.
+ */
 const replaceRagDocuments = async (
   accessToken: string,
   chunks: RagChunk[],
   vectors: number[][],
   model: string,
   target?: RagSyncTarget,
-  /** 이미 계산한 삭제 대상. 호출부가 임베딩 전에 상한을 검사했다면 그 결과를 넘겨 조회를 아낀다. */
-  precomputedStaleIds?: string[],
+  plan?: RagReplacementPlan,
 ): Promise<void> => {
   assertStorableVectors(chunks, vectors);
-  const staleIds =
-    precomputedStaleIds ?? (await assertWithinDocumentLimit(accessToken, chunks, target));
+  if (plan && !sameChunkIds(plan.chunkIds, chunks)) {
+    throw new Error("RAG 교체 계획이 저장하려는 청크와 다릅니다.");
+  }
+  const { staleIds } =
+    plan ?? (await assertWithinDocumentLimit(accessToken, chunks, target));
   for (let start = 0; start < chunks.length; start += UPSERT_CHUNK_SIZE) {
     const rows = chunks.slice(start, start + UPSERT_CHUNK_SIZE).map((chunk, index) => ({
       id: chunk.id,

@@ -12,12 +12,17 @@ import type { ChatMessage } from "@/types/chat";
 import type { Lang } from "@/types/lang";
 
 type ChatSuccessResponse = { message: Omit<ChatMessage, "id"> };
-type ChatErrorResponse = { error?: { code?: string; message?: string } };
+/*
+ * 서버는 `code` 도 함께 보내지만 화면은 읽지 않는다. 문구가 이미 언어별로 완성돼 있고,
+ * 재시도 여부는 `retryable` 이 따로 알려 준다. 읽지 않는 필드를 타입에 두면 화면이 코드로
+ * 분기하는 것처럼 보인다.
+ */
+type ChatErrorResponse = { error?: { message?: string } };
 type ChatStreamEvent =
   | { type: "status"; status: "portfolio-search" }
   | { type: "delta"; content: string }
   | { type: "done"; message: Omit<ChatMessage, "id"> }
-  | { type: "error"; code?: string; message: string; retryable?: boolean };
+  | { type: "error"; message: string; retryable?: boolean };
 
 class ChatPublicError extends Error {
   readonly retryable: boolean;
