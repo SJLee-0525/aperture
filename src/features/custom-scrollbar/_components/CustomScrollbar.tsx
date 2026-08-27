@@ -190,6 +190,9 @@ const CustomScrollbar = () => {
       activePointerId = -1;
     };
 
+    /* 관찰 범위가 body 전체인 이유는 스크롤 대상이 어디에 붙을지 모르기 때문이다. 모달은
+       body 로 포털되고 지역 스크롤러는 지면 안에 있다. 좁히자는 제안이 있었으나, 재보니
+       레코드 하나가 부르는 재계산이 2µs 이고 rAF 로 프레임당 한 번으로 모인다. */
     const resizeObserver = new ResizeObserver(scheduleUpdate);
     const mutationObserver = new MutationObserver(scheduleUpdate);
     resizeObserver.observe(root);
