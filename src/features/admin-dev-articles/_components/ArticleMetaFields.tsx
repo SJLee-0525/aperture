@@ -2,6 +2,7 @@
 
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 
 import {
   fromDateTimeLocalValue,
@@ -37,42 +38,22 @@ const ArticleMetaFields = ({ form, slugLocked, onPatch, onSlugChange }: Props) =
   <>
     <section className={styles.section}>
       <h2 className={styles.legend}>제목</h2>
-      <div className={styles.grid2}>
-        <AdminField label="제목 (한국어)">
-          <AdminInput
-            value={form.title.ko}
-            onChange={(event) => onPatch({ title: { ...form.title, ko: event.target.value } })}
-          />
-        </AdminField>
-        <AdminField label="제목 (English)">
-          <AdminInput
-            value={form.title.en}
-            onChange={(event) => onPatch({ title: { ...form.title, en: event.target.value } })}
-          />
-        </AdminField>
-      </div>
+      <LocalizedFieldPair
+        label="제목"
+        value={form.title}
+        onChange={(next) => onPatch({ title: next })}
+      />
     </section>
 
     <section className={styles.section}>
       <h2 className={styles.legend}>요약</h2>
-      <div className={styles.grid2}>
-        <AdminField label="요약 (한국어)">
-          <AdminInput
-            multiline
-            rows={4}
-            value={form.summary.ko}
-            onChange={(event) => onPatch({ summary: { ...form.summary, ko: event.target.value } })}
-          />
-        </AdminField>
-        <AdminField label="요약 (English)">
-          <AdminInput
-            multiline
-            rows={4}
-            value={form.summary.en}
-            onChange={(event) => onPatch({ summary: { ...form.summary, en: event.target.value } })}
-          />
-        </AdminField>
-      </div>
+      <LocalizedFieldPair
+        label="요약"
+        value={form.summary}
+        onChange={(next) => onPatch({ summary: next })}
+        multiline
+        rows={4}
+      />
     </section>
 
     <section className={styles.section}>

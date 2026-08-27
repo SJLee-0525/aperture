@@ -3,10 +3,10 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useAwardEditor } from "@/features/admin-music-awards/_hooks/use-award-editor";
-
 
 import type { MusicAward } from "@/types/music";
 
@@ -57,47 +57,23 @@ const AwardForm = ({ awardId, initial }: Props) => {
 
       <section className={styles.section}>
         <h2 className={styles.legend}>수상명</h2>
-        <div className={styles.grid2}>
-          <AdminField label="수상명 (한국어)" required>
-            <AdminInput
-              value={form.name.ko}
-              onChange={(event) => patch({ name: { ...form.name, ko: event.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="수상명 (English)">
-            <AdminInput
-              value={form.name.en}
-              onChange={(event) => patch({ name: { ...form.name, en: event.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="수상명"
+          value={form.name}
+          onChange={(next) => patch({ name: next })}
+          required
+        />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>설명</h2>
-        <div className={styles.grid2}>
-          <AdminField label="설명 (한국어)">
-            <AdminInput
-              multiline
-              rows={4}
-              value={form.description.ko}
-              onChange={(event) =>
-                patch({ description: { ...form.description, ko: event.target.value } })
-              }
-            />
-          </AdminField>
-          <AdminField label="설명 (English)">
-            <AdminInput
-              multiline
-              rows={4}
-              value={form.description.en}
-              onChange={(event) =>
-                patch({ description: { ...form.description, en: event.target.value } })
-              }
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="설명"
+          value={form.description}
+          onChange={(next) => patch({ description: next })}
+          multiline
+          rows={4}
+        />
       </section>
 
       <section className={styles.section}>

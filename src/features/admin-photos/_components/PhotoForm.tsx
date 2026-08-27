@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor";
@@ -81,21 +82,12 @@ const PhotoForm = ({ photoId, initial }: Props) => {
 
       <section className={base.section}>
         <h2 className={base.legend}>제목</h2>
-        <div className={base.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+        />
       </section>
 
       <section className={base.section}>

@@ -1,8 +1,7 @@
 "use client";
 
 import { AdminButton } from "@/components/AdminButton";
-import { AdminField } from "@/components/AdminField";
-import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
@@ -51,39 +50,21 @@ const AlbumForm = ({ albumId, initial }: Props) => {
 
       <section className={styles.section}>
         <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+        />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>부제</h2>
-        <div className={styles.grid2}>
-          <AdminField label="부제 (한국어)">
-            <AdminInput
-              value={form.subtitle.ko}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="부제 (English)">
-            <AdminInput
-              value={form.subtitle.en}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="부제"
+          value={form.subtitle}
+          onChange={(next) => patch({ subtitle: next })}
+        />
       </section>
 
       <section className={styles.section}>

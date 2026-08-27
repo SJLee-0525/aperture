@@ -40,6 +40,7 @@ export default defineConfig({
         "src/features/dev-blog/_hooks/use-hover-grace.ts",
         "src/features/search/_components/SearchResults.tsx",
         "src/components/DetailHero.tsx",
+        "src/components/LocalizedFieldPair.tsx",
         "src/components/Modal.tsx",
         "src/components/PageToolbar.tsx",
         "src/components/TagFilterBar.tsx",

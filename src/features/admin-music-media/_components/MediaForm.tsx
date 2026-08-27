@@ -3,10 +3,10 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useMediaEditor } from "@/features/admin-music-media/_hooks/use-media-editor";
-
 
 import type { MusicMedia } from "@/types/music";
 
@@ -35,41 +35,22 @@ const MediaForm = ({ mediaId, initial }: Props) => {
 
       <section className={styles.section}>
         <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(event) => patch({ title: { ...form.title, ko: event.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(event) => patch({ title: { ...form.title, en: event.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+        />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.legend}>출처</h2>
-        <div className={styles.grid2}>
-          <AdminField label="출처 (한국어)">
-            <AdminInput
-              value={form.source.ko}
-              placeholder="예술의전당 실황 · 2025"
-              onChange={(event) => patch({ source: { ...form.source, ko: event.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="출처 (English)">
-            <AdminInput
-              value={form.source.en}
-              placeholder="Live at Seoul Arts Center · 2025"
-              onChange={(event) => patch({ source: { ...form.source, en: event.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="출처"
+          value={form.source}
+          onChange={(next) => patch({ source: next })}
+          placeholder={{ ko: "예술의전당 실황 · 2025", en: "Live at Seoul Arts Center · 2025" }}
+        />
       </section>
 
       <section className={styles.section}>

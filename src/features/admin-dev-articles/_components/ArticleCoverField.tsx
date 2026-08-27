@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useRef, useState, type ChangeEvent } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
-import { AdminField } from "@/components/AdminField";
-import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
@@ -96,22 +95,12 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
             <input ref={inputRef} type="file" accept="image/*" hidden onChange={onFileChange} />
           </div>
 
-          <div className={styles.grid2}>
-            <AdminField label="대체 텍스트 (한국어)">
-              <AdminInput
-                value={coverAlt.ko}
-                disabled={!form.cover}
-                onChange={(event) => onPatch({ coverAlt: { ...coverAlt, ko: event.target.value } })}
-              />
-            </AdminField>
-            <AdminField label="대체 텍스트 (English)">
-              <AdminInput
-                value={coverAlt.en}
-                disabled={!form.cover}
-                onChange={(event) => onPatch({ coverAlt: { ...coverAlt, en: event.target.value } })}
-              />
-            </AdminField>
-          </div>
+          <LocalizedFieldPair
+            label="대체 텍스트"
+            value={coverAlt}
+            onChange={(next) => onPatch({ coverAlt: next })}
+            disabled={!form.cover}
+          />
 
           {error ? (
             <p className={styles.error} role="alert">

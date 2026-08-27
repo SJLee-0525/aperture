@@ -4,6 +4,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { CloseIcon } from "@/components/CloseIcon";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
@@ -63,21 +64,12 @@ const ProjectForm = ({ projectId, initial }: Props) => {
 
       <section className={base.section}>
         <h2 className={base.legend}>제목</h2>
-        <div className={base.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+        />
       </section>
 
       <section className={base.section}>
@@ -142,46 +134,24 @@ const ProjectForm = ({ projectId, initial }: Props) => {
 
       <section className={base.section}>
         <h2 className={base.legend}>요약 (카드 한 줄)</h2>
-        <div className={base.grid2}>
-          <AdminField label="요약 (한국어)">
-            <AdminInput
-              multiline
-              rows={2}
-              value={form.summary.ko}
-              onChange={(e) => patch({ summary: { ...form.summary, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="요약 (English)">
-            <AdminInput
-              multiline
-              rows={2}
-              value={form.summary.en}
-              onChange={(e) => patch({ summary: { ...form.summary, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="요약"
+          value={form.summary}
+          onChange={(next) => patch({ summary: next })}
+          multiline
+          rows={2}
+        />
       </section>
 
       <section className={base.section}>
         <h2 className={base.legend}>개요</h2>
-        <div className={base.grid2}>
-          <AdminField label="개요 (한국어)">
-            <AdminInput
-              multiline
-              rows={5}
-              value={form.overview.ko}
-              onChange={(e) => patch({ overview: { ...form.overview, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="개요 (English)">
-            <AdminInput
-              multiline
-              rows={5}
-              value={form.overview.en}
-              onChange={(e) => patch({ overview: { ...form.overview, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="개요"
+          value={form.overview}
+          onChange={(next) => patch({ overview: next })}
+          multiline
+          rows={5}
+        />
       </section>
 
       <LocalizedProjectListField

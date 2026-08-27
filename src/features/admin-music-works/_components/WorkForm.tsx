@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useWorkEditor } from "@/features/admin-music-works/_hooks/use-work-editor";
@@ -53,39 +54,21 @@ const WorkForm = ({ workId, initial }: Props) => {
 
       <section className={base.section}>
         <h2 className={base.legend}>제목</h2>
-        <div className={base.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+        />
       </section>
 
       <section className={base.section}>
         <h2 className={base.legend}>부제 (작곡가 · 작품번호)</h2>
-        <div className={base.grid2}>
-          <AdminField label="부제 (한국어)">
-            <AdminInput
-              value={form.subtitle.ko}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="부제 (English)">
-            <AdminInput
-              value={form.subtitle.en}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="부제"
+          value={form.subtitle}
+          onChange={(next) => patch({ subtitle: next })}
+        />
       </section>
 
       <section className={base.section}>
@@ -112,60 +95,31 @@ const WorkForm = ({ workId, initial }: Props) => {
 
       <section className={base.section}>
         <h2 className={base.legend}>장소</h2>
-        <div className={base.grid2}>
-          <AdminField label="장소 (한국어)">
-            <AdminInput
-              value={form.venue.ko}
-              onChange={(e) => patch({ venue: { ...form.venue, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="장소 (English)">
-            <AdminInput
-              value={form.venue.en}
-              onChange={(e) => patch({ venue: { ...form.venue, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="장소"
+          value={form.venue}
+          onChange={(next) => patch({ venue: next })}
+        />
       </section>
 
       <section className={base.section}>
         <h2 className={base.legend}>분류 (리사이틀 · 협연 · 갈라)</h2>
-        <div className={base.grid2}>
-          <AdminField label="분류 (한국어)">
-            <AdminInput
-              value={form.category.ko}
-              onChange={(e) => patch({ category: { ...form.category, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="분류 (English)">
-            <AdminInput
-              value={form.category.en}
-              onChange={(e) => patch({ category: { ...form.category, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="분류"
+          value={form.category}
+          onChange={(next) => patch({ category: next })}
+        />
       </section>
 
       <section className={base.section}>
         <h2 className={base.legend}>설명</h2>
-        <div className={base.grid2}>
-          <AdminField label="설명 (한국어)">
-            <AdminInput
-              multiline
-              rows={4}
-              value={form.description.ko}
-              onChange={(e) => patch({ description: { ...form.description, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="설명 (English)">
-            <AdminInput
-              multiline
-              rows={4}
-              value={form.description.en}
-              onChange={(e) => patch({ description: { ...form.description, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+        <LocalizedFieldPair
+          label="설명"
+          value={form.description}
+          onChange={(next) => patch({ description: next })}
+          multiline
+          rows={4}
+        />
       </section>
 
       <section className={base.section}>
