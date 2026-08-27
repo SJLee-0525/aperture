@@ -15,9 +15,10 @@ import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
+import { setCursorLoading } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
+
 import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 
-import { setCursorLoading } from "@/utils/custom-cursor-events";
 
 import type { Tag } from "@/types/tag";
 

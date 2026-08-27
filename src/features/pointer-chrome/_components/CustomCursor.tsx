@@ -3,9 +3,10 @@
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useCursorPointerEvents } from "@/features/custom-cursor/_hooks/use-cursor-pointer-events";
+import { useCursorPointerEvents } from "@/features/pointer-chrome/_hooks/use-cursor-pointer-events";
 
-import { setCursorLoading } from "@/utils/custom-cursor-events";
+import { DATA_CURSOR_UI } from "@/features/pointer-chrome/_lib/pointer-chrome-contract";
+import { setCursorLoading } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
 
 import styles from "./CustomCursor.module.css";
 
@@ -38,7 +39,7 @@ const CustomCursor = () => {
       <div
         ref={cursorRef}
         className={styles.cursor}
-        data-custom-cursor-ui
+        {...{ [DATA_CURSOR_UI]: true }}
         data-visible="false"
         aria-hidden="true"
       >

@@ -1,6 +1,6 @@
-import { autoScrollDirection, autoScrollVelocity } from "@/features/custom-cursor/_lib/auto-scroll";
+import { autoScrollDirection, autoScrollVelocity } from "@/features/pointer-chrome/_lib/auto-scroll";
 
-import type { CursorState } from "@/features/custom-cursor/_lib/cursor-state";
+import type { CursorState } from "@/features/pointer-chrome/_lib/cursor-state";
 
 /** 한 프레임에 반영할 최대 경과 시간. 탭이 뒤로 갔다 오면 델타가 커져 화면이 튄다. */
 const MAX_STEP_SECONDS = 0.05;

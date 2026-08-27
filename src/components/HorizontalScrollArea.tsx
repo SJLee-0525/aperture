@@ -113,6 +113,8 @@ const HorizontalScrollArea = ({
       <div
         ref={trackRef}
         className={styles.track}
+        // 커서가 이 표시를 보고 스크롤바 모양이 된다. 이름은 pointer-chrome-contract.ts 가
+        // 정의하지만 shared 레이어는 feature 를 import 할 수 없어 여기서는 리터럴로 적는다.
         data-custom-horizontal-scrollbar-ui
         data-visible="false"
         aria-hidden="true"

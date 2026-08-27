@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createCursorLoadingRegistry } from "@/features/custom-cursor/_lib/cursor-loading-registry";
+import { createCursorLoadingRegistry } from "@/features/pointer-chrome/_lib/cursor-loading-registry";
 
 describe("createCursorLoadingRegistry", () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { applyCursorGeometry } from "@/features/custom-cursor/_lib/cursor-mode";
+import { applyCursorGeometry } from "@/features/pointer-chrome/_lib/cursor-mode";
 
 describe("applyCursorGeometry", () => {
   it("지원하는 모드의 커서 크기와 모양을 적용한다", () => {

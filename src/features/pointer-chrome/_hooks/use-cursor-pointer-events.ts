@@ -2,18 +2,18 @@
 
 import { useEffect, type RefObject } from "react";
 
-import { createAutoScrollController } from "@/features/custom-cursor/_lib/auto-scroll-controller";
-import { createCursorLoadingRegistry } from "@/features/custom-cursor/_lib/cursor-loading-registry";
-import { createCursorState } from "@/features/custom-cursor/_lib/cursor-state";
-import { resolveCursorTarget } from "@/features/custom-cursor/_lib/cursor-target";
-import { findVerticalScroller } from "@/features/custom-cursor/_lib/vertical-scroller";
-
+import { createAutoScrollController } from "@/features/pointer-chrome/_lib/auto-scroll-controller";
+import { createCursorLoadingRegistry } from "@/features/pointer-chrome/_lib/cursor-loading-registry";
+import { createCursorState } from "@/features/pointer-chrome/_lib/cursor-state";
+import { resolveCursorTarget } from "@/features/pointer-chrome/_lib/cursor-target";
+import { DATA_CUSTOM_CURSOR } from "@/features/pointer-chrome/_lib/pointer-chrome-contract";
 import {
   CUSTOM_CURSOR_LOADING_EVENT,
   CUSTOM_CURSOR_MAP_HOVER_EVENT,
   setCursorLoading,
   type CursorLoadingDetail,
-} from "@/utils/custom-cursor-events";
+} from "@/features/pointer-chrome/_lib/pointer-chrome-events";
+import { findVerticalScroller } from "@/features/pointer-chrome/_lib/vertical-scroller";
 
 /** 커스텀 커서를 그릴 입력 환경. 손가락 입력과 모션 축소 설정에서는 기본 커서를 쓴다. */
 const ENABLE_QUERY =
@@ -227,11 +227,11 @@ const useCursorPointerEvents = ({ cursorRef, autoScrollAnchorRef, getPathname }:
     };
     const onMediaChange = () => {
       if (media.matches) {
-        root.setAttribute("data-custom-cursor", "");
+        root.setAttribute(DATA_CUSTOM_CURSOR, "");
         return;
       }
       autoScroll.stop();
-      root.removeAttribute("data-custom-cursor");
+      root.removeAttribute(DATA_CUSTOM_CURSOR);
       state.setSnapped(null);
       state.setVisible(false);
     };
@@ -257,7 +257,7 @@ const useCursorPointerEvents = ({ cursorRef, autoScrollAnchorRef, getPathname }:
     media.addEventListener("change", onMediaChange);
 
     return () => {
-      root.removeAttribute("data-custom-cursor");
+      root.removeAttribute(DATA_CUSTOM_CURSOR);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerover", onPointerOver);
       window.removeEventListener("pointerdown", onPointerDown);

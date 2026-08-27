@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createCursorState } from "@/features/custom-cursor/_lib/cursor-state";
+import { createCursorState } from "@/features/pointer-chrome/_lib/cursor-state";
 
 /** 프레임을 기다리지 않고 그리기를 바로 돌린다. */
 const runFrames = () => {

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { resolveCursorTarget } from "@/features/custom-cursor/_lib/cursor-target";
+import { resolveCursorTarget } from "@/features/pointer-chrome/_lib/cursor-target";
 
 describe("resolveCursorTarget", () => {
   it("링크의 자식 노드를 interactive target으로 정규화한다", () => {

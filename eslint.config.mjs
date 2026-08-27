@@ -48,7 +48,9 @@ const config = [
           // dev-blog: 공개 상세와 관리자 편집기가 같은 Markdown 계약·본문 렌더러를 쓴다.
           // admin-shell: 관리자 셸과 목록·수정 라우트의 공용 골격을 열네 개 admin feature 가 쓴다.
           type: "platform",
-          pattern: "src/features/(lang|theme|image-upload|photo-detail|dev-blog|admin-shell)",
+          // pointer-chrome: 커서와 스크롤바가 지도·상세·글 어디에서든 같은 계약으로 뜬다.
+          pattern:
+            "src/features/(lang|theme|image-upload|photo-detail|dev-blog|admin-shell|pointer-chrome)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {

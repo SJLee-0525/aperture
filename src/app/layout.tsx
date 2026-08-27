@@ -1,9 +1,9 @@
 import { Newsreader, Noto_Serif_KR, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
-import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
-import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomScrollbar";
 import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { MotionProvider } from "@/features/motion/_components/MotionProvider";
+import { CustomCursor } from "@/features/pointer-chrome/_components/CustomCursor";
+import { CustomScrollbar } from "@/features/pointer-chrome/_components/CustomScrollbar";
 
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
 

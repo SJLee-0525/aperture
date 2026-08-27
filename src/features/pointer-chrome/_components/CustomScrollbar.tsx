@@ -2,6 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
+import {
+  DATA_SCROLLBAR_UI,
+  DATA_SCROLL_CONTAINER,
+} from "@/features/pointer-chrome/_lib/pointer-chrome-contract";
+
 import styles from "./CustomScrollbar.module.css";
 
 /* 막대가 그려지는 조건. globals.css 의 네이티브 스크롤바 제거 규칙,
@@ -40,11 +45,11 @@ const CustomScrollbar = () => {
 
     const resolveScroller = () => {
       const modalScrollers = document.querySelectorAll<HTMLElement>(
-        '[data-custom-scroll-container]:not([data-custom-scroll-scope="local"])',
+        `[${DATA_SCROLL_CONTAINER}]:not([data-custom-scroll-scope="local"])`,
       );
       const modalScroller = modalScrollers.item(modalScrollers.length - 1);
       const localScrollers = document.querySelectorAll<HTMLElement>(
-        '[data-custom-scroll-container][data-custom-scroll-scope="local"]',
+        `[${DATA_SCROLL_CONTAINER}][data-custom-scroll-scope="local"]`,
       );
       let localScroller: HTMLElement | null = null;
       for (let index = localScrollers.length - 1; index >= 0; index -= 1) {
@@ -228,7 +233,7 @@ const CustomScrollbar = () => {
     <div
       ref={trackRef}
       className={styles.track}
-      data-custom-scrollbar-ui
+      {...{ [DATA_SCROLLBAR_UI]: true }}
       data-visible="false"
       data-dragging="false"
       aria-hidden="true"

@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { findVerticalScroller } from "@/features/custom-cursor/_lib/vertical-scroller";
+import { findVerticalScroller } from "@/features/pointer-chrome/_lib/vertical-scroller";
 
 const setScrollable = (element: HTMLElement, scrollHeight: number, clientHeight: number) => {
   Object.defineProperty(element, "scrollHeight", { value: scrollHeight, configurable: true });

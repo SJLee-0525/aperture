@@ -8,9 +8,10 @@ import { Skeleton } from "@/components/Skeleton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
+import { setCursorLoading } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
+
 import { pickText } from "@/lib/i18n/pick-text";
 
-import { setCursorLoading } from "@/utils/custom-cursor-events";
 
 import type { DevProject, DevProjectCardData } from "@/types/dev";
 import type { DevArticleProjectLink } from "@/types/dev-article";

@@ -2,7 +2,7 @@ import {
   applyCursorGeometry,
   type CursorMode,
   type ScrollbarAxis,
-} from "@/features/custom-cursor/_lib/cursor-mode";
+} from "@/features/pointer-chrome/_lib/cursor-mode";
 
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
 

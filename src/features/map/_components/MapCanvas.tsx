@@ -3,7 +3,7 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "react";
 
-import { setMapCursorHover } from "@/utils/custom-cursor-events";
+import { setMapCursorHover } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
 
 import type { MapLocation } from "@/features/map/_types/map-location";
 import type { FeatureCollection } from "geojson";
