@@ -26,15 +26,12 @@ type Props = {
  * @returns {JSX.Element}
  */
 const TagRow = ({ tag, usedCount, onEditLabel, onDelete }: Props) => {
-  const onDeleteClick = () => {
-    if (window.confirm(`"${tag.id}" 태그를 삭제할까요?`)) onDelete(tag.id);
-  };
-
   return (
     <AdminSortableRow
       id={tag.id}
       dense
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(tag.id)}
+      confirmDelete={{ name: tag.id, noun: "태그" }}
       deleteDisabled={usedCount > 0}
       deleteTitle={usedCount > 0 ? "사용 중인 태그는 삭제할 수 없습니다." : undefined}
       beforeBadge={<span className={styles.usage}>{usedCount}장 사용</span>}

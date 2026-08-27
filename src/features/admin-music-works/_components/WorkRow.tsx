@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminMusicWorkRoute } from "@/constants/routes";
 import { formatEventYMD } from "@/lib/format/format-date";
 
@@ -33,12 +34,6 @@ type Props = {
  */
 const WorkRow = ({ work, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(work.poster);
-  const onDeleteClick = () => {
-    if (window.confirm(`"${work.title.ko || "제목 없음"}" 연주를 삭제할까요?`)) {
-      onDelete(work.id);
-    }
-  };
-
   return (
     <AdminSortableRow
       id={work.id}
@@ -46,7 +41,8 @@ const WorkRow = ({ work, publishBusy, onTogglePublished, onDelete }: Props) => {
       published={work.published}
       onTogglePublished={(next) => onTogglePublished(work.id, next)}
       editHref={adminMusicWorkRoute(work.id)}
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(work.id)}
+      confirmDelete={{ name: work.title.ko || ADMIN_UNTITLED, noun: "연주" }}
     >
       <span className={styles.thumb}>
         {previewUrl ? (

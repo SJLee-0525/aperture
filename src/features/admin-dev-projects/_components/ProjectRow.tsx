@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminDevProjectRoute } from "@/constants/routes";
 
 import { imageThumbnailUrl } from "@/types/image";
@@ -32,12 +33,6 @@ type Props = {
  */
 const ProjectRow = ({ project, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(project.cover);
-  const onDeleteClick = () => {
-    if (window.confirm(`"${project.title.ko || "제목 없음"}" 프로젝트를 삭제할까요?`)) {
-      onDelete(project.id);
-    }
-  };
-
   return (
     <AdminSortableRow
       id={project.id}
@@ -45,7 +40,8 @@ const ProjectRow = ({ project, publishBusy, onTogglePublished, onDelete }: Props
       published={project.published}
       onTogglePublished={(next) => onTogglePublished(project.id, next)}
       editHref={adminDevProjectRoute(project.id)}
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(project.id)}
+      confirmDelete={{ name: project.title.ko || ADMIN_UNTITLED, noun: "프로젝트" }}
     >
       <span className={styles.thumb}>
         {previewUrl ? (

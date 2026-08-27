@@ -2,6 +2,7 @@
 
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNNAMED } from "@/constants/admin-labels";
 import { adminMusicAwardRoute } from "@/constants/routes";
 
 import type { MusicAward } from "@/types/music";
@@ -27,12 +28,6 @@ type Props = {
  * @returns {JSX.Element}
  */
 const AwardRow = ({ award, publishBusy, onTogglePublished, onDelete }: Props) => {
-  const onDeleteClick = () => {
-    if (window.confirm(`"${award.name.ko || "이름 없음"}" 수상을 삭제할까요?`)) {
-      onDelete(award.id);
-    }
-  };
-
   return (
     <AdminSortableRow
       id={award.id}
@@ -40,7 +35,8 @@ const AwardRow = ({ award, publishBusy, onTogglePublished, onDelete }: Props) =>
       published={award.published}
       onTogglePublished={(next) => onTogglePublished(award.id, next)}
       editHref={adminMusicAwardRoute(award.id)}
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(award.id)}
+      confirmDelete={{ name: award.name.ko || ADMIN_UNNAMED, noun: "수상" }}
     >
       <span className={styles.year}>{award.year || "—"}</span>
 

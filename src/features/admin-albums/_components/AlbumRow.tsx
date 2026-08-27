@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminAlbumRoute } from "@/constants/routes";
 
 import type { AdminAlbumListItem } from "@/types/admin";
@@ -32,16 +33,6 @@ type Props = {
  * @returns {JSX.Element}
  */
 const AlbumRow = ({ album, coverUrl, publishBusy, onTogglePublished, onDelete }: Props) => {
-  const onDeleteClick = () => {
-    if (
-      window.confirm(
-        `"${album.title.ko || "제목 없음"}" 앨범을 삭제할까요? 사진은 지워지지 않습니다.`,
-      )
-    ) {
-      onDelete(album.id);
-    }
-  };
-
   return (
     <AdminSortableRow
       id={album.id}
@@ -49,7 +40,8 @@ const AlbumRow = ({ album, coverUrl, publishBusy, onTogglePublished, onDelete }:
       published={album.published}
       onTogglePublished={(next) => onTogglePublished(album.id, next)}
       editHref={adminAlbumRoute(album.id)}
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(album.id)}
+      confirmDelete={{ name: album.title.ko || ADMIN_UNTITLED, noun: "앨범", note: "사진은 지워지지 않습니다." }}
     >
       <span className={styles.thumb}>
         {coverUrl ? (

@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminPhotoRoute } from "@/constants/routes";
 
 import { imageThumbnailUrl } from "@/types/image";
@@ -32,14 +33,6 @@ type Props = {
  */
 const PhotoRow = ({ photo, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(photo.image);
-  const onDeleteClick = () => {
-    if (
-      window.confirm(`"${photo.title.ko || "제목 없음"}" 사진을 삭제할까요? 되돌릴 수 없습니다.`)
-    ) {
-      onDelete(photo.id);
-    }
-  };
-
   return (
     <AdminSortableRow
       id={photo.id}
@@ -47,7 +40,8 @@ const PhotoRow = ({ photo, publishBusy, onTogglePublished, onDelete }: Props) =>
       published={photo.published}
       onTogglePublished={(next) => onTogglePublished(photo.id, next)}
       editHref={adminPhotoRoute(photo.id)}
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(photo.id)}
+      confirmDelete={{ name: photo.title.ko || ADMIN_UNTITLED, noun: "사진", note: "되돌릴 수 없습니다." }}
     >
       <span className={styles.thumb}>
         {previewUrl ? (

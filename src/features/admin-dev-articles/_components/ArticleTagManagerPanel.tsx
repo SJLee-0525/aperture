@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 
+
+
 import { AdminInput } from "@/components/AdminInput";
 
 import { useArticleTagsAdmin } from "@/features/admin-dev-articles/_hooks/use-article-tags-admin";
 
 import { normalizeArticleSlug } from "@/features/admin-dev-articles/_lib/dev-article-slug";
+import { confirmThenDelete } from "@/features/admin-shell/_lib/delete-message";
 
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
@@ -51,9 +54,7 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
     setSaving(false);
   };
 
-  const remove = () => {
-    if (window.confirm(`"${tag.id}" 태그를 삭제할까요?`)) onDelete(tag.id);
-  };
+  const remove = () => confirmThenDelete({ name: tag.id, noun: "태그" }, () => onDelete(tag.id));
 
   return (
     <li className={styles.row}>

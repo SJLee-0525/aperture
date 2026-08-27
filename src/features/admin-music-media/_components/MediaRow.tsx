@@ -2,6 +2,7 @@
 
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminMusicMediaRoute } from "@/constants/routes";
 
 import type { MusicMedia } from "@/types/music";
@@ -27,12 +28,6 @@ type Props = {
  * @returns {JSX.Element}
  */
 const MediaRow = ({ media, publishBusy, onTogglePublished, onDelete }: Props) => {
-  const onDeleteClick = () => {
-    if (window.confirm(`"${media.title.ko || "제목 없음"}" 영상을 삭제할까요?`)) {
-      onDelete(media.id);
-    }
-  };
-
   return (
     <AdminSortableRow
       id={media.id}
@@ -40,7 +35,8 @@ const MediaRow = ({ media, publishBusy, onTogglePublished, onDelete }: Props) =>
       published={media.published}
       onTogglePublished={(next) => onTogglePublished(media.id, next)}
       editHref={adminMusicMediaRoute(media.id)}
-      onDelete={onDeleteClick}
+      onDelete={() => onDelete(media.id)}
+      confirmDelete={{ name: media.title.ko || ADMIN_UNTITLED, noun: "영상" }}
     >
       <span className={styles.title}>{media.title.ko || "제목 없음"}</span>
 

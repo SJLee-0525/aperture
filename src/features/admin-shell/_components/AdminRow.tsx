@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 
+import { deleteMessage, type DeleteTarget } from "@/features/admin-shell/_lib/delete-message";
+
 import type { CSSProperties, ReactNode, Ref } from "react";
+
 
 import styles from "./admin-row.module.css";
 
@@ -21,6 +24,11 @@ type Props = {
   /** 없으면 수정 링크를 그리지 않는다. */
   editHref?: string;
   onDelete?: () => void;
+  /**
+   * 삭제 전 확인 문구의 재료. 있으면 확인을 통과한 뒤에만 `onDelete` 를 부른다.
+   * 문구를 행마다 적으면 같은 파괴 동작인데 경고 강도가 갈린다.
+   */
+  confirmDelete?: DeleteTarget;
   deleteDisabled?: boolean;
   deleteTitle?: string;
   /** 인라인 입력이 들어가 간격을 좁히는 행. 태그 사전이 쓴다. */
@@ -45,53 +53,62 @@ const AdminRow = ({
   beforeBadge,
   editHref,
   onDelete,
+  confirmDelete,
   deleteDisabled = false,
   deleteTitle,
   dense = false,
   innerRef,
   style,
-}: Props) => (
-  <li
-    ref={innerRef}
-    style={style}
-    className={dense ? `${styles.row} ${styles.rowDense}` : styles.row}
-  >
-    {handle}
-    {children}
-    {beforeBadge}
+}: Props) => {
+  const requestDelete = () => {
+    if (!onDelete) return;
+    if (confirmDelete && !window.confirm(deleteMessage(confirmDelete))) return;
+    onDelete();
+  };
 
-    {published !== undefined && onTogglePublished ? (
-      <button
-        type="button"
-        className={`${styles.badge} ${published ? styles.badgeOn : ""}`}
-        disabled={publishedBusy}
-        onClick={() => onTogglePublished(!published)}
-      >
-        {published ? publishedLabels.on : publishedLabels.off}
-      </button>
-    ) : null}
+  return (
+    <li
+      ref={innerRef}
+      style={style}
+      className={dense ? `${styles.row} ${styles.rowDense}` : styles.row}
+    >
+      {handle}
+      {children}
+      {beforeBadge}
 
-    {editHref || onDelete ? (
-      <span className={styles.actions}>
-        {editHref ? (
-          <Link href={editHref} className={styles.edit}>
-            수정
-          </Link>
-        ) : null}
-        {onDelete ? (
-          <button
-            type="button"
-            className={styles.delete}
-            onClick={onDelete}
-            disabled={deleteDisabled}
-            title={deleteTitle}
-          >
-            삭제
-          </button>
-        ) : null}
-      </span>
-    ) : null}
-  </li>
-);
+      {published !== undefined && onTogglePublished ? (
+        <button
+          type="button"
+          className={`${styles.badge} ${published ? styles.badgeOn : ""}`}
+          disabled={publishedBusy}
+          onClick={() => onTogglePublished(!published)}
+        >
+          {published ? publishedLabels.on : publishedLabels.off}
+        </button>
+      ) : null}
+
+      {editHref || onDelete ? (
+        <span className={styles.actions}>
+          {editHref ? (
+            <Link href={editHref} className={styles.edit}>
+              수정
+            </Link>
+          ) : null}
+          {onDelete ? (
+            <button
+              type="button"
+              className={styles.delete}
+              onClick={requestDelete}
+              disabled={deleteDisabled}
+              title={deleteTitle}
+            >
+              삭제
+            </button>
+          ) : null}
+        </span>
+      ) : null}
+    </li>
+  );
+};
 
 export { AdminRow };
