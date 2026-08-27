@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_WEBHOOK_BODY_BYTES,
   verifySentrySignature,
-} from "@/features/sentry-triage/_lib/verify-sentry-signature";
+} from "@/lib/sentry-triage/verify-sentry-signature";
 
 /** 테스트 고정값. 실제 Client Secret 과 무관하다. */
 const SECRET = "hook-value";

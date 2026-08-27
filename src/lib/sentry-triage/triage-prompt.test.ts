@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildTriageInput, TRIAGE_INSTRUCTIONS } from "@/features/sentry-triage/_lib/triage-prompt";
+import { buildTriageInput, TRIAGE_INSTRUCTIONS } from "@/lib/sentry-triage/triage-prompt";
 
 import type { SentryAlertSummary } from "@/types/sentry-alert";
 

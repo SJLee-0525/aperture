@@ -3,9 +3,9 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { handleSentryAlert } from "@/features/sentry-triage/_lib/handle-sentry-alert";
+import { handleSentryAlert } from "@/lib/sentry-triage/handle-sentry-alert";
 
-import type { SentryAlertDependencies } from "@/features/sentry-triage/_lib/handle-sentry-alert";
+import type { SentryAlertDependencies } from "@/lib/sentry-triage/handle-sentry-alert";
 import type { TriageResult } from "@/types/sentry-alert";
 
 const FIXTURE = readFileSync(path.join(__dirname, "__fixtures__/event-alert.json"), "utf8");

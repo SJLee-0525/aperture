@@ -4,7 +4,7 @@ import {
   buildTriageSchema,
   MAX_ACTIONS,
   parseTriageResult,
-} from "@/features/sentry-triage/_lib/triage-schema";
+} from "@/lib/sentry-triage/triage-schema";
 
 const valid = {
   severity: "high",

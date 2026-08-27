@@ -1,15 +1,15 @@
 import { after } from "next/server";
 
+import { declaredBodyTooLarge, readLimitedBody } from "@/lib/http/read-limited-body";
 import {
   handleSentryAlert,
   sentryAlertDependencies,
-} from "@/features/sentry-triage/_lib/handle-sentry-alert";
+} from "@/lib/sentry-triage/handle-sentry-alert";
 import {
   MAX_WEBHOOK_BODY_BYTES,
   verifySentrySignature,
-} from "@/features/sentry-triage/_lib/verify-sentry-signature";
+} from "@/lib/sentry-triage/verify-sentry-signature";
 
-import { declaredBodyTooLarge, readLimitedBody } from "@/lib/http/read-limited-body";
 
 /** `node:crypto` 의 `timingSafeEqual` 이 필요하다. */
 export const runtime = "nodejs";

@@ -1,4 +1,4 @@
-import type { DiscordEmbed } from "@/features/sentry-triage/_lib/discord-card";
+import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
 
 type SendResult = { ok: true } | { ok: false; error: string };
 

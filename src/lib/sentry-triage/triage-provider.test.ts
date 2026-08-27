@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getTriageProvider,
   TriageProviderUnavailableError,
-} from "@/features/sentry-triage/_lib/triage-provider";
+} from "@/lib/sentry-triage/triage-provider";
 
 import type { SentryAlertSummary, TriageResult } from "@/types/sentry-alert";
 

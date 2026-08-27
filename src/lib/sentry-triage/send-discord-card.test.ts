@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { sendDiscordCard } from "@/features/sentry-triage/_lib/send-discord-card";
+import { sendDiscordCard } from "@/lib/sentry-triage/send-discord-card";
 
-import type { DiscordEmbed } from "@/features/sentry-triage/_lib/discord-card";
+import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
 
 const embed: DiscordEmbed = { title: "Error: boom", color: 0xe5484d };
 

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_TRIAGE_DAILY_LIMIT,
   getTriageRateLimiter,
-} from "@/features/sentry-triage/_lib/triage-rate-limit";
+} from "@/lib/sentry-triage/triage-rate-limit";
 
 const UPSTASH = { UPSTASH_REDIS_REST_URL: "https://u", UPSTASH_REDIS_REST_TOKEN: "t" };
 const KV = { KV_REST_API_URL: "https://kv", KV_REST_API_TOKEN: "t2" };

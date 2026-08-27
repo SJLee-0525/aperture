@@ -3,7 +3,7 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AboutView } from "@/features/about/_components/AboutView";
+import { AboutView } from "@/features/photo-about/_components/AboutView";
 
 import { DICTIONARY } from "@/constants/dictionary";
 

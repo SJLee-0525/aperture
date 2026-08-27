@@ -14,8 +14,8 @@ import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSear
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 
 import { useChat } from "@/features/chat/_hooks/use-chat";
+import { useChatScreenTarget } from "@/features/chat/_hooks/use-chat-screen-target";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
 import { useDialog } from "@/hooks/use-dialog";
 
 import { ROUTES } from "@/constants/routes";

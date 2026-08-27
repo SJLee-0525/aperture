@@ -1,5 +1,5 @@
-import { createGeminiTriageProvider } from "@/features/sentry-triage/_lib/gemini-triage-provider";
-import { createOpenAITriageProvider } from "@/features/sentry-triage/_lib/openai-triage-provider";
+import { createGeminiTriageProvider } from "@/lib/sentry-triage/gemini-triage-provider";
+import { createOpenAITriageProvider } from "@/lib/sentry-triage/openai-triage-provider";
 
 import type { SentryAlertSummary, TriageResult } from "@/types/sentry-alert";
 

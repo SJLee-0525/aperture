@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createGeminiTriageProvider } from "@/features/sentry-triage/_lib/gemini-triage-provider";
+import { createGeminiTriageProvider } from "@/lib/sentry-triage/gemini-triage-provider";
 
 import type { SentryAlertSummary, TriageResult } from "@/types/sentry-alert";
 

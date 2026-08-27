@@ -2,10 +2,11 @@ import { Suspense } from "react";
 
 import { MapView } from "@/features/map/_components/MapView";
 
+import { toMapLocations } from "@/features/map/_lib/map-location";
+
 import { getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-import { toMapLocations } from "@/features/map/_types/map-location";
 
 import type { Lang } from "@/types/lang";
 import type { Metadata } from "next";

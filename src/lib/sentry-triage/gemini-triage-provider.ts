@@ -1,7 +1,7 @@
-import { buildTriageInput, TRIAGE_INSTRUCTIONS } from "@/features/sentry-triage/_lib/triage-prompt";
-import { buildTriageSchema, parseTriageResult } from "@/features/sentry-triage/_lib/triage-schema";
+import { buildTriageInput, TRIAGE_INSTRUCTIONS } from "@/lib/sentry-triage/triage-prompt";
+import { buildTriageSchema, parseTriageResult } from "@/lib/sentry-triage/triage-schema";
 
-import type { TriageProvider } from "@/features/sentry-triage/_lib/triage-provider";
+import type { TriageProvider } from "@/lib/sentry-triage/triage-provider";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 

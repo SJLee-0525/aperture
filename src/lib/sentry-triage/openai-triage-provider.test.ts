@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createOpenAITriageProvider } from "@/features/sentry-triage/_lib/openai-triage-provider";
+import { createOpenAITriageProvider } from "@/lib/sentry-triage/openai-triage-provider";
 
 import type { SentryAlertSummary, TriageResult } from "@/types/sentry-alert";
 

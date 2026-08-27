@@ -6,7 +6,7 @@ import {
   NOISE_COLOR,
   SEVERITY_COLOR,
   UNTRIAGED_COLOR,
-} from "@/features/sentry-triage/_lib/discord-card";
+} from "@/lib/sentry-triage/discord-card";
 
 import type { SentryAlertSummary, TriageOutcome, TriageResult } from "@/types/sentry-alert";
 

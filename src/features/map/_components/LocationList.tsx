@@ -12,7 +12,7 @@ import { countLabel } from "@/lib/format/count-label";
 import { formatCoords } from "@/lib/format/format-coords";
 import { pickText } from "@/lib/i18n/pick-text";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 
 import styles from "./LocationList.module.css";
 

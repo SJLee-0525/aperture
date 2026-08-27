@@ -8,8 +8,8 @@ import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useIntroDelay } from "@/features/landing/_hooks/use-intro-delay";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
 import { useSectionGlow } from "@/features/landing/_hooks/use-section-glow";
+import { useTyping } from "@/features/landing/_hooks/use-typing";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useTyping } from "@/hooks/use-typing";
 
 import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
 

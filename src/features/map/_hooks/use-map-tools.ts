@@ -9,7 +9,7 @@ import { pickText } from "@/lib/i18n/pick-text";
 import { countLabel, formatToolItems } from "@/lib/webmcp/tool-output";
 import { limitProperty, objectSchema } from "@/lib/webmcp/tool-schemas";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
 
 const LIST_TOOL: WebMcpToolDefinition = {

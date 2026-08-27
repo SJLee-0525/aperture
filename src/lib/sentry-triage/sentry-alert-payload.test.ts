@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_FRAMES,
   normalizeSentryAlert,
-} from "@/features/sentry-triage/_lib/sentry-alert-payload";
+} from "@/lib/sentry-triage/sentry-alert-payload";
 
 /**
  * 실제 Sentry 가 보낸 issue alert 본문(docs/plan/10 §13.2 캡처).

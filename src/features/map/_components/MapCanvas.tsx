@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 
 import { setMapCursorHover } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 import type { FeatureCollection } from "geojson";
 
 import "maplibre-gl/dist/maplibre-gl.css";

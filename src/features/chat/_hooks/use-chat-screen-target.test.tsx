@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { ChatScreenTargetProvider } from "@/components/ChatScreenTargetProvider";
 
-import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
+import { useChatScreenTarget } from "@/features/chat/_hooks/use-chat-screen-target";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
 import type { ChatScreenTarget } from "@/lib/chat-screen-target-context";

@@ -1,4 +1,4 @@
-import { AboutView } from "@/features/about/_components/AboutView";
+import { AboutView } from "@/features/photo-about/_components/AboutView";
 
 import { toLang } from "@/constants/langs";
 import { getAlbums, getPhotos } from "@/lib/content/photo";

@@ -13,7 +13,7 @@ import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { openDetailQuery } from "@/lib/navigation/detail-query-url";
 
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 
 import styles from "./MapView.module.css";
 

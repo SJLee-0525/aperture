@@ -1,13 +1,12 @@
-import { buildDiscordCard } from "@/features/sentry-triage/_lib/discord-card";
-import { sendDiscordCard } from "@/features/sentry-triage/_lib/send-discord-card";
-import { normalizeSentryAlert } from "@/features/sentry-triage/_lib/sentry-alert-payload";
-import { getTriageProvider } from "@/features/sentry-triage/_lib/triage-provider";
-import { getTriageRateLimiter } from "@/features/sentry-triage/_lib/triage-rate-limit";
-
+import { buildDiscordCard } from "@/lib/sentry-triage/discord-card";
+import { sendDiscordCard } from "@/lib/sentry-triage/send-discord-card";
+import { normalizeSentryAlert } from "@/lib/sentry-triage/sentry-alert-payload";
+import { getTriageProvider } from "@/lib/sentry-triage/triage-provider";
+import { getTriageRateLimiter } from "@/lib/sentry-triage/triage-rate-limit";
 import { claimSentryAlert, completeSentryAlert } from "@/lib/supabase/sentry-alerts";
 
-import type { DiscordEmbed } from "@/features/sentry-triage/_lib/discord-card";
-import type { TriageProvider } from "@/features/sentry-triage/_lib/triage-provider";
+import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
+import type { TriageProvider } from "@/lib/sentry-triage/triage-provider";
 import type { TriageOutcome } from "@/types/sentry-alert";
 
 /** LLM 전체 예산. 카드 전송과 기록 몫을 남긴다 (docs/plan/10 §4 시간 예산). */
