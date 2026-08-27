@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
 
-import { sectionFromPath } from "@/constants/sections";
 import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 const runThemeScript = (storage: Storage | Pick<Storage, "getItem"> = localStorage) => {
   new Function("localStorage", "document", "location", THEME_INIT_SCRIPT)(

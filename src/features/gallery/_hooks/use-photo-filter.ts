@@ -11,9 +11,9 @@ import {
   FOCAL_MIN,
   buildPhotoFilterHref,
   parsePhotoFilterQuery,
-} from "@/lib/photo-filter-query";
+} from "@/lib/photo/filter-query";
 
-import type { PhotoFilterState, PhotoFilterVocabulary } from "@/lib/photo-filter-query";
+import type { PhotoFilterState, PhotoFilterVocabulary } from "@/lib/photo/filter-query";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 
 /**

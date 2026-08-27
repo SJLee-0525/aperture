@@ -18,7 +18,7 @@ import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { countLabel } from "@/lib/format/count-label";
-import { parsePhotoFilterQuery } from "@/lib/photo-filter-query";
+import { parsePhotoFilterQuery } from "@/lib/photo/filter-query";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";

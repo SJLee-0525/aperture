@@ -1,4 +1,5 @@
 import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
+import { shouldUseMockContent } from "@/lib/content/content-source";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   fetchDevConfig,
@@ -63,7 +64,21 @@ const fetchAdminTarget = async (target: RagSyncTarget, idToken: string) => {
   return fetchRowAsUser(collection, target.sourceId, idToken);
 };
 
+/**
+ * RAG 인덱싱 원본을 Supabase 에서 직접 읽는다.
+ *
+ * 같은 폴더의 다른 getter 와 달리 mock 분기가 없다. 임베딩은 배포된 실데이터만
+ * 대상으로 하며 mock 콘텐츠를 인덱싱할 이유가 없다. 그 사실을 진입부에서 알린다 —
+ * 알리지 않으면 `supabaseUrl()` 이 빈 문자열이라 fetch 가 상대 경로로 나가고
+ * 원인을 알기 어려운 오류가 난다.
+ */
 const getRagSourceData = async () => {
+  if (shouldUseMockContent()) {
+    throw new Error(
+      "mock 모드에서는 RAG 원본을 읽을 수 없습니다. NEXT_PUBLIC_USE_MOCK=0 으로 실행하세요.",
+    );
+  }
+
   const [
     site,
     devConfig,

@@ -13,7 +13,7 @@ export default defineConfig({
         // 관리자 mock 저장소 — repository 조립 모듈은 firebase 를 끌고 오므로 순수 구현만 잰다.
         "src/lib/admin/mock/*.ts",
         "src/lib/admin/select-repository.ts",
-        "src/lib/photo-filter-query.ts",
+        "src/lib/photo/filter-query.ts",
         // 컬렉션 디코더는 순수 함수라 폴백 규칙을 테스트로 고정하기 싸다.
         "src/lib/supabase/decode/*.ts",
         // REST 전송의 헤더 규약과 재시도 정책은 여기 한 곳에서만 정해진다.
@@ -29,7 +29,7 @@ export default defineConfig({
         "src/lib/admin/form-recovery.ts",
         "src/lib/auth/assert-deployable-admin-session.ts",
         "src/lib/http/*.ts",
-        "src/lib/contact-draft-storage.ts",
+        "src/lib/contact/draft-storage.ts",
         "src/lib/search/*.ts",
         "src/lib/i18n/*.ts",
         "src/lib/format/*.ts",

@@ -74,6 +74,9 @@ const writeContactDraft = (
   return true;
 };
 
+/** 예약된 만료 타이머. 다음 쓰기가 이걸 취소하고 새로 잡는다. */
+let expiryTimer: number | null = null;
+
 /**
  * TTL 이 지나면 초안을 실제로 지운다.
  *
@@ -94,7 +97,10 @@ const scheduleContactDraftExpiry = (storage: Pick<Storage, "removeItem">): void 
     }
   };
 
-  window.setTimeout(drop, CONTACT_DRAFT_TTL_MS);
+  // 같은 탭에서 초안을 다시 쓰면 이전 예약은 필요 없다. 취소하지 않으면 쓰기 횟수만큼
+  // 타이머가 쌓이고, 먼저 잡힌 예약이 새 초안을 지운다.
+  if (expiryTimer !== null) window.clearTimeout(expiryTimer);
+  expiryTimer = window.setTimeout(drop, CONTACT_DRAFT_TTL_MS);
   window.addEventListener("pagehide", drop, { once: true });
 };
 

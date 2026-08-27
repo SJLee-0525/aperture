@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 
-import { ALL, FOCAL_MAX, FOCAL_MIN, parsePhotoFilterQuery } from "@/lib/photo-filter-query";
+import { ALL, FOCAL_MAX, FOCAL_MIN, parsePhotoFilterQuery } from "@/lib/photo/filter-query";
 
-import type { PhotoFilterState } from "@/lib/photo-filter-query";
+import type { PhotoFilterState } from "@/lib/photo/filter-query";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
 

@@ -5,7 +5,7 @@ import {
   CONTACT_DRAFT_TTL_MS,
   takeContactDraft,
   writeContactDraft,
-} from "@/lib/contact-draft-storage";
+} from "@/lib/contact/draft-storage";
 
 const KEY = SESSION_STORAGE_KEYS.CONTACT_DRAFT;
 const NOW = 1_700_000_000_000;

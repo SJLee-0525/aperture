@@ -7,7 +7,7 @@ import {
   FOCAL_MIN,
   parsePhotoFilterQuery,
   parsePhotoFilterQueryStrict,
-} from "@/lib/photo-filter-query";
+} from "@/lib/photo/filter-query";
 
 import type { Tag } from "@/types/tag";
 

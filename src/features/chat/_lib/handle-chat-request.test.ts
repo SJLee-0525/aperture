@@ -8,7 +8,7 @@ import { handleChatRequest } from "@/features/chat/_lib/handle-chat-request";
 
 import { EMPTY_DEV_CONFIG, EMPTY_MUSIC_CONFIG, EMPTY_SITE_CONFIG } from "@/constants/empty-configs";
 
-import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
+import type { PhotoFilterVocabulary } from "@/lib/photo/filter-query";
 import type { ChatReference } from "@/types/chat";
 import type { DevArticle } from "@/types/dev-article";
 

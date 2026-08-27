@@ -9,8 +9,8 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { MOBILE_TABS } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
-import { sectionFromPath } from "@/constants/sections";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 import styles from "./MobileTabBar.module.css";
 

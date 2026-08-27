@@ -47,7 +47,7 @@ import {
   buildPhotoFilterHref,
   parsePhotoFilterQueryStrict,
   type PhotoFilterVocabulary,
-} from "@/lib/photo-filter-query";
+} from "@/lib/photo/filter-query";
 import { fetchDevArticleById } from "@/lib/supabase/public/dev-articles";
 
 import type { ChatContext, ChatContextOpenTarget } from "@/features/chat/_lib/chat-context";

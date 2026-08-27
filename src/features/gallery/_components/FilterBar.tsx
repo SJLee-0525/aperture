@@ -11,7 +11,7 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 
 import { pickText } from "@/lib/i18n/pick-text";
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo/filter-query";
 
 import type { Tag } from "@/types/tag";
 

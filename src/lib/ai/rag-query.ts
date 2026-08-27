@@ -8,9 +8,6 @@ const expandRagQuery = (query: string) => {
   return additions.length ? `${query} ${[...new Set(additions)].join(" ")}` : query;
 };
 
-const keywordSimilarity = (query: string, document: string) =>
-  matchedTokenRatio(tokensFor(query), normalizeForSearch(document));
-
 /**
  * 청크 순회 전에 질문 쪽 토큰화를 한 번만 수행해두는 채점기.
  * 점수는 분류기 키워드 채점과 로컬 토큰화 채점 중 높은 쪽 —
@@ -34,4 +31,4 @@ const createKeywordScorer = (queryText: string, keywords: string[] = []) => {
   };
 };
 
-export { createKeywordScorer, expandRagQuery, keywordSimilarity };
+export { createKeywordScorer, expandRagQuery };

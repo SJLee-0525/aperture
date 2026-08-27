@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { takeContactDraft } from "@/lib/contact-draft-storage";
+import { takeContactDraft } from "@/lib/contact/draft-storage";
 
 import type { RefObject } from "react";
 

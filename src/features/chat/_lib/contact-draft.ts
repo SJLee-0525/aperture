@@ -1,4 +1,4 @@
-import { CONTACT_DRAFT_LIMITS } from "@/lib/contact-draft-storage";
+import { CONTACT_DRAFT_LIMITS } from "@/lib/contact/draft-storage";
 
 import type { ContactDraft } from "@/types/chat";
 

@@ -18,7 +18,7 @@ import {
   parsePhotoFilterQuery,
   resolveCamera,
   resolveTag,
-} from "@/lib/photo-filter-query";
+} from "@/lib/photo/filter-query";
 import { resolveTargetId } from "@/lib/webmcp/current-target";
 import { clampToolText, countLabel } from "@/lib/webmcp/tool-output";
 import {

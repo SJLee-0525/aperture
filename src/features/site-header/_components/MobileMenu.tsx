@@ -22,8 +22,8 @@ import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { MOBILE_NAVIGATION_QUERY } from "@/constants/breakpoints";
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
-import { sectionFromPath } from "@/constants/sections";
 import { localizePath } from "@/lib/i18n/locale-path";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 import styles from "./MobileMenu.module.css";
 

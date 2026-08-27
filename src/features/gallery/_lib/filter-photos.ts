@@ -1,4 +1,4 @@
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo/filter-query";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";
 

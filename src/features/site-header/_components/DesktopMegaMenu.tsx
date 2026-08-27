@@ -10,8 +10,8 @@ import { useEscapeKey } from "@/hooks/use-escape-key";
 
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
-import { sectionFromPath } from "@/constants/sections";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 import type { UIDict } from "@/constants/dictionary";
 

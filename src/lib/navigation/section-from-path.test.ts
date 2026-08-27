@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sectionFromPath } from "@/constants/sections";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 describe("sectionFromPath", () => {
   it("로케일 프리픽스(/ko·/en)를 벗기고 섹션을 판별한다", () => {

@@ -12,7 +12,7 @@ import { pickText } from "@/lib/i18n/pick-text";
 
 import type { ProfileSection } from "@/features/chat/_lib/chat-intent";
 import type { ChatProfileData } from "@/lib/content/chat";
-import type { PhotoFilterVocabulary } from "@/lib/photo-filter-query";
+import type { PhotoFilterVocabulary } from "@/lib/photo/filter-query";
 import type { ChatReference, ChatReferenceRequest } from "@/types/chat";
 import type { ImageMeta } from "@/types/image";
 import type { Lang } from "@/types/lang";
