@@ -175,7 +175,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       </section>
 
       <LocalizedProjectListField
-        field="features"
+        arrayKey="features"
         addLabel="+ 기능 추가"
         legend="주요 기능"
         items={form.features}
@@ -184,7 +184,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         onRemove={removeLocalized}
       />
       <LocalizedProjectListField
-        field="roles"
+        arrayKey="roles"
         addLabel="+ 작업 추가"
         legend="담당 · 주요 작업"
         items={form.roles}
@@ -202,7 +202,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       </section>
 
       <LocalizedProjectListField
-        field="achievements"
+        arrayKey="achievements"
         addLabel="+ 성과 추가"
         legend="성과 · 수상"
         items={form.achievements}

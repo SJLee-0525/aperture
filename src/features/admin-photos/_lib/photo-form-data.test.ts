@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyUploadResult,
-  createPhotoInput,
+  photoToInput,
   parseCoords,
   preparePhotoInput,
 } from "@/features/admin-photos/_lib/photo-form-data";
@@ -34,7 +34,7 @@ const uploadResult = (): UploadResult => ({
 
 describe("applyUploadResult", () => {
   it("업로드된 이미지와 EXIF를 사진 초안에 반영한다", () => {
-    const input = createPhotoInput();
+    const input = photoToInput();
     const result = uploadResult();
 
     expect(applyUploadResult(input, result)).toMatchObject({
@@ -51,7 +51,7 @@ describe("applyUploadResult", () => {
 
   it("EXIF에 촬영일과 좌표가 없으면 초안의 기존 값을 유지한다", () => {
     const input = {
-      ...createPhotoInput(),
+      ...photoToInput(),
       shotAt: new Date("2025-01-02T03:04:00Z"),
       coords: { lat: 37.5665, lng: 126.978 },
     };
@@ -67,7 +67,7 @@ describe("applyUploadResult", () => {
 
   it("초안의 제목·장소·태그·공개 상태는 변경하지 않는다", () => {
     const input = {
-      ...createPhotoInput(),
+      ...photoToInput(),
       title: { ko: "제목", en: "Title" },
       place: { ko: "서울", en: "Seoul" },
       tags: ["city"],
@@ -83,9 +83,9 @@ describe("applyUploadResult", () => {
   });
 });
 
-describe("createPhotoInput", () => {
+describe("photoToInput", () => {
   it("신규 사진에 빈 비공개 초안을 만든다", () => {
-    expect(createPhotoInput()).toMatchObject({
+    expect(photoToInput()).toMatchObject({
       title: { ko: "", en: "" },
       coords: null,
       tags: [],
@@ -97,7 +97,7 @@ describe("createPhotoInput", () => {
 
   it("기존 사진에서 문서 id만 제외한다", () => {
     const source = MOCK_PHOTOS[0];
-    const input = createPhotoInput(source);
+    const input = photoToInput(source);
 
     expect(input).not.toHaveProperty("id");
     expect(input).toEqual(
@@ -148,7 +148,7 @@ describe("parseCoords", () => {
 
 describe("preparePhotoInput", () => {
   it("카메라와 렌즈의 앞뒤 공백을 턴다", () => {
-    const input = { ...createPhotoInput(), camera: "  Leica M11  ", lens: " 35mm " };
+    const input = { ...photoToInput(), camera: "  Leica M11  ", lens: " 35mm " };
 
     const prepared = preparePhotoInput(input);
 
@@ -157,7 +157,7 @@ describe("preparePhotoInput", () => {
   });
 
   it("원본 입력을 변경하지 않는다", () => {
-    const input = { ...createPhotoInput(), camera: " X " };
+    const input = { ...photoToInput(), camera: " X " };
 
     const prepared = preparePhotoInput(input);
 

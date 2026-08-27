@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import { focusFirstIssue, issueFor } from "@/lib/admin/field-issue";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
+
 const formWith = (fields: string[]): HTMLFormElement => {
   const form = document.createElement("form");
   for (const field of fields) {
@@ -43,7 +45,7 @@ describe("focusFirstIssue", () => {
 
 describe("issueFor", () => {
   it("필드 이름으로 문구를 찾는다", () => {
-    const issues = [{ field: "photoIds", message: "사진을 고르세요." }];
+    const issues: FieldIssue[] = [{ field: "photoIds", message: "사진을 고르세요." }];
 
     expect(issueFor(issues, "photoIds")).toBe("사진을 고르세요.");
     expect(issueFor(issues, "title.ko")).toBeUndefined();

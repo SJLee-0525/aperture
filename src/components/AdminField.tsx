@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useId } from "react";
 
+import type { AdminFieldName } from "@/lib/admin/field-issue";
 import type { ComponentProps, ReactNode } from "react";
+
 
 import styles from "./AdminField.module.css";
 
@@ -28,7 +30,7 @@ type AdminFieldProps = {
   /** 검증 실패 문구. 있으면 입력이 aria-invalid 를 받는다. */
   error?: ReactNode;
   /** 검증 결과의 field 이름. 감싼 입력이 data-field 로 받아 포커스 대상이 된다. */
-  field?: string;
+  field?: AdminFieldName;
 } & Omit<ComponentProps<"div">, "children"> & { children?: ReactNode };
 
 /**

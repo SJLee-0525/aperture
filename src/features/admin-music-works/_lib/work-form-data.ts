@@ -1,5 +1,7 @@
+import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { normalizePublicHref } from "@/lib/security/public-url";
+
 
 import type { MusicWorkInput } from "@/lib/supabase/music";
 import type { MusicWork } from "@/types/music";
@@ -35,11 +37,7 @@ const emptyWorkInput = (): MusicWorkInput => ({
   published: false,
 });
 
-const workToInput = (work: MusicWork): MusicWorkInput => {
-  const { id: _id, ...input } = work;
-  void _id;
-  return input;
-};
+const workToInput = (work: MusicWork): MusicWorkInput => withoutId(work);
 
 const prepareWorkInput = (form: MusicWorkInput): MusicWorkInput => {
   const ticketUrl = form.ticketUrl.trim();

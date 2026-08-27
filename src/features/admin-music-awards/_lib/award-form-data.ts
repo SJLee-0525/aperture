@@ -1,4 +1,6 @@
+import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 
 import type { MusicAwardInput } from "@/lib/supabase/music";
 import type { MusicAward } from "@/types/music";
@@ -17,8 +19,7 @@ const emptyAwardInput = (): AwardFormValue => ({
 });
 
 const awardToInput = (award: MusicAward): AwardFormValue => {
-  const { id: _id, year, ...rest } = award;
-  void _id;
+  const { year, ...rest } = withoutId(award);
   return { ...rest, year: year ? String(year) : "" };
 };
 

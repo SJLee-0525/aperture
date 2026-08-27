@@ -1,4 +1,6 @@
+import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 
 import type { MusicMediaInput } from "@/lib/supabase/music";
 import type { MusicMedia } from "@/types/music";
@@ -12,11 +14,7 @@ const emptyMediaInput = (): MusicMediaInput => ({
   published: false,
 });
 
-const mediaToInput = (media: MusicMedia): MusicMediaInput => {
-  const { id: _id, ...input } = media;
-  void _id;
-  return input;
-};
+const mediaToInput = (media: MusicMedia): MusicMediaInput => withoutId(media);
 
 const prepareMediaInput = (form: MusicMediaInput): MusicMediaInput => ({
   ...form,

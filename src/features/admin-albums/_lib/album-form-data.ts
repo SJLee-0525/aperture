@@ -1,4 +1,6 @@
+import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 
 import type { AlbumInput } from "@/lib/supabase/albums";
 import type { Album } from "@/types/album";
@@ -13,11 +15,7 @@ const emptyAlbumInput = (): AlbumInput => ({
   published: false,
 });
 
-const albumToInput = (album: Album): AlbumInput => {
-  const { id: _id, ...input } = album;
-  void _id;
-  return input;
-};
+const albumToInput = (album: Album): AlbumInput => withoutId(album);
 
 const prepareAlbumInput = (input: AlbumInput): AlbumInput => ({
   ...input,

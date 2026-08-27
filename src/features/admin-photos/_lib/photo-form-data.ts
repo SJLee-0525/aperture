@@ -1,11 +1,13 @@
+import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 import type { PhotoInput } from "@/lib/supabase/photos";
 import type { Coords } from "@/types/coords";
 import type { Photo } from "@/types/photo";
 
-const createEmptyPhotoInput = (): PhotoInput => ({
+const emptyPhotoInput = (): PhotoInput => ({
   title: EMPTY_TEXT,
   shotAt: new Date(),
   camera: "",
@@ -31,12 +33,8 @@ const createEmptyPhotoInput = (): PhotoInput => ({
   published: false,
 });
 
-const createPhotoInput = (photo?: Photo): PhotoInput => {
-  if (!photo) return createEmptyPhotoInput();
-  const { id: _id, ...input } = photo;
-  void _id;
-  return input;
-};
+const photoToInput = (photo?: Photo): PhotoInput =>
+  photo ? withoutId(photo) : emptyPhotoInput();
 
 const applyUploadResult = (input: PhotoInput, result: UploadResult): PhotoInput => ({
   ...input,
@@ -85,4 +83,4 @@ const preparePhotoInput = (form: PhotoInput): PhotoInput => ({
   lens: form.lens.trim(),
 });
 
-export { applyUploadResult, createPhotoInput, parseCoords, preparePhotoInput };
+export { applyUploadResult, emptyPhotoInput, parseCoords, photoToInput, preparePhotoInput };

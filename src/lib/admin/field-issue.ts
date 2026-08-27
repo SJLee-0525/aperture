@@ -1,6 +1,26 @@
+/**
+ * 검증 결과가 가리킬 수 있는 필드 이름.
+ *
+ * 이 이름은 세 곳이 공유한다 — 검증기가 내고, 폼이 `AdminField field=` 로 컨트롤에 붙이고,
+ * `issueFor` 가 문구를 찾는다. 문자열로 두면 셋 중 하나만 달라져도 저장이 조용히 막히고
+ * 화면에는 아무 표시가 남지 않는다. 유니온으로 좁혀 `tsc` 가 그 어긋남을 잡게 한다.
+ *
+ * 이중언어 필드는 `LocalizedFieldPair` 가 한국어 쪽에 `{어간}.ko` 를 붙인다.
+ */
+type AdminFieldName =
+  | "title.ko"
+  | "name.ko"
+  | "image"
+  | "photoIds"
+  | "performedAt"
+  | "year";
+
+/** 이중언어 쌍이 화면에 붙이는 어간. 검증기는 `.ko` 를 붙인 이름을 낸다. */
+type AdminFieldStem = "title" | "name";
+
 /** 검증 실패 한 건. `field` 는 폼이 입력에 붙이는 이름이고 화면 순서와 같아야 한다. */
 type FieldIssue = {
-  field: string;
+  field: AdminFieldName;
   message: string;
 };
 
@@ -28,8 +48,8 @@ const focusFirstIssue = (form: HTMLFormElement | null, issues: FieldIssue[]): bo
 };
 
 /** 필드 이름으로 오류 문구를 찾는다. 없으면 undefined 라 AdminField 가 오류를 그리지 않는다. */
-const issueFor = (issues: FieldIssue[], field: string): string | undefined =>
+const issueFor = (issues: FieldIssue[], field: AdminFieldName): string | undefined =>
   issues.find((issue) => issue.field === field)?.message;
 
 export { focusFirstIssue, issueFor };
-export type { FieldIssue };
+export type { AdminFieldName, AdminFieldStem, FieldIssue };

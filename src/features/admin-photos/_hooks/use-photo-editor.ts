@@ -8,7 +8,7 @@ import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
 
 import {
   applyUploadResult,
-  createPhotoInput,
+  photoToInput,
   parseCoords,
   preparePhotoInput,
 } from "@/features/admin-photos/_lib/photo-form-data";
@@ -29,7 +29,7 @@ import type { Photo } from "@/types/photo";
 const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const router = useRouter();
   const isEdit = initial != null;
-  const [form, setForm] = useState<PhotoInput>(() => createPhotoInput(initial));
+  const [form, setForm] = useState<PhotoInput>(() => photoToInput(initial));
   const [lat, setLat] = useState(() => (initial?.coords ? String(initial.coords.lat) : ""));
   const [lng, setLng] = useState(() => (initial?.coords ? String(initial.coords.lng) : ""));
   // 방금 올린 파일의 EXIF 에서 좌표가 채워졌는지. 표시하지 않으면 관리자가 촬영 위치를

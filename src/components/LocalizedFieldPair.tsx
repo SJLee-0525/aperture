@@ -1,6 +1,7 @@
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 
+import type { AdminFieldStem } from "@/lib/admin/field-issue";
 import type { Lang } from "@/types/lang";
 import type { LocalizedText } from "@/types/localized";
 import type { ComponentProps } from "react";
@@ -20,7 +21,7 @@ type Props = {
   disabled?: boolean;
   placeholder?: LocalizedText;
   /** 검증 결과의 field 이름 어간. 한국어 쪽이 `{field}.ko` 를 받는다. */
-  field?: string;
+  field?: AdminFieldStem;
   /** 한국어 쪽에 붙는 검증 문구. 저장 조건이 ko 기준이라 en 은 오류를 갖지 않는다. */
   error?: string;
 };
@@ -73,7 +74,7 @@ const LocalizedFieldPair = ({
       <AdminField
         label={`${label} (한국어)`}
         required={required}
-        field={field ? `${field}.ko` : undefined}
+        field={field ? (`${field}.ko` as const) : undefined}
         error={error}
       >
         {side("ko")}
