@@ -4,7 +4,7 @@ import { m } from "motion/react";
 
 import { DetailHero } from "@/components/DetailHero";
 import { PhotoGrid } from "@/components/PhotoGrid";
-import { PhotoModal } from "@/features/photo-detail/_components/PhotoModal";
+import { OnDemandPhotoModal } from "@/features/photo-detail/_components/OnDemandPhotoModal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
@@ -14,8 +14,7 @@ import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { Album } from "@/types/album";
-import type { Photo } from "@/types/photo";
-import type { Tag } from "@/types/tag";
+import type { GalleryPhoto } from "@/types/gallery-photo";
 
 import styles from "./AlbumDetailView.module.css";
 
@@ -23,9 +22,8 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 type Props = {
   album: Album;
-  photos: Photo[];
+  photos: GalleryPhoto[];
   coverUrl: string | null;
-  tags: Tag[];
 };
 
 /**
@@ -35,12 +33,11 @@ type Props = {
  *
  * @param {Props} props
  * @param {Album} props.album
- * @param {Photo[]} props.photos
+ * @param {GalleryPhoto[]} props.photos
  * @param {string | null} props.coverUrl
- * @param {Tag[]} props.tags
  * @returns {JSX.Element}
  */
-const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
+const AlbumDetailView = ({ album, photos, coverUrl }: Props) => {
   const { dict, lang } = useLang();
   const title = pickText(album.title, lang);
 
@@ -74,7 +71,11 @@ const AlbumDetailView = ({ album, photos, coverUrl, tags }: Props) => {
         </m.div>
       </main>
 
-      <PhotoModal photos={photos} tags={tags} chatTarget />
+      <OnDemandPhotoModal
+        photoIds={photos.map((photo) => photo.id)}
+        endpoint="/api/photos"
+        chatTarget
+      />
     </>
   );
 };

@@ -6,7 +6,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // 이 파일이 보는 것은 히어로 슬롯의 variant 하나뿐이다. 그리드·모달·언어 컨텍스트는
 // 그 판정과 무관하고, 함께 렌더하면 실패 원인이 어디인지 흐려진다.
 vi.mock("@/components/PhotoGrid", () => ({ PhotoGrid: () => null }));
-vi.mock("@/features/photo-detail/_components/PhotoModal", () => ({ PhotoModal: () => null }));
+vi.mock("@/features/photo-detail/_components/OnDemandPhotoModal", () => ({
+  OnDemandPhotoModal: () => null,
+}));
 vi.mock("@/features/lang/_hooks/use-lang", () => ({
   useLang: () => ({ lang: "ko", dict: { albumsNav: "앨범", shareLabel: "공유하기" } }),
 }));
@@ -26,7 +28,7 @@ const album = {
 } as unknown as Album;
 
 const renderView = (coverUrl: string | null) =>
-  render(<AlbumDetailView album={album} photos={[]} coverUrl={coverUrl} tags={[]} />);
+  render(<AlbumDetailView album={album} photos={[]} coverUrl={coverUrl} />);
 
 const heroText = () => screen.getByRole("heading", { name: "도시의 밤" }).parentElement;
 
