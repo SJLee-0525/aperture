@@ -48,8 +48,8 @@ const Select = ({ value, options, onChange, ariaLabel }: Props) => {
     HTMLDivElement
   >();
   const listRef = useRef<HTMLUListElement>(null);
-  // 한 지면에 Select 가 둘 이상이면 고정 id 는 ARIA 트리와 CustomScrollbar 의 IDREF 를
-  // 동시에 깨뜨린다. 스크롤 막대가 이 id 를 aria-controls 로 참조한다.
+  // 한 지면에 Select 가 둘 이상이면 고정 id 는 트리거의 aria-controls 가 남의 목록을
+  // 가리키게 만든다.
   const listId = useId();
   const current = options.find((option) => option.value === value) ?? options[0];
   const currentIndex = Math.max(
