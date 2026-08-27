@@ -1,4 +1,21 @@
 /** 라우트 단일 출처 */
+/**
+ * 상세 모달을 여는 query 키.
+ *
+ * 상세는 별도 페이지가 아니라 `?photo=`·`?work=`·`?award=`·`?project=` 딥링크다
+ * (CONTEXT.md 「Navigation and detail behavior」). 앨범은 경로를 쓰지만 갤러리 안에서
+ * 여는 사진 모달과 함께 분석에 남는다.
+ */
+const DETAIL_QUERY_KEYS = {
+  photo: "photo",
+  work: "work",
+  award: "award",
+  project: "project",
+  album: "album",
+} as const;
+
+type DetailQueryKey = (typeof DETAIL_QUERY_KEYS)[keyof typeof DETAIL_QUERY_KEYS];
+
 const ROUTES = {
   // 통합 셸
   LANDING: "/", // 랜딩 허브 (A3)
@@ -164,6 +181,7 @@ const matchDevArticleSlug = (localPathname: string): string | null =>
   DEV_ARTICLE_PATH_PATTERN.exec(localPathname)?.[1] ?? null;
 
 export {
+  DETAIL_QUERY_KEYS,
   ROUTES,
   albumRoute,
   matchDevArticleSlug,
@@ -179,3 +197,4 @@ export {
   devArticleRoute,
   devProjectRoute,
 };
+export type { DetailQueryKey };

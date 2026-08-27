@@ -21,7 +21,6 @@ import { ExifPanel } from "@/features/photo-detail/_components/ExifPanel";
 import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanelSkeleton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { PHOTO_QUERY_KEY } from "@/features/photo-detail/_hooks/use-photo-detail-session";
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useImageZoom } from "@/hooks/use-image-zoom";
@@ -33,7 +32,9 @@ import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import { readPhotoNeighbors } from "@/features/photo-detail/_lib/photo-neighbors";
 
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
+
 
 import type { Photo } from "@/types/photo";
 import type { Tag } from "@/types/tag";
@@ -113,7 +114,7 @@ const PhotoModal = ({
   const searchParams = useSearchParams();
 
   // usePhotoModal 이 반환하는 photo 로는 그 호출의 인자를 만들 수 없어 URL 에서 직접 읽는다.
-  const activePhotoId = searchParams.get(PHOTO_QUERY_KEY);
+  const activePhotoId = searchParams.get(DETAIL_QUERY_KEYS.photo);
   const activeStatus = activePhotoId != null ? imageStatus.get(activePhotoId) : undefined;
 
   // 실패도 결판이 난 상태다. 스피너를 걷고 오류를 보여 준다.

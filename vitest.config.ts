@@ -49,6 +49,8 @@ export default defineConfig({
         "src/lib/content/normalize-troubleshooting.ts",
         "src/hooks/use-admin-doc-load.ts",
         "src/hooks/use-query-modal.ts",
+        "src/hooks/use-detail-query-session.ts",
+        "src/lib/navigation/detail-query-url.ts",
         "src/hooks/use-focus-trap.ts",
         "src/hooks/use-image-zoom.ts",
         "src/hooks/use-overlay-drag.ts",

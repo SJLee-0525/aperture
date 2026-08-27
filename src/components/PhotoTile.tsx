@@ -1,8 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
-import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { openDetailQuery } from "@/lib/navigation/detail-query-url";
+
 
 import { imagePreviewUrl } from "@/types/image";
 
@@ -61,9 +65,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }:
           return;
         }
         event.preventDefault();
-        const url = new URL(window.location.href);
-        url.searchParams.set("photo", photo.id);
-        pushCurrentUrl(`${url.pathname}${url.search}${url.hash}`);
+        openDetailQuery(DETAIL_QUERY_KEYS.photo, photo.id);
       }}
     >
       <Image

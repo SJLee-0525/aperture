@@ -10,10 +10,12 @@ import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanel
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useOnDemandPhotoDetails } from "@/features/photo-detail/_hooks/use-on-demand-photo-details";
-import { usePhotoDetailSession } from "@/features/photo-detail/_hooks/use-photo-detail-session";
+import { useDetailQuerySession } from "@/hooks/use-detail-query-session";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMounted } from "@/hooks/use-mounted";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 
 import { setCursorLoading } from "@/utils/custom-cursor-events";
 
@@ -57,7 +59,9 @@ const OnDemandPhotoModal = ({
   chatTarget,
 }: Props) => {
   const { dict } = useLang();
-  const { activeId, close: closeSession } = usePhotoDetailSession();
+  const { activeId, close: closeSession } = useDetailQuerySession(DETAIL_QUERY_KEYS.photo, {
+    openedOutside: true,
+  });
   const { activePhoto, failed, photos, retry, tags } = useOnDemandPhotoDetails(
     activeId,
     photoIds,

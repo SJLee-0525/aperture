@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo } from "react";
 
-import { usePhotoDetailSession } from "@/features/photo-detail/_hooks/use-photo-detail-session";
+import { useDetailQuerySession } from "@/hooks/use-detail-query-session";
+
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 
 import type { Photo } from "@/types/photo";
 
@@ -26,7 +28,11 @@ const usePhotoModal = (
   onClose?: () => void,
   keyboardEnabled = true,
 ) => {
-  const { activeId, close: closeSession, goto } = usePhotoDetailSession();
+  const {
+    activeId,
+    close: closeSession,
+    goto,
+  } = useDetailQuerySession(DETAIL_QUERY_KEYS.photo, { openedOutside: true });
   const navigationIds = useMemo(
     () => photoIds ?? photos.map((photo) => photo.id),
     [photoIds, photos],

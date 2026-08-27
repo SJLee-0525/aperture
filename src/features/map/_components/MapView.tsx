@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import { LocationList } from "@/features/map/_components/LocationList";
@@ -9,6 +8,10 @@ import { MapPhotoModal } from "@/features/map/_components/MapPhotoModal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useMapTools } from "@/features/map/_hooks/use-map-tools";
+
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
+import { openDetailQuery } from "@/lib/navigation/detail-query-url";
+
 
 import type { MapLocation } from "@/features/map/_types/map-location";
 
@@ -33,8 +36,6 @@ type Props = {
  */
 const MapView = ({ locations }: Props) => {
   const { dict } = useLang();
-  const router = useRouter();
-  const pathname = usePathname();
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
   useMapTools(locations);
   const [visibleLocationIds, setVisibleLocationIds] = useState<string[] | null>(null);
@@ -44,11 +45,7 @@ const MapView = ({ locations }: Props) => {
     const visibleIds = new Set(visibleLocationIds);
     return locations.filter((location) => visibleIds.has(location.id));
   }, [locations, visibleLocationIds]);
-  // 현재 pathname 기반 — 로케일 프리픽스(/ko/photo/map)를 그대로 유지한 채 ?photo= 만 붙인다.
-  const onSelect = useCallback(
-    (id: string) => router.push(`${pathname}?photo=${id}`, { scroll: false }),
-    [router, pathname],
-  );
+  const onSelect = useCallback((id: string) => openDetailQuery(DETAIL_QUERY_KEYS.photo, id), []);
   const onVisibleLocationsChange = useCallback((ids: string[]) => {
     setVisibleLocationIds((current) => {
       if (
