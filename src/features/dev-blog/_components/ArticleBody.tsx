@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
+import { ImageFallback } from "@/components/ImageFallback";
 import { TableScrollRegion } from "@/components/TableScrollRegion";
 import { ArticleCodeBlock } from "@/features/dev-blog/_components/ArticleCodeBlock";
 import { ArticleYouTube } from "@/features/dev-blog/_components/ArticleYouTube";
@@ -40,15 +41,11 @@ const EXTERNAL_LINK_REL = "noreferrer noopener";
 const FALLBACK_IMAGE_SIZE = { w: 1600, h: 1000 } as const;
 
 /**
- * 이미지를 불러오지 못했을 때 표시하는 워드마크.
- * 빈 영역 대신 개발 섹션에서 사용하는 이미지를 보여 준다.
- *
- * 라이트박스는 두 테마 모두 어두운 scrim 위에 뜨므로 그쪽은 항상 dark 를 쓴다.
+ * 확대 뷰에서 불러오지 못한 이미지 자리에 넣는 워드마크.
+ * 라이트박스는 두 테마 모두 어두운 scrim 위에 뜨므로 어두운 판을 쓴다.
+ * 본문 자리에는 이 URL 이 아니라 `ImageFallback` 이 들어간다.
  */
-const BROKEN_IMAGE_FALLBACK = {
-  light: "/dev-project-image",
-  dark: "/dev-project-image-dark",
-} as const;
+const BROKEN_IMAGE_FALLBACK = "/dev-project-image-dark";
 
 /** 위 워드마크의 실제 크기. 라이트박스 스테이지 비율과 본문 자리 예약에 함께 쓴다. */
 const BROKEN_IMAGE_SIZE = { w: SITE_IMAGE_SIZE.width, h: SITE_IMAGE_SIZE.height } as const;
@@ -220,25 +217,8 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
               onClick={() => context.onOpenImage(context.imageIndex.get(block.src) ?? 0)}
             >
               {context.brokenImages[block.src] ? (
-                // 로드에 실패하면 테마에 맞는 워드마크를 표시한다.
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={BROKEN_IMAGE_FALLBACK.light}
-                    alt={block.alt}
-                    width={BROKEN_IMAGE_SIZE.w}
-                    height={BROKEN_IMAGE_SIZE.h}
-                    className={styles.fallbackLight}
-                  />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={BROKEN_IMAGE_FALLBACK.dark}
-                    alt={block.alt}
-                    width={BROKEN_IMAGE_SIZE.w}
-                    height={BROKEN_IMAGE_SIZE.h}
-                    className={styles.fallbackDark}
-                  />
-                </>
+                // 로드에 실패하면 워드마크로 자리를 채운다. 이름은 감싸는 버튼이 갖는다.
+                <ImageFallback className={styles.brokenFigure} />
               ) : (
                 <>
                   {/* 전역 설정이 Vercel 최적화를 끄고 Storage 파일을 그대로 보내므로 next/image
@@ -345,7 +325,7 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
         // 로드에 실패한 이미지도 목록에 남겨 탐색 인덱스를 유지한다.
         // 확대 뷰는 두 테마 모두 어두운 scrim 위라 워드마크도 dark 를 쓴다.
         brokenImages[src]
-          ? { url: BROKEN_IMAGE_FALLBACK.dark, path: src, ...BROKEN_IMAGE_SIZE }
+          ? { url: BROKEN_IMAGE_FALLBACK, path: src, ...BROKEN_IMAGE_SIZE }
           : {
               url: src,
               path: src,

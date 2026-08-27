@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { ImageFallback } from "@/components/ImageFallback";
 import { Modal } from "@/components/Modal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -73,7 +74,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                     priority={index < FIRST_ROW_POSTERS}
                   />
                 ) : (
-                  "POSTER"
+                  <ImageFallback />
                 )}
                 <span className={styles.tag}>{pickText(work.category, lang)}</span>
               </div>
@@ -113,7 +114,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                   draggable={false}
                 />
               ) : (
-                "POSTER"
+                <ImageFallback />
               )}
             </div>
             <div>

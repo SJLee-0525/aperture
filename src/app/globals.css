@@ -299,12 +299,13 @@ img {
   display: block;
   max-width: 100%;
 }
-[data-protected-image] {
+/* 보호 대상은 표시된 영역이 아니라 그 안의 이미지다. 래퍼가 링크나 hero 전체를 감싸는
+   곳이 있어 범위로 잡으면 사진 제목·촬영 정보까지 선택할 수 없게 된다.
+   (use-image-protection.ts 의 선택자와 같은 범위) */
+[data-protected-image] img {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   user-select: none;
-}
-[data-protected-image] img {
   -webkit-user-drag: none;
 }
 

@@ -115,17 +115,12 @@
   text-align: center;
 }
 
-/* 주소가 죽은 이미지의 폴백 워드마크 — 표지 없는 카드와 같은 방식으로 테마에 맞는 쪽만 보인다.
-   `.figure` 를 함께 적는 이유는 명시도 때문이다. 위 `.figure img { display: block }` 이
-   클래스+요소(0,1,1)라 클래스 하나(0,1,0)로는 덮이지 않아 두 장이 같이 보인다. */
-.figure .fallbackDark {
-  display: none;
-}
-:global(html[data-theme="dark"]) .figure .fallbackLight {
-  display: none;
-}
-:global(html[data-theme="dark"]) .figure .fallbackDark {
-  display: block;
+/* 주소가 죽은 이미지 자리. 본문 이미지는 흐름 안에 놓이므로 폴백도 absolute 를 걷고
+   자리를 차지하게 만든다. 비율은 워드마크 판과 같다. */
+.brokenFigure {
+  position: static;
+  aspect-ratio: 1200 / 630;
+  width: 100%;
 }
 
 /* 이미지는 눌러서 크게 볼 수 있다. 버튼 껍데기가 그림 밖으로 보이지 않게 기본 스타일을 지운다. */

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Icon } from "@/components/Icon";
+import { ImageFallback } from "@/components/ImageFallback";
 
 import { devArticleRoute } from "@/constants/routes";
 import { formatEventYMD } from "@/lib/format/format-date";
@@ -89,26 +90,7 @@ const ArticleCard = ({
               priority={priority}
             />
           ) : (
-            <>
-              <Image
-                src="/dev-project-image"
-                alt=""
-                fill
-                sizes={coverSizes}
-                className={`${styles.coverImg} ${styles.fallbackLight}`}
-                draggable={false}
-                unoptimized
-              />
-              <Image
-                src="/dev-project-image-dark"
-                alt=""
-                fill
-                sizes={coverSizes}
-                className={`${styles.coverImg} ${styles.fallbackDark}`}
-                draggable={false}
-                unoptimized
-              />
-            </>
+            <ImageFallback />
           )}
           {pinnedLabel ? (
             <span className={styles.pinned}>
