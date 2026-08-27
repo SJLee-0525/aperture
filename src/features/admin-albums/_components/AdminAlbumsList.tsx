@@ -17,7 +17,7 @@ import { imageThumbnailUrl } from "@/types/image";
  * @returns {JSX.Element}
  */
 const AdminAlbumsList = () => {
-  const { items, status, error, reorder, togglePublished, remove } =
+  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
     useOrderedAdmin(getAlbumRepository());
 
   return (
@@ -39,6 +39,7 @@ const AdminAlbumsList = () => {
             key={item.id}
             album={item}
             coverUrl={imageThumbnailUrl(item.cover)}
+            publishBusy={publishPendingIds.has(item.id)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

@@ -15,7 +15,7 @@ import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
  * @returns {JSX.Element}
  */
 const AdminMusicMediaList = () => {
-  const { items, status, error, reorder, togglePublished, remove } =
+  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
     useOrderedAdmin(getMusicMediaRepository());
 
   return (
@@ -36,6 +36,7 @@ const AdminMusicMediaList = () => {
           <MediaRow
             key={item.id}
             media={item}
+            publishBusy={publishPendingIds.has(item.id)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

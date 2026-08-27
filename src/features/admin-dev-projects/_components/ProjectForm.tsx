@@ -176,6 +176,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
 
       <LocalizedProjectListField
         field="features"
+        addLabel="+ 기능 추가"
         legend="주요 기능"
         items={form.features}
         onAdd={addLocalized}
@@ -184,6 +185,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       />
       <LocalizedProjectListField
         field="roles"
+        addLabel="+ 작업 추가"
         legend="담당 · 주요 작업"
         items={form.roles}
         onAdd={addLocalized}
@@ -201,6 +203,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
 
       <LocalizedProjectListField
         field="achievements"
+        addLabel="+ 성과 추가"
         legend="성과 · 수상"
         items={form.achievements}
         onAdd={addLocalized}

@@ -14,6 +14,8 @@ import styles from "./PhotoRow.module.css";
 
 type Props = {
   photo: AdminPhotoListItem;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -23,11 +25,12 @@ type Props = {
  *
  * @param {Props} props
  * @param {AdminPhotoListItem} props.photo
+ * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
  * @param {(id: string, next: boolean) => void} props.onTogglePublished
  * @param {(id: string) => void} props.onDelete
  * @returns {JSX.Element}
  */
-const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
+const PhotoRow = ({ photo, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(photo.image);
   const onDeleteClick = () => {
     if (
@@ -40,6 +43,7 @@ const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
   return (
     <AdminSortableRow
       id={photo.id}
+      publishedBusy={publishBusy}
       published={photo.published}
       onTogglePublished={(next) => onTogglePublished(photo.id, next)}
       editHref={adminPhotoRoute(photo.id)}

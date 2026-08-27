@@ -10,6 +10,8 @@ import styles from "./AwardRow.module.css";
 
 type Props = {
   award: MusicAward;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -19,11 +21,12 @@ type Props = {
  *
  * @param {Props} props
  * @param {MusicAward} props.award
+ * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
  * @param {(id: string, next: boolean) => void} props.onTogglePublished
  * @param {(id: string) => void} props.onDelete
  * @returns {JSX.Element}
  */
-const AwardRow = ({ award, onTogglePublished, onDelete }: Props) => {
+const AwardRow = ({ award, publishBusy, onTogglePublished, onDelete }: Props) => {
   const onDeleteClick = () => {
     if (window.confirm(`"${award.name.ko || "이름 없음"}" 수상을 삭제할까요?`)) {
       onDelete(award.id);
@@ -33,6 +36,7 @@ const AwardRow = ({ award, onTogglePublished, onDelete }: Props) => {
   return (
     <AdminSortableRow
       id={award.id}
+      publishedBusy={publishBusy}
       published={award.published}
       onTogglePublished={(next) => onTogglePublished(award.id, next)}
       editHref={adminMusicAwardRoute(award.id)}

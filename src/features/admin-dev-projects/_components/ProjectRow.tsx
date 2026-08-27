@@ -14,6 +14,8 @@ import styles from "./ProjectRow.module.css";
 
 type Props = {
   project: AdminDevProjectListItem;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -23,11 +25,12 @@ type Props = {
  *
  * @param {Props} props
  * @param {AdminDevProjectListItem} props.project
+ * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
  * @param {(id: string, next: boolean) => void} props.onTogglePublished
  * @param {(id: string) => void} props.onDelete
  * @returns {JSX.Element}
  */
-const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
+const ProjectRow = ({ project, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(project.cover);
   const onDeleteClick = () => {
     if (window.confirm(`"${project.title.ko || "제목 없음"}" 프로젝트를 삭제할까요?`)) {
@@ -38,6 +41,7 @@ const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
   return (
     <AdminSortableRow
       id={project.id}
+      publishedBusy={publishBusy}
       published={project.published}
       onTogglePublished={(next) => onTogglePublished(project.id, next)}
       editHref={adminDevProjectRoute(project.id)}

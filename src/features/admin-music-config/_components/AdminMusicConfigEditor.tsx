@@ -54,7 +54,7 @@ const AdminMusicConfigPage = () => {
       <div className={styles.arrayHead}>
         <h2 className={styles.legend}>{label}</h2>
         <AdminButton variant="secondary" size="xs" onClick={() => addEntry(groupKey)}>
-          + 항목 추가
+          {`+ ${label} 추가`}
         </AdminButton>
       </div>
 

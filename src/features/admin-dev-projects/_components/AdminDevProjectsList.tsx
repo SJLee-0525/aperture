@@ -15,7 +15,7 @@ import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
  * @returns {JSX.Element}
  */
 const AdminDevProjectsList = () => {
-  const { items, status, error, reorder, togglePublished, remove } =
+  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
     useOrderedAdmin(getDevProjectRepository());
 
   return (
@@ -36,6 +36,7 @@ const AdminDevProjectsList = () => {
           <ProjectRow
             key={item.id}
             project={item}
+            publishBusy={publishPendingIds.has(item.id)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

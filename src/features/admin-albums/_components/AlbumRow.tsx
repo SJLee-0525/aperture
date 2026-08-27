@@ -14,6 +14,8 @@ type Props = {
   album: AdminAlbumListItem;
   /** coverPhotoId → 이미지 URL (없으면 빈 썸네일). */
   coverUrl: string;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -24,11 +26,12 @@ type Props = {
  * @param {Props} props
  * @param {AdminAlbumListItem} props.album
  * @param {string} props.coverUrl - coverPhotoId → 이미지 URL (없으면 빈 썸네일).
+ * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
  * @param {(id: string, next: boolean) => void} props.onTogglePublished
  * @param {(id: string) => void} props.onDelete
  * @returns {JSX.Element}
  */
-const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
+const AlbumRow = ({ album, coverUrl, publishBusy, onTogglePublished, onDelete }: Props) => {
   const onDeleteClick = () => {
     if (
       window.confirm(
@@ -42,6 +45,7 @@ const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
   return (
     <AdminSortableRow
       id={album.id}
+      publishedBusy={publishBusy}
       published={album.published}
       onTogglePublished={(next) => onTogglePublished(album.id, next)}
       editHref={adminAlbumRoute(album.id)}

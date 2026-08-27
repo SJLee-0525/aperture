@@ -15,7 +15,7 @@ import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
  * @returns {JSX.Element}
  */
 const AdminMusicAwardsList = () => {
-  const { items, status, error, reorder, togglePublished, remove } =
+  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
     useOrderedAdmin(getMusicAwardRepository());
 
   return (
@@ -36,6 +36,7 @@ const AdminMusicAwardsList = () => {
           <AwardRow
             key={item.id}
             award={item}
+            publishBusy={publishPendingIds.has(item.id)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

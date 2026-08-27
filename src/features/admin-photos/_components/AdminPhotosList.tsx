@@ -15,7 +15,7 @@ import { getPhotoRepository } from "@/lib/admin/photo-repository";
  * @returns {JSX.Element}
  */
 const AdminPhotosList = () => {
-  const { items, status, error, reorder, togglePublished, remove } =
+  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
     useOrderedAdmin(getPhotoRepository());
 
   return (
@@ -36,6 +36,7 @@ const AdminPhotosList = () => {
           <PhotoRow
             key={item.id}
             photo={item}
+            publishBusy={publishPendingIds.has(item.id)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

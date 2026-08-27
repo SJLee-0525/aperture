@@ -15,7 +15,7 @@ import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
  * @returns {JSX.Element}
  */
 const AdminMusicWorksList = () => {
-  const { items, status, error, reorder, togglePublished, remove } =
+  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
     useOrderedAdmin(getMusicWorkRepository());
 
   return (
@@ -36,6 +36,7 @@ const AdminMusicWorksList = () => {
           <WorkRow
             key={item.id}
             work={item}
+            publishBusy={publishPendingIds.has(item.id)}
             onTogglePublished={togglePublished}
             onDelete={remove}
           />

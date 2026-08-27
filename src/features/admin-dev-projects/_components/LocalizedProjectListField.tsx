@@ -13,6 +13,8 @@ type Props = {
   field: LocalizedArrayKey;
   /** 필드 위에 표시할 제목. */
   legend: string;
+  /** `+ {대상} 추가` 형식. 대상이 분명한 섹션은 범용 문구를 쓰지 않는다. */
+  addLabel: string;
   /** 현재 필드에 저장된 한국어·영어 항목 목록. */
   items: DevProjectInput[LocalizedArrayKey];
   /** 지정한 필드에 빈 항목을 추가한다. */
@@ -35,12 +37,20 @@ type Props = {
  * @param {(field: LocalizedArrayKey, index: number) => void} props.onRemove 항목을 제거하는 콜백.
  * @returns {React.JSX.Element} 다국어 항목 편집 필드.
  */
-const LocalizedProjectListField = ({ field, legend, items, onAdd, onEdit, onRemove }: Props) => (
+const LocalizedProjectListField = ({
+  field,
+  legend,
+  addLabel,
+  items,
+  onAdd,
+  onEdit,
+  onRemove,
+}: Props) => (
   <section className={base.section}>
     <div className={styles.arrayHead}>
       <h2 className={base.legend}>{legend}</h2>
       <AdminButton variant="secondary" size="xs" onClick={() => onAdd(field)}>
-        + 항목 추가
+        {addLabel}
       </AdminButton>
     </div>
     {items.length === 0 ? (

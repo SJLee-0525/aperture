@@ -95,7 +95,7 @@ const DevConfigEditor = () => {
                 size="xs"
                 onClick={() => edit({ type: "education.add" })}
               >
-                + 항목 추가
+                + 학력 추가
               </AdminButton>
             </div>
             {config.education.length === 0 ? (
@@ -269,7 +269,7 @@ const DevConfigEditor = () => {
                 size="xs"
                 onClick={() => edit({ type: "timeline.add" })}
               >
-                + 항목 추가
+                + 경력 추가
               </AdminButton>
             </div>
             {config.timeline.length === 0 ? (

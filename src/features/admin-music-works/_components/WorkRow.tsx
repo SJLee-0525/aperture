@@ -15,6 +15,8 @@ import styles from "./WorkRow.module.css";
 
 type Props = {
   work: AdminMusicWorkListItem;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -24,11 +26,12 @@ type Props = {
  *
  * @param {Props} props
  * @param {AdminMusicWorkListItem} props.work
+ * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
  * @param {(id: string, next: boolean) => void} props.onTogglePublished
  * @param {(id: string) => void} props.onDelete
  * @returns {JSX.Element}
  */
-const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
+const WorkRow = ({ work, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(work.poster);
   const onDeleteClick = () => {
     if (window.confirm(`"${work.title.ko || "제목 없음"}" 연주를 삭제할까요?`)) {
@@ -39,6 +42,7 @@ const WorkRow = ({ work, onTogglePublished, onDelete }: Props) => {
   return (
     <AdminSortableRow
       id={work.id}
+      publishedBusy={publishBusy}
       published={work.published}
       onTogglePublished={(next) => onTogglePublished(work.id, next)}
       editHref={adminMusicWorkRoute(work.id)}

@@ -63,7 +63,7 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
     <div className={styles.wrap}>
       <div className={styles.head}>
         <AdminButton variant="secondary" size="xs" onClick={add}>
-          + 항목 추가
+          + 트러블슈팅 추가
         </AdminButton>
       </div>
 
