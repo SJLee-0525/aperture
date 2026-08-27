@@ -1,8 +1,7 @@
 import "server-only";
 
-import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import { paginateAll } from "@/lib/supabase/paginate-all";
-import { fetchWithRetry } from "@/lib/supabase/public/retry-fetch";
+import { restFetch } from "@/lib/supabase/rest-client";
 
 import type { RagChunk, RagSection, RagSyncTarget, StoredRagChunkMeta } from "@/types/rag";
 
@@ -33,17 +32,6 @@ type ExistingDocument = { id: string; embeddingModel: string };
 type MatchedRagChunk = StoredRagChunkMeta & { vectorScore: number };
 
 type ReplacementScope = { sourceTypes: string[]; sourceId?: string; section?: RagSection };
-
-const restUrl = (params: URLSearchParams) => `${supabaseUrl()}/rest/v1/${TABLE}?${params}`;
-
-/** publishable key 는 apikey 헤더로만 보낸다. Authorization 은 사용자 토큰 전용이다. */
-const baseHeaders = (): Record<string, string> => ({ apikey: supabasePublishableKey() });
-
-const adminHeaders = (accessToken: string): Record<string, string> => ({
-  ...baseHeaders(),
-  Authorization: `Bearer ${accessToken}`,
-  "Content-Type": "application/json",
-});
 
 /**
  * 업스트림 원문은 서버 로그에만 남긴다 — 응답에 실으면 컬럼·정책명 같은 내부
@@ -100,10 +88,13 @@ const listAllRows = <Row>(
 ): Promise<Row[]> => {
   params.set("order", "id.asc");
   return paginateAll<Row>(async (offset, size) => {
-    const response = await fetch(restUrl(params), {
+    const response = await restFetch({
+      path: TABLE,
+      params,
+      accessToken,
       // Range 의 끝은 포함이라 요청 크기에서 하나를 뺀다.
-      headers: { ...adminHeaders(accessToken), Range: `${offset}-${offset + size - 1}` },
-      cache: "no-store",
+      headers: { Range: `${offset}-${offset + size - 1}` },
+      retry: true,
     });
     if (response.status === 416) return [];
     if (!response.ok) {
@@ -220,11 +211,13 @@ const replaceRagDocuments = async (
       embedding_model: model,
       published: true,
     }));
-    const response = await fetch(restUrl(new URLSearchParams()), {
+    // 쓰기라 재시도하지 않는다. 같은 upsert 가 두 번 나가면 이전 청크가 되살아날 수 있다.
+    const response = await restFetch({
+      path: TABLE,
       method: "POST",
-      headers: { ...adminHeaders(accessToken), Prefer: "resolution=merge-duplicates" },
-      body: JSON.stringify(rows),
-      cache: "no-store",
+      accessToken,
+      headers: { Prefer: "resolution=merge-duplicates" },
+      body: rows,
     });
     if (!response.ok) {
       await logUpstreamError("upsert", response);
@@ -240,11 +233,7 @@ const replaceRagDocuments = async (
         .map(quoteInListValue)
         .join(",")})`,
     );
-    const response = await fetch(restUrl(params), {
-      method: "DELETE",
-      headers: adminHeaders(accessToken),
-      cache: "no-store",
-    });
+    const response = await restFetch({ path: TABLE, params, method: "DELETE", accessToken });
     if (!response.ok) {
       await logUpstreamError("delete", response);
       throw new Error(`이전 임베딩 삭제 실패 (${response.status})`);
@@ -266,17 +255,18 @@ const matchRagChunks = async (input: {
   prioritize?: { sourceType: string; sourceId: string };
   signal?: AbortSignal;
 }): Promise<MatchedRagChunk[]> => {
-  const response = await fetchWithRetry(`${supabaseUrl()}/rest/v1/rpc/match_rag_chunks`, {
+  // rpc 지만 읽기 전용이라 재시도해도 저장 상태가 바뀌지 않는다.
+  const response = await restFetch({
+    path: "rpc/match_rag_chunks",
     method: "POST",
-    headers: { ...baseHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify({
+    body: {
       query_embedding: input.queryVector,
       target_sections: input.sections,
       model_key: input.modelKey,
       prioritize_source_type: input.prioritize?.sourceType ?? null,
       prioritize_source_id: input.prioritize?.sourceId ?? null,
-    }),
-    cache: "no-store",
+    },
+    retry: true,
     ...(input.signal ? { signal: input.signal } : {}),
   });
   if (!response.ok) {

@@ -6,9 +6,8 @@ import {
   documentCacheTag,
 } from "@/constants/cache";
 import { SUPABASE_COLLECTIONS, type TableCollectionId } from "@/constants/collections";
-import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import { paginateAll } from "@/lib/supabase/paginate-all";
-import { fetchWithRetry } from "@/lib/supabase/public/retry-fetch";
+import { restFetch } from "@/lib/supabase/rest-client";
 import { mergeRow } from "@/lib/supabase/row-merge";
 
 import type { MergedRow } from "@/lib/supabase/row-merge";
@@ -24,9 +23,6 @@ type SelectOptions = {
 
 const descriptor = (collection: TableCollectionId) => SUPABASE_COLLECTIONS[collection];
 
-/** publishable key 는 apikey 헤더로만 보낸다. Authorization 은 사용자 토큰 전용이다. */
-const baseHeaders = (): Record<string, string> => ({ apikey: supabasePublishableKey() });
-
 const requestRows = async (
   collection: TableCollectionId,
   params: URLSearchParams,
@@ -35,12 +31,15 @@ const requestRows = async (
   label?: string,
 ): Promise<Array<Record<string, unknown>>> => {
   const { table } = descriptor(collection);
-  const response = await fetchWithRetry(`${supabaseUrl()}/rest/v1/${table}?${params.toString()}`, {
-    headers: baseHeaders(),
+  const response = await restFetch({
+    path: table,
+    params,
+    // 정적 생성은 읽기 한 번이 실패하면 빌드를 중단한다. 공개 읽기는 전부 재시도한다.
+    retry: true,
     ...(options?.signal ? { signal: options.signal } : {}),
     ...(options?.fresh
-      ? { cache: "no-store" as const }
-      : { next: { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS, tags: [cacheTag] } }),
+      ? {}
+      : { cache: { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS, tags: [cacheTag] } }),
   });
   // 빈 결과(200 + [])와 장애를 구분한다. 설정 실수·429·5xx 를 빈 콘텐츠로 위장하지 않는다.
   if (!response.ok)
@@ -168,10 +167,7 @@ const fetchRowAsUser = async (
   const { table, select } = descriptor(collection);
   const params = new URLSearchParams({ select });
   params.set("id", `eq.${documentId}`);
-  const response = await fetch(`${supabaseUrl()}/rest/v1/${table}?${params.toString()}`, {
-    headers: { ...baseHeaders(), Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
+  const response = await restFetch({ path: table, params, accessToken, retry: true });
   if (!response.ok) throw new Error(`RAG 원본 조회 실패 (${response.status})`);
   const rows = (await response.json()) as Array<Record<string, unknown>>;
   const first = rows[0];
