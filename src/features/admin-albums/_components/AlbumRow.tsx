@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminAlbumRoute } from "@/constants/routes";
 
 import type { AdminAlbumListItem } from "@/types/admin";
+
 
 import styles from "./AlbumRow.module.css";
 
@@ -43,21 +45,21 @@ const AlbumRow = ({ album, coverUrl, publishBusy, onTogglePublished, onDelete }:
       onDelete={() => onDelete(album.id)}
       confirmDelete={{ name: album.title.ko || ADMIN_UNTITLED, noun: "앨범", note: "사진은 지워지지 않습니다." }}
     >
-      <span className={styles.thumb}>
+      <span className={`${row.thumb} ${styles.thumb}`}>
         {coverUrl ? (
           <Image
             src={coverUrl}
             alt={album.title.ko || "앨범"}
             fill
             sizes="72px"
-            className={styles.thumbImg}
+            className={row.thumbImg}
           />
         ) : null}
       </span>
 
-      <span className={styles.title}>{album.title.ko || "제목 없음"}</span>
+      <span className={row.title}>{album.title.ko || ADMIN_UNTITLED}</span>
 
-      <span className={styles.count}>{album.photoIds.length}장</span>
+      <span className={row.meta}>{album.photoIds.length}장</span>
     </AdminSortableRow>
   );
 };

@@ -40,7 +40,7 @@ const AwardRow = ({ award, publishBusy, onTogglePublished, onDelete }: Props) =>
     >
       <span className={styles.year}>{award.year || "—"}</span>
 
-      <span className={styles.name}>{award.name.ko || "이름 없음"}</span>
+      <span className={styles.name}>{award.name.ko || ADMIN_UNNAMED}</span>
 
       <span className={styles.place}>{award.place}</span>
     </AdminSortableRow>

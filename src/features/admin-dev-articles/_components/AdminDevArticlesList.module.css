@@ -45,3 +45,14 @@
     flex-basis: 100%;
   }
 }
+
+/* 공용 셸의 목록과 같은 규칙. 정렬이 없어 AdminSortableList 를 거치지 않으므로
+   이 화면이 직접 그린다. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

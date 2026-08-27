@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { ADMIN_UNTITLED } from "@/constants/admin-labels";
@@ -10,6 +11,7 @@ import { adminDevProjectRoute } from "@/constants/routes";
 import { imageThumbnailUrl } from "@/types/image";
 
 import type { AdminDevProjectListItem } from "@/types/admin";
+
 
 import styles from "./ProjectRow.module.css";
 
@@ -43,21 +45,21 @@ const ProjectRow = ({ project, publishBusy, onTogglePublished, onDelete }: Props
       onDelete={() => onDelete(project.id)}
       confirmDelete={{ name: project.title.ko || ADMIN_UNTITLED, noun: "프로젝트" }}
     >
-      <span className={styles.thumb}>
+      <span className={`${row.thumb} ${styles.thumb}`}>
         {previewUrl ? (
           <Image
             src={previewUrl}
             alt={project.title.ko || "프로젝트"}
             fill
             sizes="64px"
-            className={styles.thumbImg}
+            className={row.thumbImg}
           />
         ) : null}
       </span>
 
-      <span className={styles.title}>{project.title.ko || "제목 없음"}</span>
+      <span className={row.title}>{project.title.ko || ADMIN_UNTITLED}</span>
 
-      <span className={styles.year}>{project.year || "—"}</span>
+      <span className={row.meta}>{project.year || "—"}</span>
     </AdminSortableRow>
   );
 };

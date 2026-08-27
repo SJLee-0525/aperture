@@ -145,7 +145,42 @@
   opacity: 0.5;
 }
 
+/* 썸네일이 있는 네 행이 같은 규칙을 쓴다. 치수만 각 행이 자기 모듈에서 정한다.
+   두 모듈의 클래스가 한 요소에 겹치지만 프로퍼티가 갈라져 있어 주입 순서가 결과를
+   바꾸지 않는다. 여기에 width·height 를 더하면 그 순간 순서 의존이 생긴다. */
+.thumb {
+  position: relative;
+  flex: none;
+  background: var(--photo-bg);
+  overflow: hidden;
+}
+.thumbImg {
+  object-fit: cover;
+}
+
+/* 제목 칸. 남는 폭을 차지하고 넘치면 말줄임한다. */
+.title {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  font-size: var(--t-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 제목 옆의 짧은 값(장수·연도·날짜). 좁은 화면에서는 감춘다. */
+.meta {
+  flex: none;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+}
+
 @media (max-width: 640px) {
+  .meta {
+    display: none;
+  }
   .row {
     gap: var(--s-3);
     padding: var(--s-3);

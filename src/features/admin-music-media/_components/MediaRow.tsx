@@ -38,7 +38,7 @@ const MediaRow = ({ media, publishBusy, onTogglePublished, onDelete }: Props) =>
       onDelete={() => onDelete(media.id)}
       confirmDelete={{ name: media.title.ko || ADMIN_UNTITLED, noun: "영상" }}
     >
-      <span className={styles.title}>{media.title.ko || "제목 없음"}</span>
+      <span className={styles.title}>{media.title.ko || ADMIN_UNTITLED}</span>
 
       <span className={styles.ytId}>{media.youtubeId || "—"}</span>
     </AdminSortableRow>

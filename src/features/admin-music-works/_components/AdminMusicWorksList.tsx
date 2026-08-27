@@ -1,12 +1,9 @@
 "use client";
 
 import { WorkRow } from "@/features/admin-music-works/_components/WorkRow";
-import { AdminListShell } from "@/features/admin-shell/_components/AdminListShell";
-import { AdminSortableList } from "@/features/admin-shell/_components/AdminSortableList";
+import { AdminSortableListPage } from "@/features/admin-shell/_components/AdminSortableListPage";
 
-import { useOrderedAdmin } from "@/hooks/use-ordered-admin";
-
-import { ROUTES } from "@/constants/routes";
+import { adminNewRoute, ROUTES } from "@/constants/routes";
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
 /**
@@ -14,36 +11,21 @@ import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
  *
  * @returns {JSX.Element}
  */
-const AdminMusicWorksList = () => {
-  const { items, status, error, reorder, togglePublished, publishPendingIds, remove } =
-    useOrderedAdmin(getMusicWorkRepository());
-
-  return (
-    <AdminListShell
-      title="연주"
-      hint="드래그하거나 핸들에서 스페이스바를 눌러 순서를 조정합니다. 공개 배지를 눌러 표시 여부를 바꿉니다."
-      newHref={ROUTES.ADMIN_MUSIC_WORK_NEW}
-      newLabel="+ 새 연주"
-      emptyLabel="아직 연주가 없습니다."
-      emptyCtaLabel="+ 첫 연주 만들기"
-      status={status}
-      error={error}
-      errorFallback="연주를 불러오지 못했습니다."
-      isEmpty={items.length === 0}
-    >
-      <AdminSortableList ids={items.map((item) => item.id)} onReorder={reorder}>
-        {items.map((item) => (
-          <WorkRow
-            key={item.id}
-            work={item}
-            publishBusy={publishPendingIds.has(item.id)}
-            onTogglePublished={togglePublished}
-            onDelete={remove}
-          />
-        ))}
-      </AdminSortableList>
-    </AdminListShell>
-  );
-};
+const AdminMusicWorksList = () => (
+  <AdminSortableListPage
+    noun="연주"
+    newHref={adminNewRoute(ROUTES.ADMIN_MUSIC_WORKS)}
+    getRepository={getMusicWorkRepository}
+    renderRow={({ item, publishBusy, onTogglePublished, onDelete }) => (
+      <WorkRow
+        key={item.id}
+        work={item}
+        publishBusy={publishBusy}
+        onTogglePublished={onTogglePublished}
+        onDelete={onDelete}
+      />
+    )}
+  />
+);
 
 export default AdminMusicWorksList;

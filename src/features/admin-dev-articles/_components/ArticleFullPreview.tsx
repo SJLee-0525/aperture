@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+
+
 import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 
 import { useMounted } from "@/hooks/use-mounted";
@@ -16,6 +18,7 @@ import {
 } from "@/features/admin-dev-articles/_lib/preview-article-markdown";
 import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminDevArticleRoute } from "@/constants/routes";
 import { articleRecoverySlot, readFormRecovery } from "@/lib/admin/form-recovery";
 import { pickText } from "@/lib/i18n/pick-text";
@@ -112,7 +115,7 @@ const ArticleFullPreview = ({ articleId }: Props) => {
 
       {loaded ? (
         <ArticleDetailView
-          title={pickText(loaded.article.title, "ko") || "제목 없음"}
+          title={pickText(loaded.article.title, "ko") || ADMIN_UNTITLED}
           summary={pickText(loaded.article.summary, "ko")}
           cover={loaded.article.cover}
           coverAlt={loaded.article.coverAlt ? pickText(loaded.article.coverAlt, "ko") : ""}

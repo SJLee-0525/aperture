@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { ADMIN_UNTITLED } from "@/constants/admin-labels";
@@ -11,6 +12,7 @@ import { formatEventYMD } from "@/lib/format/format-date";
 import { imageThumbnailUrl } from "@/types/image";
 
 import type { AdminMusicWorkListItem } from "@/types/admin";
+
 
 import styles from "./WorkRow.module.css";
 
@@ -44,21 +46,21 @@ const WorkRow = ({ work, publishBusy, onTogglePublished, onDelete }: Props) => {
       onDelete={() => onDelete(work.id)}
       confirmDelete={{ name: work.title.ko || ADMIN_UNTITLED, noun: "연주" }}
     >
-      <span className={styles.thumb}>
+      <span className={`${row.thumb} ${styles.thumb}`}>
         {previewUrl ? (
           <Image
             src={previewUrl}
             alt={work.title.ko || "연주"}
             fill
             sizes="48px"
-            className={styles.thumbImg}
+            className={row.thumbImg}
           />
         ) : null}
       </span>
 
-      <span className={styles.title}>{work.title.ko || "제목 없음"}</span>
+      <span className={row.title}>{work.title.ko || ADMIN_UNTITLED}</span>
 
-      <span className={styles.date}>{formatEventYMD(work.performedAt)}</span>
+      <span className={row.meta}>{formatEventYMD(work.performedAt)}</span>
     </AdminSortableRow>
   );
 };

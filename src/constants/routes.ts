@@ -30,14 +30,7 @@ const ROUTES = {
   ADMIN_GLOBAL: "/admin/global", // 전역 — 랜딩(타이핑·리드)·연락(리드·링크)
   ADMIN_PHOTO: "/admin/photo", // 사진 관리 허브 (작업·앨범·태그·소개 묶음)
   ADMIN_PHOTOS: "/admin/photos",
-  ADMIN_PHOTO_NEW: "/admin/photos/new",
   ADMIN_ALBUMS: "/admin/albums",
-  ADMIN_ALBUM_NEW: "/admin/albums/new",
-  ADMIN_MUSIC_WORK_NEW: "/admin/music/works/new",
-  ADMIN_MUSIC_AWARD_NEW: "/admin/music/awards/new",
-  ADMIN_MUSIC_MEDIA_NEW: "/admin/music/media/new",
-  ADMIN_DEV_PROJECT_NEW: "/admin/dev/projects/new",
-  ADMIN_DEV_ARTICLE_NEW: "/admin/dev/articles/new",
   ADMIN_TAGS: "/admin/tags",
   ADMIN_SITE: "/admin/site",
   ADMIN_MUSIC: "/admin/music",
@@ -66,6 +59,17 @@ const albumRoute = (id: string) => `${ROUTES.PHOTO_ALBUMS}/${id}`;
  * @param {string} id
  * @returns {string}
  */
+/**
+ * 신규 작성 경로. 목록 경로 뒤에 `/new` 를 붙인다.
+ *
+ * 리터럴로 두면 목록 경로를 바꿀 때 수정 경로 함수 여덟은 따라오고 이쪽 일곱만
+ * 조용히 갈린다.
+ *
+ * @param {string} listRoute 목록 경로. `ROUTES.ADMIN_*` 를 넘긴다.
+ * @returns {string} 신규 작성 경로.
+ */
+const adminNewRoute = (listRoute: string) => `${listRoute}/new`;
+
 const adminPhotoRoute = (id: string) => `${ROUTES.ADMIN_PHOTOS}/${id}`;
 
 /**
@@ -167,6 +171,7 @@ export {
   adminDevArticlePreviewRoute,
   adminDevArticleRoute,
   adminMusicWorkRoute,
+  adminNewRoute,
   adminMusicAwardRoute,
   adminMusicMediaRoute,
   adminDevProjectRoute,

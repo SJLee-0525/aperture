@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
 import { ADMIN_UNTITLED } from "@/constants/admin-labels";
@@ -10,6 +11,7 @@ import { adminPhotoRoute } from "@/constants/routes";
 import { imageThumbnailUrl } from "@/types/image";
 
 import type { AdminPhotoListItem } from "@/types/admin";
+
 
 import styles from "./PhotoRow.module.css";
 
@@ -43,19 +45,19 @@ const PhotoRow = ({ photo, publishBusy, onTogglePublished, onDelete }: Props) =>
       onDelete={() => onDelete(photo.id)}
       confirmDelete={{ name: photo.title.ko || ADMIN_UNTITLED, noun: "사진", note: "되돌릴 수 없습니다." }}
     >
-      <span className={styles.thumb}>
+      <span className={`${row.thumb} ${styles.thumb}`}>
         {previewUrl ? (
           <Image
             src={previewUrl}
             alt={photo.title.ko || "사진"}
             fill
             sizes="72px"
-            className={styles.thumbImg}
+            className={row.thumbImg}
           />
         ) : null}
       </span>
 
-      <span className={styles.title}>{photo.title.ko || "제목 없음"}</span>
+      <span className={row.title}>{photo.title.ko || ADMIN_UNTITLED}</span>
     </AdminSortableRow>
   );
 };

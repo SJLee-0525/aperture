@@ -20,6 +20,14 @@ type Props = {
   isEmpty: boolean;
   /** toolbar 는 제목 줄과 목록 사이에 들어간다. 검색·필터가 있는 화면만 넘긴다. */
   toolbar?: ReactNode;
+  /**
+   * 목록을 감추지 않는 안내. 목록을 불러온 뒤의 저장 실패처럼 화면을 비울 이유가
+   * 없는 오류에 쓴다. `status === "error"` 는 목록 자체를 못 읽은 경우다.
+   */
+  notice?: string | null;
+  /** 필터가 걸러 목록이 빈 경우의 문구. 전체가 비었을 때(`emptyLabel`)와 이유가 다르다. */
+  filteredEmptyLabel?: string;
+  isFilteredEmpty?: boolean;
   children?: ReactNode;
 };
 
@@ -42,6 +50,9 @@ const AdminListShell = ({
   errorFallback,
   isEmpty,
   toolbar,
+  notice,
+  filteredEmptyLabel,
+  isFilteredEmpty = false,
   children,
 }: Props) => (
   <div className={styles.page}>
@@ -74,7 +85,16 @@ const AdminListShell = ({
       </div>
     ) : null}
 
-    {status === "ready" && !isEmpty ? children : null}
+    {status === "ready" && !isEmpty ? (
+      <>
+        {notice ? (
+          <p className={styles.stateError} role="alert">
+            {notice}
+          </p>
+        ) : null}
+        {isFilteredEmpty ? <p className={styles.state}>{filteredEmptyLabel}</p> : children}
+      </>
+    ) : null}
   </div>
 );
 

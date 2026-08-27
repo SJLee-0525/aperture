@@ -2,12 +2,11 @@
 
 import { AdminInput } from "@/components/AdminInput";
 import { ArticleRow } from "@/features/admin-dev-articles/_components/ArticleRow";
-import base from "@/features/admin-shell/_components/admin-list.module.css";
 import { AdminListShell } from "@/features/admin-shell/_components/AdminListShell";
 
 import { useDevArticlesAdmin } from "@/features/admin-dev-articles/_hooks/use-dev-articles-admin";
 
-import { ROUTES } from "@/constants/routes";
+import { adminNewRoute, ROUTES } from "@/constants/routes";
 
 import type { AdminArticleStatusFilter } from "@/features/admin-dev-articles/_lib/dev-article-filter";
 
@@ -48,7 +47,7 @@ const AdminDevArticlesPage = () => {
     <AdminListShell
       title="블로그"
       hint="초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다."
-      newHref={ROUTES.ADMIN_DEV_ARTICLE_NEW}
+      newHref={adminNewRoute(ROUTES.ADMIN_DEV_ARTICLES)}
       newLabel="+ 새 글"
       emptyLabel="아직 쓴 글이 없습니다."
       emptyCtaLabel="+ 첫 글 쓰기"
@@ -56,6 +55,9 @@ const AdminDevArticlesPage = () => {
       error={error}
       errorFallback="글을 불러오지 못했습니다."
       isEmpty={total === 0}
+      notice={error}
+      filteredEmptyLabel="조건에 맞는 글이 없습니다."
+      isFilteredEmpty={articles.length === 0}
       toolbar={
         status === "ready" ? (
           <div className={styles.toolbar}>
@@ -86,30 +88,19 @@ const AdminDevArticlesPage = () => {
         ) : null
       }
     >
-      {/* 목록을 불러온 뒤에도 저장이 실패할 수 있다. 그 오류는 목록을 감추지 않는다. */}
-      {error ? (
-        <p className={base.stateError} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      {articles.length === 0 ? (
-        <p className={base.state}>조건에 맞는 글이 없습니다.</p>
-      ) : (
-        <ul className={base.list}>
-          {articles.map((article) => (
-            <ArticleRow
-              key={article.id}
-              article={article}
-              pinBusy={pendingPinIds.has(article.id)}
-              publishBusy={pendingPublishIds.has(article.id)}
-              onTogglePublished={togglePublished}
-              onTogglePinned={togglePinned}
-              onDelete={remove}
-            />
-          ))}
-        </ul>
-      )}
+      <ul className={styles.list}>
+        {articles.map((article) => (
+          <ArticleRow
+            key={article.id}
+            article={article}
+            pinBusy={pendingPinIds.has(article.id)}
+            publishBusy={pendingPublishIds.has(article.id)}
+            onTogglePublished={togglePublished}
+            onTogglePinned={togglePinned}
+            onDelete={remove}
+          />
+        ))}
+      </ul>
     </AdminListShell>
   );
 };
