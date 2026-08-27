@@ -11,3 +11,13 @@
   text-transform: uppercase;
   color: var(--text-3);
 }
+
+.hint {
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+.error {
+  font-size: var(--t-small);
+  color: var(--danger);
+}

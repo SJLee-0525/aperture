@@ -59,20 +59,22 @@ const ArticleMetaFields = ({ form, slugLocked, onPatch, onSlugChange }: Props) =
     <section className={styles.section}>
       <h2 className={styles.legend}>주소와 발행일</h2>
       <div className={styles.grid2}>
-        <AdminField label="주소 (slug)">
+        <AdminField
+          label="주소 (slug)"
+          hint={
+            slugLocked
+              ? "발행한 글의 주소는 바꿀 수 없습니다. 공유된 링크가 끊어집니다."
+              : "제목을 적으면 자동으로 제안하고, 직접 고치면 그 값을 씁니다."
+          }
+        >
           <AdminInput
             className={styles.mono}
             value={form.slug}
             disabled={slugLocked}
             onChange={(event) => onSlugChange(event.target.value)}
           />
-          <span className={styles.note}>
-            {slugLocked
-              ? "발행한 글의 주소는 바꿀 수 없습니다. 공유된 링크가 끊어집니다."
-              : "제목을 적으면 자동으로 제안하고, 직접 고치면 그 값을 씁니다."}
-          </span>
         </AdminField>
-        <AdminField label="발행일">
+        <AdminField label="발행일" hint="목록 정렬 기준입니다. 발행하려면 채워야 합니다.">
           <AdminInput
             type="datetime-local"
             className={styles.mono}
@@ -81,7 +83,6 @@ const ArticleMetaFields = ({ form, slugLocked, onPatch, onSlugChange }: Props) =
               onPatch({ publishedAt: fromDateTimeLocalValue(event.target.value) })
             }
           />
-          <span className={styles.note}>목록 정렬 기준입니다. 발행하려면 채워야 합니다.</span>
         </AdminField>
       </div>
     </section>

@@ -35,3 +35,11 @@
 .raised {
   background: var(--surface-2);
 }
+
+/* 검증 실패. 색만으로 알리지 않도록 AdminField 가 오류 문구를 함께 그린다. */
+.invalid {
+  border-color: var(--danger);
+}
+.invalid:focus-visible {
+  border-color: var(--danger);
+}
