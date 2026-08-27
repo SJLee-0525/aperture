@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
 
 import {
@@ -13,7 +14,6 @@ import {
 } from "@/features/admin-photos/_lib/photo-form-data";
 import { validatePhotoInput } from "@/features/admin-photos/_lib/validate-photo-input";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
-
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
@@ -40,10 +40,20 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
+  const recovery = useFormRecovery("photos", photoId, form, dirty, {
+    // JSON 은 Date 를 담지 못한다. 폼이 곧바로 쓰도록 되돌린다.
+    revive: (input) => ({
+      ...(input as unknown as PhotoInput),
+      shotAt: new Date(input.shotAt as string),
+    }),
+  });
+  const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.image])));
   const uploadedPaths = useRef(new Set<string>());
+
+  const applyForm = (next: typeof form) => setForm(next);
 
   const patch = useCallback(
     (next: Partial<PhotoInput>) => setForm((previous) => ({ ...previous, ...next })),
@@ -83,11 +93,12 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   const onUploadPendingChange = useCallback((pending: boolean) => setUploading(pending), []);
   const cancel = useCallback(async () => {
     if (!confirmLeave()) return;
+    clearRecovery();
     // 확인을 통과한 뒤에만 지운다. 지우는 대상은 이번 세션에 올린 파일뿐이고
     // 저장된 문서가 참조하는 이미지는 uploadedPaths 에 들어오지 않는다.
     await removeUnreferencedImages(uploadedPaths.current, []).catch(() => undefined);
     router.replace(ROUTES.ADMIN_PHOTOS);
-  }, [confirmLeave, router]);
+  }, [confirmLeave, router, clearRecovery]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -119,6 +130,7 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
         imagePaths([input.image]),
       ).catch(() => undefined);
       setSavedFingerprint(formFingerprint(form));
+      clearRecovery();
       router.replace(ROUTES.ADMIN_PHOTOS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -127,6 +139,8 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
   };
 
   return {
+    recovery,
+    applyForm,
     dirty,
     formRef,
     issues,

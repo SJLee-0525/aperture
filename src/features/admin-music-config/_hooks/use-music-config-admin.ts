@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { getMusicConfigRepository } from "@/lib/admin/music-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -30,7 +31,14 @@ const useMusicConfigAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { confirmLeave, markSaved } = useConfigDirty({ intro, career, education });
+  const { dirty, confirmLeave, markSaved } = useConfigDirty({ intro, career, education });
+  const recovery = useFormRecovery(
+    "musicConfig",
+    "musicConfig",
+    { intro, career, education },
+    dirty,
+  );
+  const { clear: clearRecovery } = recovery;
 
   useEffect(() => {
     let alive = true;
@@ -104,6 +112,16 @@ const useMusicConfigAdmin = () => {
     markDirty();
   }, []);
 
+  const applyRecovered = (next: {
+    intro: LocalizedText;
+    career: TimelineEntry[];
+    education: TimelineEntry[];
+  }) => {
+    setIntro(next.intro);
+    setCareer(next.career);
+    setEducation(next.education);
+  };
+
   const save = useCallback(async () => {
     setError(null);
     setSaving(true);
@@ -112,15 +130,18 @@ const useMusicConfigAdmin = () => {
       await getMusicConfigRepository().set(next);
       setSaved(true);
       markSaved({ intro, career, education });
+      clearRecovery();
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [intro, career, education, markSaved]);
+  }, [intro, career, education, markSaved, clearRecovery]);
 
   return {
     confirmLeave,
+    recovery,
+    applyRecovered,
     intro,
     career,
     education,

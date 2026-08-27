@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import styles from "@/features/admin-shell/_components/admin-form.module.css";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
 
@@ -28,6 +29,8 @@ type Props = {
  */
 const AlbumForm = ({ albumId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     cancel,
     error,
     formRef,
@@ -48,6 +51,17 @@ const AlbumForm = ({ albumId, initial }: Props) => {
 
   return (
     <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
+      {recovery.pending ? (
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
+      ) : null}
+
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "앨범 수정" : "새 앨범"}</h1>
       </header>

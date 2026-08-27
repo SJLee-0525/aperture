@@ -4,6 +4,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LinkRow } from "@/features/admin-global/_components/LinkRow";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin";
 
@@ -19,6 +20,8 @@ import styles from "./AdminGlobalEditor.module.css";
 const AdminGlobalPage = () => {
   const {
     confirmLeave,
+    recovery,
+    applyRecovered,
     tagline,
     landingLead,
     contactLead,
@@ -56,6 +59,16 @@ const AdminGlobalPage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>
               순환 타이핑 역할 (‘·’ 로 구분 · 예: Photographer · Pianist · Developer)

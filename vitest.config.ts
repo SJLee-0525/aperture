@@ -22,6 +22,7 @@ export default defineConfig({
         "src/lib/admin/clear-admin-workspace.ts",
         "src/lib/admin/field-issue.ts",
         "src/lib/admin/form-fingerprint.ts",
+        "src/lib/admin/form-recovery.ts",
         "src/lib/auth/assert-deployable-admin-session.ts",
         "src/lib/http/*.ts",
         "src/lib/contact-draft-storage.ts",

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
 
 import {
@@ -11,7 +12,6 @@ import {
   prepareMediaInput,
 } from "@/features/admin-music-media/_lib/media-form-data";
 import { validateMediaInput } from "@/features/admin-music-media/_lib/validate-media-input";
-
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
@@ -34,13 +34,18 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
+  const recovery = useFormRecovery("musicMedia", mediaId, form, dirty);
+  const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
+
+  const applyForm = (next: typeof form) => setForm(next);
 
   const patch = (next: Partial<MusicMediaInput>) =>
     setForm((previous) => ({ ...previous, ...next }));
 
   const cancel = () => {
     if (!confirmLeave()) return;
+    clearRecovery();
     router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
   };
 
@@ -61,6 +66,7 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
       if (isEdit) await mediaRepository.update(mediaId, input);
       else await mediaRepository.create(mediaId, input);
       setSavedFingerprint(formFingerprint(form));
+      clearRecovery();
       router.replace(ROUTES.ADMIN_MUSIC_MEDIA);
     } catch (caught) {
       setError((caught as Error).message);
@@ -68,7 +74,20 @@ const useMediaEditor = (mediaId: string, initial?: MusicMedia) => {
     }
   };
 
-  return { dirty, form, issues, formRef, isEdit, error, saving, patch, cancel, submit };
+  return {
+    recovery,
+    applyForm,
+    dirty,
+    form,
+    issues,
+    formRef,
+    isEdit,
+    error,
+    saving,
+    patch,
+    cancel,
+    submit,
+  };
 };
 
 export { useMediaEditor };

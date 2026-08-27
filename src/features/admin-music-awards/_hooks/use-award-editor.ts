@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
 
 import {
@@ -11,7 +12,6 @@ import {
   prepareAwardInput,
 } from "@/features/admin-music-awards/_lib/award-form-data";
 import { validateAwardInput } from "@/features/admin-music-awards/_lib/validate-award-input";
-
 
 import { ROUTES } from "@/constants/routes";
 import { focusFirstIssue } from "@/lib/admin/field-issue";
@@ -34,13 +34,18 @@ const useAwardEditor = (awardId: string, initial?: MusicAward) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
+  const recovery = useFormRecovery("musicAwards", awardId, form, dirty);
+  const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
+
+  const applyForm = (next: typeof form) => setForm(next);
 
   const patch = (next: Partial<AwardFormValue>) =>
     setForm((previous) => ({ ...previous, ...next }));
 
   const cancel = () => {
     if (!confirmLeave()) return;
+    clearRecovery();
     router.replace(ROUTES.ADMIN_MUSIC_AWARDS);
   };
 
@@ -61,6 +66,7 @@ const useAwardEditor = (awardId: string, initial?: MusicAward) => {
       if (isEdit) await awardRepository.update(awardId, input);
       else await awardRepository.create(awardId, input);
       setSavedFingerprint(formFingerprint(form));
+      clearRecovery();
       router.replace(ROUTES.ADMIN_MUSIC_AWARDS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -68,7 +74,20 @@ const useAwardEditor = (awardId: string, initial?: MusicAward) => {
     }
   };
 
-  return { dirty, form, issues, formRef, isEdit, error, saving, patch, cancel, submit };
+  return {
+    recovery,
+    applyForm,
+    dirty,
+    form,
+    issues,
+    formRef,
+    isEdit,
+    error,
+    saving,
+    patch,
+    cancel,
+    submit,
+  };
 };
 
 export { useAwardEditor };

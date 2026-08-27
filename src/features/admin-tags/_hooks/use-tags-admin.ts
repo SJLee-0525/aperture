@@ -4,6 +4,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 
@@ -27,7 +28,9 @@ const useTagsAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { confirmLeave, markSaved } = useConfigDirty(tags);
+  const { dirty, confirmLeave, markSaved } = useConfigDirty(tags);
+  const recovery = useFormRecovery("photoTags", "photoTags", tags, dirty);
+  const { clear: clearRecovery } = recovery;
 
   useEffect(() => {
     let alive = true;
@@ -115,14 +118,29 @@ const useTagsAdmin = () => {
       await getSiteConfigRepository().updateFields({ tags });
       setSaved(true);
       markSaved(tags);
+      clearRecovery();
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [tags, markSaved]);
+  }, [tags, markSaved, clearRecovery]);
 
-  return { confirmLeave, tags, status, error, saving, saved, editLabel, addTag, removeTag, reorder, save };
+  return {
+    confirmLeave,
+    recovery,
+    applyRecovered: setTags,
+    tags,
+    status,
+    error,
+    saving,
+    saved,
+    editLabel,
+    addTag,
+    removeTag,
+    reorder,
+    save,
+  };
 };
 
 export { useTagsAdmin };

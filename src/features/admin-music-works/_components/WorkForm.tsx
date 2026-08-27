@@ -5,6 +5,7 @@ import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useWorkEditor } from "@/features/admin-music-works/_hooks/use-work-editor";
 
@@ -33,6 +34,8 @@ type Props = {
  */
 const WorkForm = ({ workId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     form,
     issues,
     formRef,
@@ -52,6 +55,17 @@ const WorkForm = ({ workId, initial }: Props) => {
 
   return (
     <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
+      {recovery.pending ? (
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
+      ) : null}
+
       <header className={base.head}>
         <h1 className={base.title}>{isEdit ? "연주 수정" : "새 연주"}</h1>
       </header>

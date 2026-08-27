@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -31,7 +32,19 @@ const useGlobalAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { confirmLeave, markSaved } = useConfigDirty({ tagline, landingLead, contactLead, links });
+  const { dirty, confirmLeave, markSaved } = useConfigDirty({
+    tagline,
+    landingLead,
+    contactLead,
+    links,
+  });
+  const recovery = useFormRecovery(
+    "globalConfig",
+    "globalConfig",
+    { tagline, landingLead, contactLead, links },
+    dirty,
+  );
+  const { clear: clearRecovery } = recovery;
 
   useEffect(() => {
     let alive = true;
@@ -99,6 +112,18 @@ const useGlobalAdmin = () => {
   }, []);
 
   /** 이 화면이 소유한 전역 필드만 저장한다. */
+  const applyRecovered = (next: {
+    tagline: LocalizedText;
+    landingLead: LocalizedText;
+    contactLead: LocalizedText;
+    links: SiteLink[];
+  }) => {
+    setTagline(next.tagline);
+    setLandingLead(next.landingLead);
+    setContactLead(next.contactLead);
+    setLinks(next.links);
+  };
+
   const save = useCallback(async () => {
     setError(null);
     setSaving(true);
@@ -113,15 +138,18 @@ const useGlobalAdmin = () => {
       setLinks(preparedLinks);
       setSaved(true);
       markSaved({ tagline, landingLead, contactLead, links });
+      clearRecovery();
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [tagline, landingLead, contactLead, links, markSaved]);
+  }, [tagline, landingLead, contactLead, links, markSaved, clearRecovery]);
 
   return {
     confirmLeave,
+    recovery,
+    applyRecovered,
     tagline,
     landingLead,
     contactLead,

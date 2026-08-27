@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
 
@@ -15,7 +16,7 @@ import styles from "./AdminSiteEditor.module.css";
  * @returns {JSX.Element}
  *  이름·연락 링크는 about 에 노출되지 않으므로 여기 없음(전역/연락 CMS 추가 시 그쪽에서 편집). */
 const AdminSitePage = () => {
-  const { confirmLeave, bio, status, error, saving, saved, editBio, save } = useSiteAdmin();
+  const { confirmLeave, recovery, applyRecovered, bio, status, error, saving, saved, editBio, save } = useSiteAdmin();
 
   return (
     <div className={styles.page}>
@@ -36,6 +37,16 @@ const AdminSitePage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>바이오 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>

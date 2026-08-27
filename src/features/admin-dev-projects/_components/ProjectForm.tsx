@@ -6,6 +6,7 @@ import { AdminInput } from "@/components/AdminInput";
 import { CloseIcon } from "@/components/CloseIcon";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 
@@ -34,6 +35,8 @@ type Props = {
  */
 const ProjectForm = ({ projectId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     form,
     issues,
     formRef,
@@ -62,6 +65,17 @@ const ProjectForm = ({ projectId, initial }: Props) => {
 
   return (
     <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
+      {recovery.pending ? (
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
+      ) : null}
+
       <header className={base.head}>
         <h1 className={base.title}>{isEdit ? "프로젝트 수정" : "새 프로젝트"}</h1>
       </header>

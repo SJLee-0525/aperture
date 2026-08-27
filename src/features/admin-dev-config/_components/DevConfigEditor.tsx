@@ -8,6 +8,7 @@ import { DevEducationRow } from "@/features/admin-dev-config/_components/DevEduc
 import { DevTimelineRow } from "@/features/admin-dev-config/_components/DevTimelineRow";
 import { InterviewRow } from "@/features/admin-dev-config/_components/InterviewRow";
 import { StackGroupRow } from "@/features/admin-dev-config/_components/StackGroupRow";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useDevConfigAdmin } from "@/features/admin-dev-config/_hooks/use-dev-config-admin";
 
@@ -20,7 +21,7 @@ import styles from "./DevConfigEditor.module.css";
  * @returns {JSX.Element}
  *  (연락처·소셜은 /contact, 히어로 타이핑은 랜딩 소관 → 여기 없음.) */
 const DevConfigEditor = () => {
-  const { confirmLeave, config, status, error, saving, saved, edit, save } = useDevConfigAdmin();
+  const { confirmLeave, recovery, applyRecovered, config, status, error, saving, saved, edit, save } = useDevConfigAdmin();
 
   return (
     <div className={styles.page}>
@@ -39,6 +40,16 @@ const DevConfigEditor = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>소개 리드 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>

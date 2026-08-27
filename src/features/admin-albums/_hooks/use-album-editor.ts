@@ -4,6 +4,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
 
 import {
@@ -12,7 +13,6 @@ import {
   prepareAlbumInput,
 } from "@/features/admin-albums/_lib/album-form-data";
 import { validateAlbumInput } from "@/features/admin-albums/_lib/validate-album-input";
-
 
 import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
@@ -42,6 +42,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   const [savedFingerprint, setSavedFingerprint] = useState(() => formFingerprint(form));
   const dirty = formFingerprint(form) !== savedFingerprint;
   const confirmLeave = useUnsavedForm(dirty);
+  const recovery = useFormRecovery("albums", albumId, form, dirty);
+  const { clear: clearRecovery } = recovery;
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -62,6 +64,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
       active = false;
     };
   }, []);
+
+  const applyForm = (next: typeof form) => setForm(next);
 
   const patch = useCallback(
     (next: Partial<AlbumInput>) => setForm((current) => ({ ...current, ...next })),
@@ -106,8 +110,9 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
 
   const cancel = useCallback(() => {
     if (!confirmLeave()) return;
+    clearRecovery();
     router.replace(ROUTES.ADMIN_ALBUMS);
-  }, [confirmLeave, router]);
+  }, [confirmLeave, router, clearRecovery]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
@@ -131,6 +136,7 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
         ? albumRepository.update(albumId, input)
         : albumRepository.create(albumId, input));
       setSavedFingerprint(formFingerprint(form));
+      clearRecovery();
       router.replace(ROUTES.ADMIN_ALBUMS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -139,6 +145,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   };
 
   return {
+    recovery,
+    applyForm,
     dirty,
     formRef,
     issues,

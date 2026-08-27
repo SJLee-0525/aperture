@@ -1,5 +1,6 @@
 import {
   ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX,
+  ADMIN_FORM_DRAFT_KEY_PREFIX,
   SESSION_STORAGE_KEYS,
   STORAGE_KEYS,
 } from "@/constants/storage-keys";
@@ -7,9 +8,9 @@ import {
 /**
  * 로그아웃할 때 지울 브라우저 저장소 항목.
  *
- * 글 복구본에는 아직 저장하지 않은 본문 Markdown 전체가 들어 있다. 이 값은 mock 분기 없이
- * 실데이터 모드에서도 저장되므로(`use-article-recovery`), 공용 브라우저에서 로그아웃한 뒤에도
- * 미발행 글이 그대로 남는다.
+ * 복구본에는 아직 저장하지 않은 값이 그대로 들어 있다. 글은 본문 Markdown 전체이고, 엔티티
+ * 폼과 설정 편집기도 같은 방식으로 떠 둔다. 이 값들은 mock 분기 없이 실데이터 모드에서도
+ * 저장되므로, 공용 브라우저에서 로그아웃한 뒤에도 미발행 내용이 그대로 남는다.
  *
  * `ap-admin-` 접두사를 통째로 쓸어내면 안 된다. `storage-keys.ts` 의 mock CMS 저장소 열 개가
  * 같은 접두사를 공유하며, 그쪽은 E2E 초기화를 위해 접두사를 맞춰 둔 것이지 로그아웃 정리
@@ -19,7 +20,8 @@ import {
  */
 type StorageLike = Pick<Storage, "removeItem" | "key" | "length">;
 
-const isDraftKey = (key: string): boolean => key.startsWith(ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX);
+const isDraftKey = (key: string): boolean =>
+  key.startsWith(ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX) || key.startsWith(ADMIN_FORM_DRAFT_KEY_PREFIX);
 
 /**
  * 편집 중 작업본을 지운다. 저장소 접근이 막힌 브라우저에서도 로그아웃 자체는 끝나야 하므로

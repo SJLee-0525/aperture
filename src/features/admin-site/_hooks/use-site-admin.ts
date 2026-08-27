@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -25,7 +26,9 @@ const useSiteAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { confirmLeave, markSaved } = useConfigDirty(bio);
+  const { dirty, confirmLeave, markSaved } = useConfigDirty(bio);
+  const recovery = useFormRecovery("siteBio", "siteBio", bio, dirty);
+  const { clear: clearRecovery } = recovery;
 
   useEffect(() => {
     let alive = true;
@@ -60,14 +63,26 @@ const useSiteAdmin = () => {
       await getSiteConfigRepository().updateFields({ bio });
       setSaved(true);
       markSaved(bio);
+      clearRecovery();
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [bio, markSaved]);
+  }, [bio, markSaved, clearRecovery]);
 
-  return { confirmLeave, bio, status, error, saving, saved, editBio, save };
+  return {
+    confirmLeave,
+    recovery,
+    applyRecovered: setBio,
+    bio,
+    status,
+    error,
+    saving,
+    saved,
+    editBio,
+    save,
+  };
 };
 
 export { useSiteAdmin };

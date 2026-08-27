@@ -4,6 +4,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { TimelineRow } from "@/features/admin-music-config/_components/TimelineRow";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useMusicConfigAdmin } from "@/features/admin-music-config/_hooks/use-music-config-admin";
 
@@ -22,6 +23,8 @@ import styles from "./AdminMusicConfigEditor.module.css";
 const AdminMusicConfigPage = () => {
   const {
     confirmLeave,
+    recovery,
+    applyRecovered,
     intro,
     career,
     education,
@@ -95,6 +98,16 @@ const AdminMusicConfigPage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>소개글 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>

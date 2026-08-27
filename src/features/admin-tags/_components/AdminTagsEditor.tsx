@@ -11,6 +11,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 import { AdminButton } from "@/components/AdminButton";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 import { TagAddForm } from "@/features/admin-tags/_components/TagAddForm";
 import { TagRow } from "@/features/admin-tags/_components/TagRow";
 
@@ -28,6 +29,8 @@ import styles from "./AdminTagsEditor.module.css";
 const AdminTagsPage = () => {
   const {
     confirmLeave,
+    recovery,
+    applyRecovered,
     tags,
     status,
     error,
@@ -66,6 +69,16 @@ const AdminTagsPage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <TagAddForm onAdd={addTag} />
 
           {tags.length === 0 ? (

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   adminDevArticleDraftKey,
+  adminFormDraftKey,
   SESSION_STORAGE_KEYS,
   STORAGE_KEYS,
 } from "@/constants/storage-keys";
@@ -80,5 +81,17 @@ describe("clearAdminWorkspace", () => {
     };
 
     expect(() => clearAdminWorkspace(blocked, blocked)).not.toThrow();
+  });
+
+  it("엔티티 폼과 설정 편집기의 복구본도 지운다", () => {
+    const local = storageOf({
+      [adminFormDraftKey("photos", "p1")]: "{}",
+      [adminFormDraftKey("devConfig", "devConfig")]: "{}",
+      [STORAGE_KEYS.ADMIN_PHOTOS]: "[]",
+    });
+
+    clearAdminWorkspace(local, storageOf({}));
+
+    expect(local.keys()).toEqual([STORAGE_KEYS.ADMIN_PHOTOS]);
   });
 });

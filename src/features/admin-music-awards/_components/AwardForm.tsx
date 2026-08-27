@@ -5,6 +5,7 @@ import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import styles from "@/features/admin-shell/_components/admin-form.module.css";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useAwardEditor } from "@/features/admin-music-awards/_hooks/use-award-editor";
 
@@ -27,13 +28,24 @@ type Props = {
  * @returns {JSX.Element}
  */
 const AwardForm = ({ awardId, initial }: Props) => {
-  const { form, issues, formRef, isEdit, error, saving, patch, cancel, submit } = useAwardEditor(
+  const { recovery, applyForm, form, issues, formRef, isEdit, error, saving, patch, cancel, submit } = useAwardEditor(
     awardId,
     initial,
   );
 
   return (
     <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
+      {recovery.pending ? (
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
+      ) : null}
+
       <header className={styles.head}>
         <h1 className={styles.title}>{isEdit ? "수상 수정" : "새 수상"}</h1>
       </header>

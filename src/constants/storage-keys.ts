@@ -24,6 +24,14 @@ const STORAGE_KEYS = {
 const ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX = "ap-admin-dev-article-draft:v1:";
 
 /**
+ * 엔티티 폼과 설정 편집기의 편집 중 복구본 키 접두사.
+ *
+ * mock CMS 저장소 열 개가 `ap-admin-` 을 공유하므로 그 접두사로 쓸어내면 mock 모드에서
+ * 작업한 내용이 함께 사라진다. 복구본만 지울 수 있도록 접두사를 한 단계 더 좁힌다.
+ */
+const ADMIN_FORM_DRAFT_KEY_PREFIX = "ap-admin-draft:v1:";
+
+/**
  * 편집 중인 글 하나의 복구본 키.
  *
  * @param {string} articleId 편집 중인 글의 문서 ID.
@@ -31,6 +39,16 @@ const ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX = "ap-admin-dev-article-draft:v1:";
  */
 const adminDevArticleDraftKey = (articleId: string): string =>
   `${ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX}${articleId}`;
+
+/**
+ * 편집 중인 문서 하나의 복구본 키.
+ *
+ * @param {string} collection 컬렉션 이름. 설정 편집기처럼 문서가 하나면 그 이름만 쓴다.
+ * @param {string} id 문서 ID.
+ * @returns {string} 해당 문서 전용 localStorage 키.
+ */
+const adminFormDraftKey = (collection: string, id: string): string =>
+  `${ADMIN_FORM_DRAFT_KEY_PREFIX}${collection}:${id}`;
 
 /** 탭 안에서 한 번 전달할 값에 사용하는 sessionStorage 키. */
 const SESSION_STORAGE_KEYS = {
@@ -51,6 +69,8 @@ const LEGACY_STORAGE_KEYS = {
 export {
   ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX,
   adminDevArticleDraftKey,
+  ADMIN_FORM_DRAFT_KEY_PREFIX,
+  adminFormDraftKey,
   LEGACY_STORAGE_KEYS,
   SESSION_STORAGE_KEYS,
   STORAGE_KEYS,

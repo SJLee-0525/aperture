@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import {
   editDevConfig,
   type DevConfigEdit,
 } from "@/features/admin-dev-config/_lib/edit-dev-config";
-
 
 import { getDevConfigRepository } from "@/lib/admin/dev-config-repository";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
@@ -38,7 +38,9 @@ const useDevConfigAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { confirmLeave, markSaved } = useConfigDirty(config);
+  const { dirty, confirmLeave, markSaved } = useConfigDirty(config);
+  const recovery = useFormRecovery("devConfig", "devConfig", config, dirty);
+  const { clear: clearRecovery } = recovery;
 
   useEffect(() => {
     let alive = true;
@@ -72,15 +74,18 @@ const useDevConfigAdmin = () => {
       await getDevConfigRepository().set(config);
       setSaved(true);
       markSaved(config);
+      clearRecovery();
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [config, markSaved]);
+  }, [config, markSaved, clearRecovery]);
 
   return {
     confirmLeave,
+    recovery,
+    applyRecovered: setConfig,
     config,
     status,
     error,

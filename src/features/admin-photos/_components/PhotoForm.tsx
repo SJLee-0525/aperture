@@ -5,6 +5,7 @@ import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor";
 
@@ -47,6 +48,8 @@ const EXIF_FIELDS: { key: keyof Photo["exif"]; label: string; placeholder: strin
  */
 const PhotoForm = ({ photoId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     cancel,
     clearCoords,
     coordsFromExif,
@@ -70,6 +73,17 @@ const PhotoForm = ({ photoId, initial }: Props) => {
 
   return (
     <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
+      {recovery.pending ? (
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
+      ) : null}
+
       <header className={base.head}>
         <h1 className={base.title}>{isEdit ? "사진 수정" : "새 사진"}</h1>
       </header>
