@@ -37,12 +37,18 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
       <div className={styles.grid2}>
         <AdminInput
           size="sm"
+          aria-label="질문 (한국어)"
+          name={`interview.${index}.q.ko`}
+          autoComplete="off"
           value={entry.q.ko}
           placeholder="질문 (한국어)"
           onChange={(e) => onEdit(index, "q", "ko", e.target.value)}
         />
         <AdminInput
           size="sm"
+          aria-label="Question (English)"
+          name={`interview.${index}.q.en`}
+          autoComplete="off"
           value={entry.q.en}
           placeholder="Question (English)"
           onChange={(e) => onEdit(index, "q", "en", e.target.value)}
@@ -52,6 +58,8 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
         <AdminInput
           multiline
           rows={3}
+          aria-label="답변 (한국어)"
+          name={`interview.${index}.a.ko`}
           value={entry.a.ko}
           placeholder="답변 (한국어)"
           onChange={(e) => onEdit(index, "a", "ko", e.target.value)}
@@ -59,6 +67,8 @@ const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove 
         <AdminInput
           multiline
           rows={3}
+          aria-label="Answer (English)"
+          name={`interview.${index}.a.en`}
           value={entry.a.en}
           placeholder="Answer (English)"
           onChange={(e) => onEdit(index, "a", "en", e.target.value)}

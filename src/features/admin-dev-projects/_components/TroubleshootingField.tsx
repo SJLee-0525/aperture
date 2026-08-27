@@ -29,6 +29,8 @@ const emptyEntry = (): DevTroubleshooting => ({
 });
 
 /** 항목별 제목/문제/해결/결과(ko·en) 필드 정의 — 렌더 순서 그대로. */
+const LANG_LABEL = { ko: "한국어", en: "English" } as const;
+
 const FIELDS: { key: TextFieldKey; label: string; multiline: boolean }[] = [
   { key: "title", label: "제목", multiline: false },
   { key: "problem", label: "문제", multiline: true },
@@ -95,16 +97,22 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
                           multiline
                           tone="raised"
                           rows={2}
+                          aria-label={`트러블슈팅 ${index + 1} ${label} (${LANG_LABEL[langKey]})`}
+                          name={`troubleshooting.${index}.${key}.${langKey}`}
+                          autoComplete="off"
                           value={entry[key]?.[langKey] ?? ""}
-                          placeholder={langKey === "ko" ? "한국어" : "English"}
+                          placeholder={LANG_LABEL[langKey]}
                           onChange={(e) => edit(index, key, langKey, e.target.value)}
                         />
                       ) : (
                         <AdminInput
                           key={langKey}
                           tone="raised"
+                          aria-label={`트러블슈팅 ${index + 1} ${label} (${LANG_LABEL[langKey]})`}
+                          name={`troubleshooting.${index}.${key}.${langKey}`}
+                          autoComplete="off"
                           value={entry[key]?.[langKey] ?? ""}
-                          placeholder={langKey === "ko" ? "한국어" : "English"}
+                          placeholder={LANG_LABEL[langKey]}
                           onChange={(e) => edit(index, key, langKey, e.target.value)}
                         />
                       ),

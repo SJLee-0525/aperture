@@ -46,33 +46,13 @@
   gap: var(--s-4);
 }
 
+/* 외형은 AdminInput 이 갖는다. 여기서는 폭만 정한다. */
 .search {
-  display: grid;
-  gap: var(--s-1);
   width: min(280px, 100%);
-}
-
-.searchLabel {
-  font-size: var(--t-micro);
-  color: var(--text-4);
-}
-
-.search input {
-  min-height: 36px;
-  padding: 0 var(--s-3);
-  color: var(--text);
-  background: var(--surface-1);
-  border: 1px solid var(--line);
 }
 
 .more {
   align-self: center;
-  min-height: 40px;
-  padding: 0 var(--s-5);
-  color: var(--text-2);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  cursor: pointer;
 }
 
 @media (max-width: 640px) {

@@ -12,6 +12,8 @@ import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortabl
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
 
 import { imageThumbnailUrl } from "@/types/image";
@@ -138,18 +140,18 @@ const AlbumPhotoPicker = ({
       <div className={styles.block}>
         <div className={styles.photoToolbar}>
           <p className={styles.blockLabel}>전체 사진 — 눌러서 추가/제외</p>
-          <label className={styles.search}>
-            <span className={styles.searchLabel}>사진 검색</span>
-            <input
-              type="search"
-              value={query}
-              placeholder="제목 또는 ID"
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setVisibleCount(PAGE_SIZE);
-              }}
-            />
-          </label>
+          <AdminInput
+            type="search"
+            size="sm"
+            className={styles.search}
+            aria-label="사진 검색"
+            value={query}
+            placeholder="제목 또는 ID"
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setVisibleCount(PAGE_SIZE);
+            }}
+          />
         </div>
         {photos.length > 0 ? (
           <>
@@ -186,13 +188,14 @@ const AlbumPhotoPicker = ({
               })}
             </ul>
             {visibleCount < filteredPhotos.length ? (
-              <button
-                type="button"
+              <AdminButton
+                variant="secondary"
+                size="sm"
                 className={styles.more}
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 더 보기 ({visibleCount}/{filteredPhotos.length})
-              </button>
+              </AdminButton>
             ) : null}
             {filteredPhotos.length === 0 ? (
               <p className={styles.emptySel}>검색 결과가 없습니다.</p>

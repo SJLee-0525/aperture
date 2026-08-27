@@ -101,10 +101,14 @@ const PlaceField = ({
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.tabs} role="tablist">
+      {/* role="tab" 이 아니라 aria-pressed 를 쓴다. tablist 규약은 방향키 이동과
+          tabpanel 연결까지 요구하는데, 이 둘은 화면을 바꾸는 토글 버튼이다.
+          같은 형태가 블로그 목록의 상태 필터에 이미 있다. */}
+      <div className={styles.tabs} role="group" aria-label="위치 입력 방식">
         <button
           type="button"
           className={mode === "search" ? styles.tabActive : styles.tab}
+          aria-pressed={mode === "search"}
           onClick={() => setMode("search")}
         >
           검색
@@ -112,6 +116,7 @@ const PlaceField = ({
         <button
           type="button"
           className={mode === "manual" ? styles.tabActive : styles.tab}
+          aria-pressed={mode === "manual"}
           onClick={() => setMode("manual")}
         >
           직접 입력

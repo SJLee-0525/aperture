@@ -56,6 +56,9 @@ const DevTimelineRow = ({
     <div className={styles.inputs}>
       <AdminInput
         size="sm"
+        aria-label="경력 기간"
+        name={`career.${index}.period`}
+        autoComplete="off"
         value={entry.period}
         placeholder="2025 — 현재"
         onChange={(e) => onEditPeriod(index, e.target.value)}
@@ -64,12 +67,18 @@ const DevTimelineRow = ({
         <div key={key} className={styles.grid2}>
           <AdminInput
             size="sm"
+            aria-label={`${label} (한국어)`}
+            name={`career.${index}.${key}.ko`}
+            autoComplete="off"
             value={entry[key].ko}
             placeholder={`${label} (한국어)`}
             onChange={(e) => onEditField(index, key, "ko", e.target.value)}
           />
           <AdminInput
             size="sm"
+            aria-label={`${label} (English)`}
+            name={`career.${index}.${key}.en`}
+            autoComplete="off"
             value={entry[key].en}
             placeholder={`${label} (English)`}
             onChange={(e) => onEditField(index, key, "en", e.target.value)}
