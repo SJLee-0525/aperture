@@ -22,6 +22,7 @@ export default defineConfig({
         "src/lib/rate-limit/*.ts",
         "src/lib/auth/admin-auth-throttle.ts",
         "src/lib/auth/authorize-admin-token.ts",
+        "src/lib/auth/admin-gate.ts",
         "src/lib/admin/clear-admin-workspace.ts",
         "src/lib/collection/move-item.ts",
         "src/lib/admin/field-issue.ts",

@@ -7,7 +7,8 @@ import { articleTagTokens } from "@/features/dev-blog/_lib/article-tag-tokens";
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
 import { embeddingModelKey, generateEmbeddings } from "@/lib/ai/embedding";
 import { buildRagChunks } from "@/lib/ai/rag-chunks";
-import { authorizeAdminToken, bearerToken } from "@/lib/auth/authorize-admin-token";
+import { adminGateResponse } from "@/lib/auth/admin-gate";
+import { bearerToken } from "@/lib/auth/authorize-admin-token";
 import { getRagSourceData, getRagSourceDataForTarget } from "@/lib/content/rag-source";
 import {
   assertWithinDocumentLimit,
@@ -20,12 +21,6 @@ import type { RagChunk, RagSyncTarget } from "@/types/rag";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-const tooManyRequests = (retryAfterSeconds: number) =>
-  NextResponse.json(
-    { error: "Too many failed attempts" },
-    { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
-  );
 
 const ALLOWED_SOURCE_TYPES = new Set([
   "photo",
@@ -61,12 +56,9 @@ const buildAllRagChunks = (data: RagSourceData): RagChunk[] => [
 ];
 
 export async function POST(request: Request) {
+  const denied = await adminGateResponse(request);
+  if (denied) return denied;
   const idToken = bearerToken(request);
-  const verdict = await authorizeAdminToken(idToken);
-  if (verdict.status === "throttled") return tooManyRequests(verdict.retryAfterSeconds);
-  if (verdict.status !== "ok") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   try {
     const payload = (await request.json().catch(() => null)) as {
       target?: RagSyncTarget;
@@ -128,12 +120,9 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const denied = await adminGateResponse(request);
+  if (denied) return denied;
   const idToken = bearerToken(request);
-  const verdict = await authorizeAdminToken(idToken);
-  if (verdict.status === "throttled") return tooManyRequests(verdict.retryAfterSeconds);
-  if (verdict.status !== "ok") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   try {
     const chunks = buildAllRagChunks(await getRagSourceData());
     const existing = await listRagDocumentMeta(idToken);

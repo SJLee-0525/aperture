@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 
 import { CHAT_PROFILE_CACHE_TAG } from "@/constants/cache";
-import { authorizeAdminToken } from "@/lib/auth/authorize-admin-token";
+import { requireAdminToken } from "@/lib/auth/admin-gate";
 
 /** 캐시 태그로 쓸 수 있는 형태. 컬렉션·문서 ID 가 쓰는 문자 집합에 맞춘다. */
 const REVALIDATABLE_TAG_PATTERN = /^[\w:-]{1,256}$/;
@@ -34,13 +34,7 @@ const revalidatePublicPages = async (
   tags: string[],
   paths: string[] = [],
 ): Promise<void> => {
-  const verdict = await authorizeAdminToken(idToken);
-  if (verdict.status === "throttled") {
-    throw new Error("Too many failed cache revalidation attempts");
-  }
-  if (verdict.status !== "ok") {
-    throw new Error("Unauthorized cache revalidation");
-  }
+  await requireAdminToken(idToken, "cache revalidation");
   for (const tag of new Set(tags)) {
     // 값의 출처는 관리자 브라우저의 localStorage 다. 경로가 받는 것과 같은 수준으로 형태를
     // 확인해, 한쪽만 검사가 없어 다음에 이 코드를 읽는 사람이 의도된 차이로 읽지 않게 한다.

@@ -3,8 +3,7 @@
 import { highlightArticleDocument } from "@/features/dev-blog/_lib/markdown-highlight";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
-import { authorizeAdminToken } from "@/lib/auth/authorize-admin-token";
-import { isTestAdminSessionEnabled } from "@/lib/auth/test-admin-session";
+import { requireAdminToken } from "@/lib/auth/admin-gate";
 
 import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 import type {
@@ -44,14 +43,8 @@ const previewArticleMarkdown = async (
   idToken: string,
   markdown: string,
 ): Promise<ArticlePreviewResult> => {
-  // 스로틀은 테스트 세션 우회 뒤에 둔다. 앞에 두면 E2E 가 매 미리보기마다 Upstash 를 부른다.
-  if (!isTestAdminSessionEnabled()) {
-    const verdict = await authorizeAdminToken(idToken);
-    if (verdict.status === "throttled") {
-      throw new Error("Too many failed article preview attempts");
-    }
-    if (verdict.status !== "ok") throw new Error("Unauthorized article preview");
-  }
+  // 저장하지 않는 읽기 전용 렌더라 테스트 세션 우회를 여는 유일한 관리자 표면이다.
+  await requireAdminToken(idToken, "article preview", { allowTestSession: true });
   if (markdown.length > PREVIEW_MAX_BODY_LENGTH) {
     throw new Error("본문이 너무 깁니다. 글을 나눠 주세요.");
   }

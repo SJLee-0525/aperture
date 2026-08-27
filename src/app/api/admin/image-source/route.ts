@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { authorizeAdminToken, bearerToken } from "@/lib/auth/authorize-admin-token";
+import { adminGateResponse } from "@/lib/auth/admin-gate";
 import { isAllowedStorageSourceUrl } from "@/lib/supabase/storage-source-url";
 
-const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
+// 다른 POST 라우트 셋과 같은 선언. 없으면 런타임 선택이 기본값에 맡겨져,
+// 원본을 스트림으로 읽는 이 경로가 edge 로 바뀌면 동작이 달라진다.
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
-const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 
 /**
  * 응답 본문을 상한까지만 읽는다. `Content-Length` 가 없는 응답에도 상한이 걸린다.
@@ -41,21 +44,14 @@ const readLimitedBody = async (response: Response, limit: number): Promise<Uint8
   return body;
 };
 
-const tooManyRequests = (retryAfterSeconds: number) =>
-  NextResponse.json(
-    { error: "Too many failed attempts" },
-    { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
-  );
-
 /**
  * 인증된 관리자가 요청한 Storage 원본 이미지를 프록시한다.
  * @param {Request} request Bearer 토큰과 원본 이미지 URL을 담은 요청.
  * @returns {Promise<Response>} 이미지 응답 또는 인증·입력 오류 응답.
  */
 export async function POST(request: Request) {
-  const verdict = await authorizeAdminToken(bearerToken(request));
-  if (verdict.status === "throttled") return tooManyRequests(verdict.retryAfterSeconds);
-  if (verdict.status !== "ok") return unauthorized();
+  const denied = await adminGateResponse(request);
+  if (denied) return denied;
 
   const payload = (await request.json().catch(() => null)) as { url?: unknown } | null;
   const sourceUrl = typeof payload?.url === "string" ? payload.url : "";
