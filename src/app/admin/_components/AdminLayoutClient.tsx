@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { RagStaleBanner } from "@/features/admin-maintenance/_components/RagStaleBanner";
 import { RevalidateFailureBanner } from "@/features/admin-maintenance/_components/RevalidateFailureBanner";
 import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
+import { AdminMonitoring } from "@/features/admin-shell/_components/AdminMonitoring";
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
-import { AdminMonitoring } from "@/features/monitoring/_components/AdminMonitoring";
 
 import { useRevalidateFlushOnLeave } from "@/features/admin-maintenance/_hooks/use-revalidate-flush-on-leave";
 

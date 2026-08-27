@@ -9,7 +9,12 @@ import { UploadProgress } from "@/features/image-upload/_components/UploadProgre
 
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
 
+import { moveItem } from "@/lib/collection/move-item";
+
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
+
+import type { MoveOffset } from "@/lib/collection/move-item";
+
 
 import styles from "./DevImageField.module.css";
 
@@ -73,12 +78,9 @@ const DevImageField = ({
 
   const removeImage = (index: number) => onImagesChange(images.filter((_, i) => i !== index));
 
-  const moveImage = (index: number, offset: -1 | 1) => {
-    const target = index + offset;
-    if (target < 0 || target >= images.length) return;
-    const next = [...images];
-    [next[index], next[target]] = [next[target], next[index]];
-    onImagesChange(next);
+  const moveImage = (index: number, offset: MoveOffset) => {
+    const next = moveItem(images, index, offset);
+    if (next !== images) onImagesChange(next);
   };
 
   return (

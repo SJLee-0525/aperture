@@ -10,7 +10,7 @@ vi.mock("@/features/auth/_components/AuthGuard", () => ({
   AuthGuard: ({ children }: { children: React.ReactNode }) =>
     state.authorized ? <>{children}</> : <span data-testid="auth-gate" />,
 }));
-vi.mock("@/features/monitoring/_components/AdminMonitoring", () => ({
+vi.mock("@/features/admin-shell/_components/AdminMonitoring", () => ({
   AdminMonitoring: () => <span data-testid="admin-monitoring" />,
 }));
 vi.mock("@/features/admin-shell/_components/AdminChrome", () => ({

@@ -6,6 +6,7 @@ import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
+import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
 
@@ -101,13 +102,7 @@ const useGlobalAdmin = () => {
   }, []);
   /** 위/아래 버튼 순서 이동(offset: -1 위, +1 아래). */
   const moveLink = useCallback((index: number, offset: -1 | 1) => {
-    setLinks((prev) => {
-      const target = index + offset;
-      if (target < 0 || target >= prev.length) return prev;
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    setLinks((prev) => moveItem(prev, index, offset));
     setSaved(false);
   }, []);
 

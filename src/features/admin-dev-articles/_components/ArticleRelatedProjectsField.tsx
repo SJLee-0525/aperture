@@ -2,7 +2,10 @@
 
 import { Icon } from "@/components/Icon";
 
+import { moveItem } from "@/lib/collection/move-item";
+
 import type { DevProjectOption } from "@/features/admin-dev-articles/_lib/dev-project-options";
+import type { MoveOffset } from "@/lib/collection/move-item";
 
 import styles from "./ArticleForm.module.css";
 
@@ -26,12 +29,9 @@ type Props = {
  * @returns {JSX.Element}
  */
 const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) => {
-  const move = (index: number, step: number) => {
-    const target = index + step;
-    if (target < 0 || target >= selected.length) return;
-    const next = [...selected];
-    [next[index], next[target]] = [next[target], next[index]];
-    onChange(next);
+  const move = (index: number, step: MoveOffset) => {
+    const next = moveItem(selected, index, step);
+    if (next !== selected) onChange(next);
   };
 
   const label = (id: string) => projects.find((project) => project.id === id)?.title.ko ?? id;

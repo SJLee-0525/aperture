@@ -6,6 +6,7 @@ import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
 import { getMusicConfigRepository } from "@/lib/admin/music-config-repository";
+import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import type { LocalizedText } from "@/types/localized";
@@ -102,13 +103,7 @@ const useMusicConfigAdmin = () => {
 
   /** 위/아래 버튼 순서 이동(offset: -1 위, +1 아래). */
   const moveEntry = useCallback((key: TimelineKey, index: number, offset: -1 | 1) => {
-    setterFor(key)((prev) => {
-      const target = index + offset;
-      if (target < 0 || target >= prev.length) return prev;
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    setterFor(key)((prev) => moveItem(prev, index, offset));
     markDirty();
   }, []);
 

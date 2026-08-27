@@ -1,4 +1,6 @@
+import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
+
 
 import type { DevConfig, DevStackItem } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
@@ -56,15 +58,6 @@ type DevConfigEdit =
   | { type: "award.field.edit"; index: number; field: AwardField; lang: Lang; value: string }
   | { type: "award.move"; index: number; offset: MoveOffset }
   | { type: "award.remove"; index: number };
-
-const moveItem = <T>(list: T[], index: number, offset: MoveOffset): T[] => {
-  const target = index + offset;
-  if (target < 0 || target >= list.length) return list;
-
-  const next = [...list];
-  [next[index], next[target]] = [next[target], next[index]];
-  return next;
-};
 
 /**
  * 관리자 개발 설정의 모든 편집 규칙. React·저장소와 무관한 순수 command reducer.
