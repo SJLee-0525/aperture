@@ -12,12 +12,12 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
 import { AdminButton } from "@/components/AdminButton";
 import { PhotoRow } from "@/features/admin-photos/_components/PhotoRow";
+import styles from "@/features/admin-shell/_components/admin-list.module.css";
 
 import { usePhotosAdmin } from "@/features/admin-photos/_hooks/use-photos-admin";
 
 import { ROUTES } from "@/constants/routes";
 
-import styles from "./AdminPhotosList.module.css";
 
 /**
  * 관리자 사진 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 usePhotosAdmin.

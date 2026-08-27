@@ -3,12 +3,12 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
 
 import type { Album } from "@/types/album";
 
-import styles from "./AlbumForm.module.css";
 import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
 
 type Props = {

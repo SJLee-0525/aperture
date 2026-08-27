@@ -4,6 +4,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { CloseIcon } from "@/components/CloseIcon";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 
@@ -55,14 +56,14 @@ const ProjectForm = ({ projectId, initial }: Props) => {
   } = useProjectEditor(projectId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "프로젝트 수정" : "새 프로젝트"}</h1>
+    <form className={base.form} onSubmit={submit} noValidate>
+      <header className={base.head}>
+        <h1 className={base.title}>{isEdit ? "프로젝트 수정" : "새 프로젝트"}</h1>
       </header>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
+        <div className={base.grid2}>
           <AdminField label="제목 (한국어)" required>
             <AdminInput
               value={form.title.ko}
@@ -79,9 +80,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>분류 · 연도</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>분류 · 연도</h2>
+        <div className={base.grid2}>
           <AdminField label="분류 (한국어)">
             <AdminInput
               value={form.category.ko}
@@ -105,9 +106,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>기간 · 포지션</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>기간 · 포지션</h2>
+        <div className={base.grid2}>
           <AdminField label="기간 (한국어)">
             <AdminInput
               value={form.period.ko}
@@ -139,9 +140,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>요약 (카드 한 줄)</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>요약 (카드 한 줄)</h2>
+        <div className={base.grid2}>
           <AdminField label="요약 (한국어)">
             <AdminInput
               multiline
@@ -161,9 +162,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>개요</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>개요</h2>
+        <div className={base.grid2}>
           <AdminField label="개요 (한국어)">
             <AdminInput
               multiline
@@ -200,8 +201,8 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         onRemove={removeLocalized}
       />
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>트러블슈팅</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>트러블슈팅</h2>
         <TroubleshootingField
           entries={form.troubleshooting}
           onChange={(troubleshooting) => patch({ troubleshooting })}
@@ -217,9 +218,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         onRemove={removeLocalized}
       />
 
-      <section className={styles.section}>
+      <section className={base.section}>
         <div className={styles.arrayHead}>
-          <h2 className={styles.legend}>기술 스택 (태그)</h2>
+          <h2 className={base.legend}>기술 스택 (태그)</h2>
         </div>
         <div className={styles.tagInputRow}>
           <AdminInput
@@ -256,9 +257,9 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         )}
       </section>
 
-      <section className={styles.section}>
+      <section className={base.section}>
         <div className={styles.arrayHead}>
-          <h2 className={styles.legend}>링크 (GitHub · Live 등)</h2>
+          <h2 className={base.legend}>링크 (GitHub · Live 등)</h2>
           <AdminButton variant="secondary" size="xs" onClick={addLink}>
             + 링크 추가
           </AdminButton>
@@ -292,8 +293,8 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         )}
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>이미지</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>이미지</h2>
         <DevImageField
           projectId={projectId}
           cover={form.cover}
@@ -304,8 +305,8 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -316,12 +317,12 @@ const ProjectForm = ({ projectId, initial }: Props) => {
       </section>
 
       {error ? (
-        <p className={styles.error} role="alert">
+        <p className={base.error} role="alert">
           {error}
         </p>
       ) : null}
 
-      <div className={styles.actions}>
+      <div className={base.actions}>
         <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
           {saving ? "저장 중…" : "저장"}
         </AdminButton>

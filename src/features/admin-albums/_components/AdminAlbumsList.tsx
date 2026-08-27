@@ -12,6 +12,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
 import { AdminButton } from "@/components/AdminButton";
 import { AlbumRow } from "@/features/admin-albums/_components/AlbumRow";
+import styles from "@/features/admin-shell/_components/admin-list.module.css";
 
 import { useAlbumsAdmin } from "@/features/admin-albums/_hooks/use-albums-admin";
 
@@ -19,7 +20,6 @@ import { ROUTES } from "@/constants/routes";
 
 import { imageThumbnailUrl } from "@/types/image";
 
-import styles from "./AdminAlbumsList.module.css";
 
 /**
  * 관리자 앨범 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useAlbumsAdmin.

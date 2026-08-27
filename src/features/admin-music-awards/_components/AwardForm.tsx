@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import styles from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { ROUTES } from "@/constants/routes";
 import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
@@ -14,7 +15,6 @@ import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import type { MusicAwardInput } from "@/lib/supabase/music";
 import type { MusicAward } from "@/types/music";
 
-import styles from "./AwardForm.module.css";
 
 type Props = {
   awardId: string;

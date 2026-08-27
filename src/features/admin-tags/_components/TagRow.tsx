@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { AdminInput } from "@/components/AdminInput";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import type { Tag } from "@/types/tag";
 
@@ -50,7 +51,7 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
     <li ref={setNodeRef} style={style} className={styles.row}>
       <button
         type="button"
-        className={styles.handle}
+        className={row.handle}
         aria-label="순서 이동"
         {...attributes}
         {...listeners}
@@ -63,7 +64,7 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
       </code>
 
       <label className={styles.field}>
-        <span className={styles.srLabel}>한국어</span>
+        <span className="sr-only">한국어</span>
         <AdminInput
           size="sm"
           value={tag.ko}
@@ -73,7 +74,7 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
       </label>
 
       <label className={styles.field}>
-        <span className={styles.srLabel}>English</span>
+        <span className="sr-only">English</span>
         <AdminInput
           size="sm"
           value={tag.en}
@@ -82,7 +83,7 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
         />
       </label>
 
-      <button type="button" className={styles.delete} onClick={onDeleteClick}>
+      <button type="button" className={row.delete} onClick={onDeleteClick}>
         삭제
       </button>
     </li>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import { adminDevArticleRoute } from "@/constants/routes";
 import { formatEventYMD, formatLocalYMD } from "@/lib/format/format-date";
@@ -47,7 +48,7 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
   };
 
   return (
-    <li className={styles.row}>
+    <li className={row.row}>
       <span className={styles.main}>
         <Link href={adminDevArticleRoute(article.id)} className={styles.title}>
           {title}
@@ -69,7 +70,7 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
           이름까지 뒤집으면 보조기술이 "고정 해제, 눌림" 처럼 반대되는 두 신호를 함께 읽는다. */}
       <button
         type="button"
-        className={`${styles.badge} ${styles.pinBadge} ${article.pinned ? styles.badgeOn : ""}`}
+        className={`${row.badge} ${styles.pinBadge} ${article.pinned ? row.badgeOn : ""}`}
         aria-pressed={article.pinned}
         aria-label={`${title} 고정`}
         disabled={pinBusy}
@@ -80,17 +81,17 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
 
       <button
         type="button"
-        className={`${styles.badge} ${article.published ? styles.badgeOn : ""}`}
+        className={`${row.badge} ${article.published ? row.badgeOn : ""}`}
         onClick={() => onTogglePublished(article.id, !article.published)}
       >
         {article.published ? "공개" : "초안"}
       </button>
 
-      <span className={styles.actions}>
-        <Link href={adminDevArticleRoute(article.id)} className={styles.edit}>
+      <span className={row.actions}>
+        <Link href={adminDevArticleRoute(article.id)} className={row.edit}>
           수정
         </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
+        <button type="button" className={row.delete} onClick={onDeleteClick}>
           삭제
         </button>
       </span>

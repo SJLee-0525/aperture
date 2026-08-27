@@ -2,6 +2,7 @@
 
 import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import type { DevTimelineEntry } from "@/types/dev";
 
@@ -80,7 +81,7 @@ const DevTimelineRow = ({
     <div className={styles.controls}>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="위로"
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
@@ -89,14 +90,14 @@ const DevTimelineRow = ({
       </button>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="아래로"
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
         <Icon name="arrowDown" size={14} />
       </button>
-      <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
+      <button type="button" className={row.delete} onClick={() => onRemove(index)}>
         삭제
       </button>
     </div>

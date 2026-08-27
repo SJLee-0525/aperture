@@ -5,6 +5,8 @@ import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 import Link from "next/link";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+
 import { adminPhotoRoute } from "@/constants/routes";
 
 import { imageThumbnailUrl } from "@/types/image";
@@ -49,10 +51,10 @@ const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={styles.row}>
+    <li ref={setNodeRef} style={style} className={row.row}>
       <button
         type="button"
-        className={styles.handle}
+        className={row.handle}
         aria-label="순서 이동"
         {...attributes}
         {...listeners}
@@ -76,17 +78,17 @@ const PhotoRow = ({ photo, onTogglePublished, onDelete }: Props) => {
 
       <button
         type="button"
-        className={`${styles.badge} ${photo.published ? styles.badgeOn : ""}`}
+        className={`${row.badge} ${photo.published ? row.badgeOn : ""}`}
         onClick={() => onTogglePublished(photo.id, !photo.published)}
       >
         {photo.published ? "공개" : "비공개"}
       </button>
 
-      <span className={styles.actions}>
-        <Link href={adminPhotoRoute(photo.id)} className={styles.edit}>
+      <span className={row.actions}>
+        <Link href={adminPhotoRoute(photo.id)} className={row.edit}>
           수정
         </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
+        <button type="button" className={row.delete} onClick={onDeleteClick}>
           삭제
         </button>
       </span>

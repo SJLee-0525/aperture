@@ -1,5 +1,6 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminInput } from "@/components/AdminInput";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import type { LocalizedArrayKey } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 import type { DevProjectInput } from "@/lib/supabase/dev";
@@ -35,9 +36,9 @@ type Props = {
  * @returns {React.JSX.Element} 다국어 항목 편집 필드.
  */
 const LocalizedProjectListField = ({ field, legend, items, onAdd, onEdit, onRemove }: Props) => (
-  <section className={styles.section}>
+  <section className={base.section}>
     <div className={styles.arrayHead}>
-      <h2 className={styles.legend}>{legend}</h2>
+      <h2 className={base.legend}>{legend}</h2>
       <AdminButton variant="secondary" size="xs" onClick={() => onAdd(field)}>
         + 항목 추가
       </AdminButton>
@@ -48,7 +49,7 @@ const LocalizedProjectListField = ({ field, legend, items, onAdd, onEdit, onRemo
       <ul className={styles.arrayList}>
         {items.map((item, index) => (
           <li key={index} className={styles.arrayRow}>
-            <div className={styles.grid2}>
+            <div className={`${base.grid2} ${styles.arrayGrid}`}>
               <AdminInput
                 aria-label="한국어"
                 value={item.ko}

@@ -12,12 +12,12 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
 import { AdminButton } from "@/components/AdminButton";
 import { ProjectRow } from "@/features/admin-dev-projects/_components/ProjectRow";
+import styles from "@/features/admin-shell/_components/admin-list.module.css";
 
 import { useDevProjectsAdmin } from "@/features/admin-dev-projects/_hooks/use-dev-projects-admin";
 
 import { ROUTES } from "@/constants/routes";
 
-import styles from "./AdminDevProjectsList.module.css";
 
 /**
  * 관리자 프로젝트 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useDevProjectsAdmin.

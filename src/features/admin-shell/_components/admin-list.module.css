@@ -1,4 +1,4 @@
-/* 관리자 개발 프로젝트 목록 화면 */
+/* 관리자 정렬 목록 화면의 공통 골격. 목록 일곱 개가 head·상태·빈 상태·리스트를 공유한다. */
 .page {
   display: flex;
   flex-direction: column;

@@ -5,6 +5,8 @@ import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 import Link from "next/link";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+
 import { adminAlbumRoute } from "@/constants/routes";
 
 import type { AdminAlbumListItem } from "@/types/admin";
@@ -51,10 +53,10 @@ const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={styles.row}>
+    <li ref={setNodeRef} style={style} className={row.row}>
       <button
         type="button"
-        className={styles.handle}
+        className={row.handle}
         aria-label="순서 이동"
         {...attributes}
         {...listeners}
@@ -80,17 +82,17 @@ const AlbumRow = ({ album, coverUrl, onTogglePublished, onDelete }: Props) => {
 
       <button
         type="button"
-        className={`${styles.badge} ${album.published ? styles.badgeOn : ""}`}
+        className={`${row.badge} ${album.published ? row.badgeOn : ""}`}
         onClick={() => onTogglePublished(album.id, !album.published)}
       >
         {album.published ? "공개" : "비공개"}
       </button>
 
-      <span className={styles.actions}>
-        <Link href={adminAlbumRoute(album.id)} className={styles.edit}>
+      <span className={row.actions}>
+        <Link href={adminAlbumRoute(album.id)} className={row.edit}>
           수정
         </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
+        <button type="button" className={row.delete} onClick={onDeleteClick}>
           삭제
         </button>
       </span>

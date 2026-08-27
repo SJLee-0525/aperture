@@ -21,62 +21,12 @@
   flex: 1;
 }
 
-.srLabel {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 .controls {
   flex: none;
   display: flex;
   align-items: center;
   gap: var(--s-2);
 }
-
-.move {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text-2);
-  font-size: var(--t-body);
-  cursor: pointer;
-  transition:
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-.move:hover:not(:disabled) {
-  border-color: var(--text-3);
-  color: var(--text);
-}
-.move:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.delete {
-  background: transparent;
-  border: none;
-  color: var(--text-3);
-  font-size: var(--t-small);
-  cursor: pointer;
-  transition: color var(--dur) var(--ease);
-}
-.delete:hover {
-  color: var(--danger);
-}
-
 @media (max-width: 640px) {
   .row {
     flex-wrap: wrap;

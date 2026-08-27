@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor";
 
@@ -63,13 +64,13 @@ const PhotoForm = ({ photoId, initial }: Props) => {
   } = usePhotoEditor(photoId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "사진 수정" : "새 사진"}</h1>
+    <form className={base.form} onSubmit={submit} noValidate>
+      <header className={base.head}>
+        <h1 className={base.title}>{isEdit ? "사진 수정" : "새 사진"}</h1>
       </header>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>이미지</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>이미지</h2>
         <PhotoUploadField
           photoId={photoId}
           image={form.image.url ? form.image : null}
@@ -78,9 +79,9 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
+        <div className={base.grid2}>
           <AdminField label="제목 (한국어)" required>
             <AdminInput
               value={form.title.ko}
@@ -97,9 +98,9 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>장비 · 촬영</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>장비 · 촬영</h2>
+        <div className={base.grid2}>
           <AdminField label="카메라">
             <AdminInput value={form.camera} onChange={(e) => patch({ camera: e.target.value })} />
           </AdminField>
@@ -116,8 +117,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>EXIF</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>EXIF</h2>
         <div className={styles.grid3}>
           {EXIF_FIELDS.map(({ key, label, placeholder }) => (
             <AdminField key={key} label={label}>
@@ -131,8 +132,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>장소 · 좌표</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>장소 · 좌표</h2>
         <PlaceField
           place={form.place}
           latStr={lat}
@@ -150,13 +151,13 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>태그</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>태그</h2>
         <TagMultiSelect selected={form.tags} onChange={(tags) => patch({ tags })} />
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -167,12 +168,12 @@ const PhotoForm = ({ photoId, initial }: Props) => {
       </section>
 
       {error ? (
-        <p className={styles.error} role="alert">
+        <p className={base.error} role="alert">
           {error}
         </p>
       ) : null}
 
-      <div className={styles.actions}>
+      <div className={base.actions}>
         <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
           {saving ? "저장 중…" : "저장"}
         </AdminButton>

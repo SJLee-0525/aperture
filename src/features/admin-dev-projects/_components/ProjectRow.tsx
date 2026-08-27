@@ -5,6 +5,8 @@ import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 import Link from "next/link";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+
 import { adminDevProjectRoute } from "@/constants/routes";
 
 import { imageThumbnailUrl } from "@/types/image";
@@ -47,10 +49,10 @@ const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={styles.row}>
+    <li ref={setNodeRef} style={style} className={row.row}>
       <button
         type="button"
-        className={styles.handle}
+        className={row.handle}
         aria-label="순서 이동"
         {...attributes}
         {...listeners}
@@ -76,17 +78,17 @@ const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
 
       <button
         type="button"
-        className={`${styles.badge} ${project.published ? styles.badgeOn : ""}`}
+        className={`${row.badge} ${project.published ? row.badgeOn : ""}`}
         onClick={() => onTogglePublished(project.id, !project.published)}
       >
         {project.published ? "공개" : "비공개"}
       </button>
 
-      <span className={styles.actions}>
-        <Link href={adminDevProjectRoute(project.id)} className={styles.edit}>
+      <span className={row.actions}>
+        <Link href={adminDevProjectRoute(project.id)} className={row.edit}>
           수정
         </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
+        <button type="button" className={row.delete} onClick={onDeleteClick}>
           삭제
         </button>
       </span>

@@ -2,6 +2,7 @@
 
 import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import type { TimelineKey } from "@/features/admin-music-config/_hooks/use-music-config-admin";
 import type { TimelineEntry } from "@/types/timeline";
@@ -49,7 +50,7 @@ const TimelineRow = ({
   <li className={styles.row}>
     <div className={styles.inputs}>
       <label className={styles.field}>
-        <span className={styles.srLabel}>기간</span>
+        <span className="sr-only">기간</span>
         <AdminInput
           size="sm"
           value={entry.period}
@@ -58,7 +59,7 @@ const TimelineRow = ({
         />
       </label>
       <label className={styles.field}>
-        <span className={styles.srLabel}>제목 (한국어)</span>
+        <span className="sr-only">제목 (한국어)</span>
         <AdminInput
           size="sm"
           value={entry.title.ko}
@@ -67,7 +68,7 @@ const TimelineRow = ({
         />
       </label>
       <label className={styles.field}>
-        <span className={styles.srLabel}>제목 (English)</span>
+        <span className="sr-only">제목 (English)</span>
         <AdminInput
           size="sm"
           value={entry.title.en}
@@ -80,7 +81,7 @@ const TimelineRow = ({
     <div className={styles.controls}>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="위로"
         disabled={isFirst}
         onClick={() => onMove(groupKey, index, -1)}
@@ -89,14 +90,14 @@ const TimelineRow = ({
       </button>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="아래로"
         disabled={isLast}
         onClick={() => onMove(groupKey, index, 1)}
       >
         <Icon name="arrowDown" size={14} />
       </button>
-      <button type="button" className={styles.delete} onClick={() => onRemove(groupKey, index)}>
+      <button type="button" className={row.delete} onClick={() => onRemove(groupKey, index)}>
         삭제
       </button>
     </div>

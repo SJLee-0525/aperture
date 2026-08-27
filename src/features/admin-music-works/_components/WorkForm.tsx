@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
 
 import { useWorkEditor } from "@/features/admin-music-works/_hooks/use-work-editor";
 
@@ -45,14 +46,14 @@ const WorkForm = ({ workId, initial }: Props) => {
   } = useWorkEditor(workId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "연주 수정" : "새 연주"}</h1>
+    <form className={base.form} onSubmit={submit} noValidate>
+      <header className={base.head}>
+        <h1 className={base.title}>{isEdit ? "연주 수정" : "새 연주"}</h1>
       </header>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
+        <div className={base.grid2}>
           <AdminField label="제목 (한국어)" required>
             <AdminInput
               value={form.title.ko}
@@ -69,9 +70,9 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>부제 (작곡가 · 작품번호)</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>부제 (작곡가 · 작품번호)</h2>
+        <div className={base.grid2}>
           <AdminField label="부제 (한국어)">
             <AdminInput
               value={form.subtitle.ko}
@@ -87,9 +88,9 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>일시</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>일시</h2>
+        <div className={base.grid2}>
           <AdminField label="공연 날짜">
             <AdminInput
               type="date"
@@ -109,9 +110,9 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>장소</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>장소</h2>
+        <div className={base.grid2}>
           <AdminField label="장소 (한국어)">
             <AdminInput
               value={form.venue.ko}
@@ -127,9 +128,9 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>분류 (리사이틀 · 협연 · 갈라)</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>분류 (리사이틀 · 협연 · 갈라)</h2>
+        <div className={base.grid2}>
           <AdminField label="분류 (한국어)">
             <AdminInput
               value={form.category.ko}
@@ -145,9 +146,9 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>설명</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>설명</h2>
+        <div className={base.grid2}>
           <AdminField label="설명 (한국어)">
             <AdminInput
               multiline
@@ -167,9 +168,9 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
+      <section className={base.section}>
         <div className={styles.arrayHead}>
-          <h2 className={styles.legend}>프로그램 (곡명 · 언어 무관)</h2>
+          <h2 className={base.legend}>프로그램 (곡명 · 언어 무관)</h2>
           <AdminButton variant="secondary" size="xs" onClick={addProgram}>
             + 곡 추가
           </AdminButton>
@@ -199,8 +200,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         )}
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>포스터</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>포스터</h2>
         <PosterUploadField
           workId={workId}
           poster={form.poster.url ? form.poster : null}
@@ -209,8 +210,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>예매</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>예매</h2>
         <AdminField label="예매 링크">
           <AdminInput
             value={form.ticketUrl}
@@ -220,8 +221,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         </AdminField>
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -232,12 +233,12 @@ const WorkForm = ({ workId, initial }: Props) => {
       </section>
 
       {error ? (
-        <p className={styles.error} role="alert">
+        <p className={base.error} role="alert">
           {error}
         </p>
       ) : null}
 
-      <div className={styles.actions}>
+      <div className={base.actions}>
         <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
           {saving ? "저장 중…" : "저장"}
         </AdminButton>

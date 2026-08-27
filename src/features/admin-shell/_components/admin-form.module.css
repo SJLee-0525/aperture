@@ -1,3 +1,6 @@
+/* 엔티티 폼의 공통 골격. 여섯 폼이 폭·구획·ko/en 2열·체크박스·액션 줄을 공유한다.
+   블로그 편집기는 전폭 2단 + sticky 액션 바라 이 골격을 쓰지 않는다
+   (docs/admin-ui-conventions.md 의 의도적 예외). */
 .form {
   display: flex;
   flex-direction: column;

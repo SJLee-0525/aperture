@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminInput } from "@/components/AdminInput";
 import { ArticleRow } from "@/features/admin-dev-articles/_components/ArticleRow";
+import base from "@/features/admin-shell/_components/admin-list.module.css";
 
 import { useDevArticlesAdmin } from "@/features/admin-dev-articles/_hooks/use-dev-articles-admin";
 
@@ -44,13 +45,13 @@ const AdminDevArticlesPage = () => {
   } = useDevArticlesAdmin();
 
   return (
-    <div className={styles.page}>
-      <header className={styles.head}>
-        <div className={styles.headText}>
-          <h1 className={styles.title}>블로그</h1>
-          <p className={styles.hint}>초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다.</p>
+    <div className={base.page}>
+      <header className={base.head}>
+        <div className={base.headText}>
+          <h1 className={base.title}>블로그</h1>
+          <p className={base.hint}>초안은 먼저 표시하고, 공개 글은 최근 발행순으로 정렬합니다.</p>
         </div>
-        <AdminButton variant="primary" size="sm" href={NEW_ARTICLE_HREF} className={styles.newBtn}>
+        <AdminButton variant="primary" size="sm" href={NEW_ARTICLE_HREF} className={base.newBtn}>
           + 새 글
         </AdminButton>
       </header>
@@ -83,28 +84,28 @@ const AdminDevArticlesPage = () => {
         </div>
       ) : null}
 
-      {status === "loading" ? <p className={styles.state}>불러오는 중…</p> : null}
+      {status === "loading" ? <p className={base.state}>불러오는 중…</p> : null}
 
       {status === "error" ? (
-        <p className={styles.stateError} role="alert">
+        <p className={base.stateError} role="alert">
           {error ?? "글을 불러오지 못했습니다."}
         </p>
       ) : null}
 
       {status === "ready" && error ? (
-        <p className={styles.stateError} role="alert">
+        <p className={base.stateError} role="alert">
           {error}
         </p>
       ) : null}
 
       {status === "ready" && total === 0 ? (
-        <div className={styles.empty}>
+        <div className={base.empty}>
           <p>아직 쓴 글이 없습니다.</p>
           <AdminButton
             variant="primary"
             size="sm"
             href={NEW_ARTICLE_HREF}
-            className={styles.newBtn}
+            className={base.newBtn}
           >
             + 첫 글 쓰기
           </AdminButton>
@@ -112,11 +113,11 @@ const AdminDevArticlesPage = () => {
       ) : null}
 
       {status === "ready" && total > 0 && articles.length === 0 ? (
-        <p className={styles.state}>조건에 맞는 글이 없습니다.</p>
+        <p className={base.state}>조건에 맞는 글이 없습니다.</p>
       ) : null}
 
       {articles.length > 0 ? (
-        <ul className={styles.list}>
+        <ul className={base.list}>
           {articles.map((article) => (
             <ArticleRow
               key={article.id}

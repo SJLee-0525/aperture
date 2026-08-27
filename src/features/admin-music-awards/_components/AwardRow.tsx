@@ -4,6 +4,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+
 import { adminMusicAwardRoute } from "@/constants/routes";
 
 import type { MusicAward } from "@/types/music";
@@ -43,10 +45,10 @@ const AwardRow = ({ award, onTogglePublished, onDelete }: Props) => {
   };
 
   return (
-    <li ref={setNodeRef} style={style} className={styles.row}>
+    <li ref={setNodeRef} style={style} className={row.row}>
       <button
         type="button"
-        className={styles.handle}
+        className={row.handle}
         aria-label="순서 이동"
         {...attributes}
         {...listeners}
@@ -62,17 +64,17 @@ const AwardRow = ({ award, onTogglePublished, onDelete }: Props) => {
 
       <button
         type="button"
-        className={`${styles.badge} ${award.published ? styles.badgeOn : ""}`}
+        className={`${row.badge} ${award.published ? row.badgeOn : ""}`}
         onClick={() => onTogglePublished(award.id, !award.published)}
       >
         {award.published ? "공개" : "비공개"}
       </button>
 
-      <span className={styles.actions}>
-        <Link href={adminMusicAwardRoute(award.id)} className={styles.edit}>
+      <span className={row.actions}>
+        <Link href={adminMusicAwardRoute(award.id)} className={row.edit}>
           수정
         </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
+        <button type="button" className={row.delete} onClick={onDeleteClick}>
           삭제
         </button>
       </span>

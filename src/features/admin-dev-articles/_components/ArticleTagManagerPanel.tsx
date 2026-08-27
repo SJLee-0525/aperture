@@ -61,7 +61,7 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
         {tag.id}
       </code>
       <label className={styles.rowField}>
-        <span className={styles.srLabel}>한국어 라벨</span>
+        <span className="sr-only">한국어 라벨</span>
         <AdminInput
           className={styles.input}
           size="sm"
@@ -72,7 +72,7 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
         />
       </label>
       <label className={styles.rowField}>
-        <span className={styles.srLabel}>영어 라벨</span>
+        <span className="sr-only">영어 라벨</span>
         <AdminInput
           className={styles.input}
           size="sm"

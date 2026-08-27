@@ -46,8 +46,9 @@ const config = [
         {
           // 여러 feature가 소비하는 횡단 기능. 일반 feature와 달리 다른 feature를 참조할 수 없다.
           // dev-blog: 공개 상세와 관리자 편집기가 같은 Markdown 계약·본문 렌더러를 쓴다.
+          // admin-shell: 관리자 셸과 목록·수정 라우트의 공용 골격을 열네 개 admin feature 가 쓴다.
           type: "platform",
-          pattern: "src/features/(lang|theme|image-upload|photo-detail|dev-blog)",
+          pattern: "src/features/(lang|theme|image-upload|photo-detail|dev-blog|admin-shell)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {

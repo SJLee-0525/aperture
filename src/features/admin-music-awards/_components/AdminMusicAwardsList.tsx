@@ -12,12 +12,12 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
 import { AdminButton } from "@/components/AdminButton";
 import { AwardRow } from "@/features/admin-music-awards/_components/AwardRow";
+import styles from "@/features/admin-shell/_components/admin-list.module.css";
 
 import { useMusicAwardsAdmin } from "@/features/admin-music-awards/_hooks/use-music-awards-admin";
 
 import { ROUTES } from "@/constants/routes";
 
-import styles from "./AdminMusicAwardsList.module.css";
 
 /**
  * 관리자 수상 목록 — 드래그 정렬·공개 토글·수정/삭제. 조립만, 로직은 useMusicAwardsAdmin.

@@ -1,0 +1,123 @@
+/* 관리자 목록 행의 공통 부품. 엔티티 행 일곱과 설정 편집기 행 다섯이 나눠 쓴다.
+   핸들과 공개 배지는 선택 사항이다. 태그 사전 행에는 배지가 없고, 글 행에는 핸들이 없다. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  list-style: none;
+}
+
+.handle {
+  flex: none;
+  width: 28px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-4);
+  font-size: var(--t-h3);
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+  transition: color var(--dur) var(--ease);
+}
+.handle:hover {
+  color: var(--text-2);
+}
+.handle:active {
+  cursor: grabbing;
+}
+
+/* 저장 중에는 disabled 로 잠근다. 공개 토글과 글 고정 토글이 같은 표현을 쓴다. */
+.badge {
+  flex: none;
+  height: 28px;
+  padding: 0 var(--s-3);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.badge:hover:not(:disabled) {
+  border-color: var(--line-strong);
+}
+.badge:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.badgeOn {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+/* 배열 항목의 위·아래 이동 버튼. 설정 편집기 행 다섯이 쓴다. */
+.move {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-body);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.move:hover:not(:disabled) {
+  border-color: var(--text-3);
+  color: var(--text);
+}
+.move:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.edit {
+  font-size: var(--t-small);
+  color: var(--text-2);
+  transition: color var(--dur) var(--ease);
+}
+.edit:hover {
+  color: var(--text);
+}
+
+.delete {
+  flex: none;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.delete:hover {
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .row {
+    gap: var(--s-3);
+    padding: var(--s-3);
+  }
+}
