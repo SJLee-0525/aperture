@@ -13,7 +13,7 @@ import { checkUploadSize } from "@/features/image-upload/_lib/upload-progress";
 
 import { getAdminImageStore } from "@/lib/admin/image-store";
 
-import type { UploadStage } from "@/features/image-upload/_lib/upload-progress";
+import type { BatchUploadStage } from "@/features/image-upload/_lib/upload-progress";
 import type { ImageMeta } from "@/types/image";
 
 const DEV_UPLOAD_CONCURRENCY = 3;
@@ -122,7 +122,8 @@ const useDevImageUpload = (projectId: string) => {
     pending: pendingCount > 0,
     // 배치는 압축과 업로드가 파일마다 겹쳐 흘러 단계를 하나로 말할 수 없다.
     // 진행은 completed/total 이 전한다.
-    stage: pendingCount > 0 ? ("uploading" as UploadStage) : ("idle" as UploadStage),
+    // 여러 장이 겹쳐 돌아 읽기·압축을 단계로 낼 수 없다. 진행은 completed/total 이 알린다.
+    stage: (pendingCount > 0 ? "uploading" : "idle") as BatchUploadStage,
     completed,
     total,
     error: errors.length > 0 ? `${errors.length}개 파일 처리 실패: ${errors[0]}` : null,

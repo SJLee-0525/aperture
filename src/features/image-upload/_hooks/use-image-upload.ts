@@ -94,7 +94,7 @@ const useImageUpload = (photoId: string) => {
     [photoId],
   );
 
-  return { process, pending, stage, completed: 0, total: 0, error };
+  return { process, pending, stage, error };
 };
 
 export { useImageUpload };

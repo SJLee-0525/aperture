@@ -83,4 +83,4 @@ const preparePhotoInput = (form: PhotoInput): PhotoInput => ({
   lens: form.lens.trim(),
 });
 
-export { applyUploadResult, emptyPhotoInput, parseCoords, photoToInput, preparePhotoInput };
+export { applyUploadResult, parseCoords, photoToInput, preparePhotoInput };

@@ -76,4 +76,4 @@ const AdminSortableListPage = <T extends Row>({
   );
 };
 
-export { AdminSortableListPage, SORT_HINT };
+export { AdminSortableListPage };

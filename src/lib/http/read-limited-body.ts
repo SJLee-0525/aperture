@@ -92,4 +92,4 @@ const declaredBodyTooLarge = (headers: Headers, maxBytes: number): boolean => {
   return Number.isFinite(declared) && declared > maxBytes;
 };
 
-export { declaredBodyTooLarge, readLimitedBody, readLimitedBytes, readLimitedStream };
+export { declaredBodyTooLarge, readLimitedBody, readLimitedBytes };

@@ -7,6 +7,14 @@
  */
 type UploadStage = "idle" | "reading" | "compressing" | "uploading";
 
+/**
+ * 여러 장을 한 번에 올리는 화면이 낼 수 있는 단계.
+ *
+ * 파일마다 읽기·압축·업로드가 겹쳐 돌아 어느 하나를 현재 단계로 고를 수 없다.
+ * 진행은 단계가 아니라 완료 수로 알린다.
+ */
+type BatchUploadStage = Extract<UploadStage, "idle" | "uploading">;
+
 const UPLOAD_STAGE_LABEL: Record<UploadStage, string> = {
   idle: "",
   reading: "사진 정보 읽는 중…",
@@ -20,6 +28,7 @@ const UPLOAD_STAGE_LABEL: Record<UploadStage, string> = {
  * `use-image-upload` 주석이 적은 대로 4천만 화소 사진에서 모바일 Safari 가 탭을 종료할 수
  * 있다. 압축을 시작하기 전에 걸러 그 실패를 오류 문구로 바꾼다.
  */
+/** 소비처는 `checkUploadSize` 를 거친다. 이 값을 직접 읽는 곳은 없다. */
 const MAX_UPLOAD_BYTES = 40 * 1024 * 1024;
 
 /**
@@ -34,5 +43,5 @@ const checkUploadSize = (file: File): string | null => {
   return `${mb}MB 파일은 브라우저에서 압축할 수 없습니다. ${limit}MB 이하로 줄여 주세요.`;
 };
 
-export { checkUploadSize, MAX_UPLOAD_BYTES, UPLOAD_STAGE_LABEL };
-export type { UploadStage };
+export { checkUploadSize, UPLOAD_STAGE_LABEL };
+export type { BatchUploadStage, UploadStage };

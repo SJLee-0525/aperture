@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   checkUploadSize,
-  MAX_UPLOAD_BYTES,
   UPLOAD_STAGE_LABEL,
 } from "@/features/image-upload/_lib/upload-progress";
 
@@ -11,11 +10,11 @@ const fileOf = (size: number): File =>
 
 describe("checkUploadSize", () => {
   it("상한 이하는 통과한다", () => {
-    expect(checkUploadSize(fileOf(MAX_UPLOAD_BYTES))).toBeNull();
+    expect(checkUploadSize(fileOf(40 * 1024 * 1024))).toBeNull();
   });
 
   it("상한을 넘으면 실제 크기와 상한을 함께 알린다", () => {
-    const message = checkUploadSize(fileOf(MAX_UPLOAD_BYTES + 1024 * 1024));
+    const message = checkUploadSize(fileOf(40 * 1024 * 1024 + 1024 * 1024));
 
     expect(message).toContain("41MB");
     expect(message).toContain("40MB");

@@ -73,7 +73,7 @@ const usePosterUpload = (workId: string) => {
     [workId],
   );
 
-  return { process, pending, stage, completed: 0, total: 0, error };
+  return { process, pending, stage, error };
 };
 
 export { usePosterUpload };
