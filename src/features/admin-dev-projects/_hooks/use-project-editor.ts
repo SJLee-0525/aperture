@@ -8,6 +8,7 @@ import {
   prepareProjectInput,
   projectToInput,
 } from "@/features/admin-dev-projects/_lib/project-form-data";
+import { validateProjectInput } from "@/features/admin-dev-projects/_lib/validate-project-input";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
 import { ROUTES } from "@/constants/routes";
@@ -118,8 +119,9 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (!form.title.ko.trim()) {
-      setError("제목(한국어)을 입력하세요.");
+    const validationError = validateProjectInput(form);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 

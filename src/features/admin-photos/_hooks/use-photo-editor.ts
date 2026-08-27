@@ -7,8 +7,9 @@ import {
   applyUploadResult,
   createPhotoInput,
   parseCoords,
-  validatePhotoInput,
-} from "@/features/admin-photos/_lib/photo-draft";
+  preparePhotoInput,
+} from "@/features/admin-photos/_lib/photo-form-data";
+import { validatePhotoInput } from "@/features/admin-photos/_lib/validate-photo-input";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
 import { ROUTES } from "@/constants/routes";
@@ -91,7 +92,7 @@ const usePhotoEditor = (photoId: string, initial?: Photo) => {
       return;
     }
 
-    const input = { ...form, coords };
+    const input = preparePhotoInput({ ...form, coords });
     setSaving(true);
     try {
       const photoRepository = getPhotoRepository();

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 
+import { validateWorkInput } from "@/features/admin-music-works/_lib/validate-work-input";
 import {
   emptyWorkInput,
   prepareWorkInput,
@@ -57,8 +58,9 @@ const useWorkEditor = (workId: string, initial?: MusicWork) => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (!form.title.ko.trim()) {
-      setError("제목(한국어)을 입력하세요.");
+    const validationError = validateWorkInput(form);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 

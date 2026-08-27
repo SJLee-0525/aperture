@@ -1,0 +1,58 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
+
+import {
+  awardToInput,
+  emptyAwardInput,
+  prepareAwardInput,
+} from "@/features/admin-music-awards/_lib/award-form-data";
+import { validateAwardInput } from "@/features/admin-music-awards/_lib/validate-award-input";
+
+import { ROUTES } from "@/constants/routes";
+import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
+
+import type { AwardFormValue } from "@/features/admin-music-awards/_lib/award-form-data";
+import type { MusicAward } from "@/types/music";
+
+const useAwardEditor = (awardId: string, initial?: MusicAward) => {
+  const router = useRouter();
+  const isEdit = initial != null;
+  const [form, setForm] = useState<AwardFormValue>(() =>
+    initial ? awardToInput(initial) : emptyAwardInput(),
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const patch = (next: Partial<AwardFormValue>) =>
+    setForm((previous) => ({ ...previous, ...next }));
+
+  const cancel = () => router.replace(ROUTES.ADMIN_MUSIC_AWARDS);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    const validationError = validateAwardInput(form);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const input = prepareAwardInput(form);
+      const awardRepository = getMusicAwardRepository();
+      if (isEdit) await awardRepository.update(awardId, input);
+      else await awardRepository.create(awardId, input);
+      router.replace(ROUTES.ADMIN_MUSIC_AWARDS);
+    } catch (caught) {
+      setError((caught as Error).message);
+      setSaving(false);
+    }
+  };
+
+  return { form, isEdit, error, saving, patch, cancel, submit };
+};
+
+export { useAwardEditor };

@@ -4,8 +4,8 @@ import {
   applyUploadResult,
   createPhotoInput,
   parseCoords,
-  validatePhotoInput,
-} from "@/features/admin-photos/_lib/photo-draft";
+  preparePhotoInput,
+} from "@/features/admin-photos/_lib/photo-form-data";
 
 import { MOCK_PHOTOS } from "@/mocks/photos";
 
@@ -146,24 +146,22 @@ describe("parseCoords", () => {
   });
 });
 
-describe("validatePhotoInput", () => {
-  it("한국어 제목을 먼저 요구한다", () => {
-    expect(validatePhotoInput(createPhotoInput())).toBe("제목(한국어)을 입력하세요.");
+describe("preparePhotoInput", () => {
+  it("카메라와 렌즈의 앞뒤 공백을 턴다", () => {
+    const input = { ...createPhotoInput(), camera: "  Leica M11  ", lens: " 35mm " };
+
+    const prepared = preparePhotoInput(input);
+
+    expect(prepared.camera).toBe("Leica M11");
+    expect(prepared.lens).toBe("35mm");
   });
 
-  it("제목이 있으면 업로드된 이미지를 요구한다", () => {
-    const input = { ...createPhotoInput(), title: { ko: "사진", en: "" } };
+  it("원본 입력을 변경하지 않는다", () => {
+    const input = { ...createPhotoInput(), camera: " X " };
 
-    expect(validatePhotoInput(input)).toBe("이미지를 먼저 업로드하세요.");
-  });
+    const prepared = preparePhotoInput(input);
 
-  it("한국어 제목과 이미지가 있으면 저장할 수 있다", () => {
-    const input = {
-      ...createPhotoInput(),
-      title: { ko: "사진", en: "" },
-      image: { url: "/photo.webp", path: "photos/photo.webp", w: 100, h: 100 },
-    };
-
-    expect(validatePhotoInput(input)).toBeNull();
+    expect(input.camera).toBe(" X ");
+    expect(prepared).not.toBe(input);
   });
 });

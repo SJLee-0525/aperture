@@ -7,9 +7,9 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import {
   albumToInput,
   emptyAlbumInput,
-  normalizeAlbumInput,
-  validateAlbumInput,
+  prepareAlbumInput,
 } from "@/features/admin-albums/_lib/album-form-data";
+import { validateAlbumInput } from "@/features/admin-albums/_lib/validate-album-input";
 
 import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
@@ -98,7 +98,7 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
     event.preventDefault();
     setError(null);
 
-    const normalized = normalizeAlbumInput({ ...form, photoIds: selectedPhotoIds });
+    const normalized = prepareAlbumInput({ ...form, photoIds: selectedPhotoIds });
     const input = {
       ...normalized,
       cover: photos.find((photo) => photo.id === normalized.coverPhotoId)?.image ?? null,

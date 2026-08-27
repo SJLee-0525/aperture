@@ -77,10 +77,12 @@ const parseCoords = (lat: string, lng: string): Coords | null => {
   return { lat: parsedLat, lng: parsedLng };
 };
 
-const validatePhotoInput = (input: PhotoInput): string | null => {
-  if (!input.title.ko.trim()) return "제목(한국어)을 입력하세요.";
-  if (!input.image.url) return "이미지를 먼저 업로드하세요.";
-  return null;
-};
 
-export { applyUploadResult, createPhotoInput, parseCoords, validatePhotoInput };
+/** 카메라·렌즈는 관리자가 직접 적거나 EXIF 에서 오는 자유 입력이라 저장 전에 공백을 턴다. */
+const preparePhotoInput = (form: PhotoInput): PhotoInput => ({
+  ...form,
+  camera: form.camera.trim(),
+  lens: form.lens.trim(),
+});
+
+export { applyUploadResult, createPhotoInput, parseCoords, preparePhotoInput };
