@@ -95,6 +95,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
           image={form.image.url ? form.image : null}
           onUploaded={onUploaded}
           onPendingChange={onUploadPendingChange}
+          field="image"
+          error={issueFor(issues, "image")}
         />
       </section>
 

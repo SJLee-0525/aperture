@@ -32,6 +32,10 @@ type Props = {
   onToggle: (id: string) => void;
   onReorder: (activeId: string, overId: string) => void;
   onSetCover: (id: string) => void;
+  /** 검증 결과의 field 이름. 선택 스트립이 data-field 로 받아 첫 오류 포커스 대상이 된다. */
+  field?: string;
+  /** 사진을 한 장도 고르지 않아 저장이 막혔을 때의 문구. */
+  validationError?: string;
 };
 
 const PAGE_SIZE = 60;
@@ -46,6 +50,8 @@ const PAGE_SIZE = 60;
  * @param {AdminPhotoListItem[]} props.photos
  * @param {'loading' | 'ready' | 'error'} props.status
  * @param {string | null} props.error
+ * @param {string | undefined} props.field - 검증 결과의 field 이름.
+ * @param {string | undefined} props.validationError - 선택이 비어 저장이 막혔을 때의 문구.
  * @param {string[]} props.photoIds
  * @param {string} props.coverPhotoId
  * @param {(id: string) => void} props.onToggle
@@ -57,6 +63,8 @@ const AlbumPhotoPicker = ({
   photos,
   status,
   error,
+  field,
+  validationError,
   photoIds,
   coverPhotoId,
   onToggle,
@@ -113,6 +121,11 @@ const AlbumPhotoPicker = ({
         <p className={styles.blockLabel}>
           선택된 사진 ({selectedPhotos.length}장) — 드래그로 순서, “커버로”로 대표 지정
         </p>
+        {validationError ? (
+          <p className={styles.stateError} role="alert">
+            {validationError}
+          </p>
+        ) : null}
         {selectedPhotos.length > 0 ? (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext
@@ -133,7 +146,10 @@ const AlbumPhotoPicker = ({
             </SortableContext>
           </DndContext>
         ) : (
-          <p className={styles.emptySel}>아래에서 사진을 눌러 앨범에 추가하세요.</p>
+          // 선택이 비었을 때가 검증이 걸리는 자리다. 포커스가 여기로 와야 무엇을 해야 할지 보인다.
+          <p className={styles.emptySel} data-field={field} tabIndex={-1}>
+            아래에서 사진을 눌러 앨범에 추가하세요.
+          </p>
         )}
       </div>
 

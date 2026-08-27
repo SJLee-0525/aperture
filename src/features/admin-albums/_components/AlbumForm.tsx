@@ -98,6 +98,8 @@ const AlbumForm = ({ albumId, initial }: Props) => {
           onToggle={togglePhoto}
           onReorder={reorderPhotos}
           onSetCover={setCover}
+          field="photoIds"
+          validationError={issueFor(issues, "photoIds")}
         />
       </section>
 

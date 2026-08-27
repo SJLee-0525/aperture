@@ -19,6 +19,10 @@ type Props = {
   /** 업로드 파이프라인 성공 시 폼 자동 채움에 필요한 산출물 전달. */
   onUploaded: (result: UploadResult) => void;
   onPendingChange: (pending: boolean) => void;
+  /** 검증 결과의 field 이름. 선택 버튼이 data-field 로 받아 첫 오류 포커스 대상이 된다. */
+  field?: string;
+  /** 이미지가 없어 저장이 막혔을 때의 문구. */
+  error?: string;
 };
 
 /**
@@ -30,9 +34,18 @@ type Props = {
  * @param {ImageMeta | null} props.image - 현재 폼에 설정된 이미지(미리보기용) — 없으면 플레이스홀더.
  * @param {(result: UploadResult) => void} props.onUploaded - 업로드 파이프라인 성공 시 폼 자동 채움에 필요한 산출물 전달.
  * @param {(pending: boolean) => void} props.onPendingChange
+ * @param {string | undefined} props.field - 검증 결과의 field 이름.
+ * @param {string | undefined} props.error - 이미지가 없어 저장이 막혔을 때의 문구.
  * @returns {JSX.Element}
  */
-const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props) => {
+const PhotoUploadField = ({
+  photoId,
+  image,
+  onUploaded,
+  onPendingChange,
+  field,
+  error: validationError,
+}: Props) => {
   const { process, pending, stage, error } = useImageUpload(photoId);
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrl = imageThumbnailUrl(image);
@@ -72,6 +85,8 @@ const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props
           variant="secondary"
           size="sm"
           disabled={pending}
+          data-field={field}
+          aria-invalid={validationError ? true : undefined}
           onClick={() => inputRef.current?.click()}
         >
           {image?.url ? "이미지 교체" : "이미지 선택"}
@@ -86,9 +101,9 @@ const PhotoUploadField = ({ photoId, image, onUploaded, onPendingChange }: Props
         />
         <p className={styles.note}>업로드 시 EXIF 를 추출해 아래 항목을 자동으로 채웁니다.</p>
         <UploadProgress stage={stage} />
-        {error ? (
+        {error ?? validationError ? (
           <p className={styles.error} role="alert">
-            {error}
+            {error ?? validationError}
           </p>
         ) : null}
       </div>

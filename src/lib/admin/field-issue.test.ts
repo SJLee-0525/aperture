@@ -4,54 +4,48 @@ import { describe, expect, it } from "vitest";
 
 import { focusFirstIssue, issueFor } from "@/lib/admin/field-issue";
 
-const formWith = (...fields: string[]): HTMLFormElement => {
+const formWith = (fields: string[]): HTMLFormElement => {
   const form = document.createElement("form");
   for (const field of fields) {
-    const input = document.createElement("input");
-    input.dataset.field = field;
-    form.append(input);
+    const button = document.createElement("button");
+    button.dataset.field = field;
+    form.append(button);
   }
   document.body.append(form);
   return form;
 };
 
-describe("issueFor", () => {
-  it("필드 이름으로 문구를 찾는다", () => {
-    const issues = [{ field: "title.ko", message: "제목(한국어)을 입력하세요." }];
+describe("focusFirstIssue", () => {
+  it("첫 오류의 필드로 포커스를 옮긴다", () => {
+    const form = formWith(["image", "title.ko"]);
 
-    expect(issueFor(issues, "title.ko")).toBe("제목(한국어)을 입력하세요.");
+    const moved = focusFirstIssue(form, [
+      { field: "image", message: "이미지를 먼저 업로드하세요." },
+      { field: "title.ko", message: "제목(한국어)을 입력하세요." },
+    ]);
+
+    expect(moved).toBe(true);
+    expect((document.activeElement as HTMLElement).dataset.field).toBe("image");
   });
 
-  it("해당 필드가 없으면 undefined 를 돌려준다", () => {
-    expect(issueFor([], "title.ko")).toBeUndefined();
+  it("대상 컨트롤이 없으면 옮기지 못했다고 알린다", () => {
+    // 이 false 가 곧 "저장은 막혔는데 화면에 아무 표시도 없다" 는 상태다.
+    const form = formWith(["title.ko"]);
+
+    expect(focusFirstIssue(form, [{ field: "image", message: "이미지" }])).toBe(false);
+  });
+
+  it("이슈가 없으면 아무것도 하지 않는다", () => {
+    expect(focusFirstIssue(formWith(["title.ko"]), [])).toBe(false);
+    expect(focusFirstIssue(null, [{ field: "title.ko", message: "제목" }])).toBe(false);
   });
 });
 
-describe("focusFirstIssue", () => {
-  it("첫 오류 필드로 포커스를 옮긴다", () => {
-    const form = formWith("title.ko", "place");
-    const issues = [
-      { field: "place", message: "장소" },
-      { field: "title.ko", message: "제목" },
-    ];
+describe("issueFor", () => {
+  it("필드 이름으로 문구를 찾는다", () => {
+    const issues = [{ field: "photoIds", message: "사진을 고르세요." }];
 
-    expect(focusFirstIssue(form, issues)).toBe(true);
-    expect((document.activeElement as HTMLInputElement).dataset.field).toBe("place");
-  });
-
-  it("오류가 없으면 아무것도 하지 않는다", () => {
-    expect(focusFirstIssue(formWith("title.ko"), [])).toBe(false);
-  });
-
-  it("화면에 없는 필드면 포커스를 옮기지 않는다", () => {
-    const form = formWith("title.ko");
-
-    expect(focusFirstIssue(form, [{ field: "missing", message: "" }])).toBe(false);
-  });
-
-  it("점이 든 필드 이름도 선택자로 안전하게 쓴다", () => {
-    const form = formWith("exif.iso");
-
-    expect(focusFirstIssue(form, [{ field: "exif.iso", message: "" }])).toBe(true);
+    expect(issueFor(issues, "photoIds")).toBe("사진을 고르세요.");
+    expect(issueFor(issues, "title.ko")).toBeUndefined();
   });
 });
