@@ -140,28 +140,23 @@
   align-items: center;
   gap: 2px 12px;
 }
-.legalLink {
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  gap: 6px;
-  line-height: 1;
-  color: var(--text-3);
-  font: inherit;
-  transition: color 0.2s;
-}
 .legalControl {
   display: contents;
 }
+/* 링크와 버튼은 한 줄에 나란히 서므로 같은 높이여야 한다. `font` 단축이 line-height 도
+   함께 덮기 때문에 두 규칙이 declaration 을 같은 순서로 적어야 한다. 따로 적었을 때
+   버튼만 11px 로 눌려 있었다. */
+.legalLink,
 .legalControl :global(button) {
   width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 8px;
   border: 0;
   background: transparent;
   color: var(--text-3);
   font: inherit;
-  line-height: 1;
   cursor: pointer;
   transition: color 0.2s;
 }
@@ -170,7 +165,15 @@
   color: var(--text);
 }
 
-/* 모바일: 세로 스택 + 사이트맵 2컬럼, 하단 탭바에 가리지 않도록 여백(콘텐츠와 동일 기준) */
+/* 하단 탭바가 있는 폭에서는 그 높이만큼 비워 둔다. 탭바 경계를 따라간다.
+   (constants/breakpoints.ts 의 MOBILE_NAVIGATION_MAX_WIDTH) */
+@media (max-width: 899px) {
+  .footer {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* 좁은 화면: 세로 스택 + 사이트맵 2컬럼. 내비게이션이 아니라 지면 폭에 달린 결정이다. */
 @media (max-width: 767px) {
   .top {
     grid-template-columns: 1fr;
@@ -188,9 +191,6 @@
   }
   .colLink {
     padding: 4px 8px;
-  }
-  .footer {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
   .bottomInner {
     padding: 25px 8px 0 8px;
