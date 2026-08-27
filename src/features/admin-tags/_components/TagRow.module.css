@@ -41,3 +41,11 @@
     flex: 1 1 40%;
   }
 }
+
+.usage {
+  flex: none;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  white-space: nowrap;
+}

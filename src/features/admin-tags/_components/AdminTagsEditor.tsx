@@ -31,6 +31,7 @@ const AdminTagsPage = () => {
     confirmLeave,
     recovery,
     applyRecovered,
+    usage,
     tags,
     status,
     error,
@@ -90,7 +91,13 @@ const AdminTagsPage = () => {
               <SortableContext items={tags.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                 <ul className={styles.list}>
                   {tags.map((tag) => (
-                    <TagRow key={tag.id} tag={tag} onEditLabel={editLabel} onDelete={removeTag} />
+                    <TagRow
+                      key={tag.id}
+                      tag={tag}
+                      usedCount={usage[tag.id] ?? 0}
+                      onEditLabel={editLabel}
+                      onDelete={removeTag}
+                    />
                   ))}
                 </ul>
               </SortableContext>

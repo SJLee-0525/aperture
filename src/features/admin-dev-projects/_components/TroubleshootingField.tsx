@@ -73,7 +73,14 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
             <li key={index} className={styles.card}>
               <div className={styles.cardHead}>
                 <span className={styles.cardIndex}>#{index + 1}</span>
-                <button type="button" className={styles.remove} onClick={() => remove(index)}>
+                <button
+                  type="button"
+                  className={styles.remove}
+                  onClick={() => {
+                    // 카드 하나에 제목·문제·해결·결과의 ko/en 여덟 칸이 들어 있다.
+                    if (window.confirm(`트러블슈팅 #${index + 1} 을 삭제할까요?`)) remove(index);
+                  }}
+                >
                   삭제
                 </button>
               </div>

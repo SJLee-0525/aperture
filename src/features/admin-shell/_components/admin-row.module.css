@@ -122,9 +122,13 @@
     border-color var(--dur) var(--ease),
     color var(--dur) var(--ease);
 }
-.delete:hover {
+.delete:hover:not(:disabled) {
   border-color: var(--danger);
   color: var(--danger);
+}
+.delete:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 @media (max-width: 640px) {

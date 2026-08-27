@@ -4,7 +4,9 @@ import type { DevArticle } from "@/types/dev-article";
 import type { MusicWork } from "@/types/music";
 import type { Photo } from "@/types/photo";
 
-type AdminPhotoListItem = Pick<Photo, "id" | "title" | "image" | "order" | "published">;
+// tags 는 태그 사전 화면이 사용 수를 세는 데 쓴다. id 문자열 배열이라 목록 payload 에
+// 부담을 주지 않는다.
+type AdminPhotoListItem = Pick<Photo, "id" | "title" | "image" | "tags" | "order" | "published">;
 type AdminAlbumListItem = Pick<
   Album,
   "id" | "title" | "coverPhotoId" | "cover" | "photoIds" | "order" | "published"

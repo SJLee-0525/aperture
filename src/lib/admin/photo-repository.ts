@@ -32,10 +32,11 @@ const STORE_VERSION = 1;
  * @param {Photo} photo 저장된 사진 전체.
  * @returns {AdminPhotoListItem} 목록 행에 필요한 필드만.
  */
-const toListItem = ({ id, title, image, order, published }: Photo): AdminPhotoListItem => ({
+const toListItem = ({ id, title, image, tags, order, published }: Photo): AdminPhotoListItem => ({
   id,
   title,
   image,
+  tags,
   order,
   published,
 });

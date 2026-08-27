@@ -12,6 +12,8 @@ import styles from "./TagRow.module.css";
 
 type Props = {
   tag: Tag;
+  /** 이 태그를 참조하는 사진 수. 0이 아니면 삭제를 잠근다. */
+  usedCount: number;
   onEditLabel: (id: string, field: "ko" | "en", value: string) => void;
   onDelete: (id: string) => void;
 };
@@ -21,11 +23,12 @@ type Props = {
  *
  * @param {Props} props
  * @param {Tag} props.tag
+ * @param {number} props.usedCount 이 태그를 참조하는 사진 수. 0이 아니면 삭제를 잠근다.
  * @param {(id: string, field: 'ko' | 'en', value: string) => void} props.onEditLabel
  * @param {(id: string) => void} props.onDelete
  * @returns {JSX.Element}
  */
-const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
+const TagRow = ({ tag, usedCount, onEditLabel, onDelete }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: tag.id,
   });
@@ -83,7 +86,14 @@ const TagRow = ({ tag, onEditLabel, onDelete }: Props) => {
         />
       </label>
 
-      <button type="button" className={row.delete} onClick={onDeleteClick}>
+      <span className={styles.usage}>{usedCount}장 사용</span>
+      <button
+        type="button"
+        className={row.delete}
+        onClick={onDeleteClick}
+        disabled={usedCount > 0}
+        title={usedCount > 0 ? "사용 중인 태그는 삭제할 수 없습니다." : undefined}
+      >
         삭제
       </button>
     </li>

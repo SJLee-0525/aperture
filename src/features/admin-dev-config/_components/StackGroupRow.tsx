@@ -89,7 +89,16 @@ const StackGroupRow = ({
         >
           <Icon name="arrowDown" size={14} />
         </button>
-        <button type="button" className={row.delete} onClick={() => onRemove(index)}>
+        <button
+          type="button"
+          className={row.delete}
+          onClick={() => {
+            // 카테고리 하나가 아니라 그 안의 기술 칩 전체가 함께 사라진다.
+            const count = group.items.length;
+            const label = count > 0 ? `기술 ${count}개와 함께 ` : "";
+            if (window.confirm(`"${group.category}" 그룹을 ${label}삭제할까요?`)) onRemove(index);
+          }}
+        >
           그룹 삭제
         </button>
       </div>

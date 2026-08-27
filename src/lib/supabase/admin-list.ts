@@ -57,14 +57,16 @@ const listProjected = async (table: string, select: string, orderColumns: string
 /** @returns {Promise<AdminPhotoListItem[]>} 관리자 목록에 필요한 필드만 담은 사진 목록. */
 const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
   (
-    await listProjected("photos", "id,published,sort_order,title:data->title,image:data->image", [
-      "sort_order",
-      "id",
-    ])
+    await listProjected(
+      "photos",
+      "id,published,sort_order,title:data->title,image:data->image,tags:data->tags",
+      ["sort_order", "id"],
+    )
   ).map((row) => ({
     id: readString(row.id),
     title: readText(row.title),
     image: readImage(row.image),
+    tags: readStringArray(row.tags),
     order: readNumber(row.sort_order),
     published: readBoolean(row.published),
   }));

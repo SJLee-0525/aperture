@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useConfigDirty } from "@/features/admin-shell/_hooks/use-config-dirty";
 import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
 
+import { getPhotoRepository } from "@/lib/admin/photo-repository";
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
 
 import type { Tag } from "@/types/tag";
@@ -31,6 +32,28 @@ const useTagsAdmin = () => {
   const { dirty, confirmLeave, markSaved } = useConfigDirty(tags);
   const recovery = useFormRecovery("photoTags", "photoTags", tags, dirty);
   const { clear: clearRecovery } = recovery;
+  // 사전에 없는 id 가 사진에 남으면 공개 필터 칩과 사진 데이터가 어긋난다.
+  // 블로그 태그 패널과 같은 정책으로, 쓰이는 태그는 삭제를 잠근다.
+  const [usage, setUsage] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let alive = true;
+    getPhotoRepository()
+      .list()
+      .then((photos) => {
+        if (!alive) return;
+        const counts: Record<string, number> = {};
+        for (const photo of photos) {
+          for (const id of photo.tags) counts[id] = (counts[id] ?? 0) + 1;
+        }
+        setUsage(counts);
+      })
+      // 사용 수를 세지 못하면 잠그지 못할 뿐 편집은 계속한다.
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -130,6 +153,7 @@ const useTagsAdmin = () => {
     confirmLeave,
     recovery,
     applyRecovered: setTags,
+    usage,
     tags,
     status,
     error,
