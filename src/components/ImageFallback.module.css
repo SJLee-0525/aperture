@@ -1,3 +1,4 @@
+/* 기본은 `next/image` 의 fill 자리를 그대로 덮는다. 네 소비처가 그 형태다. */
 .fallback {
   position: absolute;
   inset: 0;
@@ -6,6 +7,13 @@
   padding: var(--s-4);
   background: var(--surface-2);
 }
+/* 흐름 안에 놓는 자리. `position` 을 이 모듈 안에서 뒤집어야 호출부 모듈과
+   명시도 동률로 다투지 않는다 — 그 다툼은 스타일시트 주입 순서가 승자를 정한다. */
+.flow {
+  position: static;
+  inset: auto;
+}
+
 .mark {
   font-family: var(--font-display);
   font-size: clamp(0.9rem, 3.2vw, 1.3rem);

@@ -218,7 +218,7 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
             >
               {context.brokenImages[block.src] ? (
                 // 로드에 실패하면 워드마크로 자리를 채운다. 이름은 감싸는 버튼이 갖는다.
-                <ImageFallback className={styles.brokenFigure} />
+                <ImageFallback flow className={styles.brokenFigure} />
               ) : (
                 <>
                   {/* 전역 설정이 Vercel 최적화를 끄고 Storage 파일을 그대로 보내므로 next/image

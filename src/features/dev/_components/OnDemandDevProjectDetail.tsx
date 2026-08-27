@@ -26,7 +26,7 @@ const DetailSkeleton = ({ hasMedia = true, label }: { hasMedia?: boolean; label?
   >
     {hasMedia ? (
       <div className={detailStyles.media}>
-        <Skeleton className={styles.skeletonMedia} aspectRatio={16 / 9} />
+        <Skeleton aspectRatio={16 / 9} />
       </div>
     ) : null}
 

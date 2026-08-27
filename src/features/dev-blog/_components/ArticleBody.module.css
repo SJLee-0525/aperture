@@ -115,10 +115,9 @@
   text-align: center;
 }
 
-/* 주소가 죽은 이미지 자리. 본문 이미지는 흐름 안에 놓이므로 폴백도 absolute 를 걷고
-   자리를 차지하게 만든다. 비율은 워드마크 판과 같다. */
+/* 주소가 죽은 이미지 자리. 흐름 배치는 `ImageFallback` 의 `flow` 가 맡고 여기서는
+   크기만 정한다. 비율은 워드마크 판과 같다. */
 .brokenFigure {
-  position: static;
   aspect-ratio: 1200 / 630;
   width: 100%;
 }

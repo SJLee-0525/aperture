@@ -70,7 +70,6 @@ const DevCareerView = ({ config }: { config: DevConfig }) => {
 
       {config.awards.length > 0 ? (
         <AwardList
-          className={styles.stacked}
           label={dict.devAwardsLabel}
           awards={config.awards.map((award) => ({
             id: award.id,
