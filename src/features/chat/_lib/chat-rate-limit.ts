@@ -1,5 +1,11 @@
 import { clientAddress } from "@/lib/rate-limit/client-address";
 import {
+  DAILY_KEY_TTL_MS,
+  positiveIntOr,
+  retryAfterSeconds,
+  utcDayBucket,
+} from "@/lib/rate-limit/counter";
+import {
   evalUpstashScript,
   resolveUpstashCredentials,
   type UpstashEvalResult,
@@ -63,13 +69,12 @@ const DEFAULT_OPTIONS: RateLimitOptions = {
 
 /**
  * 정상 트래픽은 허용하면서 제공자 예산에 닿기 전에 요청을 차단할 기본 일일 상한.
+ * 트리아지의 상한(`DEFAULT_TRIAGE_DAILY_LIMIT`)과 이름을 나눈다 — 두 값의 근거가 다르다.
  */
-const DEFAULT_DAILY_LIMIT = 1_000;
+const DEFAULT_CHAT_DAILY_LIMIT = 1_000;
 
-const configuredDailyLimit = (): number => {
-  const parsed = Number(process.env.CHAT_DAILY_LIMIT);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_DAILY_LIMIT;
-};
+const configuredDailyLimit = (): number =>
+  positiveIntOr(process.env.CHAT_DAILY_LIMIT, DEFAULT_CHAT_DAILY_LIMIT);
 
 /**
  * 하루 입력 문자 예산의 기본값.
@@ -83,12 +88,8 @@ const configuredDailyLimit = (): number => {
  */
 const DEFAULT_DAILY_INPUT_CHAR_LIMIT = 2_000_000;
 
-const configuredDailyInputCharLimit = (): number => {
-  const parsed = Number(process.env.CHAT_DAILY_INPUT_CHAR_LIMIT);
-  return Number.isFinite(parsed) && parsed > 0
-    ? Math.floor(parsed)
-    : DEFAULT_DAILY_INPUT_CHAR_LIMIT;
-};
+const configuredDailyInputCharLimit = (): number =>
+  positiveIntOr(process.env.CHAT_DAILY_INPUT_CHAR_LIMIT, DEFAULT_DAILY_INPUT_CHAR_LIMIT);
 
 /**
  * IP 윈도우와 전역 일일 카운터를 하나의 EVAL에서 갱신하고, 오늘까지 쓴 입력 문자 수를 함께 읽는다.
@@ -123,19 +124,8 @@ end
 return total
 `;
 
-/**
- * 모든 인스턴스가 공유하는 UTC 날짜 키.
- *
- * @param {number} now
- * @returns {string}
- */
-const dailyBucket = (now: number): string => new Date(now).toISOString().slice(0, 10);
-
 /** 입력 문자 예산 카운터 키. 요청 수 카운터와 같은 UTC 날짜 버킷을 쓴다. */
-const inputCharsKey = (now: number): string => `chat:chars:v1:${dailyBucket(now)}`;
-
-/** 자정 직후 잔재가 남지 않도록 하루 버킷 키에 거는 만료. */
-const DAILY_KEY_TTL_MS = 172_800_000;
+const inputCharsKey = (now: number): string => `chat:chars:v1:${utcDayBucket(now)}`;
 
 /**
  * Retry-After에 사용할 다음 UTC 자정까지의 초.
@@ -220,7 +210,7 @@ const createUpstashChatRateLimiter = (options: Partial<UpstashRateLimitOptions> 
         script: UPSTASH_SCRIPT,
         keys: [
           `chat:rate:v1:${identifier}`,
-          `chat:daily:v1:${dailyBucket(now)}`,
+          `chat:daily:v1:${utcDayBucket(now)}`,
           inputCharsKey(now),
         ],
         args: [config.windowMs, DAILY_KEY_TTL_MS, config.limit],
@@ -254,7 +244,7 @@ const createUpstashChatRateLimiter = (options: Partial<UpstashRateLimitOptions> 
     if (count > config.limit) {
       return {
         allowed: false,
-        retryAfterSeconds: Math.max(1, Math.ceil(Math.max(ttlMs, 0) / 1_000)),
+        retryAfterSeconds: retryAfterSeconds(ttlMs),
         scope: "client",
       };
     }

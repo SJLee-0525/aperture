@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  DEFAULT_DAILY_LIMIT,
+  DEFAULT_TRIAGE_DAILY_LIMIT,
   getTriageRateLimiter,
 } from "@/features/sentry-triage/_lib/triage-rate-limit";
 
@@ -169,7 +169,7 @@ describe("getTriageRateLimiter", () => {
     });
 
     it("잘못된 env 값은 기본값으로 되돌린다", async () => {
-      const fetcher = vi.fn(async () => counted(DEFAULT_DAILY_LIMIT));
+      const fetcher = vi.fn(async () => counted(DEFAULT_TRIAGE_DAILY_LIMIT));
       const limiter = getTriageRateLimiter(
         { ...UPSTASH, SENTRY_TRIAGE_DAILY_LIMIT: "많이" },
         {
@@ -192,7 +192,7 @@ describe("getTriageRateLimiter", () => {
     });
 
     it("limit 이 undefined 로 주입돼도 기본값이 살아 있다", async () => {
-      const fetcher = vi.fn(async () => counted(DEFAULT_DAILY_LIMIT));
+      const fetcher = vi.fn(async () => counted(DEFAULT_TRIAGE_DAILY_LIMIT));
       const limiter = getTriageRateLimiter(UPSTASH, {
         fetcher: fetcher as unknown as typeof fetch,
         now: () => NOW,
@@ -204,7 +204,7 @@ describe("getTriageRateLimiter", () => {
     });
 
     it("0 이하 값도 기본값으로 되돌린다", async () => {
-      const fetcher = vi.fn(async () => counted(DEFAULT_DAILY_LIMIT));
+      const fetcher = vi.fn(async () => counted(DEFAULT_TRIAGE_DAILY_LIMIT));
       const limiter = getTriageRateLimiter(
         { ...UPSTASH, SENTRY_TRIAGE_DAILY_LIMIT: "0" },
         {

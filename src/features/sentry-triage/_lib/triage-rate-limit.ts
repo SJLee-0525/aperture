@@ -1,7 +1,14 @@
 import {
+  DAILY_KEY_TTL_MS,
+  INCREMENT_WITH_EXPIRY_SCRIPT,
+  positiveIntOr,
+  utcDayBucket,
+} from "@/lib/rate-limit/counter";
+import {
   evalUpstashScript,
   resolveUpstashCredentials,
   type UpstashCredentials,
+  type UpstashEnvironment,
 } from "@/lib/rate-limit/upstash-counter";
 
 type TriageRateLimitResult = {
@@ -12,9 +19,6 @@ type TriageRateLimitResult = {
 
 type TriageRateLimiter = () => Promise<TriageRateLimitResult>;
 
-/** `process.env` 를 그대로 받을 수 있도록 색인 시그니처를 포함한다. */
-type TriageRateLimitEnvironment = Record<string, string | undefined>;
-
 type UpstashOptions = UpstashCredentials & {
   limit: number;
   timeoutMs: number;
@@ -23,32 +27,14 @@ type UpstashOptions = UpstashCredentials & {
 };
 
 /** Alert Rule 조건이 1차 방어선이라 이 값은 비용 사고를 막는 상한이다. */
-const DEFAULT_DAILY_LIMIT = 50;
-
-/** 자정 직후 잔재가 남지 않을 만큼만 둔다. */
-const KEY_TTL_MS = 172_800_000;
-
-/**
- * 카운터 증가와 만료 설정을 한 번에 처리한다. 두 명령으로 나누면 첫 요청이
- * 만료 설정 전에 끊겼을 때 키가 영구히 남는다.
- */
-const UPSTASH_SCRIPT = `
-local count = redis.call("INCR", KEYS[1])
-if count == 1 then
-  redis.call("PEXPIRE", KEYS[1], ARGV[1])
-end
-return count
-`;
+const DEFAULT_TRIAGE_DAILY_LIMIT = 50;
 
 const ALLOW_WITHOUT_COUNT: TriageRateLimitResult = { allowed: true, count: 0 };
 
-const dailyKey = (now: number): string =>
-  `sentry-triage:daily:v1:${new Date(now).toISOString().slice(0, 10)}`;
+const dailyKey = (now: number): string => `sentry-triage:daily:v1:${utcDayBucket(now)}`;
 
-const configuredLimit = (env: TriageRateLimitEnvironment): number => {
-  const parsed = Number(env.SENTRY_TRIAGE_DAILY_LIMIT);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_DAILY_LIMIT;
-};
+const configuredLimit = (env: UpstashEnvironment): number =>
+  positiveIntOr(env.SENTRY_TRIAGE_DAILY_LIMIT, DEFAULT_TRIAGE_DAILY_LIMIT);
 
 /**
  * 실패하면 통과시킨다.
@@ -63,9 +49,9 @@ const createUpstashTriageRateLimiter = (options: UpstashOptions): TriageRateLimi
   return async () => {
     const outcome = await evalUpstashScript({
       credentials: { url, token },
-      script: UPSTASH_SCRIPT,
+      script: INCREMENT_WITH_EXPIRY_SCRIPT,
       keys: [dailyKey(now())],
-      args: [KEY_TTL_MS],
+      args: [DAILY_KEY_TTL_MS],
       timeoutMs,
       fetcher,
     });
@@ -85,7 +71,7 @@ const createUpstashTriageRateLimiter = (options: UpstashOptions): TriageRateLimi
  * @param overrides 테스트용 주입.
  */
 const getTriageRateLimiter = (
-  env: TriageRateLimitEnvironment = process.env,
+  env: UpstashEnvironment = process.env,
   overrides: Partial<UpstashOptions> = {},
 ): TriageRateLimiter => {
   const credentials = resolveUpstashCredentials(env);
@@ -107,4 +93,4 @@ const getTriageRateLimiter = (
   });
 };
 
-export { DEFAULT_DAILY_LIMIT, getTriageRateLimiter };
+export { DEFAULT_TRIAGE_DAILY_LIMIT, getTriageRateLimiter };

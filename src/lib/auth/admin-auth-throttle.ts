@@ -2,6 +2,10 @@ import { headers } from "next/headers";
 
 import { clientAddress } from "@/lib/rate-limit/client-address";
 import {
+  INCREMENT_WITH_EXPIRY_SCRIPT,
+  retryAfterSeconds,
+} from "@/lib/rate-limit/counter";
+import {
   evalUpstashScript,
   resolveUpstashCredentials,
   type UpstashEnvironment,
@@ -36,20 +40,6 @@ const READ_SCRIPT = `
 local count = tonumber(redis.call("GET", KEYS[1])) or 0
 local ttl = redis.call("PTTL", KEYS[1])
 return { count, ttl }
-`;
-
-/**
- * 실패 하나를 더한다.
- *
- * 증가와 만료를 한 스크립트에 담는다. 두 명령으로 나누면 첫 실패가 만료 설정 전에 끊겼을 때
- * 그 IP 의 카운터가 영구히 남는다.
- */
-const RECORD_SCRIPT = `
-local count = redis.call("INCR", KEYS[1])
-if count == 1 then
-  redis.call("PEXPIRE", KEYS[1], ARGV[1])
-end
-return count
 `;
 
 type ThrottleOptions = {
@@ -95,7 +85,7 @@ const checkAdminAuthThrottle = async (
 
   return {
     blocked: true,
-    retryAfterSeconds: Math.max(1, Math.ceil(Math.max(ttlMs, 0) / 1_000)),
+    retryAfterSeconds: retryAfterSeconds(ttlMs),
   };
 };
 
@@ -110,7 +100,7 @@ const recordAdminAuthFailure = async (options: ThrottleOptions = {}): Promise<vo
 
   await evalUpstashScript({
     credentials,
-    script: RECORD_SCRIPT,
+    script: INCREMENT_WITH_EXPIRY_SCRIPT,
     keys: [failureKey(await resolveAddress(options.address))],
     args: [WINDOW_MS],
     timeoutMs: 1_000,
