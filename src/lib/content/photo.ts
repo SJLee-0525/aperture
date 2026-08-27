@@ -1,4 +1,5 @@
 import { shouldUseMockContent } from "@/lib/content/content-source";
+import { publishedInOrder } from "@/lib/content/mock-list";
 import { fetchPublishedAlbums, fetchPublishedPhotos } from "@/lib/supabase/public/photo";
 
 import type { Album } from "@/types/album";
@@ -8,13 +9,13 @@ import type { Tag } from "@/types/tag";
 const getPhotos = async (): Promise<Photo[]> => {
   if (!shouldUseMockContent()) return fetchPublishedPhotos();
   const { MOCK_PHOTOS } = await import("@/mocks/photos");
-  return MOCK_PHOTOS.filter((photo) => photo.published).sort((a, b) => a.order - b.order);
+  return publishedInOrder(MOCK_PHOTOS);
 };
 
 const getAlbums = async (): Promise<Album[]> => {
   if (!shouldUseMockContent()) return fetchPublishedAlbums();
   const { MOCK_ALBUMS } = await import("@/mocks/albums");
-  return MOCK_ALBUMS.filter((album) => album.published).sort((a, b) => a.order - b.order);
+  return publishedInOrder(MOCK_ALBUMS);
 };
 
 const getAlbum = async (id: string): Promise<Album | null> =>

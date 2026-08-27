@@ -32,6 +32,7 @@ export default defineConfig({
         "src/lib/format/*.ts",
         "src/lib/exif/*.ts",
         "src/lib/geo/*.ts",
+        "src/lib/content/mock-list.ts",
         "src/lib/content/normalize-troubleshooting.ts",
         "src/hooks/use-admin-doc-load.ts",
         "src/hooks/use-query-modal.ts",

@@ -221,9 +221,14 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
     setPublished: (id, published) =>
       enqueue(() => patch(id, (entity) => ({ ...entity, published }))),
 
+    // live 는 삭제된 행 수가 0 이면 실패로 처리한다. 여기서 조용히 성공하면 없는 항목을
+    // 지운 화면이 mock 에서만 정상으로 보인다.
     remove: (id) =>
       enqueue(async () => {
         const entities = await load();
+        if (!entities.some((entity) => entity.id === id)) {
+          throw new Error(`삭제할 ${config.label}을(를) 찾지 못했습니다.`);
+        }
         save(entities.filter((entity) => entity.id !== id));
       }),
   };
