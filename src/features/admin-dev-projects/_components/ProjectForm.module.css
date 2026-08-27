@@ -90,21 +90,23 @@
   color: var(--danger);
 }
 
+/* 입력(AdminInput md, 44px)과 가운데를 맞춘다. 행이 flex-start 라 padding 으로 밀면
+   모바일에서 격자가 2줄이 될 때 어긋난다. */
 .remove {
   flex: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--s-2);
   background: transparent;
   border: none;
   color: var(--text-3);
   font-size: var(--t-small);
   cursor: pointer;
-  padding-top: var(--s-3);
   transition: color var(--dur) var(--ease);
 }
 .remove:hover {
   color: var(--danger);
-}
-.linkRow .remove {
-  padding-top: 0;
 }
 
 .note {

@@ -60,7 +60,7 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
            이름까지 뒤집으면 보조기술이 "고정 해제, 눌림" 처럼 반대되는 두 신호를 함께 읽는다. */
         <button
           type="button"
-          className={`${row.badge} ${styles.pinBadge} ${article.pinned ? row.badgeOn : ""}`}
+          className={`${row.badge} ${row.badgeIcon} ${article.pinned ? row.badgeOn : ""}`}
           aria-pressed={article.pinned}
           aria-label={`${title} 고정`}
           disabled={pinBusy}

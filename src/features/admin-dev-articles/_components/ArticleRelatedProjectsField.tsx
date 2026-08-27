@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import { moveItem } from "@/lib/collection/move-item";
 
@@ -78,7 +79,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
               {missing(id) ? <span className={styles.orderedWarn}>{missing(id)}</span> : null}
               <button
                 type="button"
-                className={styles.move}
+                className={row.move}
                 aria-label={`${label(id)} 위로`}
                 disabled={index === 0}
                 onClick={() => move(index, -1)}
@@ -87,7 +88,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
               </button>
               <button
                 type="button"
-                className={styles.move}
+                className={row.move}
                 aria-label={`${label(id)} 아래로`}
                 disabled={index === selected.length - 1}
                 onClick={() => move(index, 1)}
@@ -96,7 +97,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
               </button>
               <button
                 type="button"
-                className={styles.remove}
+                className={row.delete}
                 onClick={() => onChange(selected.filter((item) => item !== id))}
               >
                 제외

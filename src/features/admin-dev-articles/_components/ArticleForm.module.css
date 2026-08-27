@@ -177,24 +177,6 @@
   color: var(--danger);
   font-size: var(--t-micro);
 }
-.move {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  color: var(--text-3);
-  font-size: var(--t-micro);
-  cursor: pointer;
-}
-.move:disabled {
-  color: var(--text-4);
-  cursor: not-allowed;
-}
-
 .cover {
   display: flex;
   align-items: stretch;
