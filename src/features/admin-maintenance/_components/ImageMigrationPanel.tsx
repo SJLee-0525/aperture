@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+
+
 import {
   migrateImageThumbnails,
   type MigrationProgress,
@@ -57,12 +60,17 @@ const ImageMigrationPanel = () => {
         스냅샷을 보강합니다. 이미 완료된 파생본은 건너뛰므로 다시 실행해도 안전합니다.
       </p>
       <div className={styles.actions}>
-        <button type="button" disabled={pending || mock} onClick={() => run(true)}>
+        <AdminButton variant="primary" size="sm" disabled={pending || mock} onClick={() => run(true)}>
           변경 대상 확인
-        </button>
-        <button type="button" disabled={pending || mock} onClick={() => run(false)}>
+        </AdminButton>
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          disabled={pending || mock}
+          onClick={() => run(false)}
+        >
           마이그레이션 실행
-        </button>
+        </AdminButton>
       </div>
       {mock ? (
         <p className={styles.status}>

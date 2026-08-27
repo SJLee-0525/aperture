@@ -56,25 +56,6 @@
   gap: var(--s-3);
 }
 
-.actions button {
-  min-height: 42px;
-  padding: 0 var(--s-4);
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  cursor: pointer;
-}
-
-.actions button:last-child {
-  color: var(--text-inverse);
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.actions button:disabled {
-  cursor: wait;
-  opacity: 0.55;
-}
 
 .error {
   color: var(--danger);

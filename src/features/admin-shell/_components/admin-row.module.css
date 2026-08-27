@@ -94,6 +94,10 @@
 }
 
 .edit {
+  min-height: 28px;
+  padding: 0 var(--s-2);
+  display: inline-flex;
+  align-items: center;
   font-size: var(--t-small);
   color: var(--text-2);
   transition: color var(--dur) var(--ease);
@@ -102,16 +106,24 @@
   color: var(--text);
 }
 
+/* 파괴적 동작이라 정지 상태에서도 수정과 구분돼야 한다. hover 에서만 색이 갈리면
+   확인창을 반복해 보다가 습관적으로 누르게 된다. 색 대신 테두리로 나눈다.
+   --danger 를 정지 상태의 글자색으로 쓰면 라이트에서 대비가 4.5:1 에 못 미친다. */
 .delete {
   flex: none;
+  min-height: 28px;
+  padding: 0 var(--s-3);
   background: transparent;
-  border: none;
+  border: 1px solid var(--line-strong);
   color: var(--text-3);
   font-size: var(--t-small);
   cursor: pointer;
-  transition: color var(--dur) var(--ease);
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 .delete:hover {
+  border-color: var(--danger);
   color: var(--danger);
 }
 

@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+
+
 import {
   generatePortfolioEmbeddings,
   type PortfolioEmbeddingResult,
@@ -61,9 +64,9 @@ const EmbeddingMigrationPanel = () => {
         임베딩으로 저장합니다. 공개 콘텐츠나 임베딩 모델을 변경한 뒤 다시 실행하세요.
       </p>
       <div className={styles.actions}>
-        <button type="button" disabled={pending || mock} onClick={run}>
+        <AdminButton variant="primary" size="sm" disabled={pending || mock} onClick={run}>
           {pending ? "임베딩 생성 중…" : "전체 임베딩 생성·갱신"}
-        </button>
+        </AdminButton>
       </div>
       {mock ? (
         <p className={styles.status}>

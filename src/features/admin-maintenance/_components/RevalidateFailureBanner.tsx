@@ -28,7 +28,7 @@ const RevalidateFailureBanner = () => {
         {error ? <span className={styles.error}> 재시도 실패: {error}</span> : null}
       </p>
       <div className={styles.actions}>
-        <button type="button" className={styles.sync} onClick={retry} disabled={retrying}>
+        <button type="button" className={`${styles.action} ${styles.sync}`} onClick={retry} disabled={retrying}>
           {retrying ? "재검증 중…" : "지금 다시 시도"}
         </button>
       </div>

@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+
+
 import {
   deleteOrphanArticleImages,
   OrphanConfirmationRequiredError,
@@ -143,16 +146,17 @@ const ArticleOrphanImagePanel = () => {
       </p>
 
       <div className={base.actions}>
-        <button type="button" disabled={pending || mock} onClick={rescan}>
+        <AdminButton variant="primary" size="sm" disabled={pending || mock} onClick={rescan}>
           삭제 대상 다시 확인
-        </button>
-        <button
-          type="button"
+        </AdminButton>
+        <AdminButton
+          variant="danger"
+          size="sm"
           disabled={pending || mock || (scan?.groups.length ?? 0) === 0}
           onClick={removeAll}
         >
           확인 후 삭제
-        </button>
+        </AdminButton>
       </div>
 
       {mock ? (
@@ -185,9 +189,14 @@ const ArticleOrphanImagePanel = () => {
                 쓰이지 않고 업로드한 지 24시간이 지나, 위 삭제 버튼과 같은 조건을 만족합니다. 경로를
                 복사해 Storage에서 직접 정리할 수 있습니다.
               </p>
-              <button type="button" className={styles.copy} onClick={copyKeptPaths}>
+              <AdminButton
+                variant="secondary"
+                size="xs"
+                className={styles.copy}
+                onClick={copyKeptPaths}
+              >
                 {copied ? "복사함" : "경로 복사"}
-              </button>
+              </AdminButton>
               <ul className={styles.keptList}>
                 {scan.keptFiles.map((file) => (
                   <li key={file.path} className={styles.path} title={file.path}>

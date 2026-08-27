@@ -42,6 +42,17 @@
   color: var(--text);
 }
 
+/* 파괴적 동작. 테두리형이라 같은 줄의 primary 보다 시선을 덜 끈다. */
+.danger {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+.danger:hover:not(:disabled):not([aria-disabled="true"]) {
+  background: var(--danger);
+  color: var(--text-inverse);
+}
+
 .md {
   height: 44px;
   padding: 0 var(--s-6);

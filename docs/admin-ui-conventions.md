@@ -6,7 +6,7 @@
 
 | 컴포넌트      | 역할                                                                  | 주요 API                                                                                                                                                                      |
 | ------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AdminButton` | 관리자 공용 버튼. `href`가 있으면 같은 외형의 `next/link` Link로 렌더 | `variant: primary\|secondary`, `size: md(44)\|sm(40)\|xs(36)`, 기본 `type="button"` — 제출은 `type="submit"` 명시. `disabled`는 href 변형도 받는다(aria-disabled + 클릭 차단) |
+| `AdminButton` | 관리자 공용 버튼. `href`가 있으면 같은 외형의 `next/link` Link로 렌더 | `variant: primary\|secondary\|danger`, `size: md(44)\|sm(40)\|xs(36)`, 기본 `type="button"` — 제출은 `type="submit"` 명시. `disabled`는 href 변형도 받는다(aria-disabled + 클릭 차단) |
 | `AdminInput`  | 텍스트 입력. `multiline`이면 textarea                                 | `size: md(44)\|sm(40)`, `tone: default\|raised(surface-2)`                                                                                                                    |
 | `AdminField`  | 라벨 + 입력 세로 묶음                                                 | `label`, `required`(라벨 뒤 ` *` 렌더)                                                                                                                                        |
 
@@ -20,6 +20,7 @@
 - 숨김 파일 input (clip 패턴 — PhotoUploadField·PosterUploadField·DevImageField)
 - `ArticleForm.module.css`의 `.remove` (36px 보더 버튼, hover 시 danger) — 블로그 인라인 취소·삭제 전용
 - `ArticleTagManagerPanel`의 `.action`·`.field`·`.label` — 컴팩트(micro) 패널 밀도 유지. 입력만 `AdminInput size="sm"`
+- 배너 두 종(`RagStaleBanner`·`RevalidateFailureBanner`)의 `.action` — 좁은 알림 줄 전용 36px. 두 배너가 같은 CSS 파일을 공유하므로 한쪽만 보고 고치지 않는다
 - Markdown 본문 편집기는 공용 외형 + 로컬 편집기 레이아웃(`min-height: 420px`·mono·`tab-size`) className 유지
 
 ## 용어·라벨
@@ -27,7 +28,8 @@
 | 항목                 | 규칙                                            | 예외                                                                           |
 | -------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
 | 제출 버튼            | `저장` / 진행 중 `저장 중…`                     | LoginForm `로그인`/`로그인 중…`                                                |
-| 나가기 버튼          | `취소`                                          | —                                                                              |
+| 나가기 버튼          | `취소`                                          | dirty면 확인 후 이동                                                           |
+| 파괴적 버튼          | `AdminButton variant="danger"` (테두리형)       | 강조(primary)는 같은 줄의 안전한 동작이 가져간다                              |
 | published 배지 (Row) | `공개` / `비공개`                               | 블로그는 `공개`/`초안` — [발행 의미론](plan/07-dev-blog.md) (발행일·slug 잠금) |
 | 폼 공개 체크박스     | `공개 (방문자에게 표시)`                        | 블로그는 `발행` (발행 조건 검사와 짝)                                          |
 | 목록 상단 버튼       | `+ 새 {엔티티}`                                 | —                                                                              |
