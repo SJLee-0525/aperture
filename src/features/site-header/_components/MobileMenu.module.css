@@ -12,7 +12,7 @@
     background var(--dur),
     color var(--dur);
 }
-@media (max-width: 767px) {
+@media (max-width: 899px) {
   :global(html[data-mobile-navigation-hidden]) .burger {
     position: fixed;
     top: 10px;
@@ -38,7 +38,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .burger {
     display: none;
   }
@@ -181,6 +181,12 @@
   font-family: var(--font-sans);
   font-size: var(--t-small);
 }
+/* 입력은 테두리 없는 상자 안에 놓이므로 링을 상자 쪽에 그린다. `.search input` 의
+   `outline: none` 이 그래서 남아 있다. 패널이 스크롤 컨테이너라 바깥 링은 위쪽이 잘린다. */
+.search:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 /* 챗 composer 와 동일 — 입력 활성화 시 현재 섹션 액센트로 강조 */
 .search:focus-within {
   border-color: var(--accent);
@@ -279,6 +285,11 @@
 }
 .sub:hover {
   color: var(--accent);
+}
+/* 아코디언은 접힌 높이를 0 으로 만들려고 `.subsInner` 를 세로 padding 없이 잘라 낸다.
+   globals 의 바깥 링(offset 2px)은 그 경계 밖이라 첫 항목의 위쪽이 잘린다. 안쪽에 그린다. */
+.sub:focus-visible {
+  outline-offset: -2px;
 }
 
 /* 연락처 — 아코디언이 아닌 평면 링크(그룹 헤더와 동일한 디스플레이 타이포) */
