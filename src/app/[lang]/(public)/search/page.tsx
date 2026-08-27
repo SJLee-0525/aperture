@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SearchPageSkeleton } from "@/components/PublicPageSkeletons";
+import { SearchPageSkeleton } from "@/components/skeletons/SearchPageSkeleton";
 import { SearchResults } from "@/features/search/_components/SearchResults";
 
 import { buildSearchGroups } from "@/features/search/_lib/build-search-groups";

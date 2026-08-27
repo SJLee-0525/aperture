@@ -2,6 +2,7 @@ import { AboutSection } from "@/components/AboutSection";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { pickText } from "@/lib/i18n/pick-text";
+import { splitLead } from "@/lib/text/split-lead";
 
 import type { Lang } from "@/types/lang";
 import type { LocalizedText } from "@/types/localized";
@@ -33,13 +34,8 @@ type Props = {
 const AboutView = ({ lang, bio, photoFacts, albumCount }: Props) => {
   const dict = DICTIONARY[lang];
 
-  // bio 첫 문장 = 요약 헤드라인, 나머지 = 본문 (관리자가 bio만 편집하면 자동 반영)
-  const bioText = pickText(bio, lang);
-  const bioSplitAt = bioText.indexOf(". ");
-  const [summary, body] =
-    bioSplitAt === -1
-      ? [bioText, ""]
-      : [bioText.slice(0, bioSplitAt), bioText.slice(bioSplitAt + 2)];
+  // 관리자는 bio 를 한 덩어리로 편집한다. 화면이 첫 문장을 헤드라인으로 쓴다.
+  const { lead: summary, body } = splitLead(pickText(bio, lang));
 
   const cameras = [...new Set(photoFacts.map((fact) => fact.camera))];
   const lenses = [

@@ -1,4 +1,4 @@
-import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
+import { TimelinePageSkeleton } from "@/components/skeletons/TimelinePageSkeleton";
 
 export default function MusicCareerLoading() {
   return <TimelinePageSkeleton />;

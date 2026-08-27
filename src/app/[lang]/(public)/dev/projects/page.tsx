@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
+import { CardGridPageSkeleton } from "@/components/skeletons/CardGridPageSkeleton";
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
 
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";

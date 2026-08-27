@@ -1,4 +1,4 @@
-import { ContactPageSkeleton } from "@/components/PublicPageSkeletons";
+import { ContactPageSkeleton } from "@/components/skeletons/ContactPageSkeleton";
 
 export default function ContactLoading() {
   return <ContactPageSkeleton />;

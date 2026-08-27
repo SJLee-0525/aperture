@@ -1,9 +1,4 @@
 /* 앨범 로딩 셸 — AlbumsView.module.css .main/.title/.grid + AlbumCard 커버/정보 흉내. */
-.main {
-  height: var(--public-content-height);
-  max-height: var(--public-content-height);
-  overflow: hidden;
-}
 .title {
   /* 실제 h1(--t-h1) 렌더 높이 = font-size × line-height(1.6) 예약 → 그리드 시작 정합 */
   height: calc(var(--t-h1) * 1.6);

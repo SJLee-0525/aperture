@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
+import { CardGridPageSkeleton } from "@/components/skeletons/CardGridPageSkeleton";
 import { MusicWorksView } from "@/features/music/_components/MusicWorksView";
 
 import { getMusicWorks } from "@/lib/content/music";

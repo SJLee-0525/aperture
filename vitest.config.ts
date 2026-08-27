@@ -41,6 +41,7 @@ export default defineConfig({
         "src/lib/http/*.ts",
         "src/lib/contact/draft-storage.ts",
         "src/lib/search/*.ts",
+        "src/lib/text/*.ts",
         "src/lib/i18n/*.ts",
         "src/lib/format/*.ts",
         "src/lib/exif/*.ts",

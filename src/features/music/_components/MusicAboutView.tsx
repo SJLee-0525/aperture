@@ -2,6 +2,7 @@ import { AboutSection } from "@/components/AboutSection";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { pickText } from "@/lib/i18n/pick-text";
+import { splitLead } from "@/lib/text/split-lead";
 
 import type { Lang } from "@/types/lang";
 import type { LocalizedText } from "@/types/localized";
@@ -38,13 +39,8 @@ type Props = {
 const MusicAboutView = ({ lang, intro, workFacts, awardCount, mediaCount }: Props) => {
   const dict = DICTIONARY[lang];
 
-  // intro 첫 문장 = 요약 헤드라인, 나머지 = 본문 (사진 소개와 동일 패턴)
-  const introText = pickText(intro, lang);
-  const introSplitAt = introText.indexOf(". ");
-  const [summary, body] =
-    introSplitAt === -1
-      ? [introText, ""]
-      : [introText.slice(0, introSplitAt), introText.slice(introSplitAt + 2)];
+  // 관리자는 intro 를 한 덩어리로 편집한다. 화면이 첫 문장을 헤드라인으로 쓴다.
+  const { lead: summary, body } = splitLead(pickText(intro, lang));
 
   // 레퍼토리(작곡가 = subtitle "슈베르트 · D.911" 앞부분)·무대·장르
   const composers = [

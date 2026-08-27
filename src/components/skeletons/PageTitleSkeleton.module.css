@@ -1,0 +1,6 @@
+.titleSlot {
+  display: flex;
+  align-items: center;
+  height: calc(var(--t-h1) * 1.6);
+  margin-bottom: var(--s-6);
+}

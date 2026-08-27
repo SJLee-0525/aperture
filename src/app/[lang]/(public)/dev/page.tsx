@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { AboutPageSkeleton } from "@/components/PublicPageSkeletons";
+import { AboutPageSkeleton } from "@/components/skeletons/AboutPageSkeleton";
 import { DevAboutView } from "@/features/dev/_components/DevAboutView";
 
 import { toLang } from "@/constants/langs";

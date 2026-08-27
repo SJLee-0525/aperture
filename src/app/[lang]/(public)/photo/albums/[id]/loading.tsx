@@ -12,7 +12,7 @@ const TILE_ASPECTS = [1, 0.75, 1.35, 0.8, 1.2, 0.7, 1, 0.9];
  */
 export default function AlbumDetailLoading() {
   return (
-    <div className={styles.frame} aria-busy="true">
+    <div className="u-loading-shell" aria-busy="true">
       <Skeleton className={styles.hero} height={300} />
       <main className={styles.main}>
         <div className={styles.mason}>

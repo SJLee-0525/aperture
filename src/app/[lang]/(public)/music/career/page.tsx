@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
+import { TimelinePageSkeleton } from "@/components/skeletons/TimelinePageSkeleton";
 import { MusicCareerView } from "@/features/music/_components/MusicCareerView";
 
 import { getMusicAwards, getMusicConfig } from "@/lib/content/music";

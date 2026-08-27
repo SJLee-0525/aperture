@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
+import { TimelinePageSkeleton } from "@/components/skeletons/TimelinePageSkeleton";
 import { DevCareerView } from "@/features/dev/_components/DevCareerView";
 
 import { getDevConfig } from "@/lib/content/dev";

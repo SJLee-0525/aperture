@@ -97,7 +97,7 @@ const ArticleCard = ({
               <Icon name="pin" size={15} />
               {/* 아이콘만 보이지만 링크 이름에는 남는다. 아이콘은 aria-hidden 이라 지우면
                   카드가 고정 글이라는 사실이 보조기술에 전달되지 않는다. */}
-              <span className={styles.pinnedLabel}>{pinnedLabel}</span>
+              <span className="sr-only">{pinnedLabel}</span>
             </span>
           ) : null}
         </div>

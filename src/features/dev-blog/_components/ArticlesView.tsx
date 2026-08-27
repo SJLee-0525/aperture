@@ -159,7 +159,7 @@ const ArticlesView = ({ articles, tags }: Props) => {
       ) : (
         <>
           <section aria-labelledby={LIST_HEADING_ID}>
-            <h2 id={LIST_HEADING_ID} className={styles.heading}>
+            <h2 id={LIST_HEADING_ID} className="sr-only">
               {dict.articlesAll}
             </h2>
             <ul className={styles.list} data-view={state.view}>

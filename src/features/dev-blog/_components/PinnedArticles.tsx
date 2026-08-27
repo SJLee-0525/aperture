@@ -48,7 +48,7 @@ const PinnedArticles = ({
   readingLabelOf,
 }: Props) => (
   <section className={styles.section} aria-labelledby={HEADING_ID}>
-    <h2 id={HEADING_ID} className={styles.heading}>
+    <h2 id={HEADING_ID} className="sr-only">
       {heading}
     </h2>
     <ul className={styles.list}>

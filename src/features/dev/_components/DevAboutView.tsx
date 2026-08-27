@@ -2,6 +2,7 @@ import { AboutSection } from "@/components/AboutSection";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { pickText } from "@/lib/i18n/pick-text";
+import { splitLead } from "@/lib/text/split-lead";
 
 import type { DevConfig } from "@/types/dev";
 import type { Lang } from "@/types/lang";
@@ -49,13 +50,8 @@ const DevAboutView = ({
 }: Props) => {
   const dict = DICTIONARY[lang];
 
-  // heroLead 첫 문장 = 요약 헤드라인, 나머지 = 본문 (사진·음악 소개와 동일 패턴)
-  const heroText = pickText(heroLead, lang);
-  const heroSplitAt = heroText.indexOf(". ");
-  const [summary, body] =
-    heroSplitAt === -1
-      ? [heroText, ""]
-      : [heroText.slice(0, heroSplitAt), heroText.slice(heroSplitAt + 2)];
+  // 관리자는 heroLead 를 한 덩어리로 편집한다. 화면이 첫 문장을 헤드라인으로 쓴다.
+  const { lead: summary, body } = splitLead(pickText(heroLead, lang));
 
   const techTags = [...new Set(projectTechTags.flat())];
   const stackCount = stack.reduce((total, group) => total + group.items.length, 0);

@@ -1,0 +1,25 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(30px, 4vw, 46px);
+}
+
+.timelineRows {
+  margin-top: 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.timelineRow {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(16px, 2.5vw, 30px);
+  padding: clamp(15px, 2vw, 19px) 8px;
+  border-top: 1px solid var(--line);
+}
+
+.timelineCopy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+}
