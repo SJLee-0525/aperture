@@ -5,11 +5,8 @@ import { use } from "react";
 import { WorkForm } from "@/features/admin-music-works/_components/WorkForm";
 import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
-import { useAdminDocLoad } from "@/hooks/use-admin-doc-load";
-
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
-import type { MusicWork } from "@/types/music";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +19,10 @@ type Props = { params: Promise<{ id: string }> };
  */
 const EditMusicWorkPage = ({ params }: Props) => {
   const { id } = use(params);
-  const { doc, status, error } = useAdminDocLoad<MusicWork>(getMusicWorkRepository, id);
 
   return (
-    <AdminDocGate status={status} error={error} noun="연주">
-      {doc ? <WorkForm workId={id} initial={doc} /> : null}
+    <AdminDocGate getRepository={getMusicWorkRepository} id={id} noun="연주">
+      {(doc) => <WorkForm workId={id} initial={doc} />}
     </AdminDocGate>
   );
 };

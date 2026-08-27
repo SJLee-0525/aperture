@@ -1,11 +1,10 @@
 "use client";
 
-import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
-import styles from "@/features/admin-shell/_components/admin-form.module.css";
-import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { useMediaEditor } from "@/features/admin-music-media/_hooks/use-media-editor";
 
@@ -43,24 +42,20 @@ const MediaForm = ({ mediaId, initial }: Props) => {
   } = useMediaEditor(mediaId, initial);
 
   return (
-    <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
-      {recovery.pending ? (
-        <RecoveryNotice
-          savedAt={recovery.pending.savedAt}
-          onRestore={() => {
-            const restored = recovery.restore();
-            if (restored) applyForm(restored);
-          }}
-          onDiscard={recovery.discard}
-        />
-      ) : null}
+    <AdminFormShell
+      title={isEdit ? "영상 수정" : "새 영상"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
 
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "영상 수정" : "새 영상"}</h1>
-      </header>
-
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
         <LocalizedFieldPair
           label="제목"
           value={form.title}
@@ -71,8 +66,8 @@ const MediaForm = ({ mediaId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>출처</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>출처</h2>
         <LocalizedFieldPair
           label="출처"
           value={form.source}
@@ -81,8 +76,8 @@ const MediaForm = ({ mediaId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>YouTube</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>YouTube</h2>
         <AdminField label="YouTube 영상 ID">
           <AdminInput
             value={form.youtubeId}
@@ -92,8 +87,8 @@ const MediaForm = ({ mediaId, initial }: Props) => {
         </AdminField>
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -103,21 +98,7 @@ const MediaForm = ({ mediaId, initial }: Props) => {
         </label>
       </section>
 
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={styles.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 

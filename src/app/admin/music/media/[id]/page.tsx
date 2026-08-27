@@ -5,11 +5,8 @@ import { use } from "react";
 import { MediaForm } from "@/features/admin-music-media/_components/MediaForm";
 import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
-import { useAdminDocLoad } from "@/hooks/use-admin-doc-load";
-
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
-import type { MusicMedia } from "@/types/music";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +19,10 @@ type Props = { params: Promise<{ id: string }> };
  */
 const EditMusicMediaPage = ({ params }: Props) => {
   const { id } = use(params);
-  const { doc, status, error } = useAdminDocLoad<MusicMedia>(getMusicMediaRepository, id);
 
   return (
-    <AdminDocGate status={status} error={error} noun="영상">
-      {doc ? <MediaForm mediaId={id} initial={doc} /> : null}
+    <AdminDocGate getRepository={getMusicMediaRepository} id={id} noun="영상">
+      {(doc) => <MediaForm mediaId={id} initial={doc} />}
     </AdminDocGate>
   );
 };

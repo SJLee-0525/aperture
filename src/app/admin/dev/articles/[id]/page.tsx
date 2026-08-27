@@ -5,11 +5,8 @@ import { use } from "react";
 import { ArticleForm } from "@/features/admin-dev-articles/_components/ArticleForm";
 import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
-import { useAdminDocLoad } from "@/hooks/use-admin-doc-load";
-
 import { getDevArticleRepository } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
-import type { DevArticle } from "@/types/dev-article";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +19,10 @@ type Props = { params: Promise<{ id: string }> };
  */
 const EditDevArticlePage = ({ params }: Props) => {
   const { id } = use(params);
-  const { doc, status, error } = useAdminDocLoad<DevArticle>(getDevArticleRepository, id);
 
   return (
-    <AdminDocGate status={status} error={error} noun="글">
-      {doc ? <ArticleForm articleId={id} initial={doc} /> : null}
+    <AdminDocGate getRepository={getDevArticleRepository} id={id} noun="글">
+      {(doc) => <ArticleForm articleId={id} initial={doc} />}
     </AdminDocGate>
   );
 };

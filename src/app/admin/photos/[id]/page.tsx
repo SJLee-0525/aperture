@@ -5,11 +5,8 @@ import { use } from "react";
 import { PhotoForm } from "@/features/admin-photos/_components/PhotoForm";
 import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
-import { useAdminDocLoad } from "@/hooks/use-admin-doc-load";
-
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
-import type { Photo } from "@/types/photo";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +19,10 @@ type Props = { params: Promise<{ id: string }> };
  */
 const EditPhotoPage = ({ params }: Props) => {
   const { id } = use(params);
-  const { doc, status, error } = useAdminDocLoad<Photo>(getPhotoRepository, id);
 
   return (
-    <AdminDocGate status={status} error={error} noun="사진">
-      {doc ? <PhotoForm photoId={id} initial={doc} /> : null}
+    <AdminDocGate getRepository={getPhotoRepository} id={id} noun="사진">
+      {(doc) => <PhotoForm photoId={id} initial={doc} />}
     </AdminDocGate>
   );
 };

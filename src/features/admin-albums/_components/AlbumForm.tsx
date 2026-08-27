@@ -1,9 +1,8 @@
 "use client";
 
-import { AdminButton } from "@/components/AdminButton";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
-import styles from "@/features/admin-shell/_components/admin-form.module.css";
-import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
 
@@ -50,24 +49,20 @@ const AlbumForm = ({ albumId, initial }: Props) => {
   } = useAlbumEditor(albumId, initial);
 
   return (
-    <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
-      {recovery.pending ? (
-        <RecoveryNotice
-          savedAt={recovery.pending.savedAt}
-          onRestore={() => {
-            const restored = recovery.restore();
-            if (restored) applyForm(restored);
-          }}
-          onDiscard={recovery.discard}
-        />
-      ) : null}
+    <AdminFormShell
+      title={isEdit ? "앨범 수정" : "새 앨범"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
 
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "앨범 수정" : "새 앨범"}</h1>
-      </header>
-
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
         <LocalizedFieldPair
           label="제목"
           value={form.title}
@@ -78,8 +73,8 @@ const AlbumForm = ({ albumId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>부제</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>부제</h2>
         <LocalizedFieldPair
           label="부제"
           value={form.subtitle}
@@ -87,8 +82,8 @@ const AlbumForm = ({ albumId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>사진 · 순서 · 커버</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>사진 · 순서 · 커버</h2>
         <AlbumPhotoPicker
           photos={photos}
           status={photoStatus}
@@ -103,8 +98,8 @@ const AlbumForm = ({ albumId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -114,21 +109,7 @@ const AlbumForm = ({ albumId, initial }: Props) => {
         </label>
       </section>
 
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={styles.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 

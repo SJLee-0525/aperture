@@ -5,11 +5,8 @@ import { use } from "react";
 import { AlbumForm } from "@/features/admin-albums/_components/AlbumForm";
 import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
-import { useAdminDocLoad } from "@/hooks/use-admin-doc-load";
-
 import { getAlbumRepository } from "@/lib/admin/album-repository";
 
-import type { Album } from "@/types/album";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +19,10 @@ type Props = { params: Promise<{ id: string }> };
  */
 const EditAlbumPage = ({ params }: Props) => {
   const { id } = use(params);
-  const { doc, status, error } = useAdminDocLoad<Album>(getAlbumRepository, id);
 
   return (
-    <AdminDocGate status={status} error={error} noun="앨범">
-      {doc ? <AlbumForm albumId={id} initial={doc} /> : null}
+    <AdminDocGate getRepository={getAlbumRepository} id={id} noun="앨범">
+      {(doc) => <AlbumForm albumId={id} initial={doc} />}
     </AdminDocGate>
   );
 };

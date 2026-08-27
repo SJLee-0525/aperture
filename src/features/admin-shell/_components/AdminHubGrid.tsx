@@ -19,7 +19,6 @@ type Props = {
   lead?: ReactNode;
   cards: HubCard[];
   /** 카드 우상단 배지 문구. */
-  badgeLabel?: string;
 };
 
 /**
@@ -27,7 +26,7 @@ type Props = {
  *
  * 카드는 항상 링크다. href 를 선택 항목으로 두면 링크 없는 카드를 실수로 만들 수 있다.
  */
-const AdminHubGrid = ({ title, lead, cards, badgeLabel = "관리 →" }: Props) => (
+const AdminHubGrid = ({ title, lead, cards }: Props) => (
   <div className={styles.page}>
     <header className={styles.head}>
       <h1 className={styles.title}>{title}</h1>
@@ -37,7 +36,7 @@ const AdminHubGrid = ({ title, lead, cards, badgeLabel = "관리 →" }: Props) 
     <div className={styles.grid}>
       {cards.map((card) => (
         <Link key={card.key} href={card.href} className={styles.card}>
-          <span className={styles.badge}>{badgeLabel}</span>
+          <span className={styles.badge}>관리 →</span>
           <h2 className={styles.cardTitle}>{card.label}</h2>
           <p className={styles.cardDesc}>{card.desc}</p>
         </Link>

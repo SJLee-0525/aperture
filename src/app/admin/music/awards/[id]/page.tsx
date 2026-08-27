@@ -5,11 +5,8 @@ import { use } from "react";
 import { AwardForm } from "@/features/admin-music-awards/_components/AwardForm";
 import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
-import { useAdminDocLoad } from "@/hooks/use-admin-doc-load";
-
 import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
 
-import type { MusicAward } from "@/types/music";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +19,10 @@ type Props = { params: Promise<{ id: string }> };
  */
 const EditMusicAwardPage = ({ params }: Props) => {
   const { id } = use(params);
-  const { doc, status, error } = useAdminDocLoad<MusicAward>(getMusicAwardRepository, id);
 
   return (
-    <AdminDocGate status={status} error={error} noun="수상">
-      {doc ? <AwardForm awardId={id} initial={doc} /> : null}
+    <AdminDocGate getRepository={getMusicAwardRepository} id={id} noun="수상">
+      {(doc) => <AwardForm awardId={id} initial={doc} />}
     </AdminDocGate>
   );
 };

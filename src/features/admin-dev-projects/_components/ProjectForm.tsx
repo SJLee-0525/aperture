@@ -6,7 +6,7 @@ import { AdminInput } from "@/components/AdminInput";
 import { CloseIcon } from "@/components/CloseIcon";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 import base from "@/features/admin-shell/_components/admin-form.module.css";
-import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { useProjectEditor } from "@/features/admin-dev-projects/_hooks/use-project-editor";
 
@@ -64,21 +64,17 @@ const ProjectForm = ({ projectId, initial }: Props) => {
   } = useProjectEditor(projectId, initial);
 
   return (
-    <form className={base.form} ref={formRef} onSubmit={submit} noValidate>
-      {recovery.pending ? (
-        <RecoveryNotice
-          savedAt={recovery.pending.savedAt}
-          onRestore={() => {
-            const restored = recovery.restore();
-            if (restored) applyForm(restored);
-          }}
-          onDiscard={recovery.discard}
-        />
-      ) : null}
-
-      <header className={base.head}>
-        <h1 className={base.title}>{isEdit ? "프로젝트 수정" : "새 프로젝트"}</h1>
-      </header>
+    <AdminFormShell
+      title={isEdit ? "프로젝트 수정" : "새 프로젝트"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving || uploading}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
 
       <section className={base.section}>
         <h2 className={base.legend}>제목</h2>
@@ -309,21 +305,7 @@ const ProjectForm = ({ projectId, initial }: Props) => {
         </label>
       </section>
 
-      {error ? (
-        <p className={base.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={base.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving || uploading}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 

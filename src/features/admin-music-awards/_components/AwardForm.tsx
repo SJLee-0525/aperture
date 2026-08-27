@@ -1,11 +1,10 @@
 "use client";
 
-import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
-import styles from "@/features/admin-shell/_components/admin-form.module.css";
-import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { useAwardEditor } from "@/features/admin-music-awards/_hooks/use-award-editor";
 
@@ -43,25 +42,21 @@ const AwardForm = ({ awardId, initial }: Props) => {
   } = useAwardEditor(awardId, initial);
 
   return (
-    <form className={styles.form} ref={formRef} onSubmit={submit} noValidate>
-      {recovery.pending ? (
-        <RecoveryNotice
-          savedAt={recovery.pending.savedAt}
-          onRestore={() => {
-            const restored = recovery.restore();
-            if (restored) applyForm(restored);
-          }}
-          onDiscard={recovery.discard}
-        />
-      ) : null}
+    <AdminFormShell
+      title={isEdit ? "수상 수정" : "새 수상"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
 
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "수상 수정" : "새 수상"}</h1>
-      </header>
-
-      <section className={styles.section}>
-        <h2 className={styles.legend}>연도 · 장소</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>연도 · 장소</h2>
+        <div className={base.grid2}>
           <AdminField label="연도" required field="year" error={issueFor(issues, "year")}>
             <AdminInput
               type="number"
@@ -81,8 +76,8 @@ const AwardForm = ({ awardId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>수상명</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>수상명</h2>
         <LocalizedFieldPair
           label="수상명"
           value={form.name}
@@ -93,8 +88,8 @@ const AwardForm = ({ awardId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>설명</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>설명</h2>
         <LocalizedFieldPair
           label="설명"
           value={form.description}
@@ -104,8 +99,8 @@ const AwardForm = ({ awardId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -115,21 +110,7 @@ const AwardForm = ({ awardId, initial }: Props) => {
         </label>
       </section>
 
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={styles.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 
