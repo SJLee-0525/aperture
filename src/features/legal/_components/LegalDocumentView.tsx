@@ -1,4 +1,4 @@
-import type { LegalDocument } from "@/features/legal/_lib/legal-documents";
+import type { LegalDocument } from "@/features/legal/_lib/legal/legal-document";
 
 import styles from "./LegalDocumentView.module.css";
 

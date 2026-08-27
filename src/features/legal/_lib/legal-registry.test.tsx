@@ -7,7 +7,9 @@ vi.mock("@/features/lang/_components/LocalizedLink", () => ({
   ),
 }));
 
-import { getLegalDocument, type LegalDocumentKind } from "@/features/legal/_lib/legal-documents";
+import { getLegalDocument } from "@/features/legal/_lib/legal-registry";
+
+import type { LegalDocumentKind } from "@/features/legal/_lib/legal/legal-document";
 
 const KINDS: LegalDocumentKind[] = ["privacy", "terms", "accessibility"];
 
@@ -49,7 +51,7 @@ describe("legal documents", () => {
       SENTRY_TRANSFER_COUNTRY: { ko: "미국", en: "the United States" },
     }));
     const { getLegalDocument: getEnabledLegalDocument } =
-      await import("@/features/legal/_lib/legal-documents");
+      await import("@/features/legal/_lib/legal-registry");
     const html = renderToStaticMarkup(
       <>
         {getEnabledLegalDocument("privacy", "ko").sections.map((section) => (
@@ -70,7 +72,7 @@ describe("legal documents", () => {
       SENTRY_TRANSFER_COUNTRY: { ko: "미설정", en: "not configured" },
     }));
     const { getLegalDocument: getDisabledLegalDocument } =
-      await import("@/features/legal/_lib/legal-documents");
+      await import("@/features/legal/_lib/legal-registry");
 
     for (const lang of ["ko", "en"] as const) {
       const html = renderToStaticMarkup(

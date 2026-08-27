@@ -7,7 +7,7 @@ import {
   isLegalDocumentKind,
   LEGAL_DOCUMENT_KINDS,
   LEGAL_DOCUMENT_METADATA,
-} from "@/features/legal/_lib/legal-documents";
+} from "@/features/legal/_lib/legal-registry";
 
 import { pageMetadata } from "@/lib/seo/metadata";
 
