@@ -86,4 +86,4 @@ globals 규칙은 `:where()`라 특이도가 0이다. 컴포넌트가 자기 링
 
 ## 후속 과제 (범위 밖 기록)
 
-- 목록 셸(head·hint·state·빈 상태) 추출 — 7개 목록이 같은 구조를 반복하지만 이번 범위에서 제외
+- 설정 편집기 다섯의 setter 를 `LocalizedText` 를 받는 형태로 바꿔 `LocalizedFieldPair` 를 쓰게 한다
