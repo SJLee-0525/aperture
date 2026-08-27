@@ -39,7 +39,7 @@ type LocalListRepositoryConfig<TEntity extends ListEntity, TListItem> = {
   getStorage: () => Storage;
 };
 
-/** 목록 컬렉션 mock 저장소가 제공하는 CRUD — live(listCrud + REST projection)와 같은 모양. */
+/** 목록 컬렉션 mock 저장소가 제공하는 CRUD — live(sortableListCrud + REST projection)와 같은 모양. */
 type LocalListRepository<TEntity extends ListEntity, TListItem> = {
   newId: () => string;
   list: () => Promise<TListItem[]>;

@@ -60,11 +60,11 @@ const revalidateArticlePaths = (slug: string): void => {
 };
 
 /**
- * `DevArticleInput` 을 `listCrud` 가 받는 입력으로 좁힌다. `createdAt`/`updatedAt` 은
+ * `DevArticleInput` 을 `documentCrud` 가 받는 입력으로 좁힌다. `createdAt`/`updatedAt` 은
  * 서버 타임스탬프가 소유하므로 입력에 없어도 된다 — 타입만 맞춘다.
  *
  * @param {DevArticleInput} input 저장할 도메인 필드.
- * @returns {Omit<DevArticle, "id">} listCrud 입력 형태의 같은 값.
+ * @returns {Omit<DevArticle, "id">} documentCrud 입력 형태의 같은 값.
  */
 const asCrudInput = (input: DevArticleInput): Omit<DevArticle, "id"> =>
   input as Omit<DevArticle, "id">;
@@ -115,7 +115,7 @@ const assertPublishableLive = async (id: string, input: DevArticleInput): Promis
  * 같은 `dev-article-domain` 모듈을 여기서 얹는다. 검사 지점도 mock 과 같다:
  * 발행 상태로 저장되는 모든 경로(`create`/`update`/`setPublished`).
  *
- * 도메인 규칙용 previous 읽기와 listCrud 정책의 스냅샷 읽기가 각 1회씩 발생한다.
+ * 도메인 규칙용 previous 읽기와 documentCrud 정책의 스냅샷 읽기가 각 1회씩 발생한다.
  * 관리자 1명·저장 빈도 기준으로 수용하는 이중 읽기다.
  *
  * @param {() => Date} [now] 시스템 시각. 테스트가 고정할 수 있게 주입받는다.
@@ -167,7 +167,7 @@ const createLiveDevArticleRepository = (
       firstPublishedAt: previous.firstPublishedAt,
     };
     if (published) await assertPublishableLive(id, input);
-    // listCrud.setPublished 는 published 만 바꾸므로 최초 발행 스탬프를 위해 update 경로를 쓴다.
+    // documentCrud.setPublished 는 published 만 바꾸므로 최초 발행 스탬프를 위해 update 경로를 쓴다.
     // RAG 정책은 작업 이름 없이 전후 상태만 보므로 계약이 같다.
     await devArticlesCrud.update(id, asCrudInput(stampFirstPublished(input, previous, now)));
     if (touchesPublishedPath(previous, input)) revalidateArticlePaths(previous.slug);

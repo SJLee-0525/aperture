@@ -55,7 +55,7 @@ const createMockMusicWorkRepository = (): MusicWorkRepository => {
 };
 
 /**
- * 현재 콘텐츠 소스에 맞는 연주 저장소. live 는 기존 `listCrud` 산출물에 REST 목록만 얹은,
+ * 현재 콘텐츠 소스에 맞는 연주 저장소. live 는 기존 `sortableListCrud` 산출물에 REST 목록만 얹은,
  * 지금까지 훅이 조립하던 어댑터 그대로다.
  *
  * @returns {MusicWorkRepository} mock 이면 브라우저 로컬, live 면 Supabase 구현.

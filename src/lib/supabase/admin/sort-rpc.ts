@@ -1,7 +1,7 @@
 import { SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import type { TableCollectionId } from "@/constants/collections";
+import type { SortableCollectionId } from "@/constants/collections";
 
 type SortOrder = { id: string; order: number };
 
@@ -12,15 +12,16 @@ type SortOrder = { id: string; order: number };
  * 대조해야 부분 반영을 실패로 잡을 수 있다. 중복 ID 는 행 수 대조를 무의미하게
  * 만들어 호출 전에 거른다.
  *
+ * @param {SortableCollectionId} collection 수동 정렬을 갖는 컬렉션.
  * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록. 비어 있으면 아무것도 하지 않는다.
  * @returns {Promise<void>} 전 항목이 반영되면 완료된다.
  */
-const updateSortOrders = async (collection: TableCollectionId, orders: SortOrder[]): Promise<void> => {
+const updateSortOrders = async (
+  collection: SortableCollectionId,
+  orders: SortOrder[],
+): Promise<void> => {
   if (orders.length === 0) return;
-  // 서술자의 sortRpc 는 optional 이다. 수동 정렬이 없는 컬렉션(devArticles·site·
-  // devArticleTags)이 존재하는 한 이 검사는 타입으로 대체할 수 없다.
   const rpc = SUPABASE_COLLECTIONS[collection].sortRpc;
-  if (!rpc) throw new Error(`정렬 RPC 가 없는 컬렉션입니다: ${collection}`);
   if (new Set(orders.map(({ id }) => id)).size !== orders.length) {
     throw new Error("중복된 정렬 대상이 있습니다.");
   }

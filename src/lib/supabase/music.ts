@@ -12,7 +12,7 @@ import {
   decodeMusicMedia,
   decodeMusicWork,
 } from "@/lib/supabase/decode/music";
-import { listCrud } from "@/lib/supabase/list-crud";
+import { sortableListCrud } from "@/lib/supabase/list-crud";
 import { deleteMusicWorkImages } from "@/lib/supabase/storage";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
@@ -50,7 +50,7 @@ const SITE_TABLE = tableFor(COLLECTIONS.SITE);
  * @returns {MusicMedia} 관리자 화면에서 사용하는 영상 모델.
  */
 
-const musicWorksCrud = listCrud<MusicWork>(
+const musicWorksCrud = sortableListCrud<MusicWork>(
   COLLECTIONS.MUSIC_WORKS,
   decodeMusicWork,
   "연주",
@@ -95,13 +95,13 @@ const musicWorks = {
     await deleteMusicWorkImages(id).catch(() => undefined);
   },
 };
-const musicAwards = listCrud<MusicAward>(
+const musicAwards = sortableListCrud<MusicAward>(
   COLLECTIONS.MUSIC_AWARDS,
   decodeMusicAward,
   "수상",
   "musicAward",
 );
-const musicMediaCrud = listCrud<MusicMedia>(
+const musicMediaCrud = sortableListCrud<MusicMedia>(
   COLLECTIONS.MUSIC_MEDIA,
   decodeMusicMedia,
   "영상",

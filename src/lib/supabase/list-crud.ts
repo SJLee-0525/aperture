@@ -1,5 +1,5 @@
 import { collectionCacheTag, documentCacheTag } from "@/constants/cache";
-import { SUPABASE_COLLECTIONS, type TableCollectionId } from "@/constants/collections";
+import { SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
@@ -9,6 +9,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { paginateAll } from "@/lib/supabase/paginate-all";
 import { mergeRow } from "@/lib/supabase/row-merge";
 
+import type { SortableCollectionId, TableCollectionId } from "@/constants/collections";
 import type { RagSyncSourceType } from "@/types/rag";
 
 type WithId = { id: string };
@@ -32,7 +33,11 @@ const assertNoError = (error: QueryError, message: string): void => {
 };
 
 /**
- * 목록형 컬렉션의 공통 관리자 CRUD 팩토리 (Supabase).
+ * 문서 단위 관리자 CRUD 팩토리 (Supabase).
+ *
+ * 목록 조회와 드래그 정렬은 여기 없다. 그 둘은 수동 정렬을 갖는 컬렉션만의 연산이라
+ * `sortableListCrud` 가 얹는다. 팩토리 하나가 전부 노출하면 `devArticles` 처럼 정렬이
+ * 없는 컬렉션에도 `updateOrder` 가 붙어 호출 시 런타임에만 실패한다.
  *
  * 인코딩은 `rowEncoderFor` 가, 읽기 병합은 `row-merge` 의 `mergeRow` 가 맡아
  * 쓰기와 읽기가 같은 왕복 계약을 쓴다. 정렬·projection 은 `SUPABASE_COLLECTIONS`
@@ -43,9 +48,9 @@ const assertNoError = (error: QueryError, message: string): void => {
  * @param {string} label 오류 메시지에 표시할 항목 이름.
  * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류. 없으면 동기화 요청이 없다.
  * @param {PostSyncPolicy<T>} [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책. 없으면 모든 쓰기가 동기화를 요청하고 쓰기 직전 스냅샷도 읽지 않는다.
- * @returns {{ newId: () => string; list: () => Promise<T[]>; get: (id: string) => Promise<T | null>; create: (id: string, input: Omit<T, 'id'>) => Promise<void>; update: (id: string, input: Omit<T, 'id'>) => Promise<void>; updateOrder: (orders: SortOrder[]) => Promise<void>; setPublished: (id: string, published: boolean) => Promise<void>; remove: (id: string) => Promise<void> }} 해당 컬렉션에 묶인 관리자 CRUD 함수.
+ * @returns 해당 컬렉션에 묶인 문서 단위 CRUD 함수.
  */
-const listCrud = <T extends WithId>(
+const documentCrud = <T extends WithId>(
   collection: TableCollectionId,
   toEntity: (id: string, d: Record<string, unknown>) => T,
   label: string,
@@ -56,7 +61,7 @@ const listCrud = <T extends WithId>(
   /** 쓰기 직전 스냅샷과 조회 성공 여부. 실패와 "문서 없음"을 구분해야 fallback 이 성립한다. */
   type BeforeSnapshot = { before: T | null; failed: boolean };
 
-  const { table, select, order } = SUPABASE_COLLECTIONS[collection];
+  const { table, select } = SUPABASE_COLLECTIONS[collection];
   const encode = rowEncoderFor(collection);
   const cacheTag = collectionCacheTag(collection);
   /**
@@ -106,32 +111,6 @@ const listCrud = <T extends WithId>(
   return {
     /** 새 문서 ID를 미리 발급한다. Storage 경로를 먼저 정할 때 사용한다. */
     newId: (): string => crypto.randomUUID(),
-    /**
-     * 초안을 포함한 전체 관리자 목록을 서술자 정렬 순으로 읽는다.
-     * 세션이 없으면 RLS 가 초안을 오류 없이 감추므로 먼저 로그인 오류로 바꾼다.
-     */
-    list: async (): Promise<T[]> => {
-      await requireAdminSession();
-      // 페이지네이션이 없으면 PostgREST 가 max_rows 에서 조용히 잘라, 뒷부분 항목이 화면에서
-      // 사라진 채 재정렬이 그 상태를 저장한다. 서술자 order 의 id 2차 키가 경계를 고정한다.
-      const rows = await paginateAll<Record<string, unknown>>(async (offset, size) => {
-        let query = from().select(select);
-        for (const part of order.split(",")) {
-          const [column, direction, nulls] = part.split(".");
-          query = query.order(column, {
-            ascending: direction !== "desc",
-            ...(nulls ? { nullsFirst: nulls === "nullsfirst" } : {}),
-          });
-        }
-        const { data, error } = await query.range(offset, offset + size - 1);
-        if (error) throw new Error(`${label} 목록을 불러오지 못했습니다.`);
-        return (data ?? []) as unknown as Array<Record<string, unknown>>;
-      });
-      return rows.map((row) => {
-        const merged = mergeRow(collection, row);
-        return toEntity(merged.id, merged.data);
-      });
-    },
     /**
      * 관리자 편집용 문서 한 건을 읽는다.
      *
@@ -183,7 +162,10 @@ const listCrud = <T extends WithId>(
      * @returns {Promise<void>} 수정과 후속 갱신이 끝나면 완료된다.
      */
     patchData: async (id: string, patch: Partial<Input>): Promise<void> => {
-      const { data: row, error: readError } = await from().select("data").eq("id", id).maybeSingle();
+      const { data: row, error: readError } = await from()
+        .select("data")
+        .eq("id", id)
+        .maybeSingle();
       if (readError || !row) throw new Error(`${label} 수정에 실패했습니다.`);
       const current = (row as { data: Record<string, unknown> | null }).data ?? {};
       const next = { ...current, ...toJson(patch as Record<string, unknown>) };
@@ -193,17 +175,6 @@ const listCrud = <T extends WithId>(
       // 병합 결과를 도메인 모델로 되돌리지 않으므로 정책에 넘길 전후 상태가 없다.
       // 스냅샷 없음은 강제 동기화로 처리된다.
       await syncAfterWrite(id, null, null);
-    },
-    /**
-     * 드래그 정렬 결과를 RPC 1회로 저장한다. 정렬은 검색 본문과 무관해 RAG 동기화가 없다.
-     *
-     * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록.
-     * @returns {Promise<void>} 순서 저장이 끝나면 완료된다.
-     */
-    updateOrder: async (orders: SortOrder[]): Promise<void> => {
-      if (orders.length === 0) return;
-      await updateSortOrders(collection, orders);
-      requestPublicRevalidate(cacheTag);
     },
     /**
      * 문서의 공개 상태를 변경한다.
@@ -241,5 +212,71 @@ const listCrud = <T extends WithId>(
   };
 };
 
-export { listCrud };
+/**
+ * 수동 정렬을 갖는 컬렉션의 관리자 CRUD 팩토리.
+ *
+ * `documentCrud` 에 관리자 목록 조회와 드래그 정렬을 더한다. 인자 타입이
+ * `SortableCollectionId` 라 정렬 RPC 가 없는 컬렉션은 여기 들어올 수 없다.
+ *
+ * @param {SortableCollectionId} collection 대상 논리 컬렉션 이름.
+ * @param {(id: string, d: Record<string, unknown>) => T} toEntity 병합된 행을 도메인 모델로 바꾸는 함수.
+ * @param {string} label 오류 메시지에 표시할 항목 이름.
+ * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류.
+ * @param {PostSyncPolicy<T>} [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책.
+ * @returns 문서 CRUD 에 `list`·`updateOrder` 를 더한 함수 묶음.
+ */
+const sortableListCrud = <T extends WithId>(
+  collection: SortableCollectionId,
+  toEntity: (id: string, d: Record<string, unknown>) => T,
+  label: string,
+  ragSourceType?: RagSyncSourceType,
+  syncPolicy?: PostSyncPolicy<T>,
+) => {
+  const { table, select, order } = SUPABASE_COLLECTIONS[collection];
+  const cacheTag = collectionCacheTag(collection);
+  const from = () => getSupabaseClient().from(table);
+
+  return {
+    ...documentCrud<T>(collection, toEntity, label, ragSourceType, syncPolicy),
+    /**
+     * 초안을 포함한 전체 관리자 목록을 서술자 정렬 순으로 읽는다.
+     * 세션이 없으면 RLS 가 초안을 오류 없이 감추므로 먼저 로그인 오류로 바꾼다.
+     */
+    list: async (): Promise<T[]> => {
+      await requireAdminSession();
+      // 페이지네이션이 없으면 PostgREST 가 max_rows 에서 조용히 잘라, 뒷부분 항목이 화면에서
+      // 사라진 채 재정렬이 그 상태를 저장한다. 서술자 order 의 id 2차 키가 경계를 고정한다.
+      const rows = await paginateAll<Record<string, unknown>>(async (offset, size) => {
+        let query = from().select(select);
+        for (const part of order.split(",")) {
+          const [column, direction, nulls] = part.split(".");
+          query = query.order(column, {
+            ascending: direction !== "desc",
+            ...(nulls ? { nullsFirst: nulls === "nullsfirst" } : {}),
+          });
+        }
+        const { data, error } = await query.range(offset, offset + size - 1);
+        if (error) throw new Error(`${label} 목록을 불러오지 못했습니다.`);
+        return (data ?? []) as unknown as Array<Record<string, unknown>>;
+      });
+      return rows.map((row) => {
+        const merged = mergeRow(collection, row);
+        return toEntity(merged.id, merged.data);
+      });
+    },
+    /**
+     * 드래그 정렬 결과를 RPC 1회로 저장한다. 정렬은 검색 본문과 무관해 RAG 동기화가 없다.
+     *
+     * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록.
+     * @returns {Promise<void>} 순서 저장이 끝나면 완료된다.
+     */
+    updateOrder: async (orders: SortOrder[]): Promise<void> => {
+      if (orders.length === 0) return;
+      await updateSortOrders(collection, orders);
+      requestPublicRevalidate(cacheTag);
+    },
+  };
+};
+
+export { documentCrud, sortableListCrud };
 export type { PostSyncPolicy };

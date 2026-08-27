@@ -1,6 +1,6 @@
 import { COLLECTIONS } from "@/constants/collections";
 import { decodeAlbum } from "@/lib/supabase/decode/photo";
-import { listCrud } from "@/lib/supabase/list-crud";
+import { sortableListCrud } from "@/lib/supabase/list-crud";
 
 import type { Album } from "@/types/album";
 
@@ -15,7 +15,7 @@ type AlbumInput = Omit<Album, "id">;
  * @returns {Album} 관리자 화면에서 사용하는 앨범 모델.
  */
 
-const albumsCrud = listCrud<Album>(COLLECTIONS.ALBUMS, decodeAlbum, "앨범", "album");
+const albumsCrud = sortableListCrud<Album>(COLLECTIONS.ALBUMS, decodeAlbum, "앨범", "album");
 
 /** 새 앨범 문서 ID 선발급. */
 const newAlbumId = albumsCrud.newId;

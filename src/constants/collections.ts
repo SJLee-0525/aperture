@@ -24,6 +24,22 @@ type CollectionId = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
  */
 type TableCollectionId = Exclude<CollectionId, typeof COLLECTIONS.RAG_DOCUMENTS>;
 
+/**
+ * 관리자가 드래그로 순서를 정하는 컬렉션. 나머지는 정렬 축이 다르거나 목록이 아니다
+ * (`devArticles` 는 발행일, `site`·`devArticleTags` 는 목록 화면이 없다).
+ * 이 타입이 정렬 RPC 이름의 존재를 타입으로 보장한다.
+ */
+const SORTABLE_COLLECTIONS = [
+  COLLECTIONS.PHOTOS,
+  COLLECTIONS.ALBUMS,
+  COLLECTIONS.MUSIC_WORKS,
+  COLLECTIONS.MUSIC_AWARDS,
+  COLLECTIONS.MUSIC_MEDIA,
+  COLLECTIONS.DEV_PROJECTS,
+] as const;
+
+type SortableCollectionId = (typeof SORTABLE_COLLECTIONS)[number];
+
 /** site 컬렉션의 고정 문서 ID */
 const SITE_DOC = "config"; // 전역 + 사진
 const SITE_MUSIC_DOC = "music"; // 음악 섹션 설정
@@ -42,14 +58,12 @@ type SupabaseCollectionDescriptor = {
   hasData: boolean;
   /** 도메인 camelCase 키 ← 행 스칼라 컬럼 매핑. data 안의 구형 잔존값보다 우선한다. */
   scalars: Record<string, string>;
-  /**
-   * 드래그 정렬 결과를 한 번에 저장하는 RPC 이름. 수동 정렬이 없는 컬렉션에는 없다
-   * (`devArticles` 는 발행일 정렬, `site`·`devArticleTags` 는 목록이 아니다).
-   */
-  sortRpc?: string;
 };
 
-const listDescriptor = (table: string, sortRpc: string): SupabaseCollectionDescriptor => ({
+/** 드래그 정렬 결과를 한 번에 저장하는 RPC 이름을 반드시 갖는 서술자. */
+type SortableCollectionDescriptor = SupabaseCollectionDescriptor & { sortRpc: string };
+
+const listDescriptor = (table: string, sortRpc: string): SortableCollectionDescriptor => ({
   table,
   sortRpc,
   select: "id,published,sort_order,data",
@@ -61,7 +75,11 @@ const listDescriptor = (table: string, sortRpc: string): SupabaseCollectionDescr
   scalars: { published: "published", order: "sort_order" },
 });
 
-const SUPABASE_COLLECTIONS: Record<TableCollectionId, SupabaseCollectionDescriptor> = {
+const SUPABASE_COLLECTIONS: Record<
+  Exclude<TableCollectionId, SortableCollectionId>,
+  SupabaseCollectionDescriptor
+> &
+  Record<SortableCollectionId, SortableCollectionDescriptor> = {
   [COLLECTIONS.PHOTOS]: listDescriptor("photos", "update_photos_sort_orders"),
   [COLLECTIONS.ALBUMS]: listDescriptor("albums", "update_albums_sort_orders"),
   [COLLECTIONS.MUSIC_WORKS]: listDescriptor("music_works", "update_music_works_sort_orders"),
@@ -115,5 +133,13 @@ const SUPABASE_COLLECTIONS: Record<TableCollectionId, SupabaseCollectionDescript
  */
 const tableFor = (collection: TableCollectionId): string => SUPABASE_COLLECTIONS[collection].table;
 
-export { COLLECTIONS, SITE_DOC, SITE_MUSIC_DOC, SITE_DEV_DOC, SUPABASE_COLLECTIONS, tableFor };
-export type { CollectionId, TableCollectionId };
+export {
+  COLLECTIONS,
+  SITE_DOC,
+  SITE_MUSIC_DOC,
+  SITE_DEV_DOC,
+  SORTABLE_COLLECTIONS,
+  SUPABASE_COLLECTIONS,
+  tableFor,
+};
+export type { CollectionId, SortableCollectionId, TableCollectionId };

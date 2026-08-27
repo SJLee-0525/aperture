@@ -7,7 +7,7 @@ import { encodeListRow } from "@/lib/supabase/admin/row-codec";
 import { listAlbumsAdmin } from "@/lib/supabase/albums";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { decodePhoto } from "@/lib/supabase/decode/photo";
-import { listCrud } from "@/lib/supabase/list-crud";
+import { sortableListCrud } from "@/lib/supabase/list-crud";
 
 import type { Photo } from "@/types/photo";
 
@@ -18,7 +18,7 @@ const ALBUMS_CACHE_TAG = collectionCacheTag(COLLECTIONS.ALBUMS);
 type PhotoInput = Omit<Photo, "id">;
 
 
-const photosCrud = listCrud<Photo>(COLLECTIONS.PHOTOS, decodePhoto, "사진", "photo");
+const photosCrud = sortableListCrud<Photo>(COLLECTIONS.PHOTOS, decodePhoto, "사진", "photo");
 
 /**
  * 새 사진 문서 ID 선발급 — Storage 경로(photos/{id}) 확정에 필요.

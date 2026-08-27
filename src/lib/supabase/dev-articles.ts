@@ -6,7 +6,7 @@ import { devArticleRagPolicy } from "@/lib/content/dev-article-rag-policy";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { decodeDevArticle } from "@/lib/supabase/decode/dev-article";
-import { listCrud } from "@/lib/supabase/list-crud";
+import { documentCrud } from "@/lib/supabase/list-crud";
 import { paginateAll } from "@/lib/supabase/paginate-all";
 
 import type { DevArticle } from "@/types/dev-article";
@@ -23,7 +23,7 @@ const TAGS_TABLE = tableFor(COLLECTIONS.DEV_ARTICLE_TAGS);
  * RAG 동기화는 `devArticleRagPolicy` 가 판정한다. 초안 저장과 발행일·이미지·연관 프로젝트만
  * 바뀐 저장은 요청을 보내지 않는다.
  */
-const devArticlesCrud = listCrud<DevArticle>(
+const devArticlesCrud = documentCrud<DevArticle>(
   COLLECTIONS.DEV_ARTICLES,
   decodeDevArticle,
   "블로그 글",

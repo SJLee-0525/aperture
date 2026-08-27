@@ -1,5 +1,6 @@
 "use client";
 
+import { COLLECTIONS, tableFor } from "@/constants/collections";
 import { requireAdminSession } from "@/lib/supabase/admin/require-admin-session";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import {
@@ -31,6 +32,10 @@ import type { ImageMeta } from "@/types/image";
  * select 별칭 규칙: 객체·배열은 `->`(JSON 타입 보존), 텍스트는 `->>`(Postgres text 추출) —
  * 응답 타입을 명시적으로 고정하기 위한 선택이다.
  * 세션 가드는 RLS 가 초안을 오류 없이 감추는 것을 로그인 오류로 바꾼다.
+ *
+ * 테이블명은 서술자(`tableFor`)에서 읽고 select 와 정렬 컬럼만 호출부에 남긴다.
+ * select 는 화면마다 읽는 양이 달라 여섯이 모두 다르고 `dev_articles` 는 목록용과
+ * 이미지 참조용 둘을 갖는다. 정렬 컬럼이 서술자 order 와 다른 것도 의도다(:120-121).
  */
 
 type Row = Record<string, unknown>;
@@ -58,7 +63,7 @@ const listProjected = async (table: string, select: string, orderColumns: string
 const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
   (
     await listProjected(
-      "photos",
+      tableFor(COLLECTIONS.PHOTOS),
       "id,published,sort_order,title:data->title,image:data->image,tags:data->tags",
       ["sort_order", "id"],
     )
@@ -75,7 +80,7 @@ const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
 const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
   (
     await listProjected(
-      "albums",
+      tableFor(COLLECTIONS.ALBUMS),
       "id,published,sort_order,title:data->title,coverPhotoId:data->>coverPhotoId,cover:data->cover,photoIds:data->photoIds",
       ["sort_order", "id"],
     )
@@ -93,7 +98,7 @@ const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
 const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
   (
     await listProjected(
-      "dev_projects",
+      tableFor(COLLECTIONS.DEV_PROJECTS),
       "id,published,sort_order,title:data->title,year:data->>year,cover:data->cover",
       ["sort_order", "id"],
     )
@@ -110,7 +115,7 @@ const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
 const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
   (
     await listProjected(
-      "music_works",
+      tableFor(COLLECTIONS.MUSIC_WORKS),
       "id,published,sort_order,title:data->title,performedAt:data->>performedAt,poster:data->poster",
       ["sort_order", "id"],
     )
@@ -134,7 +139,7 @@ const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
 const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
   (
     await listProjected(
-      "dev_articles",
+      tableFor(COLLECTIONS.DEV_ARTICLES),
       "id,published,pinned,slug,published_at,updated_at,title:data->title,tags:data->tags",
       ["id"],
     )
@@ -158,12 +163,16 @@ const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
 const listDevArticleImageRefsAdmin = async (): Promise<
   Array<{ cover: ImageMeta | null; body: string }>
 > =>
-  (await listProjected("dev_articles", "id,cover:data->cover,body:data->>body", ["id"])).map(
-    (row) => ({
-      cover: readImageOrNull(row.cover),
-      body: readString(row.body),
-    }),
-  );
+  (
+    await listProjected(
+      tableFor(COLLECTIONS.DEV_ARTICLES),
+      "id,cover:data->cover,body:data->>body",
+      ["id"],
+    )
+  ).map((row) => ({
+    cover: readImageOrNull(row.cover),
+    body: readString(row.body),
+  }));
 
 export {
   listAlbumItemsAdmin,

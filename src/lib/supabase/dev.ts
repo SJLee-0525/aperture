@@ -6,7 +6,7 @@ import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { decodeDevConfig, decodeDevProject } from "@/lib/supabase/decode/dev";
-import { listCrud } from "@/lib/supabase/list-crud";
+import { sortableListCrud } from "@/lib/supabase/list-crud";
 import { deleteDevProjectImages } from "@/lib/supabase/storage";
 
 import type { DevConfig, DevProject } from "@/types/dev";
@@ -21,7 +21,7 @@ const SITE_TABLE = tableFor(COLLECTIONS.SITE);
  * @returns {DevProject} 관리자 화면에서 사용하는 프로젝트 모델.
  */
 
-const devProjectsCrud = listCrud<DevProject>(
+const devProjectsCrud = sortableListCrud<DevProject>(
   COLLECTIONS.DEV_PROJECTS,
   decodeDevProject,
   "프로젝트",
