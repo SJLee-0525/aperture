@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { ArticleForm } from "@/features/admin-dev-articles/_components/ArticleForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getDevArticleRepository } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 
 import type { DevArticle } from "@/types/dev-article";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 

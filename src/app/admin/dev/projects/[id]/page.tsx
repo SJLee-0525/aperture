@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { ProjectForm } from "@/features/admin-dev-projects/_components/ProjectForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
 
 import type { DevProject } from "@/types/dev";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 

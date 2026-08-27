@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { AlbumForm } from "@/features/admin-albums/_components/AlbumForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getAlbumRepository } from "@/lib/admin/album-repository";
 
 import type { Album } from "@/types/album";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 

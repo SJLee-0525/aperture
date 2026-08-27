@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { ROUTES } from "@/constants/routes";
+import styles from "@/features/admin-shell/_components/admin-hub.module.css";
 
-import styles from "./page.module.css";
+import { ROUTES } from "@/constants/routes";
 
 const SECTIONS: { key: string; label: string; desc: string; href: string }[] = [
   {

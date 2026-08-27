@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { PhotoForm } from "@/features/admin-photos/_components/PhotoForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
 import type { Photo } from "@/types/photo";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 

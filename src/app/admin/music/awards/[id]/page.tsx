@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { AwardForm } from "@/features/admin-music-awards/_components/AwardForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getMusicAwardRepository } from "@/lib/admin/music-award-repository";
 
 import type { MusicAward } from "@/types/music";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 

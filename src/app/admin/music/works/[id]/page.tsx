@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { WorkForm } from "@/features/admin-music-works/_components/WorkForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
 import type { MusicWork } from "@/types/music";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 

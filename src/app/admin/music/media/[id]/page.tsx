@@ -3,12 +3,11 @@
 import { use, useEffect, useState } from "react";
 
 import { MediaForm } from "@/features/admin-music-media/_components/MediaForm";
+import styles from "@/features/admin-shell/_components/admin-doc-state.module.css";
 
 import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
 import type { MusicMedia } from "@/types/music";
-
-import styles from "./page.module.css";
 
 type Status = "loading" | "found" | "missing" | "error";
 
