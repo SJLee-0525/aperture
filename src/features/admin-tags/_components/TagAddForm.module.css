@@ -17,9 +17,10 @@
   flex: none;
   width: 160px;
 }
+/* min-width 는 AdminField 가 갖는다. 같은 요소에 얹히는 클래스가 같은 속성을 적으면
+   승자를 스타일시트 삽입 순서가 정한다. */
 .fieldText {
   flex: 1;
-  min-width: 0;
 }
 
 .add {

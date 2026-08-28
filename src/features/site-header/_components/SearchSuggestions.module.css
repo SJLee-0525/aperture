@@ -57,9 +57,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* 색은 `.u-label` 이 갖는다. 같은 요소에 함께 얹히므로 여기서 다시 적으면
+   승자를 스타일시트 삽입 순서가 정한다. */
 .section {
   flex: none;
-  color: var(--text-3);
 }
 
 /* 매치 구간 표시 — SearchResults 의 .mark 와 같은 섹션 액센트 밑줄 문법. */

@@ -2,7 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
-  min-width: 0;
+  /* 폭 하한은 호출부가 `--admin-field-min-width` 로 바꾼다. 호출부가 자기 클래스에
+     min-width 를 적으면 두 클래스가 같은 속성을 다투게 되고, 승자를 스타일시트 삽입
+     순서가 정한다. */
+  min-width: var(--admin-field-min-width, 0);
 }
 
 .label {

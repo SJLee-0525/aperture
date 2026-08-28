@@ -97,7 +97,7 @@
 }
 .inlineField {
   flex: 1;
-  min-width: 120px;
+  --admin-field-min-width: 120px;
 }
 
 /* 본문 흐름에 잠깐 얹히는 작업 패널의 껍데기. 배치는 쓰는 쪽 클래스가 정한다.
