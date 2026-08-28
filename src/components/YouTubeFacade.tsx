@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./YouTubeFacade.module.css";
 
@@ -43,8 +43,10 @@ type Props = {
  */
 const YouTubeFacade = ({ videoId, title, source, playing, onPlay, className }: Props) => {
   const playable = videoId.length > 0;
+  const [failedThumbnailId, setFailedThumbnailId] = useState<string | null>(null);
   const playerRef = useRef<HTMLIFrameElement>(null);
   const started = playing && playable;
+  const usePlaceholder = !playable || failedThumbnailId === videoId;
 
   // 재생하면 포커스를 가진 버튼이 iframe 으로 교체된다. 옮기지 않으면 포커스가 body 로
   // 떨어져 다음 Tab 이 지면 처음부터 다시 시작한다. 영상 카드가 여럿이라 매번 반복된다.
@@ -68,13 +70,18 @@ const YouTubeFacade = ({ videoId, title, source, playing, onPlay, className }: P
         <button type="button" className={styles.trigger} onClick={onPlay} aria-label={title}>
           <Image
             src={
-              playable ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : PLACEHOLDER_THUMBNAIL
+              usePlaceholder
+                ? PLACEHOLDER_THUMBNAIL
+                : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
             }
             alt=""
             fill
             sizes="(max-width: 720px) 100vw, 590px"
             className={styles.thumbnail}
             draggable={false}
+            onError={() => {
+              if (!usePlaceholder) setFailedThumbnailId(videoId);
+            }}
           />
           <div className={styles.overlay}>
             <div className={styles.title}>{title}</div>

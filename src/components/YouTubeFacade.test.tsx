@@ -30,6 +30,24 @@ describe("YouTubeFacade", () => {
     expect(screen.getByText("직접 녹화")).toBeTruthy();
   });
 
+  it("유튜브 썸네일을 불러오지 못하면 사이트 자리 그림으로 바꾼다", () => {
+    render(
+      <YouTubeFacade
+        videoId={VIDEO_ID}
+        title="배포 흐름 데모"
+        playing={false}
+        onPlay={vi.fn()}
+      />,
+    );
+
+    const thumbnail = screen.getByRole("button", { name: "배포 흐름 데모" }).querySelector("img");
+    fireEvent.error(thumbnail as HTMLImageElement);
+
+    expect(decodeURIComponent(thumbnail?.getAttribute("src") ?? "")).toContain(
+      "/opengraph-image",
+    );
+  });
+
   it("재생 중에는 영상 ID 로 조립한 embed 만 띄운다", () => {
     render(<YouTubeFacade videoId={VIDEO_ID} title="배포 흐름 데모" playing onPlay={vi.fn()} />);
 

@@ -110,6 +110,32 @@ describe("ArticleBody", () => {
     }
   });
 
+  it("hydration 전에 실패한 이미지는 error 이벤트 없이도 자리 그림으로 바꾼다", () => {
+    Object.defineProperty(HTMLImageElement.prototype, "complete", {
+      configurable: true,
+      get: () => true,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
+      configurable: true,
+      get: () => 0,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalHeight", {
+      configurable: true,
+      get: () => 0,
+    });
+
+    try {
+      const { container } = renderMarkdown(`![구조도](${STORAGE_IMAGE})`);
+
+      expect(screen.queryByAltText("구조도")).toBeNull();
+      expect(container.querySelector("figure img")).toBeNull();
+    } finally {
+      for (const key of ["complete", "naturalWidth", "naturalHeight"]) {
+        Reflect.deleteProperty(HTMLImageElement.prototype, key);
+      }
+    }
+  });
+
   it("원문에 크기를 적은 이미지는 실려 오기 전에도 확대 뷰가 그 비율을 쓴다", async () => {
     renderMarkdown(`![구조도](${STORAGE_IMAGE} "2048x1365")`);
 

@@ -233,7 +233,14 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
                     // 캐시에 있는 이미지는 hydration 전에 load 가 끝나 onLoad 가 잡히지 않는다.
                     // 마운트 시점에 이미 완료됐으면 여기서 크기를 읽는다.
                     ref={(node) => {
-                      if (node?.complete) measureImage(node, block.src, context);
+                      if (!node?.complete) return;
+                      // SSR 문서를 받는 동안 이미지 요청이 먼저 실패하면 hydration 뒤에는
+                      // onError 가 다시 오지 않는다. complete 이면서 크기가 0인 상태로 복구한다.
+                      if (!node.naturalWidth || !node.naturalHeight) {
+                        context.onImageError(block.src);
+                        return;
+                      }
+                      measureImage(node, block.src, context);
                     }}
                     loading="lazy"
                     decoding="async"
