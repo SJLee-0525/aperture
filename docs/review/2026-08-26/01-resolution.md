@@ -17,8 +17,8 @@
 | SEC-S-01 | 낮음 | `/api/chat` 교차 출처 | 완료 |
 | SEC-C-11 | 낮음 | CSP 의 Firebase 호스트 | 완료. `connect-src` 6개와 이미지 2개 제거 |
 | SEC-C-01 | 낮음 | 이미지 URL 정화 부재 | 미착수. 실데이터 확인 선행 |
-| SEC-C-02 | 낮음 | 업로드 타입·크기 검증 | 미착수 |
-| SEC-C-08 | 낮음 | devProjects href 가드 | 미착수 |
+| SEC-C-02 | 낮음 | 업로드 타입·크기 검증 | 완료. 블로그 직접 업로드 경로까지 공용 검증 적용 (`72869fb`) |
+| SEC-C-08 | 낮음 | devProjects href 가드 | 완료. 폼 검증 확인 후 저장소 쓰기 경계도 보강 (`8e320c9`) |
 | SEC-S-03 | 낮음 | 트리아지 프롬프트 경계 | 완료. 데이터 펜스와 필드 길이 상한 |
 | SEC-C-03 | 낮음 | 방침의 로컬 저장소 표 누락 | 완료. 한·영 두 문서 |
 | SEC-C-10 | 낮음 | 연락 초안 능동 삭제 | 완료. 타이머와 `pagehide` |
@@ -47,7 +47,7 @@
 | SEC-C-06 | 보류 | `_ga` 쿠키 삭제 도메인 | 점검 항목화 |
 | SEC-S-06 | 보류 | rate limit `x-real-ip` 폴백 | 점검 항목화 |
 
-완료 24 · 기각 5(근거 주석) · 주석만 5 · 미착수 3.
+완료 26 · 기각 5(근거 주석) · 주석만 5 · 미착수 1.
 
 "주석" 은 코드 주석을 말한다. 동작을 바꾸지 않고 왜 그대로 두는지를 해당 파일에 적었다는 뜻이다.
 문서에만 적으면 코드를 읽는 사람이 보지 못하고 다음 리뷰가 같은 항목을 다시 올린다.
@@ -124,7 +124,7 @@ mock 이미지 호스트의 실제 결합 지점을 잘못 짚으면 테스트�
 
 ## 남은 하나 (C7)
 
-SEC-C-01, SEC-C-02, SEC-C-08 은 코드 작업을 착수하지 않았다. 선행 조건이 저장소 밖에 있다.
+SEC-C-01만 코드 작업을 착수하지 않았다. 선행 조건이 저장소 밖에 있다.
 
 C6 이 이미지 허용 목록을 Supabase origin 하나로 좁혔다. 이 상태에서 origin 정화기를 켜면 허용
 목록 밖 URL 은 커버가 사라진다. 프로덕션 데이터에 구형 Firebase origin 이 남아 있으면 공개 화면
@@ -142,17 +142,16 @@ union all select 'dev_articles',  data->'cover'->>'url'   from dev_articles;
 -- dev_projects.data->'images' 는 배열이라 jsonb_array_elements 로 따로 편다.
 ```
 
-착수 시 할 일은 [01-plan.md](01-plan.md) §C7 그대로다. 세 항목의 사정은 서로 다르다.
+착수 시 할 일은 [01-plan.md](01-plan.md) §C7 중 SEC-C-01 범위다.
 
 SEC-C-01 은 실데이터 확인이 선행 조건인 유일한 항목이다. 반환 규약도 호출부 타입을 따라야 한다.
 `Photo.image` 는 non-nullable 이라 `public/photo.ts:58` 의 `EMPTY_IMAGE` 폴백을 유지하고,
 nullable 커버(album·dev·music·article)만 `null` 로 떨어뜨린다.
 
-SEC-C-02(업로드 입력 검증)와 SEC-C-08(devProjects href 가드)은 선행 조건이 없다. C7 을 기다릴
-이유가 없으므로 먼저 떼어내도 된다. 묶어 둔 것은 같은 쓰기·업로드 경계라는 이유뿐이다.
-
-`assert-uploadable-image.ts` 는 `vitest.config.ts:12` 의 `src/features/**/_lib/*.ts` 글롭에 이미
-잡힌다. include 추가는 필요 없고 첫 커밋부터 커버리지 임계값 대상이다.
+SEC-C-02는 확인 범위가 더 넓었다. 기존 40MB 검사는 업로드 훅 세 곳에만 있었고 블로그 대표 이미지와
+본문 이미지 삽입은 업로더를 직접 호출해 크기 검사도 건너뛰었다. `validate-uploadable-image.ts`로 크기와
+타입 검증을 합치고 다섯 진입점에 적용했다. SEC-C-08은 폼 경계의 `preparePublicLinks`로 이미 위험
+스킴을 거부했지만 저장소의 create·update·links patch에서도 같은 판정을 적용해 우회 경로를 닫았다.
 
 ## 후속 필요
 

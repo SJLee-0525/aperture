@@ -141,6 +141,10 @@ AUTH-02 완화의 절반(D7).
 
 C6 이후여야 한다. 허용 목록이 먼저 확정돼야 한다.
 
+> 후속 확인 결과 SEC-C-02는 `72869fb`, SEC-C-08은 `8e320c9`에서 별도 완료했다. 이 계획에서
+> 실제로 남은 C7 범위는 실데이터 origin 확인이 필요한 SEC-C-01뿐이다. 처리 근거는
+> [01-resolution.md](01-resolution.md#남은-하나-c7)를 따른다.
+
 선행: 실데이터 origin 분포 확인(D9). `photos.data->image->>url`, `albums.data->cover`,
 `dev_projects.data->cover`·`images`, `music_works.data->poster`, `dev_articles.data->cover`.
 Firebase origin 이 남아 있으면 그 행을 먼저 이관하고, 0건이면 곧바로 적용한다.
@@ -263,9 +267,9 @@ SEC-C-05, SEC-C-03, SEC-C-10, SEC-C-13, SEC-C-04, AUTH-03, AUTH-10.
 | AUTH-02 localStorage 토큰 + `unsafe-inline` | nonce 기각, 완화 2건 수정 | C6·C9 |
 | SEC-C-11 CSP 의 Firebase 호스트 | 수정 | C6 |
 | SEC-C-01 이미지 URL 정화 부재 | 수정(실데이터 확인 선행) | C7 |
-| SEC-C-02 업로드 타입·크기 검증 | 수정 | C7 |
+| SEC-C-02 업로드 타입·크기 검증 | 완료 (`72869fb`) | C7에서 분리 |
 | SEC-S-03 트리아지 프롬프트 경계 | 수정 | C10 |
-| SEC-C-08 devProjects href 가드 | 수정 | C7 |
+| SEC-C-08 devProjects href 가드 | 완료 (`8e320c9`) | C7에서 분리 |
 | SEC-C-03 방침의 로컬 저장소 표 누락 | 수정 | C11 |
 | SEC-C-10 연락 초안 능동 삭제 | 수정 | C11 |
 | SEC-C-05 GA `page_location` 검색어 | 수정 | C11 |

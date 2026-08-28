@@ -133,15 +133,16 @@ popstate 를 보내 `useSearchParams` 가 갱신된다. `pushState`·`replaceSta
 
 ## 새로 찾은 것
 
-라이트박스에서 양 끝 이미지로 넘기면 포커스가 트랩 밖으로 나간다. `ImageLightbox.tsx:357,373` 의
+라이트박스에서 양 끝 이미지로 넘기면 포커스가 트랩 밖으로 나갔다. `ImageLightbox.tsx:342,361` 의
 이전·다음 버튼이 `disabled={!loaded || index === 0}` 형태라 양 끝에서 비활성이 된다. 키보드로
 다음 버튼을 눌러 마지막 이미지에 닿으면 방금 누른 그 버튼이 `disabled` 가 되고 브라우저가 포커스를
 `body` 로 보낸다. `useFocusTrap` 의 `keydown` 은 컨테이너에 붙어 있어 `body` 에서 누른 Tab 은
 도달하지 않고, 그때부터 브라우저 기본 순서로 라이트박스 바깥을 순회한다.
 
-`ImageLightbox.tsx:190-218` 의 document capture 리스너가 Escape 와 화살표를 받으므로 완전히 갇히지는
-않는다. 보고서에 없는 항목이고 `BUG-C-02` 와도 원인이 다르다. `disabled` 대신 `aria-disabled` 를
-쓰거나 비활성 전환 시 닫기 버튼으로 포커스를 옮기면 해소된다. 미착수로 남긴다.
+`ImageLightbox.tsx:174-200` 의 document capture 리스너가 Escape 와 화살표를 받으므로 완전히 갇히지는
+않았다. 보고서에 없는 항목이고 `BUG-C-02` 와도 원인이 다르다. `PhotoModal.tsx:383,401`에도 같은
+패턴이 있어 두 화면 모두 `aria-disabled`로 바꾸고 클릭을 막았다. 실제 브라우저에서 경계 버튼이
+포커스를 유지하고 다음 Tab도 트랩 안에 남는 계약을 고정했다 (`c544019`).
 
 이 결함은 E2E 를 쓰다가 드러났다. 세 버튼을 한 번에 확인하려고 다음 버튼을 클릭한 뒤 Tab 을 눌렀는데
 이전 버튼이 잡히지 않았다. DOM 을 찍어 보니 그 시점의 이전 버튼은 `disabled: false` · `position: fixed`
@@ -198,12 +199,11 @@ select '3) shotAt epoch', id, data->>'shotAt'
 
 ## 후속 필요
 
-1. 라이트박스 포커스 이탈. 위 「새로 찾은 것」의 항목이다. 보고서 밖이라 이번 범위에 넣지 않았다.
-2. `ARCH-A-07`. `useQueryModal` 과 `usePhotoDetailSession` 의 훅 통합이다. 05 문서가 `BUG-C-06` 을
+1. `ARCH-A-07`. `useQueryModal` 과 `usePhotoDetailSession` 의 훅 통합이다. 05 문서가 `BUG-C-06` 을
    선결 조건으로 적었고 그것이 끝났으므로 이제 두 훅이 같은 판정 규칙을 쓴다.
-3. `listProjected` 서술자 흡수와 `SortableCollectionId` 도입. 이번에 접은 이유를 위에 적었고 해당
+2. `listProjected` 서술자 흡수와 `SortableCollectionId` 도입. 이번에 접은 이유를 위에 적었고 해당
    위치에 주석으로도 남겼다.
-4. `BUG-S-19`(Firestore 잔재 주석)를 포함한 05 문서 잔여 작업.
+3. `BUG-S-19`(Firestore 잔재 주석)를 포함한 05 문서 잔여 작업.
 
 ## 검증
 

@@ -134,7 +134,7 @@ nonce 전환은 난이도 큼. 관리자 이탈 시 자동 `signOut` 같은 완�
 
 | 항목 | 위치 | 내용 | 난이도 |
 | --- | --- | --- | --- |
-| SEC-C-08 | `src/lib/supabase/dev.ts:39`, `:52-63` | `devProjects` 쓰기 경계에 `isDangerousStoredHref` 가드가 없다. `musicWorks` 는 `music.ts:101-105` 의 `assertStorableTicketUrl` 이 있다. 폼을 거치지 않는 재저장 경로가 실재한다(`migrate-image-thumbnails.ts:181`). 공개 화면은 `public/dev.ts:46` 이 정화하므로 현재 노출은 없다 | 작음 |
+| SEC-C-08 | `src/lib/supabase/dev.ts:33-37` | 완료. 폼 경계의 `preparePublicLinks`가 이미 위험 스킴을 거부하고 있었고, 폼을 우회하는 `devProjects` 저장소 쓰기 경계에도 `isDangerousStoredHref` 검증을 추가했다. 이미지 전용 patch는 링크가 없어 그대로 통과한다 (`8e320c9`) | 완료 |
 | SEC-C-03 | `src/features/legal/_lib/legal-documents.tsx:120-172` | 처리방침 로컬 저장소 표에 `ap-theme:v1`(`storage-keys.ts:3`)과 `ap-lang:v1`(`:4`)이 빠져 있다. 테마는 `theme-script.ts:12` 인라인 스크립트가 매 첫 페인트마다 읽고 구 키가 있으면 읽기 경로에서 쓰기도 한다. 언어는 `LangProvider.tsx:65-70` 이 쿠키와 함께 localStorage 에도 쓰는데 방침은 쿠키만 적었다 | 작음 |
 | SEC-C-10 | `src/lib/contact-draft-storage.ts:127-143` | 연락 초안 삭제가 읽을 때만 일어난다. TTL 은 `parseStored`(`:102-118`)가 읽기 시점에 거부하는 형태다. `/contact` 로 가지 않으면 이름·이메일·본문 JSON 이 탭이 닫힐 때까지 남는다. 방침(`legal-documents.tsx:150-158`)은 "최대 10분"이라 적었다. 저장소 자체의 방어(길이 상한, 이메일 검증, 시계 조작 방어, 삭제 실패 시 사용 거부)는 잘 되어 있다 | 작음 |
 | SEC-C-05 | `src/features/analytics/_lib/gtag.ts:110-115` | GA `page_location` 에 검색어를 포함한 전체 query string 이 실린다. `PageViewTracker.tsx:32-33` 이 `pathname?query` 를 만들고 `/admin` 만 제외한다(`:14`). ADR-0004 는 Sentry Replay 에 대해서만 URL 정제를 결정했고 GA 쪽에는 대응 정제가 없다. 동의 게이트는 정상 작동한다 | 작음 |
