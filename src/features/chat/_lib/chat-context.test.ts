@@ -120,6 +120,23 @@ describe("buildChatContext", () => {
     });
   });
 
+  it("사진 상세를 여는 네 경로가 모두 같은 target 을 만든다", () => {
+    // 갤러리·앨범 상세·지도가 같은 모달을 쓴다. 경로 하나가 표에서 빠지면 그
+    // 화면에서만 챗봇이 열린 사진을 모른다.
+    const params = new URLSearchParams("photo=p05");
+
+    for (const pathname of [
+      "/ko/photo",
+      "/ko/photo/map",
+      "/ko/photo/albums/city-night",
+    ]) {
+      expect(buildChatContext(pathname, params)).toEqual({
+        pathname,
+        openTarget: { type: "photo", id: "p05" },
+      });
+    }
+  });
+
   it("modal 값이 없으면 openTarget을 생략한다", () => {
     expect(buildChatContext("/en/music/career", new URLSearchParams("q=test"))).toEqual({
       pathname: "/en/music/career",
@@ -145,6 +162,10 @@ describe("contextTargetForPath", () => {
   it("모달 없는 경로는 null", () => {
     expect(contextTargetForPath("/ko/photo/about")).toBeNull();
     expect(contextTargetForPath("/ko/music/media")).toBeNull();
+  });
+
+  it("지도도 사진 상세를 연다", () => {
+    expect(contextTargetForPath("/ko/photo/map")).toEqual({ type: "photo", queryKey: "photo" });
   });
 
   it("로케일을 제거하고 매핑을 찾는다", () => {

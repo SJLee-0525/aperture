@@ -27,6 +27,7 @@ const CONTEXT_TARGET_BY_PATH: Readonly<
   Partial<Record<string, { type: ChatContextTarget; queryKey: string | null }>>
 > = {
   [ROUTES.PHOTO]: { type: "photo", queryKey: "photo" },
+  [ROUTES.PHOTO_MAP]: { type: "photo", queryKey: "photo" },
   [ROUTES.MUSIC]: { type: "work", queryKey: "work" },
   [ROUTES.MUSIC_CAREER]: { type: "award", queryKey: "award" },
   [ROUTES.DEV_PROJECTS]: { type: "project", queryKey: "project" },

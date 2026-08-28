@@ -355,6 +355,38 @@ test.describe("Chat", () => {
     });
   });
 
+  test("지도에서 연 사진도 화면 문맥으로 요청 본문에 실어 보낸다", async ({ page }) => {
+    // 사진 상세는 갤러리·앨범·지도 세 곳에서 열린다. 셋 다 같은 모달을 쓰지만 문맥
+    // 등록은 호출부가 켜야 해서, 한 곳만 빠져도 그 경로에서만 조용히 사라진다.
+    let context: unknown;
+    await page.route("**/api/chat", async (route) => {
+      context = route.request().postDataJSON().context;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: { role: "assistant", content: "지도에서 고른 사진을 기준으로 답했어요." },
+        }),
+      });
+    });
+    await page.goto("/ko/photo/map?photo=p05");
+    await expect(page.getByRole("dialog", { name: "심야" })).toBeVisible();
+
+    await openChat(page);
+    const dialog = page.getByRole("dialog", { name: "Ask Sungjoon." });
+    await expect(dialog.getByText("보고 있는 사진")).toBeVisible();
+    await expect(dialog.getByText("심야", { exact: true })).toBeVisible();
+    await submit(page, "이 사진 어디서 찍었어?");
+
+    await expect(
+      chatMessages(page).getByText("지도에서 고른 사진을 기준으로 답했어요."),
+    ).toBeVisible();
+    expect(context).toEqual({
+      pathname: "/ko/photo/map",
+      openTarget: { type: "photo", id: "p05" },
+    });
+  });
+
   test("모달을 바꾼 뒤 재시도하면 그 시점의 화면 문맥을 다시 보낸다", async ({ page }) => {
     const contexts: unknown[] = [];
     await page.route("**/api/chat", async (route) => {
