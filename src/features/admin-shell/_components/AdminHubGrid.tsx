@@ -18,7 +18,6 @@ type Props = {
   /** 제목 아래 한 줄. 대시보드는 인사말, 섹션 허브는 안내 문구를 넣는다. */
   lead?: ReactNode;
   cards: HubCard[];
-  /** 카드 우상단 배지 문구. */
 };
 
 /**
@@ -36,7 +35,10 @@ const AdminHubGrid = ({ title, lead, cards }: Props) => (
     <div className={styles.grid}>
       {cards.map((card) => (
         <Link key={card.key} href={card.href} className={styles.card}>
-          <span className={styles.badge}>관리 →</span>
+          {/* 화살표를 읽으면 "관리 오른쪽 화살표"가 되므로 장식으로 감춘다. */}
+          <span className={styles.badge}>
+            관리<span aria-hidden="true"> →</span>
+          </span>
           <h2 className={styles.cardTitle}>{card.label}</h2>
           <p className={styles.cardDesc}>{card.desc}</p>
         </Link>
