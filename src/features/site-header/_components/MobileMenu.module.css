@@ -20,7 +20,6 @@
     z-index: 42;
     background: color-mix(in srgb, var(--bg) 88%, transparent);
     border: 1px solid var(--line);
-    box-shadow: var(--shadow-pop);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
   }
