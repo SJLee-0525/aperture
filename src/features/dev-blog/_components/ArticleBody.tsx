@@ -112,10 +112,9 @@ type RenderContext = {
  * 실려 온 이미지의 원본 크기를 올려 보내고 자리표시 비율을 걷는다.
  * 클래스를 DOM 에서 직접 떼는 이유는 크기를 알게 될 때마다 본문 트리를 다시 만들지 않기 위해서다.
  *
- * @param {HTMLImageElement} node 크기를 읽을 이미지 요소.
- * @param {string} src 라이트박스가 쓰는 이미지 주소.
- * @param {RenderContext} context 본문 렌더 문맥.
- * @returns {void}
+ * @param node 크기를 읽을 이미지 요소.
+ * @param src 라이트박스가 쓰는 이미지 주소.
+ * @param context 본문 렌더 문맥.
  */
 const measureImage = (node: HTMLImageElement, src: string, context: RenderContext): void => {
   if (!node.naturalWidth || !node.naturalHeight) return;
@@ -283,11 +282,9 @@ type Props = { document: ArticleDocument; lang: Lang; highlights: ArticleCodeHig
  * 본문은 한국어 원문 하나뿐이라 컨테이너에 `lang="ko"` 를 못 박는다. 영어 경로에서도 같은
  * 원문을 보여 주므로, 이 표시가 없으면 보조 기술과 브라우저 번역이 문서 언어를 잘못 읽는다.
  *
- * @param {Props} props
- * @param {ArticleDocument} props.document `parseArticleMarkdown` 이 만든 렌더 트리.
- * @param {Lang} props.lang 내부 링크에 붙일 언어 프리픽스. 본문 언어와는 별개다.
- * @param {ArticleCodeHighlights} props.highlights 코드 블록 색칠 결과. 키가 없는 블록은 색 없이 그린다.
- * @returns {JSX.Element}
+ * @param props.document `parseArticleMarkdown` 이 만든 렌더 트리.
+ * @param props.lang 내부 링크에 붙일 언어 프리픽스. 본문 언어와는 별개다.
+ * @param props.highlights 코드 블록 색칠 결과. 키가 없는 블록은 색 없이 그린다.
  */
 const ArticleBody = ({ document, lang, highlights }: Props) => {
   const dict = DICTIONARY[lang];

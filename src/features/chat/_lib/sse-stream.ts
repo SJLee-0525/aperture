@@ -18,10 +18,6 @@ const EVENT_BOUNDARY = /\r?\n\r?\n/;
  * 제공자별 리더를 따로 두지 않는다. (`[DONE]` 종료 표식은 OpenAI 만 보내지만
  * 걸러도 Gemini 에 영향이 없어 여기서 함께 처리한다.)
  *
- * @param {Response} response
- * @param {AbortSignal} signal
- * @param {(payload: string) => void} onPayload
- * @returns {Promise<void>}
  * @throws {Error} 본문이 없거나 스트림이 `MAX_STREAM_CHARS` 를 넘을 때.
  */
 const readSseStream = async (

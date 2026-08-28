@@ -35,9 +35,9 @@ type ChatDevArticle = Pick<DevArticle, "id" | "slug" | "title" | "summary" | "co
  * `slug`·`pinned`·`publishedAt`·`createdAt`·`updatedAt` 은 transport 병합이 행 스칼라로 덮은
  * 값이고, `firstPublishedAt` 은 data jsonb 안에 남는다.
  *
- * @param {string} id 문서 ID.
- * @param {Record<string, unknown>} data 병합된 문서 필드.
- * @returns {DevArticle} 다국어 필드와 날짜가 정규화된 글 모델.
+ * @param id 문서 ID.
+ * @param data 병합된 문서 필드.
+ * @returns 다국어 필드와 날짜가 정규화된 글 모델.
  */
 const toDevArticle = decodeDevArticle;
 
@@ -71,8 +71,8 @@ const toChatDevArticle = (row: Record<string, unknown>): ChatDevArticle => ({
  * 정렬은 서술자의 `published_at.desc.nullslast,id.asc` 가 소유한다 — mock 정렬 계약
  * (`compareByPublishedAtDesc` 의 id 오름차순 보조 정렬)과 순서가 같다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<DevArticle[]>} 발행일 내림차순의 공개 글 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 발행일 내림차순의 공개 글 목록.
  */
 const fetchPublishedDevArticles = async (options?: { fresh?: boolean }): Promise<DevArticle[]> =>
   (await selectPublished(COLLECTIONS.DEV_ARTICLES, options)).map(({ id, data }) =>
@@ -85,9 +85,9 @@ const fetchPublishedDevArticles = async (options?: { fresh?: boolean }): Promise
  * RLS 가 초안의 무인증 read 를 막고 쿼리에도 published 게이트가 있어, 초안·부재 모두
  * `null` 로 끝난다. 호출부는 예외와 `null` 을 모두 "확인할 수 없음" 으로 처리해야 한다.
  *
- * @param {string} id 문서 ID.
- * @param {{ fresh?: boolean; signal?: AbortSignal }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<DevArticle | null>} 읽은 글. 없으면 `null`.
+ * @param id 문서 ID.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 읽은 글. 없으면 `null`.
  * @throws {Error} 읽기가 실패한 경우.
  */
 const fetchDevArticleById = async (
@@ -104,8 +104,8 @@ const fetchDevArticleById = async (
  * 태그에는 발행 개념과 `order` 필드가 없다 — 순서 계약은 id 사전순이며 mock 사전이
  * 같은 순서를 유지한다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<DevArticleTag[]>} id 오름차순의 태그 사전.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns id 오름차순의 태그 사전.
  */
 const fetchDevArticleTags = async (options?: { fresh?: boolean }): Promise<DevArticleTag[]> =>
   (await selectRows(COLLECTIONS.DEV_ARTICLE_TAGS, options)).map(({ id, data }) => ({
@@ -118,8 +118,8 @@ const fetchDevArticleTags = async (options?: { fresh?: boolean }): Promise<DevAr
  * 챗봇 문맥과 참조 카드에 필요한 글 목록. projection 으로 본문을 전송에서 제외한다 —
  * 챗봇이 쓰는 것은 제목·요약·태그·경로이고 본문은 RAG 청크가 맡는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatDevArticle[]>} 발행일 내림차순의 채팅용 글 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 발행일 내림차순의 채팅용 글 목록.
  */
 const fetchChatDevArticles = async (options?: { fresh?: boolean }): Promise<ChatDevArticle[]> =>
   (await selectProjectedPublished(COLLECTIONS.DEV_ARTICLES, CHAT_ARTICLE_SELECT, options)).map(
@@ -130,8 +130,8 @@ const fetchChatDevArticles = async (options?: { fresh?: boolean }): Promise<Chat
  * 프로젝트 역방향 목록에 필요한 관계 필드만 projection 으로 남긴다. 프로젝트 지면은
  * 글 하나도 열지 않으면서 관계만 알면 된다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<DevArticleProjectLink[]>} 발행일 내림차순의 공개 글 관계 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 발행일 내림차순의 공개 글 관계 목록.
  */
 const fetchDevArticleProjectLinks = async (options?: {
   fresh?: boolean;

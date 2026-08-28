@@ -53,8 +53,7 @@ const SECTION_ROUTES: Record<SearchSection, Array<{ label: string; path: string 
 /**
  * 지원하는 섹션 인자만 반환한다.
  *
- * @param {unknown} value 에이전트가 넘긴 section 인자(검증 전).
- * @returns {value is SearchSection}
+ * @param value 에이전트가 넘긴 section 인자(검증 전).
  */
 const isSearchSection = (value: unknown): value is SearchSection =>
   value === "photo" || value === "music" || value === "dev";
@@ -103,8 +102,7 @@ const PROFILE_TOOL: WebMcpToolDefinition = {
  * 도구 결과와 화면 결과가 구조적으로 일치한다. 반환 경로는 항상 현재 로케일 프리픽스를
  * 유지한다(프리픽스 없는 경로는 308/307 판정을 타며 방문자 언어를 바꿔놓는다 — ADR-0002).
  *
- * @param {WebMcpProfile} profile 공개 레이아웃이 내려주는 site config 최소 투영.
- * @returns {void}
+ * @param profile 공개 레이아웃이 내려주는 site config 최소 투영.
  */
 const useGlobalTools = (profile: WebMcpProfile): void => {
   const { lang } = useLang();

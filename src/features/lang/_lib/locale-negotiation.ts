@@ -21,8 +21,8 @@ type LocaleDecision = { lang: Lang; source: LocaleDecisionSource };
  * 비정상 항목을 제거한 뒤 negotiator에 표준 품질값 정렬을 맡긴다.
  * wildcard는 구체적인 브라우저 언어가 아니므로 판정 후보에서 제외한다.
  *
- * @param {string | null} acceptLanguage - 요청의 원본 `Accept-Language` 헤더.
- * @returns {BrowserLanguage} 한국어, 비한국어를 대표하는 영어, 또는 판정 불가 기본값.
+ * @param acceptLanguage - 요청의 원본 `Accept-Language` 헤더.
+ * @returns 한국어, 비한국어를 대표하는 영어, 또는 판정 불가 기본값.
  */
 const browserLanguage = (acceptLanguage: string | null): BrowserLanguage => {
   if (
@@ -57,9 +57,9 @@ const browserLanguage = (acceptLanguage: string | null): BrowserLanguage => {
 /**
  * 명시적 선호 쿠키가 정확히 하나일 때만 신뢰하고, 아니면 브라우저 언어로 폴백한다.
  *
- * @param {readonly string[]} cookieValues - 같은 이름으로 수신한 언어 쿠키 값 전체.
- * @param {string | null} acceptLanguage - 요청의 `Accept-Language` 헤더.
- * @returns {LocaleDecision} 최종 언어와 그 결정을 만든 신호.
+ * @param cookieValues - 같은 이름으로 수신한 언어 쿠키 값 전체.
+ * @param acceptLanguage - 요청의 `Accept-Language` 헤더.
+ * @returns 최종 언어와 그 결정을 만든 신호.
  */
 const decideLocale = (
   cookieValues: readonly string[],

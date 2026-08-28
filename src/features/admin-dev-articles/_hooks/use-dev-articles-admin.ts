@@ -26,7 +26,6 @@ type AdminArticlesStatus = "loading" | "ready" | "error";
  * 낙관적 갱신은 언제나 대상 행 하나만 건드린다. 여러 행의 요청이 겹칠 수 있어
  * 배열 전체를 복원하거나 재조회 결과로 갈아 끼우면 다른 행의 변경이 사라진다.
  *
- * @returns {{ articles: AdminDevArticleListItem[]; total: number; status: AdminArticlesStatus; error: string | null; keyword: string; setKeyword: (value: string) => void; statusFilter: AdminArticleStatusFilter; setStatusFilter: (value: AdminArticleStatusFilter) => void; togglePublished: (id: string, next: boolean) => Promise<void>; togglePinned: (id: string, next: boolean) => Promise<void>; pendingPinIds: ReadonlySet<string>; pendingPublishIds: ReadonlySet<string>; remove: (id: string) => Promise<void> }}
  *   `articles` 는 필터를 적용한 목록, `total` 은 필터 전 전체 글 수다.
  *   `pendingPinIds`·`pendingPublishIds` 는 각 요청이 진행 중인 행들이다.
  */

@@ -31,14 +31,10 @@ type Props = {
  * 서버 컴포넌트다. 인터뷰 Q&A 도 여기서 렌더해 AboutSection 의 children 슬롯으로 넘기므로
  * interview·stack·projectTechTags 원본은 client 경계를 넘지 않는다.
  *
- * @param {Props} props
- * @param {Lang} props.lang
- * @param {LocalizedText} props.heroLead - 첫 문장을 요약 헤드라인으로, 나머지를 본문으로 나눈다.
- * @param {DevStackGroup[]} props.stack - 카테고리 이름만 목록 컬럼에 쓴다. 칩 상세는 경력·기술 페이지 소관이다.
- * @param {DevInterview[]} props.interview
- * @param {number} props.timelineCount - 경력 항목 수. 통계 카운터에만 쓰므로 항목 본문은 받지 않는다.
- * @param {string[][]} props.projectTechTags - 프로젝트별 태그. 중복을 제거해 사용 기술 목록과 통계를 만든다.
- * @returns {JSX.Element}
+ * @param props.heroLead - 첫 문장을 요약 헤드라인으로, 나머지를 본문으로 나눈다.
+ * @param props.stack - 카테고리 이름만 목록 컬럼에 쓴다. 칩 상세는 경력·기술 페이지 소관이다.
+ * @param props.timelineCount - 경력 항목 수. 통계 카운터에만 쓰므로 항목 본문은 받지 않는다.
+ * @param props.projectTechTags - 프로젝트별 태그. 중복을 제거해 사용 기술 목록과 통계를 만든다.
  */
 const DevAboutView = ({
   lang,

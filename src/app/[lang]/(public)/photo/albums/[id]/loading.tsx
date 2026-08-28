@@ -7,8 +7,6 @@ const TILE_ASPECTS = [1, 0.75, 1.35, 0.8, 1.2, 0.7, 1, 0.9];
 
 /**
  * 앨범 상세 RSC fetch 동안의 스켈레톤 — AlbumDetailView 셸(hero 300px + 메이슨리)을 흉내.
- *
- * @returns {JSX.Element}
  */
 export default function AlbumDetailLoading() {
   return (

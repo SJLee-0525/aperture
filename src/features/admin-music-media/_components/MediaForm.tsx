@@ -21,10 +21,7 @@ type Props = {
 /**
  * 공유 영상 폼 — 이중언어 제목·출처 + YouTube ID + 저장. 조립만 하고 상태는 훅이 갖는다.
  *
- * @param {Props} props
- * @param {string} props.mediaId
- * @param {MusicMedia | undefined} props.initial - 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.initial - 있으면 수정 모드.
  */
 const MediaForm = ({ mediaId, initial }: Props) => {
   const {

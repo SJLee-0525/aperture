@@ -9,8 +9,7 @@ import type { ChatScreenTarget } from "@/lib/chat-screen-target-context";
 /**
  * 상세 모달이 열리면 항목을 등록하고 닫히면 자신이 등록한 값만 해제한다.
  *
- * @param {ChatScreenTarget | null} target 현재 상세 항목.
- * @returns {void}
+ * @param target 현재 상세 항목.
  */
 const useRegisterChatScreenTarget = (target: ChatScreenTarget | null): void => {
   const setTarget = useContext(ChatScreenTargetContext)?.setTarget;

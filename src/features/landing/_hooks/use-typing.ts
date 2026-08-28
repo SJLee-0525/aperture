@@ -11,10 +11,6 @@ import { useEffect, useRef, useState } from "react";
  *
  * `targetRef` 를 주면 그 요소가 화면 밖일 때 순환을 멈춘다. 정지 조건이 언마운트뿐이면
  * 지면을 내린 뒤에도 초당 12~22회의 리렌더가 계속된다. 다시 보이면 같은 단어부터 잇는다.
- *
- * @param {string[]} words
- * @param {React.RefObject<Element | null>} [targetRef]
- * @returns {{ text: string; index: number }}
  */
 const useTyping = (
   words: string[],

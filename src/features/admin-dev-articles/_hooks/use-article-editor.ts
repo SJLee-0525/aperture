@@ -30,8 +30,8 @@ type References = ReturnType<typeof useArticleReferences>;
 /**
  * 폼 값의 지문. 저장 이후 바뀐 것이 있는지 비교하는 데만 쓴다.
  *
- * @param {DevArticleInput} input 비교할 폼 값.
- * @returns {string} 직렬화한 값.
+ * @param input 비교할 폼 값.
+ * @returns 직렬화한 값.
  */
 /**
  * 글 편집 폼의 상태와 저장.
@@ -43,10 +43,9 @@ type References = ReturnType<typeof useArticleReferences>;
  * 발행 조건은 저장 직전이 아니라 입력하는 동안 계속 계산한다. 발행 버튼 옆에 무엇이 모자란지
  * 보여 주려면 값이 항상 있어야 하고, 저장 함수도 같은 결과를 다시 확인한다.
  *
- * @param {string} articleId 새 글이면 미리 발급한 ID, 편집이면 기존 문서 ID.
- * @param {References} references 태그·프로젝트·다른 글 주소.
- * @param {DevArticle} [initial] 편집 중인 글의 저장본. 새 글이면 없다.
- * @returns {{ form: DevArticleInput; patch: (next: Partial<DevArticleInput>) => void; isEdit: boolean; slugLocked: boolean; onSlugChange: (value: string) => void; markdownIssues: ReturnType<typeof parseArticleMarkdown>["issues"]; publishIssues: ReturnType<typeof checkArticlePublishable>; dirty: boolean; saving: boolean; savedAt: Date | null; error: string | null; save: () => Promise<boolean>; markSaved: (input: DevArticleInput) => void }}
+ * @param articleId 새 글이면 미리 발급한 ID, 편집이면 기존 문서 ID.
+ * @param references 태그·프로젝트·다른 글 주소.
+ * @param [initial] 편집 중인 글의 저장본. 새 글이면 없다.
  */
 const useArticleEditor = (articleId: string, references: References, initial?: DevArticle) => {
   const router = useRouter();

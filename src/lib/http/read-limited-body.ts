@@ -4,9 +4,9 @@
  * 본문을 통째로 읽은 뒤 크기를 재면 그 사이에 상한을 넘는 본문이 이미 메모리에 올라간다.
  * 요청과 응답 양쪽이 같은 절단 규칙을 쓴다.
  *
- * @param {ReadableStream<Uint8Array>} stream 읽을 본문 스트림.
- * @param {number} maxBytes 허용하는 최대 바이트 수.
- * @returns {Promise<Uint8Array | null>} 이어 붙인 본문. 상한을 넘으면 `null`.
+ * @param stream 읽을 본문 스트림.
+ * @param maxBytes 허용하는 최대 바이트 수.
+ * @returns 이어 붙인 본문. 상한을 넘으면 `null`.
  */
 const readLimitedStream = async (
   stream: ReadableStream<Uint8Array>,
@@ -44,9 +44,9 @@ const readLimitedStream = async (
 /**
  * 요청 본문을 상한까지만 읽어 문자열로 돌려준다.
  *
- * @param {Request} request 읽을 요청.
- * @param {number} maxBytes 허용하는 최대 바이트 수.
- * @returns {Promise<string | null>} 본문 문자열. 상한을 넘으면 `null`.
+ * @param request 읽을 요청.
+ * @param maxBytes 허용하는 최대 바이트 수.
+ * @returns 본문 문자열. 상한을 넘으면 `null`.
  */
 const readLimitedBody = async (request: Request, maxBytes: number): Promise<string | null> => {
   const body = request.body;
@@ -64,9 +64,9 @@ const readLimitedBody = async (request: Request, maxBytes: number): Promise<stri
  * 응답 본문을 상한까지만 읽어 바이트로 돌려준다. 이미지 프록시처럼 원문을 그대로
  * 되돌려주는 경로가 쓴다.
  *
- * @param {Response} response 읽을 응답.
- * @param {number} maxBytes 허용하는 최대 바이트 수.
- * @returns {Promise<Uint8Array | null>} 본문 바이트. 상한을 넘으면 `null`.
+ * @param response 읽을 응답.
+ * @param maxBytes 허용하는 최대 바이트 수.
+ * @returns 본문 바이트. 상한을 넘으면 `null`.
  */
 const readLimitedBytes = async (
   response: Response,
@@ -83,9 +83,9 @@ const readLimitedBytes = async (
  * `Transfer-Encoding: chunked` 요청에는 `Content-Length` 가 없어 이 검사를 통과한다.
  * 그래서 이 함수는 `readLimitedBody` 를 대신하지 않고 앞에 덧붙는다.
  *
- * @param {Headers} headers 요청 또는 응답 헤더.
- * @param {number} maxBytes 허용하는 최대 바이트 수.
- * @returns {boolean} 선언된 크기가 상한을 넘으면 `true`.
+ * @param headers 요청 또는 응답 헤더.
+ * @param maxBytes 허용하는 최대 바이트 수.
+ * @returns 선언된 크기가 상한을 넘으면 `true`.
  */
 const declaredBodyTooLarge = (headers: Headers, maxBytes: number): boolean => {
   const declared = Number(headers.get("content-length"));

@@ -6,9 +6,6 @@ const AUTO_SCROLL_GAIN = 8;
 
 /**
  * 앵커로부터의 Y 거리(px)를 초당 스크롤 속도로 변환한다.
- *
- * @param {number} deltaY
- * @returns {number}
  */
 const autoScrollVelocity = (deltaY: number): number => {
   const distance = Math.abs(deltaY);

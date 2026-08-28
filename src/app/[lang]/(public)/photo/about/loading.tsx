@@ -9,8 +9,6 @@ const LIST_ROW_WIDTHS = ["78%", "64%", "70%", "52%"];
 
 /**
  * 소개 RSC fetch 동안의 스켈레톤 — AboutView 셸(히어로 + 통계 4칸 + 2열 리스트)을 흉내.
- *
- * @returns {JSX.Element}
  */
 export default function AboutLoading() {
   return (

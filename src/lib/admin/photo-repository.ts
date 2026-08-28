@@ -29,8 +29,8 @@ const STORE_VERSION = 1;
  * 관리자 사진 목록에 필요한 필드만 고른다.
  * EXIF·좌표·본문 격의 큰 필드를 빼서 목록 화면이 받는 양을 live 와 맞춘다.
  *
- * @param {Photo} photo 저장된 사진 전체.
- * @returns {AdminPhotoListItem} 목록 행에 필요한 필드만.
+ * @param photo 저장된 사진 전체.
+ * @returns 목록 행에 필요한 필드만.
  */
 const toListItem = ({ id, title, image, tags, order, published }: Photo): AdminPhotoListItem => ({
   id,
@@ -46,8 +46,8 @@ const toListItem = ({ id, title, image, tags, order, published }: Photo): AdminP
  * 같은 결과를 mock 앨범 저장소 위에서 만든다(같은 순수 함수 `removePhotoFromAlbum` 공유).
  * live 처럼 앨범의 `cover` snapshot 은 건드리지 않는다.
  *
- * @param {string} photoId 삭제된 사진 ID.
- * @returns {Promise<void>} 영향받은 앨범의 갱신이 끝나면 완료된다.
+ * @param photoId 삭제된 사진 ID.
+ * @returns 영향받은 앨범의 갱신이 끝나면 완료된다.
  */
 const removePhotoReferencesFromAlbums = async (photoId: string): Promise<void> => {
   const albums = getAlbumRepository();
@@ -66,7 +66,7 @@ const removePhotoReferencesFromAlbums = async (photoId: string): Promise<void> =
 /**
  * 사진 삭제 시 앨범 참조와 해당 object URL을 함께 정리하는 mock 저장소.
  *
- * @returns {PhotoRepository} 브라우저 로컬 저장소에 붙은 사진 CRUD.
+ * @returns 브라우저 로컬 저장소에 붙은 사진 CRUD.
  */
 const createMockPhotoRepository = (): PhotoRepository => {
   const base = createLocalListRepository<Photo, AdminPhotoListItem>({
@@ -104,7 +104,7 @@ const createMockPhotoRepository = (): PhotoRepository => {
  * Supabase CRUD와 Storage 정리를 묶은 live 사진 저장소.
  * Storage 정리에 실패해도 문서 삭제 결과는 유지한다.
  *
- * @returns {PhotoRepository} Supabase 에 붙은 사진 CRUD.
+ * @returns Supabase 에 붙은 사진 CRUD.
  */
 const createLivePhotoRepository = (): PhotoRepository => ({
   newId: newPhotoId,
@@ -123,7 +123,7 @@ const createLivePhotoRepository = (): PhotoRepository => ({
 /**
  * 현재 콘텐츠 소스에 맞는 사진 저장소. 첫 호출 결과를 재사용한다.
  *
- * @returns {PhotoRepository} mock 이면 브라우저 로컬, live 면 Supabase 구현.
+ * @returns mock 이면 브라우저 로컬, live 면 Supabase 구현.
  */
 const getPhotoRepository = selectRepository<PhotoRepository>(
   createMockPhotoRepository,

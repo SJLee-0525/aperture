@@ -80,8 +80,8 @@ const OPEN_TOOL: WebMcpToolDefinition = {
  * 숫자 또는 숫자 문자열인 초점거리를 16~300mm 범위로 제한한다.
  * 유효 값은 슬라이더와 같은 16~300mm 로 클램프한다.
  *
- * @param {unknown} raw 에이전트가 넘긴 focalMin/focalMax 인자.
- * @returns {number | null} null 이면 "인자 미지정"으로 취급한다.
+ * @param raw 에이전트가 넘긴 focalMin/focalMax 인자.
+ * @returns null 이면 "인자 미지정"으로 취급한다.
  */
 const parseFocalArg = (raw: unknown): number | null => {
   const parsed =
@@ -97,9 +97,6 @@ const parseFocalArg = (raw: unknown): number | null => {
 
 /**
  * 태그나 카메라 필터를 해제하는 'all' 값인지 확인한다.
- *
- * @param {string} raw
- * @returns {boolean}
  */
 const isClearValue = (raw: string): boolean => raw.trim().toLowerCase() === "all";
 
@@ -113,9 +110,8 @@ const isClearValue = (raw: string): boolean => raw.trim().toLowerCase() === "all
  * 검색어(`?q`)도 함께 적는다. 결과 계산에는 들어가는데 상태 표시에서 빠지면
  * `/photo?q=zzz` 에서 0건인데 "Active filters: none" 이라는 오답이 나온다(W5 리뷰).
  *
- * @param {{ tag: string; camera: string; focalMin: number; focalMax: number; query: string }} state
- * @param {Tag[]} tags 태그 id 를 사람이 읽는 라벨로 되돌리기 위한 사전.
- * @returns {string} 걸린 게 없으면 "none".
+ * @param tags 태그 id 를 사람이 읽는 라벨로 되돌리기 위한 사전.
+ * @returns 걸린 게 없으면 "none".
  */
 const describeFilters = (
   state: { tag: string; camera: string; focalMin: number; focalMax: number; query: string },
@@ -139,8 +135,7 @@ const describeFilters = (
  * 이 도구가 인자로 풀 수 있는 축과 그렇지 않은 검색어를 **다른 문장**으로 나눈다.
  * 한 문장에 섞으면 `pass the search box clears "zzz"` 처럼 명령과 설명이 뒤엉킨다.
  *
- * @param {{ tag: string; camera: string; focalMin: number; focalMax: number; query: string }} state
- * @returns {string} 알릴 것이 없으면 빈 문자열. 있으면 앞에 공백 하나가 붙는다.
+ * @returns 알릴 것이 없으면 빈 문자열. 있으면 앞에 공백 하나가 붙는다.
  */
 const describeReset = (state: {
   tag: string;
@@ -172,11 +167,10 @@ const describeReset = (state: {
  * 결과 건수는 화면과 같은 `filterPhotos` 를 동기 재호출해 계산하므로 setter 반영 시점과
  * 무관하게 도구 응답과 화면이 일치한다. `?q` 검색어는 execute 시점 URL 에서 읽는다.
  *
- * @param {GalleryPhoto[]} photos 서버가 내려준 공개 사진 투영.
- * @param {Tag[]} tags 통제 태그 사전.
- * @param {PhotoFilter} filter 현재 필터 상태와 변경 함수.
- * @param {string[]} cameras 선택 가능한 카메라 목록.
- * @returns {void}
+ * @param photos 서버가 내려준 공개 사진 투영.
+ * @param tags 통제 태그 사전.
+ * @param filter 현재 필터 상태와 변경 함수.
+ * @param cameras 선택 가능한 카메라 목록.
  */
 const useGalleryTools = (
   photos: GalleryPhoto[],

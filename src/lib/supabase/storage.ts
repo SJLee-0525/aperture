@@ -23,8 +23,8 @@ const bucket = () => getSupabaseClient().storage.from(BUCKET);
  * Storage 경로를 공개 버킷 URL 로 바꾼다.
  * 동기 문자열 조립이라 객체의 존재나 접근 권한을 확인하지 않는다.
  *
- * @param {string} path 문서에 저장하는 형태의 Storage 객체 경로(버킷명 제외).
- * @returns {string} `next.config` 의 remotePatterns 가 허용하는 공개 URL.
+ * @param path 문서에 저장하는 형태의 Storage 객체 경로(버킷명 제외).
+ * @returns `next.config` 의 remotePatterns 가 허용하는 공개 URL.
  */
 const publicImageUrl = (path: string): string => bucket().getPublicUrl(path).data.publicUrl;
 
@@ -33,11 +33,11 @@ const publicImageUrl = (path: string): string => bucket().getPublicUrl(path).dat
  * 새 경로를 사용해 CDN과 브라우저의 이전 이미지 캐시를 피한다.
  * 경로에 버킷명을 넣지 않는다 — 문서의 `path` 필드가 기존 데이터와 같은 형태여야 한다.
  *
- * @param {string} folder 이미지를 저장할 Storage 폴더.
- * @param {Blob} blob 업로드할 WebP 이미지 데이터.
- * @param {string} [name] 확장자를 뺀 파일명. 한 이미지의 원본·프리뷰·썸네일에 같은 값을 넘기면
+ * @param folder 이미지를 저장할 Storage 폴더.
+ * @param blob 업로드할 WebP 이미지 데이터.
+ * @param [name] 확장자를 뺀 파일명. 한 이미지의 원본·프리뷰·썸네일에 같은 값을 넘기면
  *   문서 없이도 세 파일이 한 벌임을 경로만으로 알 수 있다. 생략하면 파일마다 새 UUID.
- * @returns {Promise<{ url: string; path: string }>} 공개 URL과 Storage 객체 경로.
+ * @returns 공개 URL과 Storage 객체 경로.
  */
 const uploadWebp = async (
   folder: string,
@@ -76,8 +76,8 @@ const listEntries = async (folder: string): Promise<ListedEntry[]> => {
  * Storage 폴더 안의 객체와 하위 폴더를 재귀 삭제한다.
  * `.list()` 는 재귀하지 않으므로 폴더 항목(id null)을 직접 내려간다.
  *
- * @param {string} folder 삭제할 Storage 폴더 경로.
- * @returns {Promise<void>} 모든 하위 객체가 삭제되면 완료된다.
+ * @param folder 삭제할 Storage 폴더 경로.
+ * @returns 모든 하위 객체가 삭제되면 완료된다.
  */
 const deleteFolder = async (folder: string): Promise<void> => {
   const entries = await listEntries(folder);
@@ -111,8 +111,8 @@ const deleteImageStrict = async (path: string): Promise<void> => {
  * `.remove()` 는 존재하지 않는 경로를 오류로 처리하지 않으므로 이미 삭제된 객체도 성공이다 —
  * 문서 삭제가 이미 지워진 파생본을 다시 지우는 멱등 경로가 이 계약에 의존한다.
  *
- * @param {Iterable<string>} paths 삭제할 Storage 객체 경로 모음.
- * @returns {Promise<void>} 존재하는 객체의 삭제가 끝나면 완료된다.
+ * @param paths 삭제할 Storage 객체 경로 모음.
+ * @returns 존재하는 객체의 삭제가 끝나면 완료된다.
  */
 const deleteImages = async (paths: Iterable<string>): Promise<void> => {
   const uniquePaths = [...new Set(paths)].filter(Boolean);
@@ -177,8 +177,8 @@ const deleteArticleImages = (articleId: string) => deleteFolder(`dev-blog/${arti
  * `metadata.size`, 시각은 최상위 `created_at` 이며 경로는 폴더 프리픽스를 결합해
  * 문서에 저장된 `path` 값과 같은 형태로 만든다.
  *
- * @param {string} folder 나열할 Storage 폴더 경로.
- * @returns {Promise<StorageFileInfo[]>} 하위 전체 객체의 경로·크기·업로드 시각.
+ * @param folder 나열할 Storage 폴더 경로.
+ * @returns 하위 전체 객체의 경로·크기·업로드 시각.
  */
 const listFolderFiles = async (folder: string): Promise<StorageFileInfo[]> => {
   const entries = await listEntries(folder);

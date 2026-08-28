@@ -28,13 +28,7 @@ type Props = {
  *
  * 서버 컴포넌트다. 파생 결과만 client 인 AboutSection 으로 넘어가고 workFacts 원본은 브라우저로 가지 않는다.
  *
- * @param {Props} props
- * @param {Lang} props.lang
- * @param {LocalizedText} props.intro - site/music 중 이 뷰가 소비하는 유일한 필드
- * @param {WorkFact[]} props.workFacts
- * @param {number} props.awardCount
- * @param {number} props.mediaCount
- * @returns {JSX.Element}
+ * @param props.intro - site/music 중 이 뷰가 소비하는 유일한 필드
  */
 const MusicAboutView = ({ lang, intro, workFacts, awardCount, mediaCount }: Props) => {
   const dict = DICTIONARY[lang];

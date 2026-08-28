@@ -17,8 +17,6 @@ declare global {
 
 /**
  * Google tag를 요청하기 전에 dataLayer 큐를 준비해 초기 설정 유실을 막는다.
- *
- * @returns {void}
  */
 const prepareGoogleAnalytics = (): void => {
   window.dataLayer = window.dataLayer || [];
@@ -35,8 +33,7 @@ const prepareGoogleAnalytics = (): void => {
  * Basic Consent Mode의 순서에 맞춰 기본값을 거부로 둔 다음, 분석 저장만 허용으로 갱신한다.
  * 철회 후 재허용할 때도 `update`가 다시 실행되므로 이전의 거부 상태가 남지 않는다.
  *
- * @param {string} measurementId - `G-`로 시작하는 GA4 측정 ID.
- * @returns {void}
+ * @param measurementId - `G-`로 시작하는 GA4 측정 ID.
  */
 const configureGoogleAnalytics = (measurementId: string): void => {
   prepareGoogleAnalytics();
@@ -63,9 +60,8 @@ const configureGoogleAnalytics = (measurementId: string): void => {
 /**
  * 현재 경로에서 읽을 수 있는 쿠키의 만료를 요청한다.
  *
- * @param {string} name - 삭제할 쿠키 이름.
- * @param {string | undefined} domain - 도메인 속성이 있는 쿠키를 위한 선택적 호스트명.
- * @returns {void}
+ * @param name - 삭제할 쿠키 이름.
+ * @param domain - 도메인 속성이 있는 쿠키를 위한 선택적 호스트명.
  */
 const expireCookie = (name: string, domain?: string): void => {
   const domainPart = domain ? `; Domain=${domain}` : "";
@@ -74,8 +70,6 @@ const expireCookie = (name: string, domain?: string): void => {
 
 /**
  * 철회 즉시 이후 측정을 막고 현재 origin에서 접근 가능한 GA 쿠키 삭제를 시도한다.
- *
- * @returns {void}
  */
 const disableGoogleAnalytics = (): void => {
   window.gtag?.("consent", "update", {
@@ -103,9 +97,6 @@ const disableGoogleAnalytics = (): void => {
 
 /**
  * `url` 은 쿼리까지 포함한 경로(`/ko/photo?photo=abc`) — 모달 딥링크도 개별 조회로 잡힌다.
- *
- * @param {string} url
- * @returns {void}
  */
 const sendPageView = (url: string): void => {
   window.gtag?.("event", "page_view", {

@@ -22,11 +22,10 @@ type Props = {
  * 초안 저장은 이 목록이 있어도 막지 않는다. 쓰다 만 글을 잃지 않는 것이 우선이고,
  * 여기 남은 항목은 발행 버튼을 누를 때만 걸림돌이 된다(07-dev-blog §3).
  *
- * @param {Props} props
- * @param {string} props.title 목록 위에 붙일 이름.
- * @param {ArticleMarkdownIssue[] | undefined} props.markdownIssues 본문 검증 결과. 원문 줄 번호를 함께 보여 준다.
- * @param {DevArticlePublishIssue[] | undefined} props.publishIssues 발행 조건 검사 결과.
- * @returns {JSX.Element | null} 사유가 하나도 없으면 아무것도 그리지 않는다.
+ * @param props.title 목록 위에 붙일 이름.
+ * @param props.markdownIssues 본문 검증 결과. 원문 줄 번호를 함께 보여 준다.
+ * @param props.publishIssues 발행 조건 검사 결과.
+ * @returns 사유가 하나도 없으면 아무것도 그리지 않는다.
  */
 const ArticleIssueList = ({ title, markdownIssues = [], publishIssues = [] }: Props) => {
   if (markdownIssues.length === 0 && publishIssues.length === 0) return null;

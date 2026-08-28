@@ -35,11 +35,9 @@ type Props = {
  * 이미지는 파일 선택 뒤 인라인 입력에서 대체 텍스트를 받아 업로드하고 커서 자리에 삽입한다.
  * 업로더는 주입받으므로 이 컴포넌트는 저장 위치를 모른다.
  *
- * @param {Props} props
- * @param {string} props.value 본문 원문.
- * @param {ArticleBodyUploader} props.upload 이미지 업로더.
- * @param {(next: string) => void} props.onChange 본문이 바뀌었을 때.
- * @returns {JSX.Element}
+ * @param props.value 본문 원문.
+ * @param props.upload 이미지 업로더.
+ * @param props.onChange 본문이 바뀌었을 때.
  */
 const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);

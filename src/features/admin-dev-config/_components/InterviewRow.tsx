@@ -20,16 +20,6 @@ type Props = {
 
 /**
  * 인터뷰 Q&A 한 항목 — 질문·답변(ko/en) 입력 + 위/아래 이동 + 삭제.
- *
- * @param {Props} props
- * @param {DevInterview} props.entry
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, field: 'q' | 'a', lang: 'ko' | 'en', value: string) => void} props.onEdit
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const InterviewRow = ({ entry, index, isFirst, isLast, onEdit, onMove, onRemove }: Props) => (
   <li className={styles.row}>

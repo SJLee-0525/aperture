@@ -18,12 +18,12 @@ import { configureGoogleAnalytics } from "@/features/analytics/_lib/gtag";
  * CSP 는 googletagmanager(script) + google-analytics(connect·img) 를 허용해야 한다 —
  * `constants/security-headers.ts` 의 ANALYTICS_* 목록.
  *
- * @returns {JSX.Element | null} 동의 후 삽입하는 스크립트와 트래커. 측정 ID가 없으면 `null`.
+ * @returns 동의 후 삽입하는 스크립트와 트래커. 측정 ID가 없으면 `null`.
  */
 export function GoogleAnalytics() {
   const [ready, setReady] = useState(false);
 
-  /** @returns {void} 외부 스크립트 준비 후 consent와 GA4 설정을 적용한다. */
+  /** @returns 외부 스크립트 준비 후 consent와 GA4 설정을 적용한다. */
   const configure = useCallback(() => {
     configureGoogleAnalytics(GA_MEASUREMENT_ID);
     setReady(true);

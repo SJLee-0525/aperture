@@ -21,11 +21,6 @@ type Props = {
 
 /**
  * 선택된 프로젝트의 전체 설명과 외부 링크를 표시한다. 모달 프레임은 상위가 소유한다.
- *
- * @param {Props} props
- * @param {DevProject} props.project
- * @param {DevArticleProjectLink[]} props.articles
- * @returns {JSX.Element}
  */
 const DevProjectDetailContent = ({ project, articles }: Props) => {
   const { dict, lang } = useLang();

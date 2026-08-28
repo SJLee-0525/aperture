@@ -29,8 +29,8 @@ export const maxDuration = 60;
  * 서명 검증까지만 동기로 하고 나머지는 응답 이후로 미룬다. Sentry 는 응답이 늦으면
  * 실패로 보고 재전송하는데, LLM 호출을 기다리면 그 시간을 넘긴다.
  *
- * @param {Request} request 서명된 웹훅 요청.
- * @returns {Promise<Response>} 검증 실패는 401·413, 접수는 202.
+ * @param request 서명된 웹훅 요청.
+ * @returns 검증 실패는 401·413, 접수는 202.
  */
 export async function POST(request: Request): Promise<Response> {
   if (declaredBodyTooLarge(request.headers, MAX_WEBHOOK_BODY_BYTES)) {

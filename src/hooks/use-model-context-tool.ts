@@ -15,9 +15,8 @@ import {
  * 마운트당 1회이고, 필터 상태·언어 등 변하는 값은 executeRef 를 거쳐 항상 최신
  * 클로저로 읽힌다 — 상태 변경마다 abort/재등록 churn 을 만들지 않는다.
  *
- * @param {WebMcpToolDefinition} definition 모듈 레벨 상수 도구 정의.
- * @param {WebMcpExecute} execute 실행 콜백 — 렌더마다 새로 만들어도 안전(ref 경유).
- * @returns {void}
+ * @param definition 모듈 레벨 상수 도구 정의.
+ * @param execute 실행 콜백 — 렌더마다 새로 만들어도 안전(ref 경유).
  */
 const useModelContextTool = (definition: WebMcpToolDefinition, execute: WebMcpExecute): void => {
   const executeRef = useRef(execute);

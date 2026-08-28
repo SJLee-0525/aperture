@@ -14,7 +14,7 @@ import { startBrowserMonitoring, stopBrowserMonitoring } from "@/lib/monitoring/
  * 로그인 화면이나 공개 트리로 이동할 때는 클라이언트를 먼저 닫는다. 공개 트리에서
  * 오류 보고가 허용돼 있으면 AnalyticsConsentProvider가 public 모드로 다시 시작한다.
  *
- * @returns {null} UI를 렌더하지 않는다.
+ * @returns UI를 렌더하지 않는다.
  */
 const AdminMonitoring = () => {
   useEffect(() => {

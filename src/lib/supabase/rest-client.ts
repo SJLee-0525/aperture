@@ -32,8 +32,8 @@ type RestRequest = {
  * 헤더를 조립하면 그 규약이 파일 수만큼 늘어나고 재시도 정책이 경로마다 갈린다.
  * 응답 상태 판정은 호출부가 한다 — 실패 문구와 로그 대상이 경로마다 다르다.
  *
- * @param {RestRequest} request 경로와 전송 옵션.
- * @returns {Promise<Response>} 상태 코드를 그대로 담은 응답.
+ * @param request 경로와 전송 옵션.
+ * @returns 상태 코드를 그대로 담은 응답.
  */
 const restFetch = (request: RestRequest): Promise<Response> => {
   const query = request.params?.toString();

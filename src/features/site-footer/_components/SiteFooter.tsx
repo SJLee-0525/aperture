@@ -25,12 +25,7 @@ const GITHUB_URL = "https://github.com/SJLee-0525";
  * 언어는 컨텍스트가 아니라 `[lang]` 세그먼트에서 온 props로 받는다. 서버에서 렌더해야
  * 정적 마크업이 클라이언트 번들에 들어가지 않는다.
  *
- * @param {{ lang: Lang; tagline: LocalizedText; links: SiteLink[]; privacyControls?: React.ReactNode }} props
- * @param {Lang} props.lang
- * @param {LocalizedText} props.tagline
- * @param {SiteLink[]} props.links
- * @param {React.ReactNode | undefined} props.privacyControls - 법적 문서 링크 옆에 주입할 쿠키 설정 UI.
- * @returns {JSX.Element}
+ * @param props.privacyControls - 법적 문서 링크 옆에 주입할 쿠키 설정 UI.
  */
 const SiteFooter = ({
   lang,

@@ -55,12 +55,12 @@ type ResolvedChatTarget = {
  * 같은 lookup 을 쓰므로 화면 문맥과 섹션 게이트가 다른 판정을 내지 않는다.
  * 확인되지 않은 target 은 `verified` 가 거짓이라 프로필 섹션을 열지 못한다.
  *
- * @param {ChatContext | undefined} context 파싱을 마친 요청 문맥.
- * @param {Lang} lang 화면 문맥을 표시할 언어.
- * @param {((id: string, signal?: AbortSignal) => Promise<DevArticle | null>) | undefined} loadArticle live 단건 로더. mock 이면 undefined.
- * @param {() => Promise<ProfileSnapshot>} getSnapshot 캐시된 스냅샷 로더.
- * @param {AbortSignal} signal 요청 취소 신호.
- * @returns {Promise<ResolvedChatTarget>} 해석한 target, 확인 여부, 우선 검색 대상, 화면 문맥.
+ * @param context 파싱을 마친 요청 문맥.
+ * @param lang 화면 문맥을 표시할 언어.
+ * @param loadArticle live 단건 로더. mock 이면 undefined.
+ * @param getSnapshot 캐시된 스냅샷 로더.
+ * @param signal 요청 취소 신호.
+ * @returns 해석한 target, 확인 여부, 우선 검색 대상, 화면 문맥.
  */
 const resolveContextTarget = async (
   context: ChatContext | undefined,

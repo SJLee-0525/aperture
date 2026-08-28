@@ -29,14 +29,14 @@ type Props = {
 /**
  * 프로젝트의 다국어 배열 필드를 항목 추가·수정·삭제 UI로 렌더링한다.
  *
- * @param {Props} props 목록 필드 렌더링에 필요한 속성.
- * @param {LocalizedArrayKey} props.arrayKey 편집할 프로젝트 배열 필드.
- * @param {string} props.legend 필드 위에 표시할 제목.
- * @param {DevProjectInput[LocalizedArrayKey]} props.items 현재 저장된 다국어 항목 목록.
- * @param {(arrayKey: LocalizedArrayKey) => void} props.onAdd 빈 항목을 추가하는 콜백.
- * @param {(arrayKey: LocalizedArrayKey, index: number, lang: "ko" | "en", value: string) => void} props.onEdit 언어별 항목 값을 수정하는 콜백.
- * @param {(arrayKey: LocalizedArrayKey, index: number) => void} props.onRemove 항목을 제거하는 콜백.
- * @returns {React.JSX.Element} 다국어 항목 편집 필드.
+ * @param props 목록 필드 렌더링에 필요한 속성.
+ * @param props.arrayKey 편집할 프로젝트 배열 필드.
+ * @param props.legend 필드 위에 표시할 제목.
+ * @param props.items 현재 저장된 다국어 항목 목록.
+ * @param props.onAdd 빈 항목을 추가하는 콜백.
+ * @param props.onEdit 언어별 항목 값을 수정하는 콜백.
+ * @param props.onRemove 항목을 제거하는 콜백.
+ * @returns 다국어 항목 편집 필드.
  */
 const LocalizedProjectListField = ({
   arrayKey,

@@ -14,9 +14,9 @@ import type { LocalizedText } from "@/types/localized";
 /**
  * 이중언어 필드의 한국어 값을 요구한다. 저장 조건이 ko 기준이다.
  *
- * @param {AdminFieldName} field 화면 컨트롤에 붙은 이름.
- * @param {LocalizedText} value 검사할 값.
- * @param {string} label 문구에 들어갈 항목 이름. "제목" → "제목(한국어)을 입력하세요."
+ * @param field 화면 컨트롤에 붙은 이름.
+ * @param value 검사할 값.
+ * @param label 문구에 들어갈 항목 이름. "제목" → "제목(한국어)을 입력하세요."
  */
 const requireKoText = (
   field: AdminFieldName,

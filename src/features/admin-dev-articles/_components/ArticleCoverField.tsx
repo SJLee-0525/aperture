@@ -27,11 +27,9 @@ type Props = {
  * 대체 텍스트에는 제목을 되풀이하지 않고 이미지 자체를 설명한다(07-dev-blog §2). 목록 카드와 상세
  * hero 가 같은 값을 쓰므로 한 번만 적는다. 이미지를 지우면 폼이 대체 텍스트도 함께 비운다.
  *
- * @param {Props} props
- * @param {DevArticleInput} props.form 현재 폼 값.
- * @param {ArticleCoverUploader} props.upload 주입받은 업로더. mock 단계에서는 fixture 주소를 준다.
- * @param {(next: Partial<DevArticleInput>) => void} props.onPatch 폼 일부를 갱신한다.
- * @returns {JSX.Element}
+ * @param props.form 현재 폼 값.
+ * @param props.upload 주입받은 업로더. mock 단계에서는 fixture 주소를 준다.
+ * @param props.onPatch 폼 일부를 갱신한다.
  */
 const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);

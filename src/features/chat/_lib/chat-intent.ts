@@ -84,9 +84,6 @@ const needsProfileContext = (messages: ChatRequestMessage[]): boolean =>
  * RAG 검색어 휴리스틱 폴백 — 분류기가 searchQuery를 못 만들었을 때 사용한다.
  * 후속 질문("그건 언제였어?")은 단독으로 임베딩하면 무의미하므로
  * 직전 사용자 메시지들을 이어붙여 맥락을 복원한다.
- *
- * @param {ChatRequestMessage[]} messages
- * @returns {string}
  */
 const buildRagQueryText = (messages: ChatRequestMessage[]): string => {
   const current = messages.at(-1)?.content.trim() ?? "";

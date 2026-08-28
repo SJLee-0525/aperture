@@ -21,8 +21,6 @@ import { SearchSuggestions, optionId } from "./SearchSuggestions";
  * 데스크톱 헤더 검색 (모바일은 CSS로 숨김 — 모바일 검색은 버거 메뉴 안). 제출 시 통합 검색
  * 페이지(/search?q=)로 이동. 입력 중에는 검색 인덱스(포커스 시 lazy load) 상위 매치를
  * 자동완성으로 제안 — 방향키로 고르고 Enter/클릭 시 해당 콘텐츠 딥링크로 바로 이동.
- *
- * @returns {JSX.Element}
  */
 const SearchBox = () => {
   const router = useRouter();

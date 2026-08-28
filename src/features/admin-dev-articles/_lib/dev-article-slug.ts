@@ -17,8 +17,8 @@ const NON_SLUG_CHARACTERS = /[^a-z0-9]+/g;
  * 한글이 남아 있으면 로마자로 바꾼다. 주소창·공유 링크·검색 결과에서 한글 slug 는
  * percent 인코딩으로 보여 읽을 수 없고, 발행 뒤에는 고칠 수 없으므로 저장 전에 정리한다.
  *
- * @param {string} raw 입력한 값 또는 제목에서 만든 후보.
- * @returns {string} 영문 소문자·숫자·하이픈만 남은 slug. 남는 글자가 없으면 빈 문자열.
+ * @param raw 입력한 값 또는 제목에서 만든 후보.
+ * @returns 영문 소문자·숫자·하이픈만 남은 slug. 남는 글자가 없으면 빈 문자열.
  */
 const normalizeArticleSlug = (raw: string): string =>
   romanize(raw.trim())
@@ -34,8 +34,8 @@ const normalizeArticleSlug = (raw: string): string =>
  * 제안일 뿐이라 관리자가 첫 발행 전까지 고칠 수 있다. 로마자 표기가 어색해도 되돌릴 수 있으므로
  * 제안을 비워 두고 매번 손으로 적게 하는 쪽보다 낫다.
  *
- * @param {LocalizedText} title 글 제목.
- * @returns {string} 제안 slug. 두 제목이 모두 비어 있으면 빈 문자열.
+ * @param title 글 제목.
+ * @returns 제안 slug. 두 제목이 모두 비어 있으면 빈 문자열.
  */
 const suggestArticleSlug = (title: LocalizedText): string =>
   normalizeArticleSlug(title.en) || normalizeArticleSlug(title.ko);
@@ -43,10 +43,10 @@ const suggestArticleSlug = (title: LocalizedText): string =>
 /**
  * 같은 slug 를 쓰는 다른 글이 있는지 본다.
  *
- * @param {string} slug 검사할 slug.
- * @param {Array<{ id: string; slug: string }>} articles 비교 대상 글 목록.
- * @param {string} [selfId] 편집 중인 글의 ID. 자기 자신은 중복으로 보지 않는다.
- * @returns {boolean} 다른 글이 이미 쓰고 있으면 true.
+ * @param slug 검사할 slug.
+ * @param articles 비교 대상 글 목록.
+ * @param [selfId] 편집 중인 글의 ID. 자기 자신은 중복으로 보지 않는다.
+ * @returns 다른 글이 이미 쓰고 있으면 true.
  */
 const isArticleSlugTaken = (
   slug: string,

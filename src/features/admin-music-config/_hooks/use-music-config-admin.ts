@@ -22,8 +22,6 @@ type TimelineKey = "career" | "education";
  * 관리자 음악 설정(site/music) 상태 관리 — 소개글·경력·학력 편집 + 저장.
  * site.ts 와 동일하게 "전체 로드 → 편집 → 전체 저장" 흐름이라 필드 유실이 없다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
- *
- * @returns {{ intro: LocalizedText; career: TimelineEntry[]; education: TimelineEntry[]; status: Status; error: string | null; saving: boolean; saved: boolean; editIntro: (field: 'ko' | 'en', value: string) => void; addEntry: (key: TimelineKey) => void; editPeriod: (key: TimelineKey, index: number, value: string) => void; editTitle: (key: TimelineKey, index: number, field: 'ko' | 'en', value: string) => void; removeEntry: (key: TimelineKey, index: number) => void; moveEntry: (key: TimelineKey, index: number, offset: -1 | 1) => void; save: () => Promise<void> }}
  */
 const useMusicConfigAdmin = () => {
   const [intro, setIntro] = useState<LocalizedText>(EMPTY_TEXT);

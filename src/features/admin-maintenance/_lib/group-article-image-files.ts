@@ -105,8 +105,8 @@ const groupStartedAt = (group: ArticleImageGroup): number =>
  * 파일만 업로드 시각으로 묶고 `estimated` 를 세운다. 시각으로 묶은 그룹은 두 이미지를 연달아
  * 올려 업로드 완료 순서가 엇갈리면 다른 이미지의 파생본을 담을 수 있다.
  *
- * @param {ArticleImageFile[]} files `dev-blog/` 아래 파일 전체.
- * @returns {ArticleImageGroup[]} 업로드가 이른 순으로 정렬한 이미지 단위 그룹.
+ * @param files `dev-blog/` 아래 파일 전체.
+ * @returns 업로드가 이른 순으로 정렬한 이미지 단위 그룹.
  */
 const groupArticleImageFiles = (files: ArticleImageFile[]): ArticleImageGroup[] => {
   const exact: ArticleImageFile[][] = [];

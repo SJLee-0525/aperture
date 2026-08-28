@@ -59,7 +59,7 @@ const listProjected = async (table: string, select: string, orderColumns: string
  * 폴백 불일치가 생기지 않게 한다.
  */
 
-/** @returns {Promise<AdminPhotoListItem[]>} 관리자 목록에 필요한 필드만 담은 사진 목록. */
+/** @returns 관리자 목록에 필요한 필드만 담은 사진 목록. */
 const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
   (
     await listProjected(
@@ -76,7 +76,7 @@ const listPhotoItemsAdmin = async (): Promise<AdminPhotoListItem[]> =>
     published: readBoolean(row.published),
   }));
 
-/** @returns {Promise<AdminAlbumListItem[]>} 관리자 목록에 필요한 필드만 담은 앨범 목록. */
+/** @returns 관리자 목록에 필요한 필드만 담은 앨범 목록. */
 const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
   (
     await listProjected(
@@ -94,7 +94,7 @@ const listAlbumItemsAdmin = async (): Promise<AdminAlbumListItem[]> =>
     published: readBoolean(row.published),
   }));
 
-/** @returns {Promise<AdminDevProjectListItem[]>} 관리자 목록에 필요한 필드만 담은 프로젝트 목록. */
+/** @returns 관리자 목록에 필요한 필드만 담은 프로젝트 목록. */
 const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
   (
     await listProjected(
@@ -111,7 +111,7 @@ const listDevProjectItemsAdmin = async (): Promise<AdminDevProjectListItem[]> =>
     published: readBoolean(row.published),
   }));
 
-/** @returns {Promise<AdminMusicWorkListItem[]>} 관리자 목록에 필요한 필드만 담은 연주 목록. */
+/** @returns 관리자 목록에 필요한 필드만 담은 연주 목록. */
 const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
   (
     await listProjected(
@@ -134,7 +134,7 @@ const listMusicWorkItemsAdmin = async (): Promise<AdminMusicWorkListItem[]> =>
  * 정렬은 id 오름차순뿐이다. 관리자 목록의 표시 순서(발행일 내림차순, 초안 맨 위)는
  * 화면 훅의 순수 함수(`dev-article-sort`)가 담당한다.
  *
- * @returns {Promise<AdminDevArticleListItem[]>} 초안을 포함한 전체 글의 목록 행.
+ * @returns 초안을 포함한 전체 글의 목록 행.
  */
 const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
   (
@@ -158,7 +158,7 @@ const listDevArticleItemsAdmin = async (): Promise<AdminDevArticleListItem[]> =>
  * 미사용 이미지 검사에서 참조 목록을 만들 때 읽는 글별 이미지 정보. 대표 이미지 메타와
  * 본문 Markdown 원문. 초안을 포함한 전체 글이 와야 초안 전용 이미지를 지우지 않는다.
  *
- * @returns {Promise<Array<{ cover: ImageMeta | null; body: string }>>} 글별 cover·body.
+ * @returns 글별 cover·body.
  */
 const listDevArticleImageRefsAdmin = async (): Promise<
   Array<{ cover: ImageMeta | null; body: string }>

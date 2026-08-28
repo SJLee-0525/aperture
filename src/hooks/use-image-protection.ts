@@ -11,8 +11,6 @@ const PROTECTED_IMAGE_SELECTOR = "[data-protected-image] img";
  *
  * 대상은 표시된 영역이 아니라 그 안의 `img` 다. 래퍼는 링크나 hero 전체를 감싸는 경우가
  * 있어 범위로 잡으면 사진 제목과 촬영 정보까지 복사할 수 없게 된다.
- *
- * @returns {void}
  */
 const useImageProtection = () => {
   useEffect(() => {

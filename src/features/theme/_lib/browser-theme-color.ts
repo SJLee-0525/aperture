@@ -9,9 +9,6 @@ const browserThemeColor = (theme: SiteTheme): string => BROWSER_THEME_COLORS[the
 
 /**
  * 모바일 브라우저 주소창·탭 UI 색을 실제 페이지 배경색과 맞춘다.
- *
- * @param {SiteTheme} [theme]
- * @returns {void}
  */
 const syncBrowserThemeColor = (theme?: SiteTheme) => {
   const currentTheme =

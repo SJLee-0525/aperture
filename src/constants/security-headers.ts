@@ -115,9 +115,6 @@ const ANALYTICS_CONNECT_HOSTS = [
  *
  * 'unsafe-eval'은 webpack HMR과 React Refresh 때문에 개발 환경에서만 허용한다.
  * 프로덕션 빌드는 eval 을 쓰지 않으므로 배포 정책에는 절대 들어가지 않아야 한다.
- *
- * @param {boolean} isDevelopment
- * @returns {string}
  */
 const buildContentSecurityPolicy = (isDevelopment: boolean) => {
   // 테스트가 env 를 스텁한 뒤 호출할 수 있도록 모듈 로드가 아니라 호출 시점에 읽는다.

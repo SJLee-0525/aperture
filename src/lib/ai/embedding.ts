@@ -29,8 +29,6 @@ const resolveEmbeddingDimensions = (dimensions?: number): number => {
  * 저장·검색이 공유하는 벡터 공간 호환성 키 — 모델과 차원이 모두 일치해야 비교 가능하다.
  * ragDocuments.embeddingModel 에 이 키를 저장하고, 검색·상태 API 는 같은 키의 청크만 인정한다.
  * 모델이나 차원을 바꾸면 키가 어긋나 기존 청크가 자동 배제되고, 전체 재생성이 이행 경로다.
- *
- * @returns {string}
  */
 const embeddingModelKey = (): string =>
   `${resolveEmbeddingModel()}@${resolveEmbeddingDimensions()}`;
@@ -47,10 +45,6 @@ class EmbeddingError extends Error {
 
 /**
  * 텍스트 입력을 OpenAI 임베딩 벡터로 변환합니다.
- *
- * @param {string} text
- * @param {GenerateEmbeddingOptions} [options]
- * @returns {Promise<number[]>}
  */
 /**
  * 한 번의 API 호출에 담을 청크 수. `rag.ts` 의 `UPSERT_CHUNK_SIZE` 와 같은 값이다.

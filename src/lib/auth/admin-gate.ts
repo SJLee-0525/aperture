@@ -17,7 +17,6 @@ type AdminGateOptions = {
 /**
  * 관리자 토큰 판정을 응답·예외 두 표현으로 나누기 전의 공통 단계.
  *
- * @returns {Promise<{ ok: true } | { ok: false; retryAfterSeconds?: number }>}
  *   통과 여부. `retryAfterSeconds` 가 있으면 스로틀, 없으면 인증 실패다.
  */
 const checkAdminToken = async (
@@ -45,9 +44,9 @@ const checkAdminToken = async (
  * (`generate-portfolio-embeddings.ts:22` 외 2곳이 `payload.error` 를 오류 문구로 쓴다).
  * 예외를 던지는 `requireAdminToken` 쪽은 서버 로그가 독자라 영어 레이블을 쓴다.
  *
- * @param {Request} request `Authorization: Bearer` 를 담은 요청.
- * @param {AdminGateOptions} [options] 표면별 예외 설정.
- * @returns {Promise<Response | null>} 거절 응답. 통과하면 `null`.
+ * @param request `Authorization: Bearer` 를 담은 요청.
+ * @param [options] 표면별 예외 설정.
+ * @returns 거절 응답. 통과하면 `null`.
  */
 const adminGateResponse = async (
   request: Request,
@@ -73,10 +72,10 @@ const adminGateResponse = async (
  * Server Action 은 상태 코드를 돌려줄 자리가 없어 Route Handler 와 표현이 다르다.
  * 문구에 대상 이름을 넣어 어느 동작이 막혔는지 서버 로그에서 구분한다.
  *
- * @param {string} idToken 관리자 access token.
- * @param {string} label 오류 문구에 넣을 동작 이름.
- * @param {AdminGateOptions} [options] 표면별 예외 설정.
- * @returns {Promise<void>} 통과하면 완료된다.
+ * @param idToken 관리자 access token.
+ * @param label 오류 문구에 넣을 동작 이름.
+ * @param [options] 표면별 예외 설정.
+ * @returns 통과하면 완료된다.
  * @throws {Error} 스로틀에 걸렸거나 관리자가 아닐 때.
  */
 const requireAdminToken = async (

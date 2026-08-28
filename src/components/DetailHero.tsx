@@ -35,13 +35,11 @@ type Props = {
  * 링크는 `next/link` 를 직접 쓴다. 이 계층(`components/`)은 언어 컨텍스트를 모르므로 로케일
  * 프리픽스를 붙인 주소를 호출부가 넘긴다.
  *
- * @param {Props} props
- * @param {{ url: string; alt: string } | null} props.cover 배경 커버. `null` 이면 타이포그래피형으로 바뀐다.
- * @param {{ href: string; label: string }} props.back 좌상단 복귀 링크. href 는 로케일 프리픽스를 포함한 완성된 경로다.
- * @param {{ title: string; label: string; url?: string }} props.share 우상단 공유 버튼. `url` 을 주면 현재 주소 대신 그 주소를 공유한다.
- * @param {number | undefined} props.minHeight 최소 높이(px). 기본 300 이며 내용이 길면 그만큼 늘어난다.
- * @param {ReactNode} props.children 제목·요약 같은 지면별 메타데이터. 텍스트 색은 소비하는 지면이 정한다.
- * @returns {JSX.Element}
+ * @param props.cover 배경 커버. `null` 이면 타이포그래피형으로 바뀐다.
+ * @param props.back 좌상단 복귀 링크. href 는 로케일 프리픽스를 포함한 완성된 경로다.
+ * @param props.share 우상단 공유 버튼. `url` 을 주면 현재 주소 대신 그 주소를 공유한다.
+ * @param props.minHeight 최소 높이(px). 기본 300 이며 내용이 길면 그만큼 늘어난다.
+ * @param props.children 제목·요약 같은 지면별 메타데이터. 텍스트 색은 소비하는 지면이 정한다.
  */
 const DetailHero = ({ cover, back, share, minHeight, children }: Props) => {
   const style = minHeight

@@ -23,8 +23,8 @@ const FIXTURE_IMAGE_SIZE = { w: 2048, h: 1365 } as const;
  * 파일 내용을 읽지 않으므로 브라우저 메모리에 이미지를 들고 있지 않고, 로컬 복구본에도
  * 주소만 남는다.
  *
- * @param {string} articleId 저장 전에 발급한 글 문서 ID.
- * @returns {ArticleImageUploader} 파일을 받아 fixture ImageMeta 를 주는 함수.
+ * @param articleId 저장 전에 발급한 글 문서 ID.
+ * @returns 파일을 받아 fixture ImageMeta 를 주는 함수.
  */
 const createMockArticleImageUploader =
   (articleId: string): ArticleImageUploader =>

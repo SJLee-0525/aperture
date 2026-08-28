@@ -28,8 +28,8 @@ const toMusicConfig = decodeMusicConfig;
 /**
  * 공개된 연주 목록을 정렬 순서대로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<MusicWork[]>} 공개된 연주 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 공개된 연주 목록.
  */
 const fetchPublishedMusicWorks = async (options?: { fresh?: boolean }): Promise<MusicWork[]> =>
   (await selectPublished(COLLECTIONS.MUSIC_WORKS, options)).map(({ id, data }) =>
@@ -39,8 +39,8 @@ const fetchPublishedMusicWorks = async (options?: { fresh?: boolean }): Promise<
 /**
  * 공개된 수상 목록을 정렬 순서대로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<MusicAward[]>} 공개된 수상 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 공개된 수상 목록.
  */
 const fetchPublishedMusicAwards = async (options?: { fresh?: boolean }): Promise<MusicAward[]> =>
   (await selectPublished(COLLECTIONS.MUSIC_AWARDS, options)).map(({ id, data }) =>
@@ -50,8 +50,8 @@ const fetchPublishedMusicAwards = async (options?: { fresh?: boolean }): Promise
 /**
  * 공개된 영상 목록을 정렬 순서대로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<MusicMedia[]>} 공개된 영상 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 공개된 영상 목록.
  */
 const fetchPublishedMusicMedia = async (options?: { fresh?: boolean }): Promise<MusicMedia[]> =>
   (await selectPublished(COLLECTIONS.MUSIC_MEDIA, options)).map(({ id, data }) =>
@@ -61,8 +61,8 @@ const fetchPublishedMusicMedia = async (options?: { fresh?: boolean }): Promise<
 /**
  * 공개 페이지에서 사용할 음악 설정 문서를 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<MusicConfig | null>} 음악 설정. 문서가 없으면 `null`이다.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 음악 설정. 문서가 없으면 `null`이다.
  */
 const fetchMusicConfig = async (options?: { fresh?: boolean }): Promise<MusicConfig | null> => {
   const data = await fetchRow(COLLECTIONS.SITE, SITE_MUSIC_DOC, "music config", options);
@@ -72,8 +72,8 @@ const fetchMusicConfig = async (options?: { fresh?: boolean }): Promise<MusicCon
 /**
  * 채팅 검색용 공개 연주 목록. 행 전체를 받아 도메인 투영만 유지한다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatMusicWork[]>} 채팅용 연주 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 채팅용 연주 목록.
  */
 const fetchChatMusicWorks = async (options?: { fresh?: boolean }): Promise<ChatMusicWork[]> =>
   (await selectPublished(COLLECTIONS.MUSIC_WORKS, options)).map(({ id, data }) => {
@@ -93,8 +93,8 @@ const fetchChatMusicWorks = async (options?: { fresh?: boolean }): Promise<ChatM
 /**
  * 채팅 검색용 공개 수상 목록.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatMusicAward[]>} 채팅용 수상 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 채팅용 수상 목록.
  */
 const fetchChatMusicAwards = async (options?: { fresh?: boolean }): Promise<ChatMusicAward[]> =>
   (await selectPublished(COLLECTIONS.MUSIC_AWARDS, options)).map(({ id, data }) => {
@@ -112,8 +112,8 @@ const fetchChatMusicAwards = async (options?: { fresh?: boolean }): Promise<Chat
 /**
  * 채팅 검색용 공개 영상 목록.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatMusicMedia[]>} 채팅용 영상 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 채팅용 영상 목록.
  */
 const fetchChatMusicMedia = async (options?: { fresh?: boolean }): Promise<ChatMusicMedia[]> =>
   (await selectPublished(COLLECTIONS.MUSIC_MEDIA, options)).map(({ id, data }) => {

@@ -27,9 +27,6 @@ type UploadResult = {
 /**
  * 파일 선택 → EXIF 추출(압축 前) → webp 압축 → Storage 업로드 → 산출물 반환.
  * photoId 는 문서 저장 전에 선발급된 ID(newPhotoId) — Storage 경로 확정용.
- *
- * @param {string} photoId
- * @returns {{ process: (file: File) => Promise<UploadResult | null>; pending: boolean; stage: UploadStage; completed: number; total: number; error: string | null }}
  */
 const useImageUpload = (photoId: string) => {
   const [pending, setPending] = useState(false);

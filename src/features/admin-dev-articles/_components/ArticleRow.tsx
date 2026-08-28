@@ -34,15 +34,13 @@ type Props = {
  * 고정은 편집 폼이 아니라 이 행에만 둔다. 글 내용이 아니라 목록에서의 배치 결정이고,
  * 두 곳에 두면 어느 값이 최신인지 알 수 없다.
  *
- * @param {Props} props
- * @param {AdminDevArticleListItem} props.article 본문을 뺀 목록 행.
- * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
- * @param {boolean} props.pinBusy 이 행의 고정 요청이 진행 중이다. 낙관적 갱신이라 연타하면
+ * @param props.article 본문을 뺀 목록 행.
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
+ * @param props.pinBusy 이 행의 고정 요청이 진행 중이다. 낙관적 갱신이라 연타하면
  *   화면과 서버 상태가 어긋난다.
- * @param {(id: string, next: boolean) => void} props.onTogglePublished 공개 상태를 바꾼다.
- * @param {(id: string, next: boolean) => void} props.onTogglePinned 고정 상태를 바꾼다.
- * @param {(id: string) => void} props.onDelete 확인 후 글을 지운다.
- * @returns {JSX.Element}
+ * @param props.onTogglePublished 공개 상태를 바꾼다.
+ * @param props.onTogglePinned 고정 상태를 바꾼다.
+ * @param props.onDelete 확인 후 글을 지운다.
  */
 const ArticleRow = ({
   article,

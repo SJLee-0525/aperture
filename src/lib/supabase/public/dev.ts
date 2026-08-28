@@ -27,8 +27,8 @@ const toDevConfig = decodeDevConfig;
 /**
  * 공개된 개발 프로젝트 목록을 정렬 순서대로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<DevProject[]>} 공개된 개발 프로젝트 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 공개된 개발 프로젝트 목록.
  */
 const fetchPublishedDevProjects = async (options?: { fresh?: boolean }): Promise<DevProject[]> =>
   (await selectPublished(COLLECTIONS.DEV_PROJECTS, options)).map(({ id, data }) =>
@@ -38,8 +38,8 @@ const fetchPublishedDevProjects = async (options?: { fresh?: boolean }): Promise
 /**
  * 공개 페이지에서 사용할 개발 설정 문서를 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<DevConfig | null>} 개발 설정. 문서가 없으면 `null`이다.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 개발 설정. 문서가 없으면 `null`이다.
  */
 const fetchDevConfig = async (options?: { fresh?: boolean }): Promise<DevConfig | null> => {
   const data = await fetchRow(COLLECTIONS.SITE, SITE_DEV_DOC, "dev config", options);
@@ -49,8 +49,8 @@ const fetchDevConfig = async (options?: { fresh?: boolean }): Promise<DevConfig 
 /**
  * 채팅 검색용 공개 프로젝트 목록. 행 전체를 받아 도메인 투영만 유지한다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatDevProject[]>} 채팅용 프로젝트 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 채팅용 프로젝트 목록.
  */
 const fetchChatDevProjects = async (options?: { fresh?: boolean }): Promise<ChatDevProject[]> =>
   (await selectPublished(COLLECTIONS.DEV_PROJECTS, options)).map(({ id, data }) => {

@@ -5,8 +5,8 @@
  * 하고, mock 은 각 getter 가 직접 해야 한다. 한 곳에서 정하지 않으면 어느 getter 가 게이트를
  * 빠뜨렸는지 눈으로 볼 수 없다.
  *
- * @param {T[]} items 초안을 포함한 mock 전량.
- * @returns {T[]} 공개 항목만, live 와 같은 순서로.
+ * @param items 초안을 포함한 mock 전량.
+ * @returns 공개 항목만, live 와 같은 순서로.
  */
 const publishedInOrder = <T extends { id: string; order: number; published: boolean }>(
   items: T[],

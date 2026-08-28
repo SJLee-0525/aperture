@@ -11,8 +11,6 @@ import { resolveNewArticleId } from "@/features/admin-dev-articles/_lib/new-arti
 
 /**
  * ID 를 정한 뒤의 새 글 폼. 마운트 뒤에만 렌더되므로 초기화에서 `window` 를 만져도 안전하다.
- *
- * @returns {JSX.Element}
  */
 const MountedNewDevArticle = () => {
   const [articleId] = useState(() =>
@@ -28,7 +26,7 @@ const MountedNewDevArticle = () => {
  * 관리자 페이지도 서버에서 한 번 평가되므로(저장소의 thunk 컨벤션과 같은 이유) `window` 는
  * 마운트 뒤에만 만진다 — 테스트 세션에서는 `AuthGuard` 가 SSR 에서도 children 을 렌더한다.
  *
- * @returns {JSX.Element | null} 마운트 전에는 아무것도 그리지 않는다.
+ * @returns 마운트 전에는 아무것도 그리지 않는다.
  */
 const NewDevArticlePage = () => {
   const mounted = useMounted();

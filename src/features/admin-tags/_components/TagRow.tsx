@@ -18,12 +18,7 @@ type Props = {
 /**
  * 정렬 가능한 태그 행 — 드래그 핸들·읽기전용 id·ko/en 입력·삭제.
  *
- * @param {Props} props
- * @param {Tag} props.tag
- * @param {number} props.usedCount 이 태그를 참조하는 사진 수. 0이 아니면 삭제를 잠근다.
- * @param {(id: string, field: 'ko' | 'en', value: string) => void} props.onEditLabel
- * @param {(id: string) => void} props.onDelete
- * @returns {JSX.Element}
+ * @param props.usedCount 이 태그를 참조하는 사진 수. 0이 아니면 삭제를 잠근다.
  */
 const TagRow = ({ tag, usedCount, onEditLabel, onDelete }: Props) => {
   return (

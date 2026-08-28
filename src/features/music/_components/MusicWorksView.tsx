@@ -24,18 +24,11 @@ const FIRST_ROW_POSTERS = 1;
 
 /**
  * 프로그램 곡 순번 2자리 표기 (01, 02, …)
- *
- * @param {number} n
- * @returns {string}
  */
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
  * 연주 목록 (/music) — 포스터 그리드. 클릭 시 프로그램·예매 모달.
- *
- * @param {{ works: MusicWork[] }} props
- * @param {MusicWork[]} props.works
- * @returns {JSX.Element}
  */
 const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   const { dict, lang } = useLang();

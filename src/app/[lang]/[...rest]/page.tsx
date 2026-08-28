@@ -11,7 +11,7 @@ import { notFound } from "next/navigation";
  * 먼저 잡는다. 그쪽도 같은 `[lang]/not-found.tsx` 로 수렴하므로 결과는 같고, 이 파일은
  * 두 세그먼트 이상(`/ko/a/b`)을 맡는다.
  *
- * @returns {never} 항상 404 를 던진다.
+ * @returns 항상 404 를 던진다.
  */
 export default function LocaleCatchAll(): never {
   notFound();

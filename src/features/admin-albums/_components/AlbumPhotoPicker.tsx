@@ -46,18 +46,8 @@ const PAGE_SIZE = 60;
  * - 상단 스트립: 선택된 사진 → dnd-kit 으로 순서 변경, 커버 지정.
  * 제외 시 커버였다면 남은 첫 사진으로 커버 이전(없으면 빈 값).
  *
- * @param {Props} props
- * @param {AdminPhotoListItem[]} props.photos
- * @param {'loading' | 'ready' | 'error'} props.status
- * @param {string | null} props.error
- * @param {string | undefined} props.field - 검증 결과의 field 이름.
- * @param {string | undefined} props.validationError - 선택이 비어 저장이 막혔을 때의 문구.
- * @param {string[]} props.photoIds
- * @param {string} props.coverPhotoId
- * @param {(id: string) => void} props.onToggle
- * @param {(activeId: string, overId: string) => void} props.onReorder
- * @param {(id: string) => void} props.onSetCover
- * @returns {JSX.Element}
+ * @param props.field - 검증 결과의 field 이름.
+ * @param props.validationError - 선택이 비어 저장이 막혔을 때의 문구.
  */
 const AlbumPhotoPicker = ({
   photos,

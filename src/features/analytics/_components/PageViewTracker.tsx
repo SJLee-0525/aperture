@@ -8,9 +8,6 @@ import { sendPageView } from "@/features/analytics/_lib/gtag";
 
 /**
  * 관리자(본인 1명) 트래픽은 방문자 통계가 아니다 — `/admin/*` 은 집계에서 제외한다.
- *
- * @param {string} pathname
- * @returns {boolean}
  */
 const isTrackablePath = (pathname: string) => !pathname.startsWith("/admin");
 
@@ -20,8 +17,6 @@ const isTrackablePath = (pathname: string) => !pathname.startsWith("/admin");
  *
  * `useSearchParams` 는 Suspense 밖에서 쓰면 상위 정적 페이지를 통째로 CSR 로 떨어뜨린다 —
  * 반드시 Suspense 안에서만 렌더할 것(GoogleAnalytics 가 감싼다).
- *
- * @returns {null}
  */
 export function PageViewTracker() {
   const pathname = usePathname();

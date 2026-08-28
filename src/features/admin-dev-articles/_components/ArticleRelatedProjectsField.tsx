@@ -23,11 +23,9 @@ type Props = {
  * 발행하게 되고, 공개 화면에서만 카드가 비어 보인다. 비공개 프로젝트는 고를 수 있지만
  * 발행 조건 검사가 막는다 — 글을 먼저 쓰고 프로젝트를 나중에 공개하는 순서를 허용하기 위해서다.
  *
- * @param {Props} props
- * @param {DevProjectOption[]} props.projects 고를 수 있는 프로젝트 전체.
- * @param {string[]} props.selected 고른 프로젝트 id. 배열 순서가 표시 순서다.
- * @param {(next: string[]) => void} props.onChange 선택이나 순서가 바뀌었을 때.
- * @returns {JSX.Element}
+ * @param props.projects 고를 수 있는 프로젝트 전체.
+ * @param props.selected 고른 프로젝트 id. 배열 순서가 표시 순서다.
+ * @param props.onChange 선택이나 순서가 바뀌었을 때.
  */
 const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) => {
   const move = (index: number, step: MoveOffset) => {

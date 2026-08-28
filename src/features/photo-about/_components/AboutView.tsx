@@ -24,12 +24,7 @@ type Props = {
  * 서버 컴포넌트다. 파생 결과(문자열·숫자·목록)만 client 인 AboutSection 으로 넘어가고
  * photoFacts 원본과 집계 코드는 브라우저로 가지 않는다.
  *
- * @param {Props} props
- * @param {Lang} props.lang
- * @param {LocalizedText} props.bio - site/config 중 이 뷰가 소비하는 유일한 필드
- * @param {PhotoFact[]} props.photoFacts
- * @param {number} props.albumCount
- * @returns {JSX.Element}
+ * @param props.bio - site/config 중 이 뷰가 소비하는 유일한 필드
  *  이름·연락처는 노출하지 않는다(연락은 /contact 로 일원화). 레이아웃은 공통 AboutSection. */
 const AboutView = ({ lang, bio, photoFacts, albumCount }: Props) => {
   const dict = DICTIONARY[lang];

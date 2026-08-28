@@ -168,9 +168,9 @@ const PROFILE_SECTION_TITLES: Record<ProfileSection, string> = {
 /**
  * 의도 분류가 고른 섹션만 남긴다. 블록 배열을 다루므로 값 안의 개행이 경계에 영향을 주지 않는다.
  *
- * @param {ProfileBlock[]} blocks 전체 프로필 블록.
- * @param {ProfileSection[]} sections 남길 섹션.
- * @returns {ProfileBlock[]} 머리글과 선택된 섹션.
+ * @param blocks 전체 프로필 블록.
+ * @param sections 남길 섹션.
+ * @returns 머리글과 선택된 섹션.
  */
 const selectProfileBlocks = (
   blocks: ProfileBlock[],
@@ -189,8 +189,8 @@ const renderProfileBlocks = (blocks: ProfileBlock[]): string =>
 /**
  * 사진 링크의 query를 검증할 공개 태그, 카메라, 사진 id를 만든다.
  *
- * @param {ChatProfileData} data 공개 채팅 데이터.
- * @returns {PhotoFilterVocabulary} 사진 링크 검증용 어휘.
+ * @param data 공개 채팅 데이터.
+ * @returns 사진 링크 검증용 어휘.
  */
 const formatLinkVocabulary = (data: ChatProfileData): PhotoFilterVocabulary => {
   const publicPhotos = byOrder(data.photos);
@@ -270,9 +270,9 @@ type ProfileSnapshot = Awaited<ReturnType<typeof buildProfileSnapshot>>;
 /**
  * 캐시된 언어별 프로필 스냅샷을 읽는다.
  *
- * @param {Lang} lang 프로필을 표시할 언어.
- * @param {ContentSource} source mock 또는 live 콘텐츠 소스.
- * @returns {Promise<ProfileSnapshot>} 캐시된 프로필 스냅샷.
+ * @param lang 프로필을 표시할 언어.
+ * @param source mock 또는 live 콘텐츠 소스.
+ * @returns 캐시된 프로필 스냅샷.
  */
 const loadProfileSnapshot = (lang: Lang, source: ContentSource): Promise<ProfileSnapshot> =>
   buildProfileSnapshot(lang, source);
@@ -303,12 +303,12 @@ const ragQueryLogFields = (query: RagQuery): string =>
 /**
  * 캐시된 프로필에서 필요한 섹션을 고르고 관련 RAG 청크를 덧붙인다.
  *
- * @param {() => Promise<ProfileSnapshot>} getSnapshot 요청 안에서 공유하는 스냅샷 로더.
- * @param {ProfileSection[] | undefined} sections 답변에 필요한 프로필 섹션.
- * @param {RagQuery | undefined} query 벡터 검색에 사용할 질의.
- * @param {AbortSignal | undefined} signal 요청 취소 신호.
- * @param {RagPrioritize | undefined} prioritize 방문자가 열어 둔 원본. 그 청크를 먼저 채운다.
- * @returns {Promise<string>} provider에 전달할 프로필 문맥.
+ * @param getSnapshot 요청 안에서 공유하는 스냅샷 로더.
+ * @param sections 답변에 필요한 프로필 섹션.
+ * @param query 벡터 검색에 사용할 질의.
+ * @param signal 요청 취소 신호.
+ * @param prioritize 방문자가 열어 둔 원본. 그 청크를 먼저 채운다.
+ * @returns provider에 전달할 프로필 문맥.
  */
 const buildProfileContextFromSnapshot = async (
   getSnapshot: () => Promise<ProfileSnapshot>,

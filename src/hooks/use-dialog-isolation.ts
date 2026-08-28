@@ -10,9 +10,7 @@ import type { RefObject } from "react";
  * 오버레이를 선택자가 아니라 ref 로 받는다. 선택자는 같은 마크업이 두 번 마운트되거나
  * 포털 대상이 바뀌면 다른 노드를 첫 매치로 집어, dialog 가 자기 자신을 inert 로 만든다.
  *
- * @param {boolean} active
- * @param {RefObject<HTMLElement | null>} overlayRef 격리에서 제외할 오버레이 노드.
- * @returns {void}
+ * @param overlayRef 격리에서 제외할 오버레이 노드.
  */
 const useDialogIsolation = (active: boolean, overlayRef: RefObject<HTMLElement | null>) => {
   useEffect(() => {

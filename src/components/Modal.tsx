@@ -28,18 +28,7 @@ type Props = {
  * document.body 로 포털 — 헤더/섹션 래퍼의 stacking context 밖으로 빼내 네비 뒤에 가리지 않게 한다.
  * 스크림 클릭·ESC·스크롤 잠금. 음악·개발 상세 공용 순수 UI. 액센트는 상위 [data-section] 이 결정.
  *
- * @param {Props} props
- * @param {boolean} props.open
- * @param {() => void} props.onClose
- * @param {string} props.closeLabel
- * @param {string | undefined} props.crumb
- * @param {string | undefined} props.label
- * @param {number | undefined} props.maxWidth
- * @param {boolean | undefined} props.mobileFull - 모바일(≤640px)에서 패널을 화면 꽉 채움 — 콘텐츠 긴 상세 모달용(프로젝트·연주).
- * @param {string | undefined} props.shareTitle
- * @param {string | undefined} props.shareLabel
- * @param {ReactNode} props.children
- * @returns {ReactPortal | null}
+ * @param props.mobileFull - 모바일(≤640px)에서 패널을 화면 꽉 채움 — 콘텐츠 긴 상세 모달용(프로젝트·연주).
  */
 const Modal = ({
   open,

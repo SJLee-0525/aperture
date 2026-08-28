@@ -44,17 +44,15 @@ type Props = {
  * 전체가 하나의 링크다. 태그는 눌러도 필터가 바뀌지 않는 텍스트로 둔다 — 링크 안에 버튼을
  * 겹치면 카드마다 키보드 이동 순서가 늘어나고 중첩 인터랙션이 된다. 필터는 위쪽 칩 행이 맡는다.
  *
- * @param {Props} props
- * @param {DevArticleSummary} props.article 본문을 뺀 글 요약.
- * @param {ArticleListView} props.view 현재 보기 방식. `grid` 는 카드, `list` 는 한 줄 행이다.
- * @param {Lang} props.lang 링크 로케일 프리픽스와 제목·요약 언어를 고른다.
- * @param {string[]} props.tagLabels 사전에서 현재 언어로 해석한 태그 라벨.
- * @param {string} props.readingLabel 완성된 읽기 시간 문구.
- * @param {string | undefined} props.pinnedLabel 고정 배지 문구. 값이 있을 때만 배지를 그린다.
+ * @param props.article 본문을 뺀 글 요약.
+ * @param props.view 현재 보기 방식. `grid` 는 카드, `list` 는 한 줄 행이다.
+ * @param props.lang 링크 로케일 프리픽스와 제목·요약 언어를 고른다.
+ * @param props.tagLabels 사전에서 현재 언어로 해석한 태그 라벨.
+ * @param props.readingLabel 완성된 읽기 시간 문구.
+ * @param props.pinnedLabel 고정 배지 문구. 값이 있을 때만 배지를 그린다.
  *   화면에는 아이콘만 보이고 이 문구는 링크 이름에만 남는다.
- * @param {boolean | undefined} props.priority LCP 보호. 첫 행의 실제 대표 이미지만 eager 로드한다.
+ * @param props.priority LCP 보호. 첫 행의 실제 대표 이미지만 eager 로드한다.
  *   대표 이미지가 없는 카드의 워드마크 자리표시자는 LCP 후보가 아니라서 받지 않는다.
- * @returns {JSX.Element}
  */
 const ArticleCard = ({
   article,

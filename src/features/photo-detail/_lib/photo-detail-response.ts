@@ -13,9 +13,9 @@ import type { Photo } from "@/types/photo";
  * 작업 그리드와 지도가 각자 라우트를 두면서 조회·직렬화·404·캐시 헤더를 복제하고 있어,
  * 한쪽만 고쳐지는 것을 막으려고 한 곳에 모았다. 두 경로의 차이는 후보 사진 필터뿐이다.
  *
- * @param {string} id 선택한 사진 ID.
- * @param {(photo: Photo) => boolean} [filter] 앞뒤 사진을 고를 후보 조건.
- * @returns {Promise<NextResponse>} 직렬화한 사진·태그 또는 404 응답.
+ * @param id 선택한 사진 ID.
+ * @param [filter] 앞뒤 사진을 고를 후보 조건.
+ * @returns 직렬화한 사진·태그 또는 404 응답.
  */
 const buildPhotoDetailResponse = async (
   id: string,

@@ -58,7 +58,7 @@ let cached: DevArticleRepository | null = null;
  * 도메인 규칙(`dev-article-domain`)을 공유하고, 팩토리는 호출 시점까지 Supabase 를
  * 건드리지 않는 closure 조립만 한다.
  *
- * @returns {DevArticleRepository} 현재 콘텐츠 소스에 맞는 저장소.
+ * @returns 현재 콘텐츠 소스에 맞는 저장소.
  */
 const getDevArticleRepository = (): DevArticleRepository => {
   cached ??= shouldUseMockContent()

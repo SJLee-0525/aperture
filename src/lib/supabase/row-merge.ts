@@ -12,9 +12,9 @@ type MergedRow = { id: string; data: Record<string, unknown> };
  * 서술자만 참조하는 순수 함수라 공개 읽기(서버)와 관리자 쓰기(브라우저)가 함께 쓴다.
  * 전송 계층에 두면 그 모듈에 `server-only` 를 걸 수 없다.
  *
- * @param {TableCollectionId} collection 논리 컬렉션 이름.
- * @param {Record<string, unknown>} row PostgREST 또는 supabase-js 가 돌려준 행.
- * @returns {MergedRow} 디코더에 넣을 `{ id, data }`.
+ * @param collection 논리 컬렉션 이름.
+ * @param row PostgREST 또는 supabase-js 가 돌려준 행.
+ * @returns 디코더에 넣을 `{ id, data }`.
  */
 const mergeRow = (collection: TableCollectionId, row: Record<string, unknown>): MergedRow => {
   const { hasData, scalars } = SUPABASE_COLLECTIONS[collection];

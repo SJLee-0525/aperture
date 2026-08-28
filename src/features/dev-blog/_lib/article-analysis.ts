@@ -24,8 +24,8 @@ type ArticleAnalysis = {
  * `react.cache` 는 인자 identity 로 판단하므로 서로 다른 요청이나 React 렌더 밖에서는
  * 매번 새로 계산한다.
  *
- * @param {DevArticle} article 본문(`body`)을 가진 글.
- * @returns {ArticleAnalysis} 렌더 트리와 그로부터 파생한 목차·읽기 시간.
+ * @param article 본문(`body`)을 가진 글.
+ * @returns 렌더 트리와 그로부터 파생한 목차·읽기 시간.
  */
 const analyzeArticle = cache((article: DevArticle): ArticleAnalysis => {
   const { document } = parseArticleMarkdown(article.body);

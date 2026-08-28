@@ -46,21 +46,19 @@ type Props = {
  * 언어는 컨텍스트가 아니라 props 로 받는다. 관리자 미리보기는 관리자 UI 언어와 무관하게 한국어
  * 지면을 그려야 하고, 공개 상세는 URL 세그먼트가 언어의 단일 출처이기 때문이다.
  *
- * @param {Props} props
- * @param {string} props.title 현재 언어 제목.
- * @param {string} props.summary 현재 언어 요약.
- * @param {ImageMeta | null} props.cover 대표 이미지. 없으면 히어로가 타이포그래피형이 된다.
- * @param {string} props.coverAlt 대표 이미지 대체 텍스트.
- * @param {Date | null} props.publishedAt 발행일. 초안 미리보기에서는 null 이다.
- * @param {number} props.readingMinutes 예상 읽기 시간(분).
- * @param {string[]} props.tagLabels 현재 언어로 해석한 태그 라벨.
- * @param {ArticleDocument} props.document 정규화된 본문.
- * @param {ArticleCodeHighlights} props.highlights 서버가 미리 만든 코드 색칠 결과.
- * @param {Lang} props.lang 지면 언어. `en` 이면 본문 앞에 한국어 원문 안내를 둔다.
- * @param {string | undefined} props.shareUrl 공유할 canonical 주소.
- * @param {boolean | undefined} props.landmark `true` 면 지면 전체를 `main` 으로 감싼다. 기본값은 `article` — 관리자 미리보기처럼 이미 다른 `main` 안에 놓이는 경우다.
- * @param {ReactNode | undefined} props.children 본문 아래에 붙일 공개 전용 영역.
- * @returns {JSX.Element}
+ * @param props.title 현재 언어 제목.
+ * @param props.summary 현재 언어 요약.
+ * @param props.cover 대표 이미지. 없으면 히어로가 타이포그래피형이 된다.
+ * @param props.coverAlt 대표 이미지 대체 텍스트.
+ * @param props.publishedAt 발행일. 초안 미리보기에서는 null 이다.
+ * @param props.readingMinutes 예상 읽기 시간(분).
+ * @param props.tagLabels 현재 언어로 해석한 태그 라벨.
+ * @param props.document 정규화된 본문.
+ * @param props.highlights 서버가 미리 만든 코드 색칠 결과.
+ * @param props.lang 지면 언어. `en` 이면 본문 앞에 한국어 원문 안내를 둔다.
+ * @param props.shareUrl 공유할 canonical 주소.
+ * @param props.landmark `true` 면 지면 전체를 `main` 으로 감싼다. 기본값은 `article` — 관리자 미리보기처럼 이미 다른 `main` 안에 놓이는 경우다.
+ * @param props.children 본문 아래에 붙일 공개 전용 영역.
  */
 const ArticleDetailView = ({
   title,

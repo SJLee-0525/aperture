@@ -34,8 +34,8 @@ const ADMIN_FORM_DRAFT_KEY_PREFIX = "ap-admin-draft:v1:";
 /**
  * 편집 중인 글 하나의 복구본 키.
  *
- * @param {string} articleId 편집 중인 글의 문서 ID.
- * @returns {string} 해당 글 전용 localStorage 키.
+ * @param articleId 편집 중인 글의 문서 ID.
+ * @returns 해당 글 전용 localStorage 키.
  */
 const adminDevArticleDraftKey = (articleId: string): string =>
   `${ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX}${articleId}`;
@@ -43,9 +43,9 @@ const adminDevArticleDraftKey = (articleId: string): string =>
 /**
  * 편집 중인 문서 하나의 복구본 키.
  *
- * @param {string} collection 컬렉션 이름. 설정 편집기처럼 문서가 하나면 그 이름만 쓴다.
- * @param {string} id 문서 ID.
- * @returns {string} 해당 문서 전용 localStorage 키.
+ * @param collection 컬렉션 이름. 설정 편집기처럼 문서가 하나면 그 이름만 쓴다.
+ * @param id 문서 ID.
+ * @returns 해당 문서 전용 localStorage 키.
  */
 const adminFormDraftKey = (collection: string, id: string): string =>
   `${ADMIN_FORM_DRAFT_KEY_PREFIX}${collection}:${id}`;

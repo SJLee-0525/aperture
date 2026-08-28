@@ -110,11 +110,6 @@ const GalleryContent = memo(function GalleryContent({
 /**
  * 작업(Work) 뷰는 URL의 검색, 필터, 상세 모달 상태를 구독한다. 배경 갤러리는
  * 파싱된 primitive props의 memo 경계로 격리한다.
- *
- * @param {Props} props
- * @param {GalleryPhoto[]} props.photos
- * @param {Tag[]} props.tags
- * @returns {JSX.Element}
  */
 const GalleryView = ({ photos, tags }: Props) => {
   const searchParams = useSearchParams();

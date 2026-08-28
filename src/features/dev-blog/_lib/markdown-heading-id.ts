@@ -8,8 +8,8 @@ const FALLBACK_HEADING_SLUG = "section";
  * heading 평문을 URL fragment 로 쓸 수 있는 slug 로 바꾼다.
  * 한글 제목이 대부분이라 라틴 문자만 남기지 않고 모든 언어의 글자를 유지한다.
  *
- * @param {string} text heading 의 평문.
- * @returns {string} 소문자 slug. 남는 글자가 없으면 `section`.
+ * @param text heading 의 평문.
+ * @returns 소문자 slug. 남는 글자가 없으면 `section`.
  */
 const toHeadingSlug = (text: string): string => {
   const slug = text.trim().toLowerCase().replace(NON_SLUG_CHARACTER, "-").replace(/^-|-$/g, "");
@@ -23,7 +23,7 @@ const toHeadingSlug = (text: string): string => {
  * 문서마다 호출자가 새 factory 를 만들어야 한다 — 상태(이미 쓴 slug)를 안에 들고 있어서
  * 두 글이 같은 factory 를 나눠 쓰면 두 번째 글의 첫 heading 부터 `-2` 가 붙는다.
  *
- * @returns {(text: string) => string} 평문을 받아 문서 안에서 유일한 id 를 돌려주는 함수.
+ * @returns 평문을 받아 문서 안에서 유일한 id 를 돌려주는 함수.
  */
 const createHeadingIdFactory = (): ((text: string) => string) => {
   // 세는 대상은 slug 등장 횟수가 아니라 **이미 발급한 id** 다. 횟수만 세면 뒤에 붙인 번호가

@@ -21,10 +21,7 @@ type Props = {
 /**
  * 공유 앨범 폼 — 이중언어 제목·부제 + 사진 선택/순서/커버 + 저장.
  *
- * @param {Props} props
- * @param {string} props.albumId
- * @param {Album | undefined} props.initial - 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.initial - 있으면 수정 모드.
  */
 const AlbumForm = ({ albumId, initial }: Props) => {
   const {

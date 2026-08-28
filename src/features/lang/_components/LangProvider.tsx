@@ -56,8 +56,7 @@ const readServerLangSnapshot = (): Lang => DEFAULT_LANG;
 /**
  * 명시적 언어 선택을 메모리, localStorage와 서버용 기능성 쿠키에 동기화한다.
  *
- * @param {Lang} next - 사용자가 선택한 지원 언어.
- * @returns {void}
+ * @param next - 사용자가 선택한 지원 언어.
  */
 const writeLang = (next: Lang): void => {
   langCache = next;
@@ -84,10 +83,7 @@ type LangProviderProps = {
  * 언어 변경은 두 모드 모두 저장소에 기록한다.
  * - 스토어 모드(prop 없음, 관리자·에러 페이지): 기존 localStorage + 모듈 스토어 동작 유지.
  *
- * @param {LangProviderProps} props
- * @param {Lang | undefined} props.lang 공개 경로의 언어 세그먼트.
- * @param {ReactNode} props.children
- * @returns {JSX.Element}
+ * @param props.lang 공개 경로의 언어 세그먼트.
  */
 const LangProvider = ({ lang: routeLang, children }: LangProviderProps) => {
   const storeLang = useSyncExternalStore(subscribeLang, readLangSnapshot, readServerLangSnapshot);

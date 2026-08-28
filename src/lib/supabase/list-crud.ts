@@ -43,11 +43,11 @@ const assertNoError = (error: QueryError, message: string): void => {
  * 쓰기와 읽기가 같은 왕복 계약을 쓴다. 정렬·projection 은 `SUPABASE_COLLECTIONS`
  * 서술자가 단일 출처다. `created_at`/`updated_at` 은 DB 기본값·트리거 소유라 쓰지 않는다.
  *
- * @param {CollectionId} collection 대상 논리 컬렉션 이름.
- * @param {(id: string, d: Record<string, unknown>) => T} toEntity 병합된 행을 도메인 모델로 바꾸는 함수.
- * @param {string} label 오류 메시지에 표시할 항목 이름.
- * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류. 없으면 동기화 요청이 없다.
- * @param {PostSyncPolicy<T>} [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책. 없으면 모든 쓰기가 동기화를 요청하고 쓰기 직전 스냅샷도 읽지 않는다.
+ * @param collection 대상 논리 컬렉션 이름.
+ * @param toEntity 병합된 행을 도메인 모델로 바꾸는 함수.
+ * @param label 오류 메시지에 표시할 항목 이름.
+ * @param [ragSourceType] 변경 후 동기화할 RAG 소스 종류. 없으면 동기화 요청이 없다.
+ * @param [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책. 없으면 모든 쓰기가 동기화를 요청하고 쓰기 직전 스냅샷도 읽지 않는다.
  * @returns 해당 컬렉션에 묶인 문서 단위 CRUD 함수.
  */
 const documentCrud = <T extends WithId>(
@@ -114,8 +114,8 @@ const documentCrud = <T extends WithId>(
     /**
      * 관리자 편집용 문서 한 건을 읽는다.
      *
-     * @param {string} id 조회할 문서 ID.
-     * @returns {Promise<T | null>} 변환된 모델. 문서가 없으면 `null`이다.
+     * @param id 조회할 문서 ID.
+     * @returns 변환된 모델. 문서가 없으면 `null`이다.
      */
     get: async (id: string): Promise<T | null> => {
       await requireAdminSession();
@@ -124,9 +124,9 @@ const documentCrud = <T extends WithId>(
     /**
      * 미리 발급한 ID로 문서를 생성한다.
      *
-     * @param {string} id 새 문서에 사용할 ID.
-     * @param {Input} input 문서 ID를 제외한 저장 필드.
-     * @returns {Promise<void>} 저장과 후속 갱신이 끝나면 완료된다.
+     * @param id 새 문서에 사용할 ID.
+     * @param input 문서 ID를 제외한 저장 필드.
+     * @returns 저장과 후속 갱신이 끝나면 완료된다.
      */
     create: async (id: string, input: Input): Promise<void> => {
       const { error } = await from().insert(encode(id, input));
@@ -139,9 +139,9 @@ const documentCrud = <T extends WithId>(
      * 기존 문서의 도메인 필드를 수정한다.
      * RLS 거부·부재 문서는 오류 없이 0행이 되므로 반환 행으로 반영을 검증한다.
      *
-     * @param {string} id 수정할 문서 ID.
-     * @param {Input} input 교체할 도메인 필드.
-     * @returns {Promise<void>} 수정과 후속 갱신이 끝나면 완료된다.
+     * @param id 수정할 문서 ID.
+     * @param input 교체할 도메인 필드.
+     * @returns 수정과 후속 갱신이 끝나면 완료된다.
      */
     update: async (id: string, input: Input): Promise<void> => {
       const snapshot = await readBeforeWrite(id);
@@ -157,9 +157,9 @@ const documentCrud = <T extends WithId>(
      * 이미지 파생본 마이그레이션처럼 한 필드만 바꾸는 작업이 공연일·촬영일을 덮어쓰는
      * 것을 막는다. 이 함수가 모르는 필드도 원본 그대로 남는다.
      *
-     * @param {string} id 수정할 문서 ID.
-     * @param {Partial<Input>} patch 덮어쓸 도메인 필드.
-     * @returns {Promise<void>} 수정과 후속 갱신이 끝나면 완료된다.
+     * @param id 수정할 문서 ID.
+     * @param patch 덮어쓸 도메인 필드.
+     * @returns 수정과 후속 갱신이 끝나면 완료된다.
      */
     patchData: async (id: string, patch: Partial<Input>): Promise<void> => {
       const { data: row, error: readError } = await from()
@@ -179,9 +179,9 @@ const documentCrud = <T extends WithId>(
     /**
      * 문서의 공개 상태를 변경한다.
      *
-     * @param {string} id 상태를 바꿀 문서 ID.
-     * @param {boolean} published 공개 여부.
-     * @returns {Promise<void>} 상태 저장과 후속 갱신이 끝나면 완료된다.
+     * @param id 상태를 바꿀 문서 ID.
+     * @param published 공개 여부.
+     * @returns 상태 저장과 후속 갱신이 끝나면 완료된다.
      */
     setPublished: async (id: string, published: boolean): Promise<void> => {
       const snapshot = await readBeforeWrite(id);
@@ -199,8 +199,8 @@ const documentCrud = <T extends WithId>(
      * 이미 없는 문서의 삭제도 실패다 — CMS 삭제 대상은 방금 목록에 뜬 문서라서,
      * 0행은 부재가 아니라 세션 만료가 원인일 가능성이 높다.
      *
-     * @param {string} id 삭제할 문서 ID.
-     * @returns {Promise<void>} 삭제와 후속 갱신이 끝나면 완료된다.
+     * @param id 삭제할 문서 ID.
+     * @returns 삭제와 후속 갱신이 끝나면 완료된다.
      */
     remove: async (id: string): Promise<void> => {
       const snapshot = await readBeforeWrite(id);
@@ -218,11 +218,11 @@ const documentCrud = <T extends WithId>(
  * `documentCrud` 에 관리자 목록 조회와 드래그 정렬을 더한다. 인자 타입이
  * `SortableCollectionId` 라 정렬 RPC 가 없는 컬렉션은 여기 들어올 수 없다.
  *
- * @param {SortableCollectionId} collection 대상 논리 컬렉션 이름.
- * @param {(id: string, d: Record<string, unknown>) => T} toEntity 병합된 행을 도메인 모델로 바꾸는 함수.
- * @param {string} label 오류 메시지에 표시할 항목 이름.
- * @param {RagSyncSourceType} [ragSourceType] 변경 후 동기화할 RAG 소스 종류.
- * @param {PostSyncPolicy<T>} [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책.
+ * @param collection 대상 논리 컬렉션 이름.
+ * @param toEntity 병합된 행을 도메인 모델로 바꾸는 함수.
+ * @param label 오류 메시지에 표시할 항목 이름.
+ * @param [ragSourceType] 변경 후 동기화할 RAG 소스 종류.
+ * @param [syncPolicy] 쓰기 전후 상태로 동기화 여부를 정하는 정책.
  * @returns 문서 CRUD 에 `list`·`updateOrder` 를 더한 함수 묶음.
  */
 const sortableListCrud = <T extends WithId>(
@@ -267,8 +267,8 @@ const sortableListCrud = <T extends WithId>(
     /**
      * 드래그 정렬 결과를 RPC 1회로 저장한다. 정렬은 검색 본문과 무관해 RAG 동기화가 없다.
      *
-     * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록.
-     * @returns {Promise<void>} 순서 저장이 끝나면 완료된다.
+     * @param orders 바뀐 항목만 담은 정렬 목록.
+     * @returns 순서 저장이 끝나면 완료된다.
      */
     updateOrder: async (orders: SortOrder[]): Promise<void> => {
       if (orders.length === 0) return;

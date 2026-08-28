@@ -25,7 +25,7 @@ type RevalidateFailureAlert = {
  * 실패는 저장 성공 이후에만 기록되므로 여기서 하는 일은 캐시 무효화뿐이다. 재시도가 성공하면
  * 기록을 지우고, 실패하면 대상은 그대로 두어 다음에 다시 시도할 수 있게 한다.
  *
- * @returns {RevalidateFailureAlert} 표시할 실패와 재시도 동작.
+ * @returns 표시할 실패와 재시도 동작.
  */
 const useRevalidateFailure = (): RevalidateFailureAlert => {
   const [failure, setFailure] = useState<RevalidateFailure | null>(null);

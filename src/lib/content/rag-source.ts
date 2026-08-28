@@ -126,10 +126,6 @@ type RagSourceData = Awaited<ReturnType<typeof getRagSourceData>>;
 /**
  * 타깃 원본을 공개 fetcher 와 같은 toX 디코더로 정규화한다 — 증분 경로가 raw 디코드를
  * 그대로 쓰면 구형 문서(평문 troubleshooting, id 없는 award)에서 전체 경로와 청크가 어긋나거나 깨진다.
- *
- * @param {RagSyncTarget} target
- * @param {string} idToken
- * @returns {Promise<RagSourceData>}
  */
 const getRagSourceDataForTarget = async (
   target: RagSyncTarget,

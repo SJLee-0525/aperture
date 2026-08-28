@@ -31,8 +31,6 @@ const EMPTY: DevConfig = {
 /**
  * 관리자 개발 설정(site/dev)의 로드·저장 lifecycle과 편집 상태 연결.
  * 저장소의 set 이 문서를 통째로 덮어쓰므로 필드 유실이 없다.
- *
- * @returns {{ config: DevConfig; status: Status; error: string | null; saving: boolean; saved: boolean; edit: (command: DevConfigEdit) => void; save: () => Promise<void> }}
  */
 const useDevConfigAdmin = () => {
   const [config, setConfig] = useState<DevConfig>(EMPTY);

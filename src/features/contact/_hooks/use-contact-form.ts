@@ -13,8 +13,6 @@ const CAPTCHA_FIELD = "h-captcha-response";
 
 /**
  * 스크립트 로드 전이거나 캡차를 끈 환경에서도 안전하게 무시된다.
- *
- * @returns {void}
  */
 const resetCaptchaWidget = () => {
   (window as { hcaptcha?: { reset: () => void } }).hcaptcha?.reset();

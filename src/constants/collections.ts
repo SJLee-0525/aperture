@@ -125,8 +125,8 @@ const SUPABASE_COLLECTIONS: Record<
  * 테이블명을 아는 곳은 여기 하나다. 소비처가 `SUPABASE_COLLECTIONS[x]?.table ?? "리터럴"`
  * 로 읽으면 서술자가 사라져도 오류 없이 동작해 계약이 무력해진다.
  *
- * @param {TableCollectionId} collection 테이블을 가진 논리 컬렉션.
- * @returns {string} Postgres 테이블명.
+ * @param collection 테이블을 가진 논리 컬렉션.
+ * @returns Postgres 테이블명.
  */
 const tableFor = (collection: TableCollectionId): string => SUPABASE_COLLECTIONS[collection].table;
 

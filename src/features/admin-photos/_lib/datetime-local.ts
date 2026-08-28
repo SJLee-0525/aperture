@@ -2,9 +2,6 @@
 
 /**
  * Date → "YYYY-MM-DDTHH:mm" (datetime-local value).
- *
- * @param {Date} date
- * @returns {string}
  */
 const toDatetimeLocal = (date: Date): string => {
   // epoch 는 디코더가 "값 없음"에 쓰는 표현이다. 날짜로 그려 주면 관리자가 그것을
@@ -20,9 +17,6 @@ const toDatetimeLocal = (date: Date): string => {
 /**
  * datetime-local 문자열 → Date. 빈 값은 "값 없음"이라 epoch 로 돌려주고,
  * 저장 경계가 그 키를 빼서 원래의 결측을 보존한다.
- *
- * @param {string} value
- * @returns {Date}
  */
 const fromDatetimeLocal = (value: string): Date => {
   if (!value) return new Date(0);

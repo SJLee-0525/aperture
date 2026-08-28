@@ -22,8 +22,8 @@ import type { ImageMeta } from "@/types/image";
  * 세 파일은 같은 asset ID 를 파일명으로 공유해, 문서에서 참조가 끊긴 뒤에도 미사용 이미지
  * 정리가 한 벌임을 경로만으로 판단한다.
  *
- * @param {string} articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정한다.
- * @returns {ArticleImageUploader} 파일 한 장을 압축·업로드해 ImageMeta 를 주는 함수.
+ * @param articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정한다.
+ * @returns 파일 한 장을 압축·업로드해 ImageMeta 를 주는 함수.
  */
 const createLiveArticleCoverUploader =
   (articleId: string): ArticleImageUploader =>
@@ -58,8 +58,8 @@ const createLiveArticleCoverUploader =
  * 본문 Markdown 은 원본 주소만 저장하고 렌더도 그 한 장만 쓴다. 파생본을 만들면 어디서도
  * 참조되지 않는 파일이 글마다 두 개씩 쌓인다.
  *
- * @param {string} articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정한다.
- * @returns {ArticleImageUploader} 파일 한 장을 압축·업로드해 ImageMeta 를 주는 함수.
+ * @param articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정한다.
+ * @returns 파일 한 장을 압축·업로드해 ImageMeta 를 주는 함수.
  */
 const createLiveArticleBodyUploader =
   (articleId: string): ArticleImageUploader =>

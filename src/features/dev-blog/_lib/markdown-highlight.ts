@@ -45,7 +45,7 @@ const loadedLanguages = new Map<ArticleCodeLanguage, Promise<void>>();
  * 하이라이터는 문법·테마를 메모리에 올려 두고 재사용한다. 요청마다 만들면 wasm 초기화가
  * 매번 반복돼 정적 생성 시간이 글 수만큼 늘어난다. Promise 를 캐시해 동시 호출도 한 번만 만든다.
  *
- * @returns {Promise<HighlighterCore>} 테마 두 개만 올라간 하이라이터.
+ * @returns 테마 두 개만 올라간 하이라이터.
  */
 const getHighlighter = (): Promise<HighlighterCore> => {
   // 거부된 Promise 를 그대로 두면 wasm 초기화가 한 번 실패한 뒤로 프로세스가 사는 동안
@@ -84,9 +84,9 @@ const ensureLanguage = (core: HighlighterCore, language: ArticleCodeLanguage): P
  * 서버에서만 돈다(`server-only`). 브라우저로 문법을 보내지 않는 것이 이 단계를 따로 둔 이유이고,
  * 결과는 문자열이 아니라 토큰 배열이라 렌더가 HTML 을 이어 붙이지 않는다.
  *
- * @param {string} code 코드 원문.
- * @param {ArticleCodeLanguage} language 정규화된 문법 이름.
- * @returns {Promise<ArticleCodeLines | null>} 줄·토큰 배열. 색칠에 실패하면 null 이고
+ * @param code 코드 원문.
+ * @param language 정규화된 문법 이름.
+ * @returns 줄·토큰 배열. 색칠에 실패하면 null 이고
  *   호출부는 색 없는 코드 블록으로 그대로 보여 준다 — 색 때문에 글이 통째로 안 열리면 안 된다.
  */
 const highlightArticleCode = async (
@@ -118,9 +118,9 @@ const highlightArticleCode = async (
 /**
  * 블록 트리를 훑어 색칠할 코드 블록을 모은다. 목록·인용 안에 들어간 코드도 빠뜨리지 않는다.
  *
- * @param {ArticleBlock[]} blocks 훑을 블록 목록.
- * @param {Map<string, { language: ArticleCodeLanguage; value: string }>} found 키로 중복을 거른 결과.
- * @returns {void} `found` 를 채운다.
+ * @param blocks 훑을 블록 목록.
+ * @param found 키로 중복을 거른 결과.
+ * @returns `found` 를 채운다.
  */
 const collectCodeBlocks = (
   blocks: ArticleBlock[],
@@ -150,8 +150,8 @@ const collectCodeBlocks = (
  * 서버 렌더, 관리자 미리보기 action)에만 묶어 둘 수 있다. 같은 코드가 여러 번 나오면 키가
  * 겹쳐 한 번만 색칠한다. 색칠에 실패한 블록은 결과에 키가 없고 렌더러가 원문을 그대로 그린다.
  *
- * @param {ArticleDocument} document 정규화된 본문.
- * @returns {Promise<ArticleCodeHighlights>} 조회 키 → 줄·토큰 배열. 코드가 없으면 빈 객체.
+ * @param document 정규화된 본문.
+ * @returns 조회 키 → 줄·토큰 배열. 코드가 없으면 빈 객체.
  */
 const highlightArticleDocument = async (
   document: ArticleDocument,

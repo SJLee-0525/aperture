@@ -18,8 +18,6 @@ type TextFieldKey = "title" | "problem" | "solution" | "result";
 
 /**
  * 새 항목 — 폼 상태에서는 result 를 항상 채워 undefined 분기를 없앤다(저장 시 빈 값이면 키 생략).
- *
- * @returns {DevTroubleshooting}
  */
 const emptyEntry = (): DevTroubleshooting => ({
   title: { ...EMPTY_TEXT },
@@ -40,11 +38,6 @@ const FIELDS: { key: TextFieldKey; label: string; multiline: boolean }[] = [
 
 /**
  * 트러블슈팅 구조화 편집 필드 — 항목 추가/삭제 + 항목당 제목·문제·해결·결과 ko/en 입력.
- *
- * @param {Props} props
- * @param {DevTroubleshooting[]} props.entries
- * @param {(entries: DevTroubleshooting[]) => void} props.onChange
- * @returns {JSX.Element}
  */
 const TroubleshootingField = ({ entries, onChange }: Props) => {
   const add = () => onChange([...entries, emptyEntry()]);

@@ -18,8 +18,6 @@ type Status = "loading" | "ready" | "error";
  * 관리자 태그 사전 상태 관리 — 로드·편집·추가·삭제·드래그 정렬·저장.
  * 저장 시 이 화면이 소유한 tags만 병합해 다른 설정 화면의 최신 값을 보존한다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
- *
- * @returns {{ tags: Tag[]; status: Status; error: string | null; saving: boolean; saved: boolean; editLabel: (id: string, field: 'ko' | 'en', value: string) => void; addTag: (draft: Tag) => string | null; removeTag: (id: string) => void; reorder: (activeId: string, overId: string) => void; save: () => Promise<void> }}
  */
 const useTagsAdmin = () => {
   const [tags, setTags] = useState<Tag[]>([]);

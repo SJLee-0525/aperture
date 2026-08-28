@@ -13,8 +13,8 @@ const PUBLIC_OBJECT_PREFIX = "/storage/v1/object/public/media/";
  * 이미 포트를 포함하므로, env 와 같은 포트만 통과하고 로컬 스택도 막히지 않는다.
  * redirect 를 따라간 뒤의 최종 URL 도 같은 함수로 다시 검증해야 한다.
  *
- * @param {string} value 검증할 URL 문자열.
- * @returns {boolean} 허용된 공개 객체 URL 이면 true.
+ * @param value 검증할 URL 문자열.
+ * @returns 허용된 공개 객체 URL 이면 true.
  */
 const isAllowedStorageSourceUrl = (value: string): boolean => {
   const origin = supabaseUrl();

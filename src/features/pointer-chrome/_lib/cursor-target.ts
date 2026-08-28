@@ -42,9 +42,6 @@ type CursorTarget = {
 
 /**
  * 포인터 아래 DOM을 커서가 이해하는 한 가지 target으로 정규화한다.
- *
- * @param {EventTarget | null} eventTarget
- * @returns {CursorTarget}
  */
 const resolveCursorTarget = (eventTarget: EventTarget | null): CursorTarget => {
   const element = eventTarget instanceof Element ? eventTarget : null;

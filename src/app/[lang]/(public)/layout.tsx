@@ -30,11 +30,6 @@ type Props = { children: React.ReactNode; params: Promise<{ lang: string }> };
  * 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config.
  *
  * 헤더·푸터는 서버 컴포넌트라 언어를 컨텍스트가 아니라 `[lang]` 세그먼트에서 받는다.
- *
- * @param {Props} props
- * @param {ReactNode} props.children
- * @param {Promise<{ lang: string }>} props.params
- * @returns {Promise<JSX.Element>}
  */
 const PublicLayout = async ({ children, params }: Props) => {
   const [{ lang: segment }, site] = await Promise.all([params, getSite()]);

@@ -9,8 +9,6 @@ const LINE_WIDTHS = ["100%", "96%", "88%", "100%", "72%"];
 
 /**
  * 블로그 상세의 RSC 대기 화면 — 히어로 높이를 실제 지면과 같은 상수에서 가져온다.
- *
- * @returns {JSX.Element}
  */
 export default function DevArticleLoading() {
   return (

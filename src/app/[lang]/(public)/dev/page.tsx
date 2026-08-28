@@ -50,10 +50,7 @@ const DevAboutContent = async ({ params }: Props) => {
  *
  *  셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `dev/loading.tsx` 경계는 career·projects·
  *  articles 전환에도 함께 쓰여 이 지면 모양을 그릴 수 없다.
- *
- * @param {Props} props
- * @param {Promise<{ lang: Lang }>} props.params
- * @returns {JSX.Element} */
+ */
 export default function DevPage({ params }: Props) {
   return (
     <Suspense fallback={<AboutPageSkeleton extended />}>

@@ -72,7 +72,7 @@ const requestAllRows = (
  * 컬렉션 행을 서술자 projection·정렬로 읽는다. published 게이트가 없는
  * 태그 사전·site 문서까지 다루는 범용 조회다.
  *
- * @returns {Promise<MergedRow[]>} 병합된 행 목록.
+ * @returns 병합된 행 목록.
  */
 const selectRows = async (
   collection: TableCollectionId,
@@ -90,8 +90,8 @@ const selectRows = async (
 /**
  * `published = true` 행만 서술자 정렬로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<MergedRow[]>} 병합된 공개 행 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 병합된 공개 행 목록.
  */
 const selectPublished = async (
   collection: TableCollectionId,
@@ -108,9 +108,9 @@ const selectPublished = async (
  * 행을 그대로 돌려주고 디코딩은 호출자가 한다. 본문 Markdown 처럼 무거운 jsonb
  * 필드를 전송에서 제외해야 하는 경로에 쓴다.
  *
- * @param {string} select 별칭 포함 PostgREST projection. jsonb 경로는 JSON 키의
+ * @param select 별칭 포함 PostgREST projection. jsonb 경로는 JSON 키의
  *   대소문자를 그대로 써야 한다 (`data->relatedProjectIds`).
- * @returns {Promise<Array<Record<string, unknown>>>} projection 그대로의 행 목록.
+ * @returns projection 그대로의 행 목록.
  */
 const selectProjectedPublished = async (
   collection: TableCollectionId,
@@ -129,8 +129,8 @@ const selectProjectedPublished = async (
  * 응답은 배열로 받아 빈 배열을 `null` 로 해석한다 — 단일 객체 Accept 의 406 의미에
  * 의존하지 않기 위해서다.
  *
- * @param {string} label 오류 메시지에 표시할 문서 이름.
- * @returns {Promise<Record<string, unknown> | null>} 병합된 문서. 없으면 `null`.
+ * @param label 오류 메시지에 표시할 문서 이름.
+ * @returns 병합된 문서. 없으면 `null`.
  */
 const fetchRow = async (
   collection: TableCollectionId,
@@ -157,7 +157,7 @@ const fetchRow = async (
  * 관리자 access token 으로 문서 한 건을 초안 포함해 읽는다. RAG 증분 동기화 전용이며
  * 인가는 RLS 가 한다 — 토큰이 admin 클레임이 아니면 초안은 빈 결과가 된다.
  *
- * @returns {Promise<Record<string, unknown> | null>} 병합된 문서. 없으면 `null`.
+ * @returns 병합된 문서. 없으면 `null`.
  */
 const fetchRowAsUser = async (
   collection: TableCollectionId,

@@ -10,9 +10,9 @@ type AlbumInput = Omit<Album, "id">;
 /**
  * 병합된 앨범 행의 누락 필드를 기본값으로 채워 `Album`으로 변환한다.
  *
- * @param {string} id 앨범 문서 ID.
- * @param {Record<string, unknown>} data 병합된 앨범 문서 필드.
- * @returns {Album} 관리자 화면에서 사용하는 앨범 모델.
+ * @param id 앨범 문서 ID.
+ * @param data 병합된 앨범 문서 필드.
+ * @returns 관리자 화면에서 사용하는 앨범 모델.
  */
 
 const albumsCrud = sortableListCrud<Album>(COLLECTIONS.ALBUMS, decodeAlbum, "앨범", "album");

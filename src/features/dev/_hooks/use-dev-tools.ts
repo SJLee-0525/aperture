@@ -63,9 +63,6 @@ const OPEN_TOOL: WebMcpToolDefinition = {
  * 기술 태그에서 대소문자와 `.js` 접미사 차이를 제거한다.
  * 에이전트는 "React" 라고 묻는데 데이터는 "React.js" 라 정확 일치만으로는 어긋난다(W5 평가).
  * React와 React Router처럼 다른 기술이 섞이지 않도록 정확히 비교한다.
- *
- * @param {string} value
- * @returns {string}
  */
 const LIST_AWARDS_TOOL: WebMcpToolDefinition = {
   name: "list_dev_awards",
@@ -79,9 +76,7 @@ const normalizeTech = (value: string): string => value.trim().toLowerCase().repl
 /**
  * 정규화한 기술 태그가 정확히 일치하는지 확인한다.
  *
- * @param {DevProjectCardData} project
- * @param {string} tech 에이전트가 넘긴 기술 태그 인자.
- * @returns {boolean}
+ * @param tech 에이전트가 넘긴 기술 태그 인자.
  */
 const matchesTech = (project: DevProjectCardData, tech: string): boolean => {
   const needle = normalizeTech(tech);
@@ -91,9 +86,8 @@ const matchesTech = (project: DevProjectCardData, tech: string): boolean => {
 /**
  * 개발 프로젝트 조회와 상세 열기를 제공하는 WebMCP 도구.
  *
- * @param {DevProjectCardData[]} projects 서버 투영 프로젝트 카드(techTags 포함).
- * @param {(id: string | null) => void} select 상세 모달을 여는 함수.
- * @returns {void}
+ * @param projects 서버 투영 프로젝트 카드(techTags 포함).
+ * @param select 상세 모달을 여는 함수.
  */
 const useDevTools = (projects: DevProjectCardData[], select: (id: string | null) => void): void => {
   const { lang } = useLang();
@@ -155,8 +149,7 @@ const useDevTools = (projects: DevProjectCardData[], select: (id: string | null)
  * 음악 수상만 도구를 갖고 개발 수상은 없어, 같은 개념을 에이전트가 한쪽에서만 볼 수
  * 있었다. 두 섹션의 도구 이름과 출력 형태를 맞춘다.
  *
- * @param {DevAward[]} awards 서버가 내려준 공개 수상 목록.
- * @returns {void}
+ * @param awards 서버가 내려준 공개 수상 목록.
  */
 const useDevAwardTools = (awards: DevAward[]): void => {
   const { lang } = useLang();

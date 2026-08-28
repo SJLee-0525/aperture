@@ -27,11 +27,9 @@ type Props<Id extends string> = {
  *
  * 선택값은 갖지 않는다. 로컬 상태로 둘지 URL 에 남길지는 지면마다 다르다.
  *
- * @param {Props<Id>} props
- * @param {readonly ViewToggleOption<Id>[]} props.options 표시 순서대로의 선택지. 각 항목은 id·label·Icon 이름을 갖는다.
- * @param {Id} props.value 현재 선택된 id. 목록에 없으면 아무것도 눌린 상태가 되지 않는다.
- * @param {(id: Id) => void} props.onChange 선택지를 누를 때 호출한다. 같은 값을 다시 눌러도 호출된다.
- * @returns {JSX.Element}
+ * @param props.options 표시 순서대로의 선택지. 각 항목은 id·label·Icon 이름을 갖는다.
+ * @param props.value 현재 선택된 id. 목록에 없으면 아무것도 눌린 상태가 되지 않는다.
+ * @param props.onChange 선택지를 누를 때 호출한다. 같은 값을 다시 눌러도 호출된다.
  */
 const ViewToggle = <Id extends string>({ options, value, onChange }: Props<Id>) => (
   <div className={styles.seg}>

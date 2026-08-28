@@ -24,14 +24,12 @@ type RailTick = { id: string; depth: 2 | 3 };
  *
  * heading 이 많으면 눈금 사이 간격이 좁아져 전부 한 화면에 담긴다.
  *
- * @param {Props} props
- * @param {ArticleTocItem[]} props.items 목차 항목.
- * @param {string | null} props.activeId 현재 heading id.
- * @param {string} props.label 여는 버튼의 이름(`목차 열기`).
- * @param {boolean} props.expanded 목차가 열려 있는지 — `aria-expanded` 로 알린다.
- * @param {string} props.panelId 이 버튼이 여는 패널의 id.
- * @param {() => void} props.onOpen 눌렀을 때 호출한다. 포인터 hover 로 여는 경로는 상위가 맡는다.
- * @returns {JSX.Element}
+ * @param props.items 목차 항목.
+ * @param props.activeId 현재 heading id.
+ * @param props.label 여는 버튼의 이름(`목차 열기`).
+ * @param props.expanded 목차가 열려 있는지 — `aria-expanded` 로 알린다.
+ * @param props.panelId 이 버튼이 여는 패널의 id.
+ * @param props.onOpen 눌렀을 때 호출한다. 포인터 hover 로 여는 경로는 상위가 맡는다.
  */
 const ArticleTocRail = ({ items, activeId, label, expanded, panelId, onOpen }: Props) => {
   const ticks: RailTick[] = items.flatMap((item) => [

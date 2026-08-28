@@ -29,18 +29,6 @@ const FIELDS: { key: Field; label: string }[] = [
 
 /**
  * 개발 수상 한 행 — 연도 + 수상명·등위·설명(ko/en) + 정렬/삭제.
- *
- * @param {Props} props
- * @param {DevAward} props.award
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, value: string) => void} props.onEditYear
- * @param {(index: number, value: string) => void} props.onEditProject
- * @param {(index: number, field: Field, lang: 'ko' | 'en', value: string) => void} props.onEditField
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const DevAwardRow = ({
   award,

@@ -29,12 +29,7 @@ const shareIcon = (
 /**
  * 현재 딥링크를 네이티브 공유 시트로 전달하는 공용 아이콘 버튼.
  *
- * @param {Props} props
- * @param {string} props.title
- * @param {string} props.label
- * @param {string | undefined} props.url 공유할 주소. 생략하면 지금 보고 있는 주소를 쓴다. 블로그 상세처럼 언어 경로가 갈리는 지면은 canonical 주소를 넘긴다.
- * @param {string | undefined} props.className
- * @returns {JSX.Element}
+ * @param props.url 공유할 주소. 생략하면 지금 보고 있는 주소를 쓴다. 블로그 상세처럼 언어 경로가 갈리는 지면은 canonical 주소를 넘긴다.
  */
 const ShareButton = ({ title, label, url: shareUrl, className }: Props) => {
   const share = async () => {

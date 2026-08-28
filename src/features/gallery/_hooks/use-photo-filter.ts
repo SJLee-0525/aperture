@@ -24,11 +24,9 @@ import type { GalleryPhoto } from "@/types/gallery-photo";
  * 슬라이더를 움직이는 동안에는 로컬 draft만 바꾸고 조작이 끝날 때 URL을 한 번 교체한다.
  * 틱마다 replaceState를 부르면 Safari rate limit(30초당 ~100회)에 걸린다.
  *
- * @param {GalleryPhoto[]} photos
- * @param {string} initialQuery ?q 검색어 (이 훅은 읽기만 한다)
- * @param {PhotoFilterState} urlFilters GalleryView가 URL에서 관대 파싱한 필터 상태
- * @param {PhotoFilterVocabulary} vocabulary 태그 사전·카메라 목록 (URL 재파싱·직렬화용)
- * @returns {{ tag: string; setTag: (tag: string) => void; camera: string; setCamera: (camera: string) => void; focalMin: number; focalMax: number; setFocal: (low: number, high: number) => void; commitFocal: (low: number, high: number) => void; cancelFocal: () => void; resetFilters: () => void; applyFilters: (partial: Partial<PhotoFilterState>, history: "push" | "replace") => void; filtersActive: boolean; visible: GalleryPhoto[] }}
+ * @param initialQuery ?q 검색어 (이 훅은 읽기만 한다)
+ * @param urlFilters GalleryView가 URL에서 관대 파싱한 필터 상태
+ * @param vocabulary 태그 사전·카메라 목록 (URL 재파싱·직렬화용)
  */
 const usePhotoFilter = (
   photos: GalleryPhoto[],

@@ -12,7 +12,7 @@ import { getAdminAccessToken } from "@/lib/supabase/auth";
  * 일반 개발·프로덕션에서는 로그인한 세션의 토큰을 그대로 꺼낸다. 로그인 전이면 빈
  * 문자열이 가고 서버가 거부한다 — 인증 판정은 서버 몫이다.
  *
- * @returns {Promise<string>} access token. 테스트 세션이거나 로그인 전이면 빈 문자열.
+ * @returns access token. 테스트 세션이거나 로그인 전이면 빈 문자열.
  */
 const adminIdToken = async (): Promise<string> => {
   if (isTestAdminSessionEnabled()) return "";

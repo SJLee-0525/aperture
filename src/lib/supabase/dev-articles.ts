@@ -37,9 +37,9 @@ const devArticlesCrud = documentCrud<DevArticle>(
  * DB 의 부분 unique 인덱스(`where slug <> ''`)가 최후 방어선이고, 이 조회는 폼 오류
  * 메시지를 위해 유지한다.
  *
- * @param {string} slug 검사할 slug. 빈 값은 초안끼리 겹칠 수 있어 검사하지 않는다.
- * @param {string} selfId 편집 중인 글의 문서 ID. 자기 자신은 중복으로 세지 않는다.
- * @returns {Promise<string | null>} slug 를 선점한 다른 글의 ID. 없으면 `null`.
+ * @param slug 검사할 slug. 빈 값은 초안끼리 겹칠 수 있어 검사하지 않는다.
+ * @param selfId 편집 중인 글의 문서 ID. 자기 자신은 중복으로 세지 않는다.
+ * @returns slug 를 선점한 다른 글의 ID. 없으면 `null`.
  */
 const findArticleSlugOwner = async (slug: string, selfId: string): Promise<string | null> => {
   if (!slug) return null;
@@ -66,9 +66,9 @@ const findArticleSlugOwner = async (slug: string, selfId: string): Promise<strin
  * 이 UPDATE 는 `updated_at` 을 올리지 않는다. 트리거가 data·published·slug·published_at
  * 이 실제로 바뀔 때만 발화하므로 SEO 수정 시각이 고정 토글에 흔들리지 않는다.
  *
- * @param {string} id 대상 글의 문서 ID.
- * @param {boolean} pinned 고정 여부.
- * @returns {Promise<void>} 저장과 공개 캐시 갱신이 끝나면 완료된다.
+ * @param id 대상 글의 문서 ID.
+ * @param pinned 고정 여부.
+ * @returns 저장과 공개 캐시 갱신이 끝나면 완료된다.
  * @throws {Error} 상한을 넘겼거나, 문서가 없거나, RLS 가 쓰기를 막아 0행이 된 경우.
  */
 const setDevArticlePinned = async (id: string, pinned: boolean): Promise<void> => {
@@ -90,7 +90,7 @@ const TAGS_CACHE_TAG = collectionCacheTag(COLLECTIONS.DEV_ARTICLE_TAGS);
 /**
  * 태그 전체를 공개 getter와 같은 ID 오름차순으로 읽는다.
  *
- * @returns {Promise<DevArticleTag[]>} id 오름차순의 태그 사전.
+ * @returns id 오름차순의 태그 사전.
  */
 const listDevArticleTagsAdmin = async (): Promise<DevArticleTag[]> =>
   // 다른 관리자 목록과 같은 규칙으로 이어 읽는다. id 정렬이 페이지 경계를 고정한다.
@@ -108,8 +108,8 @@ const listDevArticleTagsAdmin = async (): Promise<DevArticleTag[]> =>
  * 태그 ID를 PK로 사용한다. 기존 문서 덮어쓰기는 PK 충돌(23505)로 막히므로
  * 사전 존재 검사 없이 충돌 코드를 한국어 메시지로 바꾼다.
  *
- * @param {DevArticleTag} tag 저장할 태그.
- * @returns {Promise<void>} 저장과 공개 캐시 갱신이 끝나면 완료된다.
+ * @param tag 저장할 태그.
+ * @returns 저장과 공개 캐시 갱신이 끝나면 완료된다.
  */
 const createDevArticleTag = async (tag: DevArticleTag): Promise<void> => {
   const { error } = await getSupabaseClient()
@@ -124,8 +124,8 @@ const createDevArticleTag = async (tag: DevArticleTag): Promise<void> => {
  * 태그 라벨만 수정한다. 태그 ID는 글이 참조하므로 바꾸지 않는다.
  * id 변경이 필요하면 새 태그를 만들고 글을 옮긴 뒤 지운다.
  *
- * @param {DevArticleTag} tag 수정할 태그. id 로 행을 찾고 ko/en 만 갱신한다.
- * @returns {Promise<void>} 저장과 공개 캐시 갱신이 끝나면 완료된다.
+ * @param tag 수정할 태그. id 로 행을 찾고 ko/en 만 갱신한다.
+ * @returns 저장과 공개 캐시 갱신이 끝나면 완료된다.
  */
 const updateDevArticleTag = async (tag: DevArticleTag): Promise<void> => {
   const { data, error } = await getSupabaseClient()
@@ -141,8 +141,8 @@ const updateDevArticleTag = async (tag: DevArticleTag): Promise<void> => {
  * 태그 행을 삭제한다. 사용 글 수 검증은 저장소(`live-dev-article-repository`)가
  * 먼저 수행하고 여기서는 행과 캐시만 갱신한다.
  *
- * @param {string} id 삭제할 태그 id.
- * @returns {Promise<void>} 삭제와 공개 캐시 갱신이 끝나면 완료된다.
+ * @param id 삭제할 태그 id.
+ * @returns 삭제와 공개 캐시 갱신이 끝나면 완료된다.
  */
 const removeDevArticleTag = async (id: string): Promise<void> => {
   const { data, error } = await getSupabaseClient()

@@ -19,9 +19,8 @@ import type { DevArticle } from "@/types/dev-article";
  * `coverAlt` 는 대표 이미지가 없을 때 `null` 이 정상 상태다. 빈 이중언어 값으로 채우면
  * "설명이 비었다"와 "이미지가 없다"를 구분할 수 없다.
  *
- * @param {string} id 글 문서 ID.
- * @param {Record<string, unknown>} data 병합된 글 문서 필드.
- * @returns {DevArticle}
+ * @param id 글 문서 ID.
+ * @param data 병합된 글 문서 필드.
  */
 const decodeDevArticle = (id: string, data: Record<string, unknown>): DevArticle => ({
   id,

@@ -129,9 +129,6 @@ const inputCharsKey = (now: number): string => `chat:chars:v1:${utcDayBucket(now
 
 /**
  * Retry-After에 사용할 다음 UTC 자정까지의 초.
- *
- * @param {number} now
- * @returns {number}
  */
 const secondsUntilNextUtcDay = (now: number): number => {
   const date = new Date(now);
@@ -301,9 +298,7 @@ const chatRateLimiter = createConfiguredChatRateLimiter();
  * 공유 카운터가 없으면 아무것도 하지 않는다. 기록 실패는 요청을 막지 않으며,
  * 그만큼 예산 소진이 늦게 감지된다.
  *
- * @param {number} chars 이번 요청의 입력 문자 수.
- * @param {{ env?: ChatRateLimitEnvironment; fetcher?: typeof fetch; now?: () => number }} [options]
- * @returns {Promise<void>}
+ * @param chars 이번 요청의 입력 문자 수.
  */
 const recordChatInputChars = async (
   chars: number,

@@ -27,12 +27,10 @@ type Props = {
  * 예전 글을 옮길 때 실제 작성일을 그대로 넣어야 목록 순서가 맞는다(07-dev-blog §5).
  * 주소는 이미 발행한 글이면 잠긴다. 잠긴 이유를 입력 아래에 적어 왜 못 고치는지 알린다.
  *
- * @param {Props} props
- * @param {DevArticleInput} props.form 현재 폼 값.
- * @param {boolean} props.slugLocked 최초 발행 이후라 주소를 바꿀 수 없는 상태.
- * @param {(next: Partial<DevArticleInput>) => void} props.onPatch 폼 일부를 갱신한다.
- * @param {(value: string) => void} props.onSlugChange 주소를 직접 고친다. 이후 제목을 따라가지 않는다.
- * @returns {JSX.Element}
+ * @param props.form 현재 폼 값.
+ * @param props.slugLocked 최초 발행 이후라 주소를 바꿀 수 없는 상태.
+ * @param props.onPatch 폼 일부를 갱신한다.
+ * @param props.onSlugChange 주소를 직접 고친다. 이후 제목을 따라가지 않는다.
  */
 const ArticleMetaFields = ({ form, slugLocked, onPatch, onSlugChange }: Props) => (
   <>

@@ -15,11 +15,6 @@ const TAG_WIDTHS = [54, 70, 46] as const;
  * ExifPanel 로딩 스켈레톤 — 좌측 이미지 로드 전까지 우측 패널 자리를 채운다.
  * 각 구간 높이를 실제 패널의 측정값으로 예약해 로드 시 레이아웃이 튀지 않는다.
  * (구조도 실제와 동일: head → exifHead → triangle → list → minimap → tags)
- *
- * @param {Props} props
- * @param {Pick<Photo, 'fileName'> | undefined} props.photo
- * @param {number} props.tagCount
- * @returns {JSX.Element}
  */
 const ExifPanelSkeleton = ({ photo, tagCount }: Props) => {
   // 실제 패널은 기본 EXIF 7행 + 파일명이 있을 때만 1행을 추가한다.

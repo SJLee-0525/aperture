@@ -24,10 +24,7 @@ const isRevalidatableTag = (tag: string): boolean => REVALIDATABLE_TAG_PATTERN.t
  * access token 의 서명·만료와 관리자 클레임을 검증한 뒤에만 실행해,
  * 공개 호출자가 캐시 무효화와 DB 재조회를 반복하는 비용 공격을 막는다.
  *
- * @param {string} idToken
- * @param {string[]} tags
- * @param {string[]} [paths] 라우트 캐시까지 지울 리터럴 공개 경로 (`/ko/...`).
- * @returns {Promise<void>}
+ * @param [paths] 라우트 캐시까지 지울 리터럴 공개 경로 (`/ko/...`).
  */
 const revalidatePublicPages = async (
   idToken: string,

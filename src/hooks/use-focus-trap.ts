@@ -10,9 +10,6 @@ const FOCUSABLE =
  * - 컨테이너로 포커스 이동(첫 진입), Tab/Shift+Tab을 내부로 순환
  * - 비활성화 시 직전 포커스 요소로 복귀
  * 컨테이너에는 tabIndex={-1} 필요.
- *
- * @param {boolean} active
- * @returns {RefObject<HTMLDivElement | null>}
  */
 const useFocusTrap = (active: boolean) => {
   const ref = useRef<HTMLDivElement>(null);

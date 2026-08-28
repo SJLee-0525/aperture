@@ -27,8 +27,6 @@ import styles from "./AdminTagsEditor.module.css";
 
 /**
  * 관리자 태그 사전 — 추가·편집·삭제·드래그 정렬. 조립만, 로직은 useTagsAdmin.
- *
- * @returns {JSX.Element}
  */
 const AdminTagsPage = () => {
   const {

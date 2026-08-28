@@ -25,7 +25,7 @@ type Props = { params: Promise<{ lang: Lang; legalDoc: string }> };
  */
 export const dynamicParams = false;
 
-/** @returns {Promise<Array<{ legalDoc: string }>>} 정적으로 생성할 문서 세그먼트. */
+/** @returns 정적으로 생성할 문서 세그먼트. */
 export async function generateStaticParams(): Promise<Array<{ legalDoc: string }>> {
   return LEGAL_DOCUMENT_KINDS.map((legalDoc) => ({ legalDoc }));
 }
@@ -33,9 +33,8 @@ export async function generateStaticParams(): Promise<Array<{ legalDoc: string }
 /**
  * 문서 종류와 언어에 맞는 SEO 메타데이터를 만든다.
  *
- * @param {Props} props
- * @param {Promise<{ lang: Lang; legalDoc: string }>} props.params - URL 세그먼트 Promise.
- * @returns {Promise<Metadata>} canonical과 hreflang을 포함한 메타데이터.
+ * @param props.params - URL 세그먼트 Promise.
+ * @returns canonical과 hreflang을 포함한 메타데이터.
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, legalDoc } = await params;
@@ -47,9 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * 현재 URL 언어의 법적 문서를 렌더한다.
  *
- * @param {Props} props
- * @param {Promise<{ lang: Lang; legalDoc: string }>} props.params - URL 세그먼트 Promise.
- * @returns {Promise<JSX.Element>}
+ * @param props.params - URL 세그먼트 Promise.
  */
 export default async function LegalDocumentPage({ params }: Props): Promise<React.JSX.Element> {
   const { lang, legalDoc } = await params;

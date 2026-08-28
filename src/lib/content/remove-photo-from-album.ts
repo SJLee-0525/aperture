@@ -8,9 +8,9 @@ type AlbumPhotoReferences = Pick<Album, "cover" | "coverPhotoId" | "photoIds">;
  * `cover` 는 관리자 목록과 챗 참조 카드가 쓰는 이미지 스냅샷이다. 커버 사진이 삭제되면
  * Storage 객체도 함께 지워지므로 이 스냅샷을 비워야 죽은 URL 이 화면에 남지 않는다.
  *
- * @param {AlbumPhotoReferences} album 현재 앨범의 커버와 사진 ID 목록.
- * @param {string} photoId 참조에서 제거할 사진 ID.
- * @returns {AlbumPhotoReferences} 사진 ID와 필요하면 커버까지 교체한 참조.
+ * @param album 현재 앨범의 커버와 사진 ID 목록.
+ * @param photoId 참조에서 제거할 사진 ID.
+ * @returns 사진 ID와 필요하면 커버까지 교체한 참조.
  */
 const removePhotoFromAlbum = (
   album: AlbumPhotoReferences,

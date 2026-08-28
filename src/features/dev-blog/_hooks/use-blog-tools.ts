@@ -51,17 +51,14 @@ const GET_TOOL: WebMcpToolDefinition = {
  * 태그를 못 맞힌 응답과 인자 없는 목록이 함께 쓴다. 어휘를 모르면 에이전트가 태그 질문을
  * 키워드 검색으로 돌리고, 없는 태그를 "없다" 로 답할 근거도 사라진다.
  *
- * @param {DevArticleTag[]} tags 태그 사전 전체.
- * @returns {string} `chatbot (챗봇 / Chatbot), …` 형태.
+ * @param tags 태그 사전 전체.
+ * @returns `chatbot (챗봇 / Chatbot), …` 형태.
  */
 const listKnownTags = (tags: DevArticleTag[]): string =>
   tags.map((entry) => `${entry.id} (${entry.ko} / ${entry.en})`).join(", ");
 
 /**
  * 에이전트가 넘긴 문자열 인자를 정리한다. 공백만 있는 값은 넘기지 않은 것으로 본다.
- *
- * @param {unknown} raw
- * @returns {string | null}
  */
 const trimmedArgument = (raw: unknown): string | null =>
   typeof raw === "string" && raw.trim() ? raw.trim() : null;
@@ -73,9 +70,7 @@ const trimmedArgument = (raw: unknown): string | null =>
  * 부분 일치는 쓰지 않는다. 한두 글자 인자가 거의 모든 태그에 걸려 거르지 않은 목록이
  * 태그 결과인 것처럼 나간다.
  *
- * @param {ArticleToolData} article
- * @param {string} tag 에이전트가 넘긴 태그 인자.
- * @returns {boolean}
+ * @param tag 에이전트가 넘긴 태그 인자.
  */
 const matchesTag = (article: ArticleToolData, tag: string): boolean => {
   const needle = tag.trim().toLowerCase();
@@ -90,9 +85,8 @@ const matchesTag = (article: ArticleToolData, tag: string): boolean => {
  * 태그 사전을 글 목록과 따로 받는 이유는 아직 어느 글도 쓰지 않은 태그와 글이 0건일 때의
  * 사전을 글에서 뽑을 수 없기 때문이다. 0건 안내의 `Known tags:` 는 이 사전에서 만든다.
  *
- * @param {ArticleToolData[]} articles 서버가 투영한 공개 글. 발행일 내림차순.
- * @param {DevArticleTag[]} tags 블로그 태그 사전 전체.
- * @returns {void}
+ * @param articles 서버가 투영한 공개 글. 발행일 내림차순.
+ * @param tags 블로그 태그 사전 전체.
  */
 const useBlogTools = (articles: ArticleToolData[], tags: DevArticleTag[]): void => {
   const { lang } = useLang();

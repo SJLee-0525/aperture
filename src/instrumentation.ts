@@ -7,7 +7,7 @@ import * as Sentry from "@sentry/nextjs";
 /**
  * 서버 기동 시 런타임에 맞는 Sentry 설정을 로드한다.
  *
- * @returns {Promise<void>} 초기화 완료.
+ * @returns 초기화 완료.
  */
 export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME === "nodejs") {

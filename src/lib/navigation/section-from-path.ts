@@ -10,8 +10,8 @@ import type { SectionId } from "@/constants/sections";
  * 판정은 `constants/` 가 아니라 여기 있다 — 로케일 규칙을 아는 함수라
  * 상수 모듈이 `lib/i18n` 을 역방향으로 참조하게 된다.
  *
- * @param {string} pathname 로케일 프리픽스를 포함할 수 있는 경로.
- * @returns {SectionId} 매칭된 섹션. 없으면 랜딩.
+ * @param pathname 로케일 프리픽스를 포함할 수 있는 경로.
+ * @returns 매칭된 섹션. 없으면 랜딩.
  */
 const sectionFromPath = (pathname: string): SectionId => {
   const bare = stripLangPrefix(pathname);

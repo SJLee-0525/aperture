@@ -19,14 +19,13 @@ type Props = {
  * 결과 수 문구도 포맷하지 않는다. 단위가 지면마다 다르고(`12 photos` · `9 articles`)
  * 두 언어에서 같은 표기를 쓰므로, 문자열은 호출부가 만들어 넘긴다.
  *
- * @param {Props} props
- * @param {string} props.title 페이지 제목. 지면의 유일한 h1 이다.
- * @param {string | undefined} props.count 완성된 결과 수 문구. 없으면 표시하지 않는다.
- * @param {boolean | undefined} props.countLive 결과 수가 같은 지면에서 바뀌면 켠다. 켜면 값이
+ * @param props.title 페이지 제목. 지면의 유일한 h1 이다.
+ * @param props.count 완성된 결과 수 문구. 없으면 표시하지 않는다.
+ * @param props.countLive 결과 수가 같은 지면에서 바뀌면 켠다. 켜면 값이
  *   바뀔 때마다 낭독기가 읽는다. 목록이 페이지 이동으로만 바뀌는 지면에서 켜면 최초 렌더에서도
  *   읽어 버린다.
- * @param {ReactNode | undefined} props.children 제목 오른쪽 도구. `count` 와 함께 한 줄에 놓인다.
- * @returns {JSX.Element} count·children 이 모두 없으면 도구 영역을 그리지 않는다.
+ * @param props.children 제목 오른쪽 도구. `count` 와 함께 한 줄에 놓인다.
+ * @returns count·children 이 모두 없으면 도구 영역을 그리지 않는다.
  */
 const PageToolbar = ({ title, count, countLive, children }: Props) => (
   <div className={styles.toolbar}>

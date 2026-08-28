@@ -24,12 +24,7 @@ type Props = {
  * 연주 포스터 업로드 필드 — 파일 선택 → webp 압축 → Storage(music/{workId}/) 업로드.
  * 사진과 달리 EXIF 추출은 없다(usePosterUpload).
  *
- * @param {Props} props
- * @param {string} props.workId
- * @param {ImageMeta | null} props.poster - 현재 폼에 설정된 포스터(미리보기용) — 없으면 플레이스홀더.
- * @param {(poster: ImageMeta | null) => void} props.onChange
- * @param {(pending: boolean) => void} props.onPendingChange
- * @returns {JSX.Element}
+ * @param props.poster - 현재 폼에 설정된 포스터(미리보기용) — 없으면 플레이스홀더.
  */
 const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props) => {
   const { process, pending, stage, error } = usePosterUpload(workId);

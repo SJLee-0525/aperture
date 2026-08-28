@@ -6,8 +6,6 @@ const SPOT_COUNT = 7;
 
 /**
  * 지도 RSC fetch 동안의 스켈레톤 — MapView 셸(위치 리스트 320px + 지도 stage)을 흉내.
- *
- * @returns {JSX.Element}
  */
 export default function MapLoading() {
   return (

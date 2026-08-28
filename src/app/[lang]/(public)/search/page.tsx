@@ -42,8 +42,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  *
  * 두 조회는 병렬로 시작한다. `getDevArticles` 는 React `cache` 로 중복 조회가 막히지만
  * 본문 평문화는 캐시 대상이 아니라, 순차로 기다리면 그 시간이 나머지 조회에 더해진다.
- *
- * @returns {Promise<JSX.Element>}
  */
 const SearchResultsContent = async ({
   paramsPromise,
@@ -69,8 +67,6 @@ const SearchResultsContent = async ({
  *
  * 셸을 동기로 두고 `params`·`searchParams` 를 Suspense 하위에서 기다린다. 목록은 인덱스
  * 매치와 본문 매치가 모두 모인 뒤 한 번에 나온다. 그 전까지는 스켈레톤이다.
- *
- * @returns {JSX.Element}
  */
 export default function SearchPage({ params, searchParams }: Props) {
   return (

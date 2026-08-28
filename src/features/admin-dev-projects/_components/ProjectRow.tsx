@@ -26,12 +26,7 @@ type Props = {
 /**
  * 정렬 가능한 프로젝트 행 — 드래그 핸들·대표 썸네일·제목·연도·공개 토글·수정/삭제.
  *
- * @param {Props} props
- * @param {AdminDevProjectListItem} props.project
- * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
- * @param {(id: string, next: boolean) => void} props.onTogglePublished
- * @param {(id: string) => void} props.onDelete
- * @returns {JSX.Element}
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
  */
 const ProjectRow = ({ project, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(project.cover);

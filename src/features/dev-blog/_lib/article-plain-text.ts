@@ -20,9 +20,6 @@ const TABLE_CELL_SEPARATOR = " · ";
 
 /**
  * 줄 안의 공백만 하나로 줄이고 빈 줄을 없앤다. 줄바꿈은 목록 항목과 표의 행 경계라 남긴다.
- *
- * @param {string} text
- * @returns {string}
  */
 const normalizeWhitespace = (text: string): string =>
   text
@@ -34,9 +31,6 @@ const normalizeWhitespace = (text: string): string =>
 /**
  * 인라인 노드를 평문으로 편다. 링크는 라벨만 남기고 주소는 버린다 —
  * URL 은 임베딩에서 의미를 만들지 않으면서 예산만 쓴다.
- *
- * @param {ArticleInline[]} nodes
- * @returns {string}
  */
 const inlineToPlainText = (nodes: ArticleInline[]): string =>
   nodes
@@ -71,9 +65,7 @@ const listItemsToPlainText = (items: ArticleListItem[], options: ArticlePlainTex
  * 목록 항목과 인용문은 재귀라 옵션을 그대로 넘긴다 — 최상위에서만 적용하면
  * 중첩된 코드 블록이 옵션을 무시한다.
  *
- * @param {ArticleBlock} block
- * @param {ArticlePlainTextOptions} options
- * @returns {string} 평문. 목록 항목과 표의 행은 줄바꿈으로 나뉜다.
+ * @returns 평문. 목록 항목과 표의 행은 줄바꿈으로 나뉜다.
  */
 const blockToPlainText = (block: ArticleBlock, options: ArticlePlainTextOptions): string => {
   switch (block.type) {
@@ -113,9 +105,8 @@ const blockToPlainText = (block: ArticleBlock, options: ArticlePlainTextOptions)
 /**
  * 블록 하나를 평문화한다.
  *
- * @param {ArticleBlock} block
- * @param {ArticlePlainTextOptions} [options] 생략하면 코드 블록을 자르지 않는다.
- * @returns {string} 공백을 정리한 평문. 담을 내용이 없으면 빈 문자열.
+ * @param [options] 생략하면 코드 블록을 자르지 않는다.
+ * @returns 공백을 정리한 평문. 담을 내용이 없으면 빈 문자열.
  */
 const articleBlockText = (block: ArticleBlock, options: ArticlePlainTextOptions = {}): string =>
   normalizeWhitespace(blockToPlainText(block, options));
@@ -123,9 +114,9 @@ const articleBlockText = (block: ArticleBlock, options: ArticlePlainTextOptions 
 /**
  * 글 본문 전체의 평문. 챗 화면 문맥과 본문 검색이 같은 문자열을 쓴다.
  *
- * @param {DevArticle} article 평문화할 글.
- * @param {ArticlePlainTextOptions} [options] 생략하면 코드 블록을 자르지 않는다.
- * @returns {string} 블록 단위 줄바꿈으로 이어 붙인 본문 평문.
+ * @param article 평문화할 글.
+ * @param [options] 생략하면 코드 블록을 자르지 않는다.
+ * @returns 블록 단위 줄바꿈으로 이어 붙인 본문 평문.
  */
 const articlePlainText = (article: DevArticle, options: ArticlePlainTextOptions = {}): string =>
   analyzeArticle(article)
@@ -139,9 +130,9 @@ const articlePlainText = (article: DevArticle, options: ArticlePlainTextOptions 
  * 문자 단위로 자르면 마크다운 토막이 남는다. 첫 블록부터 예산을 넘으면(거대 코드 블록)
  * 그 블록만 예산 길이로 자르며, 이때도 서로게이트 페어는 쪼개지 않는다.
  *
- * @param {DevArticle} article 평문화할 글.
- * @param {number} maxChars 담을 수 있는 최대 문자 수.
- * @returns {{ text: string; complete: boolean }} 평문과 전문이 다 실렸는지 여부.
+ * @param article 평문화할 글.
+ * @param maxChars 담을 수 있는 최대 문자 수.
+ * @returns 평문과 전문이 다 실렸는지 여부.
  */
 const articlePlainTextClipped = (
   article: DevArticle,

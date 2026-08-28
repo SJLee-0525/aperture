@@ -4,10 +4,6 @@ type Props = {
 
 /**
  * 모바일 전역 내비게이션과 모든 닫기 액션이 공유하는 아이콘.
- *
- * @param {Props} props
- * @param {number | undefined} props.size
- * @returns {JSX.Element}
  */
 const CloseIcon = ({ size = 19 }: Props) => (
   <svg

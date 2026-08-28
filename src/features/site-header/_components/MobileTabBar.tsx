@@ -21,8 +21,6 @@ const isTabActive = (href: string, pathname: string): boolean =>
 
 /**
  * 모바일 하단 탭바 — 현재 섹션(사진/음악/개발)의 탭 세트. 랜딩(home)에선 숨김. 데스크톱은 CSS로 숨김.
- *
- * @returns {JSX.Element | null}
  */
 const MobileTabBar = () => {
   const { dict } = useLang();

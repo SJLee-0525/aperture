@@ -21,17 +21,6 @@ type Props = {
 
 /**
  * 개발 학력 한 행 — 기간 + 제목(ko/en) + 정렬/삭제.
- *
- * @param {Props} props
- * @param {TimelineEntry} props.entry
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, value: string) => void} props.onEditPeriod
- * @param {(index: number, lang: 'ko' | 'en', value: string) => void} props.onEditTitle
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const DevEducationRow = ({
   entry,

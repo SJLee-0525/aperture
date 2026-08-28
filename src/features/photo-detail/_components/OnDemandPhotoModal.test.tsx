@@ -44,8 +44,6 @@ const serialized = (id: string) =>
 
 /**
  * 응답 이후 마이크로태스크·재렌더 사이클을 여러 번 비워 재요청 루프 여부를 드러낸다.
- *
- * @returns {Promise<void>}
  */
 const flushCycles = async () => {
   for (let i = 0; i < 5; i += 1) {

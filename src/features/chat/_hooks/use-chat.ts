@@ -113,12 +113,12 @@ const readEventStream = async (response: Response, onEvent: (event: ChatStreamEv
 /**
  * 챗봇 메시지와 요청 상태를 관리한다. 화면 정보는 전송 직전 URL에서 읽는다.
  *
- * @param {Lang} lang 응답 및 오류 문구에 사용할 언어.
- * @param {(() => string | null) | undefined} getExcludedTargetKey 사용자가 제외한 항목의
+ * @param lang 응답 및 오류 문구에 사용할 언어.
+ * @param getExcludedTargetKey 사용자가 제외한 항목의
  * `"type:id"` 키를 전송 시점에 읽는 함수.
- * @param {(() => ChatScreenTarget | null) | undefined} getScreenTarget 입력창에 표시된 화면
+ * @param getScreenTarget 입력창에 표시된 화면
  * 항목을 전송 시점에 읽는 함수.
- * @returns {{ messages: ChatMessage[]; isReplying: boolean; retry: (messageId: string) => boolean; send: (rawQuestion: string) => boolean }} 메시지 목록과 전송 API.
+ * @returns 메시지 목록과 전송 API.
  */
 const useChat = (
   lang: Lang,

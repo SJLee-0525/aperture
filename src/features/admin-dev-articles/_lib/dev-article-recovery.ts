@@ -15,8 +15,8 @@ const toDate = (value: unknown): Date | null => {
 /**
  * 저장된 복구본을 폼 값으로 되돌린다.
  *
- * @param {Record<string, unknown>} input JSON 에서 읽은 원본.
- * @returns {DevArticleInput} 발행 시각이 `Date` 로 돌아온 폼 값.
+ * @param input JSON 에서 읽은 원본.
+ * @returns 발행 시각이 `Date` 로 돌아온 폼 값.
  */
 const fromStoredArticleInput = (input: Record<string, unknown>): DevArticleInput => ({
   ...(input as unknown as DevArticleInput),

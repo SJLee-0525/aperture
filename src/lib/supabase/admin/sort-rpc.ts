@@ -12,9 +12,9 @@ type SortOrder = { id: string; order: number };
  * 대조해야 부분 반영을 실패로 잡을 수 있다. 중복 ID 는 행 수 대조를 무의미하게
  * 만들어 호출 전에 거른다.
  *
- * @param {SortableCollectionId} collection 수동 정렬을 갖는 컬렉션.
- * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록. 비어 있으면 아무것도 하지 않는다.
- * @returns {Promise<void>} 전 항목이 반영되면 완료된다.
+ * @param collection 수동 정렬을 갖는 컬렉션.
+ * @param orders 바뀐 항목만 담은 정렬 목록. 비어 있으면 아무것도 하지 않는다.
+ * @returns 전 항목이 반영되면 완료된다.
  */
 const updateSortOrders = async (
   collection: SortableCollectionId,

@@ -20,12 +20,7 @@ type Props = {
 /**
  * 정렬 가능한 수상 행 — 드래그 핸들·연도·수상명·장소·공개 토글·수정/삭제.
  *
- * @param {Props} props
- * @param {MusicAward} props.award
- * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
- * @param {(id: string, next: boolean) => void} props.onTogglePublished
- * @param {(id: string) => void} props.onDelete
- * @returns {JSX.Element}
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
  */
 const AwardRow = ({ award, publishBusy, onTogglePublished, onDelete }: Props) => {
   return (

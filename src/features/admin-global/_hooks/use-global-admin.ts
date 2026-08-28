@@ -22,8 +22,6 @@ const EMPTY_LINK: SiteLink = { label: "", href: "" };
  * 관리자 전역(랜딩·연락) 상태 관리 — tagline(순환 타이핑)·landingLead·contactLead·links 편집.
  * site/config에서 편집 필드를 로드하고, 저장 시 이 화면이 소유한 필드만 병합한다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
- *
- * @returns {{ tagline: LocalizedText; landingLead: LocalizedText; contactLead: LocalizedText; links: SiteLink[]; status: Status; error: string | null; saving: boolean; saved: boolean; editTagline: (field: 'ko' | 'en', value: string) => void; editLandingLead: (field: 'ko' | 'en', value: string) => void; editContactLead: (field: 'ko' | 'en', value: string) => void; addLink: () => void; editLink: (index: number, field: keyof SiteLink, value: string) => void; removeLink: (index: number) => void; moveLink: (index: number, offset: -1 | 1) => void; save: () => Promise<void> }}
  */
 const useGlobalAdmin = () => {
   const [tagline, setTagline] = useState<LocalizedText>(EMPTY_TEXT);

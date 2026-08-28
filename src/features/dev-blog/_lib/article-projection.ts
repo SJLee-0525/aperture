@@ -35,8 +35,8 @@ type DevArticleSummary = {
  * 맡아 같은 요청의 다른 projection 과 결과를 나눠 쓴다. 색칠(shiki)은 하지 않는다 —
  * 목록에는 코드 블록을 그리지 않는다.
  *
- * @param {DevArticle} article 공개 글 한 건.
- * @returns {DevArticleSummary} 본문을 뺀 요약. 읽기 시간은 1분 이상이다.
+ * @param article 공개 글 한 건.
+ * @returns 본문을 뺀 요약. 읽기 시간은 1분 이상이다.
  */
 const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
   id: article.id,
@@ -55,8 +55,8 @@ const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
 /**
  * 목록 전체를 요약으로 바꾼다. 입력 순서를 그대로 지킨다 — 정렬은 getter 가 이미 마쳤다.
  *
- * @param {readonly DevArticle[]} articles 발행일 내림차순으로 정렬된 공개 글.
- * @returns {DevArticleSummary[]} 같은 순서의 요약 목록.
+ * @param articles 발행일 내림차순으로 정렬된 공개 글.
+ * @returns 같은 순서의 요약 목록.
  */
 const toDevArticleSummaries = (articles: readonly DevArticle[]): DevArticleSummary[] =>
   articles.map(toDevArticleSummary);

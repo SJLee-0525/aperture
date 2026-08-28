@@ -23,7 +23,7 @@ const photosCrud = sortableListCrud<Photo>(COLLECTIONS.PHOTOS, decodePhoto, "사
 /**
  * 새 사진 문서 ID 선발급 — Storage 경로(photos/{id}) 확정에 필요.
  *
- * @returns {string} 미리 발급한 사진 문서 ID.
+ * @returns 미리 발급한 사진 문서 ID.
  */
 const newPhotoId = photosCrud.newId;
 
@@ -56,8 +56,8 @@ const setPhotoPublished = photosCrud.setPublished;
  * 실패하면 앨범에서만 빠진 상태가 된다(`removePhotoFromAlbum` 이 멱등이라 재삭제 가능).
  * 앨범 갱신은 참조 정리일 뿐이라 앨범 RAG 동기화는 요청하지 않는다(기존 배치와 동일).
  *
- * @param {string} id 삭제할 사진 문서 ID.
- * @returns {Promise<void>} 삭제와 RAG 동기화가 끝나면 완료된다.
+ * @param id 삭제할 사진 문서 ID.
+ * @returns 삭제와 RAG 동기화가 끝나면 완료된다.
  */
 const deletePhoto = async (id: string): Promise<void> => {
   const albumsTable = tableFor(COLLECTIONS.ALBUMS);

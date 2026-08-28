@@ -61,12 +61,8 @@ const distanceBetween = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
  *   리스너 재바인딩이 `resetKey` 를 신호로 삼는다.
  * - `enabled` 가 꺼지면(하위 레이어로 내려가면) 즉시 배율 1 로 리셋된다.
  *
- * @param {Options} options
- * @param {boolean} options.enabled
- * @param {string} options.resetKey
- * @param {((stage: HTMLElement) => number) | undefined} options.getMaxScale 최대 배율. 표면 노드를 받아 이미지 해상도 대비로 계산할 수 있다. 기본 3.
- * @param {((zoomed: boolean) => void) | undefined} options.onZoomChange 줌 경계 전환시만 호출.
- * @returns {{ stageRef: RefObject<HTMLDivElement | null>; zoomed: boolean; reset: (animate?: boolean) => void; handleStageClick: (onSingleTap: () => void) => void }}
+ * @param options.getMaxScale 최대 배율. 표면 노드를 받아 이미지 해상도 대비로 계산할 수 있다. 기본 3.
+ * @param options.onZoomChange 줌 경계 전환시만 호출.
  */
 const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options) => {
   const stageRef = useRef<HTMLDivElement>(null);

@@ -89,9 +89,9 @@ export const viewport: Viewport = {
 
 /**
  * 전역 메타데이터, 폰트, 테마, 언어 공급자를 설치하는 루트 레이아웃.
- * @param {Readonly<{ children: React.ReactNode }>} props 레이아웃 하위 콘텐츠.
- * @param {React.ReactNode} props.children 모든 애플리케이션 라우트.
- * @returns {JSX.Element} 전역 html·body 셸.
+ * @param props 레이아웃 하위 콘텐츠.
+ * @param props.children 모든 애플리케이션 라우트.
+ * @returns 전역 html·body 셸.
  */
 export default function RootLayout({
   children,

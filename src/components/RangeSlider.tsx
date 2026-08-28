@@ -25,16 +25,7 @@ type Props = {
  * 듀얼 핸들 레인지 슬라이더 (초점거리 min~max). 두 range input을 겹쳐 thumb만 조작 가능.
  * onChange는 드래그 틱마다, onChangeEnd는 조작이 끝났을 때 한 번 호출된다.
  *
- * @param {Props} props
- * @param {number} props.min
- * @param {number} props.max
- * @param {number} props.low
- * @param {number} props.high
- * @param {string | undefined} props.unit
- * @param {(low: number, high: number) => void} props.onChange
- * @param {((low: number, high: number) => void) | undefined} props.onChangeEnd
- * @param {(() => void) | undefined} props.onChangeCancel
- * @returns {JSX.Element} 두 개의 native range input으로 만든 범위 슬라이더.
+ * @returns 두 개의 native range input으로 만든 범위 슬라이더.
  */
 const RangeSlider = ({
   min,

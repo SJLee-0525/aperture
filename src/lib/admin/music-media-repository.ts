@@ -15,7 +15,7 @@ const STORE_VERSION = 1;
 /**
  * 현재 콘텐츠 소스에 맞는 영상 저장소. live 는 기존 `sortableListCrud` 산출물 그대로다.
  *
- * @returns {MusicMediaRepository} mock 이면 브라우저 로컬, live 면 Supabase 구현.
+ * @returns mock 이면 브라우저 로컬, live 면 Supabase 구현.
  */
 const getMusicMediaRepository = selectRepository<MusicMediaRepository>(
   () =>

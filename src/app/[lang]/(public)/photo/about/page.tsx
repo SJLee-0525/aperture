@@ -25,10 +25,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * 소개 — 통계는 사진·앨범에서 자동 집계. 파생에 쓰는 필드만 투영해 직렬화.
- *
- * @param {Props} props
- * @param {Promise<{ lang: Lang }>} props.params
- * @returns {Promise<JSX.Element>}
  */
 export default async function AboutPage({ params }: Props) {
   const [{ lang }, site, photos, albums] = await Promise.all([

@@ -26,13 +26,8 @@ type Props = {
 /**
  * 정렬 가능한 앨범 행 — 드래그 핸들·커버 썸네일·제목·사진 수·공개 토글·수정/삭제.
  *
- * @param {Props} props
- * @param {AdminAlbumListItem} props.album
- * @param {string} props.coverUrl - coverPhotoId → 이미지 URL (없으면 빈 썸네일).
- * @param {boolean} props.publishBusy 이 행의 공개 토글이 저장 중이다.
- * @param {(id: string, next: boolean) => void} props.onTogglePublished
- * @param {(id: string) => void} props.onDelete
- * @returns {JSX.Element}
+ * @param props.coverUrl - coverPhotoId → 이미지 URL (없으면 빈 썸네일).
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
  */
 const AlbumRow = ({ album, coverUrl, publishBusy, onTogglePublished, onDelete }: Props) => {
   return (

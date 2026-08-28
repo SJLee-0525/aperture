@@ -41,7 +41,7 @@ type AdminImageStore = {
  * mock 구현 — objectURL 로 저장한다. 새로고침하면 URL 이 끊어지는 한계는
  * 관리자 배지가 안내한다.
  *
- * @returns {AdminImageStore} 브라우저 메모리에 붙는 이미지 저장소.
+ * @returns 브라우저 메모리에 붙는 이미지 저장소.
  */
 const createMockImageStore = (): AdminImageStore => ({
   uploadPhotoImage: async (photoId, blob) => uploadMockImage(`photos/${photoId}`, blob),
@@ -63,7 +63,7 @@ const createMockImageStore = (): AdminImageStore => ({
 /**
  * 현재 콘텐츠 소스에 맞는 이미지 저장소. live 는 `lib/supabase/storage` 함수 그대로다.
  *
- * @returns {AdminImageStore} mock 이면 objectURL, live 면 Supabase Storage 구현.
+ * @returns mock 이면 objectURL, live 면 Supabase Storage 구현.
  */
 const getAdminImageStore = selectRepository<AdminImageStore>(createMockImageStore, () => ({
   uploadPhotoImage,

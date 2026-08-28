@@ -70,8 +70,6 @@ const HELP_SECTIONS: { title: string; body: string }[] = [
 
 /**
  * 접을 수 있는 Markdown 도움말(07-dev-blog §3). 기본은 접어 두고 편집 영역을 넓게 쓴다.
- *
- * @returns {JSX.Element}
  */
 const ArticleMarkdownHelp = () => (
   <details className={styles.help}>

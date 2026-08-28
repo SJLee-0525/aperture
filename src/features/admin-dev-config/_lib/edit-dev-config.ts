@@ -61,10 +61,6 @@ type DevConfigEdit =
 
 /**
  * 관리자 개발 설정의 모든 편집 규칙. React·저장소와 무관한 순수 command reducer.
- *
- * @param {DevConfig} config
- * @param {DevConfigEdit} edit
- * @returns {DevConfig}
  */
 const editDevConfig = (config: DevConfig, edit: DevConfigEdit): DevConfig => {
   switch (edit.type) {

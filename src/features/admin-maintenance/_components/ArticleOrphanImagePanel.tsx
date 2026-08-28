@@ -21,8 +21,8 @@ import base from "./ImageMigrationPanel.module.css";
 /**
  * 바이트 수를 관리자 표에 읽기 좋은 단위로 줄인다.
  *
- * @param {number} bytes 파일 크기.
- * @returns {string} KB/MB 로 반올림한 문자열.
+ * @param bytes 파일 크기.
+ * @returns KB/MB 로 반올림한 문자열.
  */
 const formatBytes = (bytes: number): string => {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
@@ -33,8 +33,8 @@ const formatBytes = (bytes: number): string => {
 /**
  * 업로드 시각을 표에 맞는 짧은 형식으로 만든다.
  *
- * @param {Date} value 업로드 시각.
- * @returns {string} `YYYY-MM-DD HH:mm` 형식.
+ * @param value 업로드 시각.
+ * @returns `YYYY-MM-DD HH:mm` 형식.
  */
 const formatUploadedAt = (value: Date): string =>
   `${value.toISOString().slice(0, 10)} ${value.toTimeString().slice(0, 5)}`;
@@ -45,8 +45,6 @@ const formatUploadedAt = (value: Date): string =>
  * 원본·프리뷰·썸네일 한 벌이 모두 미참조이고 업로드한 지 24시간이 지난 것만 찾는다.
  * 삭제 직전에 같은 기준으로 다시 확인하며, Storage를 연결하지 않는 mock 모드에서는
  * 실행할 수 없다.
- *
- * @returns {JSX.Element}
  */
 const ArticleOrphanImagePanel = () => {
   const mock = shouldUseMockContent();

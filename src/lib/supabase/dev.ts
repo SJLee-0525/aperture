@@ -16,9 +16,9 @@ const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 /**
  * 프로젝트 행의 다국어 필드와 배열 기본값을 정규화한다.
  *
- * @param {string} id 프로젝트 문서 ID.
- * @param {Record<string, unknown>} d 병합된 프로젝트 문서 필드.
- * @returns {DevProject} 관리자 화면에서 사용하는 프로젝트 모델.
+ * @param id 프로젝트 문서 ID.
+ * @param d 병합된 프로젝트 문서 필드.
+ * @returns 관리자 화면에서 사용하는 프로젝트 모델.
  */
 
 const devProjectsCrud = sortableListCrud<DevProject>(
@@ -32,8 +32,8 @@ const devProjects = {
   /**
    * 프로젝트 문서를 삭제한 뒤 해당 프로젝트의 Storage 이미지도 정리한다.
    *
-   * @param {string} id 삭제할 프로젝트 문서 ID.
-   * @returns {Promise<void>} 문서 삭제와 이미지 정리가 끝나면 완료된다.
+   * @param id 삭제할 프로젝트 문서 ID.
+   * @returns 문서 삭제와 이미지 정리가 끝나면 완료된다.
    */
   remove: async (id: string): Promise<void> => {
     await devProjectsCrud.remove(id);
@@ -44,7 +44,7 @@ const devProjects = {
 /**
  * 소개 문구, 인터뷰, 기술 스택과 이력을 담은 개발 설정 문서를 읽는다.
  *
- * @returns {Promise<DevConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
+ * @returns 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getDevConfigAdmin = async (): Promise<DevConfig> => {
   const { data, error } = await getSupabaseClient()
@@ -60,8 +60,8 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
 /**
  * 개발 설정 문서 전체를 저장하고 공개 캐시와 RAG 문서를 갱신한다.
  *
- * @param {DevConfig} config 저장할 개발 소개와 이력 설정.
- * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
+ * @param config 저장할 개발 소개와 이력 설정.
+ * @returns 저장과 RAG 동기화가 끝나면 완료된다.
  */
 const updateDevConfig = async (config: DevConfig): Promise<void> => {
   const { data, error } = await getSupabaseClient()

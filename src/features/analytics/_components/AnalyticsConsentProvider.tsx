@@ -60,23 +60,21 @@ const GoogleAnalytics = dynamic(
   { ssr: false },
 );
 
-/** @returns {() => void} 아무 작업도 하지 않는 구독 해제 함수. */
+/** @returns 아무 작업도 하지 않는 구독 해제 함수. */
 const subscribeNoop = (): (() => void) => () => undefined;
-/** @returns {boolean} 클라이언트 hydration 완료 스냅샷. */
+/** @returns 클라이언트 hydration 완료 스냅샷. */
 const clientHydratedSnapshot = (): boolean => true;
-/** @returns {boolean} 서버 렌더 중 hydration 스냅샷. */
+/** @returns 서버 렌더 중 hydration 스냅샷. */
 const serverHydratedSnapshot = (): boolean => false;
 
 /**
  * 공개 트리의 동의 상태와 두 소비자(GA · Sentry 오류 모니터링)의 로딩을 한 경계에서
  * 관리한다. 두 클라이언트 코드 모두 허용 상태에서만 별도 청크로 불러온다(ADR-0004).
  *
- * @param {AnalyticsConsentProviderProps} props
- * @param {boolean} props.gaEnabled - 유효한 GA4 측정 ID가 있는지 여부.
- * @param {boolean} props.monitoringEnabled - Sentry DSN이 구성돼 있는지 여부.
- * @param {React.ReactNode} props.children - 동의 경계 안의 공개 페이지 트리.
- * @param {boolean} [props.forceBanner=false] - 개발 환경에서 배너만 강제로 표시할지 여부.
- * @returns {JSX.Element}
+ * @param props.gaEnabled - 유효한 GA4 측정 ID가 있는지 여부.
+ * @param props.monitoringEnabled - Sentry DSN이 구성돼 있는지 여부.
+ * @param props.children - 동의 경계 안의 공개 페이지 트리.
+ * @param [props.forceBanner=false] - 개발 환경에서 배너만 강제로 표시할지 여부.
  */
 const AnalyticsConsentProvider = ({
   gaEnabled,
@@ -93,8 +91,8 @@ const AnalyticsConsentProvider = ({
   /**
    * 동의 선택 변경을 구독하고 철회가 감지되면 React 갱신 전에 GA를 차단한다.
    *
-   * @param {() => void} listener - 외부 스토어 변경을 React에 알리는 콜백.
-   * @returns {() => void} 동의 선택 구독 해제 함수.
+   * @param listener - 외부 스토어 변경을 React에 알리는 콜백.
+   * @returns 동의 선택 구독 해제 함수.
    */
   const subscribeConsent = useCallback(
     (listener: () => void) =>
@@ -104,7 +102,7 @@ const AnalyticsConsentProvider = ({
       }),
     [],
   );
-  /** @returns {TrackingConsent | null} UI가 활성화된 경우의 현재 동의 선택. */
+  /** @returns UI가 활성화된 경우의 현재 동의 선택. */
   const getConsentSnapshot = useCallback(
     () => (consentUiEnabled ? getAnalyticsConsentSnapshot() : null),
     [consentUiEnabled],
@@ -141,8 +139,7 @@ const AnalyticsConsentProvider = ({
   /**
    * 배너 선택을 저장하고 현재 설정 UI를 닫는다.
    *
-   * @param {TrackingConsent} value - 방문자가 저장한 분석·오류 기록 선택.
-   * @returns {void}
+   * @param value - 방문자가 저장한 분석·오류 기록 선택.
    */
   const decide = useCallback((value: TrackingConsent) => {
     setSettingsOpen(false);
@@ -154,7 +151,7 @@ const AnalyticsConsentProvider = ({
     settingsTriggerRef.current = null;
   }, []);
 
-  /** @returns {void} 동의 UI가 구성된 경우 설정 배너를 다시 연다. */
+  /** @returns 동의 UI가 구성된 경우 설정 배너를 다시 연다. */
   const openSettings = useCallback(() => {
     if (consentUiEnabled) {
       settingsTriggerRef.current =

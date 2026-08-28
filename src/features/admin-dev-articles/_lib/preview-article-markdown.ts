@@ -34,9 +34,9 @@ type ArticlePreviewResult = {
  * 관리자만 호출할 수 있게 막는다. 렌더 결과에 비공개 데이터가 담기지는 않지만, 공개 호출자가
  * 임의의 긴 본문으로 색칠을 반복시키는 비용 공격을 막아야 한다.
  *
- * @param {string} idToken 브라우저가 보낸 Supabase access token.
- * @param {string} markdown 저장 전 본문 원문.
- * @returns {Promise<ArticlePreviewResult>} 렌더 트리·검증 결과·색칠 결과.
+ * @param idToken 브라우저가 보낸 Supabase access token.
+ * @param markdown 저장 전 본문 원문.
+ * @returns 렌더 트리·검증 결과·색칠 결과.
  * @throws {Error} 관리자가 아니거나 본문이 상한을 넘을 때.
  */
 const previewArticleMarkdown = async (

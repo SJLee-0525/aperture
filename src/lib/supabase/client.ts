@@ -18,7 +18,7 @@ let browserClient: SupabaseClient | null = null;
  * 서버 토큰 검증은 이 싱글턴을 쓰지 않는다. 세션 지속 옵션이 다르므로
  * `lib/auth/verify-admin-id-token.ts` 가 별도 서버 클라이언트를 갖는다.
  *
- * @returns {SupabaseClient} 세션을 localStorage 에 지속하는 브라우저 클라이언트.
+ * @returns 세션을 localStorage 에 지속하는 브라우저 클라이언트.
  */
 const getSupabaseClient = (): SupabaseClient =>
   (browserClient ??= createClient(supabaseUrl(), supabasePublishableKey(), {

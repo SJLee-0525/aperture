@@ -18,7 +18,6 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
  * 발행 조건 검사가 "사전에 있는 태그인지 · 공개할 수 있는 프로젝트인지 · 주소가 겹치는지"를
  * 판단할 때 쓰는 값이다.
  *
- * @returns {{ tags: DevArticleTag[]; projects: DevProjectOption[]; articles: AdminDevArticleListItem[]; loading: boolean; error: string | null; addTag: (tag: DevArticleTag) => Promise<void> }}
  *   `addTag` 는 저장에 성공하면 사전 목록을 갱신하고, 실패하면 예외를 그대로 올려 호출부가 문구를 보여 준다.
  */
 const useArticleReferences = () => {

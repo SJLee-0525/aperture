@@ -19,11 +19,9 @@ type Props = {
  * 브라우저로 오지 않는다. 색이 없으면(모르는 언어이거나 색칠 실패) 원문을 그대로 보여 준다 —
  * 색 때문에 글이 안 열리면 안 된다.
  *
- * @param {Props} props
- * @param {string} props.rawLanguage 원문에 적힌 표기. 색과 무관하게 라벨로 노출한다.
- * @param {string} props.value 코드 원문. 색칠 결과가 없을 때 그대로 그린다.
- * @param {ArticleCodeLines | null} props.tokens 줄·토큰 배열. null 이면 색 없이 그린다.
- * @returns {JSX.Element}
+ * @param props.rawLanguage 원문에 적힌 표기. 색과 무관하게 라벨로 노출한다.
+ * @param props.value 코드 원문. 색칠 결과가 없을 때 그대로 그린다.
+ * @param props.tokens 줄·토큰 배열. null 이면 색 없이 그린다.
  */
 const ArticleCodeBlock = ({ rawLanguage, value, tokens }: Props) => (
   <HorizontalScrollArea

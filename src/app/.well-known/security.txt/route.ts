@@ -10,8 +10,8 @@ const EXPIRES_DAYS = 180;
 /**
  * 배포 시각에서 만료일을 계산한다.
  *
- * @param {Date} [from] 기준 시각. 테스트가 고정할 수 있게 주입받는다.
- * @returns {string} RFC 9116 `Expires` 값.
+ * @param [from] 기준 시각. 테스트가 고정할 수 있게 주입받는다.
+ * @returns RFC 9116 `Expires` 값.
  */
 const expiresAt = (from: Date = new Date()): string =>
   new Date(from.getTime() + EXPIRES_DAYS * 24 * 60 * 60 * 1000).toISOString();
@@ -28,7 +28,7 @@ const body = [
 /**
  * 보안 취약점 신고에 필요한 연락처와 문서 만료일을 평문으로 제공한다.
  *
- * @returns {Response} 하루 동안 캐시 가능한 UTF-8 security.txt 응답.
+ * @returns 하루 동안 캐시 가능한 UTF-8 security.txt 응답.
  */
 export { expiresAt };
 

@@ -21,9 +21,9 @@ const MAX_PAGINATED_ROWS = 500_000;
  * 종료를 확인하려면 빈 페이지를 한 번 더 읽어야 하므로, 마지막 페이지가 꽉 차지 않아도
  * 요청이 한 번 더 나간다.
  *
- * @param {(offset: number, size: number) => Promise<T[]>} fetchPage 지정한 구간을 읽는 함수.
- * @param {{ maxRows?: number }} [options] `maxRows` 는 안전 상한. 테스트가 낮춰 잡을 수 있다.
- * @returns {Promise<T[]>} 페이지를 이어 붙인 전체 행.
+ * @param fetchPage 지정한 구간을 읽는 함수.
+ * @param [options] `maxRows` 는 안전 상한. 테스트가 낮춰 잡을 수 있다.
+ * @returns 페이지를 이어 붙인 전체 행.
  * @throws {Error} 누적 행 수가 상한을 넘을 때.
  */
 const paginateAll = async <T>(

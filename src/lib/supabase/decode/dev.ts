@@ -44,9 +44,8 @@ const readDevTimeline = (value: unknown): DevTimelineEntry[] =>
  *
  * 구형 평문 `troubleshooting` 은 `normalizeTroubleshooting` 이 구조화 형태로 맞춘다.
  *
- * @param {string} id 프로젝트 문서 ID.
- * @param {Record<string, unknown>} data 병합된 프로젝트 문서 필드.
- * @returns {DevProject}
+ * @param id 프로젝트 문서 ID.
+ * @param data 병합된 프로젝트 문서 필드.
  */
 const decodeDevProject = (id: string, data: Record<string, unknown>): DevProject => ({
   id,
@@ -70,8 +69,7 @@ const decodeDevProject = (id: string, data: Record<string, unknown>): DevProject
 });
 
 /**
- * @param {Record<string, unknown>} data 병합된 개발 설정 필드.
- * @returns {DevConfig}
+ * @param data 병합된 개발 설정 필드.
  */
 const decodeDevConfig = (data: Record<string, unknown>): DevConfig => ({
   heroLead: readText(data.heroLead),

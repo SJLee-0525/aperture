@@ -81,16 +81,7 @@ const readServerMobile = () => false;
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
  * 이전·현재·다음 세 장을 트랙에 올려 모바일에서 좌우로 끌어 넘길 수 있게 한다.
  *
- * @param {Props} props
- * @param {Photo[]} props.photos
- * @param {Tag[]} props.tags
- * @param {string[] | undefined} props.photoIds
- * @param {(() => void) | undefined} props.onClose
- * @param {boolean | undefined} props.animateOnOpen
- * @param {boolean | undefined} props.revealed
- * @param {((id: string) => void) | undefined} props.onImageReady
- * @param {boolean | undefined} props.chatTarget 열린 사진을 챗봇 화면 문맥으로 등록할지 여부.
- * @returns {ReactPortal | null}
+ * @param props.chatTarget 열린 사진을 챗봇 화면 문맥으로 등록할지 여부.
  */
 const PhotoModal = ({
   photos,

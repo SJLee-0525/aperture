@@ -19,9 +19,6 @@ import type { ImageMeta } from "@/types/image";
  * 음악 포스터 업로드 — webp 압축 → Storage(music/{workId}/) → ImageMeta 반환.
  * 사진 파이프라인(use-image-upload)과 달리 **EXIF·좌표 추출이 없다**(포스터는 촬영정보 불필요).
  * workId 는 문서 저장 전에 선발급된 ID(musicWorks.newId) — Storage 경로 확정용.
- *
- * @param {string} workId
- * @returns {{ process: (file: File) => Promise<ImageMeta | null>; pending: boolean; stage: UploadStage; completed: number; total: number; error: string | null }}
  */
 const usePosterUpload = (workId: string) => {
   const [pending, setPending] = useState(false);

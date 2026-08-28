@@ -6,9 +6,7 @@
  * PostgREST 쿼리(`published_at desc nullslast, id asc`)가 같은 순서를 내야 하며,
  * 공개 목록·챗봇 투영이 이 비교자 하나를 공유해 mock 과 live 의 순서가 갈리지 않는다.
  *
- * @param {{ id: string; publishedAt: Date | null }} a
- * @param {{ id: string; publishedAt: Date | null }} b
- * @returns {number} `Array.prototype.sort` 비교 결과.
+ * @returns `Array.prototype.sort` 비교 결과.
  */
 const compareByPublishedAtDesc = <T extends { id: string; publishedAt: Date | null }>(
   a: T,

@@ -16,8 +16,7 @@ type DraftTargets = {
  * 마운트 후 연락 초안을 한 번 읽어 비어 있는 uncontrolled input에 넣는다.
  * sessionStorage는 hydration이 끝난 뒤 effect에서만 읽는다.
  *
- * @param {DraftTargets} targets
- * @returns {void} 반환값 없음.
+ * @returns 반환값 없음.
  */
 const useContactDraft = ({ nameRef, emailRef, messageRef }: DraftTargets): void => {
   useEffect(() => {

@@ -16,9 +16,7 @@ type Props = { markdown: string };
  * JSON 으로 오므로, 브라우저에 문법 번들을 복제하지 않으면서도 같은 컴포넌트를 쓴다.
  * 렌더할 수 없는 곳은 본문 위에 원문 줄 번호와 함께 모아 보여 준다(07-dev-blog §3).
  *
- * @param {Props} props
- * @param {string} props.markdown 저장 전 본문.
- * @returns {JSX.Element}
+ * @param props.markdown 저장 전 본문.
  */
 const ArticlePreviewPanel = ({ markdown }: Props) => {
   const { result, loading, error } = useArticlePreview(markdown, true);

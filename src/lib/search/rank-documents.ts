@@ -8,10 +8,9 @@ import type { SearchDocument } from "@/types/search";
  * 동점은 입력 배열 순서(섹션 고정 순서 + 관리자 큐레이션)를 유지한다(stable sort).
  * 자동완성(suggest-documents)과 WebMCP `search_portfolio` 가 같은 랭킹을 공유한다.
  *
- * @param {SearchDocument[]} documents 대상 문서(섹션 필터는 호출부 책임).
- * @param {string} query 정리(trim)된 질의.
- * @param {ReadonlySet<string>} [queryTokens] 이미 토큰화했다면 재사용.
- * @returns {SearchDocument[]}
+ * @param documents 대상 문서(섹션 필터는 호출부 책임).
+ * @param query 정리(trim)된 질의.
+ * @param [queryTokens] 이미 토큰화했다면 재사용.
  */
 const rankDocuments = (
   documents: SearchDocument[],

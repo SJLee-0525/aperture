@@ -26,7 +26,7 @@ const ORPHAN_RATIO_LIMIT = 0.5;
  * 된다. 비율의 분모는 글 수가 아니라 Storage 그룹 수라, 글이 적고 미참조 이미지가 많은
  * 상태에서도 한도를 넘는다. 그래서 이 값은 삭제를 막는 조건이 아니라 확인을 요구하는 근거다.
  *
- * @returns {string | null} 확인이 필요한 이유. 정상이면 `null`.
+ * @returns 확인이 필요한 이유. 정상이면 `null`.
  */
 const confirmationReasonFor = (
   articleCount: number,
@@ -107,8 +107,8 @@ class OrphanConfirmationRequiredError extends Error {
  * 사유뿐 아니라 삭제 대상 경로 집합까지 담는다. 문구가 같아도 대상이 달라졌으면
  * 사람이 본 화면과 다른 삭제이므로 다시 확인해야 한다.
  *
- * @param {OrphanScanResult} scan 확인 화면이 근거로 삼은 스캔 결과.
- * @returns {string} 비교용 토큰.
+ * @param scan 확인 화면이 근거로 삼은 스캔 결과.
+ * @returns 비교용 토큰.
  */
 const orphanConfirmationToken = (scan: OrphanScanResult): string =>
   [scan.confirmationReason ?? "", ...scan.groups.flatMap((group) => group.paths).sort()].join("\n");
@@ -129,8 +129,8 @@ const toOrphanGroup = (group: ArticleImageGroup): OrphanGroup => ({
  * 남긴다. 본문 Markdown 은 원본 주소만 저장하므로, 이 규칙이 없으면 살아 있는 본문 이미지의
  * 파생본이 매번 정리 대상으로 잡힌다.
  *
- * @param {() => Date} [now] 24시간 판정 기준 시각. 테스트가 고정할 수 있게 주입받는다.
- * @returns {Promise<OrphanScanResult>} 정리 대상 그룹과 요약 수치, 함께 남긴 미참조 파일.
+ * @param [now] 24시간 판정 기준 시각. 테스트가 고정할 수 있게 주입받는다.
+ * @returns 정리 대상 그룹과 요약 수치, 함께 남긴 미참조 파일.
  */
 const scanOrphanArticleImages = async (
   now: () => Date = () => new Date(),
@@ -194,11 +194,11 @@ const scanOrphanArticleImages = async (
  * 재검사 결과가 관리자가 확인한 내용과 다르면 아무것도 지우지 않고
  * `OrphanConfirmationRequiredError` 를 던진다. 사유가 없던 상태에서 새로 생긴 경우도 포함한다.
  *
- * @param {string[]} paths 관리자가 dry run 에서 확인한 후보 경로.
- * @param {{ confirmationToken?: string; now?: () => Date }} [options] `confirmationToken` 은
+ * @param paths 관리자가 dry run 에서 확인한 후보 경로.
+ * @param [options] `confirmationToken` 은
  *   확인 화면이 근거로 삼은 스캔의 `orphanConfirmationToken` 값이다.
  *   `now` 는 재검증의 24시간 판정 기준 시각.
- * @returns {Promise<OrphanDeleteResult>} 경로별 성공·실패·제외 결과.
+ * @returns 경로별 성공·실패·제외 결과.
  * @throws {OrphanConfirmationRequiredError} 확인 내용과 재검사 결과가 어긋날 때.
  */
 const deleteOrphanArticleImages = async (

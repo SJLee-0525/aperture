@@ -22,8 +22,7 @@ const LIST_TOOL: WebMcpToolDefinition = {
 /**
  * /photo/albums 목록의 WebMCP 도구 — 서버가 투영한 카드 데이터를 그대로 직렬화한다.
  *
- * @param {AlbumCard[]} albums 서버 투영 앨범 카드(커버·장수 계산 완료).
- * @returns {void}
+ * @param albums 서버 투영 앨범 카드(커버·장수 계산 완료).
  */
 const useAlbumTools = (albums: AlbumCard[]): void => {
   const { lang } = useLang();

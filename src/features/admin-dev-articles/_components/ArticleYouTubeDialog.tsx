@@ -23,10 +23,8 @@ type Props = {
  * 주소는 여기서 미리 검사해 ID 를 못 뽑으면 삽입을 막는다 — 본문에 넣은 뒤 발행 단계에서
  * 알게 되는 것보다 낫다.
  *
- * @param {Props} props
- * @param {(url: string, title: string, source: string) => void} props.onInsert 검사를 통과한 값을 본문에 넣는다.
- * @param {() => void} props.onClose 입력을 접는다.
- * @returns {JSX.Element}
+ * @param props.onInsert 검사를 통과한 값을 본문에 넣는다.
+ * @param props.onClose 입력을 접는다.
  */
 const ArticleYouTubeDialog = ({ onInsert, onClose }: Props) => {
   const [url, setUrl] = useState("");

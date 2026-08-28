@@ -30,8 +30,8 @@ const PART_FORMATTER = new Intl.DateTimeFormat("en-US", {
 /**
  * 인스턴트를 사이트 기준 타임존의 벽시계 값으로 읽는다.
  *
- * @param {Date} date 표시할 인스턴트.
- * @returns {WallClock} 사이트 타임존에서 본 연·월·일·시·분·초.
+ * @param date 표시할 인스턴트.
+ * @returns 사이트 타임존에서 본 연·월·일·시·분·초.
  */
 const siteWallClock = (date: Date): WallClock => {
   const parts = PART_FORMATTER.formatToParts(date);
@@ -55,8 +55,8 @@ const siteWallClock = (date: Date): WallClock => {
  * UTC 로 가정한 값이 그 타임존에서 몇 시로 보이는지 재서 차이만큼 되돌린다.
  * 업로드한 기기의 타임존과 무관하게 같은 EXIF 원문이 같은 인스턴트가 된다.
  *
- * @param {WallClock} wall 촬영지 기준 벽시계 값.
- * @returns {Date} 사이트 타임존으로 해석한 인스턴트.
+ * @param wall 촬영지 기준 벽시계 값.
+ * @returns 사이트 타임존으로 해석한 인스턴트.
  */
 const instantFromSiteWallClock = (wall: WallClock): Date => {
   const guess = Date.UTC(wall.year, wall.month - 1, wall.day, wall.hour, wall.minute, wall.second);

@@ -6,10 +6,6 @@
  * 파생본을 다시 줄일 때 쓰도록 `Blob` 도 받는다. 라이브러리가 `file.name` 을 읽어 결과
  * `File` 을 다시 만들기 때문에, 이름 없는 `Blob` 은 여기서 `File` 로 감싼다.
  * 저장 경로는 업로더가 정하므로 이 이름은 쓰이지 않는다.
- *
- * @param {Blob} source
- * @param {number} [maxWidthOrHeight]
- * @returns {Promise<Blob>}
  */
 const compressToWebp = async (source: Blob, maxWidthOrHeight = 2048): Promise<Blob> => {
   const { default: imageCompression } = await import("browser-image-compression");

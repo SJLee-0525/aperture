@@ -16,9 +16,6 @@ const SUGGEST_DEBOUNCE_MS = 120;
  * 검색창 자동완성 상태 — loadIndex 를 포커스 시점에 호출하면 인덱스를 lazy load 한다
  * (검색 안 쓰는 방문자 비용 0). 입력은 짧은 디바운스 후 in-memory 대조로 추천을 갱신한다.
  * 데스크톱 SearchBox 와 모바일 버거 메뉴 검색이 공유한다.
- *
- * @param {string} query
- * @returns {{ suggestions: SearchSuggestion[]; loadIndex: () => void }}
  */
 const useSearchSuggestions = (query: string) => {
   const { lang } = useLang();

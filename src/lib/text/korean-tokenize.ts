@@ -159,9 +159,6 @@ const tokensFor = (text: string): Set<string> => {
 
 /**
  * 문서 텍스트를 질의와 같은 토큰 파이프라인으로 정규화한 대조용 문자열로 만든다.
- *
- * @param {string} text
- * @returns {string}
  */
 const normalizeForSearch = (text: string): string => [...tokensFor(text)].join(" ");
 

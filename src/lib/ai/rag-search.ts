@@ -40,11 +40,11 @@ const PRIORITIZED_SLOTS = 3;
  * `exclude` 는 화면 문맥에 본문 전문이 이미 실린 원본을 후보에서 뺀다. 우선 슬롯만
  * 비우면 같은 글 청크가 나머지 자리로 흘러 중복이 오히려 늘어나므로 후보 전체에서 거른다.
  *
- * @param {RagQuery} query 검색어와 키워드.
- * @param {RagSection[]} sections 검색할 섹션.
- * @param {AbortSignal} [signal] 요청 취소 신호.
- * @param {{ prioritize?: RagPrioritize; exclude?: RagExclude }} [options] 우선 검색·제외 대상.
- * @returns {Promise<StoredRagChunkMeta[]>} 우선 대상 최대 3개(점수 내림차순) 뒤에 하한을 통과한
+ * @param query 검색어와 키워드.
+ * @param sections 검색할 섹션.
+ * @param [signal] 요청 취소 신호.
+ * @param [options] 우선 검색·제외 대상.
+ * @returns 우선 대상 최대 3개(점수 내림차순) 뒤에 하한을 통과한
  *   나머지 청크(점수 내림차순). 두 묶음을 합쳐 최대 10개이며 전체가 점수순은 아니다 —
  *   `ignoreScoreFloor` 에서는 우선 대상이 더 높은 점수의 청크보다 앞에 온다.
  */

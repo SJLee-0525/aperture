@@ -26,10 +26,9 @@ type Props = {
  *
  * 비공개·삭제된 프로젝트는 호출부가 공개 목록과 맞춰 걸러 준다 — 여기서는 받은 순서를 지킨다.
  *
- * @param {Props} props
- * @param {DevProjectCardData[]} props.projects 글이 지정한 순서의 공개 프로젝트.
- * @param {Lang} props.lang 링크 프리픽스와 제목·요약 언어.
- * @returns {JSX.Element | null} 프로젝트가 없으면 null.
+ * @param props.projects 글이 지정한 순서의 공개 프로젝트.
+ * @param props.lang 링크 프리픽스와 제목·요약 언어.
+ * @returns 프로젝트가 없으면 null.
  */
 const ArticleRelatedProjects = ({ projects, lang }: Props) => {
   if (projects.length === 0) return null;

@@ -21,10 +21,7 @@ type Props = {
 /**
  * 상세 정보 패널 — 제목 + 노출 삼각 + EXIF 리스트 + 미니맵 + 태그.
  *
- * @param {Props} props
- * @param {Photo} props.photo
- * @param {string[]} props.tagLabels - 사전에서 해석된 태그 라벨(현재 언어)
- * @returns {JSX.Element}
+ * @param props.tagLabels - 사전에서 해석된 태그 라벨(현재 언어)
  */
 const ExifPanel = ({ photo, tagLabels }: Props) => {
   const { dict, lang } = useLang();

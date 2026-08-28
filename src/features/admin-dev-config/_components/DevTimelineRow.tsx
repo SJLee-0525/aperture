@@ -30,17 +30,6 @@ const FIELDS: { key: LocalizedField; label: string }[] = [
 
 /**
  * 경력 타임라인 한 행 — 기간 + 제목·역할·설명(ko/en) + 위/아래 이동 + 삭제.
- *
- * @param {Props} props
- * @param {DevTimelineEntry} props.entry
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, value: string) => void} props.onEditPeriod
- * @param {(index: number, field: LocalizedField, lang: 'ko' | 'en', value: string) => void} props.onEditField
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const DevTimelineRow = ({
   entry,

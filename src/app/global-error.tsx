@@ -18,10 +18,10 @@ type Props = {
  * 오류 전송은 동의 뒤 로드된 SDK가 있을 때만 일어난다 — Provider 밖이라 동의 상태를
  * 다시 읽지 않고, 미로드 시 포워더가 no-op이다(ADR-0004).
  *
- * @param {Props} props 전역 오류 복구 동작.
- * @param {Error & { digest?: string }} props.error 루트 레이아웃 렌더 중 포착한 오류.
- * @param {() => void} props.reset 애플리케이션을 다시 렌더링하는 콜백.
- * @returns {JSX.Element} 자체 html·body를 포함한 최상위 오류 화면.
+ * @param props 전역 오류 복구 동작.
+ * @param props.error 루트 레이아웃 렌더 중 포착한 오류.
+ * @param props.reset 애플리케이션을 다시 렌더링하는 콜백.
+ * @returns 자체 html·body를 포함한 최상위 오류 화면.
  */
 export default function GlobalError({ error, reset }: Props) {
   useEffect(() => {

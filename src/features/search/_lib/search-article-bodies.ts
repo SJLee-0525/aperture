@@ -76,8 +76,8 @@ const snippetAround = (body: string, index: number, queryLength: number): string
  * 원문 위치에 대응시킬 수 없어 본문 서두 스니펫으로 물러난다 —
  * `splitTextByMatches` 의 길이 불일치 가드와 같은 계약이다.
  *
- * @param {string} rawQuery 방문자 질의. 2자 미만이거나 100자 초과면 대조하지 않는다.
- * @returns {Promise<ArticleBodyMatch[]>} 발행일 내림차순(getter 순서)의 일치 목록.
+ * @param rawQuery 방문자 질의. 2자 미만이거나 100자 초과면 대조하지 않는다.
+ * @returns 발행일 내림차순(getter 순서)의 일치 목록.
  */
 const searchArticleBodies = async (rawQuery: string): Promise<ArticleBodyMatch[]> => {
   const query = comparable(rawQuery.trim());

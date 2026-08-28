@@ -42,10 +42,8 @@ type Props = {
  * 발행 조건을 만족하지 않으면 저장 자체를 하지 않는다 — 조건을 만족하지 못한 채 공개로 넘어간
  * 문서가 남는 것을 막는다. 초안 저장에는 조건을 걸지 않는다(07-dev-blog §3).
  *
- * @param {Props} props
- * @param {string} props.articleId 새 글이면 미리 발급한 ID, 수정이면 문서 ID.
- * @param {DevArticle | undefined} props.initial 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.articleId 새 글이면 미리 발급한 ID, 수정이면 문서 ID.
+ * @param props.initial 있으면 수정 모드.
  */
 const ArticleForm = ({ articleId, initial }: Props) => {
   const router = useRouter();

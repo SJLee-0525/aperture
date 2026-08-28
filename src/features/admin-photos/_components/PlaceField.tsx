@@ -32,16 +32,7 @@ type Mode = "search" | "manual";
  * 장소 지정 — 검색(Nominatim, 좌표 자동) / 직접 입력(이름·좌표 수동) 두 방식.
  * 상태(place·lat·lng)는 부모(PhotoForm)가 소유하고, 이 컴포넌트는 표현만 담당한다.
  *
- * @param {Props} props
- * @param {LocalizedText} props.place
- * @param {string} props.latStr
- * @param {string} props.lngStr
- * @param {(place: LocalizedText) => void} props.onPlaceChange
- * @param {(value: string) => void} props.onLatChange
- * @param {(value: string) => void} props.onLngChange
- * @param {() => void} props.onClearCoords
- * @param {(place: LocalizedText, lat: number, lng: number) => void} props.onPickResult - 검색 결과 선택 → 장소명(ko/en) + 좌표를 한 번에 채운다.
- * @returns {JSX.Element}
+ * @param props.onPickResult - 검색 결과 선택 → 장소명(ko/en) + 좌표를 한 번에 채운다.
  */
 const PlaceField = ({
   place,

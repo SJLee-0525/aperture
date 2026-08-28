@@ -28,9 +28,9 @@ const KEY_SEPARATOR = ":";
  * 순서 번호로 맞추면 렌더 순서와 색칠 순서가 어긋날 수 있고, 같은 코드가 두 번 나오면
  * 내용 키가 한 번만 색칠하게 해 준다.
  *
- * @param {ArticleCodeLanguage} language 정규화된 문법 이름.
- * @param {string} value 코드 원문.
- * @returns {string} 색칠 결과 map 의 키.
+ * @param language 정규화된 문법 이름.
+ * @param value 코드 원문.
+ * @returns 색칠 결과 map 의 키.
  */
 const articleCodeHighlightKey = (language: ArticleCodeLanguage, value: string): string =>
   `${language}${KEY_SEPARATOR}${value}`;

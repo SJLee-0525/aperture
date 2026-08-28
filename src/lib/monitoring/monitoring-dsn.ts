@@ -15,9 +15,9 @@ const SENTRY_DATA_REGION: SentryDataRegion | null =
 /**
  * Sentry SaaS DSN의 수집 지역과 고지할 저장 지역이 같은지 확인한다.
  *
- * @param {string} dsn - 검사할 Sentry DSN.
- * @param {SentryDataRegion} region - 개인정보 처리방침에 고지한 저장 지역.
- * @returns {boolean} DSN 호스트가 저장 지역과 일치하면 `true`.
+ * @param dsn - 검사할 Sentry DSN.
+ * @param region - 개인정보 처리방침에 고지한 저장 지역.
+ * @returns DSN 호스트가 저장 지역과 일치하면 `true`.
  */
 const isSentryDsnInRegion = (dsn: string, region: SentryDataRegion): boolean => {
   try {

@@ -17,8 +17,8 @@ type ArticleDirectiveResult =
  *
  * `youtu.be/{id}`, `youtube.com/watch?v={id}`, `youtube.com/embed/{id}`, `/shorts/{id}` 를 받는다.
  *
- * @param {string} raw 관리자가 붙여 넣은 주소.
- * @returns {string | null} 11 자 영상 ID, 형식이 맞지 않으면 null.
+ * @param raw 관리자가 붙여 넣은 주소.
+ * @returns 11 자 영상 ID, 형식이 맞지 않으면 null.
  */
 const extractYouTubeVideoId = (raw: string): string | null => {
   const value = raw.trim();
@@ -50,10 +50,10 @@ const extractYouTubeVideoId = (raw: string): string | null => {
  * 분리돼 있어야 관리자 도움말과 테스트가 같은 함수를 그대로 쓸 수 있다.
  * 이미지와의 연결(캡션이 바로 앞 이미지에 붙는지)은 블록 순서를 아는 정규화 단계가 판단한다.
  *
- * @param {string} name 지시자 이름.
- * @param {string} label 대괄호 안의 평문. caption 은 설명, youtube 는 주소다.
- * @param {Record<string, string | null | undefined>} attributes 중괄호 속성.
- * @returns {ArticleDirectiveResult} 해석 결과 또는 발행을 막을 issue.
+ * @param name 지시자 이름.
+ * @param label 대괄호 안의 평문. caption 은 설명, youtube 는 주소다.
+ * @param attributes 중괄호 속성.
+ * @returns 해석 결과 또는 발행을 막을 issue.
  */
 const resolveArticleDirective = (
   name: string,

@@ -54,18 +54,15 @@ type Props = {
  * 사진, 음악, 개발 소개 화면이 공유하는 레이아웃.
  * 통계와 목록은 각 섹션에서 계산해 전달한다.
  *
- * @param {Props} props
- * @param {Lang} props.lang 검색 링크에 사용할 현재 언어.
- * @param {string} props.eyebrow 섹션 역할 라벨.
- * @param {string} props.summary 소개 요약 제목.
- * @param {string} props.body 요약 뒤에 표시할 본문.
- * @param {Stat[]} props.stats 숫자 통계.
- * @param {Col[]} props.cols 두 열로 표시할 목록.
- * @param {number | undefined} props.collapsedItemCount - 각 목록을 접었을 때 노출할 항목 수.
- * @param {string} props.showMoreLabel 목록 펼치기 버튼 라벨.
- * @param {string} props.showLessLabel
- * @param {ReactNode} props.children 섹션 아래에 표시할 추가 콘텐츠.
- * @returns {JSX.Element}
+ * @param props.lang 검색 링크에 사용할 현재 언어.
+ * @param props.eyebrow 섹션 역할 라벨.
+ * @param props.summary 소개 요약 제목.
+ * @param props.body 요약 뒤에 표시할 본문.
+ * @param props.stats 숫자 통계.
+ * @param props.cols 두 열로 표시할 목록.
+ * @param props.collapsedItemCount - 각 목록을 접었을 때 노출할 항목 수.
+ * @param props.showMoreLabel 목록 펼치기 버튼 라벨.
+ * @param props.children 섹션 아래에 표시할 추가 콘텐츠.
  */
 const AboutSection = ({
   lang,

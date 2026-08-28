@@ -14,8 +14,7 @@ const readTags = (value: unknown): Tag[] =>
     }));
 
 /**
- * @param {Record<string, unknown>} data 병합된 사이트 설정 필드.
- * @returns {SiteConfig}
+ * @param data 병합된 사이트 설정 필드.
  */
 const decodeSiteConfig = (data: Record<string, unknown>): SiteConfig => ({
   name: readText(data.name),

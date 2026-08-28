@@ -12,10 +12,6 @@ type Props = { params: Promise<{ id: string }> };
 
 /**
  * 영상 수정 — id 로 로드 후 MediaForm 에 초기값 전달. 없으면 안내 문구.
- *
- * @param {Props} props
- * @param {Promise<{ id: string }>} props.params
- * @returns {JSX.Element}
  */
 const EditMusicMediaPage = ({ params }: Props) => {
   const { id } = use(params);

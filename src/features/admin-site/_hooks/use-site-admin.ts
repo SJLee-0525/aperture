@@ -18,8 +18,6 @@ type Status = "loading" | "ready" | "error";
  * about 페이지가 노출하는 편집 대상은 **bio 뿐**이다(이름·연락 링크는 노출 안 함 → 전역/연락 CMS 소관, 추후).
  * 저장 시 이 화면이 소유한 bio만 병합해 단일 config 문서의 다른 필드를 건드리지 않는다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
- *
- * @returns {{ bio: LocalizedText; status: Status; error: string | null; saving: boolean; saved: boolean; editBio: (field: 'ko' | 'en', value: string) => void; save: () => Promise<void> }}
  */
 const useSiteAdmin = () => {
   const [bio, setBio] = useState<LocalizedText>(EMPTY_TEXT);

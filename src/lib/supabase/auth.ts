@@ -26,9 +26,9 @@ const authErrorMessage = (error: { code?: string; name?: string }): string => {
 /**
  * 관리자 로그인. 실패 시 한국어 메시지를 담은 Error 를 throw.
  *
- * @param {string} email 관리자 이메일.
- * @param {string} password 관리자 비밀번호.
- * @returns {Promise<User>} 인증된 Supabase 사용자.
+ * @param email 관리자 이메일.
+ * @param password 관리자 비밀번호.
+ * @returns 인증된 Supabase 사용자.
  */
 const signIn = async (email: string, password: string): Promise<User> => {
   const { data, error } = await getSupabaseClient().auth.signInWithPassword({ email, password });
@@ -42,7 +42,7 @@ const signIn = async (email: string, password: string): Promise<User> => {
  * 세션만 끊으면 아직 저장하지 않은 글 본문이 브라우저에 남는다. 공용·공유 브라우저에서
  * 다음 사용자가 그 값을 읽을 수 있다.
  *
- * @returns {Promise<void>} 로컬 세션 정리가 끝나면 완료된다. 서버 측 해지 실패는 무시한다.
+ * @returns 로컬 세션 정리가 끝나면 완료된다. 서버 측 해지 실패는 무시한다.
  */
 const signOutAdmin = async (): Promise<void> => {
   await getSupabaseClient().auth.signOut();
@@ -53,8 +53,8 @@ const signOutAdmin = async (): Promise<void> => {
  * 인증 상태 구독. 반환값은 구독 해제 함수.
  * 구독 직후 INITIAL_SESSION 이벤트로 현재 세션이 한 번 전달된다.
  *
- * @param {(user: User | null) => void} callback 인증 사용자가 바뀔 때 실행할 함수.
- * @returns {(() => void)} 인증 상태 구독을 해제하는 함수.
+ * @param callback 인증 사용자가 바뀔 때 실행할 함수.
+ * @returns 인증 상태 구독을 해제하는 함수.
  */
 const subscribeAuth = (callback: (user: User | null) => void): (() => void) => {
   const { data } = getSupabaseClient().auth.onAuthStateChange((_event, session) => {
@@ -75,7 +75,7 @@ const isAdminUser = (user: User | null): boolean =>
  * server action·API 호출에 붙일 현재 세션의 access token.
  * 만료가 임박하면 supabase-js 가 세션을 갱신한 뒤 돌려준다.
  *
- * @returns {Promise<string | null>} 로그인 전이면 null.
+ * @returns 로그인 전이면 null.
  */
 const getAdminAccessToken = async (): Promise<string | null> => {
   const { data } = await getSupabaseClient().auth.getSession();

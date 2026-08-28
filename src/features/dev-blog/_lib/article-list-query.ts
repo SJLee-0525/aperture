@@ -27,9 +27,9 @@ const FIRST_PAGE = 1;
  * URL 계약은 id 하나뿐이라 라벨 매칭을 허용하면 같은 화면을 가리키는 주소가 여러 개가 된다.
  * 사전에서 지운 태그가 링크에 남아 있으면 빈 목록 대신 전체를 보여 준다.
  *
- * @param {URLSearchParams} searchParams 현재 URL 의 query. 같은 키가 여러 번 오면 첫 값을 쓴다.
- * @param {readonly DevArticleTag[]} tags 통제 태그 사전.
- * @returns {ArticleListState} 정규화된 상태. `page` 는 항상 1 이상이다.
+ * @param searchParams 현재 URL 의 query. 같은 키가 여러 번 오면 첫 값을 쓴다.
+ * @param tags 통제 태그 사전.
+ * @returns 정규화된 상태. `page` 는 항상 1 이상이다.
  */
 const parseArticleListQuery = (
   searchParams: URLSearchParams,
@@ -54,9 +54,9 @@ const parseArticleListQuery = (
  * 결과가 현재 주소와 다르면 화면이 replace 로 주소를 맞춰, 범위를 벗어난 페이지나 남은
  * 파라미터가 공유 링크에 남지 않는다.
  *
- * @param {string} pathname query 를 제외한 경로. 로케일 프리픽스 포함 여부는 호출부가 정한다.
- * @param {ArticleListState} state 정규화된 목록 상태.
- * @returns {string} query 가 비면 경로만 돌려준다.
+ * @param pathname query 를 제외한 경로. 로케일 프리픽스 포함 여부는 호출부가 정한다.
+ * @param state 정규화된 목록 상태.
+ * @returns query 가 비면 경로만 돌려준다.
  */
 const buildArticleListHref = (pathname: string, state: ArticleListState): string => {
   const params = new URLSearchParams();
@@ -71,8 +71,8 @@ const buildArticleListHref = (pathname: string, state: ArticleListState): string
 /**
  * 글 수에 필요한 페이지 수를 센다.
  *
- * @param {number} total 필터를 적용한 글 수.
- * @returns {number} 글이 없어도 1 — 빈 목록에도 1페이지는 존재한다.
+ * @param total 필터를 적용한 글 수.
+ * @returns 글이 없어도 1 — 빈 목록에도 1페이지는 존재한다.
  */
 const articlePageCount = (total: number): number =>
   Math.max(FIRST_PAGE, Math.ceil(total / ARTICLES_PER_PAGE));
@@ -80,9 +80,9 @@ const articlePageCount = (total: number): number =>
 /**
  * 한 페이지에 보일 만큼만 잘라낸다.
  *
- * @param {readonly T[]} items 정렬을 마친 전체 목록.
- * @param {number} page 1부터 시작하는 페이지 번호. 범위 밖이면 빈 배열이 된다.
- * @returns {T[]} 해당 페이지의 글.
+ * @param items 정렬을 마친 전체 목록.
+ * @param page 1부터 시작하는 페이지 번호. 범위 밖이면 빈 배열이 된다.
+ * @returns 해당 페이지의 글.
  */
 const sliceArticlesPage = <T>(items: readonly T[], page: number): T[] => {
   const start = (page - FIRST_PAGE) * ARTICLES_PER_PAGE;

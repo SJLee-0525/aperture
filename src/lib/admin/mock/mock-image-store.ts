@@ -16,9 +16,9 @@ const urlsByPath = new Map<string, string>();
 /**
  * 압축한 이미지를 mock 저장소에 올린다.
  *
- * @param {string} folder live 와 같은 규칙의 Storage 폴더(예: `photos/{id}`).
- * @param {Blob} blob 업로드할 WebP 이미지 데이터.
- * @returns {{ url: string; path: string }} objectURL 과 live 형식의 객체 경로.
+ * @param folder live 와 같은 규칙의 Storage 폴더(예: `photos/{id}`).
+ * @param blob 업로드할 WebP 이미지 데이터.
+ * @returns objectURL 과 live 형식의 객체 경로.
  */
 const uploadMockImage = (folder: string, blob: Blob): { url: string; path: string } => {
   const path = `${folder}/${crypto.randomUUID()}.webp`;
@@ -32,8 +32,7 @@ const uploadMockImage = (folder: string, blob: Blob): { url: string; path: strin
  * 현재 세션에서 만들지 않은 경로는 건너뛴다.
  * object-not-found 허용과 같은 태도다.
  *
- * @param {Iterable<string>} paths 지울 객체 경로 모음.
- * @returns {void}
+ * @param paths 지울 객체 경로 모음.
  */
 const deleteMockImages = (paths: Iterable<string>): void => {
   for (const path of paths) {
@@ -48,8 +47,7 @@ const deleteMockImages = (paths: Iterable<string>): void => {
  * 폴더 아래의 mock 이미지를 전부 지운다. 문서 삭제 후 이미지 정리
  * (live 의 `deletePhotoImages` 등)와 같은 자리다.
  *
- * @param {string} folder 지울 폴더 경로(예: `photos/{id}`).
- * @returns {void}
+ * @param folder 지울 폴더 경로(예: `photos/{id}`).
  */
 const deleteMockImageFolder = (folder: string): void => {
   const prefix = `${folder}/`;

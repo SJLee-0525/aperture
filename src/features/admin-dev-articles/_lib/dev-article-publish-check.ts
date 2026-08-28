@@ -49,8 +49,8 @@ type PublishCheckContext = {
 /**
  * 두 언어 값이 모두 채워졌는지 본다.
  *
- * @param {{ ko: string; en: string }} text 검사할 값.
- * @returns {boolean} 한쪽이라도 비어 있으면 false.
+ * @param text 검사할 값.
+ * @returns 한쪽이라도 비어 있으면 false.
  */
 const hasBothLanguages = (text: { ko: string; en: string }): boolean =>
   Boolean(text.ko.trim()) && Boolean(text.en.trim());
@@ -62,9 +62,9 @@ const hasBothLanguages = (text: { ko: string; en: string }): boolean =>
  * 초안 저장은 이 검사를 거치지 않는다. 작성 중인 내용을 잃지 않는 것이 우선이라
  * 미완성 글도 저장할 수 있어야 한다(07-dev-blog §3).
  *
- * @param {DevArticleInput} input `prepareArticleInput` 을 거친 저장 값.
- * @param {PublishCheckContext} context 중복·사전·관계를 판단할 주변 정보.
- * @returns {DevArticlePublishIssue[]} 발행을 막는 사유. 비어 있으면 발행할 수 있다.
+ * @param input `prepareArticleInput` 을 거친 저장 값.
+ * @param context 중복·사전·관계를 판단할 주변 정보.
+ * @returns 발행을 막는 사유. 비어 있으면 발행할 수 있다.
  */
 const checkArticlePublishable = (
   input: DevArticleInput,

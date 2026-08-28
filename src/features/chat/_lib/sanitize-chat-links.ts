@@ -28,9 +28,6 @@ const ALLOWED_ACTION_ROUTES = new Set<string>([
  * 모델이 반환한 href를 내부 상대 경로로 검증한다. `new URL()`이 dot segment를
  * 정규화하기 전에 raw pathname을 검사한다. 공개 pathname에는 percent encoding을
  * 허용하지 않으며 query 값에서만 허용한다.
- *
- * @param {string} href
- * @returns {{ pathname: string; searchParams: URLSearchParams } | null}
  */
 const parseInternalHref = (
   href: string,
@@ -73,10 +70,10 @@ const REFERENCE_SECTION_ROUTES: Record<ChatReferenceType, string> = {
 /**
  * 모델이 반환한 링크를 공개 내부 경로로 제한하고 사진 query를 canonical URL로 바꾼다.
  *
- * @param {ChatLink[] | undefined} links provider가 반환한 링크 후보.
- * @param {ChatReference[] | undefined} references 응답에 함께 표시할 참조 카드.
- * @param {PhotoFilterVocabulary | undefined} photoVocabulary 사진 query 검증용 공개 어휘.
- * @returns {ChatLink[] | undefined} 최대 두 개의 검증된 링크.
+ * @param links provider가 반환한 링크 후보.
+ * @param references 응답에 함께 표시할 참조 카드.
+ * @param photoVocabulary 사진 query 검증용 공개 어휘.
+ * @returns 최대 두 개의 검증된 링크.
  */
 const sanitizeLinks = (
   links: ChatLink[] | undefined,

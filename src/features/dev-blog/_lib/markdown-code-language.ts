@@ -57,8 +57,8 @@ const CODE_LANGUAGE_ALIASES: Record<string, ArticleCodeLanguage> = {
 /**
  * 코드 fence 표기를 문법 이름으로 정규화한다.
  *
- * @param {string} raw fence 에 적힌 표기. 언어를 적지 않았으면 빈 문자열.
- * @returns {ArticleCodeLanguage | null} 아는 언어면 문법 이름, 아니면 null(색 없이 렌더).
+ * @param raw fence 에 적힌 표기. 언어를 적지 않았으면 빈 문자열.
+ * @returns 아는 언어면 문법 이름, 아니면 null(색 없이 렌더).
  */
 const normalizeCodeLanguage = (raw: string): ArticleCodeLanguage | null => {
   const key = raw.trim().toLowerCase();

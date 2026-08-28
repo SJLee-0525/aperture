@@ -11,7 +11,7 @@ import styles from "./RagStaleBanner.module.css";
  * 내용을 보여 준다는 사실과 다시 시도할 수단을 알린다. 재시도하지 않아도 ISR 주기가 지나면
  * 자동으로 갱신된다.
  *
- * @returns {JSX.Element | null} 남은 실패가 없으면 null.
+ * @returns 남은 실패가 없으면 null.
  */
 const RevalidateFailureBanner = () => {
   const { error, failure, retry, retrying } = useRevalidateFailure();

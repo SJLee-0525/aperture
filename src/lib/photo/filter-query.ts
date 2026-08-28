@@ -38,9 +38,9 @@ const DEFAULT_FILTER_STATE: PhotoFilterState = {
 /**
  * 태그 id와 ko/en 라벨을 대소문자 구분 없이 조회한다.
  *
- * @param {Tag[]} tags site/config 의 통제 태그 사전.
- * @param {string} raw URL·에이전트가 넘긴 태그 값.
- * @returns {Tag | null} 매칭 실패 시 null.
+ * @param tags site/config 의 통제 태그 사전.
+ * @param raw URL·에이전트가 넘긴 태그 값.
+ * @returns 매칭 실패 시 null.
  */
 const resolveTag = (tags: Tag[], raw: string): Tag | null => {
   const needle = raw.trim().toLowerCase();
@@ -57,9 +57,9 @@ const resolveTag = (tags: Tag[], raw: string): Tag | null => {
 /**
  * 카메라 이름을 조회한다. 정확히 일치하는 이름을 우선하며 부분 일치는 후보가 하나일 때만 허용한다.
  *
- * @param {readonly string[]} cameras 공개 사진에서 파생한 카메라명 목록.
- * @param {string} raw URL·에이전트가 넘긴 카메라 값.
- * @returns {string | null} 매칭 실패·중의적 부분 일치 시 null.
+ * @param cameras 공개 사진에서 파생한 카메라명 목록.
+ * @param raw URL·에이전트가 넘긴 카메라 값.
+ * @returns 매칭 실패·중의적 부분 일치 시 null.
  */
 const resolveCamera = (cameras: readonly string[], raw: string): string | null => {
   const needle = raw.trim().toLowerCase();
@@ -72,10 +72,6 @@ const resolveCamera = (cameras: readonly string[], raw: string): string | null =
 /**
  * 브라우저 URL을 관대하게 파싱한다. 잘못된 값은 기본값으로 바꾸고 알 수 없는 key는
  * 무시한다. 같은 key가 여러 번 나오면 첫 값을 쓴다.
- *
- * @param {URLSearchParams} searchParams
- * @param {PhotoFilterVocabulary} vocabulary
- * @returns {PhotoFilterState}
  */
 const parsePhotoFilterQuery = (
   searchParams: URLSearchParams,
@@ -111,10 +107,6 @@ const parsePhotoFilterQuery = (
  * 챗봇 링크처럼 신뢰할 수 없는 query를 엄격하게 파싱한다. 알 수 없거나 중복된 key,
  * 잘못된 값, 역전된 범위, 빈 query를 만나면 전체를 거부한다. photoIds가 있으면 사진
  * id의 존재도 확인한다.
- *
- * @param {URLSearchParams} searchParams
- * @param {PhotoFilterVocabulary} vocabulary
- * @returns {{ state: PhotoFilterState; q: string | null; photoId: string | null } | null}
  */
 const parsePhotoFilterQueryStrict = (
   searchParams: URLSearchParams,
@@ -178,10 +170,9 @@ const parsePhotoFilterQueryStrict = (
  * 정규화된 사진 필터를 canonical URL로 직렬화한다. query 순서는 q, tag, camera,
  * focalMin, focalMax, photo이며 기본값과 빈 값은 생략한다.
  *
- * @param {string} pathname query를 제외한 경로. 로케일 포함 여부는 호출부가 결정한다.
- * @param {PhotoFilterState} state 정규화된 필터 상태. 태그는 id, 카메라는 공개 목록의 정확한 이름이다.
- * @param {{ q?: string | null; photo?: string | null }} [carry] 필터 밖 보존 파라미터.
- * @returns {string}
+ * @param pathname query를 제외한 경로. 로케일 포함 여부는 호출부가 결정한다.
+ * @param state 정규화된 필터 상태. 태그는 id, 카메라는 공개 목록의 정확한 이름이다.
+ * @param [carry] 필터 밖 보존 파라미터.
  */
 const buildPhotoFilterHref = (
   pathname: string,

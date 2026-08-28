@@ -29,9 +29,6 @@ const getVerifier = (): SupabaseClient =>
  * 로그아웃해도 이미 발급된 토큰은 `exp` 까지 통과한다. 이 함수는 JWKS 로 로컬 검증만 하고
  * Supabase 서버의 세션 해지 여부를 조회하지 않는다. 비대칭 서명 JWT 의 성질이며,
  * 토큰이 유출된 상황에서 로그아웃은 대응이 되지 않는다.
- *
- * @param {string} idToken
- * @returns {Promise<boolean>}
  */
 const verifyAdminIdToken = async (idToken: string): Promise<boolean> => {
   if (!idToken || !isSupabaseConfigured()) return false;

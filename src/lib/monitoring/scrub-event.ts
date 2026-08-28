@@ -22,8 +22,8 @@ const SENSITIVE_QUERY_KEYS = ["q", "token", "code"];
 /**
  * 쿼리스트링(`a=1&token=x`)에서 민감 키의 값만 마스킹한다.
  *
- * @param {string} query - `?` 뒤의 원본 쿼리스트링.
- * @returns {string} 민감 키의 값이 `[Filtered]`로 바뀐 쿼리스트링.
+ * @param query - `?` 뒤의 원본 쿼리스트링.
+ * @returns 민감 키의 값이 `[Filtered]`로 바뀐 쿼리스트링.
  */
 const scrubQueryString = (query: string): string =>
   query
@@ -39,8 +39,8 @@ const scrubQueryString = (query: string): string =>
 /**
  * URL의 쿼리 부분에서 민감 값을 마스킹한다. 쿼리가 없으면 원본을 반환한다.
  *
- * @param {string} url - 절대 또는 상대 URL.
- * @returns {string} 쿼리만 마스킹된 URL.
+ * @param url - 절대 또는 상대 URL.
+ * @returns 쿼리만 마스킹된 URL.
  */
 const scrubUrl = (url: string): string => {
   const queryIndex = url.indexOf("?");
@@ -52,8 +52,8 @@ const scrubUrl = (url: string): string => {
  * Sentry 이벤트에서 인증 토큰·요청 본문·민감 쿼리를 제거한다.
  * `beforeSend`에 그대로 연결할 수 있도록 이벤트를 반환한다.
  *
- * @param {ErrorEvent} event - 전송 직전의 Sentry 오류 이벤트.
- * @returns {ErrorEvent} 민감 값이 제거된 같은 이벤트.
+ * @param event - 전송 직전의 Sentry 오류 이벤트.
+ * @returns 민감 값이 제거된 같은 이벤트.
  */
 const scrubEvent = (event: ErrorEvent): ErrorEvent => {
   const request = event.request;
@@ -91,8 +91,8 @@ const scrubEvent = (event: ErrorEvent): ErrorEvent => {
 /**
  * breadcrumb의 URL 필드(fetch/xhr `url`, navigation `from`/`to`)에서 민감 쿼리를 마스킹한다.
  *
- * @param {Breadcrumb} breadcrumb - 기록 직전의 breadcrumb.
- * @returns {Breadcrumb} URL 쿼리가 마스킹된 같은 breadcrumb.
+ * @param breadcrumb - 기록 직전의 breadcrumb.
+ * @returns URL 쿼리가 마스킹된 같은 breadcrumb.
  */
 const scrubBreadcrumb = (breadcrumb: Breadcrumb): Breadcrumb => {
   const data = breadcrumb.data;
@@ -115,8 +115,8 @@ type ReplayRecordingEvent = {
  * Replay 녹화 이벤트의 현재 주소와 navigation URL에서 민감 쿼리를 제거한다.
  * ErrorEvent의 `beforeSend`와 Replay의 녹화 스트림은 서로 다른 경로라 별도 콜백이 필요하다.
  *
- * @param {ReplayRecordingEvent} event - Replay 버퍼에 추가되기 직전의 이벤트.
- * @returns {ReplayRecordingEvent} URL이 정제된 같은 이벤트.
+ * @param event - Replay 버퍼에 추가되기 직전의 이벤트.
+ * @returns URL이 정제된 같은 이벤트.
  */
 const scrubReplayEvent = <T extends ReplayRecordingEvent>(event: T): T => {
   const data = event.data;

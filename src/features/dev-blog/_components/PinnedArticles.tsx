@@ -30,14 +30,12 @@ type Props = {
  * 차지하는데, 이 섹션은 모든 페이지에 반복되므로 아래 목록이 첫 화면에서 밀려난다.
  * 같은 이유로 고정 자체가 `MAX_PINNED_ARTICLES` 건으로 제한된다.
  *
- * @param {Props} props
- * @param {DevArticleSummary[]} props.articles 고정 글. 비어 있으면 호출부가 이 섹션을 그리지 않는다.
- * @param {Lang} props.lang 링크 프리픽스와 제목 언어.
- * @param {string} props.heading 영역 이름. 화면에는 보이지 않고 보조기술만 읽는다.
- * @param {string} props.badgeLabel 카드에 붙일 고정 배지 문구.
- * @param {(tagId: string) => string} props.labelOf 태그 id 를 현재 언어 라벨로 바꾼다.
- * @param {(minutes: number) => string} props.readingLabelOf 읽기 시간 문구를 만든다.
- * @returns {JSX.Element}
+ * @param props.articles 고정 글. 비어 있으면 호출부가 이 섹션을 그리지 않는다.
+ * @param props.lang 링크 프리픽스와 제목 언어.
+ * @param props.heading 영역 이름. 화면에는 보이지 않고 보조기술만 읽는다.
+ * @param props.badgeLabel 카드에 붙일 고정 배지 문구.
+ * @param props.labelOf 태그 id 를 현재 언어 라벨로 바꾼다.
+ * @param props.readingLabelOf 읽기 시간 문구를 만든다.
  */
 const PinnedArticles = ({
   articles,

@@ -49,13 +49,7 @@ const readServerColumns = () => PHOTO_GRID_DESKTOP_COLUMNS;
  * 뷰 토글(메이슨리↔정사각) 시에도 layout 이 타일 크기·위치 변화를 부드럽게 잇는다.
  * initial={false} — 최초 로드는 애니메이션 없이 즉시(LCP 보호, 페이지 전환 페이드로 충분).
  *
- * @param {Props} props
- * @param {GalleryPhoto[]} props.photos
- * @param {Lang} props.lang
- * @param {boolean} props.square
- * @param {string} props.emptyLabel
- * @param {(() => void) | undefined} props.onTilePreload - 타일 hover/focus 시 상세 모달 리소스 프리로드
- * @returns {JSX.Element}
+ * @param props.onTilePreload - 타일 hover/focus 시 상세 모달 리소스 프리로드
  */
 const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) => {
   // useState + effect 로 두면 첫 클라이언트 렌더가 데스크톱 열 수로 한 번 그려진 뒤

@@ -20,10 +20,9 @@ type Props = {
  *
  * 글 상세는 모달이 아니라 독립 지면이므로 링크로 나간다. 모달은 이동과 함께 닫힌다.
  *
- * @param {Props} props
- * @param {DevArticleProjectLink[]} props.articles 발행일 내림차순의 공개 글.
- * @param {Lang} props.lang 링크 프리픽스와 제목 언어.
- * @returns {JSX.Element | null} 글이 없으면 null.
+ * @param props.articles 발행일 내림차순의 공개 글.
+ * @param props.lang 링크 프리픽스와 제목 언어.
+ * @returns 글이 없으면 null.
  */
 const DevProjectRelatedArticles = ({ articles, lang }: Props) => {
   if (articles.length === 0) return null;

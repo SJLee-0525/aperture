@@ -23,8 +23,6 @@ const STATUS_FILTERS: { value: AdminArticleStatusFilter; label: string }[] = [
  *
  * 정렬이 없어 목록 셸만 쓴다. 초안이 목록 위에 오고 발행 글이 발행일 내림차순으로
  * 뒤따른다(`dev-article-sort`).
- *
- * @returns {JSX.Element}
  */
 const AdminDevArticlesPage = () => {
   const {

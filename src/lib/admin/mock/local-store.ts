@@ -13,8 +13,8 @@
 /**
  * 배열이 아닌 객체인지 확인한다.
  *
- * @param {unknown} value 확인할 값.
- * @returns {value is Record<string, unknown>} 일반 객체이면 true.
+ * @param value 확인할 값.
+ * @returns 일반 객체이면 true.
  */
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -34,12 +34,12 @@ type LocalStoreDiscardReason = "parse-failed" | "version-mismatch" | "decode-fai
  * 화면에는 "처음 여는 빈 저장소" 와 구분되지 않는 모습이 나오고, 그 위에서 한 편집은
  * 저장도 되지 않는다. 정상으로 보이는 빈 저장소가 조용한 실패 중 가장 나쁘다.
  *
- * @param {Pick<Storage, "getItem">} storage 읽을 저장소.
- * @param {string} key localStorage 키.
- * @param {number} version 기대하는 저장 형식 버전. 다르면 통째로 버린다.
- * @param {(value: unknown) => T | null} decode 담긴 값의 형 검증. 어긋나면 null 을 돌려준다.
- * @param {(reason: LocalStoreDiscardReason) => void} [onDiscard] 저장본을 버릴 때 사유를 알린다.
- * @returns {T | null} 검증을 통과한 값. 저장본이 없거나 버렸으면 null 이며 호출부가 다시 seed 한다.
+ * @param storage 읽을 저장소.
+ * @param key localStorage 키.
+ * @param version 기대하는 저장 형식 버전. 다르면 통째로 버린다.
+ * @param decode 담긴 값의 형 검증. 어긋나면 null 을 돌려준다.
+ * @param [onDiscard] 저장본을 버릴 때 사유를 알린다.
+ * @returns 검증을 통과한 값. 저장본이 없거나 버렸으면 null 이며 호출부가 다시 seed 한다.
  * @throws {Error} 저장소 자체를 읽을 수 없을 때(차단·비활성).
  */
 const readLocalStore = <T>(
@@ -81,11 +81,11 @@ const readLocalStore = <T>(
  * 값을 봉투에 담아 덮어쓴다. Date 는 JSON 직렬화에서 ISO 문자열이 되므로
  * 되살리는 쪽(decode)이 책임진다.
  *
- * @param {Pick<Storage, "setItem">} storage 쓸 저장소.
- * @param {string} key localStorage 키.
- * @param {number} version 저장 형식 버전.
- * @param {unknown} value 저장할 값 전체.
- * @returns {boolean} 저장 성공 여부. 용량 초과·차단이면 false 다.
+ * @param storage 쓸 저장소.
+ * @param key localStorage 키.
+ * @param version 저장 형식 버전.
+ * @param value 저장할 값 전체.
+ * @returns 저장 성공 여부. 용량 초과·차단이면 false 다.
  */
 const writeLocalStore = (
   storage: Pick<Storage, "setItem">,
@@ -108,8 +108,8 @@ const writeLocalStore = (
  * 되돌아간 사실을 콘솔에서 바로 잇는 편이 낫다. 아무것도 남기지 않으면 화면만 보고는
  * 되돌아갔다는 것 자체를 알 수 없다.
  *
- * @param {string} label 컬렉션·문서 이름.
- * @returns {(reason: LocalStoreDiscardReason) => void} 사유를 받는 콜백.
+ * @param label 컬렉션·문서 이름.
+ * @returns 사유를 받는 콜백.
  */
 const warnOnDiscard =
   (label: string) =>

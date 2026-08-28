@@ -12,9 +12,6 @@ type FilterState = {
 
 /**
  * "35 mm" → 35, 알 수 없는 값 → null
- *
- * @param {string} focalLength
- * @returns {number | null}
  */
 const parseFocal = (focalLength: string): number | null => {
   const parsed = parseInt(focalLength, 10);
@@ -23,9 +20,6 @@ const parseFocal = (focalLength: string): number | null => {
 
 /**
  * 사진 한 장의 텍스트 검색 haystack
- *
- * @param {GalleryPhoto} photo
- * @returns {string}
  */
 const haystackOf = (photo: GalleryPhoto): string =>
   [photo.title.ko, photo.title.en, photo.camera, photo.lens, photo.place.ko, photo.place.en]
@@ -34,20 +28,12 @@ const haystackOf = (photo: GalleryPhoto): string =>
 
 /**
  * 검색 haystack 사전 계산 — 사진 목록이 바뀔 때 한 번만 만들고 키스트로크마다 재조합하지 않는다.
- *
- * @param {GalleryPhoto[]} photos
- * @returns {Map<string, string>}
  */
 const buildSearchIndex = (photos: GalleryPhoto[]): Map<string, string> =>
   new Map(photos.map((photo) => [photo.id, haystackOf(photo)]));
 
 /**
  * 순수 필터 — 태그·카메라·초점거리·텍스트. 정렬은 getter에서 이미 완료(order).
- *
- * @param {GalleryPhoto[]} photos
- * @param {FilterState} f
- * @param {Map<string, string>} [searchIndex]
- * @returns {GalleryPhoto[]}
  */
 const filterPhotos = (
   photos: GalleryPhoto[],

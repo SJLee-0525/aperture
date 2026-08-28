@@ -9,8 +9,6 @@ const CHIP_WIDTHS = [64, 88, 52];
 
 /**
  * 작업(홈) RSC fetch 동안의 스켈레톤 — 검색은 내비게이션에 두고 툴바·FilterBar·메이슨리를 실제 셸과 정합한다.
- *
- * @returns {JSX.Element}
  */
 export default function WorkLoading() {
   return (

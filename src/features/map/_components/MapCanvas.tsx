@@ -22,8 +22,6 @@ const currentTheme = (): "light" | "dark" =>
 
 /**
  * 지도 레이어에 사용할 현재 테마 색상을 읽는다.
- *
- * @returns {{ accent: string; bg: string }}
  */
 const readColors = () => {
   const cs = getComputedStyle(document.documentElement);
@@ -51,12 +49,6 @@ const VIEWPORT_UPDATE_DELAY = 250;
  * 사진 좌표를 클러스터링해 표시하는 MapLibre 지도.
  * 클러스터를 누르면 확장 줌으로 이동하고, 단일 핀을 누르면 사진을 선택한다.
  * 테마 변경 시 지도 스타일과 사용자 레이어를 다시 구성한다.
- *
- * @param {Props} props
- * @param {MapLocation[]} props.locations
- * @param {(id: string) => void} props.onSelect
- * @param {(ids: string[]) => void} props.onVisibleLocationsChange
- * @returns {JSX.Element}
  */
 const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);

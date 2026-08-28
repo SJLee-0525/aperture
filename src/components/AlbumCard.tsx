@@ -20,15 +20,7 @@ type Props = {
 /**
  * 앨범 카드 — 정사각 커버 + 장수 배지 + 제목·부제.
  *
- * @param {Props} props
- * @param {string} props.href
- * @param {string | null} props.coverUrl
- * @param {string} props.coverAlt
- * @param {number} props.count
- * @param {string} props.title
- * @param {string} props.subtitle
- * @param {boolean | undefined} props.priority LCP 보호 — 첫 화면에 들어오는 카드만 eager 로드.
- * @returns {JSX.Element}
+ * @param props.priority LCP 보호 — 첫 화면에 들어오는 카드만 eager 로드.
  */
 const AlbumCard = ({
   href,

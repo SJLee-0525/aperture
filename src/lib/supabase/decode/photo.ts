@@ -50,9 +50,8 @@ const readCoords = (value: unknown): Coords | null => {
 /**
  * 병합된 사진 행을 도메인 모델로 바꾼다. 공개와 관리자가 같은 함수를 쓴다.
  *
- * @param {string} id 사진 문서 ID.
- * @param {Record<string, unknown>} data 병합된 사진 문서 필드.
- * @returns {Photo}
+ * @param id 사진 문서 ID.
+ * @param data 병합된 사진 문서 필드.
  */
 const decodePhoto = (id: string, data: Record<string, unknown>): Photo => {
   const fileName = readString(data.fileName);
@@ -81,9 +80,8 @@ const decodePhoto = (id: string, data: Record<string, unknown>): Photo => {
 /**
  * 병합된 앨범 행을 도메인 모델로 바꾼다.
  *
- * @param {string} id 앨범 문서 ID.
- * @param {Record<string, unknown>} data 병합된 앨범 문서 필드.
- * @returns {Album}
+ * @param id 앨범 문서 ID.
+ * @param data 병합된 앨범 문서 필드.
  */
 const decodeAlbum = (id: string, data: Record<string, unknown>): Album => ({
   id,

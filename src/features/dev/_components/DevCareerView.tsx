@@ -24,9 +24,7 @@ import styles from "./DevCareerView.module.css";
  * 수상 행은 `?award=` 딥링크 모달을 열며, 뒤로가기로 닫히는 계약은 `useQueryModal` 이 담당한다.
  * 비어 있는 항목(학력·경력·수상·스택)은 각각 렌더하지 않아 빈 라벨만 남지 않게 한다.
  *
- * @param {{ config: DevConfig }} props
- * @param {DevConfig} props.config - education·timeline·awards·stack 을 소비한다. 나머지 필드는 소개 페이지 소관이다.
- * @returns {JSX.Element}
+ * @param props.config - education·timeline·awards·stack 을 소비한다. 나머지 필드는 소개 페이지 소관이다.
  */
 const DevCareerView = ({ config }: { config: DevConfig }) => {
   const { dict, lang } = useLang();

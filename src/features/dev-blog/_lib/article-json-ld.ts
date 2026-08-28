@@ -20,8 +20,8 @@ type ArticleJsonLdInput = {
  *
  * 본문 전체(`articleBody`)는 넣지 않는다. 지면에 이미 있는 내용을 한 번 더 실어 문서 크기만 키운다.
  *
- * @param {ArticleJsonLdInput} input 글과 이미 계산한 주소·라벨.
- * @returns {Record<string, unknown>} `JSON.stringify` 해서 script 에 넣을 객체.
+ * @param input 글과 이미 계산한 주소·라벨.
+ * @returns `JSON.stringify` 해서 script 에 넣을 객체.
  */
 const buildArticleJsonLd = ({
   article,
@@ -64,8 +64,8 @@ const HTML_UNSAFE_ESCAPES: Record<string, string> = {
  * 제목에 닫는 script 태그가 있으면 script 요소가 거기서 끝나고 뒤 내용이 문서 본문이 된다.
  * 현재 CSP 는 인라인 script 를 허용하므로 그렇게 새어 나온 조각이 실행된다.
  *
- * @param {Record<string, unknown>} jsonLd `buildArticleJsonLd` 가 만든 객체.
- * @returns {string} script 안에 그대로 넣어도 태그 경계를 깨지 않는 JSON 문자열.
+ * @param jsonLd `buildArticleJsonLd` 가 만든 객체.
+ * @returns script 안에 그대로 넣어도 태그 경계를 깨지 않는 JSON 문자열.
  */
 const serializeJsonLdScript = (jsonLd: Record<string, unknown>): string =>
   JSON.stringify(jsonLd).replace(

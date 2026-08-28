@@ -27,8 +27,6 @@ const SECTIONS: HubCard[] = [
 
 /**
  * 개발 섹션 허브 — 세부 관리 화면으로 나눠 보낸다.
- *
- * @returns {JSX.Element}
  */
 const AdminDevPage = () => <AdminHubGrid title="개발" lead="프로젝트·블로그와 소개 설정을 관리합니다." cards={SECTIONS} />;
 

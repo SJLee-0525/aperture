@@ -31,10 +31,9 @@ const NON_DEPLOYABLE_COMMANDS = new Set(["typegen", "lint", "info"]);
  * `next.config.ts` 가 phase 와 함께 부르므로 build 와 start 양쪽에서 실행된다. E2E 는 두
  * 단계 모두 탈출구 플래그를 넣어야 통과한다.
  *
- * @param {string} phase `next.config.ts` 가 받은 실행 단계.
- * @param {Readonly<Record<string, string | undefined>>} env 검사할 환경 변수. 기본값은 현재 프로세스.
- * @param {readonly string[]} argv 실행 인자. Next 하위 명령을 가려내는 데만 쓴다.
- * @returns {void}
+ * @param phase `next.config.ts` 가 받은 실행 단계.
+ * @param env 검사할 환경 변수. 기본값은 현재 프로세스.
+ * @param argv 실행 인자. Next 하위 명령을 가려내는 데만 쓴다.
  * @throws {Error} 탈출구 없이 배포 산출물에 mock 콘텐츠를 켰을 때.
  */
 const assertDeployableContentSource = (

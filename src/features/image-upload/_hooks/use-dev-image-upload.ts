@@ -22,9 +22,6 @@ const DEV_UPLOAD_CONCURRENCY = 3;
  * 개발 프로젝트 이미지 업로드 — webp 압축 → Storage(dev/{projectId}/) → ImageMeta.
  * 파일 1장 단위(process). 대표(cover)·갤러리(images) 모두 이 훅으로 올린다. EXIF 추출 없음.
  * projectId 는 문서 저장 전에 선발급된 ID(devProjects.newId) — Storage 경로 확정용.
- *
- * @param {string} projectId
- * @returns {{ process: (file: File) => Promise<ImageMeta | null>; processBatch: (files: File[]) => Promise<ImageMeta[]>; pending: boolean; pendingCount: number; error: string | null }}
  */
 const useDevImageUpload = (projectId: string) => {
   const [pendingCount, setPendingCount] = useState(0);

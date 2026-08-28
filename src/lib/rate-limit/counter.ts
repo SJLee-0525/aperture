@@ -26,16 +26,16 @@ const DAILY_KEY_TTL_MS = 172_800_000;
 /**
  * 모든 인스턴스가 공유하는 UTC 날짜 키 조각. 서버 타임존이 달라도 같은 버킷을 쓴다.
  *
- * @param {number} now 기준 시각(ms).
- * @returns {string} `YYYY-MM-DD`.
+ * @param now 기준 시각(ms).
+ * @returns `YYYY-MM-DD`.
  */
 const utcDayBucket = (now: number): string => new Date(now).toISOString().slice(0, 10);
 
 /**
  * 남은 밀리초를 `Retry-After` 초로 바꾼다. 0 초를 돌려주면 클라이언트가 즉시 재시도한다.
  *
- * @param {number} remainingMs 남은 시간. 음수나 비수치는 0으로 본다.
- * @returns {number} 1 이상의 정수 초.
+ * @param remainingMs 남은 시간. 음수나 비수치는 0으로 본다.
+ * @returns 1 이상의 정수 초.
  */
 const retryAfterSeconds = (remainingMs: number): number =>
   Math.max(1, Math.ceil(Math.max(Number.isFinite(remainingMs) ? remainingMs : 0, 0) / 1_000));
@@ -43,9 +43,9 @@ const retryAfterSeconds = (remainingMs: number): number =>
 /**
  * 환경변수에서 양의 정수 상한을 읽는다. 값이 없거나 형이 어긋나면 기본값이다.
  *
- * @param {string | undefined} raw 환경변수 값.
- * @param {number} fallback 형이 어긋날 때 쓸 값.
- * @returns {number} 양의 정수.
+ * @param raw 환경변수 값.
+ * @param fallback 형이 어긋날 때 쓸 값.
+ * @returns 양의 정수.
  */
 const positiveIntOr = (raw: string | undefined, fallback: number): number => {
   const parsed = Number(raw);

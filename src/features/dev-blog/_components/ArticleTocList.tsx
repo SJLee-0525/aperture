@@ -21,12 +21,10 @@ type Props = {
  * 항목이 많아 부모 높이를 넘으면 이 목록이 스크롤한다. 스크롤 막대는 저장소 공용
  * `CustomScrollbar` 가 그린다 — 표식만 붙이면 지면에 이미 떠 있는 그 컴포넌트가 집어 간다.
  *
- * @param {Props} props
- * @param {ArticleTocItem[]} props.items h2 와 그 아래 h3 로 묶은 목차.
- * @param {string | null} props.activeId 현재 읽는 heading id.
- * @param {string} props.label 목차 영역의 이름.
- * @param {(id: string) => void} props.onSelect 항목을 고를 때 호출한다.
- * @returns {JSX.Element}
+ * @param props.items h2 와 그 아래 h3 로 묶은 목차.
+ * @param props.activeId 현재 읽는 heading id.
+ * @param props.label 목차 영역의 이름.
+ * @param props.onSelect 항목을 고를 때 호출한다.
  */
 const ArticleTocList = ({ items, activeId, label, onSelect }: Props) => (
   <nav

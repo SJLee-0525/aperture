@@ -47,9 +47,6 @@ const LIST_AWARDS_TOOL: WebMcpToolDefinition = {
 /**
  * 공연 일시 — 화면(MusicWorksView)과 같은 formatEventYMD 로 직렬화한다.
  * toISOString 은 UTC 변환이라 로컬 자정으로 저장된 공연일이 하루 전으로 밀린다(KST 기준).
- *
- * @param {MusicWork} work
- * @returns {string}
  */
 const dateOf = (work: MusicWork): string => formatEventYMD(work.performedAt);
 
@@ -58,9 +55,7 @@ const dateOf = (work: MusicWork): string => formatEventYMD(work.performedAt);
  * (에이전트가 영어로 물어도 한국어 데이터에 닿아야 한다). pickText 대조는 두지 않는다 —
  * 반환값이 항상 ko 또는 en 이라 앞 두 조건의 부분집합이다.
  *
- * @param {MusicWork} work
- * @param {string} category 에이전트가 넘긴 카테고리 인자.
- * @returns {boolean}
+ * @param category 에이전트가 넘긴 카테고리 인자.
  */
 const matchesCategory = (work: MusicWork, category: string): boolean => {
   const needle = category.trim().toLowerCase();
@@ -73,8 +68,7 @@ const matchesCategory = (work: MusicWork, category: string): boolean => {
 /**
  * /music 연주 목록의 WebMCP 도구 2종 — MusicWorksView 안에서 마운트한다.
  *
- * @param {MusicWork[]} works 서버가 내려준 공개 연주 목록.
- * @returns {void}
+ * @param works 서버가 내려준 공개 연주 목록.
  */
 const useMusicWorkTools = (works: MusicWork[]): void => {
   const { lang } = useLang();
@@ -126,8 +120,7 @@ const useMusicWorkTools = (works: MusicWork[]): void => {
 /**
  * /music/career 수상 목록의 WebMCP 도구 — MusicCareerView 안에서 마운트한다.
  *
- * @param {MusicAward[]} awards 서버가 내려준 공개 수상 목록.
- * @returns {void}
+ * @param awards 서버가 내려준 공개 수상 목록.
  */
 const useMusicAwardTools = (awards: MusicAward[]): void => {
   const { lang } = useLang();

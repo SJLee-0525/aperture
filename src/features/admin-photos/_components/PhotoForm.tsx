@@ -40,10 +40,7 @@ const EXIF_FIELDS: { key: keyof Photo["exif"]; label: string; placeholder: strin
 /**
  * 공유 사진 폼 — 업로드(EXIF 자동 채움) + 이중언어·EXIF·좌표·태그 편집 + 저장.
  *
- * @param {Props} props
- * @param {string} props.photoId
- * @param {Photo | undefined} props.initial - 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.initial - 있으면 수정 모드.
  */
 const PhotoForm = ({ photoId, initial }: Props) => {
   const {

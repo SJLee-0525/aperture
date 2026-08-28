@@ -33,14 +33,8 @@ type Props = {
  * 개발 프로젝트 이미지 필드 — 대표(cover) 1장 + 갤러리(images) 여러 장.
  * cover·gallery 모두 useDevImageUpload(projectId) 로 webp 압축 후 Storage 업로드.
  *
- * @param {Props} props
- * @param {string} props.projectId
- * @param {ImageMeta | null} props.cover - 목록 대표 이미지 — 없으면 플레이스홀더.
- * @param {ImageMeta[]} props.images - 상세 모달 갤러리 이미지들.
- * @param {(cover: ImageMeta | null) => void} props.onCoverChange
- * @param {(images: ImageMeta[]) => void} props.onImagesChange
- * @param {(pending: boolean) => void} props.onPendingChange
- * @returns {JSX.Element}
+ * @param props.cover - 목록 대표 이미지 — 없으면 플레이스홀더.
+ * @param props.images - 상세 모달 갤러리 이미지들.
  */
 const DevImageField = ({
   projectId,

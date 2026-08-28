@@ -43,9 +43,7 @@ type Status = "loading" | "ready" | "missing" | "error";
  *
  * 관리자 인증 안에서만 열리며 sitemap·검색·RAG·WebMCP 어디에도 등록하지 않는다.
  *
- * @param {Props} props
- * @param {string} props.articleId 미리 볼 글의 문서 ID.
- * @returns {JSX.Element}
+ * @param props.articleId 미리 볼 글의 문서 ID.
  */
 const ArticleFullPreview = ({ articleId }: Props) => {
   const mounted = useMounted();

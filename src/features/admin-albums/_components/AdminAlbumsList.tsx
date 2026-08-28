@@ -10,8 +10,6 @@ import { imageThumbnailUrl } from "@/types/image";
 
 /**
  * 관리자 앨범 목록 — 드래그·키보드 정렬, 공개 토글, 수정/삭제. 조립만 한다.
- *
- * @returns {JSX.Element}
  */
 const AdminAlbumsList = () => (
   <AdminSortableListPage

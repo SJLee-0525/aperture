@@ -58,18 +58,11 @@ const prefersReducedMotion = () =>
  * `onSwipe` 를 넘길 때만 좌우 넘기기가 켜진다. 이때 반환된 `swipeSurfaceRef` 를
  * 움직일 요소에 붙인다.
  *
- * @param {Options} options
- * @param {boolean} options.enabled
- * @param {() => void} options.onDismiss
- * @param {RefObject<HTMLElement | null>} options.surfaceRef 아래로 끌 때 움직일 요소.
- * @param {RefObject<HTMLElement | null> | undefined} options.scrimRef 화면에 고정한 채 드래그 거리만큼 딤을 낮출 스크림. 오버레이 전체를 움직이면 뒤 지면이 매 프레임 다시 그려진다.
- * @param {((target: EventTarget | null) => boolean) | undefined} options.canStart
- * @param {((target: EventTarget | null) => boolean) | undefined} options.canSwipeStart
- * @param {((direction: SwipeDirection) => boolean) | undefined} options.canSwipeCommit 넘길 수 없으면 저항만 준다.
- * @param {((direction: SwipeDirection) => boolean) | undefined} options.canSwipePeek 옆 칸이 그려져 있는지. 아니면 애니메이션 없이 넘긴다.
- * @param {(() => number) | undefined} options.getSwipeStageWidth 한 칸 이동 거리. 0 이면 넘기지 않는다.
- * @param {((direction: SwipeDirection) => void) | undefined} options.onSwipe
- * @returns {{ onTouchStart: (event: React.TouchEvent<HTMLElement>) => void; onTouchMove: (event: React.TouchEvent<HTMLElement>) => void; onTouchEnd: () => void; onTouchCancel: () => void; consumeDragged: () => boolean; swipeSurfaceRef: RefObject<HTMLDivElement | null> }}
+ * @param options.surfaceRef 아래로 끌 때 움직일 요소.
+ * @param options.scrimRef 화면에 고정한 채 드래그 거리만큼 딤을 낮출 스크림. 오버레이 전체를 움직이면 뒤 지면이 매 프레임 다시 그려진다.
+ * @param options.canSwipeCommit 넘길 수 없으면 저항만 준다.
+ * @param options.canSwipePeek 옆 칸이 그려져 있는지. 아니면 애니메이션 없이 넘긴다.
+ * @param options.getSwipeStageWidth 한 칸 이동 거리. 0 이면 넘기지 않는다.
  */
 const useOverlayDrag = ({
   enabled,

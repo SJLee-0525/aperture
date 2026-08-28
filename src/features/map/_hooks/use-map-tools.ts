@@ -24,8 +24,7 @@ const LIST_TOOL: WebMcpToolDefinition = {
 /**
  * /photo/map 의 WebMCP 도구 — 좌표는 사진 EXIF 에서 온 공개 데이터다.
  *
- * @param {MapLocation[]} locations 좌표 있는 공개 사진의 위치 투영.
- * @returns {void}
+ * @param locations 좌표 있는 공개 사진의 위치 투영.
  */
 const useMapTools = (locations: MapLocation[]): void => {
   const { lang } = useLang();

@@ -27,10 +27,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * 저장할 연락 필드의 형식과 길이를 검사한다.
  *
- * @param {string} name 이름. 빈 문자열을 허용한다.
- * @param {string} email 이메일. 빈 문자열을 허용한다.
- * @param {string} message 문의 내용.
- * @returns {boolean} 모든 필드가 저장 계약을 만족하면 true.
+ * @param name 이름. 빈 문자열을 허용한다.
+ * @param email 이메일. 빈 문자열을 허용한다.
+ * @param message 문의 내용.
+ * @returns 모든 필드가 저장 계약을 만족하면 true.
  */
 const isValidFields = (name: string, email: string, message: string): boolean =>
   Boolean(message.trim()) &&
@@ -43,10 +43,7 @@ const isValidFields = (name: string, email: string, message: string): boolean =>
  * storage 예외(SecurityError 등)는 실패(false)로 삼키고, 호출부는 실패해도
  * 일반 /contact 링크로 이동을 계속한다.
  *
- * @param {Pick<Storage, "setItem">} storage
- * @param {ContactDraft} draft
- * @param {number} [now]
- * @returns {boolean} 저장 성공 여부.
+ * @returns 저장 성공 여부.
  */
 const writeContactDraft = (
   storage: Pick<Storage, "setItem" | "removeItem">,
@@ -107,8 +104,8 @@ const scheduleContactDraftExpiry = (storage: Pick<Storage, "removeItem">): void 
 /**
  * 배열이 아닌 객체인지 확인한다.
  *
- * @param {unknown} value 확인할 값.
- * @returns {value is Record<string, unknown>} 일반 객체이면 true.
+ * @param value 확인할 값.
+ * @returns 일반 객체이면 true.
  */
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -116,9 +113,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 /**
  * 저장된 JSON을 읽어 아직 유효한 연락 필드만 반환한다.
  *
- * @param {string} raw sessionStorage에서 읽은 JSON 문자열.
- * @param {number} now 만료 여부를 판단할 현재 시각(ms).
- * @returns {Pick<StoredContactDraftV1, "name" | "email" | "message"> | null} 유효한 초안 필드. 검증에 실패하면 null.
+ * @param raw sessionStorage에서 읽은 JSON 문자열.
+ * @param now 만료 여부를 판단할 현재 시각(ms).
+ * @returns 유효한 초안 필드. 검증에 실패하면 null.
  */
 const parseStored = (
   raw: string,
@@ -150,10 +147,6 @@ const parseStored = (
 
 /**
  * 연락 초안을 한 번만 읽는다. 값을 읽은 직후 삭제하며, 삭제하지 못하면 사용하지 않는다.
- *
- * @param {Pick<Storage, "getItem" | "removeItem">} storage
- * @param {number} [now]
- * @returns {{ name: string; email: string; message: string } | null}
  */
 const takeContactDraft = (
   storage: Pick<Storage, "getItem" | "removeItem">,

@@ -46,8 +46,8 @@ const PUBLISH_ISSUE_MESSAGES = {
 /**
  * Markdown 검증 결과 한 건을 원문 위치와 함께 읽을 수 있는 문장으로 만든다.
  *
- * @param {ArticleMarkdownIssue} issue 검증 결과.
- * @returns {string} `12번째 줄 — …` 형태의 안내. detail 이 있으면 괄호로 덧붙인다.
+ * @param issue 검증 결과.
+ * @returns `12번째 줄 — …` 형태의 안내. detail 이 있으면 괄호로 덧붙인다.
  */
 const markdownIssueMessage = (issue: ArticleMarkdownIssue): string => {
   const detail = issue.detail ? ` (${issue.detail})` : "";
@@ -57,8 +57,8 @@ const markdownIssueMessage = (issue: ArticleMarkdownIssue): string => {
 /**
  * 발행 조건 한 건을 문장으로 만든다.
  *
- * @param {DevArticlePublishIssue} issue 발행 조건 검사 결과.
- * @returns {string} 안내 문장. detail 이 있으면 괄호로 덧붙인다.
+ * @param issue 발행 조건 검사 결과.
+ * @returns 안내 문장. detail 이 있으면 괄호로 덧붙인다.
  */
 const publishIssueMessage = (issue: DevArticlePublishIssue): string =>
   `${PUBLISH_ISSUE_MESSAGES[issue.code]}${issue.detail ? ` (${issue.detail})` : ""}`;

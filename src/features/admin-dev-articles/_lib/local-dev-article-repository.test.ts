@@ -48,8 +48,8 @@ const input = (overrides: Partial<DevArticleInput> = {}): DevArticleInput => ({
 /**
  * 상한까지 고정한다. seed 에 이미 고정된 글이 있어 몇 건을 더 채워야 하는지는 그때그때 다르다.
  *
- * @param {DevArticleRepository} repo 대상 저장소.
- * @returns {Promise<string[]>} 상한을 채우고 남은 미고정 글의 id.
+ * @param repo 대상 저장소.
+ * @returns 상한을 채우고 남은 미고정 글의 id.
  */
 const fillPins = async (repo: DevArticleRepository): Promise<string[]> => {
   const items = await repo.list();

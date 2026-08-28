@@ -25,8 +25,6 @@ const fetchMock = vi.fn();
 
 /**
  * 모듈 캐시(searchIndexPromise)가 테스트 간 새어들지 않게 매번 새 모듈로 훅을 얻는다.
- *
- * @returns {Promise<(query: string) => { suggestions: SearchSuggestion[]; loadIndex: () => void }>}
  */
 const freshHook = async () => {
   vi.resetModules();

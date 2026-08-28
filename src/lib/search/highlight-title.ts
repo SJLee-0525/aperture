@@ -8,10 +8,6 @@ type TitleSegment = { text: string; hit: boolean };
  * 채점 토큰에 검색어 원문도 더하고 조사를 제거한다.
  * "캐논으로"가 제목의 "캐논"과 만나야 한다. 순수 시각용이라 랭킹 무영향.
  * 호출부가 전달한 채점 토큰이 있으면 재사용한다.
- *
- * @param {string} query
- * @param {ReadonlySet<string>} [scoringTokens]
- * @returns {ReadonlySet<string>}
  */
 const highlightTokensFor = (
   query: string,
@@ -32,10 +28,6 @@ const highlightTokensFor = (
  * 정렬 근거를 눈에 보이게 하는 용도라 부분·별칭 일치까지 흉내내지 않는다(그건 마크 없이 통과).
  * 토큰이 NFKC+소문자 정규화본이라 제목도 같은 변환본에서 위치를 찾되, 변환으로 길이가
  * 정규화 후 문자열 길이가 달라지면 잘못된 위치를 강조하지 않도록 원문을 반환한다.
- *
- * @param {string} text
- * @param {ReadonlySet<string>} queryTokens
- * @returns {TitleSegment[]}
  */
 const splitTextByMatches = (text: string, queryTokens: ReadonlySet<string>): TitleSegment[] => {
   const whole: TitleSegment[] = [{ text, hit: false }];

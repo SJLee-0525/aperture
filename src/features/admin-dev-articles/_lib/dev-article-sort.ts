@@ -10,9 +10,7 @@ import type { AdminDevArticleListItem } from "@/types/admin";
  * 늘어놓는다. 관리자가 목록에서 먼저 찾는 것은 지금 쓰고 있는 글이다.
  * 초안의 `publishedAt` 이 비어 있어 이 정렬은 DB 쿼리로 표현할 수 없다. 화면 쪽 순수 함수로 남는다.
  *
- * @param {AdminDevArticleListItem} a
- * @param {AdminDevArticleListItem} b
- * @returns {number} `Array.prototype.sort` 비교 결과.
+ * @returns `Array.prototype.sort` 비교 결과.
  */
 const compareAdminArticles = (a: AdminDevArticleListItem, b: AdminDevArticleListItem): number => {
   if (!a.publishedAt && !b.publishedAt) return b.updatedAt.getTime() - a.updatedAt.getTime();
@@ -26,8 +24,8 @@ const compareAdminArticles = (a: AdminDevArticleListItem, b: AdminDevArticleList
 /**
  * 목록을 관리자 순서로 정렬한다. 원본 배열은 그대로 둔다.
  *
- * @param {AdminDevArticleListItem[]} items 저장소가 준 목록.
- * @returns {AdminDevArticleListItem[]} 정렬한 새 배열.
+ * @param items 저장소가 준 목록.
+ * @returns 정렬한 새 배열.
  */
 const sortAdminArticles = (items: AdminDevArticleListItem[]): AdminDevArticleListItem[] =>
   [...items].sort(compareAdminArticles);

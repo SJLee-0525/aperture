@@ -33,8 +33,8 @@ const toAlbum = decodeAlbum;
 /**
  * 공개된 사진 목록을 정렬 순서대로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<Photo[]>} 공개된 사진 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 공개된 사진 목록.
  */
 const fetchPublishedPhotos = async (options?: { fresh?: boolean }): Promise<Photo[]> =>
   (await selectPublished(COLLECTIONS.PHOTOS, options)).map(({ id, data }) => toPhoto(id, data));
@@ -42,8 +42,8 @@ const fetchPublishedPhotos = async (options?: { fresh?: boolean }): Promise<Phot
 /**
  * 공개된 앨범 목록을 정렬 순서대로 읽는다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<Album[]>} 공개된 앨범 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 공개된 앨범 목록.
  */
 const fetchPublishedAlbums = async (options?: { fresh?: boolean }): Promise<Album[]> =>
   (await selectPublished(COLLECTIONS.ALBUMS, options)).map(({ id, data }) => toAlbum(id, data));
@@ -52,8 +52,8 @@ const fetchPublishedAlbums = async (options?: { fresh?: boolean }): Promise<Albu
  * 채팅 검색용 공개 사진 목록. PostgREST 는 jsonb 부분 선택이 번거로워 행 전체를 받고
  * 도메인 투영만 유지한다 — 행 수백 개 규모라 전송량 차이가 무시할 수준이다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatPhoto[]>} 채팅용 사진 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 채팅용 사진 목록.
  */
 const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto[]> =>
   (await selectPublished(COLLECTIONS.PHOTOS, options)).map(({ id, data }) => {
@@ -76,8 +76,8 @@ const fetchChatPhotos = async (options?: { fresh?: boolean }): Promise<ChatPhoto
 /**
  * 채팅 검색용 공개 앨범 목록. 투영 방식은 `fetchChatPhotos` 와 같다.
  *
- * @param {{ fresh?: boolean }} [options] 공개 데이터 조회 옵션.
- * @returns {Promise<ChatAlbum[]>} 채팅용 앨범 목록.
+ * @param [options] 공개 데이터 조회 옵션.
+ * @returns 채팅용 앨범 목록.
  */
 const fetchChatAlbums = async (options?: { fresh?: boolean }): Promise<ChatAlbum[]> =>
   (await selectPublished(COLLECTIONS.ALBUMS, options)).map(({ id, data }) => {

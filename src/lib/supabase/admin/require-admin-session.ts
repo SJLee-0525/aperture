@@ -9,7 +9,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
  * 계정이 관리자 하나뿐이라 "로그인했지만 admin 이 아닌" 상태 자체가 없다. 그런 계정이
  * 생기면 `isAdminUser`(`lib/supabase/auth.ts`)를 여기서 함께 확인해야 한다.
  *
- * @returns {Promise<void>} 세션이 있으면 완료된다.
+ * @returns 세션이 있으면 완료된다.
  */
 const requireAdminSession = async (): Promise<void> => {
   const { data, error } = await getSupabaseClient().auth.getSession();

@@ -28,11 +28,6 @@ type Props = {
 
 /**
  * 프로젝트 목록과 URL 기반 상세 선택을 조율한다.
- *
- * @param {Props} props
- * @param {DevProjectCardData[]} props.projects
- * @param {Record<string, DevArticleProjectLink[]>} props.articlesByProject
- * @returns {JSX.Element}
  */
 const DevProjectsView = ({ projects, articlesByProject }: Props) => {
   const { dict, lang } = useLang();

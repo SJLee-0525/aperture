@@ -46,8 +46,8 @@ const asString = (value: unknown): string =>
  * 그 값을 그대로 저장하면 같은 사진이라도 업로드한 기기의 타임존에 따라 다른 인스턴트가
  * 된다. 로컬 벽시계 성분만 꺼내 사이트 기준으로 다시 해석해 업로드 기기 의존을 없앤다.
  *
- * @param {unknown} value exifr 가 돌려준 `DateTimeOriginal`.
- * @returns {Date | null} 사이트 타임존으로 해석한 촬영일시. 값이 없으면 `null`.
+ * @param value exifr 가 돌려준 `DateTimeOriginal`.
+ * @returns 사이트 타임존으로 해석한 촬영일시. 값이 없으면 `null`.
  */
 const toSiteInstant = (value: unknown): Date | null => {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) return null;
@@ -65,9 +65,6 @@ const toSiteInstant = (value: unknown): Date | null => {
  * ★ 압축 前 원본에서 EXIF·GPS 를 읽는다 (압축하면 메타데이터가 날아감).
  * 카메라/렌즈 이름은 EXIF 원문(SONY / ILCE-7M4) 그대로 — 관리자가 다듬는다.
  * exifr는 파일 선택 시점에 동적 로드 — 관리자 폼 진입만으로는 번들에 싣지 않는다.
- *
- * @param {File} file
- * @returns {Promise<ExtractedExif>}
  */
 const extractExif = async (file: File): Promise<ExtractedExif> => {
   let tags: Record<string, unknown> = {};

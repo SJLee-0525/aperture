@@ -22,32 +22,32 @@ const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 /**
  * 병합된 행의 날짜 값을 화면 모델의 `Date`로 맞춘다.
  *
- * @param {unknown} v 변환할 ISO 문자열 또는 `Date` 값.
- * @returns {Date} 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
+ * @param v 변환할 ISO 문자열 또는 `Date` 값.
+ * @returns 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
  */
 
 /**
  * 연주 행의 누락 필드를 기본값으로 채워 `MusicWork`로 변환한다.
  *
- * @param {string} id 연주 문서 ID.
- * @param {Record<string, unknown>} d 병합된 연주 문서 필드.
- * @returns {MusicWork} 관리자 화면에서 사용하는 연주 모델.
+ * @param id 연주 문서 ID.
+ * @param d 병합된 연주 문서 필드.
+ * @returns 관리자 화면에서 사용하는 연주 모델.
  */
 
 /**
  * 수상 행의 다국어 필드와 기본값을 정규화한다.
  *
- * @param {string} id 수상 문서 ID.
- * @param {Record<string, unknown>} d 병합된 수상 문서 필드.
- * @returns {MusicAward} 관리자 화면에서 사용하는 수상 모델.
+ * @param id 수상 문서 ID.
+ * @param d 병합된 수상 문서 필드.
+ * @returns 관리자 화면에서 사용하는 수상 모델.
  */
 
 /**
  * 영상 행의 다국어 필드와 기본값을 정규화한다.
  *
- * @param {string} id 영상 문서 ID.
- * @param {Record<string, unknown>} d 병합된 영상 문서 필드.
- * @returns {MusicMedia} 관리자 화면에서 사용하는 영상 모델.
+ * @param id 영상 문서 ID.
+ * @param d 병합된 영상 문서 필드.
+ * @returns 관리자 화면에서 사용하는 영상 모델.
  */
 
 const musicWorksCrud = sortableListCrud<MusicWork>(
@@ -87,8 +87,8 @@ const musicWorks = {
   /**
    * 연주 문서를 삭제한 뒤 해당 연주의 Storage 이미지도 정리한다.
    *
-   * @param {string} id 삭제할 연주 문서 ID.
-   * @returns {Promise<void>} 문서 삭제와 이미지 정리가 끝나면 완료된다.
+   * @param id 삭제할 연주 문서 ID.
+   * @returns 문서 삭제와 이미지 정리가 끝나면 완료된다.
    */
   remove: async (id: string): Promise<void> => {
     await musicWorksCrud.remove(id);
@@ -137,7 +137,7 @@ const musicMedia = {
 /**
  * 소개와 경력·학력 타임라인을 담은 음악 설정 문서를 읽는다.
  *
- * @returns {Promise<MusicConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
+ * @returns 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
   const { data, error } = await getSupabaseClient()
@@ -153,8 +153,8 @@ const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
 /**
  * 음악 설정 문서 전체를 저장하고 공개 캐시와 RAG 문서를 갱신한다.
  *
- * @param {MusicConfig} config 저장할 소개, 경력, 학력 설정.
- * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
+ * @param config 저장할 소개, 경력, 학력 설정.
+ * @returns 저장과 RAG 동기화가 끝나면 완료된다.
  */
 const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
   const { data, error } = await getSupabaseClient()

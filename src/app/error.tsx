@@ -20,10 +20,10 @@ type Props = {
  * 바운더리가 오류를 삼키면 전역 핸들러가 못 보므로 여기서 직접 전송한다 —
  * 단, 동의 뒤 로드된 SDK가 있을 때만이고 미로드 시 콘솔 기록만 남는다(ADR-0004).
  *
- * @param {Props} props 오류 정보와 재시도 동작.
- * @param {Error & { digest?: string }} props.error 렌더링 중 포착한 오류.
- * @param {() => void} props.reset 오류 경계를 다시 렌더링하는 콜백.
- * @returns {JSX.Element} 현재 언어의 오류 안내 화면.
+ * @param props 오류 정보와 재시도 동작.
+ * @param props.error 렌더링 중 포착한 오류.
+ * @param props.reset 오류 경계를 다시 렌더링하는 콜백.
+ * @returns 현재 언어의 오류 안내 화면.
  */
 export default function Error({ error, reset }: Props) {
   const { dict } = useLang();

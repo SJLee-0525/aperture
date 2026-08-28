@@ -27,7 +27,7 @@ type AuthState = {
  * `isTestAdminSessionEnabled` 의 프로덕션 가드가 영영 돌지 않아, 플래그가 켜진 채 배포돼도
  * 아무도 알아채지 못한다.
  *
- * @returns {AuthState} 구독 결과. 테스트 세션이면 `user` 는 null, `isAdmin` 도 false 이고
+ * @returns 구독 결과. 테스트 세션이면 `user` 는 null, `isAdmin` 도 false 이고
  *   화면을 열지 말지는 호출부가 `testSession` 으로 판단한다.
  */
 const useAuth = (): AuthState => {

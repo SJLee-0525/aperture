@@ -13,7 +13,7 @@ import styles from "./MockModeBadge.module.css";
  *
  * 콘텐츠 소스는 빌드 시 인라인되는 env 로 정해지므로 서버 렌더와 hydration 결과가 같다.
  *
- * @returns {JSX.Element | null} mock 모드에서는 안내 배너, 실데이터 모드에서는 null.
+ * @returns mock 모드에서는 안내 배너, 실데이터 모드에서는 null.
  */
 const MockModeBadge = () => {
   if (!shouldUseMockContent()) return null;

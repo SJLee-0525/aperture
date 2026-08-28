@@ -24,13 +24,13 @@ type Props = {
 /**
  * 방문 분석과 오류 보고를 따로 선택하는 하단 배너를 렌더한다.
  *
- * @param {Props} props - 배너 설정과 저장 콜백.
- * @param {boolean} props.gaEnabled - 방문 분석을 선택할 수 있는지 여부.
- * @param {boolean} props.monitoringEnabled - 오류 보고를 선택할 수 있는지 여부.
- * @param {TrackingConsent | null} props.initialConsent - 저장된 선택.
- * @param {boolean} props.reopened - 방문자가 설정 버튼으로 다시 연 경우. 이때만 포커스를 가져온다.
- * @param {(decision: TrackingConsent) => void} props.onDecide - 선택 저장 콜백.
- * @returns {JSX.Element} 선택적 데이터 수집 설정 배너.
+ * @param props - 배너 설정과 저장 콜백.
+ * @param props.gaEnabled - 방문 분석을 선택할 수 있는지 여부.
+ * @param props.monitoringEnabled - 오류 보고를 선택할 수 있는지 여부.
+ * @param props.initialConsent - 저장된 선택.
+ * @param props.reopened - 방문자가 설정 버튼으로 다시 연 경우. 이때만 포커스를 가져온다.
+ * @param props.onDecide - 선택 저장 콜백.
+ * @returns 선택적 데이터 수집 설정 배너.
  */
 const AnalyticsConsentBanner = ({
   gaEnabled,

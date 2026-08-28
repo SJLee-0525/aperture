@@ -17,9 +17,8 @@ import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/mus
  * `ticketUrl` 은 저장된 원문 그대로 둔다. 읽기에서 정화하면 폼이 그 빈 값을 저장하고
  * 전체 문서를 되쓰는 경로도 원본을 지운다. 공개 표시용 정화는 `decode/public-sanitize` 가 한다.
  *
- * @param {string} id 연주 문서 ID.
- * @param {Record<string, unknown>} data 병합된 연주 문서 필드.
- * @returns {MusicWork}
+ * @param id 연주 문서 ID.
+ * @param data 병합된 연주 문서 필드.
  */
 const decodeMusicWork = (id: string, data: Record<string, unknown>): MusicWork => ({
   id,
@@ -38,9 +37,8 @@ const decodeMusicWork = (id: string, data: Record<string, unknown>): MusicWork =
 });
 
 /**
- * @param {string} id 수상 문서 ID.
- * @param {Record<string, unknown>} data 병합된 수상 문서 필드.
- * @returns {MusicAward}
+ * @param id 수상 문서 ID.
+ * @param data 병합된 수상 문서 필드.
  */
 const decodeMusicAward = (id: string, data: Record<string, unknown>): MusicAward => ({
   id,
@@ -53,9 +51,8 @@ const decodeMusicAward = (id: string, data: Record<string, unknown>): MusicAward
 });
 
 /**
- * @param {string} id 영상 문서 ID.
- * @param {Record<string, unknown>} data 병합된 영상 문서 필드.
- * @returns {MusicMedia}
+ * @param id 영상 문서 ID.
+ * @param data 병합된 영상 문서 필드.
  */
 const decodeMusicMedia = (id: string, data: Record<string, unknown>): MusicMedia => ({
   id,
@@ -67,8 +64,7 @@ const decodeMusicMedia = (id: string, data: Record<string, unknown>): MusicMedia
 });
 
 /**
- * @param {Record<string, unknown>} data 병합된 음악 설정 필드.
- * @returns {MusicConfig}
+ * @param data 병합된 음악 설정 필드.
  */
 const decodeMusicConfig = (data: Record<string, unknown>): MusicConfig => ({
   intro: readText(data.intro),

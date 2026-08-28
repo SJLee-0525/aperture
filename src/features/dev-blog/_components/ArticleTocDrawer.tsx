@@ -39,15 +39,14 @@ type Props = {
  * 열면 현재 읽던 항목이 보이는 자리로 목록을 스크롤하고 그 항목에 포커스를 준다 — 긴 목차에서
  * 맨 위부터 다시 찾지 않게 하려는 것이다. 닫을 때는 열었던 눈금으로 포커스를 돌려준다.
  *
- * @param {Props} props
- * @param {ArticleTocItem[]} props.items 목차 항목.
- * @param {string | null} props.activeId 현재 heading id.
- * @param {boolean} props.open 열림 여부.
- * @param {string} props.panelId 여는 버튼의 `aria-controls` 대상 id.
- * @param {Lang} props.lang 라벨 언어.
- * @param {() => void} props.onClose 닫기 요청(backdrop·닫기 버튼·Escape).
- * @param {(id: string) => void} props.onSelect 항목 선택 — 상위가 드로어를 닫고 이동시킨다.
- * @returns {ReactPortal | null} 닫혀 있거나 마운트 전이면 null.
+ * @param props.items 목차 항목.
+ * @param props.activeId 현재 heading id.
+ * @param props.open 열림 여부.
+ * @param props.panelId 여는 버튼의 `aria-controls` 대상 id.
+ * @param props.lang 라벨 언어.
+ * @param props.onClose 닫기 요청(backdrop·닫기 버튼·Escape).
+ * @param props.onSelect 항목 선택 — 상위가 드로어를 닫고 이동시킨다.
+ * @returns 닫혀 있거나 마운트 전이면 null.
  */
 const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSelect }: Props) => {
   const dict = DICTIONARY[lang];

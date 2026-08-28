@@ -42,8 +42,8 @@ const ALLOWED_SOURCE_TYPES = new Set([
  * 블로그 청크 빌더는 Markdown 파서를 쓰므로 feature 안에 있고 `lib/ai/rag-chunks` 는 그쪽을
  * import 하지 않는다. 두 결과를 잇는 지점이 여기 하나여야 전체 생성과 상태 조회가 같은 집합을 본다.
  *
- * @param {RagSourceData} data 조회를 마친 공개 원본.
- * @returns {RagChunk[]} 임베딩 대상 전체 청크.
+ * @param data 조회를 마친 공개 원본.
+ * @returns 임베딩 대상 전체 청크.
  */
 const buildAllRagChunks = (data: RagSourceData): RagChunk[] => [
   ...buildRagChunks(data),

@@ -25,8 +25,8 @@ let legacyConsentChecked = false;
 /**
  * 저장값이 지원하는 동의 상태인지 확인한다.
  *
- * @param {unknown} value - 검사할 값.
- * @returns {boolean} `granted` 또는 `denied`이면 `true`.
+ * @param value - 검사할 값.
+ * @returns `granted` 또는 `denied`이면 `true`.
  */
 const isDecision = (value: unknown): value is ConsentDecision =>
   value === "granted" || value === "denied";
@@ -34,9 +34,9 @@ const isDecision = (value: unknown): value is ConsentDecision =>
 /**
  * 직렬화된 v3 선택을 검증하고 아직 유효한 값만 반환한다.
  *
- * @param {string | null} raw - localStorage에서 읽은 JSON 문자열.
- * @param {number} [now=Date.now()] - 만료 여부를 판단할 기준 시각.
- * @returns {ParsedTrackingConsent | null} 유효한 선택과 만료 시각 또는 `null`.
+ * @param raw - localStorage에서 읽은 JSON 문자열.
+ * @param [now=Date.now()] - 만료 여부를 판단할 기준 시각.
+ * @returns 유효한 선택과 만료 시각 또는 `null`.
  */
 const parseStoredTrackingConsent = (
   raw: string | null,
@@ -66,9 +66,9 @@ const parseStoredTrackingConsent = (
 /**
  * 직렬화된 v3 선택을 검증하고 아직 유효한 선택만 반환한다.
  *
- * @param {string | null} raw - localStorage에서 읽은 JSON 문자열.
- * @param {number} [now=Date.now()] - 만료 여부를 판단할 기준 시각.
- * @returns {TrackingConsent | null} 유효한 선택 또는 `null`.
+ * @param raw - localStorage에서 읽은 JSON 문자열.
+ * @param [now=Date.now()] - 만료 여부를 판단할 기준 시각.
+ * @returns 유효한 선택 또는 `null`.
  */
 const parseAnalyticsConsent = (raw: string | null, now = Date.now()): TrackingConsent | null =>
   parseStoredTrackingConsent(raw, now)?.consent ?? null;
@@ -76,8 +76,7 @@ const parseAnalyticsConsent = (raw: string | null, now = Date.now()): TrackingCo
 /**
  * 이전 단일 범위 동의값을 제거한다. 새 범위로 승계하지 않는다.
  *
- * @param {Pick<Storage, "getItem" | "removeItem">} storage - 정리할 웹 저장소.
- * @returns {void}
+ * @param storage - 정리할 웹 저장소.
  */
 const removeLegacyConsent = (storage: Pick<Storage, "getItem" | "removeItem">): void => {
   for (const key of [LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT, LEGACY_STORAGE_KEYS.COMBINED_CONSENT]) {
@@ -88,9 +87,9 @@ const removeLegacyConsent = (storage: Pick<Storage, "getItem" | "removeItem">): 
 /**
  * 저장소에서 세분화 선택을 읽고 손상되거나 만료된 항목을 정리한다.
  *
- * @param {Pick<Storage, "getItem" | "removeItem">} storage - 선택을 읽을 웹 저장소.
- * @param {number} [now=Date.now()] - 만료 여부를 판단할 기준 시각.
- * @returns {TrackingConsent | null} 저장된 선택 또는 `null`.
+ * @param storage - 선택을 읽을 웹 저장소.
+ * @param [now=Date.now()] - 만료 여부를 판단할 기준 시각.
+ * @returns 저장된 선택 또는 `null`.
  */
 const readAnalyticsConsent = (
   storage: Pick<Storage, "getItem" | "removeItem">,
@@ -110,10 +109,10 @@ const readAnalyticsConsent = (
 /**
  * 세분화 선택과 180일 만료 시각을 기록한다.
  *
- * @param {Pick<Storage, "setItem">} storage - 선택을 기록할 웹 저장소.
- * @param {TrackingConsent} value - 저장할 분석·오류 보고 선택.
- * @param {number} [now=Date.now()] - 만료 시각 계산에 쓸 기준 시각.
- * @returns {boolean} 저장에 성공하면 `true`.
+ * @param storage - 선택을 기록할 웹 저장소.
+ * @param value - 저장할 분석·오류 보고 선택.
+ * @param [now=Date.now()] - 만료 시각 계산에 쓸 기준 시각.
+ * @returns 저장에 성공하면 `true`.
  */
 const writeAnalyticsConsent = (
   storage: Pick<Storage, "setItem">,
@@ -135,7 +134,7 @@ const writeAnalyticsConsent = (
 /**
  * 현재 선택을 읽고 같은 저장값에는 안정된 객체 참조를 반환한다.
  *
- * @returns {TrackingConsent | null} 현재 유효한 선택 또는 `null`.
+ * @returns 현재 유효한 선택 또는 `null`.
  */
 const getAnalyticsConsentSnapshot = (): TrackingConsent | null => {
   if (volatileConsent !== undefined) {
@@ -170,8 +169,6 @@ const getAnalyticsConsentSnapshot = (): TrackingConsent | null => {
  *
  * `useSyncExternalStore` 의 getSnapshot 은 순수해야 하므로 이 정리는 그쪽이 아니라
  * provider 의 mount effect 가 한 번 호출한다.
- *
- * @returns {void}
  */
 const cleanupStoredAnalyticsConsent = (): void => {
   try {
@@ -192,8 +189,8 @@ const cleanupStoredAnalyticsConsent = (): void => {
 /**
  * 현재 문서와 다른 탭의 선택 변경을 구독한다.
  *
- * @param {() => void} listener - 선택이 바뀌었을 때 호출할 함수.
- * @returns {() => void} 구독 해제 함수.
+ * @param listener - 선택이 바뀌었을 때 호출할 함수.
+ * @returns 구독 해제 함수.
  */
 const subscribeAnalyticsConsent = (listener: () => void): (() => void) => {
   const onStorage = (event: StorageEvent) => {
@@ -214,8 +211,7 @@ const subscribeAnalyticsConsent = (listener: () => void): (() => void) => {
 /**
  * 현재 탭의 세분화 선택을 갱신한다.
  *
- * @param {TrackingConsent} value - 저장할 분석·오류 보고 선택.
- * @returns {void}
+ * @param value - 저장할 분석·오류 보고 선택.
  */
 const setBrowserAnalyticsConsent = (value: TrackingConsent): void => {
   volatileConsent = value;
@@ -234,8 +230,6 @@ const setBrowserAnalyticsConsent = (value: TrackingConsent): void => {
 
 /**
  * 테스트 사이에 동의 캐시를 초기화한다.
- *
- * @returns {void}
  */
 const resetAnalyticsConsentCache = (): void => {
   volatileConsent = undefined;

@@ -14,9 +14,6 @@ type AwardProjectSeed = {
 
 /**
  * 수상 딥링크가 로컬·데모에서도 실제 상세 모달을 열도록 하는 최소 프로젝트 fixture.
- *
- * @param {AwardProjectSeed} seed
- * @returns {DevProject}
  */
 const awardProject = (seed: AwardProjectSeed): DevProject => ({
   ...seed,

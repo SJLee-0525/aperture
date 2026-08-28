@@ -34,13 +34,6 @@ const chevron = (
 /**
  * 커스텀 드롭다운 — 네이티브 <select> 대신 토큰 스타일 트리거 + 리스트박스.
  * 바깥 클릭·Escape 로 닫힘. 순수 UI(비즈니스 로직 없음, props 만).
- *
- * @param {Props} props
- * @param {string} props.value
- * @param {Option[]} props.options
- * @param {(value: string) => void} props.onChange
- * @param {string | undefined} props.ariaLabel
- * @returns {JSX.Element}
  */
 const Select = ({ value, options, onChange, ariaLabel }: Props) => {
   const { open, triggerRef, rootRef, toggle, close } = usePopupDisclosure<

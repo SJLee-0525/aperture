@@ -1,9 +1,5 @@
 /**
  * X(Twitter) 로고 (fill)
- *
- * @param {{ size?: number }} props
- * @param {number | undefined} props.size
- * @returns {JSX.Element}
  */
 const XIcon = ({ size = 17 }: { size?: number }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true">
