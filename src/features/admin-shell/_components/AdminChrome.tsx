@@ -39,7 +39,7 @@ const AdminChromeBar = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className={styles.shell}>
+    <div className={styles.shell} data-admin-shell>
       <header className={styles.bar}>
         <Link href={ROUTES.ADMIN} className={styles.brand} onNavigate={blockIfDirty}>
           Sungjoon Lee.<span className={styles.tag}>관리자</span>
