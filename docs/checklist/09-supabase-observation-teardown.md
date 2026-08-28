@@ -1,6 +1,7 @@
 # Supabase 전환 관찰·Firebase 해체 절차
 
 > 상위: [08-supabase-migration.md](08-supabase-migration.md) M8 · 계획 근거: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) §8~§10
+> 실행 계획과 해체 전 기준값: [`docs/plan/11-firebase-teardown-and-supabase-backup.md`](../plan/11-firebase-teardown-and-supabase-backup.md)
 > 관찰 기간: **2026-08-15(PR #18 머지) ~ 2026-08-29**. 기간 중 이상이 없으면 아래 해체 절차를 순서대로 진행한다.
 > 관찰 기간에는 Firebase 프로젝트, Vercel 의 Firebase 환경변수, GCP 카드 등록을 건드리지 않는다. 셋이 롤백 경로다.
 
@@ -11,6 +12,19 @@
 - [x] 콘텐츠 저장 왕복: 관리자 저장 시 "RAG 자동 갱신 실패" 경고가 없고 공개 페이지에 revalidate 주기 안에 반영되는지 확인한다. 평소 편집이 곧 검증이라 별도 작업은 없다
 - [x] 챗봇·검색: 가끔 챗 질문과 본문 검색이 정상 응답하는지 확인한다. Vercel 함수 로그의 `[chat-input]`(프롬프트 크기)과 `[chat-rag]`(청크 수) 값이 비정상적으로 크지 않은지 본다
 - [x] Sentry·Vercel 로그: Supabase 호출 실패(4xx/5xx)가 반복되는 새 오류가 없는지 확인한다
+
+### 관찰 종료 기준값 (2026-08-29 KST)
+
+- [x] 프로젝트: Free, `ap-northeast-2`, Healthy, 일시정지 예고 없음
+- [x] keep-alive: 2026-08-28 12:30 PM KST 마지막 성공. 최초 수동 1회와 이후 관찰 구간 6회 모두 성공
+- [x] Usage: DB 0.032/0.5GB, Storage 0.076/1GB, Egress 0.25/5GB, Cached Egress 0.13/5GB, Auth MAU 2/50,000
+- [x] 최근 24시간 API: 2xx 약 1,500건, 4xx 0건, 5xx 0건
+- [x] 데이터: 콘텐츠 199행(발행 197·초안 2), RAG 424청크, 태그 10행, site 3행
+- [x] Auth: 사용자 1명, `app_metadata.role = 'admin'` 1명
+- [x] Storage: `media` 831개, 77,603,202 bytes
+- [x] RAG 동기화: 원본 242/242, 100%, stale 0
+- [x] anon 쓰기 재검증: `photos` insert HTTP 401, PostgREST `42501`, probe 행 0건
+- [x] Firebase URL 전수 검사(2026-08-29): JSONB 8개 테이블의 `data::text`에서 `firebasestorage.googleapis.com`·`storage.googleapis.com` 검색, `total_firebase_url_matches = 0`
 
 ### 문제 발생 시 롤백
 
@@ -38,6 +52,9 @@
 
 ### 2.3 인프라·계정 정리 (코드 머지·배포 확인 후)
 
+- [ ] GitHub Actions 기반 주간 백업을 추가한다: DB roles/schema/data + `media` 버킷 + manifest·SHA-256을 age로 암호화해 Google Drive에 업로드
+- [ ] 첫 자동 백업을 로컬에서 복호화하고 DB 행 수·RAG 청크·Storage 객체 수를 기준값과 대조한다
+- [ ] Firebase 삭제 직전 `pre-firebase-teardown` 수동 백업을 만들고 Google Drive의 파일 존재·크기를 확인한다
 - [ ] Vercel 에서 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거하고 재배포 1회로 정상을 확인한다
 - [ ] Firebase 콘솔: Auth 관리자 계정, Storage 데이터, 프로젝트 순서로 삭제한다. 프로젝트 삭제 뒤에는 Supabase 이전본이 유일본이 되고 되돌릴 수 없으므로 맨 마지막에 한다
 - [ ] GCP: 예산 알림을 삭제하고 결제 계정 카드 등록을 해제한다 (카드 등록 표면 0 달성)

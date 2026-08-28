@@ -4,6 +4,7 @@
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
 > 마지막 갱신: 2026-08-16 (M0~M7 완료, M8 진행 중 — PR #18 머지로 프로덕션 Supabase 전환, 배포 후 수동 시나리오·RLS·keep-alive 확인 완료. 잔여: 2주 관찰(~08-29) 후 해체. 관찰·해체 절차: [09-supabase-observation-teardown.md](09-supabase-observation-teardown.md))
+> 해체 실행 계획과 2026-08-29 기준값: [11-firebase-teardown-and-supabase-backup.md](../plan/11-firebase-teardown-and-supabase-backup.md)
 
 ## 진행 요약
 
@@ -139,7 +140,10 @@
 - [x] keep-alive 첫 실행 성공(수동 dispatch, 2026-08-15) + 주기를 주 2회 → 3일 간격으로 변경, Supabase 대시보드 모니터링 시작
 - [x] keep-alive 유효성 관찰(관찰 기간 중): 3일 간격으로 충분하다고 가정하지 않고 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
 - [x] 2주 관찰(2026-08-15 시작, ~08-29): Firebase 프로젝트·이전 환경변수 보존 (롤백 = 이전 커밋 재배포 + env 그대로, §9)
+- [x] 관찰 종료 기준값 기록(2026-08-29): Free·서울 리전·Healthy, DB 0.032GB, Storage 0.076GB, Egress 0.25GB·Cached Egress 0.13GB, API 4xx/5xx 0, RAG 424청크·원본 242/242, `media` 831개·77,603,202 bytes
+- [x] Firebase Storage URL 전수 검사(2026-08-29): JSONB `data` 8개 테이블에서 Firebase 호스트 0건 확인
 - [ ] 로컬 Supabase 기반 RLS 통합 테스트 작성으로 `test:rules` 대체 (§8)
+- [ ] Supabase 무료 플랜 백업 자동화: DB·`media`를 age로 암호화해 Google Drive에 주간 보관하고 첫 백업 복구 훈련 통과
 - [ ] 관찰 종료 후 해체: firebase·firebase-tools·@firebase/rules-unit-testing 제거(lockfile npm 10 재생성), `firestore.rules`·`storage.rules`·`firestore.indexes.json`·`firebase.json`·`.firebaserc`·`lib/firebase/` 삭제, knip·depcruise 통과
 - [ ] 문서 개정: CLAUDE.md(스택·원칙·데이터 모델·env·한도 표·명령어), ADR-0001 각주, `.claude/agents/firebase.md`, troubleshooting 2편 (§10)
 - [ ] GCP 예산 알림·카드 등록 정리, Firebase 프로젝트 최종 삭제
