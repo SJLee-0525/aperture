@@ -31,3 +31,4 @@ const readPhotoNeighbors = (
 };
 
 export { readPhotoNeighbors };
+export type { PhotoNeighbors };
