@@ -224,9 +224,12 @@ npm run check           # Next.js 타입 생성 및 TypeScript 검사
 npm test                # Vitest 단위 테스트
 npm run test:e2e        # Playwright E2E — 프로덕션 빌드 + 시각 회귀
 npm run test:e2e:admin  # 관리자 E2E — dev 서버 (프로덕션 빌드는 인증 우회를 금지한다)
+npm run test:visual     # 핵심 공개 화면의 데스크톱·모바일 시각 회귀
 npm run test:chat-eval  # mock 챗봇 응답·RAG·참조 평가
 npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
+npm run deps:check      # 의존 방향과 순환 의존성 검사
+npm run knip            # 미사용 파일·export·의존성 검사
 npm run storybook       # 컴포넌트 Storybook
 ```
 
@@ -258,6 +261,12 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [Supabase 이전 계획](./docs/plan/08-supabase-migration.md)                   | Firebase에서 Supabase로의 데이터 계층 이전  |
 | [오류 알림 AI 트리아지](./docs/plan/10-sentry-ai-triage.md)                  | Sentry 웹훅, LLM 판정과 Discord 알림 구성   |
 | [UI 품질 테스트](./docs/testing.md)                                          | 시각 회귀, 접근성, 언어·분석 동의 검증 방법 |
+
+### 코드 검토
+
+| 날짜 | 검토 문서 | 완료 보고 | 범위 |
+| --- | --- | --- | --- |
+| 2026-08-26 | [전수 검토](./docs/review/2026-08-26/README.md) | [처리 결과](./docs/review/2026-08-26/00-completion.md) | `src/` 전체 |
 
 ## 제작 및 AI 활용
 
