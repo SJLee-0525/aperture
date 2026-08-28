@@ -60,18 +60,30 @@ const VIEWPORT_UPDATE_DELAY = 250;
  */
 const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  /* 지도는 마운트당 한 번만 만든다. 콜백이나 배열의 참조가 바뀌었다고 다시 만들면 같은
+     컨테이너에 인스턴스가 둘 생기고, 먼저 것이 제거될 때 캔버스만 남아 화면이 빈다. */
+  const locationsRef = useRef(locations);
+  const onSelectRef = useRef(onSelect);
+  const onVisibleLocationsChangeRef = useRef(onVisibleLocationsChange);
+  useEffect(() => {
+    locationsRef.current = locations;
+    onSelectRef.current = onSelect;
+    onVisibleLocationsChangeRef.current = onVisibleLocationsChange;
+  }, [locations, onSelect, onVisibleLocationsChange]);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const points = locations.map(
+    const initialLocations = locationsRef.current;
+    const points = initialLocations.map(
       (location) => [location.coords.lng, location.coords.lat] as [number, number],
     );
 
     const data: FeatureCollection = {
       type: "FeatureCollection",
-      features: locations.map((location) => ({
+      features: initialLocations.map((location) => ({
         type: "Feature",
         geometry: {
           type: "Point",
@@ -100,14 +112,18 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
       ...fit,
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    mapRef.current = map;
 
+    /* 캔버스 크기는 생성 시점의 컨테이너 크기로 굳는다. 컨테이너가 아직 자리를 잡기 전에
+       만들어지면 기본 높이(300px)가 그대로 남아 지도가 잘린 채 보인다. 레이아웃이 끝난 뒤
+       한 번 다시 재서 그 상태를 벗어난다. */
     let viewportUpdateTimer: ReturnType<typeof setTimeout> | undefined;
     const updateVisibleLocations = () => {
       clearTimeout(viewportUpdateTimer);
       viewportUpdateTimer = setTimeout(() => {
         const bounds = map.getBounds();
-        onVisibleLocationsChange(
-          locations
+        onVisibleLocationsChangeRef.current(
+          locationsRef.current
             .filter((location) => bounds.contains([location.coords.lng, location.coords.lat]))
             .map((location) => location.id),
         );
@@ -196,7 +212,7 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
     // 단일 핀을 누르면 사진 상세를 연다.
     map.on("click", POINT_LAYER, (event) => {
       const id = event.features?.[0]?.properties?.id;
-      if (typeof id === "string") onSelect(id);
+      if (typeof id === "string") onSelectRef.current(id);
     });
 
     for (const layer of [CLUSTER_LAYER, POINT_LAYER]) {
@@ -223,9 +239,25 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
       clearTimeout(viewportUpdateTimer);
       observer.disconnect();
       setMapCursorHover(false);
+      mapRef.current = null;
       map.remove();
     };
-  }, [locations, onSelect, onVisibleLocationsChange]);
+  }, []);
+
+  /* 위치 목록이 바뀌면 소스 데이터만 갈아 끼운다. 지도를 다시 만들면 방문자가 옮겨 둔
+     화면 위치와 줌이 함께 초기화된다. */
+  useEffect(() => {
+    const source = mapRef.current?.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+    source.setData({
+      type: "FeatureCollection",
+      features: locations.map((location) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [location.coords.lng, location.coords.lat] },
+        properties: { id: location.id },
+      })),
+    });
+  }, [locations]);
 
   return <div ref={containerRef} className={styles.canvas} />;
 };

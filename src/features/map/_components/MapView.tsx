@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import { LocationList } from "@/features/map/_components/LocationList";
@@ -10,7 +11,7 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useMapTools } from "@/features/map/_hooks/use-map-tools";
 
 import { DETAIL_QUERY_KEYS } from "@/constants/routes";
-import { openDetailQuery } from "@/lib/navigation/detail-query-url";
+import { detailQueryHref } from "@/lib/navigation/detail-query-url";
 
 
 import type { MapLocation } from "@/features/map/_lib/map-location";
@@ -36,6 +37,7 @@ type Props = {
  */
 const MapView = ({ locations }: Props) => {
   const { dict } = useLang();
+  const router = useRouter();
   // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
   useMapTools(locations);
   const [visibleLocationIds, setVisibleLocationIds] = useState<string[] | null>(null);
@@ -45,7 +47,15 @@ const MapView = ({ locations }: Props) => {
     const visibleIds = new Set(visibleLocationIds);
     return locations.filter((location) => visibleIds.has(location.id));
   }, [locations, visibleLocationIds]);
-  const onSelect = useCallback((id: string) => openDetailQuery(DETAIL_QUERY_KEYS.photo, id), []);
+  /* 지도만 라우터로 연다. history API 를 직접 쓰면 App Router 가 그 entry 를 모르는 채
+     popstate 를 받아 이 세그먼트를 다시 마운트하고, 그때 WebGL 지도가 통째로 사라진다.
+     query 는 그대로 두고 photo 키만 더한다. */
+  const onSelect = useCallback(
+    (id: string) => {
+      router.push(detailQueryHref(window.location, DETAIL_QUERY_KEYS.photo, id), { scroll: false });
+    },
+    [router],
+  );
   const onVisibleLocationsChange = useCallback((ids: string[]) => {
     setVisibleLocationIds((current) => {
       if (
