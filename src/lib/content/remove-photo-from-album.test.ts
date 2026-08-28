@@ -28,11 +28,13 @@ describe("removePhotoFromAlbum", () => {
   });
 
   it("마지막 사진을 삭제하면 커버도 비운다", () => {
-    expect(removePhotoFromAlbum({ cover: COVER, coverPhotoId: "a", photoIds: ["a"] }, "a")).toEqual({
-      cover: null,
-      coverPhotoId: "",
-      photoIds: [],
-    });
+    expect(removePhotoFromAlbum({ cover: COVER, coverPhotoId: "a", photoIds: ["a"] }, "a")).toEqual(
+      {
+        cover: null,
+        coverPhotoId: "",
+        photoIds: [],
+      },
+    );
   });
 
   // 커버 사진이 지워지면 Storage 객체도 함께 사라진다. 스냅샷을 그대로 두면

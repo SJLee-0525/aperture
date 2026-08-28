@@ -34,6 +34,8 @@ const SECTIONS: HubCard[] = [
 /**
  * 음악 섹션 허브 — 세부 관리 화면으로 나눠 보낸다.
  */
-const AdminMusicPage = () => <AdminHubGrid title="음악" lead="연주·수상·영상·소개를 관리합니다." cards={SECTIONS} />;
+const AdminMusicPage = () => (
+  <AdminHubGrid title="음악" lead="연주·수상·영상·소개를 관리합니다." cards={SECTIONS} />
+);
 
 export default AdminMusicPage;

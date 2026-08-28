@@ -36,7 +36,9 @@ describe("LocalizedFieldPair", () => {
   });
 
   it("multiline이면 두 쪽 모두 textarea로 그린다", () => {
-    render(<LocalizedFieldPair label="설명" value={value} onChange={() => {}} multiline rows={4} />);
+    render(
+      <LocalizedFieldPair label="설명" value={value} onChange={() => {}} multiline rows={4} />,
+    );
 
     expect(screen.getByLabelText("설명 (한국어)").tagName).toBe("TEXTAREA");
     expect(screen.getByLabelText("설명 (English)").tagName).toBe("TEXTAREA");

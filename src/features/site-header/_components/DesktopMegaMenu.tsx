@@ -39,7 +39,16 @@ type MegaMenuGroupProps = {
  * 열림 상태가 바뀐 그룹만 다시 렌더하도록 격리한다.
  */
 const MegaMenuGroup = memo(
-  ({ dict, group, isCurrent, isOpen, onClose, onLeave, onHoverStart, onPinToggle }: MegaMenuGroupProps) => {
+  ({
+    dict,
+    group,
+    isCurrent,
+    isOpen,
+    onClose,
+    onLeave,
+    onHoverStart,
+    onPinToggle,
+  }: MegaMenuGroupProps) => {
     const panelId = useId();
 
     return (

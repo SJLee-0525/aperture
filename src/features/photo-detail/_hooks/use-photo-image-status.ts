@@ -28,9 +28,7 @@ const usePhotoImageStatus = (): PhotoImageStatus => {
   const [retryCounts, setRetryCounts] = useState<ReadonlyMap<string, number>>(() => new Map());
 
   const mark = useCallback((id: string, next: ImageStatus) => {
-    setStatus((current) =>
-      current.get(id) === next ? current : new Map(current).set(id, next),
-    );
+    setStatus((current) => (current.get(id) === next ? current : new Map(current).set(id, next)));
   }, []);
 
   const markLoaded = useCallback((id: string) => mark(id, "loaded"), [mark]);

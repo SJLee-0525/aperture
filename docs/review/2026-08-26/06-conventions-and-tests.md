@@ -14,17 +14,17 @@
 
 ## 지켜지고 있는 것
 
-| 항목 | 측정값 |
-| --- | --- |
-| `../` 상대경로 import | 1 (`src/features/lang/_lib/proxy-locale.test.ts:6`) |
-| barrel `index.ts` | 0 |
-| `.module.css` hex 직박 | 0 (156파일 전체) |
-| `TODO` / `FIXME` | 0 (623파일) |
-| 레이어 역방향 import (`features→app`, `components→features`, `lib→features`) | 0 |
-| 스냅샷 테스트 | 0 (`__snapshots__` 디렉토리 없음) |
-| 공개 JSX 한국어 하드코딩 | 1 (`features/auth/_components/LoginForm.tsx:42`, 관리자 로그인 화면) |
-| 300줄 초과 비테스트 파일 | 20 / 623 (3.2%) |
-| `toHaveBeenCalled*` 비중 | 456 / 3,532 = 12.9% |
+| 항목                                                                         | 측정값                                                               |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `../` 상대경로 import                                                        | 1 (`src/features/lang/_lib/proxy-locale.test.ts:6`)                  |
+| barrel `index.ts`                                                            | 0                                                                    |
+| `.module.css` hex 직박                                                       | 0 (156파일 전체)                                                     |
+| `TODO` / `FIXME`                                                             | 0 (623파일)                                                          |
+| 레이어 역방향 import (`features→app`, `components→features`, `lib→features`) | 0                                                                    |
+| 스냅샷 테스트                                                                | 0 (`__snapshots__` 디렉토리 없음)                                    |
+| 공개 JSX 한국어 하드코딩                                                     | 1 (`features/auth/_components/LoginForm.tsx:42`, 관리자 로그인 화면) |
+| 300줄 초과 비테스트 파일                                                     | 20 / 623 (3.2%)                                                      |
+| `toHaveBeenCalled*` 비중                                                     | 456 / 3,532 = 12.9%                                                  |
 
 유일한 `../` 1건은 alias로 표현할 수 없다. `src/proxy.ts`가 `@/` 매핑 밖(`src/` 루트)에 있어서다.
 
@@ -137,11 +137,11 @@ Firebase 잔재 중 유일하게 동작에 영향을 주는 건이다.
 
 CLAUDE.md는 "`@param`, `@returns`도 타입을 그대로 반복한다면 생략한다"고 적었다. 코드베이스 전역이 반대로 되어 있다.
 
-| 형태 | 건수 | 그중 설명 없음 |
-| --- | --- | --- |
-| `@param {Type} name` | 1,407 | 568 |
-| `@returns {Type}` | 813 | 375 |
-| 합계 | **2,220** | **943** |
+| 형태                 | 건수      | 그중 설명 없음 |
+| -------------------- | --------- | -------------- |
+| `@param {Type} name` | 1,407     | 568            |
+| `@returns {Type}`    | 813       | 375            |
+| 합계                 | **2,220** | **943**        |
 
 943건은 삭제 대상이다. `@param {Props} props`, `@returns {JSX.Element}` 형태로 타입 외에 아무 정보가 없다. `src/app/admin/**/page.tsx`에만 `@returns {JSX.Element}`가 17건 있고, `src/app/[lang]/(public)/**/page.tsx`에 `@returns {Promise<JSX.Element>}`가 10건 있다.
 
@@ -177,13 +177,13 @@ const toSize = (value?: number | string) => (typeof value === "number" ? `${valu
 
 ## 주석 문체
 
-| 항목 | 건수 | 근거 |
-| --- | --- | --- |
-| em dash로 문장을 이은 주석 라인 | 627 | CLAUDE.md 원칙 5 |
-| 화살표로 절차를 꾸민 주석 라인 | 82 | 원칙 5 |
-| 계획 문서 단계 참조 | 41 | 원칙 1 |
-| 비유·과장 표현 | 27 (실제 위반 8) | 원칙 4 |
-| 판단 변호 | 1 | 원칙 6 |
+| 항목                            | 건수             | 근거             |
+| ------------------------------- | ---------------- | ---------------- |
+| em dash로 문장을 이은 주석 라인 | 627              | CLAUDE.md 원칙 5 |
+| 화살표로 절차를 꾸민 주석 라인  | 82               | 원칙 5           |
+| 계획 문서 단계 참조             | 41               | 원칙 1           |
+| 비유·과장 표현                  | 27 (실제 위반 8) | 원칙 4           |
+| 판단 변호                       | 1                | 원칙 6           |
 
 ### 일괄 교정을 권하지 않는다
 
@@ -235,15 +235,15 @@ CLAUDE.md 원칙 6이 금지한 "이쪽이 더 낫다" 패턴 그대로다. 무�
 
 ## 컨벤션
 
-| ID | 주장 | 판정 |
-| --- | --- | --- |
-| CONV-01 | `.module.css` 하드코딩 `rgba()` | 부분확정 (45건 / 15파일, 실제 조치 2줄) |
-| CONV-02 | `_types/` 폴더가 규약 밖 | 확정 |
-| CONV-03 | ESLint boundaries가 `src/lib`·`src/mocks` 미감시 | 확정 |
-| CONV-04 | `../` 금지·barrel 금지에 CI 게이트 없음 | 확정 |
-| CONV-05 | 관리자 UI 문자열 191건 사전 미경유 | 확정 (규약 문서 측 문제) |
-| CONV-06 | 300줄 초과 20파일 | 확정 |
-| CONV-07 | CLAUDE.md 구조도 드리프트 | 확정 |
+| ID      | 주장                                             | 판정                                    |
+| ------- | ------------------------------------------------ | --------------------------------------- |
+| CONV-01 | `.module.css` 하드코딩 `rgba()`                  | 부분확정 (45건 / 15파일, 실제 조치 2줄) |
+| CONV-02 | `_types/` 폴더가 규약 밖                         | 확정                                    |
+| CONV-03 | ESLint boundaries가 `src/lib`·`src/mocks` 미감시 | 확정                                    |
+| CONV-04 | `../` 금지·barrel 금지에 CI 게이트 없음          | 확정                                    |
+| CONV-05 | 관리자 UI 문자열 191건 사전 미경유               | 확정 (규약 문서 측 문제)                |
+| CONV-06 | 300줄 초과 20파일                                | 확정                                    |
+| CONV-07 | CLAUDE.md 구조도 드리프트                        | 확정                                    |
 
 확정 5, 부분확정 2, 기각 0.
 
@@ -300,14 +300,14 @@ CONV-04도 같은 성격이다. `no-restricted-imports`, `import/no-internal-mod
 
 623개 중 20개(3.2%)로 전반적으로 양호하다. 상위 3개만 분할 여지가 뚜렷하다.
 
-| 줄 | 파일 | 판단 |
-| --- | --- | --- |
-| 1,020 | `features/legal/_lib/legal-documents.tsx` | Privacy·Terms·Accessibility 3개 문서 원문이 한 파일. 문서당 1파일로 분리. JSX를 갖는 파일이 `_lib/`에 있는 배치 문제도 함께 해소 |
-| 720 | `features/custom-cursor/_components/CustomCursor.tsx` | 포인터 추적을 `_hooks`·`_lib`로 추출하면 컴포넌트는 렌더만 남는다 |
-| 687 | `features/chat/_lib/handle-chat-request.ts` | 요청 검증·rate limit·문맥 조립·스트리밍이 한 파일. `@param {` 20건이 몰린 파일이기도 하다 |
-| 640 | `constants/dictionary.ts` | 사전은 단일 출처가 목적이므로 유지 타당 |
-| 624 / 501 / 337 | `mocks/dev.ts`, `mocks/dev-articles.ts`, `mocks/photos.ts` | 데이터 파일. 유지 타당 |
-| 609 | `features/photo-detail/_components/PhotoModal.tsx` | 라이트박스/바텀시트 분기 + 줌 + 딥링크. 분할 가능 |
+| 줄              | 파일                                                       | 판단                                                                                                                             |
+| --------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 1,020           | `features/legal/_lib/legal-documents.tsx`                  | Privacy·Terms·Accessibility 3개 문서 원문이 한 파일. 문서당 1파일로 분리. JSX를 갖는 파일이 `_lib/`에 있는 배치 문제도 함께 해소 |
+| 720             | `features/custom-cursor/_components/CustomCursor.tsx`      | 포인터 추적을 `_hooks`·`_lib`로 추출하면 컴포넌트는 렌더만 남는다                                                                |
+| 687             | `features/chat/_lib/handle-chat-request.ts`                | 요청 검증·rate limit·문맥 조립·스트리밍이 한 파일. `@param {` 20건이 몰린 파일이기도 하다                                        |
+| 640             | `constants/dictionary.ts`                                  | 사전은 단일 출처가 목적이므로 유지 타당                                                                                          |
+| 624 / 501 / 337 | `mocks/dev.ts`, `mocks/dev-articles.ts`, `mocks/photos.ts` | 데이터 파일. 유지 타당                                                                                                           |
+| 609             | `features/photo-detail/_components/PhotoModal.tsx`         | 라이트박스/바텀시트 분기 + 줌 + 딥링크. 분할 가능                                                                                |
 
 이 목록은 아키텍처 보고서의 개별 SRP 발견(`ARCH-A-01`·`ARCH-A-02`·`ARCH-A-15`)과 같은 파일을 가리킨다. 목록은 여기, 분해 설계는 그쪽이다.
 
@@ -331,11 +331,11 @@ components/ProjectCard              DevProjectCard로 개명됨
 
 여기에 더해, **섹션 액센트 색 세 개가 전부 실제와 다르다.** CLAUDE.md는 아키텍처 원칙 9로 `[data-section]` 액센트를 못 박아 두고 색값까지 표에 적었는데, `src/app/globals.css:68-70`의 실제 값은 다르다.
 
-| 섹션 | CLAUDE.md | `globals.css:68-70` |
-| --- | --- | --- |
-| photo | `#0a84ff` | `#0066cc` |
-| music | `#e5484d` | `#b4232d` |
-| dev | `#16a34a` | `#087a32` |
+| 섹션  | CLAUDE.md | `globals.css:68-70` |
+| ----- | --------- | ------------------- |
+| photo | `#0a84ff` | `#0066cc`           |
+| music | `#e5484d` | `#b4232d`           |
+| dev   | `#16a34a` | `#087a32`           |
 
 셋 다 실제 구현이 문서보다 어둡다. 대비를 위해 조정한 결과로 보이는데 문서가 따라오지 않았다. 디자인 충실도 점검(`/design-check`)이 CLAUDE.md를 기준으로 삼는 순간 잘못된 색을 정답으로 판정한다.
 
@@ -345,30 +345,30 @@ components/ProjectCard              DevProjectCard로 개명됨
 
 **TEST-01 확정.** `vitest.config.ts:11-39`의 `coverage.include`는 명시적 allowlist다. 85%/80% 임계값이 걸리는 대상은 158파일 / 15,284줄이다.
 
-| 패턴 | 파일 |
-| --- | --- |
-| `src/features/**/_lib/*.ts` | 121 |
-| `src/lib/admin/mock/*.ts` | 4 |
-| `src/lib/{search,i18n}/*.ts` | 10 |
-| `src/lib/{format,exif,geo}/*.ts` | 4 |
-| 개별 지정 `.ts` 4개 | 4 |
-| `src/hooks/*.ts` 5개 + contact `_hooks` 2개 | 7 |
-| 개별 지정 컴포넌트·뷰 8개 | 8 |
-| 합계 | **158 / 623 = 25.4%** |
+| 패턴                                        | 파일                  |
+| ------------------------------------------- | --------------------- |
+| `src/features/**/_lib/*.ts`                 | 121                   |
+| `src/lib/admin/mock/*.ts`                   | 4                     |
+| `src/lib/{search,i18n}/*.ts`                | 10                    |
+| `src/lib/{format,exif,geo}/*.ts`            | 4                     |
+| 개별 지정 `.ts` 4개                         | 4                     |
+| `src/hooks/*.ts` 5개 + contact `_hooks` 2개 | 7                     |
+| 개별 지정 컴포넌트·뷰 8개                   | 8                     |
+| 합계                                        | **158 / 623 = 25.4%** |
 
 파일 수로는 25.4%이고 줄 수로는 15,284 / 54,974 = **27.8%**다. 임계값이 걸리는 단위는 줄과 구문이므로 줄 기준이 옳은 척도이고, "약 28%"라는 결론은 정확하다.
 
 측정에서 빠진 영역 중 상당수는 **테스트가 이미 있는데도** 수치에 반영되지 않는다.
 
-| 영역 | 보유 테스트 |
-| --- | --- |
-| `src/lib/supabase/**` | 11 |
-| `src/lib/monitoring` | 5 |
-| `src/lib/ai` | 5 |
-| `src/lib/cache` | 3 |
-| `src/lib/{security,auth,webmcp,seo,text}` | 12 |
-| `src/constants` | 4 |
-| `src/app/**` | 약 5 |
+| 영역                                      | 보유 테스트 |
+| ----------------------------------------- | ----------- |
+| `src/lib/supabase/**`                     | 11          |
+| `src/lib/monitoring`                      | 5           |
+| `src/lib/ai`                              | 5           |
+| `src/lib/cache`                           | 3           |
+| `src/lib/{security,auth,webmcp,seo,text}` | 12          |
+| `src/constants`                           | 4           |
+| `src/app/**`                              | 약 5        |
 
 **이미 존재하는 테스트 39~44개가 커버리지 수치에 전혀 잡히지 않는다.** allowlist 구조의 결과다. 새 코드는 기본적으로 게이트 밖에서 태어나고, 85% 임계값은 이미 잘 테스트된 158파일 위에서만 계산되므로 항상 통과한다. `npm run test:coverage`가 초록이어도 RLS 경계, PostgREST transport, route handler, 관리자 CMS의 실제 커버리지는 아무도 모른다.
 

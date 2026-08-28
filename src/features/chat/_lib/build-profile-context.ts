@@ -177,9 +177,7 @@ const selectProfileBlocks = (
   sections: ProfileSection[],
 ): ProfileBlock[] => {
   const titles = new Set(sections.map((name) => PROFILE_SECTION_TITLES[name]));
-  return blocks.filter(
-    (block) => block.section === HEADER_SECTION || titles.has(block.section),
-  );
+  return blocks.filter((block) => block.section === HEADER_SECTION || titles.has(block.section));
 };
 
 /** 프롬프트에 실을 문자열로 합친다. 블록을 문자열로 되돌리는 곳은 여기 하나다. */

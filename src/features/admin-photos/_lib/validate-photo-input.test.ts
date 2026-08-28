@@ -7,13 +7,17 @@ import type { PhotoInput } from "@/lib/supabase/photos";
 
 describe("validatePhotoInput", () => {
   it("한국어 제목을 먼저 요구한다", () => {
-    expect(validatePhotoInput(photoToInput())).toContainEqual(expect.objectContaining({ message: "제목(한국어)을 입력하세요." }));
+    expect(validatePhotoInput(photoToInput())).toContainEqual(
+      expect.objectContaining({ message: "제목(한국어)을 입력하세요." }),
+    );
   });
 
   it("제목이 있으면 업로드된 이미지를 요구한다", () => {
     const input = { ...photoToInput(), title: { ko: "사진", en: "" } };
 
-    expect(validatePhotoInput(input)).toContainEqual(expect.objectContaining({ message: "이미지를 먼저 업로드하세요." }));
+    expect(validatePhotoInput(input)).toContainEqual(
+      expect.objectContaining({ message: "이미지를 먼저 업로드하세요." }),
+    );
   });
 
   it("한국어 제목과 이미지가 있으면 저장할 수 있다", () => {

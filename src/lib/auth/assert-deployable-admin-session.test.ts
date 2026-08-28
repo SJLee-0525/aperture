@@ -32,14 +32,9 @@ describe("assertDeployableAdminSession", () => {
     ).not.toThrow();
   });
 
-  it.each(["typegen", "lint", "info"])(
-    "산출물을 만들지 않는 %s 는 통과시킨다",
-    (command) => {
-      expect(() =>
-        assertDeployableAdminSession(BUILD, ON, ["node", "next", command]),
-      ).not.toThrow();
-    },
-  );
+  it.each(["typegen", "lint", "info"])("산출물을 만들지 않는 %s 는 통과시킨다", (command) => {
+    expect(() => assertDeployableAdminSession(BUILD, ON, ["node", "next", command])).not.toThrow();
+  });
 
   it("mock 콘텐츠 탈출구로는 열리지 않는다", () => {
     expect(() =>

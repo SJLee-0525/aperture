@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-
-
 import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetailView";
 
 import { useMounted } from "@/hooks/use-mounted";

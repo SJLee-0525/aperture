@@ -266,9 +266,7 @@ describe("assertWithinDocumentLimit", () => {
       .mockResolvedValueOnce(jsonResponse([]));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(assertWithinDocumentLimit("token", [chunk("a")])).rejects.toThrow(
-      "1000개를 초과",
-    );
+    await expect(assertWithinDocumentLimit("token", [chunk("a")])).rejects.toThrow("1000개를 초과");
     expect(calls(fetchMock).every(({ init }) => init.method === undefined)).toBe(true);
   });
 

@@ -39,10 +39,8 @@ describe("buildPhotoModalSlides", () => {
 
   it("재시도 횟수가 키에 섞인다", () => {
     // 같은 src 를 그대로 두면 브라우저가 다시 받지 않는다. 키가 바뀌어야 img 가 새로 붙는다.
-    const retried = buildPhotoModalSlides(
-      photo("b"),
-      { previous: null, next: null },
-      (id) => (id === "b" ? 2 : 0),
+    const retried = buildPhotoModalSlides(photo("b"), { previous: null, next: null }, (id) =>
+      id === "b" ? 2 : 0,
     );
 
     expect(retried[1]?.key).toBe("b@2");

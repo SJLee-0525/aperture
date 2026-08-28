@@ -1,7 +1,6 @@
 import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
-
 import type { UploadResult } from "@/features/image-upload/_hooks/use-image-upload";
 import type { PhotoInput } from "@/lib/supabase/photos";
 import type { Coords } from "@/types/coords";
@@ -33,8 +32,7 @@ const emptyPhotoInput = (): PhotoInput => ({
   published: false,
 });
 
-const photoToInput = (photo?: Photo): PhotoInput =>
-  photo ? withoutId(photo) : emptyPhotoInput();
+const photoToInput = (photo?: Photo): PhotoInput => (photo ? withoutId(photo) : emptyPhotoInput());
 
 const applyUploadResult = (input: PhotoInput, result: UploadResult): PhotoInput => ({
   ...input,
@@ -74,7 +72,6 @@ const parseCoords = (lat: string, lng: string): Coords | null => {
   if (Math.abs(parsedLat) > 90 || Math.abs(parsedLng) > 180) return null;
   return { lat: parsedLat, lng: parsedLng };
 };
-
 
 /** 카메라·렌즈는 관리자가 직접 적거나 EXIF 에서 오는 자유 입력이라 저장 전에 공백을 턴다. */
 const preparePhotoInput = (form: PhotoInput): PhotoInput => ({

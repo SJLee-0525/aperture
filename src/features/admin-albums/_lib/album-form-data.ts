@@ -1,7 +1,6 @@
 import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
-
 import type { AlbumInput } from "@/lib/supabase/albums";
 import type { Album } from "@/types/album";
 
@@ -23,6 +22,5 @@ const prepareAlbumInput = (input: AlbumInput): AlbumInput => ({
     ? input.coverPhotoId
     : (input.photoIds[0] ?? ""),
 });
-
 
 export { albumToInput, emptyAlbumInput, prepareAlbumInput };

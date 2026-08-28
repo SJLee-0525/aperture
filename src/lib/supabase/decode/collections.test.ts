@@ -149,8 +149,8 @@ describe("컬렉션 디코더 — 오형 값", () => {
     expect(decodeMusicWork("w1", { ticketUrl: "http://insecure.test" }).ticketUrl).toBe(
       "http://insecure.test",
     );
-    expect(decodeDevProject("d1", { links: [{ label: "L", href: "http://x.test" }] }).links).toEqual(
-      [{ label: "L", href: "http://x.test" }],
-    );
+    expect(
+      decodeDevProject("d1", { links: [{ label: "L", href: "http://x.test" }] }).links,
+    ).toEqual([{ label: "L", href: "http://x.test" }]);
   });
 });

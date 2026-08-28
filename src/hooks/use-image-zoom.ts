@@ -90,9 +90,7 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     // `||` 는 0 과 NaN 을 기본값으로 바꿔 버려 아래 유한성 검사가 무한대만 잡게 된다.
     // 이미지 dimension 이 0 인 데이터에서 배율이 조용히 3 이 되는 것을 막는다.
     const raw = node ? latestRef.current.getMaxScale?.(node) : undefined;
-    return typeof raw === "number" && Number.isFinite(raw)
-      ? Math.max(1, raw)
-      : MAX_SCALE_DEFAULT;
+    return typeof raw === "number" && Number.isFinite(raw) ? Math.max(1, raw) : MAX_SCALE_DEFAULT;
   }, []);
 
   const clearPendingSingleTap = useCallback(() => {
@@ -278,7 +276,6 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     const ensureWillChange = () => {
       node.style.willChange = "transform";
     };
-
 
     const onTouchStart = (event: TouchEvent) => {
       // 제스처 사이에 모달 레이아웃이 바뀔 수 있다(모바일 EXIF 패널 펼침). 시작마다 다시 잰다.

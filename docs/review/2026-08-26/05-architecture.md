@@ -16,19 +16,19 @@ barrel 금지, `../` 금지, feature 내부 하위폴더 규칙을 전부 기계
 
 측정값부터.
 
-| 항목 | 값 |
-| --- | --- |
-| `components → features` 역방향 import | 0건 |
-| `features → app` 역방향 import | 0건 |
-| `lib`·`constants`·`types`·`mocks` → `features` | 0건 |
-| barrel `index.ts` | 0개 |
-| `../` 상대경로 import | 1건 (`features/lang/_lib/proxy-locale.test.ts:6`, 테스트가 `src/proxy.ts`를 부르는 구조적 예외) |
-| feature 간 직접 참조 | 28쌍, 전부 `eslint.config.mjs:47-52`의 platform 화이트리스트 안 |
-| knip (미사용 파일·export·의존성) | 0건 |
-| dependency-cruiser | 1,079 모듈, 위반 0건 |
-| jscpd | 1.29% (36 clones / 687줄) |
-| 공개 라우트 `generateMetadata` 누락 | 0건 (17/17이 `lib/seo/metadata.ts`의 `pageMetadata` 경유) |
-| 데이터 계층 `any` | 0건 (`as unknown as` 7곳, 전부 supabase-js 응답 타입 우회) |
+| 항목                                           | 값                                                                                              |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `components → features` 역방향 import          | 0건                                                                                             |
+| `features → app` 역방향 import                 | 0건                                                                                             |
+| `lib`·`constants`·`types`·`mocks` → `features` | 0건                                                                                             |
+| barrel `index.ts`                              | 0개                                                                                             |
+| `../` 상대경로 import                          | 1건 (`features/lang/_lib/proxy-locale.test.ts:6`, 테스트가 `src/proxy.ts`를 부르는 구조적 예외) |
+| feature 간 직접 참조                           | 28쌍, 전부 `eslint.config.mjs:47-52`의 platform 화이트리스트 안                                 |
+| knip (미사용 파일·export·의존성)               | 0건                                                                                             |
+| dependency-cruiser                             | 1,079 모듈, 위반 0건                                                                            |
+| jscpd                                          | 1.29% (36 clones / 687줄)                                                                       |
+| 공개 라우트 `generateMetadata` 누락            | 0건 (17/17이 `lib/seo/metadata.ts`의 `pageMetadata` 경유)                                       |
+| 데이터 계층 `any`                              | 0건 (`as unknown as` 7곳, 전부 supabase-js 응답 타입 우회)                                      |
 
 feature 내부 하위폴더 규칙도 `_types/` 폴더 2개를 빼면 지켜진다(그 2개는 규약 편 CONV-02가 다룬다).
 
@@ -151,11 +151,11 @@ CLAUDE.md 완료 점검 1번("이 주석이 없으면 코드에서 알 수 없�
 
 같은 행을 같은 도메인 타입으로 바꾸는 코드가 컬렉션마다 2~3벌 있고, 폴백이 서로 다르다.
 
-| 필드 | 공개 | 관리자 get | 관리자 list |
-| --- | --- | --- | --- |
-| `MusicWork.performedAt` | epoch (`transport.ts:35-38`) | **현재 시각** (`music.ts:23-26`) | epoch (`admin-list.ts:111`) |
-| `Photo.image` | `?? EMPTY_IMAGE` (`public/photo.ts:58`) | 폴백 없음 (`photos.ts:56`) | `?? {url:"",...}` (`admin-list.ts:47`) |
-| `Photo.title` | `asText` (형 검증 있음) | `as ... ?? EMPTY_TEXT` (형 검증 없음) | `asText` |
+| 필드                    | 공개                                    | 관리자 get                            | 관리자 list                            |
+| ----------------------- | --------------------------------------- | ------------------------------------- | -------------------------------------- |
+| `MusicWork.performedAt` | epoch (`transport.ts:35-38`)            | **현재 시각** (`music.ts:23-26`)      | epoch (`admin-list.ts:111`)            |
+| `Photo.image`           | `?? EMPTY_IMAGE` (`public/photo.ts:58`) | 폴백 없음 (`photos.ts:56`)            | `?? {url:"",...}` (`admin-list.ts:47`) |
+| `Photo.title`           | `asText` (형 검증 있음)                 | `as ... ?? EMPTY_TEXT` (형 검증 없음) | `asText`                               |
 
 `ticketUrl`·`links`의 공개/관리자 차이는 문서화된 의도다. 날짜와 `image` 폴백 차이는 그렇지 않다.
 날짜 폴백이 `new Date()`라는 사실이 실제 데이터 오염 경로를 만든다(정확성 편 BUG-S-02: 썸네일
@@ -313,8 +313,8 @@ CLAUDE.md 완료 점검 1번("이 주석이 없으면 코드에서 알 수 없�
 ### `?photo=` 쓰기 경로 4벌, 그중 하나가 저장소가 스스로 금지한 패턴 (ARCH-A-06, 중간)
 
 `MapView.tsx:46-49`가 `router.push(\`${pathname}?photo=${id}\`, {scroll:false})`를 쓴다. 기존 query를 통째로
-버리는 유일한 구현이고(다른 3벌은 `URLSearchParams` 복사로 보존한다), 저장소 자신이 기록한 금지
-패턴이기도 하다. `lib/navigation/replace-current-url.ts:3-5`가 "Next 16에서 정적 페이지 딥링크로 바로
+버리는 유일한 구현이고(다른 3벌은 `URLSearchParams`복사로 보존한다), 저장소 자신이 기록한 금지
+패턴이기도 하다.`lib/navigation/replace-current-url.ts:3-5`가 "Next 16에서 정적 페이지 딥링크로 바로
 진입한 경우 같은 pathname에 대한 router.replace가 no-op"이라고 적었고, `ArticlesView.tsx:46-47`이 같은
 취지로 push를 피한다. 지도에서 사진을 열면 다른 query가 사라지고, 정적 진입 시 아예 열리지 않을 수 있다.
 

@@ -11,9 +11,7 @@ describe("RAG 검색어 보강", () => {
   });
 
   it("한글 브랜드 검색어와 영문 장비명을 일치시킨다", () => {
-    expect(
-      score("캐논", "Camera: Canon EOS R6 | Lens: RF 24-70mm"),
-    ).toBeGreaterThanOrEqual(0.5);
+    expect(score("캐논", "Camera: Canon EOS R6 | Lens: RF 24-70mm")).toBeGreaterThanOrEqual(0.5);
     expect(score("니콘", "Camera: Canon EOS R6")).toBeLessThan(0.5);
   });
 

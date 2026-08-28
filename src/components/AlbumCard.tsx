@@ -4,7 +4,6 @@ import Link from "next/link";
 import { PHOTO_GRID_IMAGE_SIZES } from "@/constants/breakpoints";
 import { countLabel } from "@/lib/format/count-label";
 
-
 import styles from "./AlbumCard.module.css";
 
 type Props = {

@@ -222,8 +222,7 @@ const replaceRagDocuments = async (
   if (plan && !sameChunkIds(plan.chunkIds, chunks)) {
     throw new Error("RAG 교체 계획이 저장하려는 청크와 다릅니다.");
   }
-  const { staleIds } =
-    plan ?? (await assertWithinDocumentLimit(accessToken, chunks, target));
+  const { staleIds } = plan ?? (await assertWithinDocumentLimit(accessToken, chunks, target));
   for (let start = 0; start < chunks.length; start += UPSERT_CHUNK_SIZE) {
     const rows = chunks.slice(start, start + UPSERT_CHUNK_SIZE).map((chunk, index) => ({
       id: chunk.id,

@@ -79,7 +79,9 @@ const generateEmbeddings = async (
   // 순차 호출이다. 병렬로 보내면 제공자의 분당 요청 한도를 건드려 전체 재생성이 실패한다.
   for (let start = 0; start < texts.length; start += EMBEDDING_BATCH_SIZE) {
     const batch = texts.slice(start, start + EMBEDDING_BATCH_SIZE);
-    vectors.push(...(await embedBatch(batch, { apiKey, model, dimensions, signal: options?.signal })));
+    vectors.push(
+      ...(await embedBatch(batch, { apiKey, model, dimensions, signal: options?.signal })),
+    );
   }
   return vectors;
 };

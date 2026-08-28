@@ -12,7 +12,6 @@ import { imageThumbnailUrl } from "@/types/image";
 
 import type { AdminDevProjectListItem } from "@/types/admin";
 
-
 import styles from "./ProjectRow.module.css";
 
 type Props = {

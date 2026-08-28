@@ -29,7 +29,11 @@
 `ImageMigrationPanel.module.css:59-65`가 `.actions button`으로 유지보수 패널의 모든 버튼을 스타일링하고, `:67-71`이 다음 규칙으로 primary를 정한다.
 
 ```css
-.actions button:last-child { color: var(--text-inverse); background: var(--accent); border-color: var(--accent); }
+.actions button:last-child {
+  color: var(--text-inverse);
+  background: var(--accent);
+  border-color: var(--accent);
+}
 ```
 
 DOM 순서만으로 강조 버튼을 결정한다. `ArticleOrphanImagePanel.tsx`가 같은 `base.actions`를 재사용하는데, 그 안에서 마지막 자식은 파괴적인 `확인 후 삭제`(`:148-154`)이고 앞선 형제가 안전한 `삭제 대상 다시 확인`(`:146-148`)이다. 결과적으로 파일을 실제로 지우는 버튼이 accent로 강조되고, 목록만 새로 읽는 버튼이 secondary 회색이다. 코드와 CSS를 직접 대조해 재현을 확인했다.
@@ -163,11 +167,11 @@ const cancel = async () => {
 
 세 발견은 위치가 다를 뿐 같은 사실을 가리킨다. 추출된 공용 셸이 없다. 해시로 확인한 결과는 이렇다.
 
-| 계열 | 대상 | 증거 |
-| --- | --- | --- |
-| 목록 셸 6쌍 | `Admin{Photos,Albums,MusicWorks,MusicAwards,MusicMedia,DevProjects}List.module.css` | `diff` 결과가 **첫 줄 주석 1행**뿐. 나머지 66줄 동일 |
-| 수정 라우트 7쌍 | `photos/[id]` · `albums/[id]` · `music/works/[id]` · `music/awards/[id]` · `music/media/[id]` · `dev/projects/[id]` · `dev/articles/[id]`의 `page.module.css` | md5 `278598491e7bd6912267e76e2529056d` 완전 일치 |
-| 허브 3쌍 | `admin/photo` · `admin/music` · `admin/dev`의 `page.module.css` | md5 `e648f798bd5ebf738e5f96f972c48bc4` 완전 일치 |
+| 계열            | 대상                                                                                                                                                          | 증거                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 목록 셸 6쌍     | `Admin{Photos,Albums,MusicWorks,MusicAwards,MusicMedia,DevProjects}List.module.css`                                                                           | `diff` 결과가 **첫 줄 주석 1행**뿐. 나머지 66줄 동일 |
+| 수정 라우트 7쌍 | `photos/[id]` · `albums/[id]` · `music/works/[id]` · `music/awards/[id]` · `music/media/[id]` · `dev/projects/[id]` · `dev/articles/[id]`의 `page.module.css` | md5 `278598491e7bd6912267e76e2529056d` 완전 일치     |
+| 허브 3쌍        | `admin/photo` · `admin/music` · `admin/dev`의 `page.module.css`                                                                                               | md5 `e648f798bd5ebf738e5f96f972c48bc4` 완전 일치     |
 
 `.tsx` 쪽도 마찬가지다. 목록 여섯 개는 센서 구성, `onDragEnd`, loading/error/empty/list 4분기, 신규 생성 버튼 구조가 문자열만 바꾼 복사본이고 줄 수도 97~100줄로 붙어 있다. 수정 라우트 일곱 개는 `Status` 타입 선언부터 `use(params)`, `useEffect` 안의 repository `.get(id)`, 4분기 렌더까지 동일하다.
 

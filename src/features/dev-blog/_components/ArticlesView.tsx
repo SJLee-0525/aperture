@@ -111,7 +111,11 @@ const ArticlesView = ({ articles, tags }: Props) => {
 
   return (
     <main className="u-page-main">
-      <PageToolbar title={dict.devArticlesNav} count={countLabel(filtered.length, "article")} countLive>
+      <PageToolbar
+        title={dict.devArticlesNav}
+        count={countLabel(filtered.length, "article")}
+        countLive
+      >
         <ViewToggle
           options={[
             { id: "grid", label: dict.viewGrid, icon: "square" },

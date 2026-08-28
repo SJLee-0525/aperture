@@ -14,9 +14,7 @@ afterEach(cleanup);
 describe("ArticleCoverField", () => {
   it("이미지가 아닌 파일은 업로더를 호출하기 전에 거부한다", () => {
     const upload = Object.assign(vi.fn(), { variant: "cover" as const }) as ArticleCoverUploader;
-    render(
-      <ArticleCoverField form={emptyArticleInput()} upload={upload} onPatch={vi.fn()} />,
-    );
+    render(<ArticleCoverField form={emptyArticleInput()} upload={upload} onPatch={vi.fn()} />);
 
     fireEvent.change(document.querySelector('input[type="file"]') as HTMLInputElement, {
       target: { files: [new File([], "document.pdf", { type: "application/pdf" })] },

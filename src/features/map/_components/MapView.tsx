@@ -13,7 +13,6 @@ import { useMapTools } from "@/features/map/_hooks/use-map-tools";
 import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { detailQueryHref } from "@/lib/navigation/detail-query-url";
 
-
 import type { MapLocation } from "@/features/map/_lib/map-location";
 
 import styles from "./MapView.module.css";

@@ -270,7 +270,7 @@ WCAG 위반은 아니다. `--accent`(#0066cc)와 `--surface-2`(#f3f3f5)의 대�
 
 ### 초점거리 슬라이더의 접근 이름이 "min mm" 이다 (UI-P-26)
 
-`RangeSlider.tsx:106` 과 `:116` 이 `aria-label={\`min ${unit}\`}` 과 `max` 를 쓴다. 호출부인 `FilterBar.tsx:110-119` 가 `unit="mm"` 를 넘기므로 한국어 화면에서 "min mm"으로 읽힌다. 무엇의 최소·최대인지도 이름에 없고 `aria-valuetext` 가 없어 값이 "24"처럼 단위 없이 읽힌다.
+`RangeSlider.tsx:106` 과 `:116` 이 `aria-label={\`min ${unit}\`}`과`max`를 쓴다. 호출부인`FilterBar.tsx:110-119`가`unit="mm"`를 넘기므로 한국어 화면에서 "min mm"으로 읽힌다. 무엇의 최소·최대인지도 이름에 없고`aria-valuetext` 가 없어 값이 "24"처럼 단위 없이 읽힌다.
 
 `minLabel`·`maxLabel` props 를 받아 `FilterBar` 가 사전 문구와 조합해 넘기고, 각 input 에 `aria-valuetext` 를 붙인다. 난이도는 작다.
 

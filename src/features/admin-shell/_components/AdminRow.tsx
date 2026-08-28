@@ -6,7 +6,6 @@ import { deleteMessage, type DeleteTarget } from "@/features/admin-shell/_lib/de
 
 import type { CSSProperties, ReactNode, Ref } from "react";
 
-
 import styles from "./admin-row.module.css";
 
 type Props = {

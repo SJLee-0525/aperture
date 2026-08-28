@@ -21,8 +21,9 @@ describe("checkAdminAuthThrottle", () => {
   it("공유 카운터가 없으면 통과시키고 요청을 보내지 않는다", async () => {
     const fetcher = vi.fn<typeof fetch>();
 
-    await expect(checkAdminAuthThrottle({ env: {}, fetcher, address: "203.0.113.1" })).resolves
-      .toEqual({ blocked: false, retryAfterSeconds: 0 });
+    await expect(
+      checkAdminAuthThrottle({ env: {}, fetcher, address: "203.0.113.1" }),
+    ).resolves.toEqual({ blocked: false, retryAfterSeconds: 0 });
     expect(fetcher).not.toHaveBeenCalled();
   });
 

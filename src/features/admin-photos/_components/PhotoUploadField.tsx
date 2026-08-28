@@ -97,7 +97,7 @@ const PhotoUploadField = ({
         />
         <p className={styles.note}>업로드 시 EXIF 를 추출해 아래 항목을 자동으로 채웁니다.</p>
         <UploadProgress stage={stage} />
-        {error ?? validationError ? (
+        {(error ?? validationError) ? (
           <p className={styles.error} role="alert">
             {error ?? validationError}
           </p>

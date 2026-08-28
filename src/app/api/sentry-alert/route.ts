@@ -10,7 +10,6 @@ import {
   verifySentrySignature,
 } from "@/lib/sentry-triage/verify-sentry-signature";
 
-
 /** `node:crypto` 의 `timingSafeEqual` 이 필요하다. */
 export const runtime = "nodejs";
 export const maxDuration = 60;

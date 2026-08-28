@@ -61,7 +61,14 @@ const siteWallClock = (date: Date): WallClock => {
 const instantFromSiteWallClock = (wall: WallClock): Date => {
   const guess = Date.UTC(wall.year, wall.month - 1, wall.day, wall.hour, wall.minute, wall.second);
   const seen = siteWallClock(new Date(guess));
-  const seenUtc = Date.UTC(seen.year, seen.month - 1, seen.day, seen.hour, seen.minute, seen.second);
+  const seenUtc = Date.UTC(
+    seen.year,
+    seen.month - 1,
+    seen.day,
+    seen.hour,
+    seen.minute,
+    seen.second,
+  );
   return new Date(guess - (seenUtc - guess));
 };
 

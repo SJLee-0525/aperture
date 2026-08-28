@@ -378,17 +378,23 @@ describe("handleChatRequest", () => {
 
   it("교차 출처 Sec-Fetch-Site 는 막고, 헤더가 없으면 통과시킨다", async () => {
     const crossSite = await handleChatRequest(
-      createRequest({ lang: "ko", messages: [{ role: "user", content: "안녕" }] }, {
-        "sec-fetch-site": "cross-site",
-      }),
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "안녕" }] },
+        {
+          "sec-fetch-site": "cross-site",
+        },
+      ),
       { provider: vi.fn() },
     );
     expect(crossSite.status).toBe(400);
 
     const sameOrigin = await handleChatRequest(
-      createRequest({ lang: "ko", messages: [{ role: "user", content: "안녕" }] }, {
-        "sec-fetch-site": "same-origin",
-      }),
+      createRequest(
+        { lang: "ko", messages: [{ role: "user", content: "안녕" }] },
+        {
+          "sec-fetch-site": "same-origin",
+        },
+      ),
       { provider: vi.fn().mockResolvedValue({ content: "네" }) },
     );
     expect(sameOrigin.status).not.toBe(400);

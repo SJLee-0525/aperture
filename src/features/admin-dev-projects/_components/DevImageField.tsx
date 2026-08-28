@@ -15,7 +15,6 @@ import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
 
 import type { MoveOffset } from "@/lib/collection/move-item";
 
-
 import styles from "./DevImageField.module.css";
 
 type Props = {

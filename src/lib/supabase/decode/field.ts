@@ -116,8 +116,7 @@ const readTimeline = (value: unknown): TimelineEntry[] =>
   }));
 
 /** `readDate` 가 결측에 쓰는 값인지 판별한다. 인코더가 키 생략 여부를 정할 때 본다. */
-const isMissingDate = (value: unknown): boolean =>
-  value instanceof Date && value.getTime() === 0;
+const isMissingDate = (value: unknown): boolean => value instanceof Date && value.getTime() === 0;
 
 export {
   asRecord,

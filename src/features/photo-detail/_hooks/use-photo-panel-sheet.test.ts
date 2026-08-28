@@ -90,7 +90,10 @@ describe("펼치는 입력 셋", () => {
 });
 
 describe("접는 입력 셋", () => {
-  const expand = (node: HTMLElement, result: { current: ReturnType<typeof usePhotoPanelSheet> }) => {
+  const expand = (
+    node: HTMLElement,
+    result: { current: ReturnType<typeof usePhotoPanelSheet> },
+  ) => {
     act(() => result.current.toggleExpanded());
     expect(result.current.expanded).toBe(true);
   };

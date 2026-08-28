@@ -7,7 +7,6 @@ import { toMapLocations } from "@/features/map/_lib/map-location";
 import { getPhotos } from "@/lib/content/photo";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-
 import type { Lang } from "@/types/lang";
 import type { Metadata } from "next";
 

@@ -117,7 +117,6 @@ const ChatPanel = ({ open, onClose }: Props) => {
       (message) => message.id !== "welcome" && message.role === "assistant" && !message.pending,
     )?.content ?? "";
 
-
   useEffect(() => {
     if (!open) return;
     listRef.current?.scrollTo({

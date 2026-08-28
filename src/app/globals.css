@@ -264,7 +264,6 @@ body {
   html[data-custom-cursor] iframe {
     cursor: auto !important;
   }
-
 }
 
 /* 네이티브 스크롤바를 없애는 조건은 커스텀 막대가 실제로 그려지는 조건과 문자 그대로

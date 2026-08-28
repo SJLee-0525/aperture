@@ -10,8 +10,6 @@ import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin"
 
 import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
 
-
-
 import { ROUTES } from "@/constants/routes";
 
 import styles from "./AdminGlobalEditor.module.css";

@@ -17,7 +17,6 @@ const ALBUMS_CACHE_TAG = collectionCacheTag(COLLECTIONS.ALBUMS);
 /** 새 사진을 저장할 때 사용하는 문서 ID 제외 입력값. */
 type PhotoInput = Omit<Photo, "id">;
 
-
 const photosCrud = sortableListCrud<Photo>(COLLECTIONS.PHOTOS, decodePhoto, "사진", "photo");
 
 /**

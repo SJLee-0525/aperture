@@ -102,21 +102,21 @@ BUG-C-07-A. EXIF 촬영일시를 뷰어 타임존으로 재해석한다. `format
 
 ## 테스트가 못 잡는 이유
 
-| 테스트 | 잡는 것 | 통과시킨 것 |
-| --- | --- | --- |
-| `theme-script.test.ts` | 테마 적용, 섹션 프리픽스 매칭 | `:48,59` 가 `/music`·`/dev/projects` 같은 i18n 이전 URL 로만 검증한다. 그 URL 은 실사용에서 308 로 튕겨 브라우저에 닿지 않으므로, 테스트는 통과하는데 실사용 경로는 전부 실패한다(BUG-C-01). |
-| `build-profile-context.test.ts` (9) | 섹션 필터, published 게이트, 글 12건 상한, 언어 선택 | fixture 문자열이 전부 한 줄이라 값 안에 `\n\n` 이 들어가는 경우가 없다(BUG-S-01). |
-| `migrate-image-thumbnails.test.ts` (6) | dry-run 집계, 세 종류 업로드, 앨범 커버 반영, 인증 실패 | fixture 의 `performedAt`·`shotAt` 이 항상 유효해 디코더 기본값이 되쓰기로 굳는 왕복이 드러나지 않는다(BUG-S-02). |
-| `chat-schema.test.ts` + `handle-chat-request.test.ts` | 메시지 수·길이 상한, `REQUEST_TOO_LARGE` 분기 | fixture 가 ASCII 라 한 글자가 1바이트로 계산된다. 한국어 8,000자가 20,000바이트를 넘는다는 경계를 재현하는 케이스가 없다(BUG-S-03). |
-| `find-orphan-article-images.test.ts` (16) | 24시간 창, 그룹 단위 판정, 확인 토큰, 파일별 실패 격리 | 모든 fixture 가 `uploadedAt` 을 명시해 `created_at` 이 없는 파일이 등장하지 않는다(BUG-S-04). |
-| `embedding.test.ts` (8) | 키 누락, 차원 env, 401 처리 | 입력이 항상 1~2개라 배치 부재를 재현할 수 없다(BUG-S-05). |
-| `rag.test.ts` (11) | 범위 계산, 차원 검증, upsert 후 delete 순서, `MAX_DOCUMENTS` | 상한 검사의 시점이 route 쪽이라 임베딩 전인지 후인지는 검증 대상 밖이다(BUG-S-06). |
-| `chat-rate-limit.test.ts` | Lua 반환 4요소, 폴백, 일일 상한, 문자 예산 | 4xx 를 `ChatRateLimitConfigurationError` 로 바꾸는 동작을 계약으로 고정했다. 429 가 여기 섞이는 것이 문제인데 테스트가 그것을 보증하고 있다(BUG-S-07). |
-| `use-chat.test.tsx` | 스트림 이벤트 처리, 오류 메시지, 재시도 | reader 해제·스트림 취소·`controller.abort()` 호출 여부를 보지 않는다(BUG-S-09). |
-| `sse-stream.test.ts` | `data:` 파싱, `[DONE]`, 중단 시 예외 | `\r\n` 이 조각 경계에 걸리는 입력이 없다(BUG-S-10). |
-| `storage-source-url.test.ts` | 다른 origin·버킷·서명 URL 거부 | 포트가 있는 origin(로컬 스택)에 대한 케이스가 없다(BUG-S-12). |
-| `remove-photo-from-album.test.ts` (1) | `photoIds` 제거와 `coverPhotoId` 승계 | 반환 타입에 `cover` 가 없어 스냅샷 미갱신이 애초에 테스트 관심 밖이다(BUG-S-13). |
-| `list-crud.test.ts` (14) | 정책 분기, 0행 처리, 정렬 RPC 대조 | 디코더 기본값이 쓰기로 굳는 read-write 왕복은 범위 밖이다(BUG-S-02). |
-| jsdom 환경 전반 | DOM 구조, 이벤트, 상태 전이 | 레이아웃이 없어 `offsetParent` 가 항상 `null` 이다. 포커스 트랩의 가시성 판정 결함은 단위 테스트로 재현 자체가 불가능하다(BUG-C-02). |
+| 테스트                                                | 잡는 것                                                      | 통과시킨 것                                                                                                                                                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme-script.test.ts`                                | 테마 적용, 섹션 프리픽스 매칭                                | `:48,59` 가 `/music`·`/dev/projects` 같은 i18n 이전 URL 로만 검증한다. 그 URL 은 실사용에서 308 로 튕겨 브라우저에 닿지 않으므로, 테스트는 통과하는데 실사용 경로는 전부 실패한다(BUG-C-01). |
+| `build-profile-context.test.ts` (9)                   | 섹션 필터, published 게이트, 글 12건 상한, 언어 선택         | fixture 문자열이 전부 한 줄이라 값 안에 `\n\n` 이 들어가는 경우가 없다(BUG-S-01).                                                                                                            |
+| `migrate-image-thumbnails.test.ts` (6)                | dry-run 집계, 세 종류 업로드, 앨범 커버 반영, 인증 실패      | fixture 의 `performedAt`·`shotAt` 이 항상 유효해 디코더 기본값이 되쓰기로 굳는 왕복이 드러나지 않는다(BUG-S-02).                                                                             |
+| `chat-schema.test.ts` + `handle-chat-request.test.ts` | 메시지 수·길이 상한, `REQUEST_TOO_LARGE` 분기                | fixture 가 ASCII 라 한 글자가 1바이트로 계산된다. 한국어 8,000자가 20,000바이트를 넘는다는 경계를 재현하는 케이스가 없다(BUG-S-03).                                                          |
+| `find-orphan-article-images.test.ts` (16)             | 24시간 창, 그룹 단위 판정, 확인 토큰, 파일별 실패 격리       | 모든 fixture 가 `uploadedAt` 을 명시해 `created_at` 이 없는 파일이 등장하지 않는다(BUG-S-04).                                                                                                |
+| `embedding.test.ts` (8)                               | 키 누락, 차원 env, 401 처리                                  | 입력이 항상 1~2개라 배치 부재를 재현할 수 없다(BUG-S-05).                                                                                                                                    |
+| `rag.test.ts` (11)                                    | 범위 계산, 차원 검증, upsert 후 delete 순서, `MAX_DOCUMENTS` | 상한 검사의 시점이 route 쪽이라 임베딩 전인지 후인지는 검증 대상 밖이다(BUG-S-06).                                                                                                           |
+| `chat-rate-limit.test.ts`                             | Lua 반환 4요소, 폴백, 일일 상한, 문자 예산                   | 4xx 를 `ChatRateLimitConfigurationError` 로 바꾸는 동작을 계약으로 고정했다. 429 가 여기 섞이는 것이 문제인데 테스트가 그것을 보증하고 있다(BUG-S-07).                                       |
+| `use-chat.test.tsx`                                   | 스트림 이벤트 처리, 오류 메시지, 재시도                      | reader 해제·스트림 취소·`controller.abort()` 호출 여부를 보지 않는다(BUG-S-09).                                                                                                              |
+| `sse-stream.test.ts`                                  | `data:` 파싱, `[DONE]`, 중단 시 예외                         | `\r\n` 이 조각 경계에 걸리는 입력이 없다(BUG-S-10).                                                                                                                                          |
+| `storage-source-url.test.ts`                          | 다른 origin·버킷·서명 URL 거부                               | 포트가 있는 origin(로컬 스택)에 대한 케이스가 없다(BUG-S-12).                                                                                                                                |
+| `remove-photo-from-album.test.ts` (1)                 | `photoIds` 제거와 `coverPhotoId` 승계                        | 반환 타입에 `cover` 가 없어 스냅샷 미갱신이 애초에 테스트 관심 밖이다(BUG-S-13).                                                                                                             |
+| `list-crud.test.ts` (14)                              | 정책 분기, 0행 처리, 정렬 RPC 대조                           | 디코더 기본값이 쓰기로 굳는 read-write 왕복은 범위 밖이다(BUG-S-02).                                                                                                                         |
+| jsdom 환경 전반                                       | DOM 구조, 이벤트, 상태 전이                                  | 레이아웃이 없어 `offsetParent` 가 항상 `null` 이다. 포커스 트랩의 가시성 판정 결함은 단위 테스트로 재현 자체가 불가능하다(BUG-C-02).                                                         |
 
 comment drift(BUG-S-19, Firestore 잔재 주석)는 ARCH-D-10·ARCH-A-14 와 같은 정리 작업이라 05 문서에서 다룬다.

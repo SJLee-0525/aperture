@@ -83,10 +83,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
 
   // 저장 여부는 상태가 아니라 두 값의 차이다. updater 안에서 setDirty 를 부르면 렌더 도중
   // 다른 상태를 갱신하게 되고, 복구본 적용·저장처럼 두 값이 함께 움직이는 경로에서 어긋난다.
-  const dirty = useMemo(
-    () => formFingerprint(form) !== savedFingerprint,
-    [form, savedFingerprint],
-  );
+  const dirty = useMemo(() => formFingerprint(form) !== savedFingerprint, [form, savedFingerprint]);
   // 열한 개 폼과 같은 가드에 등록한다. 등록하지 않으면 셸 헤더의 워드마크·사이트 보기·
   // 로그아웃이 편집 중에도 경고 없이 이동한다.
   const confirmLeave = useUnsavedForm(dirty);

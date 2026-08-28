@@ -7,7 +7,6 @@ import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
 import { getMusicWorkRepository } from "@/lib/admin/music-work-repository";
 
-
 type Props = { params: Promise<{ id: string }> };
 
 /**

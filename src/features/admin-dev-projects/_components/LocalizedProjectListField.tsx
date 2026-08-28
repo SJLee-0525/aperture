@@ -74,7 +74,11 @@ const LocalizedProjectListField = ({
                 onChange={(event) => onEdit(arrayKey, index, "en", event.target.value)}
               />
             </div>
-            <button type="button" className={styles.remove} onClick={() => onRemove(arrayKey, index)}>
+            <button
+              type="button"
+              className={styles.remove}
+              onClick={() => onRemove(arrayKey, index)}
+            >
               삭제
             </button>
           </li>

@@ -25,12 +25,12 @@
 04 문서의 31개 ID 전부와, `05-architecture.md` 의 **관리자 항목 4건을 이 계획이 흡수한다**.
 UI-A-06/08/31 과 ARCH-A-03 은 같은 사실을 두 번 측정한 것이고, 나머지 셋도 관리자 파일만 건드린다.
 
-| 흡수하는 05 항목 | 04 의 대응 |
-| --- | --- |
-| ARCH-A-03 관리자 CRUD 껍데기 6~7세트 (높음) | UI-A-06 · UI-A-08 · UI-A-31 |
-| ARCH-A-19 ko/en 필드쌍 30개소 (중간) | UI-A-07 의 폼 CSS 원자와 같은 층 |
-| ARCH-A-18 `moveItem` 5벌 (낮음) | 없음 (설정 편집기 공통) |
-| ARCH-A-11 `AdminMonitoring` 이동 (낮음) | 없음 |
+| 흡수하는 05 항목                            | 04 의 대응                       |
+| ------------------------------------------- | -------------------------------- |
+| ARCH-A-03 관리자 CRUD 껍데기 6~7세트 (높음) | UI-A-06 · UI-A-08 · UI-A-31      |
+| ARCH-A-19 ko/en 필드쌍 30개소 (중간)        | UI-A-07 의 폼 CSS 원자와 같은 층 |
+| ARCH-A-18 `moveItem` 5벌 (낮음)             | 없음 (설정 편집기 공통)          |
+| ARCH-A-11 `AdminMonitoring` 이동 (낮음)     | 없음                             |
 
 **범위 밖**: ARCH-A-05(공개 수상 목록·모달)는 `MusicCareerView`·`DevCareerView` 라 05 에 남는다.
 `vitest.config.ts` 의 include→exclude 뒤집기는 06 문서 소관이며 여기서는 신규 파일만 include 에 더한다.
@@ -39,44 +39,44 @@ UI-A-06/08/31 과 ARCH-A-03 은 같은 사실을 두 번 측정한 것이고, �
 
 착수 전 코드로 재확인한 결과 04 문서의 사실 11개가 달랐다. 계획은 아래 확인값을 따른다.
 
-| # | 보고서 서술 | 확인한 사실 |
-| --- | --- | --- |
-| 1 | 목록 컴포넌트는 6개 | **7개**다. `AdminDevArticlesList.tsx`(136줄)가 dnd 없이 같은 head·hint·loading·error·empty 골격을 쓰고 toolbar 를 얹는다. 셸을 2층으로 나눠야 이 화면도 받는다 |
-| 2 | `use-ordered-admin.ts` 가 feature 안에 있다 | **이미 `src/hooks/use-ordered-admin.ts`(145줄, 테스트 보유) 공용 훅이다.** feature 별 `use-*-admin` 6개는 `items` 를 도메인 명사로 renaming 하는 17줄 쉼이고, 목록 컴포넌트 6벌의 **유일한 구조적 차이가 그 rename** 이다 |
-| 3 | `globals.css` 에 `.sr-only` 가 없다 | **있다.** `globals.css:395-405`, 03-plan 의 C4(`10a985e`)가 넣었다. `clip-path: inset(50%)` 형태다. `.srLabel` 4벌(`TagRow`·`TimelineRow`·`LinkRow`·`ArticleTagManagerPanel`)은 지금 바로 접힌다 |
-| 4 | `--text-4` 가 라이트 2.56:1 · 다크 3.07:1 | 03-plan 의 C5(`82bccba`)가 **라이트 `#8a8a93` · 다크 `#6f6f78`** 로 이미 올렸고 "본문 텍스트 금지" 주석도 `globals.css:107-109` 에 있다. 라이트는 3.42:1 이라 그래픽 3:1 은 통과, 본문 4.5:1 은 여전히 미달이다. 남은 일은 관리자 **15파일 18줄**의 용도 분류다 |
-| 5 | 취소 시 Storage 삭제는 개발 프로젝트 폼만 | **세 곳이다.** `use-photo-editor.ts:73`, `use-work-editor.ts:54`, `use-project-editor.ts:115`. 그리고 그 삭제는 오작동이 아니다. `trackUploads` 가 `!initialPaths.has(path)` 일 때만 쌓으므로 지워지는 것은 이번 세션 업로드분뿐이고, 저장된 문서의 이미지는 남는다. 결함은 삭제 대상이 아니라 **묻지 않는다는 것**이다 |
-| 6 | `.delete`·`.remove` 정의가 40건이라 문서 예외의 "13곳" 전제가 깨졌다 | **개수는 맞지만 비교 대상이 틀렸다.** 선언 줄 40개는 **20개 파일**에 파일당 두 줄(기본 + 의사 상태)로 들어 있다. 그리고 `docs/admin-ui-conventions.md:18` 의 "13곳"은 Row 소형 텍스트 액션을 묶은 서술인데 `*Row.module.css` 가 저장소에 정확히 **13개**다. 문서는 맞게 셌다. 전제가 깨진 진짜 근거는 20개 파일 중 **7개가 Row 가 아니라는 것**이다: `SelectedPhotoChip` · `ArticleForm` · `WorkForm` · `ProjectForm` · `PosterUploadField` · `DevImageField` · `TroubleshootingField`. 예외를 Row 로 한정해 적어 뒀는데 폼·필드·칩으로 새어 나갔다 |
-| 7 | 수상·영상 폼은 훅·유틸 분리만 빠졌다 | 정규화도 없다는 결론은 맞지만 **"형제 폼 넷"이 아니다.** 저장 전 trim 을 하는 것은 둘뿐이다 — `prepareWorkInput`(`work-form-data.ts:42`, `ticketUrl`·`program`)과 `prepareProjectInput`(`project-form-data.ts:51`, `techTags`). `normalizeAlbumInput`(`album-form-data.ts:22`)은 이름도 다르고 `coverPhotoId` 보정만 하며, `photo-draft.ts` 에는 prepare 계열이 아예 없다. **검증도 갈린다** — `validateAlbumInput`(`:29`)·`validatePhotoInput`(`:80`) 둘만 `_lib` 에 있고, 나머지 넷의 인라인도 다시 두 갈래다: 훅 안(`use-work-editor.ts:61`·`use-project-editor.ts:122`)과 컴포넌트 안(`AwardForm.tsx:71`·`MediaForm.tsx:70`). 여섯 폼의 형태가 세 갈래다(D19) |
-| 8 | `ImageMigrationPanel.module.css` 를 세 패널이 재사용 | `EmbeddingMigrationPanel` 은 **자체 `.module.css` 자체가 없고** 그 파일을 직접 import 한다(`:16`). 버튼이 하나뿐이라 `:last-child` 가 그 하나를 accent 로 만든다. `.panel` 의 `max-width: 760px` 도 문서의 {720, 860, 960} 밖이다 |
-| 9 | (04 가 잡지 않음) | `RagStaleBanner.tsx:30,34` 의 `styles.detail`·`styles.later` 가 CSS 에 없어 `undefined` 로 렌더된다. 지금은 `.actions a`/`.actions button` 자손 선택자가 받쳐 화면이 정상이라 증상이 없다 |
-| 10 | 테스트 공백 24디렉토리 61파일 | 확정. 덧붙여 **`admin-music-awards`·`admin-music-media` 는 저장소에서 테스트가 0인 유일한 두 feature** 이고 `_lib/` 폴더 자체가 없다. UI-A-23 과 같은 뿌리다 |
-| 11 | Row 8벌이 공통 6블록을 공유한다 | **여섯만 완전 일치다.** `.handle` 3규칙 + `.badge` 3규칙을 다 가진 것은 `Photo`·`Album`·`Work`·`Award`·`Media`·`Project` 여섯이고, `TagRow` 는 `handle` 만(공개 배지 없음), `ArticleRow` 는 `badge` 만(핸들 없음, `:disabled` 포함 4규칙)이다. 셸은 두 블록을 **선택 사항**으로 받아야 한다(D2 단서) |
+| #   | 보고서 서술                                                          | 확인한 사실                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 목록 컴포넌트는 6개                                                  | **7개**다. `AdminDevArticlesList.tsx`(136줄)가 dnd 없이 같은 head·hint·loading·error·empty 골격을 쓰고 toolbar 를 얹는다. 셸을 2층으로 나눠야 이 화면도 받는다                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 2   | `use-ordered-admin.ts` 가 feature 안에 있다                          | **이미 `src/hooks/use-ordered-admin.ts`(145줄, 테스트 보유) 공용 훅이다.** feature 별 `use-*-admin` 6개는 `items` 를 도메인 명사로 renaming 하는 17줄 쉼이고, 목록 컴포넌트 6벌의 **유일한 구조적 차이가 그 rename** 이다                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 3   | `globals.css` 에 `.sr-only` 가 없다                                  | **있다.** `globals.css:395-405`, 03-plan 의 C4(`10a985e`)가 넣었다. `clip-path: inset(50%)` 형태다. `.srLabel` 4벌(`TagRow`·`TimelineRow`·`LinkRow`·`ArticleTagManagerPanel`)은 지금 바로 접힌다                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 4   | `--text-4` 가 라이트 2.56:1 · 다크 3.07:1                            | 03-plan 의 C5(`82bccba`)가 **라이트 `#8a8a93` · 다크 `#6f6f78`** 로 이미 올렸고 "본문 텍스트 금지" 주석도 `globals.css:107-109` 에 있다. 라이트는 3.42:1 이라 그래픽 3:1 은 통과, 본문 4.5:1 은 여전히 미달이다. 남은 일은 관리자 **15파일 18줄**의 용도 분류다                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 5   | 취소 시 Storage 삭제는 개발 프로젝트 폼만                            | **세 곳이다.** `use-photo-editor.ts:73`, `use-work-editor.ts:54`, `use-project-editor.ts:115`. 그리고 그 삭제는 오작동이 아니다. `trackUploads` 가 `!initialPaths.has(path)` 일 때만 쌓으므로 지워지는 것은 이번 세션 업로드분뿐이고, 저장된 문서의 이미지는 남는다. 결함은 삭제 대상이 아니라 **묻지 않는다는 것**이다                                                                                                                                                                                                                                                                                                                                           |
+| 6   | `.delete`·`.remove` 정의가 40건이라 문서 예외의 "13곳" 전제가 깨졌다 | **개수는 맞지만 비교 대상이 틀렸다.** 선언 줄 40개는 **20개 파일**에 파일당 두 줄(기본 + 의사 상태)로 들어 있다. 그리고 `docs/admin-ui-conventions.md:18` 의 "13곳"은 Row 소형 텍스트 액션을 묶은 서술인데 `*Row.module.css` 가 저장소에 정확히 **13개**다. 문서는 맞게 셌다. 전제가 깨진 진짜 근거는 20개 파일 중 **7개가 Row 가 아니라는 것**이다: `SelectedPhotoChip` · `ArticleForm` · `WorkForm` · `ProjectForm` · `PosterUploadField` · `DevImageField` · `TroubleshootingField`. 예외를 Row 로 한정해 적어 뒀는데 폼·필드·칩으로 새어 나갔다                                                                                                               |
+| 7   | 수상·영상 폼은 훅·유틸 분리만 빠졌다                                 | 정규화도 없다는 결론은 맞지만 **"형제 폼 넷"이 아니다.** 저장 전 trim 을 하는 것은 둘뿐이다 — `prepareWorkInput`(`work-form-data.ts:42`, `ticketUrl`·`program`)과 `prepareProjectInput`(`project-form-data.ts:51`, `techTags`). `normalizeAlbumInput`(`album-form-data.ts:22`)은 이름도 다르고 `coverPhotoId` 보정만 하며, `photo-draft.ts` 에는 prepare 계열이 아예 없다. **검증도 갈린다** — `validateAlbumInput`(`:29`)·`validatePhotoInput`(`:80`) 둘만 `_lib` 에 있고, 나머지 넷의 인라인도 다시 두 갈래다: 훅 안(`use-work-editor.ts:61`·`use-project-editor.ts:122`)과 컴포넌트 안(`AwardForm.tsx:71`·`MediaForm.tsx:70`). 여섯 폼의 형태가 세 갈래다(D19) |
+| 8   | `ImageMigrationPanel.module.css` 를 세 패널이 재사용                 | `EmbeddingMigrationPanel` 은 **자체 `.module.css` 자체가 없고** 그 파일을 직접 import 한다(`:16`). 버튼이 하나뿐이라 `:last-child` 가 그 하나를 accent 로 만든다. `.panel` 의 `max-width: 760px` 도 문서의 {720, 860, 960} 밖이다                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 9   | (04 가 잡지 않음)                                                    | `RagStaleBanner.tsx:30,34` 의 `styles.detail`·`styles.later` 가 CSS 에 없어 `undefined` 로 렌더된다. 지금은 `.actions a`/`.actions button` 자손 선택자가 받쳐 화면이 정상이라 증상이 없다                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 10  | 테스트 공백 24디렉토리 61파일                                        | 확정. 덧붙여 **`admin-music-awards`·`admin-music-media` 는 저장소에서 테스트가 0인 유일한 두 feature** 이고 `_lib/` 폴더 자체가 없다. UI-A-23 과 같은 뿌리다                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 11  | Row 8벌이 공통 6블록을 공유한다                                      | **여섯만 완전 일치다.** `.handle` 3규칙 + `.badge` 3규칙을 다 가진 것은 `Photo`·`Album`·`Work`·`Award`·`Media`·`Project` 여섯이고, `TagRow` 는 `handle` 만(공개 배지 없음), `ArticleRow` 는 `badge` 만(핸들 없음, `:disabled` 포함 4규칙)이다. 셸은 두 블록을 **선택 사항**으로 받아야 한다(D2 단서)                                                                                                                                                                                                                                                                                                                                                              |
 
 ## 확정한 설계 결정
 
-| # | 결정 | 근거 |
-| --- | --- | --- |
-| D1 | 04 와 05 의 관리자 항목을 한 계획으로 합친다 | UI-A-06/08/31 과 ARCH-A-03 이 같은 사실이다. 나누면 같은 파일을 두 번 연다 |
-| D2 | 목록 셸을 **2층**으로 나누고 Row 셸은 핸들·배지를 선택 사항으로 받는다 | `AdminListShell`(head·hint·loading·error·empty·신규 버튼) 위에 `AdminSortableList`(DndContext·센서·announcements)를 얹는다. 정렬 목록 6개는 둘 다, `AdminDevArticlesList` 는 셸만 쓴다(정정 1). `AdminSortableRow` 는 `TagRow`(배지 없음)와 `ArticleRow`(핸들 없음)를 받아야 하므로 두 블록이 필수가 아니다(정정 11) |
-| D3 | `use-*-admin` 쉼 6개를 지우고 목록이 `useOrderedAdmin` 을 직접 부른다 | 그 rename 이 여섯 목록의 유일한 구조적 차이다(정정 2). 없애면 셸 하나가 여섯을 그대로 받는다 |
-| D4 | 이탈 가드는 **세 경로**를 덮되 `<Link>` 를 버리지 않는다 | `beforeunload`(새로고침·탭 닫기), 취소의 dirty confirm, 셸 헤더의 in-app 내비게이션 **3개 전부** — `AdminChrome.tsx:37` 워드마크 `Link`, `:41` 사이트 보기 `Link`, `:44` 로그아웃 `button`. 앞의 둘은 `onNavigate`, 마지막은 `onClick` 이다. 공유 상태는 Context 로 내린다 — Next 문서가 이 시나리오를 `link.md:1092` 「Blocking navigation」 절에서 그대로 권한다. 한계 셋(`:499-503`: 수식키 클릭·외부 URL·`download`)과 브라우저 뒤로가기 미보장은 훅 JSDoc 에 남긴다 |
-| D4b | 설정 편집기의 링크형 취소를 **버튼으로 바꾸지 않는다** | 그 다섯은 raw `<Link>` 가 아니라 `AdminButton href=` 이고, 링크 변형의 타입이 `Omit<ComponentProps<typeof Link>, "aria-disabled">`(`AdminButton.tsx:16-17`)라 `onNavigate` 가 지금도 통과한다. 구현도 `linkRest` 를 `<Link>` 에 그대로 펼친다(`:48-55`, `onClick` 만 감싼다). 버튼으로 바꾸면 prefetch 와 중클릭·새 탭이 사라지고 다섯 컴포넌트에 `useRouter` 가 들어가며, 같은 관리자 안에 이탈 가드가 두 방식으로 공존한다. Context 가 감싸면 호출부 변경이 0에 가깝고 D4 와 결론이 같아진다 |
-| D5 | 복구본을 11개 폼 전부로 넓히고 **새 키 접두사**를 쓴다 | `ap-admin-draft:v1:{collection}:{id}`. `ap-admin-` 을 통째로 쓸어내면 같은 접두사를 공유하는 mock CMS 저장소 10개가 함께 사라진다(`clear-admin-workspace.ts:14-16`). `clearAdminWorkspace` 가 새 접두사도 쓸어내게 확장한다 |
-| D6 | 검증은 필드 인라인 + 첫 오류로 포커스 | 하단 `role="alert"` 한 줄은 저장소 실패 전용으로 남긴다. 마우스 사용자도 스크롤을 되짚지 않게 하는 것이 목적이다 |
-| D7 | `AdminField` 를 `<div>` + 명시 `<label htmlFor>` + context 로 바꾼다 | **85개 호출부 전부가 `AdminInput` 을 감싸므로**(전수 확인) 라벨이 고아가 되지 않는다. 힌트를 `<label>` 밖으로 빼면 UI-A-11 이 같은 변경으로 닫힌다 |
-| D8 | 정렬은 `KeyboardSensor` + 한국어 `announcements` | 핸들이 이미 `role="button"`·`tabIndex=0`·`aria-roledescription="sortable"` 을 받고 있어 낭독과 동작이 어긋나 있다. 위아래 버튼을 더하면 8개 행의 액션이 둘씩 늘어 다른 액션과 경쟁한다 |
-| D9 | `AdminButton` 의 danger 는 **테두리형** | 안전한 확인 버튼이 primary 를 가져가 패널 설명문의 권장 순서와 시선 순서가 같아진다. 같은 모양이 `ArticleForm.module.css` 의 `.remove` 에 이미 있다 |
-| D10 | 치수 문서에 **아이콘 2단계**를 신설한다 | 텍스트 버튼 44/40/36 은 그대로 두고 정사각 아이콘·칩 액션에 32(icon-md)·28(icon-sm)을 더한다. 26·30·18px 만 흡수한다. `.chipRemove` 는 24px 이상으로 올린다 |
-| D11 | 사진 태그 삭제를 블로그와 같은 수준으로 잠근다 | `ArticleTagManagerPanel` 이 이미 `usedCount > 0` 이면 `disabled` 다. 두 화면의 안전 수준이 뒤집혀 있는 상태를 없앤다 |
-| D12 | 배열 항목 삭제 confirm 은 **하위 항목을 품은 것만** | `StackGroupRow` 의 그룹 삭제와 `TroubleshootingField` 의 카드 삭제 둘이다. 단일 텍스트 항목까지 막으면 확인창이 잦아진다 |
-| D13 | 업로드는 단계 노출 + 크기 사전 검사. 취소는 넣지 않는다 | `browser-image-compression` 은 signal 을 받지만 Storage 업로드 중단은 보장되지 않아 부분 취소가 된다 |
-| D14 | 숨김 파일 input 3곳을 블로그 방식(`hidden` + 버튼 `.click()`)으로 통일한다 | 포커스가 실제 버튼에 보이고, 바이트 단위로 같은 clip 블록 3벌과 `docs/admin-ui-conventions.md:20` 의 예외 항목이 함께 사라진다 |
-| D15 | `ROUTES` 에 NEW 상수 7종을 두고 취소는 진입 허브로 보낸다 | 태그·사진 설정 → `/admin/photo`, 음악 설정 → `/admin/music`, 개발 설정 → `/admin/dev`, 전역 설정 → `/admin`. 셸이 `newHref` 를 prop 으로 받으므로 한곳에서 읽힌다 |
-| D16 | 커버리지 include 에 **이번에 만드는 파일만** 더한다 | 셸 하나가 일곱 호출부를 대표하므로 85% 임계값이 처음으로 관리자 쓰기 경로에 신호를 준다. include→exclude 뒤집기는 06 소관이다 |
-| D17 | UI-A-27 의 320px 넘침은 **실측 후 판정**한다 | CSS 계산만으로 가로 스크롤을 단정한 것이 원 보고서의 약한 지점이었다. `MockModeBadge` 가 sticky 가 아니라는 사실은 실측 없이 확정되므로 그쪽만 먼저 닫는다 |
-| D18 | 작업 순서는 CSS → 폼 계층 → 데이터 손실 → 목록 셸 → 접근성 | 목록 셸은 목록·수정 라우트·허브·Row 를 건드리고 데이터 손실은 폼을 건드려 겹치지 않는다. 다만 검증·이탈 가드는 UI-A-23(수상·영상 훅 분리)이 선행돼야 두 파일을 두 번 열지 않는다 |
-| D19 | **여섯 엔티티 폼의 `_lib` 계약을 하나로 맞춘다** | 지금 형태가 세 갈래다(정정 7). C4 에서 `prepare*Input` 이름으로 통일하고 — `normalizeAlbumInput` → `prepareAlbumInput` 개명, `preparePhotoInput` 신설 — 검증도 여섯 곳 전부 `_lib/validate-*.ts` 로 뺀다. C7 이 `{field, message}[]` 로 바꿀 때 여섯을 같은 방식으로 고치고 테스트도 `_lib` 에 붙는다. 표준을 정하지 않으면 C4 가 갈래를 하나 더 만든다 |
+| #   | 결정                                                                       | 근거                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | 04 와 05 의 관리자 항목을 한 계획으로 합친다                               | UI-A-06/08/31 과 ARCH-A-03 이 같은 사실이다. 나누면 같은 파일을 두 번 연다                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| D2  | 목록 셸을 **2층**으로 나누고 Row 셸은 핸들·배지를 선택 사항으로 받는다     | `AdminListShell`(head·hint·loading·error·empty·신규 버튼) 위에 `AdminSortableList`(DndContext·센서·announcements)를 얹는다. 정렬 목록 6개는 둘 다, `AdminDevArticlesList` 는 셸만 쓴다(정정 1). `AdminSortableRow` 는 `TagRow`(배지 없음)와 `ArticleRow`(핸들 없음)를 받아야 하므로 두 블록이 필수가 아니다(정정 11)                                                                                                                                                                           |
+| D3  | `use-*-admin` 쉼 6개를 지우고 목록이 `useOrderedAdmin` 을 직접 부른다      | 그 rename 이 여섯 목록의 유일한 구조적 차이다(정정 2). 없애면 셸 하나가 여섯을 그대로 받는다                                                                                                                                                                                                                                                                                                                                                                                                   |
+| D4  | 이탈 가드는 **세 경로**를 덮되 `<Link>` 를 버리지 않는다                   | `beforeunload`(새로고침·탭 닫기), 취소의 dirty confirm, 셸 헤더의 in-app 내비게이션 **3개 전부** — `AdminChrome.tsx:37` 워드마크 `Link`, `:41` 사이트 보기 `Link`, `:44` 로그아웃 `button`. 앞의 둘은 `onNavigate`, 마지막은 `onClick` 이다. 공유 상태는 Context 로 내린다 — Next 문서가 이 시나리오를 `link.md:1092` 「Blocking navigation」 절에서 그대로 권한다. 한계 셋(`:499-503`: 수식키 클릭·외부 URL·`download`)과 브라우저 뒤로가기 미보장은 훅 JSDoc 에 남긴다                       |
+| D4b | 설정 편집기의 링크형 취소를 **버튼으로 바꾸지 않는다**                     | 그 다섯은 raw `<Link>` 가 아니라 `AdminButton href=` 이고, 링크 변형의 타입이 `Omit<ComponentProps<typeof Link>, "aria-disabled">`(`AdminButton.tsx:16-17`)라 `onNavigate` 가 지금도 통과한다. 구현도 `linkRest` 를 `<Link>` 에 그대로 펼친다(`:48-55`, `onClick` 만 감싼다). 버튼으로 바꾸면 prefetch 와 중클릭·새 탭이 사라지고 다섯 컴포넌트에 `useRouter` 가 들어가며, 같은 관리자 안에 이탈 가드가 두 방식으로 공존한다. Context 가 감싸면 호출부 변경이 0에 가깝고 D4 와 결론이 같아진다 |
+| D5  | 복구본을 11개 폼 전부로 넓히고 **새 키 접두사**를 쓴다                     | `ap-admin-draft:v1:{collection}:{id}`. `ap-admin-` 을 통째로 쓸어내면 같은 접두사를 공유하는 mock CMS 저장소 10개가 함께 사라진다(`clear-admin-workspace.ts:14-16`). `clearAdminWorkspace` 가 새 접두사도 쓸어내게 확장한다                                                                                                                                                                                                                                                                    |
+| D6  | 검증은 필드 인라인 + 첫 오류로 포커스                                      | 하단 `role="alert"` 한 줄은 저장소 실패 전용으로 남긴다. 마우스 사용자도 스크롤을 되짚지 않게 하는 것이 목적이다                                                                                                                                                                                                                                                                                                                                                                               |
+| D7  | `AdminField` 를 `<div>` + 명시 `<label htmlFor>` + context 로 바꾼다       | **85개 호출부 전부가 `AdminInput` 을 감싸므로**(전수 확인) 라벨이 고아가 되지 않는다. 힌트를 `<label>` 밖으로 빼면 UI-A-11 이 같은 변경으로 닫힌다                                                                                                                                                                                                                                                                                                                                             |
+| D8  | 정렬은 `KeyboardSensor` + 한국어 `announcements`                           | 핸들이 이미 `role="button"`·`tabIndex=0`·`aria-roledescription="sortable"` 을 받고 있어 낭독과 동작이 어긋나 있다. 위아래 버튼을 더하면 8개 행의 액션이 둘씩 늘어 다른 액션과 경쟁한다                                                                                                                                                                                                                                                                                                         |
+| D9  | `AdminButton` 의 danger 는 **테두리형**                                    | 안전한 확인 버튼이 primary 를 가져가 패널 설명문의 권장 순서와 시선 순서가 같아진다. 같은 모양이 `ArticleForm.module.css` 의 `.remove` 에 이미 있다                                                                                                                                                                                                                                                                                                                                            |
+| D10 | 치수 문서에 **아이콘 2단계**를 신설한다                                    | 텍스트 버튼 44/40/36 은 그대로 두고 정사각 아이콘·칩 액션에 32(icon-md)·28(icon-sm)을 더한다. 26·30·18px 만 흡수한다. `.chipRemove` 는 24px 이상으로 올린다                                                                                                                                                                                                                                                                                                                                    |
+| D11 | 사진 태그 삭제를 블로그와 같은 수준으로 잠근다                             | `ArticleTagManagerPanel` 이 이미 `usedCount > 0` 이면 `disabled` 다. 두 화면의 안전 수준이 뒤집혀 있는 상태를 없앤다                                                                                                                                                                                                                                                                                                                                                                           |
+| D12 | 배열 항목 삭제 confirm 은 **하위 항목을 품은 것만**                        | `StackGroupRow` 의 그룹 삭제와 `TroubleshootingField` 의 카드 삭제 둘이다. 단일 텍스트 항목까지 막으면 확인창이 잦아진다                                                                                                                                                                                                                                                                                                                                                                       |
+| D13 | 업로드는 단계 노출 + 크기 사전 검사. 취소는 넣지 않는다                    | `browser-image-compression` 은 signal 을 받지만 Storage 업로드 중단은 보장되지 않아 부분 취소가 된다                                                                                                                                                                                                                                                                                                                                                                                           |
+| D14 | 숨김 파일 input 3곳을 블로그 방식(`hidden` + 버튼 `.click()`)으로 통일한다 | 포커스가 실제 버튼에 보이고, 바이트 단위로 같은 clip 블록 3벌과 `docs/admin-ui-conventions.md:20` 의 예외 항목이 함께 사라진다                                                                                                                                                                                                                                                                                                                                                                 |
+| D15 | `ROUTES` 에 NEW 상수 7종을 두고 취소는 진입 허브로 보낸다                  | 태그·사진 설정 → `/admin/photo`, 음악 설정 → `/admin/music`, 개발 설정 → `/admin/dev`, 전역 설정 → `/admin`. 셸이 `newHref` 를 prop 으로 받으므로 한곳에서 읽힌다                                                                                                                                                                                                                                                                                                                              |
+| D16 | 커버리지 include 에 **이번에 만드는 파일만** 더한다                        | 셸 하나가 일곱 호출부를 대표하므로 85% 임계값이 처음으로 관리자 쓰기 경로에 신호를 준다. include→exclude 뒤집기는 06 소관이다                                                                                                                                                                                                                                                                                                                                                                  |
+| D17 | UI-A-27 의 320px 넘침은 **실측 후 판정**한다                               | CSS 계산만으로 가로 스크롤을 단정한 것이 원 보고서의 약한 지점이었다. `MockModeBadge` 가 sticky 가 아니라는 사실은 실측 없이 확정되므로 그쪽만 먼저 닫는다                                                                                                                                                                                                                                                                                                                                     |
+| D18 | 작업 순서는 CSS → 폼 계층 → 데이터 손실 → 목록 셸 → 접근성                 | 목록 셸은 목록·수정 라우트·허브·Row 를 건드리고 데이터 손실은 폼을 건드려 겹치지 않는다. 다만 검증·이탈 가드는 UI-A-23(수상·영상 훅 분리)이 선행돼야 두 파일을 두 번 열지 않는다                                                                                                                                                                                                                                                                                                               |
+| D19 | **여섯 엔티티 폼의 `_lib` 계약을 하나로 맞춘다**                           | 지금 형태가 세 갈래다(정정 7). C4 에서 `prepare*Input` 이름으로 통일하고 — `normalizeAlbumInput` → `prepareAlbumInput` 개명, `preparePhotoInput` 신설 — 검증도 여섯 곳 전부 `_lib/validate-*.ts` 로 뺀다. C7 이 `{field, message}[]` 로 바꿀 때 여섯을 같은 방식으로 고치고 테스트도 `_lib` 에 붙는다. 표준을 정하지 않으면 C4 가 갈래를 하나 더 만든다                                                                                                                                        |
 
 ## 실행 규약
 
@@ -166,7 +166,7 @@ UI-A-06/08/31 과 ARCH-A-03 은 같은 사실을 두 번 측정한 것이고, �
   - 훅 안(1단 이동): `use-work-editor.ts:61`·`use-project-editor.ts:122`.
   - 컴포넌트 안(2단 이동): `AwardForm.tsx:71`·`MediaForm.tsx:70`. 이 둘은 훅을 새로 만들면서 동시에
     옮기므로 C4 작업량이 나머지보다 크다.
-  반환 형태는 C7 에서 `{ field, message }[]` 로 바꾸므로 여기서는 위치만 옮긴다.
+    반환 형태는 C7 에서 `{ field, message }[]` 로 바꾸므로 여기서는 위치만 옮긴다.
 - `_lib/*.test.ts` 를 붙인다. 저장소에서 테스트가 0인 두 feature 가 여기서 사라진다(정정 10).
 
 **C5 · `[REFACTOR] ko/en 필드쌍을 공용 컴포넌트로`** (ARCH-A-19)
@@ -409,43 +409,43 @@ features/admin-shell/_components/
 
 ## 항목별 판정 (ID 31개 + 흡수 4개)
 
-| 항목 | 판정 | 커밋 |
-| --- | --- | --- |
-| UI-A-01 dnd-kit 키보드 대체 수단 | 수정 | C14 |
-| UI-A-02 미저장 이탈 경고 | 수정 | C8 |
-| UI-A-03 라벨 없는 입력 3곳 | 수정 | C15 |
-| UI-A-04 검증 오류 필드 연결 | 수정 | C6 · C7 |
-| UI-A-05 배열 항목 삭제 확인 | 부분 수정 (하위 항목 2곳만, D12) | C11 |
-| UI-A-06 수정 라우트·목록 복붙 | 수정 | C2 · C12 · C13 |
-| UI-A-07 폼 CSS 원자 재정의 | 수정 (`.sr-only` 는 이미 존재, 예외 근거는 정정 6 으로 교체) | C3 · C18 |
-| UI-A-08 목록 셸 부재 | 수정 | C3 · C12 |
-| UI-A-09 파괴적 버튼의 accent | 수정 | C10 |
-| UI-A-10 앨범 사진 선택기 raw 입력 | 부분 수정 (`border-radius` 근거는 기각) | C15 |
-| UI-A-11 힌트가 접근 이름에 흡수 | 수정 | C6 |
-| UI-A-12 `role="tablist"` 에 tab 없음 | 수정 (`role="group"` + `aria-pressed`) | C15 |
-| UI-A-13 치수 3단계 이탈 | 부분 수정 (아이콘 단계 신설, 2.5.8 단정은 기각) | C18 |
-| UI-A-14 `--text-4` 대비 | 수정 (토큰은 C5 완료, 용도 분류만) | C16 |
-| UI-A-15 업로드 진행 표시 | 부분 수정 (취소 미채택, D13) | C17 |
-| UI-A-16 자동 초안 복구 | 수정 (11폼 전부) | C9 |
-| UI-A-17 사진 태그 삭제 | 수정 (사용 중이면 잠금) | C11 |
-| UI-A-18 저장 성공 미낭독 | 수정 | C16 |
-| UI-A-19 연도 `Number("")` → 0 | 수정 (`NaN` 주장은 기각) | C7 |
-| UI-A-20 공연 날짜 지우기 불가 | 수정 | C7 |
-| UI-A-21 공개 배지 연타 가드 | 수정 | C20 |
-| UI-A-22 유지보수 h1 두 개 | 수정 | C16 |
-| UI-A-23 수상·영상 폼 분리 | 수정 (범위 확대 — 여섯 폼의 `_lib` 계약 통일, D19) | C4 |
-| UI-A-24 신규 경로·취소 목적지 | 수정 | C19 |
-| UI-A-25 dnd-kit 영어 안내 | 수정 | C14 |
-| UI-A-26 삭제가 수정과 같은 무게 | 수정 | C10 · C18 |
-| UI-A-27 좁은 화면 상단 바 | 부분 수정 (배지는 수정, 320px 는 실측 후, D17) | C22 |
-| UI-A-28 대시보드 죽은 분기 | 수정 | C13 |
-| UI-A-29 숨김 파일 input 포커스 | 수정 (블로그 방식 통일) | C16 |
-| UI-A-30 배열 추가 라벨 | 수정 | C20 |
-| UI-A-31 복붙과 테스트 공백 | 수정 | C3 · C4 · C12 · C13 |
-| ARCH-A-03 관리자 CRUD 껍데기 | 수정 (흡수) | C2 · C3 · C12 · C13 |
-| ARCH-A-19 ko/en 필드쌍 30개소 | 수정 (흡수) | C5 |
-| ARCH-A-18 `moveItem` 5벌 | 수정 (흡수) | C21 |
-| ARCH-A-11 `AdminMonitoring` 이동 | 수정 (흡수) | C21 |
+| 항목                                 | 판정                                                         | 커밋                |
+| ------------------------------------ | ------------------------------------------------------------ | ------------------- |
+| UI-A-01 dnd-kit 키보드 대체 수단     | 수정                                                         | C14                 |
+| UI-A-02 미저장 이탈 경고             | 수정                                                         | C8                  |
+| UI-A-03 라벨 없는 입력 3곳           | 수정                                                         | C15                 |
+| UI-A-04 검증 오류 필드 연결          | 수정                                                         | C6 · C7             |
+| UI-A-05 배열 항목 삭제 확인          | 부분 수정 (하위 항목 2곳만, D12)                             | C11                 |
+| UI-A-06 수정 라우트·목록 복붙        | 수정                                                         | C2 · C12 · C13      |
+| UI-A-07 폼 CSS 원자 재정의           | 수정 (`.sr-only` 는 이미 존재, 예외 근거는 정정 6 으로 교체) | C3 · C18            |
+| UI-A-08 목록 셸 부재                 | 수정                                                         | C3 · C12            |
+| UI-A-09 파괴적 버튼의 accent         | 수정                                                         | C10                 |
+| UI-A-10 앨범 사진 선택기 raw 입력    | 부분 수정 (`border-radius` 근거는 기각)                      | C15                 |
+| UI-A-11 힌트가 접근 이름에 흡수      | 수정                                                         | C6                  |
+| UI-A-12 `role="tablist"` 에 tab 없음 | 수정 (`role="group"` + `aria-pressed`)                       | C15                 |
+| UI-A-13 치수 3단계 이탈              | 부분 수정 (아이콘 단계 신설, 2.5.8 단정은 기각)              | C18                 |
+| UI-A-14 `--text-4` 대비              | 수정 (토큰은 C5 완료, 용도 분류만)                           | C16                 |
+| UI-A-15 업로드 진행 표시             | 부분 수정 (취소 미채택, D13)                                 | C17                 |
+| UI-A-16 자동 초안 복구               | 수정 (11폼 전부)                                             | C9                  |
+| UI-A-17 사진 태그 삭제               | 수정 (사용 중이면 잠금)                                      | C11                 |
+| UI-A-18 저장 성공 미낭독             | 수정                                                         | C16                 |
+| UI-A-19 연도 `Number("")` → 0        | 수정 (`NaN` 주장은 기각)                                     | C7                  |
+| UI-A-20 공연 날짜 지우기 불가        | 수정                                                         | C7                  |
+| UI-A-21 공개 배지 연타 가드          | 수정                                                         | C20                 |
+| UI-A-22 유지보수 h1 두 개            | 수정                                                         | C16                 |
+| UI-A-23 수상·영상 폼 분리            | 수정 (범위 확대 — 여섯 폼의 `_lib` 계약 통일, D19)           | C4                  |
+| UI-A-24 신규 경로·취소 목적지        | 수정                                                         | C19                 |
+| UI-A-25 dnd-kit 영어 안내            | 수정                                                         | C14                 |
+| UI-A-26 삭제가 수정과 같은 무게      | 수정                                                         | C10 · C18           |
+| UI-A-27 좁은 화면 상단 바            | 부분 수정 (배지는 수정, 320px 는 실측 후, D17)               | C22                 |
+| UI-A-28 대시보드 죽은 분기           | 수정                                                         | C13                 |
+| UI-A-29 숨김 파일 input 포커스       | 수정 (블로그 방식 통일)                                      | C16                 |
+| UI-A-30 배열 추가 라벨               | 수정                                                         | C20                 |
+| UI-A-31 복붙과 테스트 공백           | 수정                                                         | C3 · C4 · C12 · C13 |
+| ARCH-A-03 관리자 CRUD 껍데기         | 수정 (흡수)                                                  | C2 · C3 · C12 · C13 |
+| ARCH-A-19 ko/en 필드쌍 30개소        | 수정 (흡수)                                                  | C5                  |
+| ARCH-A-18 `moveItem` 5벌             | 수정 (흡수)                                                  | C21                 |
+| ARCH-A-11 `AdminMonitoring` 이동     | 수정 (흡수)                                                  | C21                 |
 
 ## 검증
 
@@ -457,20 +457,20 @@ features/admin-shell/_components/
 
 **새 테스트가 고정할 계약**
 
-| 대상 | 고정할 것 |
-| --- | --- |
-| `AdminListShell` · `AdminSortableList` | loading/error/empty/list 4분기, 빈 상태 CTA, `onReorder` 호출 인자 |
-| `AdminSortableRow` | 핸들 접근 이름, 공개 배지 토글, 삭제 confirm 취소 시 미호출, **핸들 없이(ArticleRow)·배지 없이(TagRow) 렌더** |
-| `prepare*Input` 6종 | 여섯이 같은 이름·같은 반환 계약. trim 대상과 보정 규칙 |
-| `validate-*` 6종 | `{ field, message }[]` 반환, 필드 키가 실제 입력과 1:1 |
-| `use-admin-doc-load` | `alive` 가드로 언마운트 후 setState 없음, missing/error 분기 |
-| `use-unsaved-guard` | dirty 일 때만 `beforeunload` 등록, 언마운트 시 해제 |
-| `form-recovery` | 버전 불일치·TTL 만료·미래 타임스탬프·쓰기 실패 각각의 반환 |
-| `clearAdminWorkspace` | 새 draft 접두사는 지우고 mock CMS 키 10개는 남긴다 |
-| `LocalizedFieldPair` | ko/en 두 입력의 접근 이름과 `required` 전달 |
-| `AdminField` · `AdminInput` | `hint`·`error` 가 접근 이름이 아니라 `aria-describedby` 로 붙는다 |
-| `AdminButton` danger | 클래스와 `disabled` 처리 |
-| `use-ordered-admin` | `togglePublished` 진행 중 재요청 무시 |
+| 대상                                   | 고정할 것                                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `AdminListShell` · `AdminSortableList` | loading/error/empty/list 4분기, 빈 상태 CTA, `onReorder` 호출 인자                                            |
+| `AdminSortableRow`                     | 핸들 접근 이름, 공개 배지 토글, 삭제 confirm 취소 시 미호출, **핸들 없이(ArticleRow)·배지 없이(TagRow) 렌더** |
+| `prepare*Input` 6종                    | 여섯이 같은 이름·같은 반환 계약. trim 대상과 보정 규칙                                                        |
+| `validate-*` 6종                       | `{ field, message }[]` 반환, 필드 키가 실제 입력과 1:1                                                        |
+| `use-admin-doc-load`                   | `alive` 가드로 언마운트 후 setState 없음, missing/error 분기                                                  |
+| `use-unsaved-guard`                    | dirty 일 때만 `beforeunload` 등록, 언마운트 시 해제                                                           |
+| `form-recovery`                        | 버전 불일치·TTL 만료·미래 타임스탬프·쓰기 실패 각각의 반환                                                    |
+| `clearAdminWorkspace`                  | 새 draft 접두사는 지우고 mock CMS 키 10개는 남긴다                                                            |
+| `LocalizedFieldPair`                   | ko/en 두 입력의 접근 이름과 `required` 전달                                                                   |
+| `AdminField` · `AdminInput`            | `hint`·`error` 가 접근 이름이 아니라 `aria-describedby` 로 붙는다                                             |
+| `AdminButton` danger                   | 클래스와 `disabled` 처리                                                                                      |
+| `use-ordered-admin`                    | `togglePublished` 진행 중 재요청 무시                                                                         |
 
 **수동 확인**
 

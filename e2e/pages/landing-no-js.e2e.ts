@@ -13,9 +13,7 @@ test.describe("랜딩", () => {
 
     const rows = page.locator("main a[href^='/ko/']");
     await expect(rows.first()).toBeVisible();
-    const opacity = await rows
-      .first()
-      .evaluate((element) => getComputedStyle(element).opacity);
+    const opacity = await rows.first().evaluate((element) => getComputedStyle(element).opacity);
     expect(Number(opacity)).toBeGreaterThan(0.9);
 
     await context.close();

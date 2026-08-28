@@ -21,10 +21,9 @@ describe("useDialogIsolation", () => {
     const overlayRef = createRef<HTMLElement>();
     overlayRef.current = overlay;
 
-    const { rerender } = renderHook(
-      ({ active }) => useDialogIsolation(active, overlayRef),
-      { initialProps: { active: true } },
-    );
+    const { rerender } = renderHook(({ active }) => useDialogIsolation(active, overlayRef), {
+      initialProps: { active: true },
+    });
 
     expect(page.inert).toBe(true);
     expect(overlay.inert).not.toBe(true);

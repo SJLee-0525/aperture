@@ -40,10 +40,7 @@ describe("태그 사전 편집", () => {
 
     act(() => result.current.editLabel("seoul", "ko", "서울"));
 
-    expect(result.current.tags).toEqual([
-      { id: "seoul", ko: "서울", en: "seoul" },
-      tag("tokyo"),
-    ]);
+    expect(result.current.tags).toEqual([{ id: "seoul", ko: "서울", en: "seoul" }, tag("tokyo")]);
   });
 
   it("한 틱에 두 번 추가해도 두 번째가 첫 번째를 본다", async () => {

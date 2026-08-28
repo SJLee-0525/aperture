@@ -13,19 +13,19 @@ knip 어느 것도 문제를 잡지 못한다. 그래서 도구가 못 보는 �
 
 11개 에이전트가 각자 담당 범위의 파일을 전부 열어 읽었다. 샘플링은 금지했다.
 
-| 담당 | 범위 | 적용 기준 |
-| --- | --- | --- |
-| 인증·인가 | `lib/auth`, `lib/supabase/admin`, `features/auth`, API 라우트의 토큰 검증, `proxy.ts` | auth-implementation-patterns |
-| 서버 경계 보안 | `app/api/**`, 챗 핸들러, sentry-triage, `lib/ai`, `lib/monitoring` | security-and-hardening |
-| 클라이언트 보안 | dev-blog 마크다운 파이프라인, 업로드, analytics, legal, contact | security-and-hardening |
-| 공개 UI | gallery, photo-detail, albums, map, music, dev, search, contact, `components/` | frontend-ui-engineering |
-| 셸·횡단 UI | site-header/footer, theme, lang, 커스텀 커서·스크롤바, 챗 UI, `hooks/` | frontend-ui-engineering + fixing-motion-performance |
-| 관리자 UI | `features/admin-*`, `app/admin/**` | frontend-ui-engineering |
-| 데이터 아키텍처 | `lib/**`, `constants/`, `types/`, `mocks/` | improve-codebase-architecture |
-| 앱 계층 아키텍처 | `features/**` 구조, `app/**` 라우팅 | improve-codebase-architecture |
-| 서버 정확성 | 챗, 마크다운, 유지보수, supabase, cache, search | code-review |
-| 클라이언트 정확성 | `hooks/**`, 모든 `_hooks/`, i18n 경로, 필터 | code-review + react-state-management |
-| 규약·테스트 | `src/**` 전체의 주석 규칙·컨벤션·테스트 범위 | CLAUDE.md 직접 대조 |
+| 담당              | 범위                                                                                  | 적용 기준                                           |
+| ----------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 인증·인가         | `lib/auth`, `lib/supabase/admin`, `features/auth`, API 라우트의 토큰 검증, `proxy.ts` | auth-implementation-patterns                        |
+| 서버 경계 보안    | `app/api/**`, 챗 핸들러, sentry-triage, `lib/ai`, `lib/monitoring`                    | security-and-hardening                              |
+| 클라이언트 보안   | dev-blog 마크다운 파이프라인, 업로드, analytics, legal, contact                       | security-and-hardening                              |
+| 공개 UI           | gallery, photo-detail, albums, map, music, dev, search, contact, `components/`        | frontend-ui-engineering                             |
+| 셸·횡단 UI        | site-header/footer, theme, lang, 커스텀 커서·스크롤바, 챗 UI, `hooks/`                | frontend-ui-engineering + fixing-motion-performance |
+| 관리자 UI         | `features/admin-*`, `app/admin/**`                                                    | frontend-ui-engineering                             |
+| 데이터 아키텍처   | `lib/**`, `constants/`, `types/`, `mocks/`                                            | improve-codebase-architecture                       |
+| 앱 계층 아키텍처  | `features/**` 구조, `app/**` 라우팅                                                   | improve-codebase-architecture                       |
+| 서버 정확성       | 챗, 마크다운, 유지보수, supabase, cache, search                                       | code-review                                         |
+| 클라이언트 정확성 | `hooks/**`, 모든 `_hooks/`, i18n 경로, 필터                                           | code-review + react-state-management                |
+| 규약·테스트       | `src/**` 전체의 주석 규칙·컨벤션·테스트 범위                                          | CLAUDE.md 직접 대조                                 |
 
 결과 258건.
 
@@ -65,14 +65,14 @@ knip 어느 것도 문제를 잡지 못한다. 그래서 도구가 못 보는 �
 
 리뷰 시작 시점에 직접 실행한 값이다.
 
-| 항목 | 결과 |
-| --- | --- |
-| `tsc --noEmit` | 통과 |
-| `eslint` | 0건 |
-| `depcruise src` | 위반 0건 (1,079 모듈 / 3,037 의존) |
-| `knip` | 0건 |
-| `vitest run --coverage` | 2,115개 중 2,114개 통과 |
-| `jscpd src` | 36 clones / 687줄 / 1.29% |
+| 항목                    | 결과                               |
+| ----------------------- | ---------------------------------- |
+| `tsc --noEmit`          | 통과                               |
+| `eslint`                | 0건                                |
+| `depcruise src`         | 위반 0건 (1,079 모듈 / 3,037 의존) |
+| `knip`                  | 0건                                |
+| `vitest run --coverage` | 2,115개 중 2,114개 통과            |
+| `jscpd src`             | 36 clones / 687줄 / 1.29%          |
 
 테스트 1건(`ArticleBody.test.tsx`)이 실패했으나 11개 에이전트가 동시에 도는 부하 상태에서
 기본 5초 타임아웃을 넘긴 것이고, 단독 재실행 시 2.2초에 통과했다. 코드 결함이 아니라

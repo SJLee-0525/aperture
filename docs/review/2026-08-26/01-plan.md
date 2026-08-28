@@ -23,38 +23,38 @@ README 의 작업 순서에서 2단계(Firebase 표면 제거)가 이 계획 안
 이 계획의 첫 판에 실행 시 깨지는 항목 2개와 사실과 다른 전제 2개가 있었다. 전부 코드로 재확인해 고쳤다.
 같은 실수를 반복하지 않도록 남긴다.
 
-| # | 초안의 오류 | 확인한 사실 |
-| --- | --- | --- |
-| 1 | 로그아웃 시 `ap-admin-` 접두사 일괄 삭제 | `storage-keys.ts:8-20` 의 mock CMS 저장소 10개가 같은 접두사다. mock 모드 로그아웃 한 번에 사진·앨범·연주·프로젝트·config 가 통째로 사라진다. `:11` 주석이 접두사 용도를 "E2E 초기화"라고 이미 못박았다 |
-| 2 | mock 이미지 호스트를 `NODE_ENV` 로 게이트 | `package.json:20`·`:24` 의 `test:e2e`·`test:visual` 이 `--production --build` 이고 `e2e/run.cjs:19`·`:37` 이 `NEXT_PUBLIC_USE_MOCK=1` 이다. `NODE_ENV` 게이트는 두 스위트를 깨뜨린다 |
-| 3 | JWT 형태 선검사로 JWKS 조회를 막는다 | `GoTrueClient.js:5331` 의 `decodeJWT` 가 `:5336` `validateExp`·`:5347` `fetchJwk` 보다 먼저 3-part 분리와 `BASE64URL_REGEX` 를 돌린다. 절약되는 네트워크 왕복은 0회다 |
-| 4 | mock 생성기 2곳이 `STORAGE_IMAGE_HOSTS[0]` 에 묶여 있다 | `lib/admin/mock/mock-image-store.ts:25` 는 `URL.createObjectURL` 뿐이라 무관하다. 실제 지점은 `admin-dev-articles/_lib/mock-article-uploader.ts:34` 이고 `mock-article-uploader.test.ts:39` 가 이를 단언한다 |
-| 5 | `firebaseObjectPath` 를 그대로 유지한다 | `article-body-storage-paths.ts:47` 이 `STORAGE_IMAGE_HOSTS` 로 게이트한다. 목록에서 Firebase 를 빼면 항상 `null` 인 도달 불가 코드가 된다 |
-| 6 | AUTH-05 는 한 줄 재사용이다 | `require-admin-session.ts:8` 에 "role 은 다시 검사하지 않는다"가 명시돼 있다. 문서화된 결정의 번복이다 |
-| 7 | `next.config.ts` 는 Firebase 제거 범위 밖이다 | `:36-43` 의 `remotePatterns` Firebase 항목과 "M8 까지 유지" 주석이 남아 있다 |
-| 8 | 새 `_lib` 파일을 커버리지 include 에 추가해야 한다 | `vitest.config.ts:12` 의 `src/features/**/_lib/*.ts` 가 이미 글롭이다. 반대로 `read-limited-body.ts` 를 `lib/http/` 로 옮기면 조용히 빠진다 |
-| 9 | `deps:check` 가 레이어 위반을 잡는다 | `.dependency-cruiser.cjs` 에는 `no-circular`·`not-to-unresolvable` 둘뿐이다. 레이어 규칙은 CLAUDE.md 컨벤션이지 CI 게이트가 아니다 |
+| #   | 초안의 오류                                             | 확인한 사실                                                                                                                                                                                                  |
+| --- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | 로그아웃 시 `ap-admin-` 접두사 일괄 삭제                | `storage-keys.ts:8-20` 의 mock CMS 저장소 10개가 같은 접두사다. mock 모드 로그아웃 한 번에 사진·앨범·연주·프로젝트·config 가 통째로 사라진다. `:11` 주석이 접두사 용도를 "E2E 초기화"라고 이미 못박았다      |
+| 2   | mock 이미지 호스트를 `NODE_ENV` 로 게이트               | `package.json:20`·`:24` 의 `test:e2e`·`test:visual` 이 `--production --build` 이고 `e2e/run.cjs:19`·`:37` 이 `NEXT_PUBLIC_USE_MOCK=1` 이다. `NODE_ENV` 게이트는 두 스위트를 깨뜨린다                         |
+| 3   | JWT 형태 선검사로 JWKS 조회를 막는다                    | `GoTrueClient.js:5331` 의 `decodeJWT` 가 `:5336` `validateExp`·`:5347` `fetchJwk` 보다 먼저 3-part 분리와 `BASE64URL_REGEX` 를 돌린다. 절약되는 네트워크 왕복은 0회다                                        |
+| 4   | mock 생성기 2곳이 `STORAGE_IMAGE_HOSTS[0]` 에 묶여 있다 | `lib/admin/mock/mock-image-store.ts:25` 는 `URL.createObjectURL` 뿐이라 무관하다. 실제 지점은 `admin-dev-articles/_lib/mock-article-uploader.ts:34` 이고 `mock-article-uploader.test.ts:39` 가 이를 단언한다 |
+| 5   | `firebaseObjectPath` 를 그대로 유지한다                 | `article-body-storage-paths.ts:47` 이 `STORAGE_IMAGE_HOSTS` 로 게이트한다. 목록에서 Firebase 를 빼면 항상 `null` 인 도달 불가 코드가 된다                                                                    |
+| 6   | AUTH-05 는 한 줄 재사용이다                             | `require-admin-session.ts:8` 에 "role 은 다시 검사하지 않는다"가 명시돼 있다. 문서화된 결정의 번복이다                                                                                                       |
+| 7   | `next.config.ts` 는 Firebase 제거 범위 밖이다           | `:36-43` 의 `remotePatterns` Firebase 항목과 "M8 까지 유지" 주석이 남아 있다                                                                                                                                 |
+| 8   | 새 `_lib` 파일을 커버리지 include 에 추가해야 한다      | `vitest.config.ts:12` 의 `src/features/**/_lib/*.ts` 가 이미 글롭이다. 반대로 `read-limited-body.ts` 를 `lib/http/` 로 옮기면 조용히 빠진다                                                                  |
+| 9   | `deps:check` 가 레이어 위반을 잡는다                    | `.dependency-cruiser.cjs` 에는 `no-circular`·`not-to-unresolvable` 둘뿐이다. 레이어 규칙은 CLAUDE.md 컨벤션이지 CI 게이트가 아니다                                                                           |
 
 ## 확정한 설계 결정
 
-| # | 결정 | 근거 |
-| --- | --- | --- |
-| D1 | 34건 전부 판정한다 | 기각도 근거를 남겨야 재보고되지 않는다 |
-| D2 | AUTH-01 은 Upstash 실패 카운터 fail-open. 형태 선검사는 넣지 않는다 | 관리자 1명 운영에서 공유 카운터 부재로 관리자가 잠기면 안 된다. 선검사는 라이브러리가 이미 하는 일이라 왕복을 0회 절약한다 |
-| D3 | `verifyAdminIdToken` 은 순수 검증기 유지, 스로틀은 별도 모듈 | 네트워크 부수효과가 섞이면 테스트가 어려워지고 SRP 가 깨진다 |
-| D4 | Upstash 전송 계층을 `lib/rate-limit/` 로 추출 | 관리자용을 더하면 중복이 세 벌이 된다. `lib → features` 는 CLAUDE.md 위반이라 `lib` 에 둔다 |
-| D5 | 챗 RAG 로그는 프로덕션에서 계측값만, 개발에서만 원문 | 방침 위반을 없애면서 로컬 디버깅은 유지한다 |
-| D6 | GPS 는 자동 채움 유지 + 배지·지우기 버튼. 저장 정밀도는 손대지 않는다 | 11m 로 줄여도 자택은 자택이라 방어 효과가 없고 지도 핀만 뭉개진다 |
-| D7 | CSP nonce 전환은 기각. `connect-src` 축소 + 관리자 유휴 signOut | nonce 는 proxy matcher 를 전 경로로 넓혀야 하고 정적 우선 렌더와 충돌한다 |
-| D8 | Firebase 호스트는 제거. mock origin 게이트는 `NEXT_PUBLIC_USE_MOCK === "1"` | `NODE_ENV` 로 하면 프로덕션 빌드 + mock 인 e2e·시각 회귀가 깨진다 |
-| D9 | 이미지 origin 정화기는 실데이터 확인 후 엄격 거부. mock 게이트를 D8 과 공유 | 구형 URL 이 남아 있으면 공개 화면 커버가 빈다 |
-| D10 | 로그아웃 정리는 명시 키 목록. 접두사 스윕 금지 | `ap-admin-` 은 mock CMS 저장소 10개와 공유하는 E2E 초기화용 접두사다 |
-| D11 | `/api/chat` 은 `Content-Type` 필수, `Sec-Fetch-Site` 는 있을 때만 검사 | 헤더를 떼는 환경의 방문자를 막지 않으면서 simple request 경로를 닫는다 |
-| D12 | GA `page_location` 은 허용 목록 방식으로 정제 | 딥링크 id 분석은 유지하고 검색어는 내보내지 않는다 |
-| D13 | `lib/` 신규 파일만 커버리지 include 에 추가 | 파일 단위로 추가해야 기존 무테스트 파일이 임계값을 깨뜨리지 않는다 |
-| D14 | 참고 항목은 한 줄짜리만 구현, 나머지는 주석으로 계약 명시 | 방어 깊이와 작업량의 균형 |
-| D15 | AUTH-05 는 기각. `require-admin-session` 의 단일 책임을 유지하고 JSDoc 만 보강 | 문서화된 결정이고 계정이 1개라 "로그인했지만 admin 아님" 상태가 없다 |
-| D16 | 즉시 피해 항목(SEC-S-02)을 리팩터보다 먼저 내보낸다 | 동작 변경 0인 추출 작업이 실피해 수정보다 앞설 이유가 없다 |
+| #   | 결정                                                                           | 근거                                                                                                                       |
+| --- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| D1  | 34건 전부 판정한다                                                             | 기각도 근거를 남겨야 재보고되지 않는다                                                                                     |
+| D2  | AUTH-01 은 Upstash 실패 카운터 fail-open. 형태 선검사는 넣지 않는다            | 관리자 1명 운영에서 공유 카운터 부재로 관리자가 잠기면 안 된다. 선검사는 라이브러리가 이미 하는 일이라 왕복을 0회 절약한다 |
+| D3  | `verifyAdminIdToken` 은 순수 검증기 유지, 스로틀은 별도 모듈                   | 네트워크 부수효과가 섞이면 테스트가 어려워지고 SRP 가 깨진다                                                               |
+| D4  | Upstash 전송 계층을 `lib/rate-limit/` 로 추출                                  | 관리자용을 더하면 중복이 세 벌이 된다. `lib → features` 는 CLAUDE.md 위반이라 `lib` 에 둔다                                |
+| D5  | 챗 RAG 로그는 프로덕션에서 계측값만, 개발에서만 원문                           | 방침 위반을 없애면서 로컬 디버깅은 유지한다                                                                                |
+| D6  | GPS 는 자동 채움 유지 + 배지·지우기 버튼. 저장 정밀도는 손대지 않는다          | 11m 로 줄여도 자택은 자택이라 방어 효과가 없고 지도 핀만 뭉개진다                                                          |
+| D7  | CSP nonce 전환은 기각. `connect-src` 축소 + 관리자 유휴 signOut                | nonce 는 proxy matcher 를 전 경로로 넓혀야 하고 정적 우선 렌더와 충돌한다                                                  |
+| D8  | Firebase 호스트는 제거. mock origin 게이트는 `NEXT_PUBLIC_USE_MOCK === "1"`    | `NODE_ENV` 로 하면 프로덕션 빌드 + mock 인 e2e·시각 회귀가 깨진다                                                          |
+| D9  | 이미지 origin 정화기는 실데이터 확인 후 엄격 거부. mock 게이트를 D8 과 공유    | 구형 URL 이 남아 있으면 공개 화면 커버가 빈다                                                                              |
+| D10 | 로그아웃 정리는 명시 키 목록. 접두사 스윕 금지                                 | `ap-admin-` 은 mock CMS 저장소 10개와 공유하는 E2E 초기화용 접두사다                                                       |
+| D11 | `/api/chat` 은 `Content-Type` 필수, `Sec-Fetch-Site` 는 있을 때만 검사         | 헤더를 떼는 환경의 방문자를 막지 않으면서 simple request 경로를 닫는다                                                     |
+| D12 | GA `page_location` 은 허용 목록 방식으로 정제                                  | 딥링크 id 분석은 유지하고 검색어는 내보내지 않는다                                                                         |
+| D13 | `lib/` 신규 파일만 커버리지 include 에 추가                                    | 파일 단위로 추가해야 기존 무테스트 파일이 임계값을 깨뜨리지 않는다                                                         |
+| D14 | 참고 항목은 한 줄짜리만 구현, 나머지는 주석으로 계약 명시                      | 방어 깊이와 작업량의 균형                                                                                                  |
+| D15 | AUTH-05 는 기각. `require-admin-session` 의 단일 책임을 유지하고 JSDoc 만 보강 | 문서화된 결정이고 계정이 1개라 "로그인했지만 admin 아님" 상태가 없다                                                       |
+| D16 | 즉시 피해 항목(SEC-S-02)을 리팩터보다 먼저 내보낸다                            | 동작 변경 0인 추출 작업이 실피해 수정보다 앞설 이유가 없다                                                                 |
 
 ## 커밋 계획
 
@@ -252,89 +252,89 @@ SEC-C-05, SEC-C-03, SEC-C-10, SEC-C-13, SEC-C-04, AUTH-03, AUTH-10.
 
 ### 중간
 
-| 항목 | 판정 | 커밋 |
-| --- | --- | --- |
-| AUTH-01 관리자 표면 인증 실패 제한 없음 | 수정 | C4 |
-| SEC-S-02 챗 질의 원문 로그 | 수정 | C2 |
+| 항목                                    | 판정 | 커밋 |
+| --------------------------------------- | ---- | ---- |
+| AUTH-01 관리자 표면 인증 실패 제한 없음 | 수정 | C4   |
+| SEC-S-02 챗 질의 원문 로그              | 수정 | C2   |
 
 ### 낮음
 
-| 항목 | 판정 | 커밋 |
-| --- | --- | --- |
-| AUTH-06 로그아웃이 관리자 로컬 상태를 남김 | 수정(명시 키 목록) | C9 |
-| SEC-C-09 GPS 자동 채움 | 수정(배지·지우기·검증). 정밀도 절삭은 기각 | C8 |
-| SEC-S-01 `/api/chat` 교차 출처 | 수정 | C5 |
-| AUTH-02 localStorage 토큰 + `unsafe-inline` | nonce 기각, 완화 2건 수정 | C6·C9 |
-| SEC-C-11 CSP 의 Firebase 호스트 | 수정 | C6 |
-| SEC-C-01 이미지 URL 정화 부재 | 수정(실데이터 확인 선행) | C7 |
-| SEC-C-02 업로드 타입·크기 검증 | 완료 (`72869fb`) | C7에서 분리 |
-| SEC-S-03 트리아지 프롬프트 경계 | 수정 | C10 |
-| SEC-C-08 devProjects href 가드 | 완료 (`8e320c9`) | C7에서 분리 |
-| SEC-C-03 방침의 로컬 저장소 표 누락 | 수정 | C11 |
-| SEC-C-10 연락 초안 능동 삭제 | 수정 | C11 |
-| SEC-C-05 GA `page_location` 검색어 | 수정 | C11 |
-| SEC-S-07 502 본문의 내부 예외 | 수정 | C10 |
-| SEC-S-05 `redirect: "follow"` | 수정 | C10 |
-| SEC-S-04 `sentry-alert` 본문 절단 | 수정 | C10 |
-| AUTH-07 테스트 세션 빌드 게이트 | 수정 | C10 |
-| AUTH-09 웹훅 신선도·멱등 | 수정 | C10 |
-| SEC-C-12 Firestore 잔존 주석 | 수정 | C12 |
+| 항목                                        | 판정                                       | 커밋        |
+| ------------------------------------------- | ------------------------------------------ | ----------- |
+| AUTH-06 로그아웃이 관리자 로컬 상태를 남김  | 수정(명시 키 목록)                         | C9          |
+| SEC-C-09 GPS 자동 채움                      | 수정(배지·지우기·검증). 정밀도 절삭은 기각 | C8          |
+| SEC-S-01 `/api/chat` 교차 출처              | 수정                                       | C5          |
+| AUTH-02 localStorage 토큰 + `unsafe-inline` | nonce 기각, 완화 2건 수정                  | C6·C9       |
+| SEC-C-11 CSP 의 Firebase 호스트             | 수정                                       | C6          |
+| SEC-C-01 이미지 URL 정화 부재               | 수정(실데이터 확인 선행)                   | C7          |
+| SEC-C-02 업로드 타입·크기 검증              | 완료 (`72869fb`)                           | C7에서 분리 |
+| SEC-S-03 트리아지 프롬프트 경계             | 수정                                       | C10         |
+| SEC-C-08 devProjects href 가드              | 완료 (`8e320c9`)                           | C7에서 분리 |
+| SEC-C-03 방침의 로컬 저장소 표 누락         | 수정                                       | C11         |
+| SEC-C-10 연락 초안 능동 삭제                | 수정                                       | C11         |
+| SEC-C-05 GA `page_location` 검색어          | 수정                                       | C11         |
+| SEC-S-07 502 본문의 내부 예외               | 수정                                       | C10         |
+| SEC-S-05 `redirect: "follow"`               | 수정                                       | C10         |
+| SEC-S-04 `sentry-alert` 본문 절단           | 수정                                       | C10         |
+| AUTH-07 테스트 세션 빌드 게이트             | 수정                                       | C10         |
+| AUTH-09 웹훅 신선도·멱등                    | 수정                                       | C10         |
+| SEC-C-12 Firestore 잔존 주석                | 수정                                       | C12         |
 
 ### 참고
 
-| 항목 | 판정 | 근거 |
-| --- | --- | --- |
-| SEC-C-04 `youtubeId` 무검증 | 수정 | 한 줄. 블로그 `::youtube` 와 규칙을 맞춘다 |
-| AUTH-03 `detectSessionInUrl` | 수정 | 옵션 객체 신설. 쓰지 않는 입력 표면 |
-| AUTH-04 `iss`·`aud` 미검증 | 주석 | 현재 구성에서 우회 불가. 키 회전·다중 프로젝트 시 필요한 계약을 코드에 남긴다 |
-| AUTH-05 세션만 확인 | **기각** | `require-admin-session.ts:8` 이 이미 "role 은 검사하지 않는다"를 결정으로 적었다. 계정이 1개라 "로그인했지만 admin 아님" 상태가 없다. JSDoc 만 보강 |
-| AUTH-10 재검증 `tags` 무검사 | 수정 | `paths` 와 같은 수준으로 맞춘다 |
-| AUTH-08 Postgres `=` 조기 종료 | 기각 | 새는 값이 SHA-256 hex 이고 인증에 필요한 것은 원문 시크릿이다. 마이그레이션 주석에 명시 |
-| SEC-S-08 모델 링크 query | 기각 | 내부 경로 한정이고 XSS 가 아니다. 주석에 명시 |
-| SEC-S-09 스트림 총량 상한 | 수정 | 초과 시 throw. 제공자 오작동 시 메모리 소모를 막는다 |
-| SEC-S-10 `allowed_mentions` | 수정 | 한 줄. SEC-S-03 과 결합했을 때의 `@everyone` 을 막는다 |
-| SEC-S-11 `SCREEN_CONTEXT` 펜스 | 기각 | 본문 저자가 관리자 본인이다. `chat-prompt.ts:15` 완화가 이미 있다 |
-| SEC-C-13 `setItem` 미보호 | 수정 | 한 줄 |
-| 검수관 6-3 로그아웃 후 토큰 유효 | 주석 | 비대칭 서명 JWT 의 구조적 성질. 오해 방지용 |
-| 검수관 6-4 포트 URL 거부 | 주석 | 더 엄격한 쪽이라 결함이 아니다. 두 파일의 계약을 맞춘다 |
-| 검수관 6-5 RPC 소유권 검증 | 주석 | 시크릿 하나가 두 함수의 전 권한을 연다는 구조만 기록 |
+| 항목                             | 판정     | 근거                                                                                                                                                |
+| -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEC-C-04 `youtubeId` 무검증      | 수정     | 한 줄. 블로그 `::youtube` 와 규칙을 맞춘다                                                                                                          |
+| AUTH-03 `detectSessionInUrl`     | 수정     | 옵션 객체 신설. 쓰지 않는 입력 표면                                                                                                                 |
+| AUTH-04 `iss`·`aud` 미검증       | 주석     | 현재 구성에서 우회 불가. 키 회전·다중 프로젝트 시 필요한 계약을 코드에 남긴다                                                                       |
+| AUTH-05 세션만 확인              | **기각** | `require-admin-session.ts:8` 이 이미 "role 은 검사하지 않는다"를 결정으로 적었다. 계정이 1개라 "로그인했지만 admin 아님" 상태가 없다. JSDoc 만 보강 |
+| AUTH-10 재검증 `tags` 무검사     | 수정     | `paths` 와 같은 수준으로 맞춘다                                                                                                                     |
+| AUTH-08 Postgres `=` 조기 종료   | 기각     | 새는 값이 SHA-256 hex 이고 인증에 필요한 것은 원문 시크릿이다. 마이그레이션 주석에 명시                                                             |
+| SEC-S-08 모델 링크 query         | 기각     | 내부 경로 한정이고 XSS 가 아니다. 주석에 명시                                                                                                       |
+| SEC-S-09 스트림 총량 상한        | 수정     | 초과 시 throw. 제공자 오작동 시 메모리 소모를 막는다                                                                                                |
+| SEC-S-10 `allowed_mentions`      | 수정     | 한 줄. SEC-S-03 과 결합했을 때의 `@everyone` 을 막는다                                                                                              |
+| SEC-S-11 `SCREEN_CONTEXT` 펜스   | 기각     | 본문 저자가 관리자 본인이다. `chat-prompt.ts:15` 완화가 이미 있다                                                                                   |
+| SEC-C-13 `setItem` 미보호        | 수정     | 한 줄                                                                                                                                               |
+| 검수관 6-3 로그아웃 후 토큰 유효 | 주석     | 비대칭 서명 JWT 의 구조적 성질. 오해 방지용                                                                                                         |
+| 검수관 6-4 포트 URL 거부         | 주석     | 더 엄격한 쪽이라 결함이 아니다. 두 파일의 계약을 맞춘다                                                                                             |
+| 검수관 6-5 RPC 소유권 검증       | 주석     | 시크릿 하나가 두 함수의 전 권한을 연다는 구조만 기록                                                                                                |
 
 ### 조건부·보류
 
-| 항목 | 판정 |
-| --- | --- |
-| SEC-C-07 연락 폼 캡차 | 조건부가 아니라 발동 중이다. `.env.local` 에 `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` 가 설정돼 있어 Web3Forms POST 경로가 살아 있다. 코드 경계는 없고 실제 경계는 대시보드의 hCaptcha 필수 설정이다. C13 에서 문서화·항목화 |
-| SEC-C-06 `_ga` 쿠키 삭제 도메인 | 배포 환경 확인 항목. C13 |
-| SEC-S-06 rate limit `x-real-ip` 폴백 | 배포 환경 확인 항목. C13 |
+| 항목                                 | 판정                                                                                                                                                                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEC-C-07 연락 폼 캡차                | 조건부가 아니라 발동 중이다. `.env.local` 에 `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` 가 설정돼 있어 Web3Forms POST 경로가 살아 있다. 코드 경계는 없고 실제 경계는 대시보드의 hCaptcha 필수 설정이다. C13 에서 문서화·항목화 |
+| SEC-C-06 `_ga` 쿠키 삭제 도메인      | 배포 환경 확인 항목. C13                                                                                                                                                                                               |
+| SEC-S-06 rate limit `x-real-ip` 폴백 | 배포 환경 확인 항목. C13                                                                                                                                                                                               |
 
 ### 리뷰가 다루지 않은 추가 발견
 
-| 항목 | 내용 | 커밋 |
-| --- | --- | --- |
-| ENV-01 | `.env.local` 에 `NEXT_PUBLIC_FIREBASE_*` 6개와 `NEXT_PUBLIC_ADMIN_UID` 가 남아 있다. 코드 참조는 0건이라 죽은 값이지만 Firebase 표면의 일부다. `NEXT_PUBLIC_ADMIN_UID` 는 관리자 판별이 `app_metadata.role` 로 바뀌기 전의 잔재다 | C6 |
-| ENV-02 | `mocks/dev-articles.ts:16-17` 과 `mock-article-uploader.ts:34` 가 `STORAGE_IMAGE_HOSTS[0]` 의 Firebase URL 형태에 묶여 있다. SEC-C-11 을 단독 적용하면 mock 모드 본문 이미지가 정책에서 차단되고 `mock-article-uploader.test.ts:39` 가 깨진다 | C6 |
+| 항목   | 내용                                                                                                                                                                                                                                          | 커밋 |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| ENV-01 | `.env.local` 에 `NEXT_PUBLIC_FIREBASE_*` 6개와 `NEXT_PUBLIC_ADMIN_UID` 가 남아 있다. 코드 참조는 0건이라 죽은 값이지만 Firebase 표면의 일부다. `NEXT_PUBLIC_ADMIN_UID` 는 관리자 판별이 `app_metadata.role` 로 바뀌기 전의 잔재다             | C6   |
+| ENV-02 | `mocks/dev-articles.ts:16-17` 과 `mock-article-uploader.ts:34` 가 `STORAGE_IMAGE_HOSTS[0]` 의 Firebase URL 형태에 묶여 있다. SEC-C-11 을 단독 적용하면 mock 모드 본문 이미지가 정책에서 차단되고 `mock-article-uploader.test.ts:39` 가 깨진다 | C6   |
 
 ## 검증
 
 각 커밋 후 `npm run check` · `npm run lint` · `npm run test:coverage` · `npm run deps:check`.
 `deps:check` 는 `no-circular`·`not-to-unresolvable` 만 보므로 레이어 위반은 잡지 못한다.
 
-| 단계 | 추가 확인 |
-| --- | --- |
-| C2 | 프로덕션 빌드 로그에 질의 원문 0건 |
-| C3 | 기존 rate limit 테스트 567줄이 수정 없이 통과 |
-| C4 | 관리자 로그인 후 4개 경로 수동 확인. `npm run test:e2e:admin` 이 Upstash 를 타지 않음 |
-| C5 | `curl -H "Content-Type: text/plain"` 이 거부됨 |
-| C6 | `npm run build` 후 CSP 에 googleapis 0건. `npm run test:e2e` · `npm run test:visual` 필수 |
-| C7 | 실데이터 origin 조회 결과를 아래 열린 항목에 기록한 뒤 적용 |
+| 단계  | 추가 확인                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------------------------ |
+| C2    | 프로덕션 빌드 로그에 질의 원문 0건                                                                                 |
+| C3    | 기존 rate limit 테스트 567줄이 수정 없이 통과                                                                      |
+| C4    | 관리자 로그인 후 4개 경로 수동 확인. `npm run test:e2e:admin` 이 Upstash 를 타지 않음                              |
+| C5    | `curl -H "Content-Type: text/plain"` 이 거부됨                                                                     |
+| C6    | `npm run build` 후 CSP 에 googleapis 0건. `npm run test:e2e` · `npm run test:visual` 필수                          |
+| C7    | 실데이터 origin 조회 결과를 아래 열린 항목에 기록한 뒤 적용                                                        |
 | C8·C9 | 실제 관리자 로그인으로 좌표 폼·로그아웃 확인. mock 모드에서 로그아웃 후 사진·앨범 데이터가 남아 있는지 반드시 확인 |
-| 전체 | `npm run test:e2e` |
+| 전체  | `npm run test:e2e`                                                                                                 |
 
 `package.json` 을 건드리는 단계는 없으므로 lockfile 재생성 절차는 필요 없다.
 
 ## 진행 상황
 
-C1~C6, C8~C13 을 커밋했다. **C7 만 남아 있고 선행 조건이 열린 항목 3번이다.**
+C1~~C6, C8~~C13 을 커밋했다. **C7 만 남아 있고 선행 조건이 열린 항목 3번이다.**
 
 계획과 달라진 것 둘을 기록한다.
 

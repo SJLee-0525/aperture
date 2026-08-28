@@ -130,12 +130,5 @@ const SUPABASE_COLLECTIONS: Record<
  */
 const tableFor = (collection: TableCollectionId): string => SUPABASE_COLLECTIONS[collection].table;
 
-export {
-  COLLECTIONS,
-  SITE_DOC,
-  SITE_MUSIC_DOC,
-  SITE_DEV_DOC,
-  SUPABASE_COLLECTIONS,
-  tableFor,
-};
+export { COLLECTIONS, SITE_DOC, SITE_MUSIC_DOC, SITE_DEV_DOC, SUPABASE_COLLECTIONS, tableFor };
 export type { CollectionId, SortableCollectionId, TableCollectionId };

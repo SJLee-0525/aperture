@@ -7,7 +7,6 @@ import { AdminDocGate } from "@/features/admin-shell/_components/AdminDocGate";
 
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
 
-
 type Props = { params: Promise<{ id: string }> };
 
 /**

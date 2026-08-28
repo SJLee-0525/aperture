@@ -37,10 +37,7 @@ describe("useFocusTrap", () => {
   let clientRectsDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
-    clientRectsDescriptor = Object.getOwnPropertyDescriptor(
-      Element.prototype,
-      "getClientRects",
-    );
+    clientRectsDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "getClientRects");
     Object.defineProperty(Element.prototype, "getClientRects", {
       configurable: true,
       writable: true,

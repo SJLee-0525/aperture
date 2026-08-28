@@ -1,10 +1,7 @@
 import { headers } from "next/headers";
 
 import { clientAddress } from "@/lib/rate-limit/client-address";
-import {
-  INCREMENT_WITH_EXPIRY_SCRIPT,
-  retryAfterSeconds,
-} from "@/lib/rate-limit/counter";
+import { INCREMENT_WITH_EXPIRY_SCRIPT, retryAfterSeconds } from "@/lib/rate-limit/counter";
 import {
   evalUpstashScript,
   resolveUpstashCredentials,

@@ -76,8 +76,7 @@ const usePhotoPanelSheet = (): PhotoPanelSheet => {
     (event: TouchEvent<HTMLElement>) => {
       const startY = event.touches[0]?.clientY ?? null;
       touchStartY.current = startY;
-      collapsePullStartY.current =
-        expanded && event.currentTarget.scrollTop <= 1 ? startY : null;
+      collapsePullStartY.current = expanded && event.currentTarget.scrollTop <= 1 ? startY : null;
     },
     [expanded],
   );
@@ -132,11 +131,8 @@ const usePhotoPanelSheet = (): PhotoPanelSheet => {
       }
 
       const sameDirection =
-        wheelTravel.current === 0 ||
-        Math.sign(wheelTravel.current) === Math.sign(event.deltaY);
-      wheelTravel.current = sameDirection
-        ? wheelTravel.current + event.deltaY
-        : event.deltaY;
+        wheelTravel.current === 0 || Math.sign(wheelTravel.current) === Math.sign(event.deltaY);
+      wheelTravel.current = sameDirection ? wheelTravel.current + event.deltaY : event.deltaY;
 
       if (wheelTravel.current > 8) expandPanel(panel);
     },

@@ -5,7 +5,6 @@ import { createContext, useContext, useId } from "react";
 import type { AdminFieldName } from "@/lib/admin/field-issue";
 import type { ComponentProps, ReactNode } from "react";
 
-
 import styles from "./AdminField.module.css";
 
 type AdminFieldContextValue = {

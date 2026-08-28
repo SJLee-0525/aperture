@@ -68,7 +68,6 @@ const ArticleTocDrawer = ({ items, activeId, open, panelId, lang, onClose, onSel
     current.focus({ preventScroll: true });
   }, [open, activeId, panelRef]);
 
-
   if (!mounted || !open) return null;
 
   return createPortal(

@@ -10,7 +10,6 @@ import { adminAlbumRoute } from "@/constants/routes";
 
 import type { AdminAlbumListItem } from "@/types/admin";
 
-
 import styles from "./AlbumRow.module.css";
 
 type Props = {
@@ -38,7 +37,11 @@ const AlbumRow = ({ album, coverUrl, publishBusy, onTogglePublished, onDelete }:
       onTogglePublished={(next) => onTogglePublished(album.id, next)}
       editHref={adminAlbumRoute(album.id)}
       onDelete={() => onDelete(album.id)}
-      confirmDelete={{ name: album.title.ko || ADMIN_UNTITLED, noun: "앨범", note: "사진은 지워지지 않습니다." }}
+      confirmDelete={{
+        name: album.title.ko || ADMIN_UNTITLED,
+        noun: "앨범",
+        note: "사진은 지워지지 않습니다.",
+      }}
     >
       <span className={`${row.thumb} ${styles.thumb}`}>
         {coverUrl ? (

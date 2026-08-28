@@ -50,12 +50,7 @@ describe("저장 경계", () => {
     });
 
     const [fields] = mocks.updateFields.mock.calls[0]!;
-    expect(Object.keys(fields).sort()).toEqual([
-      "contactLead",
-      "landingLead",
-      "links",
-      "tagline",
-    ]);
+    expect(Object.keys(fields).sort()).toEqual(["contactLead", "landingLead", "links", "tagline"]);
   });
 
   it("저장 전에 링크를 정리하고 정리된 값을 폼에 되돌린다", async () => {

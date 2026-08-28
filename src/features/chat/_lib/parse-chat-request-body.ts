@@ -1,4 +1,8 @@
-import { ChatRequestError, MAX_BODY_BYTES, parseChatRequest } from "@/features/chat/_lib/chat-schema";
+import {
+  ChatRequestError,
+  MAX_BODY_BYTES,
+  parseChatRequest,
+} from "@/features/chat/_lib/chat-schema";
 
 import { declaredBodyTooLarge, readLimitedBody } from "@/lib/http/read-limited-body";
 

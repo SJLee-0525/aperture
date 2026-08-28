@@ -2,7 +2,6 @@ import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { normalizePublicHref } from "@/lib/security/public-url";
 
-
 import type { MusicWorkInput } from "@/lib/supabase/music";
 import type { MusicWork } from "@/types/music";
 

@@ -50,7 +50,6 @@ const AwardForm = ({ awardId, initial }: Props) => {
       recovery={recovery}
       onRestore={(restored) => applyForm(restored as typeof form)}
     >
-
       <section className={base.section}>
         <h2 className={base.legend}>연도 · 장소</h2>
         <div className={base.grid2}>
@@ -106,7 +105,6 @@ const AwardForm = ({ awardId, initial }: Props) => {
           <span>공개 (방문자에게 표시)</span>
         </label>
       </section>
-
     </AdminFormShell>
   );
 };

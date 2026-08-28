@@ -7,13 +7,7 @@
  *
  * 이중언어 필드는 `LocalizedFieldPair` 가 한국어 쪽에 `{어간}.ko` 를 붙인다.
  */
-type AdminFieldName =
-  | "title.ko"
-  | "name.ko"
-  | "image"
-  | "photoIds"
-  | "performedAt"
-  | "year";
+type AdminFieldName = "title.ko" | "name.ko" | "image" | "photoIds" | "performedAt" | "year";
 
 /** 이중언어 쌍이 화면에 붙이는 어간. 검증기는 `.ko` 를 붙인 이름을 낸다. */
 type AdminFieldStem = "title" | "name";

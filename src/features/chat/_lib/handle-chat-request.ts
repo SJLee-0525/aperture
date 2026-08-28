@@ -174,7 +174,9 @@ const handleChatRequest = async (
   // 최신 데이터 재조회도 요청 안에서 하나의 promise를 공유한다.
   let freshDataPromise: Promise<ChatProfileData> | undefined;
   const getFreshData =
-    contentSource === "live" ? () => (freshDataPromise ??= loadFreshData(contentSource)) : undefined;
+    contentSource === "live"
+      ? () => (freshDataPromise ??= loadFreshData(contentSource))
+      : undefined;
   // 섹션 게이트(verified)와 화면 문맥이 같은 조회 결과를 보도록 하나의 promise 를 공유한다.
   // 나뉘면 한쪽만 비공개를 반영해 누수가 반만 닫힌다.
   let freshLookupPromise: Promise<ScreenContextLookup> | undefined;

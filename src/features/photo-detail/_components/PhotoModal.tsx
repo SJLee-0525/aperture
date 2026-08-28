@@ -31,7 +31,6 @@ import { readPhotoNeighbors } from "@/features/photo-detail/_lib/photo-neighbors
 import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 
-
 import type { Photo } from "@/types/photo";
 import type { Tag } from "@/types/tag";
 

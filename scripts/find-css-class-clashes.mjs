@@ -31,7 +31,11 @@ const propsByClass = (cssText) => {
     }
     if (props.size === 0) continue;
     for (const part of selector.split(",")) {
-      const last = part.trim().split(/[\s>+~]+/).pop() ?? "";
+      const last =
+        part
+          .trim()
+          .split(/[\s>+~]+/)
+          .pop() ?? "";
       /* 클래스 하나만으로 이루어진 셀렉터만 센다. `.a:hover` 나 `.a.b` 는 조건이 붙거나
          명시도가 높아 순서가 승자를 정하지 않는다. */
       const bare = /^\.([A-Za-z_][-\w]*)$/.exec(last);
@@ -132,7 +136,10 @@ const findCssClassClashes = ({ files, readCss }) => {
       if (!expression.replace("className=", "").includes("className")) continue;
       const own = sourcesIn(expression, aliases).filter(([cssPath]) => cssPath !== globalsPath);
       if (own.length === 0) continue;
-      const name = path.split(/[\\/]/).pop().replace(/\.tsx$/, "");
+      const name = path
+        .split(/[\\/]/)
+        .pop()
+        .replace(/\.tsx$/, "");
       mergers.set(name, [...(mergers.get(name) ?? []), ...own]);
     }
   }

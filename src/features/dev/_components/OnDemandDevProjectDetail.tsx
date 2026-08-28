@@ -12,7 +12,6 @@ import { setCursorLoading } from "@/features/pointer-chrome/_lib/pointer-chrome-
 
 import { pickText } from "@/lib/i18n/pick-text";
 
-
 import type { DevProject, DevProjectCardData } from "@/types/dev";
 import type { DevArticleProjectLink } from "@/types/dev-article";
 

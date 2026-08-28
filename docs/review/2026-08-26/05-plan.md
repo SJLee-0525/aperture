@@ -25,14 +25,14 @@
 
 ### 이미 해소된 항목 (작업 불필요)
 
-| 항목 | 어디서 | 확인한 사실 |
-| --- | --- | --- |
-| ARCH-D-01·D-02·D-07 디코더 2~3벌 | 02 (`c9f1997`) | `lib/supabase/decode/field.ts` 필드 리더 + 컬렉션 디코더 한 벌. `TableCollectionId` 로 `Partial` 제거, `?? "리터럴"` 7곳·throw 2곳 소멸. `sortRpc` 는 서술자로 흡수 |
-| ARCH-D-09 캐시 태그 | 02 (BUG-S-15) | 제안과 **반대 방향으로** 해소. `documentCacheTag` 를 site 전용으로 좁히는 대신 `list-crud.ts:66` 이 전 쓰기에서 컬렉션·문서 태그를 함께 무효화한다 |
-| ARCH-D-13 포트 검사 | 02 (BUG-S-12) | 코드와 양쪽 주석 모두 정정 |
-| ARCH-A-08 Escape 13곳 | 03 (`dadbf8d`) | `use-escape-key.ts` 신설, 7곳 이관. 남은 6곳은 각각 파일에 근거 기록 |
-| ARCH-A-26 법적 문서 라우트 | 02 (`c97f2de`) | `[legalDoc]` 통합 + 무-로케일 308 |
-| ARCH-D-10 의 `src/**` 부분 | 01 (`ced6c4e`·`f3bee30`) | 남은 Firebase 언급 **12줄 / 3파일**이 전부 정당(레거시 Storage URL 마이그레이션 지원, 태그 이름 예시) |
+| 항목                             | 어디서                   | 확인한 사실                                                                                                                                                         |
+| -------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ARCH-D-01·D-02·D-07 디코더 2~3벌 | 02 (`c9f1997`)           | `lib/supabase/decode/field.ts` 필드 리더 + 컬렉션 디코더 한 벌. `TableCollectionId` 로 `Partial` 제거, `?? "리터럴"` 7곳·throw 2곳 소멸. `sortRpc` 는 서술자로 흡수 |
+| ARCH-D-09 캐시 태그              | 02 (BUG-S-15)            | 제안과 **반대 방향으로** 해소. `documentCacheTag` 를 site 전용으로 좁히는 대신 `list-crud.ts:66` 이 전 쓰기에서 컬렉션·문서 태그를 함께 무효화한다                  |
+| ARCH-D-13 포트 검사              | 02 (BUG-S-12)            | 코드와 양쪽 주석 모두 정정                                                                                                                                          |
+| ARCH-A-08 Escape 13곳            | 03 (`dadbf8d`)           | `use-escape-key.ts` 신설, 7곳 이관. 남은 6곳은 각각 파일에 근거 기록                                                                                                |
+| ARCH-A-26 법적 문서 라우트       | 02 (`c97f2de`)           | `[legalDoc]` 통합 + 무-로케일 308                                                                                                                                   |
+| ARCH-D-10 의 `src/**` 부분       | 01 (`ced6c4e`·`f3bee30`) | 남은 Firebase 언급 **12줄 / 3파일**이 전부 정당(레거시 Storage URL 마이그레이션 지원, 태그 이름 예시)                                                               |
 
 ### 04-plan 이 흡수한 항목
 
@@ -67,16 +67,16 @@ ARCH-D-05 · D-08 · D-15 · D-17 · A-25 · A-27. 여섯 모두 문서가 착�
 
 ## 보고서에서 정정한 것
 
-| # | 보고서 서술 | 확인한 사실 |
-| --- | --- | --- |
-| 1 | ARCH-D-03 의 셋째 지점 — `getDevProject` 의 mock 폴백이 계약을 가른다 | **기각.** `MOCK_DEV_PROJECT_DETAILS` 는 `mocks/dev.ts:376` 이 "수상 모달 딥링크에서만 조회하며 공개 목록에 노출하지 않는 fixture" 라고 적은 의도된 설계이고 `mocks/dev.test.ts:22-33` 이 계약을 고정한다. live 에는 목록 밖 published 프로젝트가 존재할 수 없다. 나머지 두 지점은 실재한다 |
-| 2 | ARCH-D-09 — `documentCacheTag` 를 site 전용으로 좁힌다 | **반대 방향으로 이미 해소됐다.** 지금 좁히면 02 의 BUG-S-15 수정이 되돌아간다 |
-| 3 | ARCH-A-28 — `max-width: 1180px` 가 15개 | **17파일 18줄**이다. 그리고 개수보다 중요한 것은 **9벌이 4줄 블록 단위로 바이트 동일**이라는 사실이고, 원 보고서의 `PublicPageShell` 제안은 헤더·푸터·랜딩·스켈레톤 8줄을 받지 못한다 |
-| 4 | ARCH-A-08 — 13곳을 전부 교체한다 | 03 이 7곳만 이관하고 6곳은 각각 근거를 남겼다. "전부 교체" 는 이미 반증된 처방이다 |
-| 5 | ARCH-A-23 의 대상 `DevProjectCard.tsx` | **그 이름의 파일이 없다.** 실제 대상은 `PhotoTile.tsx`·`Chip.tsx` 둘이다 |
-| 6 | ARCH-D-10 — `src/**` 64줄 / 44파일 | 01 작업 후 **12줄 / 3파일**이 남았고 전부 정당하다. 남은 실제 대상은 `vitest.config.ts:13` 의 거짓 근거 주석, CLAUDE.md 구조도, ADR-0001 개정 표기 셋뿐이다 |
-| 7 | (보고서가 잡지 않음) | CLAUDE.md 가 서술하는 **프레임 내보내기 기능이 코드에 없다.** `features/export/`·`FRAME_STYLES` 뿐 아니라 Project Vision 과 스택 표의 "내보내기 · 클라이언트 canvas · 프레임 6종" 행도 구현이 없다 |
-| 8 | (보고서가 잡지 않음) | 문서에 없는 feature 가 12개가 아니라 **13개**다. `features/status/` 가 빠졌다 |
+| #   | 보고서 서술                                                           | 확인한 사실                                                                                                                                                                                                                                                                                |
+| --- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | ARCH-D-03 의 셋째 지점 — `getDevProject` 의 mock 폴백이 계약을 가른다 | **기각.** `MOCK_DEV_PROJECT_DETAILS` 는 `mocks/dev.ts:376` 이 "수상 모달 딥링크에서만 조회하며 공개 목록에 노출하지 않는 fixture" 라고 적은 의도된 설계이고 `mocks/dev.test.ts:22-33` 이 계약을 고정한다. live 에는 목록 밖 published 프로젝트가 존재할 수 없다. 나머지 두 지점은 실재한다 |
+| 2   | ARCH-D-09 — `documentCacheTag` 를 site 전용으로 좁힌다                | **반대 방향으로 이미 해소됐다.** 지금 좁히면 02 의 BUG-S-15 수정이 되돌아간다                                                                                                                                                                                                              |
+| 3   | ARCH-A-28 — `max-width: 1180px` 가 15개                               | **17파일 18줄**이다. 그리고 개수보다 중요한 것은 **9벌이 4줄 블록 단위로 바이트 동일**이라는 사실이고, 원 보고서의 `PublicPageShell` 제안은 헤더·푸터·랜딩·스켈레톤 8줄을 받지 못한다                                                                                                      |
+| 4   | ARCH-A-08 — 13곳을 전부 교체한다                                      | 03 이 7곳만 이관하고 6곳은 각각 근거를 남겼다. "전부 교체" 는 이미 반증된 처방이다                                                                                                                                                                                                         |
+| 5   | ARCH-A-23 의 대상 `DevProjectCard.tsx`                                | **그 이름의 파일이 없다.** 실제 대상은 `PhotoTile.tsx`·`Chip.tsx` 둘이다                                                                                                                                                                                                                   |
+| 6   | ARCH-D-10 — `src/**` 64줄 / 44파일                                    | 01 작업 후 **12줄 / 3파일**이 남았고 전부 정당하다. 남은 실제 대상은 `vitest.config.ts:13` 의 거짓 근거 주석, CLAUDE.md 구조도, ADR-0001 개정 표기 셋뿐이다                                                                                                                                |
+| 7   | (보고서가 잡지 않음)                                                  | CLAUDE.md 가 서술하는 **프레임 내보내기 기능이 코드에 없다.** `features/export/`·`FRAME_STYLES` 뿐 아니라 Project Vision 과 스택 표의 "내보내기 · 클라이언트 canvas · 프레임 6종" 행도 구현이 없다                                                                                         |
+| 8   | (보고서가 잡지 않음)                                                  | 문서에 없는 feature 가 12개가 아니라 **13개**다. `features/status/` 가 빠졌다                                                                                                                                                                                                              |
 
 ---
 
@@ -89,14 +89,14 @@ ARCH-D-05 · D-08 · D-15 · D-17 · A-25 · A-27. 여섯 모두 문서가 착�
 `use-roving-list-focus` 는 들어오는 엣지도 나가는 엣지도 0이다. 결과로 **오버레이 6개가
 6가지 다른 조합**을 손으로 적는다.
 
-| 컴포넌트 | focusTrap | scrollLock | escapeKey | dialogIsolation | overlayLayer |
-| --- | --- | --- | --- | --- | --- |
-| `Modal` | ✓ | ✓ | ✓ | — | 간접 |
-| `ChatPanel` | ✓ | ✓ `{fixBodyOnMobile:false}` | ✓ | ✓ | 간접 |
-| `ArticleTocDrawer` | ✓ | ✓ | ✓ | ✓ | 간접 |
-| `MobileMenu` | ✓ | ✓ `{fixBodyOnMobile:false, lockRootOnMobile:false}` | ✓ | — | 간접 |
-| `ImageLightbox` | ✓ | ✓ | **자체 리스너** | — | ✓ 직접 |
-| `PhotoModal` | ✓ | ✓ | **자체 리스너** | — | ✓ 직접 |
+| 컴포넌트           | focusTrap | scrollLock                                          | escapeKey       | dialogIsolation | overlayLayer |
+| ------------------ | --------- | --------------------------------------------------- | --------------- | --------------- | ------------ |
+| `Modal`            | ✓         | ✓                                                   | ✓               | —               | 간접         |
+| `ChatPanel`        | ✓         | ✓ `{fixBodyOnMobile:false}`                         | ✓               | ✓               | 간접         |
+| `ArticleTocDrawer` | ✓         | ✓                                                   | ✓               | ✓               | 간접         |
+| `MobileMenu`       | ✓         | ✓ `{fixBodyOnMobile:false, lockRootOnMobile:false}` | ✓               | —               | 간접         |
+| `ImageLightbox`    | ✓         | ✓                                                   | **자체 리스너** | —               | ✓ 직접       |
+| `PhotoModal`       | ✓         | ✓                                                   | **자체 리스너** | —               | ✓ 직접       |
 
 여섯 전부 `createPortal(..., document.body)` + `role="dialog"` + `aria-modal="true"` 를 각자 적고
 `useMounted` 도 넷이 각자 부른다. 규칙이 모듈이 아니라 **여섯 벌의 호출 순서에만** 있다.
@@ -191,14 +191,14 @@ focus 소유권, `.sr-only` 기법, skip-link. 규칙은 `globals.css` 주석 3�
 유지하되 **구현만 공용으로 옮긴다**" 였다. `git log b81adae..HEAD -- dev-article-recovery.ts` 가
 **0건**이다.
 
-| 계약 | 11개 폼 | 블로그 |
-| --- | --- | --- |
-| dirty 지문 | `lib/admin/form-fingerprint.ts` (9줄) | `use-article-editor.ts:33` 자체 구현 (같은 `JSON.stringify`) |
-| 복구본 저장소 | `lib/admin/form-recovery.ts` (123줄) | `_lib/dev-article-recovery.ts` (137줄) |
-| 복구본 훅 | `_hooks/use-form-recovery.ts` (91줄) | `_hooks/use-article-recovery.ts` (89줄) |
-| 복구 안내 UI | `RecoveryNotice` 10줄 | `ArticleForm.tsx:84-104` 인라인 21줄 (문구·버튼 라벨 동일) |
-| 이탈 문구 | `LEAVE_MESSAGE` 상수 | `ArticleForm.tsx:67` 리터럴 재작성 |
-| 키 접두사 | `ADMIN_FORM_DRAFT_KEY_PREFIX` | `ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX` |
+| 계약          | 11개 폼                               | 블로그                                                       |
+| ------------- | ------------------------------------- | ------------------------------------------------------------ |
+| dirty 지문    | `lib/admin/form-fingerprint.ts` (9줄) | `use-article-editor.ts:33` 자체 구현 (같은 `JSON.stringify`) |
+| 복구본 저장소 | `lib/admin/form-recovery.ts` (123줄)  | `_lib/dev-article-recovery.ts` (137줄)                       |
+| 복구본 훅     | `_hooks/use-form-recovery.ts` (91줄)  | `_hooks/use-article-recovery.ts` (89줄)                      |
+| 복구 안내 UI  | `RecoveryNotice` 10줄                 | `ArticleForm.tsx:84-104` 인라인 21줄 (문구·버튼 라벨 동일)   |
+| 이탈 문구     | `LEAVE_MESSAGE` 상수                  | `ArticleForm.tsx:67` 리터럴 재작성                           |
+| 키 접두사     | `ADMIN_FORM_DRAFT_KEY_PREFIX`         | `ADMIN_DEV_ARTICLE_DRAFT_KEY_PREFIX`                         |
 
 두 저장소 모듈은 정렬 후 **바이트 동일한 줄이 61개**이고 `TTL_MS = 7*24*60*60*1000` 리터럴까지
 같다. 구조도 같다 — 버전 필드, `savedAt > now` 거부, `Pick<Storage,…>` 포트, 예외 미전파.
@@ -216,11 +216,11 @@ submit 2 · return 3. **15 × 6 = 90줄의 새 복사본이다.** 유일한 차�
 
 **POST-04 · `image`·`photoIds` 검증이 여전히 화면에 연결되지 않았다.** 전수 대조 결과:
 
-| 짝 | validator 가 내는 `field` | Form 의 `field=` / `issueFor` | 결과 |
-| --- | --- | --- | --- |
-| album | `title.ko`, **`photoIds`** | `title` 만 | **미연결** — `AlbumPhotoPicker` 에 `field`·`error` prop 자체가 없다 |
-| photo | **`image`**, `title.ko` | `title` 만 | **미연결** — `PhotoUploadField` 에 `data-field`·`AdminField` 가 0회 |
-| work · award · media · project | — | — | 정상 |
+| 짝                             | validator 가 내는 `field`  | Form 의 `field=` / `issueFor` | 결과                                                                |
+| ------------------------------ | -------------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| album                          | `title.ko`, **`photoIds`** | `title` 만                    | **미연결** — `AlbumPhotoPicker` 에 `field`·`error` prop 자체가 없다 |
+| photo                          | **`image`**, `title.ko`    | `title` 만                    | **미연결** — `PhotoUploadField` 에 `data-field`·`AdminField` 가 0회 |
+| work · award · media · project | —                          | —                             | 정상                                                                |
 
 사진은 `image` 가 **첫 issue** 라 `focusFirstIssue` 가 `false` 를 돌려주고 하단 `role="alert"` 도
 `error` 가 `null` 이라 렌더되지 않는다. **저장을 눌러도 아무 일이 일어나지 않는다.**
@@ -314,13 +314,13 @@ actions 8줄의 **골격 26줄 × 6 = 156줄**을 각자 적는다. 연속 동�
 **SEC-01 · 관리자 게이트 전처리 5벌, 실패 표현이 5곳 모두 다르다.** `authorizeAdminToken` 뒤
 verdict 를 접는 3줄이 5곳에 각각 있다.
 
-| 호출부 | throttled | unauthorized |
-| --- | --- | --- |
-| `image-source/route.ts:57-58` | `tooManyRequests()` | `unauthorized()` 지역 헬퍼 |
-| `portfolio-embeddings/route.ts:66-69` | `tooManyRequests()` | 인라인 `NextResponse.json` |
-| `portfolio-embeddings/route.ts:133-136` | 같은 파일 안 2벌째 | 같음 |
-| `preview-article-markdown.ts:50-53` | `throw Error(...)` | `throw Error(...)` |
-| `revalidate-public.ts:37-43` | `throw Error(...)` | `throw Error(...)` |
+| 호출부                                  | throttled           | unauthorized               |
+| --------------------------------------- | ------------------- | -------------------------- |
+| `image-source/route.ts:57-58`           | `tooManyRequests()` | `unauthorized()` 지역 헬퍼 |
+| `portfolio-embeddings/route.ts:66-69`   | `tooManyRequests()` | 인라인 `NextResponse.json` |
+| `portfolio-embeddings/route.ts:133-136` | 같은 파일 안 2벌째  | 같음                       |
+| `preview-article-markdown.ts:50-53`     | `throw Error(...)`  | `throw Error(...)`         |
+| `revalidate-public.ts:37-43`            | `throw Error(...)`  | `throw Error(...)`         |
 
 `tooManyRequests` 는 두 파일에 **바이트 동일한 5줄**로 복사돼 있다. 그리고 **테스트 세션
 우회가 적용된 관리자 표면이 5 중 1**이다 — `preview-article-markdown.ts:48` 만
@@ -382,20 +382,20 @@ verdict 를 접는 3줄이 5곳에 각각 있다.
 
 ## 확정한 설계 결정
 
-| # | 결정 | 근거 |
-| --- | --- | --- |
-| D1 | 04-plan 완주 후 착수하고 **완주 직후 재검수를 먼저 한다**(C0 · 완료) | 계획을 세우는 동안에도 04 가 21커밋 진행했고 `validate-work-input.ts` 가 13→17줄로 바뀌었다. 중간 시점 실측은 POST 항목이 대체했다 |
-| D12 | **POST-01·POST-04 를 Phase 3 의 맨 앞에 둔다** | 둘은 구조 문제가 아니라 관측 가능한 기능 갱이다. 블로그 편집 중 셸 링크 가드가 돌지 않고, 이미지 없이 저장하면 화면이 무반응이다. 구조 작업(C13~C18)이 그 위에 얹힌다 |
-| D2 | ARCH-A-01·A-12·UI-S-04·UI-S-12 를 **한 단계**로 묶는다 | 넷이 두 파일을 공유한다. 분해를 먼저 해야 성능 2건의 수정 지점이 함수 단위로 드러나고, 폴더 통합은 그 뒤라야 이동 대상이 확정된다 |
-| D3 | `SortableCollectionId` 로 `sortableListCrud`/`documentCrud` 를 나눈다 | 서술자가 `listDescriptor(table, sortRpc)` 팩토리로 이미 6개를 묶어 분류가 새로 생기지 않는다. `sort-rpc.ts:30` throw 와 `devArticlesCrud.updateOrder`·`.list` 함정이 타입으로 대체된다 |
-| D4 | `listProjected` 는 **테이블명만** 서술자로 흡수한다 | 6개 호출부의 select 가 전부 다르고 `dev_articles` 하나가 둘을 갖는다. `orderColumns` 의 `["id"]` 가 서술자 order 와 다른 것은 의도이고 `admin-list.ts:120-121` 이 그렇게 적었다. 드리프트 위험은 테이블명 리터럴에만 있었다 |
-| D5 | ARCH-A-28 은 **토큰 + 유틸리티 클래스** | `--page-max` 가 18줄 전부를, `.u-page-main` 이 바이트 동일한 9벌을 받는다. `PublicPageShell` 은 헤더·푸터·랜딩·스켈레톤을 받지 못해 절반만 해결한다 |
-| D6 | `features/about` → `features/photo-about`, `features/sentry-triage` → `src/lib/sentry-triage/` | 전자는 이름이 전역인데 사진 섹션 전용이고 `music`·`dev` 에 각자의 About 뷰가 있다. 후자는 24파일이 전부 `_lib/` 이라 UI 없는 서버 파이프라인이 `features/` 에 있다 |
-| D7 | `useDialog` 합성 훅을 만든다 | 오버레이 6개가 6가지 조합을 손으로 적고 `createPortal`+`role="dialog"`+`aria-modal` 을 각자 쓴다. scrollLock 옵션이 실제로 다르므로 **옵션은 그대로 받되 조립만 접는다** — 인터페이스를 넓히지 않는다 |
-| D8 | 관리자 게이트를 `withAdminToken` 하나로 접는다 | 5벌 × 3줄 + `tooManyRequests` 바이트 동일 2벌이 있고 실패 표현이 5가지다. 접는 자리가 비어 있다 |
-| D9 | Upstash **카운터**를 전송 위에 한 겹 더 둔다 | `ad5b93b` 가 전송만 뽑았다. Lua 관용구 3벌 중 둘은 바이트 동일이고 retry-after 계산도 2줄 동일이다 |
-| D10 | ARCH-A-02(챗 분해)는 **마지막 단계**에 둔다 | 저장소에서 가장 복잡한 경로다. 기존 1,267줄 테스트가 그물이지만 다른 항목이 끝난 뒤라야 실패 원인이 이 변경으로 좁혀진다 |
-| D11 | 진행 방식은 04-plan 과 동일 | 커밋마다 네 게이트, 중간 승인 없이 끝까지, `git push`·PR 없음 |
+| #   | 결정                                                                                           | 근거                                                                                                                                                                                                                        |
+| --- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | 04-plan 완주 후 착수하고 **완주 직후 재검수를 먼저 한다**(C0 · 완료)                           | 계획을 세우는 동안에도 04 가 21커밋 진행했고 `validate-work-input.ts` 가 13→17줄로 바뀌었다. 중간 시점 실측은 POST 항목이 대체했다                                                                                          |
+| D12 | **POST-01·POST-04 를 Phase 3 의 맨 앞에 둔다**                                                 | 둘은 구조 문제가 아니라 관측 가능한 기능 갱이다. 블로그 편집 중 셸 링크 가드가 돌지 않고, 이미지 없이 저장하면 화면이 무반응이다. 구조 작업(C13~C18)이 그 위에 얹힌다                                                       |
+| D2  | ARCH-A-01·A-12·UI-S-04·UI-S-12 를 **한 단계**로 묶는다                                         | 넷이 두 파일을 공유한다. 분해를 먼저 해야 성능 2건의 수정 지점이 함수 단위로 드러나고, 폴더 통합은 그 뒤라야 이동 대상이 확정된다                                                                                           |
+| D3  | `SortableCollectionId` 로 `sortableListCrud`/`documentCrud` 를 나눈다                          | 서술자가 `listDescriptor(table, sortRpc)` 팩토리로 이미 6개를 묶어 분류가 새로 생기지 않는다. `sort-rpc.ts:30` throw 와 `devArticlesCrud.updateOrder`·`.list` 함정이 타입으로 대체된다                                      |
+| D4  | `listProjected` 는 **테이블명만** 서술자로 흡수한다                                            | 6개 호출부의 select 가 전부 다르고 `dev_articles` 하나가 둘을 갖는다. `orderColumns` 의 `["id"]` 가 서술자 order 와 다른 것은 의도이고 `admin-list.ts:120-121` 이 그렇게 적었다. 드리프트 위험은 테이블명 리터럴에만 있었다 |
+| D5  | ARCH-A-28 은 **토큰 + 유틸리티 클래스**                                                        | `--page-max` 가 18줄 전부를, `.u-page-main` 이 바이트 동일한 9벌을 받는다. `PublicPageShell` 은 헤더·푸터·랜딩·스켈레톤을 받지 못해 절반만 해결한다                                                                         |
+| D6  | `features/about` → `features/photo-about`, `features/sentry-triage` → `src/lib/sentry-triage/` | 전자는 이름이 전역인데 사진 섹션 전용이고 `music`·`dev` 에 각자의 About 뷰가 있다. 후자는 24파일이 전부 `_lib/` 이라 UI 없는 서버 파이프라인이 `features/` 에 있다                                                          |
+| D7  | `useDialog` 합성 훅을 만든다                                                                   | 오버레이 6개가 6가지 조합을 손으로 적고 `createPortal`+`role="dialog"`+`aria-modal` 을 각자 쓴다. scrollLock 옵션이 실제로 다르므로 **옵션은 그대로 받되 조립만 접는다** — 인터페이스를 넓히지 않는다                       |
+| D8  | 관리자 게이트를 `withAdminToken` 하나로 접는다                                                 | 5벌 × 3줄 + `tooManyRequests` 바이트 동일 2벌이 있고 실패 표현이 5가지다. 접는 자리가 비어 있다                                                                                                                             |
+| D9  | Upstash **카운터**를 전송 위에 한 겹 더 둔다                                                   | `ad5b93b` 가 전송만 뽑았다. Lua 관용구 3벌 중 둘은 바이트 동일이고 retry-after 계산도 2줄 동일이다                                                                                                                          |
+| D10 | ARCH-A-02(챗 분해)는 **마지막 단계**에 둔다                                                    | 저장소에서 가장 복잡한 경로다. 기존 1,267줄 테스트가 그물이지만 다른 항목이 끝난 뒤라야 실패 원인이 이 변경으로 좁혀진다                                                                                                    |
+| D11 | 진행 방식은 04-plan 과 동일                                                                    | 커밋마다 네 게이트, 중간 승인 없이 끝까지, `git push`·PR 없음                                                                                                                                                               |
 
 ---
 
@@ -652,8 +652,8 @@ verdict 를 접는 3줄이 5곳에 각각 있다.
 - `usePhotoDetailSession` 을 `useQueryModal` 위에 세운다. 두 훅이 같은 history 판정(`openRef`
   하이브리드)을 쓰게 한다. 지금 photo 쪽만 effect 로 갱신되는 boolean 이다.
 - `openPhoto(id)` 를 유일한 쓰기 경로로 export 한다. `MapView.tsx:49` 의
-  `router.push(\`${pathname}?photo=${id}\`)` 와 `PhotoTile.tsx:63-67` 의 직접 URL 조작이 이걸
-  호출한다. 전자는 기존 query 를 통째로 버리는 유일한 구현이고 `replace-current-url.ts:3-5` 가
+  `router.push(\`${pathname}?photo=${id}\`)`와`PhotoTile.tsx:63-67`의 직접 URL 조작이 이걸
+호출한다. 전자는 기존 query 를 통째로 버리는 유일한 구현이고`replace-current-url.ts:3-5` 가
   적은 금지 패턴이기도 하다.
 - `src/constants/routes.ts` 에 `DETAIL_QUERY_KEYS = {photo, work, award, project}`.
   `features/analytics/_lib/analytics-query.ts:11` 의 `ANALYTICS_QUERY_ALLOWLIST` 도 여기서 파생시킨다.
@@ -807,7 +807,7 @@ props 0개인데 구현이 722줄이라 depth 가 아니라 은닉이고, 상태
 
 - 항목별 처리 결과표. **이미 해소 6건 · 04 흡수 4건 · 유지 판정 8건**의 근거를 각각 남긴다.
 - §"보고서에서 정정한 것" 8건 + 실행 중 새로 드러난 것.
-- **NEW-01~14 · SEC-01~08 의 처리 결과.** 리뷰 문서 밖에서 나온 항목이므로 어떻게 찾았는지를
+- **NEW-01~~14 · SEC-01~~08 의 처리 결과.** 리뷰 문서 밖에서 나온 항목이므로 어떻게 찾았는지를
   함께 적는다(`4c32af3..HEAD` 재대조).
 - ARCH-A-04 의 실측(49 → 7 → 2)과 그에 따라 ARCH-A-22 의 전제가 사라진 경위.
 - C27 의 프레임 비용 실측 수치.
@@ -816,78 +816,78 @@ props 0개인데 구현이 722줄이라 depth 가 아니라 은닉이고, 상태
 
 ## 항목별 판정 (ID 34개 + 흡수 2 + 이월 2)
 
-| 항목 | 판정 | 커밋 |
-| --- | --- | --- |
-| ARCH-A-01 CustomCursor 722줄 | 수정 | C26 |
-| ARCH-A-02 handleChatRequest 327줄 | 수정 | C32 |
-| ARCH-A-03 관리자 CRUD 껍데기 | 04 흡수 (완료) | — |
-| ARCH-A-04 useLang 리프 클라이언트화 | **유지** (실측 후보 2파일) | — |
-| ARCH-A-05 수상 목록·모달 복붙 | 수정 | C19 |
-| ARCH-A-06 `?photo=` 쓰기 4벌 | 수정 | C21 |
-| ARCH-A-07 useQueryModal 통합 | 수정 | C21 |
-| ARCH-A-08 Escape 13곳 | **완료** (03 `dadbf8d`, 7곳 이관·6곳 근거 기록) | — |
-| ARCH-A-09 앨범 상세 모달 로딩 | 수정 | C22 |
-| ARCH-A-10 라우트의 도메인 투영 | 수정 | C23 |
-| ARCH-A-11 AdminMonitoring 이동 | 04 흡수 (완료) | — |
-| ARCH-A-12 커서·스크롤바 DOM 결합 | 수정 | C28 |
-| ARCH-A-13 hooks 소비처 1곳 2개 | 수정 | C30 |
-| ARCH-A-15 legal-documents 1,090줄 | 수정 (라우팅 분리 추가) | C29 |
-| ARCH-A-16 PublicPageSkeletons | 수정 | C25 |
-| ARCH-A-17 sentry-triage 위치 | 수정 (`lib/` 로 이동) | C30 |
-| ARCH-A-18 moveItem 5벌 | 04 흡수 (완료) | — |
-| ARCH-A-19 ko/en 필드쌍 | 04 흡수 (18/30개소, 잔여는 04 후속) | — |
-| ARCH-A-20 eslint shared 패턴 | 수정 | C31 |
-| ARCH-A-21 about 이름 + split-lead 3벌 | 수정 (개명 + 승격) | C25 · C30 |
-| ARCH-A-22 dictionary 640줄 분할 | **유지** (A-04 전제 소멸) | — |
-| ARCH-A-23 components 순수성 누수 | 수정 (대상 2파일) | C21 |
-| ARCH-A-24 브레이크포인트 하드코딩 | 수정 | C24 |
-| ARCH-A-25 검색 2분할 | **유지** (이론적) | — |
-| ARCH-A-26 법적 문서 라우트 | **완료** (02 `c97f2de`) | — |
-| ARCH-A-27 on-demand 2층위 | **유지** (이론적) | — |
-| ARCH-A-28 `max-width: 1180px` | 수정 (토큰 + 유틸, 실측 17파일) | C24 |
-| ARCH-D-01 디코더 2~3벌 | **완료** (02 `c9f1997`) | — |
-| ARCH-D-02 서술자 단일 출처 | **완료** (02, `TableCollectionId`) | — |
-| ARCH-D-03 mock/live 계약 | 부분 수정 (2/3 지점. 셋째는 기각) | C2 |
-| ARCH-D-04 mergeRow 위치 | 수정 | C3 |
-| ARCH-D-05 이미지 파생본 4파일 | **유지** (이론적) | — |
-| ARCH-D-06 listCrud 인터페이스 | 수정 | C5 |
-| ARCH-D-07 무검증 캐스팅 | **완료** (02, 필드 리더) | — |
-| ARCH-D-08 site_documents 코덱 | **유지** (이론적) | — |
-| ARCH-D-09 캐시 태그 | **완료** (02 BUG-S-15, 반대 방향) | — |
-| ARCH-D-10 Firestore 잔재 | 부분 수정 (`src/**` 는 01 완료, 문서·게이트만) | C33 |
-| ARCH-D-11 REST 클라이언트 2벌 | 수정 | C4 |
-| ARCH-D-12 keywordSimilarity 죽은 코드 | 수정 | C7 |
-| ARCH-D-13 포트 검사 | **완료** (02 BUG-S-12) | — |
-| ARCH-D-14 lib 루트 평면 파일 | 부분 수정 (함수만 이동) | C7 |
-| ARCH-D-15 buildRagChunks 부분성 | **유지** (이론적) | — |
-| ARCH-D-16 rag-source mock 미경유 | 수정 | C7 |
-| ARCH-D-17 `cache()` 미적용 | **유지** (이론적) | — |
-| CONV-02 `_types/` 폴더 2개 (06 흡수) | 수정 | C30 |
-| CONV-03 boundaries 미감시 (06 흡수) | 수정 | C31 |
-| UI-S-04 스크롤바 관찰 범위 (03 이월) | 수정 | C27 |
-| UI-S-12 휠마다 getComputedStyle (03 이월) | 수정 | C27 |
+| 항목                                      | 판정                                            | 커밋      |
+| ----------------------------------------- | ----------------------------------------------- | --------- |
+| ARCH-A-01 CustomCursor 722줄              | 수정                                            | C26       |
+| ARCH-A-02 handleChatRequest 327줄         | 수정                                            | C32       |
+| ARCH-A-03 관리자 CRUD 껍데기              | 04 흡수 (완료)                                  | —         |
+| ARCH-A-04 useLang 리프 클라이언트화       | **유지** (실측 후보 2파일)                      | —         |
+| ARCH-A-05 수상 목록·모달 복붙             | 수정                                            | C19       |
+| ARCH-A-06 `?photo=` 쓰기 4벌              | 수정                                            | C21       |
+| ARCH-A-07 useQueryModal 통합              | 수정                                            | C21       |
+| ARCH-A-08 Escape 13곳                     | **완료** (03 `dadbf8d`, 7곳 이관·6곳 근거 기록) | —         |
+| ARCH-A-09 앨범 상세 모달 로딩             | 수정                                            | C22       |
+| ARCH-A-10 라우트의 도메인 투영            | 수정                                            | C23       |
+| ARCH-A-11 AdminMonitoring 이동            | 04 흡수 (완료)                                  | —         |
+| ARCH-A-12 커서·스크롤바 DOM 결합          | 수정                                            | C28       |
+| ARCH-A-13 hooks 소비처 1곳 2개            | 수정                                            | C30       |
+| ARCH-A-15 legal-documents 1,090줄         | 수정 (라우팅 분리 추가)                         | C29       |
+| ARCH-A-16 PublicPageSkeletons             | 수정                                            | C25       |
+| ARCH-A-17 sentry-triage 위치              | 수정 (`lib/` 로 이동)                           | C30       |
+| ARCH-A-18 moveItem 5벌                    | 04 흡수 (완료)                                  | —         |
+| ARCH-A-19 ko/en 필드쌍                    | 04 흡수 (18/30개소, 잔여는 04 후속)             | —         |
+| ARCH-A-20 eslint shared 패턴              | 수정                                            | C31       |
+| ARCH-A-21 about 이름 + split-lead 3벌     | 수정 (개명 + 승격)                              | C25 · C30 |
+| ARCH-A-22 dictionary 640줄 분할           | **유지** (A-04 전제 소멸)                       | —         |
+| ARCH-A-23 components 순수성 누수          | 수정 (대상 2파일)                               | C21       |
+| ARCH-A-24 브레이크포인트 하드코딩         | 수정                                            | C24       |
+| ARCH-A-25 검색 2분할                      | **유지** (이론적)                               | —         |
+| ARCH-A-26 법적 문서 라우트                | **완료** (02 `c97f2de`)                         | —         |
+| ARCH-A-27 on-demand 2층위                 | **유지** (이론적)                               | —         |
+| ARCH-A-28 `max-width: 1180px`             | 수정 (토큰 + 유틸, 실측 17파일)                 | C24       |
+| ARCH-D-01 디코더 2~3벌                    | **완료** (02 `c9f1997`)                         | —         |
+| ARCH-D-02 서술자 단일 출처                | **완료** (02, `TableCollectionId`)              | —         |
+| ARCH-D-03 mock/live 계약                  | 부분 수정 (2/3 지점. 셋째는 기각)               | C2        |
+| ARCH-D-04 mergeRow 위치                   | 수정                                            | C3        |
+| ARCH-D-05 이미지 파생본 4파일             | **유지** (이론적)                               | —         |
+| ARCH-D-06 listCrud 인터페이스             | 수정                                            | C5        |
+| ARCH-D-07 무검증 캐스팅                   | **완료** (02, 필드 리더)                        | —         |
+| ARCH-D-08 site_documents 코덱             | **유지** (이론적)                               | —         |
+| ARCH-D-09 캐시 태그                       | **완료** (02 BUG-S-15, 반대 방향)               | —         |
+| ARCH-D-10 Firestore 잔재                  | 부분 수정 (`src/**` 는 01 완료, 문서·게이트만)  | C33       |
+| ARCH-D-11 REST 클라이언트 2벌             | 수정                                            | C4        |
+| ARCH-D-12 keywordSimilarity 죽은 코드     | 수정                                            | C7        |
+| ARCH-D-13 포트 검사                       | **완료** (02 BUG-S-12)                          | —         |
+| ARCH-D-14 lib 루트 평면 파일              | 부분 수정 (함수만 이동)                         | C7        |
+| ARCH-D-15 buildRagChunks 부분성           | **유지** (이론적)                               | —         |
+| ARCH-D-16 rag-source mock 미경유          | 수정                                            | C7        |
+| ARCH-D-17 `cache()` 미적용                | **유지** (이론적)                               | —         |
+| CONV-02 `_types/` 폴더 2개 (06 흡수)      | 수정                                            | C30       |
+| CONV-03 boundaries 미감시 (06 흡수)       | 수정                                            | C31       |
+| UI-S-04 스크롤바 관찰 범위 (03 이월)      | 수정                                            | C27       |
+| UI-S-12 휠마다 getComputedStyle (03 이월) | 수정                                            | C27       |
 
 수정 30 · 부분 수정 4 · 완료(선행 작업) 8 · 04 흡수 4 · 유지 8.
 
 ### 보고서 밖 항목의 배치
 
-| 항목 | 커밋 | 항목 | 커밋 |
-| --- | --- | --- | --- |
-| NEW-01 dialog 합성점 부재 | C20 | POST-05 검증 규칙 6벌 | C13 |
-| NEW-02 useEscapeKey 죽은 인터페이스 | C20 | POST-06 삭제 확인 11벌 | C15 |
-| NEW-03 keydown 규약 6벌 | C20 | POST-07 AdminFormShell 부재 | C16 |
-| NEW-04 history 계약 분기 | C21 | POST-08 목록 셸 잔여 리터럴 | C17 |
-| NEW-05 디코더 객체·배열 리더 | C6 | POST-09 죽은 인터페이스 3건 | C16 · C18 |
-| NEW-06 `.sr-only` 로컬 3벌 | C25 | POST-10 행 CSS 중복 | C17 |
-| NEW-07 공개 화면 컨벤션 문서 0 | C33 | POST-11 배관 2자리 | C16 |
-| NEW-08 legal 책임 4개 | C29 | POST-12 NEW 경로 리터럴 | C17 |
-| POST-01 블로그 이탈 가드 미연결 | C11 | POST-13 `void _id` 7벌 | C13 |
-| POST-02 블로그 복구본 평행 구현 | C11 | SEC-01 관리자 게이트 5벌 | C8 |
-| POST-03 dirty 배선 6벌 | C14 | SEC-02 Upstash 카운터 | C9 |
-| POST-04 검증 오류 미표시 | C12 | SEC-03 본문 상한·죽은 분기 | C10 |
-| SEC-04 API 오류 응답 5벌 | C10 | SEC-05 챗 오류 표현 4벌 | C32 |
-| SEC-06 replaceRagDocuments 순서 의존 | C32 | SEC-07 로그아웃 절차 2벌 | C11 |
-| SEC-08 초안 타이머 누적 | C7 | | |
+| 항목                                 | 커밋 | 항목                        | 커밋      |
+| ------------------------------------ | ---- | --------------------------- | --------- |
+| NEW-01 dialog 합성점 부재            | C20  | POST-05 검증 규칙 6벌       | C13       |
+| NEW-02 useEscapeKey 죽은 인터페이스  | C20  | POST-06 삭제 확인 11벌      | C15       |
+| NEW-03 keydown 규약 6벌              | C20  | POST-07 AdminFormShell 부재 | C16       |
+| NEW-04 history 계약 분기             | C21  | POST-08 목록 셸 잔여 리터럴 | C17       |
+| NEW-05 디코더 객체·배열 리더         | C6   | POST-09 죽은 인터페이스 3건 | C16 · C18 |
+| NEW-06 `.sr-only` 로컬 3벌           | C25  | POST-10 행 CSS 중복         | C17       |
+| NEW-07 공개 화면 컨벤션 문서 0       | C33  | POST-11 배관 2자리          | C16       |
+| NEW-08 legal 책임 4개                | C29  | POST-12 NEW 경로 리터럴     | C17       |
+| POST-01 블로그 이탈 가드 미연결      | C11  | POST-13 `void _id` 7벌      | C13       |
+| POST-02 블로그 복구본 평행 구현      | C11  | SEC-01 관리자 게이트 5벌    | C8        |
+| POST-03 dirty 배선 6벌               | C14  | SEC-02 Upstash 카운터       | C9        |
+| POST-04 검증 오류 미표시             | C12  | SEC-03 본문 상한·죽은 분기  | C10       |
+| SEC-04 API 오류 응답 5벌             | C10  | SEC-05 챗 오류 표현 4벌     | C32       |
+| SEC-06 replaceRagDocuments 순서 의존 | C32  | SEC-07 로그아웃 절차 2벌    | C11       |
+| SEC-08 초안 타이머 누적              | C7   |                             |           |
 
 ---
 
@@ -900,38 +900,38 @@ props 0개인데 구현이 722줄이라 depth 가 아니라 은닉이고, 상태
 
 **추가 확인**
 
-| 시점 | 무엇을 |
-| --- | --- |
-| C3 | `npm run build` — `import "server-only"` 뒤 공개 fetcher 가 브라우저 번들에 남아 있으면 빌드가 잡는다 |
-| C11 | `npm run test:e2e:admin` — 블로그 이탈 가드가 셸 링크 셋에서 실제로 걸리는지. 복구본 키 마이그레이션 |
-| C12 | 이미지 없이 사진 저장·사진 없이 앨범 저장 시 오류 문구와 포커스 이동 |
-| C16·C17 | `npm run test:e2e:admin` — 폼 셸·목록 셸 이관 회귀 |
-| C20 | `npm run test:e2e` 접근성 스위트 — 03 이 세운 focus·ESC·스크롤 잠금 계약 |
-| C21 | 지도·갤러리·앨범에서 사진을 열고 닫아 history 동작 확인. 정적 진입(`?photo=` 딥링크)도 |
-| C24 | 320px·760px·1100px 세 폭에서 그리드 열 수 |
-| C26~C28 | `npm run test:e2e` — 자동 스크롤·스냅·로딩 표시 |
-| C32 | 기존 `handle-chat-request.test.ts` 1,267줄이 **무수정** 통과 |
+| 시점    | 무엇을                                                                                                |
+| ------- | ----------------------------------------------------------------------------------------------------- |
+| C3      | `npm run build` — `import "server-only"` 뒤 공개 fetcher 가 브라우저 번들에 남아 있으면 빌드가 잡는다 |
+| C11     | `npm run test:e2e:admin` — 블로그 이탈 가드가 셸 링크 셋에서 실제로 걸리는지. 복구본 키 마이그레이션  |
+| C12     | 이미지 없이 사진 저장·사진 없이 앨범 저장 시 오류 문구와 포커스 이동                                  |
+| C16·C17 | `npm run test:e2e:admin` — 폼 셸·목록 셸 이관 회귀                                                    |
+| C20     | `npm run test:e2e` 접근성 스위트 — 03 이 세운 focus·ESC·스크롤 잠금 계약                              |
+| C21     | 지도·갤러리·앨범에서 사진을 열고 닫아 history 동작 확인. 정적 진입(`?photo=` 딥링크)도                |
+| C24     | 320px·760px·1100px 세 폭에서 그리드 열 수                                                             |
+| C26~C28 | `npm run test:e2e` — 자동 스크롤·스냅·로딩 표시                                                       |
+| C32     | 기존 `handle-chat-request.test.ts` 1,267줄이 **무수정** 통과                                          |
 
 **새 테스트가 고정할 계약**
 
-| 대상 | 고정할 것 |
-| --- | --- |
-| `publishedInOrder` | 초안 제외와 order 정렬. `content/*` 네 getter 가 같은 결과 |
-| `local-list-repository.remove` | 없는 id 는 실패. live 와 같은 오류 조건 |
-| `row-merge` | `data` 잔존값이 행 스칼라를 이기지 못한다 |
-| `restFetch` | 헤더 조립(`apikey` 만), 재시도 on/off, `accessToken` 이 `Authorization` 으로만 |
-| `sortableListCrud` / `documentCrud` | `devArticles` 에 `updateOrder`·`list` 가 **타입에 없다** |
-| `decode/field` 새 리더 | `objects`·`readLinks`·타임라인이 형 불일치를 폴백으로 흡수 |
-| `withAdminToken` | throttled·unauthorized 응답 형태, 테스트 세션 우회 대상 |
-| `rate-limit/counter` | 창 카운터의 첫 요청 TTL 설정, 일 버킷 경계, retry-after 초 계산 |
-| `useDialog` | 여섯 조합이 같은 portal·ARIA 계약, scrollLock 옵션 통과 |
-| `usePhotoDetailSession` | `useQueryModal` 과 같은 push/replace 판정. 한 틱에 두 번 열기 |
-| `FieldIssue` 유니온 | 생산자 키와 `data-field` 가 어긋나면 `tsc` 실패 |
-| `useConfigDirty`(개명 후) | baseline 유무 두 형태, 저장 후 dirty 해제, 언마운트 시 `setDirty(false)` |
-| `form-recovery` 흡수본 | 블로그 `version: 3` 계약과 `revive` 가 기존 복구본을 그대로 읽는다 |
-| `AdminRow` confirm | 취소 시 `onDelete` 미호출, 조사(`을`/`를`) 선택 |
-| `AdminFormShell` | 오류 문단이 저장소 실패 전용, 복구 안내 렌더 조건 |
-| `split-lead` | 첫 문장 분리와 `". "` 가 없는 문자열 |
+| 대상                                | 고정할 것                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `publishedInOrder`                  | 초안 제외와 order 정렬. `content/*` 네 getter 가 같은 결과                     |
+| `local-list-repository.remove`      | 없는 id 는 실패. live 와 같은 오류 조건                                        |
+| `row-merge`                         | `data` 잔존값이 행 스칼라를 이기지 못한다                                      |
+| `restFetch`                         | 헤더 조립(`apikey` 만), 재시도 on/off, `accessToken` 이 `Authorization` 으로만 |
+| `sortableListCrud` / `documentCrud` | `devArticles` 에 `updateOrder`·`list` 가 **타입에 없다**                       |
+| `decode/field` 새 리더              | `objects`·`readLinks`·타임라인이 형 불일치를 폴백으로 흡수                     |
+| `withAdminToken`                    | throttled·unauthorized 응답 형태, 테스트 세션 우회 대상                        |
+| `rate-limit/counter`                | 창 카운터의 첫 요청 TTL 설정, 일 버킷 경계, retry-after 초 계산                |
+| `useDialog`                         | 여섯 조합이 같은 portal·ARIA 계약, scrollLock 옵션 통과                        |
+| `usePhotoDetailSession`             | `useQueryModal` 과 같은 push/replace 판정. 한 틱에 두 번 열기                  |
+| `FieldIssue` 유니온                 | 생산자 키와 `data-field` 가 어긋나면 `tsc` 실패                                |
+| `useConfigDirty`(개명 후)           | baseline 유무 두 형태, 저장 후 dirty 해제, 언마운트 시 `setDirty(false)`       |
+| `form-recovery` 흡수본              | 블로그 `version: 3` 계약과 `revive` 가 기존 복구본을 그대로 읽는다             |
+| `AdminRow` confirm                  | 취소 시 `onDelete` 미호출, 조사(`을`/`를`) 선택                                |
+| `AdminFormShell`                    | 오류 문단이 저장소 실패 전용, 복구 안내 렌더 조건                              |
+| `split-lead`                        | 첫 문장 분리와 `". "` 가 없는 문자열                                           |
 
 **수동 확인**
 

@@ -8,7 +8,6 @@ import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 import { openDetailQuery } from "@/lib/navigation/detail-query-url";
 
-
 import { imagePreviewUrl } from "@/types/image";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";

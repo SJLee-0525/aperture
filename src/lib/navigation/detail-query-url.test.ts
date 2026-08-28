@@ -18,7 +18,11 @@ describe("detailQueryHref", () => {
   });
 
   it("앞의 물음표가 없어도 같은 결과를 낸다", () => {
-    const withMark = detailQueryHref({ pathname: "/ko/photo", search: "?tag=street" }, "photo", "a");
+    const withMark = detailQueryHref(
+      { pathname: "/ko/photo", search: "?tag=street" },
+      "photo",
+      "a",
+    );
     const without = detailQueryHref({ pathname: "/ko/photo", search: "tag=street" }, "photo", "a");
 
     expect(without).toBe(withMark);

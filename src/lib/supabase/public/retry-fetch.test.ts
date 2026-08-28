@@ -29,10 +29,7 @@ afterEach(() => {
 describe("fetchWithRetry", () => {
   it("5xx 는 다시 보내고 성공하면 그 응답을 돌려준다", async () => {
     const ok = response(200);
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(response(503))
-      .mockResolvedValueOnce(ok);
+    const fetchMock = vi.fn().mockResolvedValueOnce(response(503)).mockResolvedValueOnce(ok);
     vi.stubGlobal("fetch", fetchMock);
 
     const promise = fetchWithRetry("https://example.test/rows");

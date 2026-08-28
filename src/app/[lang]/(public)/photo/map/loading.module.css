@@ -38,9 +38,13 @@
   .view {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(240px, 52%) minmax(0, 48%);
-    height: calc(100dvh - var(--public-header-height) - var(--mobile-tab-bar-height) - env(safe-area-inset-bottom, 0px));
+    height: calc(
+      100dvh - var(--public-header-height) - var(--mobile-tab-bar-height) -
+        env(safe-area-inset-bottom, 0px)
+    );
     max-height: calc(
-      100dvh - var(--public-header-height) - var(--mobile-tab-bar-height) - env(safe-area-inset-bottom, 0px)
+      100dvh - var(--public-header-height) - var(--mobile-tab-bar-height) -
+        env(safe-area-inset-bottom, 0px)
     );
     min-height: 520px;
   }

@@ -34,15 +34,15 @@ describe("declaredBodyTooLarge", () => {
   it("헤더가 없거나 숫자가 아니면 판단하지 않는다", () => {
     // chunked 요청에는 Content-Length 가 없다. 여기서 막으면 정상 요청이 끊긴다.
     expect(declaredBodyTooLarge(new Headers(), 100)).toBe(false);
-    expect(declaredBodyTooLarge(new Headers({ "content-length": "not-a-number" }), 100)).toBe(false);
+    expect(declaredBodyTooLarge(new Headers({ "content-length": "not-a-number" }), 100)).toBe(
+      false,
+    );
   });
 });
 
 describe("readLimitedBody", () => {
   it("상한 이내면 본문을 그대로 돌려준다", async () => {
-    await expect(readLimitedBody(requestOf(["hello ", "world"]), 100)).resolves.toBe(
-      "hello world",
-    );
+    await expect(readLimitedBody(requestOf(["hello ", "world"]), 100)).resolves.toBe("hello world");
   });
 
   it("상한을 넘으면 null 이다", async () => {

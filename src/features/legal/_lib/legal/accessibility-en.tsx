@@ -54,9 +54,9 @@ const ACCESSIBILITY_EN: LegalDocument = {
       title: "Technical scope",
       content: (
         <p>
-          The site relies on HTML, CSS, JavaScript, and WAI-ARIA support in current major
-          browsers. Blocking JavaScript may limit navigation, dialogs, maps, and chatbot features,
-          while explicit public URLs aim to retain access to core content.
+          The site relies on HTML, CSS, JavaScript, and WAI-ARIA support in current major browsers.
+          Blocking JavaScript may limit navigation, dialogs, maps, and chatbot features, while
+          explicit public URLs aim to retain access to core content.
         </p>
       ),
     },

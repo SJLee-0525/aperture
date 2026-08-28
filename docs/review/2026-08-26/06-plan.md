@@ -25,20 +25,20 @@ barrel 0건, hex 직박 0건, 레이어 역방향 0건, `TODO` 0건.
 
 ### 05 가 닫은 것
 
-| 06 항목 | 05 커밋 | 확인한 사실 |
-| --- | --- | --- |
-| CONV-02 `_types/` 2개 | C30 `9ea762e` | `find src -type d -name _types` → 0건 |
-| CONV-03 boundaries 미감시 | C31 `576ddf8` | `shared` 가 `lib\|mocks` 포함. 없는 폴더명 6개 제거 |
-| `vitest.config.ts:13` 거짓 주석 | C33 `9c9b98e` | firebase 근거 문장 삭제됨 |
-| CONV-06 legal 1,090줄 | C29 `4b9ecb0` | 6분할. 최대가 `privacy-en.tsx` 383줄 |
-| CONV-06 chat 731줄 | C32 `ef54a4e` | 300줄 초과 목록에서 사라짐 |
-| CONV-06 CustomCursor 722줄 | C26·C28 | `features/pointer-chrome/` 로 통합 |
-| CONV-07 구조도 | C33 | `FRAME_STYLES`·"프레임 내보내기"·`features/export`·`src/utils` 전부 0건 |
-| CONV-07 액센트 색 3개 | 03 `f1c90d2` | `globals.css` 와 일치 |
-| Firebase 주석 64줄/44파일 | 01 | **12줄 / 3파일.** 전부 06 이 "정당" 판정한 것 |
-| `Modal.module.css:25` rgba | — | 이미 `var(--scrim)` |
-| `<span>관리 →</span>` 4개소 | 04 | `AdminHubGrid.tsx:30` 1곳 |
-| TEST-03 「디코더 두 벌」 | 02 + C6 | `lib/supabase/decode/` 한 벌 |
+| 06 항목                         | 05 커밋       | 확인한 사실                                                             |
+| ------------------------------- | ------------- | ----------------------------------------------------------------------- |
+| CONV-02 `_types/` 2개           | C30 `9ea762e` | `find src -type d -name _types` → 0건                                   |
+| CONV-03 boundaries 미감시       | C31 `576ddf8` | `shared` 가 `lib\|mocks` 포함. 없는 폴더명 6개 제거                     |
+| `vitest.config.ts:13` 거짓 주석 | C33 `9c9b98e` | firebase 근거 문장 삭제됨                                               |
+| CONV-06 legal 1,090줄           | C29 `4b9ecb0` | 6분할. 최대가 `privacy-en.tsx` 383줄                                    |
+| CONV-06 chat 731줄              | C32 `ef54a4e` | 300줄 초과 목록에서 사라짐                                              |
+| CONV-06 CustomCursor 722줄      | C26·C28       | `features/pointer-chrome/` 로 통합                                      |
+| CONV-07 구조도                  | C33           | `FRAME_STYLES`·"프레임 내보내기"·`features/export`·`src/utils` 전부 0건 |
+| CONV-07 액센트 색 3개           | 03 `f1c90d2`  | `globals.css` 와 일치                                                   |
+| Firebase 주석 64줄/44파일       | 01            | **12줄 / 3파일.** 전부 06 이 "정당" 판정한 것                           |
+| `Modal.module.css:25` rgba      | —             | 이미 `var(--scrim)`                                                     |
+| `<span>관리 →</span>` 4개소     | 04            | `AdminHubGrid.tsx:30` 1곳                                               |
+| TEST-03 「디코더 두 벌」        | 02 + C6       | `lib/supabase/decode/` 한 벌                                            |
 
 **E2E 주장 4건이 기각됐다.** 06 이 스스로 기각한 둘(308 redirects · 테마 토글)에 더해,
 재측정에서 둘이 더 기각됐다.
@@ -49,37 +49,37 @@ barrel 0건, hex 직박 0건, 레이어 역방향 0건, `TODO` 0건.
 
 ### 살아 있는 것 — 확정 수치
 
-| 항목 | 06 문서 | 현재 |
-| --- | --- | --- |
-| JSDoc `@param {` | 1,407 | **1,452** |
-| JSDoc `@returns {` | 813 | **825** |
-| 합계 | 2,220 | **2,277** |
-| 그중 설명 없음 | 943 | **약 1,070** |
-| 오배치 JSDoc | 2 | **4** |
-| 관리자 JSX 한국어 리터럴 | 191 | **540** (106파일) |
-| 관리자 파일 중 사전 import | — | **0개** |
-| `.module.css` rgba | 45 / 15파일 | **30 / 14파일** |
-| 계획 단계 참조 | 41줄 | **36줄** (조치 34) |
-| 비유 (비테스트) | 8 | **9** |
-| 비유 (테스트) | 5 | **7** |
-| `admin-*` 테스트 0 | 24디렉토리 / 61파일 | **23 / 55** |
-| `src/**` 비테스트·비mock·비`.d.ts` | 623파일 / 54,974줄 | **714 / 57,599** |
-| `../` import (`src/**`) | 1 | **1** |
-| barrel `index.ts` | 0 | **0** |
-| `no-restricted-imports` 등 3종 | 없음 | **없음** |
+| 항목                               | 06 문서             | 현재               |
+| ---------------------------------- | ------------------- | ------------------ |
+| JSDoc `@param {`                   | 1,407               | **1,452**          |
+| JSDoc `@returns {`                 | 813                 | **825**            |
+| 합계                               | 2,220               | **2,277**          |
+| 그중 설명 없음                     | 943                 | **약 1,070**       |
+| 오배치 JSDoc                       | 2                   | **4**              |
+| 관리자 JSX 한국어 리터럴           | 191                 | **540** (106파일)  |
+| 관리자 파일 중 사전 import         | —                   | **0개**            |
+| `.module.css` rgba                 | 45 / 15파일         | **30 / 14파일**    |
+| 계획 단계 참조                     | 41줄                | **36줄** (조치 34) |
+| 비유 (비테스트)                    | 8                   | **9**              |
+| 비유 (테스트)                      | 5                   | **7**              |
+| `admin-*` 테스트 0                 | 24디렉토리 / 61파일 | **23 / 55**        |
+| `src/**` 비테스트·비mock·비`.d.ts` | 623파일 / 54,974줄  | **714 / 57,599**   |
+| `../` import (`src/**`)            | 1                   | **1**              |
+| barrel `index.ts`                  | 0                   | **0**              |
+| `no-restricted-imports` 등 3종     | 없음                | **없음**           |
 
 ### CONV-06 잔여 — 확정
 
 05 가 상위 3개를 해소해 300줄 초과 목록의 얼굴이 바뀌었다.
 
-| 줄 | 파일 | 판정 |
-| --- | --- | --- |
-| 644 | `constants/dictionary.ts` | **유지** (05 ARCH-A-22) |
-| 624 / 503 / 337 | `mocks/{dev,dev-articles,photos}.ts` | **유지** — 데이터 |
-| **612** | `photo-detail/_components/PhotoModal.tsx` | **분할** (C14) |
-| 566 | `hooks/use-image-zoom.ts` | **유지** |
-| 404 | `hooks/use-overlay-drag.ts` | **유지** |
-| 383 / 365 | `legal/_lib/legal/privacy-{en,ko}.tsx` | **유지** — C29 산출물 |
+| 줄              | 파일                                      | 판정                    |
+| --------------- | ----------------------------------------- | ----------------------- |
+| 644             | `constants/dictionary.ts`                 | **유지** (05 ARCH-A-22) |
+| 624 / 503 / 337 | `mocks/{dev,dev-articles,photos}.ts`      | **유지** — 데이터       |
+| **612**         | `photo-detail/_components/PhotoModal.tsx` | **분할** (C14)          |
+| 566             | `hooks/use-image-zoom.ts`                 | **유지**                |
+| 404             | `hooks/use-overlay-drag.ts`               | **유지**                |
+| 383 / 365       | `legal/_lib/legal/privacy-{en,ko}.tsx`    | **유지** — C29 산출물   |
 
 `PhotoModal` 은 05 가 C20·C21·C22·C24 로 네 번 건드렸는데 607→612 로 늘었다.
 훅 둘은 06 목록에 없던 새 발견이고, 핀치·휠·더블탭·팬이 같은 제스처 상태를 공유하며
@@ -250,13 +250,13 @@ CLAUDE.md 「컨벤션」 절에만 손댄다. 「디렉토리 구조」는 C33 
 
 C3 이 세운 예외의 반대편. 사진 위가 아니라 UI 표면인데 토큰을 안 쓰는 5건.
 
-| 파일:줄 | 조치 |
-| --- | --- |
-| `MobileMenu.module.css:93` | `--scrim-soft` **신설**. `--scrim`(0.55/0.7)과 값 차이가 커서 재사용 불가 |
-| `LocationList.module.css:14` | `--shadow-card` |
-| `PhotoModal.module.css:196` | `--shadow-pop` |
-| `OnDemandPhotoModal.module.css:120` | `--shadow-pop` |
-| `RangeSlider.module.css:52` | `--shadow-card` |
+| 파일:줄                             | 조치                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------- |
+| `MobileMenu.module.css:93`          | `--scrim-soft` **신설**. `--scrim`(0.55/0.7)과 값 차이가 커서 재사용 불가 |
+| `LocationList.module.css:14`        | `--shadow-card`                                                           |
+| `PhotoModal.module.css:196`         | `--shadow-pop`                                                            |
+| `OnDemandPhotoModal.module.css:120` | `--shadow-pop`                                                            |
+| `RangeSlider.module.css:52`         | `--shadow-card`                                                           |
 
 같은 두 파일의 스피너 border(`PhotoModal:99`·`OnDemandPhotoModal:64`,
 `rgba(255,255,255,0.18)`)는 **사진 위라 C3 예외에 속한다.** 건드리지 않는다.
@@ -312,6 +312,7 @@ CSS 주석에 남긴다. 전역 토큰을 한 화면 때문에 조정하지 않�
   전체 실측에서 잡는다. 측정은 한 번이면 된다.
   `src/lib/**` 85% 가 즉시 실패하면 그 값을 실측치로 낮추고 C7~C9 가 끌어올린 뒤 다시 올린다 —
   **계획을 고치고 `06-resolution.md` 에 기록한다.**
+
 - 05 실행규약 5번이 이 커밋으로 소멸한다. `06-resolution.md` 에 그 사실을 적는다.
 - 지금 allowlist 에 있으면서 **테스트가 0인 파일**(`decode/{photo,dev,music,dev-article,site}.ts`,
   `row-merge.ts`)이 뒤집기 전후로 어떻게 잡히는지 확인한다. C7 의 대상이다.
@@ -329,19 +330,19 @@ CLAUDE.md 아키텍처 원칙 6 이 정한 공개 렌더 경로다. 여기가 �
 `decode/*.ts` 는 `coverage.include` 에 글로브로 들어 있으면서 5개가 테스트 0이다.**
 게이트 안에 있는 미검증 영역이다.
 
-| 파일 | 고정할 계약 |
-| --- | --- |
-| `decode/photo.ts` | EXIF·좌표·dimensions 폴백. `data` 결손에 화면이 안 깨진다 |
-| `decode/dev.ts` | `troubleshooting` 구형 평문 `{ko,en}` 하위호환 정규화 |
-| `decode/music.ts` | works·awards·media 세 형태 |
-| `decode/dev-article.ts` | `published_at` null 과 `pinned` |
-| `decode/site.ts` | 문서 3종(`config`·`music`·`dev`) |
-| **`row-merge.ts`** | **`data` 잔존값이 행 스칼라를 이기지 못한다.** 05 가 약속하고 빠뜨림 |
-| `public/photo.ts` | `published=eq.true` + 서술자 `order` + **2차 키 `id.asc`** |
-| `public/music.ts` | 세 컬렉션이 같은 게이트 |
-| `public/dev.ts` | 목록·상세 published 게이트 |
-| `public/site.ts` | `site_documents` 조회 |
-| `public/retry-fetch.ts` | 재시도 조건·횟수, 재시도하지 않는 상태 코드 |
+| 파일                    | 고정할 계약                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| `decode/photo.ts`       | EXIF·좌표·dimensions 폴백. `data` 결손에 화면이 안 깨진다            |
+| `decode/dev.ts`         | `troubleshooting` 구형 평문 `{ko,en}` 하위호환 정규화                |
+| `decode/music.ts`       | works·awards·media 세 형태                                           |
+| `decode/dev-article.ts` | `published_at` null 과 `pinned`                                      |
+| `decode/site.ts`        | 문서 3종(`config`·`music`·`dev`)                                     |
+| **`row-merge.ts`**      | **`data` 잔존값이 행 스칼라를 이기지 못한다.** 05 가 약속하고 빠뜨림 |
+| `public/photo.ts`       | `published=eq.true` + 서술자 `order` + **2차 키 `id.asc`**           |
+| `public/music.ts`       | 세 컬렉션이 같은 게이트                                              |
+| `public/dev.ts`         | 목록·상세 published 게이트                                           |
+| `public/site.ts`        | `site_documents` 조회                                                |
+| `public/retry-fetch.ts` | 재시도 조건·횟수, 재시도하지 않는 상태 코드                          |
 
 `paginateAll` 이 PostgREST `max_rows` 절단을 이어 읽는지도 fetcher 쪽에서 함께 고정한다.
 전송 계층은 05 C3·C4 가 `server-only` 와 `restFetch` 로 정리해 뒀다(`rest-client.test.ts` 보유).
@@ -351,12 +352,12 @@ fetcher mock 은 그 경계를 따른다.
 
 `src/lib/supabase/admin/` 아래 테스트는 `row-codec.test.ts` 하나뿐이다.
 
-| 파일 | 고정할 계약 |
-| --- | --- |
+| 파일                             | 고정할 계약                                                   |
+| -------------------------------- | ------------------------------------------------------------- |
 | `admin/require-admin-session.ts` | 세션 없음·`getSession` 오류에 던진다. **role 은 보지 않는다** |
-| `supabase/auth.ts` | `isAdminUser` 가 `app_metadata.role` 만 본다 (원칙 2) |
-| `admin/sort-rpc.ts` | `devArticles` 에 `updateOrder` 가 타입에 없다 |
-| `supabase/photos.ts` 외 3 | 쓰기가 세션 가드를 먼저 부른다. 캐시 태그 무효화 대상 |
+| `supabase/auth.ts`               | `isAdminUser` 가 `app_metadata.role` 만 본다 (원칙 2)         |
+| `admin/sort-rpc.ts`              | `devArticles` 에 `updateOrder` 가 타입에 없다                 |
+| `supabase/photos.ts` 외 3        | 쓰기가 세션 가드를 먼저 부른다. 캐시 태그 무효화 대상         |
 
 `require-admin-session` 은 결함 수정이 아니라 **문서화된 결정의 고정**이다(D8). JSDoc 이 적어 둔
 "그런 계정이 생기면 `isAdminUser` 를 여기서 함께 확인해야 한다"는 조건도 테스트에 남긴다.
@@ -378,12 +379,12 @@ const compressed = await compressToWebp(file);
 `extractExif`(`@/lib/exif/extract`)와 `compressToWebp`(`_lib/compress`)가 별개 모듈이므로
 `vi.mock` 두 벌 + `getAdminImageStore` mock 하나로 `renderHook` 에서 순서를 단언한다.
 
-| 파일 | 고정할 계약 |
-| --- | --- |
-| `_lib/compress.ts` | 3단 파생본(2048·960·320) 크기 인자와 webp 출력 |
-| `_hooks/use-image-upload.ts` | **`extractExif` 가 `compressToWebp` 보다 먼저**다 |
-| `_hooks/use-poster-upload.ts` | EXIF 없이 dimension→압축→업로드→DB |
-| `_hooks/use-dev-image-upload.ts` | 동일 + 배치 동시성 `DEV_UPLOAD_CONCURRENCY = 3` |
+| 파일                             | 고정할 계약                                       |
+| -------------------------------- | ------------------------------------------------- |
+| `_lib/compress.ts`               | 3단 파생본(2048·960·320) 크기 인자와 webp 출력    |
+| `_hooks/use-image-upload.ts`     | **`extractExif` 가 `compressToWebp` 보다 먼저**다 |
+| `_hooks/use-poster-upload.ts`    | EXIF 없이 dimension→압축→업로드→DB                |
+| `_hooks/use-dev-image-upload.ts` | 동일 + 배치 동시성 `DEV_UPLOAD_CONCURRENCY = 3`   |
 
 **04-resolution 유지 판정 2번을 전제로 삼는다**: 업로드 취소는 구현하지 않았고
 `browser-image-compression` 은 signal 을 받지만 Storage 업로드 중단은 보장되지 않는다.
@@ -425,6 +426,7 @@ admin-tags/_components(3)        · _hooks(1)
 안전망으로는 약하다.
 
 **전제로 삼을 것 둘:**
+
 - 04-resolution 유지 판정 1번 — 브라우저 뒤로가기는 App Router 에 막는 API 가 없어 보호되지
   않는다. 훅 JSDoc 에만 있는 계약이므로 테스트로 고정하지 않는다.
 - 04-resolution 유지 판정 7번 — **블로그 편집기 CSS 는 공용 폼 골격에 합치지 않는다.**
@@ -596,23 +598,23 @@ TypeScript 가 타입의 출처이므로 타입 안전성에 영향이 없다. *
 
 ## 항목별 판정 (ID 15개)
 
-| ID | 판정 | 어디서 |
-| --- | --- | --- |
-| CONV-01 rgba | **처방 교체** — 사진 위 25건은 예외, 실제 조치는 UI 색 5건 | C3 · C4 |
-| CONV-02 `_types/` | 05 가 처리 | 05 C30 |
-| CONV-03 boundaries | 05 가 처리 | 05 C31 |
-| CONV-04 import 게이트 | 수정. **"구조적 예외" 근거는 기각** | C5 |
-| CONV-05 관리자 문자열 540건 | 문서 예외 | C3 |
-| CONV-06 300줄 초과 | 상위 3개는 05. `PhotoModal` 만 분할, 훅 둘 유지 | 05 / C14 |
-| CONV-07 구조도 | 05 가 거의 처리. 잔여 CLAUDE.md 세 줄 | 05 C33 / C15 |
-| TEST-01 커버리지 게이트 | 수정 (이중 임계값) | C6 |
-| TEST-02 관리자 CMS | 부분 수정 (8디렉토리). 15디렉토리 유지 | C11 |
-| TEST-03 공개 읽기 경로 | 수정. `decode/` 5 + fetcher 5 + `row-merge` | C7 |
-| TEST-04 세션 가드 | 수정 (**결함 수정 아님**) | C8 |
-| TEST-05 업로드 | 수정 (**주입 리팩터 불필요**) | C9 |
-| TEST-06 E2E | 2건으로 축소 (4건 기각) | C10 |
-| 주석 문체 | 단계참조 34 · 비유 9+7 · 변호 1 · 오배치 4. 대시·화살표 유지 | C12 |
-| JSDoc 2,277건 | 전량 정리 · 단독 커밋 | C13 |
+| ID                          | 판정                                                         | 어디서       |
+| --------------------------- | ------------------------------------------------------------ | ------------ |
+| CONV-01 rgba                | **처방 교체** — 사진 위 25건은 예외, 실제 조치는 UI 색 5건   | C3 · C4      |
+| CONV-02 `_types/`           | 05 가 처리                                                   | 05 C30       |
+| CONV-03 boundaries          | 05 가 처리                                                   | 05 C31       |
+| CONV-04 import 게이트       | 수정. **"구조적 예외" 근거는 기각**                          | C5           |
+| CONV-05 관리자 문자열 540건 | 문서 예외                                                    | C3           |
+| CONV-06 300줄 초과          | 상위 3개는 05. `PhotoModal` 만 분할, 훅 둘 유지              | 05 / C14     |
+| CONV-07 구조도              | 05 가 거의 처리. 잔여 CLAUDE.md 세 줄                        | 05 C33 / C15 |
+| TEST-01 커버리지 게이트     | 수정 (이중 임계값)                                           | C6           |
+| TEST-02 관리자 CMS          | 부분 수정 (8디렉토리). 15디렉토리 유지                       | C11          |
+| TEST-03 공개 읽기 경로      | 수정. `decode/` 5 + fetcher 5 + `row-merge`                  | C7           |
+| TEST-04 세션 가드           | 수정 (**결함 수정 아님**)                                    | C8           |
+| TEST-05 업로드              | 수정 (**주입 리팩터 불필요**)                                | C9           |
+| TEST-06 E2E                 | 2건으로 축소 (4건 기각)                                      | C10          |
+| 주석 문체                   | 단계참조 34 · 비유 9+7 · 변호 1 · 오배치 4. 대시·화살표 유지 | C12          |
+| JSDoc 2,277건               | 전량 정리 · 단독 커밋                                        | C13          |
 
 ---
 
@@ -620,33 +622,33 @@ TypeScript 가 타입의 출처이므로 타입 안전성에 영향이 없다. *
 
 **커밋마다**: `npm run check && npm run lint && npm run test:coverage && npm run deps:check`
 
-| 시점 | 무엇을 |
-| --- | --- |
-| C4 | 스크림·그림자를 라이트·다크 양쪽에서 확인. `test:visual` 갱신분을 같은 커밋에 |
-| C5 | `@/proxy` 가 tsc·vitest 양쪽에서 해석되는지. lint 오탐 0 |
-| C6 | 전체 실측치를 기록해 전역 임계값에 적는다. **뒤집기 전후 통과 테스트 수 동일**(2,507) |
-| C7~C9 | `test:coverage` 로 새 테스트가 수치에 반영되는지 (C6 검증도 겸한다) |
-| C10 | `test:e2e` 를 **다른 빌드·테스트 없이** 실행. 실패 시 총 소요 시간 먼저 확인 |
-| C11 | `test:e2e:admin` — 새 단위 테스트가 E2E 계약과 어긋나지 않는지 |
-| C13 | `npm run check` 만으로 충분. JSDoc 제거가 타입을 바꾸지 않는다 |
-| C14 | `test:e2e` 사진 스위트 + `test:visual`. 아래 수동 항목 |
+| 시점  | 무엇을                                                                                |
+| ----- | ------------------------------------------------------------------------------------- |
+| C4    | 스크림·그림자를 라이트·다크 양쪽에서 확인. `test:visual` 갱신분을 같은 커밋에         |
+| C5    | `@/proxy` 가 tsc·vitest 양쪽에서 해석되는지. lint 오탐 0                              |
+| C6    | 전체 실측치를 기록해 전역 임계값에 적는다. **뒤집기 전후 통과 테스트 수 동일**(2,507) |
+| C7~C9 | `test:coverage` 로 새 테스트가 수치에 반영되는지 (C6 검증도 겸한다)                   |
+| C10   | `test:e2e` 를 **다른 빌드·테스트 없이** 실행. 실패 시 총 소요 시간 먼저 확인          |
+| C11   | `test:e2e:admin` — 새 단위 테스트가 E2E 계약과 어긋나지 않는지                        |
+| C13   | `npm run check` 만으로 충분. JSDoc 제거가 타입을 바꾸지 않는다                        |
+| C14   | `test:e2e` 사진 스위트 + `test:visual`. 아래 수동 항목                                |
 
 **새 테스트가 고정할 계약**
 
-| 대상 | 고정할 것 |
-| --- | --- |
-| `decode/*` 5종 | `data` 결손 폴백. 구형 평문 하위호환. `published_at` null |
-| `row-merge.ts` | `data` 잔존값이 행 스칼라를 이기지 못한다 |
-| `public/*` 4종 | published 게이트 + 서술자 order + 2차 키 `id.asc`. `paginateAll` 절단 방지 |
-| `public/retry-fetch.ts` | 재시도 조건·횟수, 재시도하지 않는 상태 코드 |
-| `require-admin-session` | 세션 없음·오류에 던진다. **role 은 보지 않는다** |
-| `auth.ts::isAdminUser` | `app_metadata.role` 만 본다 |
-| `_lib/compress.ts` | 3단 파생본 크기 인자와 webp 출력 |
-| `use-image-upload` | **`extractExif` 가 `compressToWebp` 보다 먼저**다 |
-| `use-poster-upload` 외 1 | EXIF 없이 dimension→압축→업로드→DB. 동시성 3 |
-| 설정 편집기 훅 4종 | 저장 병합, 저장 후 dirty 해제, 언마운트 시 `setDirty(false)` |
-| 앨범 상세 e2e | `photoIds` 배열 순서가 **공개 화면** 순서다 |
-| `photo-map.e2e.ts` | 지도 마커 렌더와 클릭 |
+| 대상                     | 고정할 것                                                                  |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `decode/*` 5종           | `data` 결손 폴백. 구형 평문 하위호환. `published_at` null                  |
+| `row-merge.ts`           | `data` 잔존값이 행 스칼라를 이기지 못한다                                  |
+| `public/*` 4종           | published 게이트 + 서술자 order + 2차 키 `id.asc`. `paginateAll` 절단 방지 |
+| `public/retry-fetch.ts`  | 재시도 조건·횟수, 재시도하지 않는 상태 코드                                |
+| `require-admin-session`  | 세션 없음·오류에 던진다. **role 은 보지 않는다**                           |
+| `auth.ts::isAdminUser`   | `app_metadata.role` 만 본다                                                |
+| `_lib/compress.ts`       | 3단 파생본 크기 인자와 webp 출력                                           |
+| `use-image-upload`       | **`extractExif` 가 `compressToWebp` 보다 먼저**다                          |
+| `use-poster-upload` 외 1 | EXIF 없이 dimension→압축→업로드→DB. 동시성 3                               |
+| 설정 편집기 훅 4종       | 저장 병합, 저장 후 dirty 해제, 언마운트 시 `setDirty(false)`               |
+| 앨범 상세 e2e            | `photoIds` 배열 순서가 **공개 화면** 순서다                                |
+| `photo-map.e2e.ts`       | 지도 마커 렌더와 클릭                                                      |
 
 **수동 확인**
 

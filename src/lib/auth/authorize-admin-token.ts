@@ -1,7 +1,4 @@
-import {
-  checkAdminAuthThrottle,
-  recordAdminAuthFailure,
-} from "@/lib/auth/admin-auth-throttle";
+import { checkAdminAuthThrottle, recordAdminAuthFailure } from "@/lib/auth/admin-auth-throttle";
 import { verifyAdminIdToken } from "@/lib/auth/verify-admin-id-token";
 
 /**

@@ -125,11 +125,7 @@ describe("buildChatContext", () => {
     // 화면에서만 챗봇이 열린 사진을 모른다.
     const params = new URLSearchParams("photo=p05");
 
-    for (const pathname of [
-      "/ko/photo",
-      "/ko/photo/map",
-      "/ko/photo/albums/city-night",
-    ]) {
+    for (const pathname of ["/ko/photo", "/ko/photo/map", "/ko/photo/albums/city-night"]) {
       expect(buildChatContext(pathname, params)).toEqual({
         pathname,
         openTarget: { type: "photo", id: "p05" },

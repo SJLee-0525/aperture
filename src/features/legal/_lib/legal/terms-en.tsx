@@ -15,8 +15,8 @@ const TERMS_EN: LegalDocument = {
       content: (
         <p>
           This personal portfolio shows photography, music, and development work by Sungjoon Lee.
-          Unless stated otherwise, information reflects the time it was written or published and
-          may be changed or withdrawn without notice.
+          Unless stated otherwise, information reflects the time it was written or published and may
+          be changed or withdrawn without notice.
         </p>
       ),
     },
@@ -62,8 +62,8 @@ const TERMS_EN: LegalDocument = {
       content: (
         <p>
           Do not compromise site or visitor safety, bypass security controls, disrupt service,
-          infringe rights, or perform unauthorised bulk collection and redistribution. This does
-          not restrict normal search indexing or accessibility tools.
+          infringe rights, or perform unauthorised bulk collection and redistribution. This does not
+          restrict normal search indexing or accessibility tools.
         </p>
       ),
     },

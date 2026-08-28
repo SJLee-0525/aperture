@@ -62,7 +62,6 @@ const WorkForm = ({ workId, initial }: Props) => {
       recovery={recovery}
       onRestore={(restored) => applyForm(restored as typeof form)}
     >
-
       <section className={base.section}>
         <h2 className={base.legend}>제목</h2>
         <LocalizedFieldPair
@@ -202,7 +201,6 @@ const WorkForm = ({ workId, initial }: Props) => {
           <span>공개 (방문자에게 표시)</span>
         </label>
       </section>
-
     </AdminFormShell>
   );
 };

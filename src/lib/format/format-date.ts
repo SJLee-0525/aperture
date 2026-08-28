@@ -10,9 +10,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
  */
 const formatShotAt = (date: Date): string => {
   const wall = siteWallClock(date);
-  return (
-    `${wall.year}·${pad(wall.month)}·${pad(wall.day)} · ${pad(wall.hour)}:${pad(wall.minute)}`
-  );
+  return `${wall.year}·${pad(wall.month)}·${pad(wall.day)} · ${pad(wall.hour)}:${pad(wall.minute)}`;
 };
 
 /**

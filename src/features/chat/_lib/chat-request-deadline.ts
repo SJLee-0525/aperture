@@ -19,10 +19,7 @@ type ChatRequestDeadline = {
  *
  * 마감 promise 는 reject 만 하므로 race 로만 쓴다. 직접 await 하면 성공 경로에서 영원히 남는다.
  */
-const createChatRequestDeadline = (
-  request: Request,
-  timeoutMs: number,
-): ChatRequestDeadline => {
+const createChatRequestDeadline = (request: Request, timeoutMs: number): ChatRequestDeadline => {
   const controller = new AbortController();
   let timedOut = false;
 

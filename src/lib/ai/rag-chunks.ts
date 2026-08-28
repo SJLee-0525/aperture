@@ -9,7 +9,8 @@ const localized = (value: LocalizedText) => [value.ko, value.en].filter(Boolean)
  * 템플릿 리터럴로 이으면 값이 비어도 라벨 때문에 항상 truthy 가 되어,
  * 빈 문서에서도 라벨만 든 청크가 만들어지고 나머지 청크를 stale 로 지운다.
  */
-const labeled = (label: string, value: string): string | null => (value ? `${label}: ${value}` : null);
+const labeled = (label: string, value: string): string | null =>
+  value ? `${label}: ${value}` : null;
 const chunkId = (section: RagSection, type: string, sourceId: string, key: string) =>
   encodeURIComponent(`${section}:${type}:${sourceId}:${key}`);
 const chunk = (

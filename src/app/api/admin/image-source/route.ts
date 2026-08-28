@@ -28,9 +28,7 @@ export async function POST(request: Request) {
 
   // 리다이렉트를 따라가면 최종 URL 을 재검증하기 전에 중간 홉으로 요청이 이미 나간다.
   // Storage 공개 객체는 리다이렉트를 쓰지 않으므로 첫 응답이 리다이렉트면 그대로 실패다.
-  const source = await fetch(sourceUrl, { cache: "no-store", redirect: "error" }).catch(
-    () => null,
-  );
+  const source = await fetch(sourceUrl, { cache: "no-store", redirect: "error" }).catch(() => null);
   if (!source?.ok) {
     return NextResponse.json(
       { error: `원본 이미지 다운로드 실패 (${source?.status ?? "network"})` },

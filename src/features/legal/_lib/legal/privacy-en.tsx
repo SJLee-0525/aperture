@@ -45,8 +45,8 @@ const PRIVACY_EN: LegalDocument = {
                   <td>Name, email, and enquiry</td>
                   <td>Deliver and answer an enquiry</td>
                   <td>
-                    Until the enquiry is resolved or deletion is requested; Web3Forms policy
-                    allows retention for up to three years
+                    Until the enquiry is resolved or deletion is requested; Web3Forms policy allows
+                    retention for up to three years
                   </td>
                 </tr>
                 <tr>
@@ -78,8 +78,8 @@ const PRIVACY_EN: LegalDocument = {
             </table>
           </LegalTableScroll>
           <p>
-            Hosting, security, and error handling may also temporarily create standard provider
-            logs containing an IP address, request time, path, and user agent.
+            Hosting, security, and error handling may also temporarily create standard provider logs
+            containing an IP address, request time, path, and user agent.
           </p>
         </>
       ),
@@ -231,12 +231,12 @@ const PRIVACY_EN: LegalDocument = {
                     </td>
                     <td>United States · when an error alert fires · HTTPS</td>
                     <td>
-                      Severity triage and suggested fixes · kept in this site&apos;s database
-                      until the purpose ends or deletion is requested
+                      Severity triage and suggested fixes · kept in this site&apos;s database until
+                      the purpose ends or deletion is requested
                     </td>
                     <td>
-                      Turn off Error reporting in settings to stop browser errors; server errors
-                      are processed regardless of consent
+                      Turn off Error reporting in settings to stop browser errors; server errors are
+                      processed regardless of consent
                     </td>
                   </tr>
                 ) : null}
@@ -247,8 +247,8 @@ const PRIVACY_EN: LegalDocument = {
                     <td>United States · when an error alert fires · HTTPS</td>
                     <td>Operator alerts · until deleted from the channel</td>
                     <td>
-                      Turn off Error reporting in settings to stop browser errors; server errors
-                      are processed regardless of consent
+                      Turn off Error reporting in settings to stop browser errors; server errors are
+                      processed regardless of consent
                     </td>
                   </tr>
                 ) : null}
@@ -344,8 +344,7 @@ const PRIVACY_EN: LegalDocument = {
             </p>
           ) : null}
           <p>
-            See the official data terms from{" "}
-            <a href={EXTERNAL_POLICY_URLS.web3Forms}>Web3Forms</a>,{" "}
+            See the official data terms from <a href={EXTERNAL_POLICY_URLS.web3Forms}>Web3Forms</a>,{" "}
             <a href={EXTERNAL_POLICY_URLS.googleAnalytics}>Google Analytics</a>,{" "}
             <a href={EXTERNAL_POLICY_URLS.openAi}>OpenAI API</a>,{" "}
             <a href={EXTERNAL_POLICY_URLS.gemini}>Gemini API</a>
@@ -364,10 +363,10 @@ const PRIVACY_EN: LegalDocument = {
       content: (
         <>
           <p>
-            Information controlled by the site is deleted without undue delay when its purpose
-            ends or a valid deletion request is received. Browser storage can be deleted directly
-            by the visitor. Information already transmitted to a provider follows that provider’s
-            process and any legal retention duty.
+            Information controlled by the site is deleted without undue delay when its purpose ends
+            or a valid deletion request is received. Browser storage can be deleted directly by the
+            visitor. Information already transmitted to a provider follows that provider’s process
+            and any legal retention duty.
           </p>
           <p>
             You will not be unfairly disadvantaged for exercising privacy rights. If services,

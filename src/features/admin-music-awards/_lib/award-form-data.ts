@@ -1,7 +1,6 @@
 import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
-
 import type { MusicAwardInput } from "@/lib/supabase/music";
 import type { MusicAward } from "@/types/music";
 

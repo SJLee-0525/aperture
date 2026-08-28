@@ -52,12 +52,10 @@ describe("requireAny · requireValue", () => {
 
 describe("collectIssues", () => {
   it("통과한 규칙을 걸러 화면 순서를 지킨다", () => {
-    const issues = collectIssues(
-      null,
-      { field: "image", message: "이미지" },
-      null,
-      { field: "title.ko", message: "제목" },
-    );
+    const issues = collectIssues(null, { field: "image", message: "이미지" }, null, {
+      field: "title.ko",
+      message: "제목",
+    });
 
     expect(issues.map(({ field }) => field)).toEqual(["image", "title.ko"]);
   });

@@ -13,7 +13,6 @@ import { imageThumbnailUrl } from "@/types/image";
 
 import type { AdminMusicWorkListItem } from "@/types/admin";
 
-
 import styles from "./WorkRow.module.css";
 
 type Props = {

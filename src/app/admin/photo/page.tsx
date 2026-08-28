@@ -34,6 +34,8 @@ const SECTIONS: HubCard[] = [
 /**
  * 사진 섹션 허브 — 세부 관리 화면으로 나눠 보낸다.
  */
-const AdminPhotoPage = () => <AdminHubGrid title="사진" lead="작업·앨범·태그·소개를 관리합니다." cards={SECTIONS} />;
+const AdminPhotoPage = () => (
+  <AdminHubGrid title="사진" lead="작업·앨범·태그·소개를 관리합니다." cards={SECTIONS} />
+);
 
 export default AdminPhotoPage;

@@ -1,4 +1,7 @@
-import { autoScrollDirection, autoScrollVelocity } from "@/features/pointer-chrome/_lib/auto-scroll";
+import {
+  autoScrollDirection,
+  autoScrollVelocity,
+} from "@/features/pointer-chrome/_lib/auto-scroll";
 
 import type { CursorState } from "@/features/pointer-chrome/_lib/cursor-state";
 

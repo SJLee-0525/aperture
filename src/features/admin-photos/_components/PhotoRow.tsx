@@ -12,7 +12,6 @@ import { imageThumbnailUrl } from "@/types/image";
 
 import type { AdminPhotoListItem } from "@/types/admin";
 
-
 import styles from "./PhotoRow.module.css";
 
 type Props = {
@@ -38,7 +37,11 @@ const PhotoRow = ({ photo, publishBusy, onTogglePublished, onDelete }: Props) =>
       onTogglePublished={(next) => onTogglePublished(photo.id, next)}
       editHref={adminPhotoRoute(photo.id)}
       onDelete={() => onDelete(photo.id)}
-      confirmDelete={{ name: photo.title.ko || ADMIN_UNTITLED, noun: "사진", note: "되돌릴 수 없습니다." }}
+      confirmDelete={{
+        name: photo.title.ko || ADMIN_UNTITLED,
+        noun: "사진",
+        note: "되돌릴 수 없습니다.",
+      }}
     >
       <span className={`${row.thumb} ${styles.thumb}`}>
         {previewUrl ? (

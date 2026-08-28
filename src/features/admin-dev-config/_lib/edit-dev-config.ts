@@ -1,7 +1,6 @@
 import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
-
 import type { DevConfig, DevStackItem } from "@/types/dev";
 import type { LocalizedText } from "@/types/localized";
 

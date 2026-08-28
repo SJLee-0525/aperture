@@ -51,7 +51,7 @@ describe("readSseStream", () => {
     const payloads: string[] = [];
 
     await readSseStream(
-      responseOf(['data: first\r\ndata: second\r\n\r\n']),
+      responseOf(["data: first\r\ndata: second\r\n\r\n"]),
       new AbortController().signal,
       (payload) => payloads.push(payload),
     );

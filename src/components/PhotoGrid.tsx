@@ -5,10 +5,7 @@ import { useMemo, useSyncExternalStore } from "react";
 
 import { PhotoTile } from "@/components/PhotoTile";
 
-import {
-  PHOTO_GRID_BREAKPOINTS,
-  PHOTO_GRID_DESKTOP_COLUMNS,
-} from "@/constants/breakpoints";
+import { PHOTO_GRID_BREAKPOINTS, PHOTO_GRID_DESKTOP_COLUMNS } from "@/constants/breakpoints";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Lang } from "@/types/lang";

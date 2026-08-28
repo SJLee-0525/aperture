@@ -107,13 +107,11 @@ test.describe("Photo", () => {
       // 시간이 아니라 연출의 종료 상태를 기다린다.
       await expect
         .poll(() =>
-          page
-            .locator("[data-photo-modal-frame]")
-            .evaluate((node) => {
-              const style = getComputedStyle(node);
-              const settled = new DOMMatrixReadOnly(style.transform).a === 1;
-              return style.opacity === "1" && settled;
-            }),
+          page.locator("[data-photo-modal-frame]").evaluate((node) => {
+            const style = getComputedStyle(node);
+            const settled = new DOMMatrixReadOnly(style.transform).a === 1;
+            return style.opacity === "1" && settled;
+          }),
         )
         .toBe(true);
       return page.locator("[data-photo-modal-track]");

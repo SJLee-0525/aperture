@@ -5,7 +5,11 @@ import {
   TARGET_PROFILE_SECTIONS,
   type ResolvedChatTarget,
 } from "@/features/chat/_lib/resolve-chat-target";
-import { isPhotoQueryRoute, parseInternalHref, sanitizeLinks } from "@/features/chat/_lib/sanitize-chat-links";
+import {
+  isPhotoQueryRoute,
+  parseInternalHref,
+  sanitizeLinks,
+} from "@/features/chat/_lib/sanitize-chat-links";
 
 import type { ProfileSnapshot } from "@/features/chat/_lib/build-profile-context";
 import type { ChatContext } from "@/features/chat/_lib/chat-context";
