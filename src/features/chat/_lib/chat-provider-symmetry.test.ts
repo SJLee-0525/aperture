@@ -120,7 +120,7 @@ describe.each(FIXTURES)("제공자 동작 대칭성 ($label)", ({ create, stream
     expect(deltas.join("")).toBe("여기서 잘렸습니다");
   });
 
-  it("비스트림 응답의 잘림도 같은 방식으로 회수한다", async () => {
+  it("비스트림 응답의 잘림도 같은 방식으로 본문만 남긴다", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(jsonOf('{"content":"부분 답변입니다.","links":[{"la')),

@@ -38,7 +38,7 @@ type References = ReturnType<typeof useArticleReferences>;
  *
  * slug 는 관리자가 직접 고치기 전까지 제목을 따라간다. 한 번 고치면 그 뒤로는 제목이 바뀌어도
  * 건드리지 않는다 — 주소를 정해 둔 뒤 제목만 다듬는 것이 흔한 순서다. 이미 발행한 글
- * (`firstPublishedAt`)이면 아예 잠근다(계획 §2).
+ * (`firstPublishedAt`)이면 아예 잠근다(07-dev-blog §2).
  *
  * 발행 조건은 저장 직전이 아니라 입력하는 동안 계속 계산한다. 발행 버튼 옆에 무엇이 모자란지
  * 보여 주려면 값이 항상 있어야 하고, 저장 함수도 같은 결과를 다시 확인한다.
@@ -143,7 +143,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
       markSaved(input);
       setSavedAt(new Date());
       // 새 글은 저장과 함께 편집 주소로 옮긴다. 다시 저장하면 같은 문서를 고쳐야 한다.
-      // 문서가 실제로 생겼으니 탭이 들고 있던 "저장 전 새 글 ID"도 놓아 준다.
+      // 문서가 실제로 생겼으므로 탭에 저장해 둔 "저장 전 새 글 ID"도 지운다.
       if (!isEdit) {
         clearNewArticleId(window.sessionStorage);
         router.replace(adminDevArticleRoute(articleId));

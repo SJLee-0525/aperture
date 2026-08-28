@@ -32,7 +32,7 @@ const blockedStorage = (): Storage =>
   });
 
 describe("resolveNewArticleId", () => {
-  it("처음에는 새 ID를 만들어 붙들어 둔다", () => {
+  it("처음에는 새 ID를 만들어 저장한다", () => {
     const storage = createStorage();
     const id = resolveNewArticleId(storage, () => "generated");
 
@@ -55,7 +55,7 @@ describe("resolveNewArticleId", () => {
 });
 
 describe("clearNewArticleId", () => {
-  it("저장에 성공하면 붙들고 있던 ID를 놓아 준다", () => {
+  it("저장에 성공하면 보관하던 ID를 지운다", () => {
     const storage = createStorage();
     resolveNewArticleId(storage, () => "first");
     clearNewArticleId(storage);

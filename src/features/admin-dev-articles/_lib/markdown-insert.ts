@@ -74,7 +74,7 @@ const usableDimensions = (width?: number, height?: number): boolean =>
 
 /**
  * 본문 이미지 조각을 만든다. 캡션이 있으면 바로 다음 줄에 붙인다 —
- * `::caption` 은 바로 앞 이미지에만 연결된다(계획 §3).
+ * `::caption` 은 바로 앞 이미지에만 연결된다(07-dev-blog §3).
  *
  * 크기를 알면 title 자리에 `너비x높이` 로 적는다. 렌더가 이 값을 `<img width height>` 로
  * 넘겨 이미지가 도착하기 전에 자리를 잡는다(`markdown-normalize` 의 title 계약).
@@ -94,7 +94,7 @@ const imageMarkdown = (url: string, alt: string, options: ImageMarkdownOptions =
 
 /**
  * YouTube 조각을 만든다. 제목은 facade 와 iframe 의 accessible name 이라 필수이고,
- * 출처는 선택이다(계획 §4).
+ * 출처는 선택이다(07-dev-blog §4).
  *
  * 주소도 제목·출처와 같은 수준으로 정리한다. `]` 나 `}` 가 그대로 들어가면 지시자가 거기서
  * 끊겨 `::youtube` 가 아니라 깨진 문단이 되고, 관리자는 자기가 붙여 넣은 주소에서 원인을

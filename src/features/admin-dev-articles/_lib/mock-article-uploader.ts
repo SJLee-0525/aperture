@@ -3,8 +3,8 @@ import { MOCK_STORAGE_ORIGIN } from "@/constants/security-headers";
 import type { ImageMeta } from "@/types/image";
 
 /**
- * 글 이미지를 올리는 함수. 폼은 이 형만 알고 실제 구현은 주입받는다(계획 §2).
- * mock 단계에서는 아래 fixture 구현이, B5 에서는 Storage 업로더가 들어온다.
+ * 글 이미지를 올리는 함수. 폼은 이 형만 알고 실제 구현은 주입받는다.
+ * mock 모드에서는 아래 fixture 구현이, 실데이터 모드에서는 Storage 업로더가 들어온다.
  */
 type ArticleImageUploader = (file: File) => Promise<ImageMeta>;
 

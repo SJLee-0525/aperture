@@ -7,9 +7,8 @@ import type { AdminDevArticleListItem } from "@/types/admin";
  * (`lib/content/dev-articles.ts` 의 공개 비교자와 같은 규칙).
  *
  * 초안은 `publishedAt` 이 없어 그 축에 자리가 없다. 발행 글보다 위에 두고 최근에 고친 순으로
- * 늘어놓는다 — 관리자 목록에서 먼저 찾게 되는 것은 지금 쓰고 있는 글이고, 방금 만든 초안이
- * 목록 맨 아래로 가라앉으면 매번 찾아 내려가야 한다. 정렬은 DB 쿼리로 표현할 수 없어
- * (초안의 `publishedAt` 이 비어 있다) B5 이후에도 화면 쪽 순수 함수로 남는다.
+ * 늘어놓는다. 관리자가 목록에서 먼저 찾는 것은 지금 쓰고 있는 글이다.
+ * 초안의 `publishedAt` 이 비어 있어 이 정렬은 DB 쿼리로 표현할 수 없다. 화면 쪽 순수 함수로 남는다.
  *
  * @param {AdminDevArticleListItem} a
  * @param {AdminDevArticleListItem} b

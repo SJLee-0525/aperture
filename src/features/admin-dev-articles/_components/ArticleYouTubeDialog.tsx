@@ -18,7 +18,7 @@ type Props = {
 /**
  * YouTube 삽입 입력줄 — 주소·제목·출처를 받아 전용 문법을 만든다.
  *
- * 외부 metadata API 로 제목을 자동으로 가져오지 않는다(계획 §4). 제목은 facade 와 iframe 의
+ * 외부 metadata API 로 제목을 자동으로 가져오지 않는다(07-dev-blog §4). 제목은 facade 와 iframe 의
  * accessible name 이라 필수이고, 자동 조회는 외부 요청과 실패 처리를 늘리기만 한다.
  * 주소는 여기서 미리 검사해 ID 를 못 뽑으면 삽입을 막는다 — 본문에 넣은 뒤 발행 단계에서
  * 알게 되는 것보다 낫다.

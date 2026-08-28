@@ -56,11 +56,11 @@ const hasBothLanguages = (text: { ko: string; en: string }): boolean =>
   Boolean(text.ko.trim()) && Boolean(text.en.trim());
 
 /**
- * 발행 조건을 검사한다(계획 §5). 관리자 화면과 저장 함수가 같은 함수를 부른다 —
+ * 발행 조건을 검사한다(07-dev-blog §5). 관리자 화면과 저장 함수가 같은 함수를 부른다 —
  * 조건을 두 벌 적으면 화면에서는 막고 저장에서는 통과하는 상태가 생긴다.
  *
  * 초안 저장은 이 검사를 거치지 않는다. 작성 중인 내용을 잃지 않는 것이 우선이라
- * 미완성 글도 저장할 수 있어야 한다(계획 §3).
+ * 미완성 글도 저장할 수 있어야 한다(07-dev-blog §3).
  *
  * @param {DevArticleInput} input `prepareArticleInput` 을 거친 저장 값.
  * @param {PublishCheckContext} context 중복·사전·관계를 판단할 주변 정보.

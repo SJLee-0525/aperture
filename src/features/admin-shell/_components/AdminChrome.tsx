@@ -15,13 +15,6 @@ import styles from "./AdminChrome.module.css";
 import { MockModeBadge } from "./MockModeBadge";
 import { UnsavedGuardProvider, useUnsavedGuardContext } from "./UnsavedGuardProvider";
 
-/**
- * 인증된 관리자 화면의 공통 크롬 — 상단 바(브랜드·사이트 보기·로그아웃) + mock 안내 + 컨텐츠 영역.
- *
- * @param {{ children: ReactNode }} props
- * @param {ReactNode} props.children
- * @returns {JSX.Element}
- */
 const AdminChromeBar = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const guard = useUnsavedGuardContext();
@@ -66,6 +59,10 @@ const AdminChromeBar = ({ children }: { children: ReactNode }) => {
   );
 };
 
+/**
+ * 인증된 관리자 화면의 공통 크롬. 상단 바(브랜드·사이트 보기·로그아웃)와 mock 안내,
+ * 컨텐츠 영역을 얹는다. 미저장 가드가 상단 바 밖에도 필요해 provider 를 여기서 연다.
+ */
 const AdminChrome = ({ children }: { children: ReactNode }) => (
   <UnsavedGuardProvider>
     <AdminChromeBar>{children}</AdminChromeBar>

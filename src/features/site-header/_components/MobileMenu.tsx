@@ -30,8 +30,6 @@ import styles from "./MobileMenu.module.css";
  * 데스크톱은 CSS로 버거 숨김(mega-menu 사용). 버거 + 오버레이를 한 컴포넌트로 캡슐화.
  * 검색은 제출로 /search 만 연다 — 자동완성 드롭다운은 데스크톱(SearchBox) 전용.
  */
-
-
 const MobileMenu = () => {
   const { dict, lang } = useLang();
   const pathname = usePathname();

@@ -24,7 +24,7 @@ type ArticlePublishGuardContext = {
  * 입력을 저장 형태로 맞춘다. 최초 발행이면 그 시각을 한 번만 남긴다.
  *
  * 발행을 취소해도 기존 `firstPublishedAt` 은 지우지 않는다 — 값의 존재가
- * "발행된 적 있음 = slug 변경 금지" 의 근거라서다(계획 §2).
+ * "발행된 적 있음 = slug 변경 금지" 의 근거라서다(07-dev-blog §2).
  *
  * @param {DevArticleInput} input 폼이 만든 저장 필드.
  * @param {{ firstPublishedAt: Date | null } | undefined} previous 이전 저장본. 새 글이면 undefined.

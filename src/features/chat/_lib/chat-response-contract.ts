@@ -123,13 +123,10 @@ const parseChatResult = (text: string): ChatProviderResult => {
 };
 
 /**
- * 출력 토큰 상한에 걸려 구조화 JSON 이 미완성일 때 본문만 회수한다.
- * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 동일하므로
- * "본문 확정 + links/references 포기"가 "다 보여주고 오류"보다 항상 낫다.
- * 두 제공자 모두 이 경로를 쓰므로 메인·서브를 바꿔도 잘림 처리 방식이 달라지지 않는다.
- *
- * @param {string} text
- * @returns {ChatProviderResult}
+ * 출력 토큰 상한에 걸려 구조화 JSON 이 미완성이면 본문만 남기고 나머지 필드는 버린다.
+ * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 같으므로,
+ * 링크·참조 파싱이 실패해도 화면에 그려진 본문은 그대로 확정된다.
+ * 두 제공자가 이 경로를 함께 쓴다. 메인·서브를 바꿔도 잘림 처리가 달라지지 않는다.
  */
 const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   try {
@@ -137,7 +134,7 @@ const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   } catch (error) {
     const content = truncateUtf16Safely(contentFromPartialJson(text), MAX_RESPONSE_CHARS).trim();
     if (!content) throw error;
-    // 잘린 JSON에서는 본문만 회수한다. 나머지 구조화 필드는 모두 버린다.
+    // 잘린 JSON 에서는 본문만 남긴다. 나머지 구조화 필드는 모두 버린다.
     return { content, contactDraft: null };
   }
 };

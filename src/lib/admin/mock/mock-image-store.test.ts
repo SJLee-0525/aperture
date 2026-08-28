@@ -55,7 +55,7 @@ describe("deleteMockImages", () => {
 });
 
 describe("deleteMockImageFolder", () => {
-  it("하위 폴더까지 폴더 아래 전부를 회수한다", () => {
+  it("하위 폴더까지 폴더 아래 전부를 지운다", () => {
     const main = uploadMockImage("dev/d1", blob);
     const preview = uploadMockImage("dev/d1/previews", blob);
     const other = uploadMockImage("dev/d2", blob);

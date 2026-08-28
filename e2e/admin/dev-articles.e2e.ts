@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { resetAdminStorage } from "../utils/admin-fixtures";
 
 /**
- * 관리자 블로그 작성 흐름. 로컬 저장소를 Firestore 대신 쓰는 mock 단계를 검증한다.
+ * 관리자 블로그 작성 흐름. Supabase 대신 브라우저 로컬 저장소를 쓰는 mock 모드를 검증한다.
  * 인증은 `NEXT_PUBLIC_ADMIN_TEST_SESSION` 으로 열린다(비-프로덕션 전용).
  */
 const BODY = [
