@@ -198,7 +198,7 @@ const MobileMenu = () => {
                   {/* 헤더의 언어·테마 토글은 시트가 열리면 시트 위에 보이지만 트랩 밖이라
                       키보드로 닿을 수 없었다. 시트가 여는 동안은 이쪽이 그 둘을 갖는다. */}
                   <div className={styles.sheetControls}>
-                    <LangMenu />
+                    <LangMenu placement="above-start" />
                     <ThemeToggleButton />
                     <button type="button" className={styles.sheetClose} onClick={close}>
                       {dict.menuCloseLabel}

@@ -154,6 +154,27 @@ test.describe("경로 기반 i18n", () => {
     expect(tableColors.table).toBe(tableColors.blue);
   });
 
+  test("시트의 언어 패널은 화면 안에서 트리거 위로 열린다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "시트는 모바일 폭에서만 뜬다");
+    // 헤더의 토글은 지면 우측 끝에 있어 아래·오른쪽 정렬이 맞지만, 시트의 컨트롤 행은
+    // 트리거가 왼쪽 끝이고 지면 맨 아래다. 같은 정렬을 쓰면 패널이 화면 밖으로 나간다.
+    await page.goto("/ko/photo");
+    await page.getByRole("button", { name: "메뉴 열기" }).click();
+    const sheet = page.getByRole("dialog", { name: "주요 메뉴" });
+    const trigger = sheet.getByRole("button", { name: "언어" });
+    await trigger.click();
+
+    const panel = page.getByRole("menu");
+    await expect(panel).toBeVisible();
+    const panelBox = (await panel.boundingBox())!;
+    const triggerBox = (await trigger.boundingBox())!;
+    const viewport = page.viewportSize()!;
+
+    expect(panelBox.x).toBeGreaterThanOrEqual(0);
+    expect(panelBox.x + panelBox.width).toBeLessThanOrEqual(viewport.width);
+    expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(triggerBox.y);
+  });
+
   test("언어 토글이 같은 페이지의 다른 언어 경로로 이동한다", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "토글 UI는 데스크톱에서 대표 검증");
 

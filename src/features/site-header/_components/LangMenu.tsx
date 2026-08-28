@@ -18,11 +18,19 @@ const OPTIONS: { code: Lang; label: string }[] = [
   { code: "en", label: "English" },
 ];
 
+type Props = {
+  /**
+   * 패널이 열리는 자리. 기본은 헤더 우측 끝을 전제로 트리거 아래·오른쪽 정렬이다.
+   * 모바일 시트의 컨트롤 행은 트리거가 왼쪽 끝이고 지면 맨 아래라 반대로 연다.
+   */
+  placement?: "below-end" | "above-start";
+};
+
 /**
  * 언어 드롭다운 (지구본 → 한국어/English). 디자인에 없는 요소 — 이중언어 지원을 위한 의도적 추가.
  * 데스크톱·모바일 헤더 공용.
  */
-const LangMenu = () => {
+const LangMenu = ({ placement = "below-end" }: Props) => {
   const { dict, lang, setLang } = useLang();
   const router = useRouter();
   const { open, triggerRef, rootRef, toggle, close, dismiss } = usePopupDisclosure<
@@ -48,7 +56,7 @@ const LangMenu = () => {
   };
 
   return (
-    <div className={styles.wrap} ref={rootRef}>
+    <div className={styles.wrap} ref={rootRef} data-placement={placement}>
       <button
         ref={triggerRef}
         type="button"
