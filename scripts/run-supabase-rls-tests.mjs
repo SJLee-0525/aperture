@@ -11,8 +11,26 @@ const initialStatus = run(["status", "-o", "env"], { capture: true });
 const stackWasRunning = initialStatus.status === 0;
 
 if (!stackWasRunning) {
-  const started = run(["start"]);
-  if (started.status !== 0) process.exit(started.status ?? 1);
+  const started = run(["start", "--debug"]);
+  if (started.status !== 0) {
+    console.error("Supabase 시작 실패: 컨테이너 상태와 로그를 출력한다.");
+    run(["status"]);
+    spawnSync("docker", ["ps", "-a"], { cwd: process.cwd(), stdio: "inherit" });
+    const listed = spawnSync("docker", ["ps", "-a", "--format", "{{.Names}}"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+    for (const container of listed.stdout
+      ?.split("\n")
+      .filter((name) => name.startsWith("supabase_")) ?? []) {
+      console.error(`--- ${container} logs ---`);
+      spawnSync("docker", ["logs", "--tail", "300", container], {
+        cwd: process.cwd(),
+        stdio: "inherit",
+      });
+    }
+    process.exit(started.status ?? 1);
+  }
 }
 
 try {
