@@ -22,6 +22,7 @@
 | [05-plan.md](05-plan.md) | 위 34개 항목의 실행 계획 — 항목별 판정과 커밋 단위 |
 | [05-resolution.md](05-resolution.md) | 위 계획의 처리 결과 — 실측으로 닫은 항목과 유지 판정 |
 | [06-conventions-and-tests.md](06-conventions-and-tests.md) | 주석 규칙, 컨벤션, 테스트 범위 |
+| [06-plan.md](06-plan.md) | 위 15개 항목의 실행 계획 — 항목별 판정과 커밋 단위 |
 | [07-rejected.md](07-rejected.md) | 검증에서 걸러진 주장과 보류 항목 |
 | [08-method.md](08-method.md) | 검토 방법과 이 보고서를 읽는 법 |
 
