@@ -156,7 +156,7 @@ ap-northeast-2 리전에 생성하고 관리자 계정 1개와 `app_metadata.rol
 ### M1 — 스키마·RLS·버킷·keep-alive
 
 `supabase/migrations/`에 §2의 DDL·RLS·트리거를 SQL로 작성해 적용한다. `media` 버킷과
-Storage 정책, GitHub Actions keep-alive 워크플로(주 2회 cron, PostgREST를 anon key로
+Storage 정책, GitHub Actions keep-alive 워크플로(주 2회 cron, PostgREST를 publishable key로
 호출, 키는 repo secrets)를 만든다. 공식 문서는 일시정지 판정 기준을 정확한 호출 횟수로
 보장하지 않으므로 주 2회로 충분하다고 가정하지 않는다. M8 관찰 기간에 대시보드에서
 정지 예고 여부를 확인하고 필요하면 일 1회로 올린다. `schedule` 워크플로는 기본 브랜치에서만

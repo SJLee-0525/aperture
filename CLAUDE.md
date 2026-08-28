@@ -156,7 +156,7 @@
 - 사진 상세·연주 상세·프로젝트 상세는 **모달**(`?photo=`/`?work=`/`?project=` 딥링크), 행 ID가 식별자.
   앨범 상세 = `/photo/albums/[id]`. slug를 쓰는 콘텐츠는 블로그 글뿐이다.
 
-상세 설계·RLS 패턴은 [`firebase` agent](.claude/agents/firebase.md) 참조 (⚠️ 이름은 레거시 — 8/29 해체 시 supabase 에이전트로 개편 예정, [checklist 09](docs/checklist/09-supabase-observation-teardown.md) §2.2).
+상세 설계·RLS 패턴은 [`supabase` agent](.claude/agents/supabase.md) 참조.
 
 ## 디렉토리 구조 (단일 Next.js 앱, 루트 — 3계층: app → features → components)
 
@@ -323,7 +323,7 @@ npm run test:e2e:admin # 관리자 흐름 E2E (dev 서버 기준)
 ```
 
 > RLS 정책 변경은 Supabase 대시보드/마이그레이션으로 적용한다.
-> `npm run test:rules`(Firebase 에뮬레이터)는 **레거시** — 8/29 해체 시 로컬 Supabase 기반 RLS 통합 테스트로 대체한다
+> `npm run test:rules`는 로컬 Supabase 스택에서 RLS·RPC·Storage 권한을 검증한다. Docker와 Supabase CLI가 필요하다.
 > ([checklist 09](docs/checklist/09-supabase-observation-teardown.md) §2.1).
 
 ### ⚠️ 의존성 추가 시 lockfile은 npm 10으로 재생성 (CI 필수)
@@ -469,11 +469,11 @@ const getUser = (id: string): User | null => users.get(id) ?? null;
 
 ## .claude 구성
 
-| 종류     | 항목                                                                                                                                                        |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·RLS·인증 — 이름은 레거시, 8/29 개편 예정) |
-| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                                                        |
-| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                                                |
+| 종류     | 항목                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`supabase`](.claude/agents/supabase.md) (데이터·RLS·인증·Storage) |
+| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                                |
+| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                        |
 
 ## Agent skills
 

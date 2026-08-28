@@ -168,13 +168,14 @@ Firebase 프로젝트 삭제 직전에는 수동으로 `pre-firebase-teardown` �
 
 필요한 GitHub Actions secret은 다음과 같다.
 
-| Secret                  | 용도                                |
-| ----------------------- | ----------------------------------- |
-| `SUPABASE_DB_URL`       | Session pooler 연결 문자열          |
-| `SUPABASE_ACCESS_TOKEN` | linked 프로젝트의 Storage 접근      |
-| `SUPABASE_PROJECT_REF`  | 프로젝트 식별자                     |
-| `RCLONE_CONFIG`         | 개인 Google Drive OAuth remote 설정 |
-| `BACKUP_AGE_RECIPIENT`  | 백업 암호화 공개키                  |
+| Secret                  | 용도                                      |
+| ----------------------- | ----------------------------------------- |
+| `SUPABASE_DB_URL`       | Session pooler 연결 문자열                |
+| `SUPABASE_DB_PASSWORD`  | CLI link에 쓰는 프로젝트 DB 비밀번호      |
+| `SUPABASE_ACCESS_TOKEN` | linked 프로젝트의 Storage 접근            |
+| `SUPABASE_PROJECT_REF`  | 프로젝트 식별자                           |
+| `RCLONE_CONFIG_B64`     | base64로 인코딩한 Google Drive OAuth 설정 |
+| `BACKUP_AGE_RECIPIENT`  | 백업 암호화 공개키                        |
 
 DB URL, OAuth refresh token, dump 파일은 로그에 출력하지 않는다. 백업 파일은 저장소나 GitHub
 Actions artifact에 올리지 않는다. 보관 정책은 주간 백업 최근 8개와 월간 백업 최근 12개를

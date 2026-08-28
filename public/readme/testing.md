@@ -11,7 +11,7 @@
 | 반응형           | [Playwright projects](../../playwright.config.ts)                   | 데스크톱 Chrome과 Pixel 7 크기             |
 | 접근성           | [axe, Playwright](../../e2e/accessibility.e2e.ts)                   | 문서 구조, ARIA와 WCAG AA 색상 대비        |
 | 시각 회귀        | [Playwright snapshots](../../e2e/visual/public-pages.visual.e2e.ts) | 핵심 공개 화면의 픽셀 변화                 |
-| Firebase Rules   | [Firebase Emulator](../../test/security-rules.test.mjs)             | 비로그인 쓰기 차단과 관리자 권한           |
+| Supabase RLS     | [로컬 Supabase](../../test/supabase-rls.test.mjs)                   | 비로그인·일반 사용자 제한과 관리자 권한    |
 | 품질·성능        | [Lighthouse CI](../../lighthouserc.cjs)                             | 접근성, Best Practices, SEO와 성능 지표    |
 | 컴포넌트 상태    | [Storybook](../../.storybook)                                       | 공용 UI의 기본·빈 상태·모바일 변형         |
 
@@ -46,7 +46,7 @@ ESLint의 `boundaries` 규칙은 서로 다른 feature의 직접 참조와 share
 
 ## Mock 기반 E2E
 
-[`e2e`](../../e2e) 테스트 서버는 `NEXT_PUBLIC_USE_MOCK=1`로 시작합니다. Firebase 운영 상태나 관리자 계정과 관계없이 고정된 데이터로 같은 흐름을 검사합니다.
+[`e2e`](../../e2e) 테스트 서버는 `NEXT_PUBLIC_USE_MOCK=1`로 시작합니다. Supabase 운영 상태나 관리자 계정과 관계없이 고정된 데이터로 같은 흐름을 검사합니다.
 
 대표 mock 콘텐츠를 이용해 다음 흐름을 검사합니다.
 
@@ -82,6 +82,6 @@ E2E는 지도와 외부 링크가 표시되는 지점까지 검사합니다. 지
 
 폰트 렌더링은 운영체제에 따라 달라질 수 있어 기준 환경을 고정합니다. macOS에서는 일반 E2E와 접근성 검사를 실행하고, 시각 기준선 갱신은 지정된 CI 환경에서 처리합니다.
 
-## Firebase Rules
+## Supabase RLS
 
-[`Firebase Rules 테스트`](../../test/security-rules.test.mjs)는 Firebase Emulator와 별도의 demo 프로젝트를 사용합니다. 공개 읽기와 관리자 쓰기 조건을 실제 운영 데이터 없이 확인하며, 새 컬렉션이나 Storage 경로가 추가되면 허용·거부 사례를 함께 추가합니다.
+[`Supabase RLS 테스트`](../../test/supabase-rls.test.mjs)는 로컬 Supabase 스택을 시작하고 격리된 fixture를 만든다. 비로그인 방문자의 공개 읽기와 쓰기 거부, 일반 사용자의 권한 제한, 관리자 CRUD·정렬 RPC·Storage 쓰기를 운영 데이터 없이 확인한다. 실행에는 Docker와 Supabase CLI가 필요하다.

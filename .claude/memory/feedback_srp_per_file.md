@@ -19,7 +19,7 @@
 
 ## 예외 (묶는 게 더 명확한 케이스 — 이 프로젝트 버전)
 
-1. **Firebase 래퍼** — `lib/firebase/` 안에서 **관심사별 1파일** (client.ts / auth.ts / firestore.ts / storage.ts). 함수 단위로 더 쪼개지 않음.
+1. **Supabase 경계** — `lib/supabase/` 안에서 **관심사별 1파일**로 나누되, 함께 바뀌는 요청 조립과 응답 해석은 한 모듈에 둔다.
 2. **타입 정의** — 같은 엔티티의 타입 변형(Photo / PhotoDraft 등)은 `types/photo.ts` 한 파일.
 3. **상수** — `constants/collections.ts` 처럼 도메인별 1파일.
 4. **내보내기 프레임 렌더** — 프레임 6종을 `features/export/frame-preview.ts` 한 파일에 모음 (분산 시 프레임 간 일관성 파악 어려움).

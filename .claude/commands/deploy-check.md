@@ -1,9 +1,9 @@
 ---
-description: 배포 전 점검. 빌드 통과, Security Rules 안전성(무인증 쓰기 전면 금지), 환경변수(Firebase), 무료 한도 영향, 시크릿 누출을 확인한다. Vercel 배포·Rules 배포 직전에 실행.
+description: 배포 전 점검. 빌드, Supabase RLS, 환경변수, 무료 한도와 시크릿 누출을 확인한다.
 allowed-tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 ---
 
-배포(Vercel push 또는 `firebase deploy`) 직전 안전 점검 명령.
+Vercel 배포 직전 안전 점검 명령.
 
 ## 절차
 
@@ -17,15 +17,13 @@ npm run lint
 - [ ] `package-lock.json` 이 변경됐다면 **npm 10 으로 재생성됐는가** (CI 는 Node 22/npm 10 `npm ci` — 로컬 npm 11 churn 시 전 잡 실패. `npx npm@10 install --package-lock-only` 후 `npx npm@10 ci --dry-run` 검증, [CLAUDE.md 개발 명령어](../../CLAUDE.md) 참조)
 - [ ] `package.json` 변경 시 `package-lock.json` 도 같은 커밋에 staged 되어 있는가
 
-### Step 2 — Security Rules 점검 ★ (서버 없는 구조라 이게 보안의 전부)
+### Step 2 — Supabase RLS 점검
 
-- `firestore.rules` / `storage.rules` Read 후 확인:
-  - [ ] `allow write: if true` 또는 match-all 허용 규칙 **없음** (있으면 🔴 즉시 중단)
-  - [ ] `isAdmin()` 의 UID 가 실제 관리자 UID 와 일치 (firestore + storage 두 파일)
-  - [ ] 새로 추가된 컬렉션이 Rules 에 누락되지 않음 (photos·albums·**musicWorks·musicAwards·musicMedia·devProjects**·site)
-  - [ ] 모든 컬렉션의 create/update/delete 가 관리자 UID에만 허용되는가
-  - [ ] Storage 개별 파일 get만 공개이고 list/write/delete는 관리자로 제한되는가
-- Rules 가 변경됐다면: Emulator 테스트 통과 확인 (전체 컬렉션 무인증 write 거부 + Storage 제한)
+- [ ] `npm run test:rules` 통과: 비로그인·일반 사용자 쓰기 제한, 관리자 CRUD·RPC·Storage 허용
+- [ ] 새 테이블과 RPC의 권한 변경이 `supabase/migrations/`에 기록됨
+- [ ] 공개 읽기는 `published = true` 행 또는 의도적으로 공개한 문서에만 허용됨
+- [ ] 관리자 판별은 검증된 JWT의 `app_metadata.role = admin`을 사용함
+- [ ] 애플리케이션 런타임에 secret key나 레거시 `service_role` 키가 없음
 
 ### Step 3 — 환경변수·시크릿
 
@@ -41,15 +39,15 @@ npm run lint
 - [ ] `NEXT_PUBLIC_SENTRY_DATA_REGION=US|DE`가 DSN의 실제 ingest 지역과 일치함. 누락 시 Sentry는 비활성
 - [ ] Vercel의 **Automatically expose System Environment Variables**가 켜져 있어 Sentry가 Production과 Preview를 구분함
 - [ ] **`NEXT_PUBLIC_USE_MOCK` 이 프로덕션(Vercel)에 `1` 로 설정돼 있지 않음** — 설정 시 실서비스가 mock 을 노출한다 (🔴). 미설정이 정상(prod=실데이터)
-- [ ] `git status` 에 `.env*` / 서비스 계정 JSON 이 staged 되어 있지 않음
+- [ ] `git status` 에 `.env*` 또는 자격증명 파일이 staged 되어 있지 않음
 
 ### Step 4 — 무료 한도 영향
 
-- [ ] 새 공개 페이지(랜딩·음악·개발 포함)에 `revalidate` 있음 (Firestore 읽기 5만/일 보호)
-- [ ] 공개 쿼리(`published + order`)마다 인덱스가 `firestore.indexes.json` 에 있는가 (컬렉션당 1개 · 총 6개)
-- [ ] 업로드 경로(사진·음악 포스터·개발 썸네일)에 이미지 압축(webp ~2048px) 적용됨 (Storage 다운로드 1GB/일 보호)
+- [ ] 새 공개 페이지(랜딩·음악·개발 포함)에 `revalidate`와 적절한 캐시 태그가 있음
+- [ ] 공개 쿼리의 필터·정렬 열에 필요한 PostgreSQL 인덱스가 마이그레이션에 있음
+- [ ] 업로드 경로(사진·음악 포스터·개발 썸네일)에 이미지 압축(webp ~2048px) 적용됨
 - [ ] 지도가 `/photo/map` 라우트에서만 dynamic 로드되는가 (MapLibre 스크립트 code-split), 음악 YouTube 는 facade 후 클릭 시 iframe 인가
-- [ ] (최초 배포 시) **GCP 예산 알림 $1 등록됨** (Firebase 결제 표면 — 지도는 CARTO 무료라 과금 없음)
+- [ ] Supabase DB·Storage·egress 사용량과 최근 백업 성공 시각을 확인함
 
 ### Step 5 — 결과 보고
 
@@ -57,7 +55,7 @@ npm run lint
 ## deploy-check 결과
 
 빌드: ✅/❌
-Rules: 🟢 안전 / 🔴 차단 사유
+RLS: 🟢 안전 / 🔴 차단 사유
 환경변수: ✅/❌ 누락 목록
 무료 한도: 🟢/🟡 주의사항
 
@@ -69,5 +67,5 @@ Rules: 🟢 안전 / 🔴 차단 사유
 
 ## 참조
 
-- [`firebase` agent](../agents/firebase.md) — Rules 표준 패턴·Emulator 테스트
+- [`supabase` agent](../agents/supabase.md) — RLS·RPC·Storage 표준과 로컬 통합 테스트
 - [`CLAUDE.md`](../../CLAUDE.md) — 무료 한도 가드 표

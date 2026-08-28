@@ -168,13 +168,13 @@ describe("formatProfileContext", () => {
   it("글 줄에 참조 카드 조회에 쓰는 문서 ID 를 함께 적는다", () => {
     // 글 주소는 slug 라 다른 섹션과 달리 url 만으로는 모델이 문서 ID 를 알 수 없다.
     // ID 가 없으면 `resolveReferencesWithRefresh` 가 요청을 못 찾아 카드를 조용히 버린다.
-    // 운영 데이터의 문서 ID 는 Firestore 자동 ID 라 slug 와 다르다.
-    const withFirestoreId = {
+    // 운영 데이터에는 이전 시스템에서 이어받은 ID가 있어 slug와 다르다.
+    const withLegacyId = {
       ...data,
       articles: [{ ...data.articles[0], id: "9rhrRuIfN0eREKKOId77", slug: "serverless-portfolio" }],
     };
-    const context = render(withFirestoreId, "ko");
-    const reference = formatProfileReferences(withFirestoreId, "ko").find(
+    const context = render(withLegacyId, "ko");
+    const reference = formatProfileReferences(withLegacyId, "ko").find(
       ({ type }) => type === "article",
     );
 

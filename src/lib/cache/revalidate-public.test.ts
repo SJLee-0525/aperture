@@ -77,7 +77,7 @@ describe("revalidatePublicPages", () => {
     mocks.verifyAdminIdToken.mockResolvedValue(false);
 
     await expect(
-      revalidatePublicPages("invalid", ["firestore:photos"], ["/ko/dev/articles/dd"]),
+      revalidatePublicPages("invalid", ["supabase:photos"], ["/ko/dev/articles/dd"]),
     ).rejects.toThrow("Unauthorized cache revalidation");
     expect(mocks.updateTag).not.toHaveBeenCalled();
     expect(mocks.revalidateTag).not.toHaveBeenCalled();

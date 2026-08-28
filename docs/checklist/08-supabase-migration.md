@@ -51,7 +51,7 @@
 - [x] 정렬 일괄 갱신 RPC 6개 작성 (수동 정렬 테이블별 템플릿 — `dev_articles` 제외, `security invoker` + `set search_path` + `revoke`/`grant execute`) — 부분 upsert는 `data jsonb not null` 검사로 실패하므로 금지 (§2.3)
 - [x] RLS: published 게이트 8개 테이블 + 전체 공개 2개 테이블, role 클레임 기반 admin write (§2.4)
 - [x] Storage 버킷 `media` 생성: 공개 read, `file_size_limit` 10MB, `allowed_mime_types image/*`, admin 클레임 write/delete 정책 (공개 URL 응답으로 버킷 존재 확인)
-- [x] keep-alive 워크플로 `.github/workflows/supabase-keepalive.yml`: 주 2회 cron + `workflow_dispatch`, PostgREST를 anon key(repo secrets)로 직접 호출 — 핑 경로(`site_documents` select)는 curl로 검증 완료. `schedule`은 main 머지 후에만 자동 실행되므로 그 전에는 수동 dispatch로 대신
+- [x] keep-alive 워크플로 `.github/workflows/supabase-keepalive.yml`: 주 2회 cron + `workflow_dispatch`, PostgREST를 publishable key(repo secrets)로 직접 호출 — 핑 경로(`site_documents` select)는 curl로 검증 완료. `schedule`은 main 머지 후에만 자동 실행되므로 그 전에는 수동 dispatch로 대신
 - [x] 원격 적용: `supabase link` + `supabase db push`로 마이그레이션 4개 적용 완료 (§4 M1 — 로컬 Docker 스택 없이 진행)
 - [x] anon 검증: 읽기 200(`photos`·`site_documents`·`rag_documents` 빈 배열), 쓰기 42501 거부, 정렬 RPC 실행 거부
 - [x] admin 검증: 관리자 JWT `app_metadata.role=admin`(ES256) 확인, insert 201 → 미발행 anon 비노출 → 정렬 RPC 204(`sort_order` 반영 + `updated_at` 트리거 동작) → 발행 후 anon 노출 → delete 204 왕복 통과

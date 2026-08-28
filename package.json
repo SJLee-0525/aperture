@@ -29,7 +29,7 @@
     "test:lighthouse": "lhci autorun",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:rules": "firebase emulators:exec --project demo-aperture --only firestore,storage \"node --test test/security-rules.test.mjs\""
+    "test:rules": "node scripts/run-supabase-rls-tests.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -43,7 +43,6 @@
     "browser-image-compression": "^2.0.2",
     "es-hangul": "^2.4.0",
     "exifr": "^7.1.3",
-    "firebase": "12.17.1",
     "maplibre-gl": "^5.24.0",
     "mdast-util-directive": "^3.1.0",
     "mdast-util-from-markdown": "^2.0.3",
@@ -60,7 +59,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
-    "@firebase/rules-unit-testing": "^5.0.1",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.62.0",
     "@storybook/addon-a11y": "^10.5.5",
@@ -79,7 +77,6 @@
     "eslint-config-next": "16.2.12",
     "eslint-plugin-boundaries": "^7.1.0",
     "eslint-plugin-import": "^2.32.0",
-    "firebase-tools": "^15.24.0",
     "jscpd": "^5.0.14",
     "jsdom": "^29.1.1",
     "knip": "^6.29.0",

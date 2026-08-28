@@ -2,6 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["test/**/*.test.mjs", "lighthouserc.cjs", "e2e/fixtures/generate-exif-sample.mjs"],
   "ignore": ["design/**", "e2e/fixtures/google-font-responses.cjs"],
+  "ignoreBinaries": ["supabase"],
   "ignoreDependencies": ["@opentelemetry/core"],
   "playwright": {
     "config": ["playwright.config.ts"],

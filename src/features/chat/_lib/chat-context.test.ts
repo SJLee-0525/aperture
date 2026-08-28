@@ -13,7 +13,7 @@ describe("parseChatContext", () => {
     ["award", "/ko/music/career", "award"],
     ["project", "/en/dev/projects", "project"],
     ["album photo", "/ko/photo/albums/city-night", "photo"],
-    ["Firestore album photo", "/ko/photo/albums/9rhrRuIfN0eREKKOId77", "photo"],
+    ["legacy album photo", "/ko/photo/albums/9rhrRuIfN0eREKKOId77", "photo"],
   ])("%s 대상의 정상 문맥을 해석한다", (_, pathname, type) => {
     expect(parseChatContext({ pathname, openTarget: { type, id: "abc123" } })).toEqual({
       pathname,
@@ -37,7 +37,7 @@ describe("parseChatContext", () => {
   it.each([["../../site/config"], ["a1?key=x"], ["a 1"], ["a/1"], ["a#1"]])(
     "문서 ID로 쓸 수 없는 id(%s)는 openTarget을 버린다",
     (id) => {
-      // 서버가 이 값으로 Firestore 문서를 직접 읽으므로 경로·query 문자를 허용하지 않는다.
+      // 서버가 이 값으로 DB 행을 직접 읽으므로 경로·query 문자를 허용하지 않는다.
       expect(
         parseChatContext({ pathname: "/ko/photo", openTarget: { type: "photo", id } }),
       ).toEqual({ pathname: "/ko/photo" });

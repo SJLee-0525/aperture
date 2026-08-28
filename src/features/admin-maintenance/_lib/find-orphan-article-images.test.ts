@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   listDevArticleImageRefsAdmin: vi.fn(),
@@ -28,13 +28,18 @@ const now = () => NOW;
 /** 기준 시각에서 지정한 시간만큼 이전의 업로드 시각. */
 const hoursAgo = (hours: number) => new Date(NOW.getTime() - hours * 60 * 60 * 1000);
 
-const COVER_URL = "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/";
+const STORAGE_ORIGIN = "https://test.supabase.co";
 const bodyImage = (path: string) =>
-  `![그림](${COVER_URL}${encodeURIComponent(path)}?alt=media&token=t)`;
+  `![그림](${STORAGE_ORIGIN}/storage/v1/object/public/media/${path})`;
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", STORAGE_ORIGIN);
   vi.clearAllMocks();
   mocks.deleteImageStrict.mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe("scanOrphanArticleImages", () => {

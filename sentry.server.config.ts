@@ -28,7 +28,7 @@ Sentry.init({
   // 전체 수집)이 적용되므로 반드시 명시한다. httpBodies: []가 /api/chat 방문자 질문을 지킨다.
   dataCollection: MINIMAL_DATA_COLLECTION,
 
-  // Firebase ID token(Authorization)·민감 쿼리(q·token·code)를 전송 직전에 한 번 더 제거.
+  // Supabase access token(Authorization)·민감 쿼리(q·token·code)를 전송 직전에 한 번 더 제거.
   beforeSend: scrubEvent,
 });
 

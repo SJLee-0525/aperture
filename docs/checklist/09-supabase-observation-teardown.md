@@ -36,23 +36,23 @@
 
 ### 2.1 코드 해체 (한 브랜치에서 진행, 게이트 전부 통과 후 머지)
 
-- [ ] 패키지 제거: `firebase`, `firebase-tools`, `@firebase/rules-unit-testing`. lockfile 은 npm 10 재생성 절차를 지킨다 (`git checkout -- package-lock.json && npx npm@10 install --package-lock-only && npx npm@10 ci --dry-run`)
-- [ ] 설정 파일 삭제: `firestore.rules`, `storage.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`. `test:rules` 스크립트도 제거한다
-- [ ] `test:rules` 대체: 로컬 Supabase 스택(`supabase start`) 기반 RLS 통합 테스트를 작성한다 (§8: anon 비공개 select 거부, admin 클레임 쓰기 허용, 정렬 RPC 권한)
-- [ ] CSP 정리: `security-headers.ts` 의 `FIREBASE_HOSTS` 를 제거하고 `STORAGE_IMAGE_HOSTS` 에서 Firebase 2종을 뺀다. mock 업로더가 Firebase URL 형태를 쓰면 Supabase 형태로 먼저 교체한다
-- [ ] 잔존 참조 정리: `next.config.ts` 의 firebasestorage remotePattern, `article-body-storage-paths` 의 Firebase `/o/` 파서(데이터 URL 은 전부 재작성됨), `mocks/` 의 firebasestorage URL 픽스처, `.env.example` 의 Firebase 블록과 과도기 문구
+- [x] 패키지 제거: `firebase`, `firebase-tools`, `@firebase/rules-unit-testing`. npm 10으로 lockfile 재생성·`ci --dry-run` 확인 — 2026-08-29
+- [x] 설정 파일 삭제: `firestore.rules`, `storage.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`, 기존 Rules 테스트 삭제 — 2026-08-29
+- [x] `test:rules` 대체: 로컬 Supabase 스택 기반 RLS 통합 테스트 작성. 비로그인·일반 사용자·관리자 CRUD, 정렬 RPC, Storage 권한 포함. 로컬 Docker 부재로 첫 실실행은 CI에서 확인 — 2026-08-29
+- [x] CSP 정리: Firebase Storage 호스트 제거, mock URL을 Supabase 형태로 교체 — 2026-08-29
+- [x] 잔존 참조 정리: 이미지 설정, 본문 Firebase `/o/` 파서, fixture, `.env.example` 과 과도기 문구 정리 — 2026-08-29
 - [ ] 검증: check·lint·knip·depcruise·test·build 통과. `rg -i firebase src` 결과가 0 또는 문서화된 예외만 남는다
 
 ### 2.2 문서 개정
 
 - [x] `CLAUDE.md`: 스택 표(호스팅·인증·DB·이미지), 아키텍처 원칙(Rules 를 RLS 로), 데이터 모델(테이블 기준), 환경변수, 무료 한도 표, 개발 명령어(firebase CLI 제거)를 전면 개정한다 — 2026-08-20 완료. `test:rules`·firebase 에이전트는 해체 예정으로 표기만 남겼다
 - [ ] `docs/adr/0001-serverless-rag.md` 에 Supabase 전환 각주를 달고, ADR-0005 에 해체 완료를 기록한다
-- [ ] `.claude/agents/firebase.md` 를 supabase 에이전트로 개편하거나 삭제하고, `.claude/hooks` 의 Firebase 전제 규칙을 점검한다
-- [ ] troubleshooting 문서 2편과 `docs/agents/*` 의 Firebase 서술을 정리하고, `firestore-rules-deploy-gotcha` 메모리를 폐기한다
+- [x] `.claude/agents/firebase.md`를 `supabase.md`로 교체하고 hooks·deploy-check의 Firebase 전제 규칙을 제거 — 2026-08-29
+- [x] troubleshooting 문서의 현재 용어를 정리하고 Firestore 읽기 최적화 문서는 역사 기록으로 표시. `firestore-rules-deploy-gotcha` 메모리는 저장소에 남아 있지 않음을 확인 — 2026-08-29
 
 ### 2.3 인프라·계정 정리 (코드 머지·배포 확인 후)
 
-- [ ] GitHub Actions 기반 주간 백업을 추가한다: DB roles/schema/data + `media` 버킷 + manifest·SHA-256을 age로 암호화해 Google Drive에 업로드
+- [x] GitHub Actions 기반 주간 백업을 추가한다: DB roles/schema/data + `media` 버킷 + manifest·SHA-256을 age로 암호화해 Google Drive에 업로드 — 코드·셸 구문 검증 완료, 첫 원격 실행은 secrets 등록 후 확인
 - [ ] 첫 자동 백업을 로컬에서 복호화하고 DB 행 수·RAG 청크·Storage 객체 수를 기준값과 대조한다
 - [ ] Firebase 삭제 직전 `pre-firebase-teardown` 수동 백업을 만들고 Google Drive의 파일 존재·크기를 확인한다
 - [ ] Vercel 에서 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거하고 재배포 1회로 정상을 확인한다
