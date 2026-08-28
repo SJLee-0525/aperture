@@ -176,6 +176,11 @@ test.describe("Photo", () => {
     await photoAssertions.openAlbum(page);
   });
 
+  test("앨범 상세는 그 앨범의 사진만 앨범이 정한 순서로 보여 준다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "구성은 뷰포트와 무관하다");
+    await photoAssertions.albumShowsOnlyItsPhotosInOrder(page);
+  });
+
   test("지도 위치를 클릭해 사진 모달을 열고 닫는다", async ({ page }) => {
     await page.goto("/ko/photo/map");
     await photoAssertions.openMapPhoto(page);
