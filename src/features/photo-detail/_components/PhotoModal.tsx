@@ -122,7 +122,9 @@ const PhotoModal = ({
   const imgFailed = activeStatus === "failed";
   const mobile = useSyncExternalStore(subscribeMobile, readMobile, readServerMobile);
   const navigationLocked = mobile && expanded;
-  const isTopLayer = useOverlayLayer(Boolean(photos.length));
+  /* 열려 있는 동안만 stack 에 오른다. 이 컴포넌트는 퇴장 연출을 위해 닫힌 뒤에도 마운트된
+     채로 남으므로, 마운트 여부로 판정하면 다른 오버레이가 Escape 를 넘겨받지 못한다. */
+  const isTopLayer = useOverlayLayer(activePhotoId != null);
   const showPhotoChrome = !navigationLocked && photoChromeVisible;
   const {
     photo,
