@@ -8,7 +8,7 @@ import {
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
-import { checkUploadSize } from "@/features/image-upload/_lib/upload-progress";
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
 
 import { getAdminImageStore } from "@/lib/admin/image-store";
 
@@ -27,9 +27,9 @@ const usePosterUpload = (workId: string) => {
 
   const process = useCallback(
     async (file: File): Promise<ImageMeta | null> => {
-      const tooLarge = checkUploadSize(file);
-      if (tooLarge) {
-        setError(tooLarge);
+      const validationError = validateUploadableImage(file);
+      if (validationError) {
+        setError(validationError);
         return null;
       }
       setPending(true);

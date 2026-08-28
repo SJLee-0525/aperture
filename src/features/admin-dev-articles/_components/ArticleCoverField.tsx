@@ -6,6 +6,8 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { AdminButton } from "@/components/AdminButton";
 import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
 
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
+
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -42,6 +44,12 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
     // 같은 파일을 다시 골라도 change 가 오도록 값을 비운다.
     event.target.value = "";
     if (!file) return;
+
+    const validationError = validateUploadableImage(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setUploading(true);
     setError(null);

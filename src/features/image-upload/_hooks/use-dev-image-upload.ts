@@ -9,7 +9,7 @@ import {
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
 import { runLimited } from "@/features/image-upload/_lib/run-limited";
-import { checkUploadSize } from "@/features/image-upload/_lib/upload-progress";
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
 
 import { getAdminImageStore } from "@/lib/admin/image-store";
 
@@ -60,9 +60,9 @@ const useDevImageUpload = (projectId: string) => {
 
   const process = useCallback(
     async (file: File): Promise<ImageMeta | null> => {
-      const tooLarge = checkUploadSize(file);
-      if (tooLarge) {
-        setErrors([tooLarge]);
+      const validationError = validateUploadableImage(file);
+      if (validationError) {
+        setErrors([validationError]);
         return null;
       }
       setTotal(1);
@@ -85,9 +85,11 @@ const useDevImageUpload = (projectId: string) => {
   const processBatch = useCallback(
     async (files: File[]): Promise<ImageMeta[]> => {
       if (files.length === 0) return [];
-      const tooLarge = files.map(checkUploadSize).filter((message): message is string => !!message);
-      if (tooLarge.length > 0) {
-        setErrors(tooLarge);
+      const validationErrors = files
+        .map(validateUploadableImage)
+        .filter((message): message is string => !!message);
+      if (validationErrors.length > 0) {
+        setErrors(validationErrors);
         return [];
       }
       setTotal(files.length);

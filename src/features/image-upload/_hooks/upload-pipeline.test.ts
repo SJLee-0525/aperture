@@ -45,6 +45,7 @@ import { useImageUpload } from "@/features/image-upload/_hooks/use-image-upload"
 import { usePosterUpload } from "@/features/image-upload/_hooks/use-poster-upload";
 
 const file = (name = "photo.jpg") => new File(["x"], name, { type: "image/jpeg" });
+const invalidFile = () => new File(["x"], "document.pdf", { type: "application/pdf" });
 const stored = { url: "https://cdn.test/x.webp", path: "photos/p1/main.webp" };
 
 beforeEach(() => {
@@ -119,6 +120,13 @@ describe("사진 업로드", () => {
     expect(calls).toEqual([]);
   });
 
+  it("이미지가 아니면 EXIF도 압축도 시작하지 않는다", async () => {
+    const { result } = renderHook(() => useImageUpload("p1"));
+
+    expect(await result.current.process(invalidFile())).toBeNull();
+    expect(calls).toEqual([]);
+  });
+
   it("파이프라인 실패는 오류로 남기고 null 을 돌려준다", async () => {
     mocks.compressToWebp.mockRejectedValue(new Error("압축 실패"));
     const { result } = renderHook(() => useImageUpload("p1"));
@@ -141,6 +149,14 @@ describe("EXIF 를 쓰지 않는 업로드", () => {
     expect(mocks.store.uploadMusicPosterThumbnail).toHaveBeenCalledTimes(1);
   });
 
+  it("포스터가 아니면 압축과 업로드를 시작하지 않는다", async () => {
+    const { result } = renderHook(() => usePosterUpload("w1"));
+
+    expect(await result.current.process(invalidFile())).toBeNull();
+    expect(mocks.compressToWebp).not.toHaveBeenCalled();
+    expect(mocks.store.uploadMusicPoster).not.toHaveBeenCalled();
+  });
+
   it("개발 이미지도 EXIF 를 추출하지 않는다", async () => {
     const { result } = renderHook(() => useDevImageUpload("d1"));
 
@@ -148,5 +164,14 @@ describe("EXIF 를 쓰지 않는 업로드", () => {
 
     expect(mocks.extractExif).not.toHaveBeenCalled();
     expect(mocks.store.uploadDevImage).toHaveBeenCalledTimes(1);
+  });
+
+  it("개발 이미지 단일·배치 입력을 압축 전에 거부한다", async () => {
+    const { result } = renderHook(() => useDevImageUpload("d1"));
+
+    expect(await result.current.process(invalidFile())).toBeNull();
+    expect(await result.current.processBatch([file("shot.png"), invalidFile()])).toEqual([]);
+    expect(mocks.compressToWebp).not.toHaveBeenCalled();
+    expect(mocks.store.uploadDevImage).not.toHaveBeenCalled();
   });
 });

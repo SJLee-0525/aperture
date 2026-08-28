@@ -14,6 +14,7 @@ import {
   insertAtSelection,
   youtubeMarkdown,
 } from "@/features/admin-dev-articles/_lib/markdown-insert";
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
 
 import type { ArticleBodyUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
 
@@ -86,6 +87,12 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+
+    const validationError = validateUploadableImage(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setError(null);
     setPendingAlt("");
