@@ -93,6 +93,31 @@ describe("OnDemandPhotoModal fetch 회귀", () => {
     });
   });
 
+  it("열린 세션에서 상세 요청이 실패하면 pending 프레임이 재시도를 제공한다", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ photos: ["p1", "p2"].map(serialized), tags: [] }),
+      })
+      .mockRejectedValue(new TypeError("Failed to fetch"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const view = render(
+      <OnDemandPhotoModal photoIds={["p1", "p2", "p3"]} endpoint="/api/photos" />,
+    );
+    await waitFor(() => expect(photoModalRender).toHaveBeenCalled());
+    const firstProps = photoModalRender.mock.calls.at(-1)?.[0] as {
+      onImageReady: (id: string) => void;
+    };
+    act(() => firstProps.onImageReady("p1"));
+
+    activePhotoId = "p3";
+    view.rerender(<OnDemandPhotoModal photoIds={["p1", "p2", "p3"]} endpoint="/api/photos" />);
+
+    expect(await screen.findByRole("button", { name: "다시 시도" })).not.toBeNull();
+  });
+
   it("캐시 여부와 무관하게 이미지가 준비되는 순간 실제 모달을 드러낸다", async () => {
     vi.stubGlobal(
       "fetch",

@@ -69,7 +69,7 @@ const OnDemandPhotoModal = ({
   const { activeId, close: closeSession } = useDetailQuerySession(DETAIL_QUERY_KEYS.photo, {
     openedOutside: true,
   });
-  const { failed, photos, retry, tags } = useOnDemandPhotoDetails(
+  const { activePhoto, failed, photos, retry, tags } = useOnDemandPhotoDetails(
     activeId,
     photoIds,
     endpoint,
@@ -78,19 +78,19 @@ const OnDemandPhotoModal = ({
   const [readyId, setReadyId] = useState<string | null>(null);
   /** 현재 detail query session 을 처음 연 사진. 사진 교체로는 바꾸지 않는다. */
   const [openedId, setOpenedId] = useState<string | null>(null);
-  /** 이번 열기에서 로딩 프레임이 등장했는지. 한 번 뜨면 닫을 때까지 유지한다. */
-  const [pendingShown, setPendingShown] = useState(false);
+  /** 로딩 프레임이 현재 소유한 사진. 사진이 준비될 때까지 재시도 전환도 유지한다. */
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
   /* 뒤로가기로 닫으면 close() 를 거치지 않는다. query 의 null 경계에서 세션 상태를
      초기화하되, 열린 채 다른 사진으로 이동하는 것은 새 진입이 아니라 교체로 취급한다. */
   if (openedId == null && activeId != null) {
     setOpenedId(activeId);
     setReadyId(null);
-    setPendingShown(false);
+    setPendingId(null);
   } else if (openedId != null && activeId == null) {
     setOpenedId(null);
     setReadyId(null);
-    setPendingShown(false);
+    setPendingId(null);
   }
 
   const close = useCallback(() => {
@@ -102,18 +102,20 @@ const OnDemandPhotoModal = ({
   }, [activeId, photoIds]);
   const knownActiveId = activeId ? photoIds.includes(activeId) : false;
   const mounted = useMounted();
-  // 로딩 프레임은 세션의 첫 사진에만 쓴다. 이후 사진은 열린 모달 안의 이미지 로더가 맡는다.
-  const waiting = activeId != null && readyId == null;
-  const pendingRef = useFocusTrap(pendingShown && waiting && mounted);
+  /* 세션 첫 사진과 상세 데이터 자체가 없는 사진은 로딩 프레임이 맡는다. 상세가 캐시된
+     미로딩 사진은 열린 모달 안의 이미지 로더가 맡아 셸을 다시 숨기지 않는다. */
+  const shouldStartPending = activeId != null && (readyId == null || activePhoto == null);
+  const pendingOpen = activeId != null && pendingId === activeId && readyId !== activeId;
+  const pendingRef = useFocusTrap(pendingOpen && mounted);
   // 로딩 프레임도 닫을 수 있어야 한다. 사진이 늦게 오는 동안 Escape 가 듣지 않으면
   // 방문자는 닫기 버튼을 찾기 전까지 갇힌다.
-  useEscapeKey(pendingShown && waiting, close);
+  useEscapeKey(pendingOpen, close);
 
   useEffect(() => {
-    if (!waiting) return;
-    const timer = window.setTimeout(() => setPendingShown(true), PENDING_DELAY_MS);
+    if (!activeId || !shouldStartPending || pendingId === activeId) return;
+    const timer = window.setTimeout(() => setPendingId(activeId), PENDING_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [waiting]);
+  }, [activeId, pendingId, shouldStartPending]);
   // 로딩 프레임 → 실제 모달 전환 중에도 한 소유자가 잠금을 계속 유지한다.
   useScrollLock(activeId != null);
 
@@ -139,16 +141,19 @@ const OnDemandPhotoModal = ({
           onClose={close}
           /* 로딩 프레임이 뜨지 않은 열기에서는 이 모달이 스크림과 패널을 함께 띄운다.
              프레임이 이미 스크림을 올렸다면 배경은 그대로 두고 패널만 등장한다. */
-          animateOnOpen={!pendingShown}
+          animateOnOpen={pendingId !== activeId}
           revealed={readyId != null}
-          onImageReady={setReadyId}
+          onImageReady={(id) => {
+            setReadyId(id);
+            setPendingId((current) => (current === id ? null : current));
+          }}
           chatTarget={chatTarget}
         />
       ) : null}
       {mounted
         ? createPortal(
             <AnimatePresence>
-              {pendingShown && waiting ? (
+              {pendingOpen ? (
                 /* 바깥에는 퇴장을 주지 않는다. 사진이 도착하면 그 아래 모달이 같은 스크림을
                    이미 불투명하게 그리고 있어, 여기서 함께 페이드하면 전면 backdrop-filter 가
                    두 겹으로 합성된다. */
