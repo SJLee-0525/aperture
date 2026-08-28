@@ -61,8 +61,33 @@ const config = [
           pattern: "src/(components|hooks|constants|types|assets|lib|mocks)",
         },
       ],
+      // src 최상위 파일. Next.js 가 위치를 정하므로 폴더로 묶을 수 없다
+      // (proxy·instrumentation 은 이 경로에 있어야 인식된다).
+      // element 패턴은 폴더를 매칭하므로 파일 분류는 이쪽에 적는다.
+      "boundaries/files": [{ category: "root", pattern: "src/*.ts" }],
     },
     rules: {
+      // 어느 element 에도 속하지 않는 파일을 막는다. 새 최상위 폴더를 만들고 위 목록에
+      // 더하지 않으면 그 폴더는 default: "allow" 로 떨어져 경계 규칙이 통째로 비껴간다.
+      "boundaries/no-unknown-files": "error",
+      "boundaries/no-unknown-dependencies": "error",
+      // `../` 금지와 barrel 금지는 CLAUDE.md 컨벤션인데 강제하는 것이 hook 경고뿐이었다.
+      // hook 은 로컬 편집에서만 돌고 CI 는 보지 못한다.
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["../*", "../**"],
+              message: "상대경로 import 금지. src/ 전체가 @/* 로 매핑되므로 alias 를 쓴다.",
+            },
+            {
+              group: ["@/**/index", "@/**/index.*"],
+              message: "barrel export 금지. 대상 파일 경로를 직접 import 한다.",
+            },
+          ],
+        },
+      ],
       "boundaries/dependencies": [
         "error",
         {

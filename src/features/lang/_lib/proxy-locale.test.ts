@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { LOCALE_PREFERENCE_COOKIE } from "@/constants/locale-preference";
 
-import { proxy } from "../../../proxy";
+import { proxy } from "@/proxy";
 
 const request = (
   path: string,
