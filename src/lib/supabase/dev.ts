@@ -3,6 +3,7 @@ import { COLLECTIONS, SITE_DEV_DOC, tableFor } from "@/constants/collections";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
+import { isDangerousStoredHref } from "@/lib/security/public-url";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { decodeDevConfig, decodeDevProject } from "@/lib/supabase/decode/dev";
@@ -27,8 +28,28 @@ const devProjectsCrud = sortableListCrud<DevProject>(
   "프로젝트",
   "project",
 );
+
+/** 폼을 거치지 않는 쓰기도 브라우저에서 실행 가능한 링크를 저장하지 않는다. */
+const assertStorableProjectLinks = (input: Pick<DevProjectInput, "links">): void => {
+  if (input.links.some(({ href }) => isDangerousStoredHref(href))) {
+    throw new Error("프로젝트 링크에 사용할 수 없는 주소입니다.");
+  }
+};
+
 const devProjects = {
   ...devProjectsCrud,
+  create: async (id: string, input: DevProjectInput): Promise<void> => {
+    assertStorableProjectLinks(input);
+    await devProjectsCrud.create(id, input);
+  },
+  update: async (id: string, input: DevProjectInput): Promise<void> => {
+    assertStorableProjectLinks(input);
+    await devProjectsCrud.update(id, input);
+  },
+  patchData: async (id: string, patch: Partial<DevProjectInput>): Promise<void> => {
+    if (patch.links) assertStorableProjectLinks({ links: patch.links });
+    await devProjectsCrud.patchData(id, patch);
+  },
   /**
    * 프로젝트 문서를 삭제한 뒤 해당 프로젝트의 Storage 이미지도 정리한다.
    *
