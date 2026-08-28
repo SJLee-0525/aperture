@@ -5,8 +5,9 @@ import {
   formatLinkVocabulary,
   formatProfileContext,
   formatProfileReferences,
+  renderProfileBlocks,
   resolveReferencesWithRefresh,
-  selectFormattedProfileContext,
+  selectProfileBlocks,
 } from "@/features/chat/_lib/build-profile-context";
 
 import { MOCK_ALBUMS } from "@/mocks/albums";
@@ -46,10 +47,21 @@ const data = {
   articleTags: MOCK_DEV_ARTICLE_TAGS,
 };
 
+/** 블록 배열을 프롬프트에 실리는 문자열로 만든다. 검증은 그 결과를 본다. */
+const render = (data: Parameters<typeof formatProfileContext>[0], lang: "ko" | "en") =>
+  renderProfileBlocks(formatProfileContext(data, lang));
+
+/** 섹션 필터를 거친 뒤의 문자열. */
+const renderSelected = (
+  data: Parameters<typeof formatProfileContext>[0],
+  lang: "ko" | "en",
+  sections: Parameters<typeof selectProfileBlocks>[1],
+) => renderProfileBlocks(selectProfileBlocks(formatProfileContext(data, lang), sections));
+
 describe("formatProfileContext", () => {
   it("선택한 언어의 공개 콘텐츠와 실제 내부 경로를 결정적으로 직렬화한다", () => {
-    const first = formatProfileContext(data, "ko");
-    const second = formatProfileContext(data, "ko");
+    const first = render(data, "ko");
+    const second = render(data, "ko");
 
     expect(first).toBe(second);
     expect(first).toContain("# PROFILE_CONTEXT");
@@ -70,27 +82,55 @@ describe("formatProfileContext", () => {
       title: { ko: "비공개 프로젝트", en: "Private project" },
       published: false,
     };
-    const context = formatProfileContext(
-      { ...data, devProjects: [...MOCK_DEV_PROJECTS, privateProject] },
-      "ko",
-    );
+    const context = render({ ...data, devProjects: [...MOCK_DEV_PROJECTS, privateProject] }, "ko");
 
     expect(context).not.toContain("비공개 프로젝트");
     expect(context).not.toContain("private-project");
   });
 
+  /**
+   * bio·landingLead·heroLead·intro 는 관리자 폼의 multiline textarea 다. 문단을 나눈
+   * 값에 블록 구분자가 그대로 들어가면, 문자열 split 에 기대는 섹션 필터가 뒷조각을
+   * 통째로 버려 챗봇이 연락처나 프로젝트 목록을 모른다고 답한다.
+   */
+  it("관리자가 문단을 나눈 값이 섹션을 쪼개지 않는다", () => {
+    const paragraphed = {
+      ...data,
+      site: {
+        ...data.site,
+        bio: {
+          ko: "빛과 정적의 도시 풍경.\n\n의뢰·프린트 문의는 언제나 환영합니다.",
+          en: "City light.\n\nInquiries welcome.",
+        },
+      },
+      devConfig: {
+        ...data.devConfig,
+        heroLead: { ko: "첫 문단.\n\n둘째 문단.", en: "First.\n\nSecond." },
+      },
+    };
+
+    const profileOnly = renderSelected(paragraphed, "ko", ["profile"]);
+    const developmentOnly = renderSelected(paragraphed, "ko", ["development"]);
+
+    // Profile 섹션의 뒷부분(연락 경로·공개 링크)이 살아남는다.
+    expect(profileOnly).toContain("Contact page:");
+    // 값의 개행은 공백으로 눌러 담아 한 줄 = 한 항목 형식을 지킨다.
+    expect(profileOnly).toContain("의뢰·프린트 문의는 언제나 환영합니다.");
+    expect(profileOnly).not.toMatch(/Photography bio:.*\n\n/);
+    // Development 섹션도 Introduction 뒤가 잘리지 않는다.
+    expect(developmentOnly).toContain("## Development");
+    expect(developmentOnly).toContain("Project:");
+  });
+
   it("영어 문맥은 영어 필드를 선택한다", () => {
-    const context = formatProfileContext(data, "en");
+    const context = render(data, "en");
 
     expect(context).toContain("Name: Sungjoon Lee");
     expect(context).toContain("Photography bio: Quiet light in the city.");
   });
 
   it("선택한 프로필 섹션만 모델 문맥에 남긴다", () => {
-    const context = selectFormattedProfileContext(formatProfileContext(data, "ko"), [
-      "profile",
-      "photography",
-    ]);
+    const context = renderSelected(data, "ko", ["profile", "photography"]);
 
     expect(context).toContain("## Profile");
     expect(context).toContain("## Photography");
@@ -114,7 +154,7 @@ describe("formatProfileContext", () => {
   });
 
   it("개발 블록에 글 목록을 넣되 본문은 넣지 않는다", () => {
-    const context = formatProfileContext(data, "ko");
+    const context = render(data, "ko");
     const article = data.articles[0];
 
     expect(context).toContain(`Article: ${article.title.ko}`);
@@ -133,7 +173,7 @@ describe("formatProfileContext", () => {
       ...data,
       articles: [{ ...data.articles[0], id: "9rhrRuIfN0eREKKOId77", slug: "serverless-portfolio" }],
     };
-    const context = formatProfileContext(withFirestoreId, "ko");
+    const context = render(withFirestoreId, "ko");
     const reference = formatProfileReferences(withFirestoreId, "ko").find(
       ({ type }) => type === "article",
     );
@@ -152,7 +192,7 @@ describe("formatProfileContext", () => {
     }));
     const grown = { ...data, articles: many };
 
-    const context = formatProfileContext(grown, "ko");
+    const context = render(grown, "ko");
     const references = formatProfileReferences(grown, "ko");
 
     expect(context).toContain("url: /dev/articles/many-11");
@@ -208,12 +248,12 @@ describe("appendRagChunks", () => {
   };
 
   it("벡터 검색 청크를 섹션 요약 아래에 덧붙이고 요약은 유지한다", () => {
-    const base = selectFormattedProfileContext(formatProfileContext(data, "ko"), [
+    const base = selectProfileBlocks(formatProfileContext(data, "ko"), [
       "profile",
       "development",
       "music",
     ]);
-    const merged = appendRagChunks(base, [chunk]);
+    const merged = renderProfileBlocks(appendRagChunks(base, [chunk]));
 
     expect(merged).toContain("## Development");
     expect(merged).toContain("## Music");
@@ -223,7 +263,9 @@ describe("appendRagChunks", () => {
   });
 
   it("검색 청크가 없으면 기존 문맥을 그대로 반환한다", () => {
-    expect(appendRagChunks("# PROFILE_CONTEXT", [])).toBe("# PROFILE_CONTEXT");
+    const blocks = formatProfileContext(data, "ko");
+
+    expect(appendRagChunks(blocks, [])).toBe(blocks);
   });
 });
 

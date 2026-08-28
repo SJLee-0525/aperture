@@ -13,7 +13,7 @@
  *
  * 실제 권한 검증은 RLS 정책이 맡는다. 이 스위치는 화면 흐름만 연다.
  *
- * @returns {boolean} 테스트 관리자 세션을 허용하면 true.
+ * @returns 테스트 관리자 세션을 허용하면 true.
  * @throws {Error} 프로덕션 빌드에서 스위치가 켜져 있을 때.
  */
 const isTestAdminSessionEnabled = (): boolean => {

@@ -27,14 +27,14 @@ test.describe("Admin · 설정", () => {
     await addForm.getByLabel("English", { exact: true }).fill("E2E");
     await addForm.getByRole("button", { name: "+ 태그 추가" }).click();
 
-    // 라벨 수정(night)과 삭제(tokyo) — id 는 행의 code 로 표시된다.
+    // 라벨 수정(night) — id 는 행의 code 로 표시된다.
     const nightRow = page.locator("li").filter({ hasText: "night" });
     await nightRow.getByLabel("한국어", { exact: true }).fill("이름바꿈");
-    await page
-      .locator("li")
-      .filter({ hasText: "tokyo" })
-      .getByRole("button", { name: "삭제" })
-      .click();
+
+    // 사진이 쓰는 태그는 삭제가 잠긴다. 사전에 없는 id 가 사진에 남는 경로를 막는다.
+    await expect(
+      page.locator("li").filter({ hasText: "tokyo" }).getByRole("button", { name: "삭제" }),
+    ).toBeDisabled();
 
     await page.getByRole("button", { name: "저장", exact: true }).click();
     await expect(page.getByText("저장되었습니다.")).toBeVisible();
@@ -45,7 +45,22 @@ test.describe("Admin · 설정", () => {
       timeout: 30_000,
     });
     await expect(page.getByRole("button", { name: "이름바꿈", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "도쿄", exact: true })).toHaveCount(0);
+
+    // 아무 사진도 쓰지 않는 태그는 지울 수 있고, 선택지에서도 사라진다.
+    await page.goto("/admin/tags");
+    await page
+      .locator("li")
+      .filter({ hasText: "e2e" })
+      .getByRole("button", { name: "삭제" })
+      .click();
+    await page.getByRole("button", { name: "저장", exact: true }).click();
+    await expect(page.getByText("저장되었습니다.")).toBeVisible();
+
+    await page.goto("/admin/photos/new");
+    await expect(page.getByRole("button", { name: "이름바꿈", exact: true })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.getByRole("button", { name: "이투이", exact: true })).toHaveCount(0);
   });
 
   test("전역과 사진 소개를 차례로 저장해도 서로의 값을 지키는 병합 계약", async ({ page }) => {

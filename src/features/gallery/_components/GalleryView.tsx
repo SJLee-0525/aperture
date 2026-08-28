@@ -17,7 +17,8 @@ import { useInfiniteScroll } from "@/features/gallery/_hooks/use-infinite-scroll
 import { usePhotoFilter } from "@/features/gallery/_hooks/use-photo-filter";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
-import { parsePhotoFilterQuery } from "@/lib/photo-filter-query";
+import { countLabel } from "@/lib/format/count-label";
+import { parsePhotoFilterQuery } from "@/lib/photo/filter-query";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";
@@ -64,8 +65,12 @@ const GalleryContent = memo(function GalleryContent({
   const { visible: windowed, hasMore, attachSentinel } = useInfiniteScroll(filter.visible);
 
   return (
-    <main className={styles.main}>
-      <PageToolbar title={dict.workNav} count={`${filter.visible.length} photos`}>
+    <main className="u-page-main">
+      <PageToolbar
+        title={dict.workNav}
+        count={countLabel(filter.visible.length, "photo")}
+        countLive
+      >
         <ViewToggle
           options={[
             { id: "mason", label: dict.viewMasonry, icon: "mason" },
@@ -109,11 +114,6 @@ const GalleryContent = memo(function GalleryContent({
 /**
  * 작업(Work) 뷰는 URL의 검색, 필터, 상세 모달 상태를 구독한다. 배경 갤러리는
  * 파싱된 primitive props의 memo 경계로 격리한다.
- *
- * @param {Props} props
- * @param {GalleryPhoto[]} props.photos
- * @param {Tag[]} props.tags
- * @returns {JSX.Element}
  */
 const GalleryView = ({ photos, tags }: Props) => {
   const searchParams = useSearchParams();

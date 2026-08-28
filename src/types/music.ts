@@ -7,7 +7,7 @@ type MusicWork = {
   id: string;
   title: LocalizedText;
   subtitle: LocalizedText; // 작곡가·작품번호 ("Schubert · D.911")
-  performedAt: Date; // 공연 일시 (Firestore Timestamp ↔ 래퍼가 변환)
+  performedAt: Date; // 공연 일시 (ISO 문자열 ↔ 디코더가 변환)
   time: string; // "19:30"
   venue: LocalizedText;
   category: LocalizedText; // 리사이틀 / 협연 / 갈라

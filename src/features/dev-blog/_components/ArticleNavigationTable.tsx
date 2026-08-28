@@ -8,7 +8,7 @@ import { Icon } from "@/components/Icon";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { devArticleRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
@@ -38,11 +38,10 @@ type Props = {
  * 쪽 이동은 `replaceCurrentUrl` 로 주소만 바꾼다(push 아님). 이 표를 몇 번 넘겼다고 뒤로가기가
  * 그만큼 쌓이면, 본문 목차가 남긴 fragment 기록과 섞여 뒤로가기가 어디로 갈지 예측할 수 없게 된다.
  *
- * @param {Props} props
- * @param {DevArticleSummary[]} props.articles 발행일 내림차순 전체 공개 글.
- * @param {string} props.currentSlug 지금 보고 있는 글 — 그 행은 링크 대신 현재 위치로 표시한다.
- * @param {Lang} props.lang 링크 프리픽스와 제목 언어.
- * @returns {JSX.Element | null} 글이 하나뿐이면 null.
+ * @param props.articles 발행일 내림차순 전체 공개 글.
+ * @param props.currentSlug 지금 보고 있는 글 — 그 행은 링크 대신 현재 위치로 표시한다.
+ * @param props.lang 링크 프리픽스와 제목 언어.
+ * @returns 글이 하나뿐이면 null.
  */
 const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
   const dict = DICTIONARY[lang];
@@ -91,7 +90,7 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
                     <div aria-current="page" className={styles.currentRow}>
                       <span className={styles.currentTitle}>{title}</span>
                       <time className={styles.date} dateTime={article.publishedAt.toISOString()}>
-                        {formatYMD(article.publishedAt)}
+                        {formatEventYMD(article.publishedAt)}
                       </time>
                     </div>
                   ) : (
@@ -102,7 +101,7 @@ const ArticleNavigationTable = ({ articles, currentSlug, lang }: Props) => {
                     >
                       <span className={styles.title}>{title}</span>
                       <time className={styles.date} dateTime={article.publishedAt.toISOString()}>
-                        {formatYMD(article.publishedAt)}
+                        {formatEventYMD(article.publishedAt)}
                       </time>
                     </Link>
                   )}

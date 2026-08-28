@@ -24,8 +24,8 @@ type ArticleBodyUploader = ArticleImageUploader & { readonly variant: "body" };
  * mock 은 업로드 없이 실 주소와 같은 모양의 fixture 를, live 는 3단 WebP 업로더를 준다.
  * 두 구현 모두 반환하는 `ImageMeta` 의 `url`/`path` 가 저장 문서가 참조하는 계약이다.
  *
- * @param {string} articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정하는 데 쓴다.
- * @returns {ArticleCoverUploader} 파일 한 장을 올려 ImageMeta 를 주는 함수.
+ * @param articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정하는 데 쓴다.
+ * @returns 파일 한 장을 올려 ImageMeta 를 주는 함수.
  */
 const createArticleCoverUploader = (articleId: string): ArticleCoverUploader =>
   Object.assign(
@@ -40,8 +40,8 @@ const createArticleCoverUploader = (articleId: string): ArticleCoverUploader =>
  *
  * live 는 파생본 없이 원본 한 장만 올린다. mock 은 애초에 한 장만 만들어 같은 구현을 쓴다.
  *
- * @param {string} articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정하는 데 쓴다.
- * @returns {ArticleBodyUploader} 파일 한 장을 올려 ImageMeta 를 주는 함수.
+ * @param articleId 저장 전에 발급한 글 문서 ID. Storage 경로를 정하는 데 쓴다.
+ * @returns 파일 한 장을 올려 ImageMeta 를 주는 함수.
  */
 const createArticleBodyUploader = (articleId: string): ArticleBodyUploader =>
   Object.assign(

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 const STORAGE_IMAGE =
-  "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
+  "https://mock-storage.aperture.invalid/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
 
 const codes = (markdown: string) => parseArticleMarkdown(markdown).issues.map(({ code }) => code);
 

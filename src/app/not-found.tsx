@@ -1,38 +1,25 @@
 "use client";
 
-import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+import { StatusView } from "@/features/status/_components/StatusView";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
-import { ROUTES } from "@/constants/routes";
-
-import styles from "./status.module.css";
-
 /**
- * 전역 404 — 미매칭 URL과 notFound() 호출을 모두 처리. 루트 레이아웃 하위라 useLang으로 ko/en 대응.
- * error.tsx와 동일한 editorial 톤(status.module.css 공유). 복구 버튼 없이 홈으로 유도.
+ * 로케일 세그먼트 밖 404. `/bogus` 처럼 언어를 담지 않은 주소가 여기로 온다.
+ * 이 파일은 루트 레이아웃 하위라 스토어 모드 LangProvider 를 읽는다. URL 에 언어가 없으니
+ * 저장된 선호를 쓰는 것이 맞다. `/en/bogus` 같은 로케일 안의 404 는 `[lang]/not-found.tsx` 다.
  *
- * @returns {JSX.Element} 현재 언어의 404 안내 화면.
+ * @returns 저장된 언어의 404 안내 화면.
  */
 export default function NotFound() {
   const { dict } = useLang();
 
   return (
-    <main className={styles.main}>
-      <div className={styles.inner}>
-        <div className={styles.label}>404</div>
-        <h1 className={styles.title}>{dict.notFoundTitle}</h1>
-        <p className={styles.body}>
-          {dict.notFoundBody}
-          <br />
-          {dict.notFoundBody2}
-        </p>
-        <div className={styles.actions}>
-          <LocalizedLink href={ROUTES.LANDING} className={styles.home}>
-            {dict.backHome}
-          </LocalizedLink>
-        </div>
-      </div>
-    </main>
+    <StatusView
+      label="404"
+      title={dict.notFoundTitle}
+      body={[dict.notFoundBody, dict.notFoundBody2]}
+      homeLabel={dict.backHome}
+    />
   );
 }

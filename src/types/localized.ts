@@ -1,4 +1,4 @@
-/** ko/en 이중언어 평문 — Firestore에는 {ko, en} map 필드로 저장 */
+/** ko/en 이중언어 평문 — `data` jsonb 안에 {ko, en} map 으로 저장 */
 type LocalizedText = { ko: string; en: string };
 
 export type { LocalizedText };

@@ -1,92 +1,58 @@
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_MUSIC_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { COLLECTIONS, SITE_MUSIC_DOC, tableFor } from "@/constants/collections";
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { asText } from "@/lib/i18n/as-text";
 import { isDangerousStoredHref } from "@/lib/security/public-url";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { listCrud } from "@/lib/supabase/list-crud";
+import {
+  decodeMusicAward,
+  decodeMusicConfig,
+  decodeMusicMedia,
+  decodeMusicWork,
+} from "@/lib/supabase/decode/music";
+import { sortableListCrud } from "@/lib/supabase/list-crud";
 import { deleteMusicWorkImages } from "@/lib/supabase/storage";
 
 import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/music";
 
-const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
+const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 
 /**
  * 병합된 행의 날짜 값을 화면 모델의 `Date`로 맞춘다.
  *
- * @param {unknown} v 변환할 ISO 문자열 또는 `Date` 값.
- * @returns {Date} 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
+ * @param v 변환할 ISO 문자열 또는 `Date` 값.
+ * @returns 변환된 날짜. 지원하지 않는 값이면 현재 시각을 반환한다.
  */
-const asDate = (v: unknown): Date => {
-  if (typeof v === "string" || typeof v === "number") return new Date(v);
-  return v instanceof Date ? v : new Date();
-};
 
 /**
  * 연주 행의 누락 필드를 기본값으로 채워 `MusicWork`로 변환한다.
  *
- * @param {string} id 연주 문서 ID.
- * @param {Record<string, unknown>} d 병합된 연주 문서 필드.
- * @returns {MusicWork} 관리자 화면에서 사용하는 연주 모델.
+ * @param id 연주 문서 ID.
+ * @param d 병합된 연주 문서 필드.
+ * @returns 관리자 화면에서 사용하는 연주 모델.
  */
-const toMusicWork = (id: string, d: Record<string, unknown>): MusicWork => ({
-  id,
-  title: asText(d.title),
-  subtitle: asText(d.subtitle),
-  performedAt: asDate(d.performedAt),
-  time: (d.time as string) ?? "",
-  venue: asText(d.venue),
-  category: asText(d.category),
-  program: (d.program as string[]) ?? [],
-  description: asText(d.description),
-  poster: (d.poster as MusicWork["poster"]) ?? { url: "", path: "", w: 0, h: 0 },
-  // 읽기에서 정화하지 않는다. https 가 아닌 주소를 빈 값으로 바꾸면 폼이 그 빈 값을
-  // 그대로 저장하고, 전체 문서를 되쓰는 마이그레이션도 원본을 지운다.
-  // 정책(https 전용)은 폼이, 위험 스킴 차단은 저장 경계가 본다.
-  ticketUrl: (d.ticketUrl as string) ?? "",
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
 /**
  * 수상 행의 다국어 필드와 기본값을 정규화한다.
  *
- * @param {string} id 수상 문서 ID.
- * @param {Record<string, unknown>} d 병합된 수상 문서 필드.
- * @returns {MusicAward} 관리자 화면에서 사용하는 수상 모델.
+ * @param id 수상 문서 ID.
+ * @param d 병합된 수상 문서 필드.
+ * @returns 관리자 화면에서 사용하는 수상 모델.
  */
-const toMusicAward = (id: string, d: Record<string, unknown>): MusicAward => ({
-  id,
-  year: (d.year as number) ?? 0,
-  name: asText(d.name),
-  place: (d.place as string) ?? "",
-  description: asText(d.description),
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
 /**
  * 영상 행의 다국어 필드와 기본값을 정규화한다.
  *
- * @param {string} id 영상 문서 ID.
- * @param {Record<string, unknown>} d 병합된 영상 문서 필드.
- * @returns {MusicMedia} 관리자 화면에서 사용하는 영상 모델.
+ * @param id 영상 문서 ID.
+ * @param d 병합된 영상 문서 필드.
+ * @returns 관리자 화면에서 사용하는 영상 모델.
  */
-const toMusicMedia = (id: string, d: Record<string, unknown>): MusicMedia => ({
-  id,
-  title: asText(d.title),
-  source: asText(d.source),
-  youtubeId: (d.youtubeId as string) ?? "",
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
-const musicWorksCrud = listCrud<MusicWork>(
+const musicWorksCrud = sortableListCrud<MusicWork>(
   COLLECTIONS.MUSIC_WORKS,
-  toMusicWork,
+  decodeMusicWork,
   "연주",
   "musicWork",
 );
@@ -104,6 +70,10 @@ const assertStorableTicketUrl = (input: MusicWorkInput): void => {
   }
 };
 
+/**
+ * 예매 링크 검증은 `create`·`update` 에만 얹는다. spread 로 함께 노출되는 `patchData` 는
+ * 이미지 파생본 마이그레이션이 포스터만 바꿀 때 쓰므로 링크를 건드리지 않는다.
+ */
 const musicWorks = {
   ...musicWorksCrud,
   create: async (id: string, input: MusicWorkInput): Promise<void> => {
@@ -117,31 +87,57 @@ const musicWorks = {
   /**
    * 연주 문서를 삭제한 뒤 해당 연주의 Storage 이미지도 정리한다.
    *
-   * @param {string} id 삭제할 연주 문서 ID.
-   * @returns {Promise<void>} 문서 삭제와 이미지 정리가 끝나면 완료된다.
+   * @param id 삭제할 연주 문서 ID.
+   * @returns 문서 삭제와 이미지 정리가 끝나면 완료된다.
    */
   remove: async (id: string): Promise<void> => {
     await musicWorksCrud.remove(id);
     await deleteMusicWorkImages(id).catch(() => undefined);
   },
 };
-const musicAwards = listCrud<MusicAward>(
+const musicAwards = sortableListCrud<MusicAward>(
   COLLECTIONS.MUSIC_AWARDS,
-  toMusicAward,
+  decodeMusicAward,
   "수상",
   "musicAward",
 );
-const musicMedia = listCrud<MusicMedia>(
+const musicMediaCrud = sortableListCrud<MusicMedia>(
   COLLECTIONS.MUSIC_MEDIA,
-  toMusicMedia,
+  decodeMusicMedia,
   "영상",
   "musicMedia",
 );
 
 /**
+ * YouTube 영상 ID 는 11자의 base64url 문자다.
+ *
+ * 블로그 본문의 `::youtube` 디렉티브(`markdown-directives.ts`)가 같은 형태를 강제한다.
+ * 여기만 열어 두면 두 경로의 규칙이 갈리고, 폼을 거치지 않는 재저장이 임의 경로를 심을 수 있다.
+ */
+const YOUTUBE_ID_PATTERN = /^[\w-]{11}$/;
+
+const assertStorableYoutubeId = (input: { youtubeId: string }): void => {
+  if (!YOUTUBE_ID_PATTERN.test(input.youtubeId)) {
+    throw new Error("YouTube 영상 ID 형식이 올바르지 않습니다.");
+  }
+};
+
+const musicMedia = {
+  ...musicMediaCrud,
+  create: async (id: string, input: Omit<MusicMedia, "id">): Promise<void> => {
+    assertStorableYoutubeId(input);
+    await musicMediaCrud.create(id, input);
+  },
+  update: async (id: string, input: Omit<MusicMedia, "id">): Promise<void> => {
+    assertStorableYoutubeId(input);
+    await musicMediaCrud.update(id, input);
+  },
+};
+
+/**
  * 소개와 경력·학력 타임라인을 담은 음악 설정 문서를 읽는다.
  *
- * @returns {Promise<MusicConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
+ * @returns 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
   const { data, error } = await getSupabaseClient()
@@ -151,19 +147,14 @@ const getMusicConfigAdmin = async (): Promise<MusicConfig> => {
     .maybeSingle();
   if (error) throw new Error("음악 설정을 불러오지 못했습니다.");
   if (!data) return EMPTY_MUSIC_CONFIG;
-  const d = (data.data as Record<string, unknown> | null) ?? {};
-  return {
-    intro: asText(d.intro),
-    career: (d.career as MusicConfig["career"]) ?? [],
-    education: (d.education as MusicConfig["education"]) ?? [],
-  };
+  return decodeMusicConfig((data.data as Record<string, unknown> | null) ?? {});
 };
 
 /**
  * 음악 설정 문서 전체를 저장하고 공개 캐시와 RAG 문서를 갱신한다.
  *
- * @param {MusicConfig} config 저장할 소개, 경력, 학력 설정.
- * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
+ * @param config 저장할 소개, 경력, 학력 설정.
+ * @returns 저장과 RAG 동기화가 끝나면 완료된다.
  */
 const updateMusicConfig = async (config: MusicConfig): Promise<void> => {
   const { data, error } = await getSupabaseClient()

@@ -29,8 +29,6 @@ const resolveEmbeddingDimensions = (dimensions?: number): number => {
  * 저장·검색이 공유하는 벡터 공간 호환성 키 — 모델과 차원이 모두 일치해야 비교 가능하다.
  * ragDocuments.embeddingModel 에 이 키를 저장하고, 검색·상태 API 는 같은 키의 청크만 인정한다.
  * 모델이나 차원을 바꾸면 키가 어긋나 기존 청크가 자동 배제되고, 전체 재생성이 이행 경로다.
- *
- * @returns {string}
  */
 const embeddingModelKey = (): string =>
   `${resolveEmbeddingModel()}@${resolveEmbeddingDimensions()}`;
@@ -47,11 +45,14 @@ class EmbeddingError extends Error {
 
 /**
  * 텍스트 입력을 OpenAI 임베딩 벡터로 변환합니다.
- *
- * @param {string} text
- * @param {GenerateEmbeddingOptions} [options]
- * @returns {Promise<number[]>}
  */
+/**
+ * 한 번의 API 호출에 담을 청크 수. `rag.ts` 의 `UPSERT_CHUNK_SIZE` 와 같은 값이다.
+ * 배치가 없으면 콘텐츠가 늘었을 때 전체 재생성이 통째로 실패하고, 그 경로가 임베딩
+ * 모델·차원을 바꿀 수 있는 유일한 수단이다.
+ */
+const EMBEDDING_BATCH_SIZE = 100;
+
 const generateEmbedding = async (
   text: string,
   options?: GenerateEmbeddingOptions,
@@ -73,6 +74,30 @@ const generateEmbeddings = async (
   }
   const model = resolveEmbeddingModel(options?.model);
   const dimensions = resolveEmbeddingDimensions(options?.dimensions);
+
+  const vectors: number[][] = [];
+  // 순차 호출이다. 병렬로 보내면 제공자의 분당 요청 한도를 건드려 전체 재생성이 실패한다.
+  for (let start = 0; start < texts.length; start += EMBEDDING_BATCH_SIZE) {
+    const batch = texts.slice(start, start + EMBEDDING_BATCH_SIZE);
+    vectors.push(
+      ...(await embedBatch(batch, { apiKey, model, dimensions, signal: options?.signal })),
+    );
+  }
+  return vectors;
+};
+
+/**
+ * 한 배치를 임베딩한다.
+ *
+ * 응답 순서는 보장되지 않아 `index` 로 정렬해 복원한다. 그 index 는 배치마다 0부터
+ * 다시 시작하므로 배치별로 정렬한 뒤 이어 붙여야 한다. 전체를 모아 정렬하면 섞인다.
+ */
+const embedBatch = async (
+  texts: string[],
+  config: { apiKey: string; model: string; dimensions: number; signal?: AbortSignal },
+): Promise<number[][]> => {
+  const { apiKey, model, dimensions } = config;
+  const options = { signal: config.signal };
 
   const response = await fetch(OPENAI_EMBEDDINGS_API_URL, {
     method: "POST",

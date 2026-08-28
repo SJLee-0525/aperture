@@ -7,6 +7,7 @@ import { AdminInput } from "@/components/AdminInput";
 import { useArticleTagsAdmin } from "@/features/admin-dev-articles/_hooks/use-article-tags-admin";
 
 import { normalizeArticleSlug } from "@/features/admin-dev-articles/_lib/dev-article-slug";
+import { confirmThenDelete } from "@/features/admin-shell/_lib/delete-message";
 
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
@@ -25,12 +26,9 @@ type RowProps = {
  * ID는 글이 참조하는 키라 수정할 수 없다. 라벨은 저장 버튼을 눌렀을 때 반영하며,
  * 사용 중인 태그는 삭제할 수 없다.
  *
- * @param {RowProps} props
- * @param {DevArticleTag} props.tag
- * @param {number} props.usedCount 이 태그를 참조하는 글 수. 0이 아니면 삭제를 잠근다.
- * @param {(tag: DevArticleTag) => Promise<boolean>} props.onSave 라벨 저장. 성공 여부를 돌려준다.
- * @param {(id: string) => void} props.onDelete 삭제 요청. 실패 사유는 패널 오류 영역이 보여 준다.
- * @returns {JSX.Element}
+ * @param props.usedCount 이 태그를 참조하는 글 수. 0이 아니면 삭제를 잠근다.
+ * @param props.onSave 라벨 저장. 성공 여부를 돌려준다.
+ * @param props.onDelete 삭제 요청. 실패 사유는 패널 오류 영역이 보여 준다.
  */
 const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
   const [ko, setKo] = useState(tag.ko);
@@ -51,9 +49,7 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
     setSaving(false);
   };
 
-  const remove = () => {
-    if (window.confirm(`"${tag.id}" 태그를 삭제할까요?`)) onDelete(tag.id);
-  };
+  const remove = () => confirmThenDelete({ name: tag.id, noun: "태그" }, () => onDelete(tag.id));
 
   return (
     <li className={styles.row}>
@@ -61,7 +57,7 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
         {tag.id}
       </code>
       <label className={styles.rowField}>
-        <span className={styles.srLabel}>한국어 라벨</span>
+        <span className="sr-only">한국어 라벨</span>
         <AdminInput
           className={styles.input}
           size="sm"
@@ -72,7 +68,7 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
         />
       </label>
       <label className={styles.rowField}>
-        <span className={styles.srLabel}>영어 라벨</span>
+        <span className="sr-only">영어 라벨</span>
         <AdminInput
           className={styles.input}
           size="sm"
@@ -104,8 +100,6 @@ const TagManagerRow = ({ tag, usedCount, onSave, onDelete }: RowProps) => {
  *
  * 태그는 ID 순서로 표시한다. 새 ID는 영어 라벨을 우선 사용하고, 없으면 한국어 라벨을
  * 로마자로 바꿔 만든다.
- *
- * @returns {JSX.Element}
  */
 const ArticleTagManagerPanel = () => {
   const { tags, usage, status, error, createTag, saveLabels, removeTag } = useArticleTagsAdmin();

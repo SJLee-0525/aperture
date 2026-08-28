@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
+import { CardGridPageSkeleton } from "@/components/skeletons/CardGridPageSkeleton";
 import { MusicWorksView } from "@/features/music/_components/MusicWorksView";
 
 import { getMusicWorks } from "@/lib/content/music";
@@ -34,8 +34,6 @@ const MusicWorksContent = async () => {
  *
  * 셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `music/loading.tsx` 경계는 about·career·
  * media 전환에도 함께 쓰여 이 지면 모양을 그릴 수 없다.
- *
- * @returns {JSX.Element}
  */
 export default function MusicPage() {
   return (

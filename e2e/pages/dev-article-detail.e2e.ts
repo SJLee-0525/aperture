@@ -106,10 +106,10 @@ test.describe("개발 블로그 상세", () => {
     await list.evaluate((node) => node.scrollTo(0, node.scrollHeight));
     expect(await list.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
 
-    // 막대는 저장소 공용 CustomScrollbar 가 그린다 — 라벨이 목록 스코프로 바뀐다.
+    // 막대는 저장소 공용 CustomScrollbar 가 그린다 — 스코프가 목록으로 바뀐다.
     await expect(page.locator("[data-custom-scrollbar-ui]")).toHaveAttribute(
-      "aria-label",
-      "내부 목록 스크롤",
+      "data-scroll-scope",
+      "local",
     );
   });
 
@@ -191,7 +191,11 @@ test.describe("개발 블로그 상세", () => {
     await page.goto(ARTICLE);
 
     // 이 행은 링크가 아니라 현재 위치 표시다. hover 배경이 다시 깔리면 두 상태를 구분할 수 없다.
-    const current = page.locator('[aria-current="page"]');
+    // 셸 내비도 현재 위치에 aria-current 를 붙이므로 표 안으로 범위를 좁힌다.
+    const table = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "다른 글" }) });
+    const current = table.locator('[aria-current="page"]');
     const before = await current.evaluate((element) => getComputedStyle(element).paddingLeft);
     await current.hover();
     await expect
@@ -216,6 +220,55 @@ test.describe("개발 블로그 상세", () => {
 
     await page.keyboard.press("Escape");
     await expect(lightbox).toBeHidden();
+  });
+
+  /**
+   * 포커스 트랩이 가시성을 offsetParent 로 판정하면 fixed 요소가 전부 빠진다.
+   * 라이트박스의 닫기·이전·다음 버튼이 모두 fixed 라, 그때 Tab 은 스크림 하나만
+   * 오가고 키보드 사용자는 어떤 버튼에도 닿지 못한다(BUG-C-02).
+   *
+   * jsdom 에는 레이아웃이 없어 getClientRects 가 늘 비어 있다. 이 결함은 실제 브라우저
+   * 에서만 재현되므로 단위 테스트가 아니라 여기서 고정한다.
+   *
+   * 양 끝의 이동 버튼도 aria-disabled 로 탭 순서에 남는다. 이동 직후 버튼이 잠겨도
+   * 포커스가 body 로 빠지지 않아야 컨테이너의 keydown 트랩이 계속 동작한다.
+   */
+  test("라이트박스 안에서 Tab 이 fixed 버튼들에 닿는다", async ({ page }) => {
+    await page.goto(ARTICLE);
+
+    const zoom = page.getByRole("button", { name: /크게 보기/ });
+    await expect(zoom.first()).toBeAttached();
+    const lightbox = page.getByRole("dialog");
+
+    /** 트랩이 순환하므로 한 바퀴 안에 나오는 라벨을 모은다. */
+    const tabThroughTrap = async (): Promise<string[]> => {
+      const labels = new Set<string>();
+      for (let step = 0; step < 8; step += 1) {
+        await page.keyboard.press("Tab");
+        const label = await page.evaluate(
+          () => document.activeElement?.getAttribute("aria-label") ?? "",
+        );
+        if (label) labels.add(label);
+      }
+      return [...labels];
+    };
+
+    await zoom.first().scrollIntoViewIfNeeded();
+    await zoom.first().click();
+    await expect(lightbox).toBeVisible();
+
+    const labels = await tabThroughTrap();
+    expect(labels).toEqual(expect.arrayContaining(["닫기", "이전 이미지", "다음 이미지"]));
+
+    const next = lightbox.getByRole("button", { name: "다음 이미지" });
+    await next.click();
+    await expect(next).toHaveAttribute("aria-disabled", "true");
+    await expect(next).toBeFocused();
+
+    await page.keyboard.press("Tab");
+    await expect
+      .poll(() => lightbox.evaluate((node) => node.contains(document.activeElement)))
+      .toBe(true);
   });
 
   // 프리렌더 목록 밖 경로는 요청-시 렌더되고, 그 응답의 상태 코드는 스트리밍이 시작된 뒤라

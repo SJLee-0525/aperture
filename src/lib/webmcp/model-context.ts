@@ -36,8 +36,6 @@ type SpecModelContext = {
 
 /**
  * WebMCP 진입점을 찾는다. SSR과 미지원 브라우저에서는 null이다.
- *
- * @returns {SpecModelContext | null}
  */
 const specModelContext = (): SpecModelContext | null => {
   if (typeof document === "undefined") return null;
@@ -51,8 +49,6 @@ const specModelContext = (): SpecModelContext | null => {
 
 /**
  * WebMCP 지원 여부 — dynamic import 게이트(WebMcpTools)가 사용한다.
- *
- * @returns {boolean}
  */
 const isWebMcpSupported = (): boolean => specModelContext() !== null;
 
@@ -67,10 +63,10 @@ const TOOL_FAILURE_MESSAGE = "Tool failed. Try again or navigate the site manual
  *
  * 등록 실패는 React effect 밖으로 전파하지 않는다.
  *
- * @param {WebMcpToolDefinition} definition 모듈 레벨 상수로 선언된 도구 정의.
- * @param {WebMcpExecute} execute 도구 실행 콜백 — 문자열(또는 null) 결과를 반환.
- * @param {AbortSignal} signal abort 시 등록 해제.
- * @returns {boolean} 등록을 시도했는지 여부(no-op 이면 false).
+ * @param definition 모듈 레벨 상수로 선언된 도구 정의.
+ * @param execute 도구 실행 콜백 — 문자열(또는 null) 결과를 반환.
+ * @param signal abort 시 등록 해제.
+ * @returns 등록을 시도했는지 여부(no-op 이면 false).
  */
 const registerWebMcpTool = (
   definition: WebMcpToolDefinition,

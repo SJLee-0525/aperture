@@ -8,11 +8,9 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 
-import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useDialog } from "@/hooks/use-dialog";
 import { useImageZoom } from "@/hooks/use-image-zoom";
 import { useOverlayDrag } from "@/hooks/use-overlay-drag";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 import type { ImageMeta } from "@/types/image";
 import type { RefObject } from "react";
@@ -69,7 +67,7 @@ const LightboxSlide = memo(function LightboxSlide({
       <div
         className={styles.stage}
         style={{
-          width: `min(94vw, 1400px, ${88 * itemRatio}vh)`,
+          width: `min(94vw, 1400px, ${88 * itemRatio}dvh)`,
           aspectRatio: `${item.w} / ${item.h}`,
         }}
         onContextMenu={(event) => event.preventDefault()}
@@ -109,17 +107,6 @@ const LightboxSlide = memo(function LightboxSlide({
  * PhotoModal(사진 섹션 전용 라이트박스)과 동일한 오버레이 어휘(스크림·사각 내비)를 따르되
  * EXIF 등 도메인 결합 없이 이미지 확대만 담당한다. ESC 는 capture 단계에서 소비해
  * 아래에 열려 있는 Modal(문서 bubble 리스너)이 함께 닫히지 않게 한다.
- *
- * @param {Props} props
- * @param {ImageMeta[]} props.images
- * @param {number} props.index
- * @param {string} props.alt
- * @param {string} props.closeLabel
- * @param {string} props.previousLabel
- * @param {string} props.nextLabel
- * @param {() => void} props.onClose
- * @param {(index: number) => void} props.onNavigate
- * @returns {ReactPortal | null}
  */
 const ImageLightbox = ({
   images,
@@ -132,18 +119,18 @@ const ImageLightbox = ({
   onNavigate,
 }: Props) => {
   const count = images.length;
-  const containerRef = useFocusTrap(true);
   const trackRef = useRef<HTMLDivElement>(null);
   const dismissSurfaceRef = useRef<HTMLDivElement>(null);
-  const scrimRef = useRef<HTMLButtonElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const reportedIndexRef = useRef(index);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(() => new Set());
   const [chromeVisible, setChromeVisible] = useState(true);
   const image = images[index];
   const imageKey = image ? image.path || image.url : "";
   const loaded = imageKey ? loadedImages.has(imageKey) : false;
-  useScrollLock(true);
-  const isTopLayer = useOverlayLayer(true);
+  // Escape 는 방향키·확대 복귀와 한 리스너에 있다(:190 이하). 나누면 확대 상태에서
+  // 복귀와 이동의 순서가 갈려 동작이 바뀐다. 그래서 조립만 빌리고 키는 직접 다룬다.
+  const { panelRef: containerRef, isTopLayer } = useDialog(true, { escape: false });
   const {
     stageRef: zoomSurfaceRef,
     zoomed,
@@ -184,6 +171,8 @@ const ImageLightbox = ({
     canStart: (target) => !(target instanceof Element && target.closest("button")),
   });
 
+  // Escape 와 방향키를 한 리스너에서 다룬다. `useEscapeKey` 로 Escape 만 떼면 확대 상태에서
+  // 원배율 복귀와 이동의 순서가 갈리므로 자체 리스너를 유지한다.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (!isTopLayer) return;
@@ -284,13 +273,9 @@ const ImageLightbox = ({
       onTouchEnd={onDismissTouchEnd}
       onTouchCancel={onDismissTouchCancel}
     >
-      <button
-        ref={scrimRef}
-        type="button"
-        className={styles.scrim}
-        aria-label={closeLabel}
-        onClick={onClose}
-      />
+      {/* 화면 전체를 덮는 요소라 button 이면 트랩의 첫 탭 스톱이 되고, 닫기 버튼과 이름이
+          같아 낭독기의 버튼 목록에 "닫기"가 둘 나온다. */}
+      <div ref={scrimRef} className={styles.scrim} aria-hidden="true" onClick={onClose} />
       <div ref={dismissSurfaceRef} className={styles.dismissSurface}>
         <div
           ref={trackRef}
@@ -354,8 +339,11 @@ const ImageLightbox = ({
             type="button"
             className={`${styles.nav} ${styles.prev}`}
             aria-label={previousLabel}
-            disabled={!loaded || index === 0}
-            onClick={() => goTo(index - 1)}
+            aria-disabled={!loaded || index === 0}
+            onClick={() => {
+              if (!loaded || index === 0) return;
+              goTo(index - 1);
+            }}
             initial={{ opacity: 0, x: -6, y: "-50%" }}
             animate={{ opacity: 1, x: 0, y: "-50%" }}
             exit={{ opacity: 0, x: -6, y: "-50%" }}
@@ -370,8 +358,11 @@ const ImageLightbox = ({
             type="button"
             className={`${styles.nav} ${styles.next}`}
             aria-label={nextLabel}
-            disabled={!loaded || index === count - 1}
-            onClick={() => goTo(index + 1)}
+            aria-disabled={!loaded || index === count - 1}
+            onClick={() => {
+              if (!loaded || index === count - 1) return;
+              goTo(index + 1);
+            }}
             initial={{ opacity: 0, x: 6, y: "-50%" }}
             animate={{ opacity: 1, x: 0, y: "-50%" }}
             exit={{ opacity: 0, x: 6, y: "-50%" }}

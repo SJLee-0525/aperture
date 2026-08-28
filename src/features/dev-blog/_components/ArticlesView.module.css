@@ -1,22 +1,5 @@
-.main {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: var(--s-8) var(--s-6) var(--s-16);
-}
-
 /* 화면에는 두지 않는다. 지면 제목이 이미 무슨 목록인지 말한다.
    영역 이름은 남겨야 보조기술이 위 고정 섹션과 구분해 읽는다. */
-.heading {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
 
 .list {
   display: grid;

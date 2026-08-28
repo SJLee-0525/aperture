@@ -8,8 +8,6 @@ import { getMusicMediaRepository } from "@/lib/admin/music-media-repository";
 
 /**
  * 새 영상 — 마운트 시 문서 ID 1회 선발급 후 MediaForm 에 전달.
- *
- * @returns {JSX.Element}
  */
 const NewMusicMediaPage = () => {
   const [mediaId] = useState(() => getMusicMediaRepository().newId());

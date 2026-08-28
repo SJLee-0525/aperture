@@ -23,7 +23,7 @@
   width: 18px;
   height: 18px;
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .btn {
     width: 34px;
     height: 34px;
@@ -52,6 +52,14 @@
   border: 1px solid var(--line);
   box-shadow: var(--shadow-card);
   padding: 5px;
+}
+/* 시트 컨트롤 행에서는 트리거가 왼쪽 끝이라 오른쪽 정렬이면 패널이 화면 밖으로 나가고,
+   지면 맨 아래라 아래로 열면 스크롤 컨테이너에 잘린다. 왼쪽 기준으로 위로 연다. */
+.wrap[data-placement="above-start"] .panel {
+  top: auto;
+  bottom: 44px;
+  right: auto;
+  left: 0;
 }
 .option {
   display: flex;

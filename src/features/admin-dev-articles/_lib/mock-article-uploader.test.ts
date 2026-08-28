@@ -4,7 +4,7 @@ import { imageMarkdown } from "@/features/admin-dev-articles/_lib/markdown-inser
 import { createMockArticleImageUploader } from "@/features/admin-dev-articles/_lib/mock-article-uploader";
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
-import { STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
+import { MOCK_STORAGE_ORIGIN } from "@/constants/security-headers";
 
 const file = (name: string) => new File([], name, { type: "image/png" });
 
@@ -36,7 +36,7 @@ describe("createMockArticleImageUploader", () => {
   it("허용 호스트 아래 주소를 준다", async () => {
     const image = await createMockArticleImageUploader("a1")(file("a.png"));
 
-    expect(image.url.startsWith(STORAGE_IMAGE_HOSTS[0])).toBe(true);
+    expect(image.url.startsWith(MOCK_STORAGE_ORIGIN)).toBe(true);
   });
 
   it("만든 주소가 본문 이미지 검증을 통과한다", async () => {

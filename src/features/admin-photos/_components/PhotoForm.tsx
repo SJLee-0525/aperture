@@ -1,12 +1,16 @@
 "use client";
 
-import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { usePhotoEditor } from "@/features/admin-photos/_hooks/use-photo-editor";
 
 import { fromDatetimeLocal, toDatetimeLocal } from "@/features/admin-photos/_lib/datetime-local";
+
+import { issueFor } from "@/lib/admin/field-issue";
 
 import type { Photo } from "@/types/photo";
 
@@ -36,15 +40,18 @@ const EXIF_FIELDS: { key: keyof Photo["exif"]; label: string; placeholder: strin
 /**
  * 공유 사진 폼 — 업로드(EXIF 자동 채움) + 이중언어·EXIF·좌표·태그 편집 + 저장.
  *
- * @param {Props} props
- * @param {string} props.photoId
- * @param {Photo | undefined} props.initial - 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.initial - 있으면 수정 모드.
  */
 const PhotoForm = ({ photoId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     cancel,
+    clearCoords,
+    coordsFromExif,
     error,
+    formRef,
+    issues,
     form,
     isEdit,
     lat,
@@ -61,43 +68,44 @@ const PhotoForm = ({ photoId, initial }: Props) => {
   } = usePhotoEditor(photoId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "사진 수정" : "새 사진"}</h1>
-      </header>
-
-      <section className={styles.section}>
-        <h2 className={styles.legend}>이미지</h2>
+    <AdminFormShell
+      title={isEdit ? "사진 수정" : "새 사진"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving || uploading}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
+      <section className={base.section}>
+        <h2 className={base.legend}>이미지</h2>
         <PhotoUploadField
           photoId={photoId}
           image={form.image.url ? form.image : null}
           onUploaded={onUploaded}
           onPendingChange={onUploadPendingChange}
+          field="image"
+          error={issueFor(issues, "image")}
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+          field="title"
+          error={issueFor(issues, "title.ko")}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>장비 · 촬영</h2>
-        <div className={styles.grid2}>
+      <section className={base.section}>
+        <h2 className={base.legend}>장비 · 촬영</h2>
+        <div className={base.grid2}>
           <AdminField label="카메라">
             <AdminInput value={form.camera} onChange={(e) => patch({ camera: e.target.value })} />
           </AdminField>
@@ -114,8 +122,8 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>EXIF</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>EXIF</h2>
         <div className={styles.grid3}>
           {EXIF_FIELDS.map(({ key, label, placeholder }) => (
             <AdminField key={key} label={label}>
@@ -129,12 +137,14 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>장소 · 좌표</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>장소 · 좌표</h2>
         <PlaceField
           place={form.place}
           latStr={lat}
           lngStr={lng}
+          fromExif={coordsFromExif}
+          onClearCoords={clearCoords}
           onPlaceChange={(place) => patch({ place })}
           onLatChange={setLat}
           onLngChange={setLng}
@@ -146,13 +156,13 @@ const PhotoForm = ({ photoId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>태그</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>태그</h2>
         <TagMultiSelect selected={form.tags} onChange={(tags) => patch({ tags })} />
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -161,22 +171,7 @@ const PhotoForm = ({ photoId, initial }: Props) => {
           <span>공개 (방문자에게 표시)</span>
         </label>
       </section>
-
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={styles.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving || uploading}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 

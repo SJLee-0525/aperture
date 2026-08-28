@@ -166,9 +166,9 @@ describe("Gemini chat provider", () => {
 
   /**
    * 예전에는 MAX_TOKENS 를 오류로 올려 502 로 끝냈다. 스트리밍으로 이미 다 보여준 본문을
-   * 버리는 셈이라 OpenAI 와 동작이 어긋났고, 지금은 양쪽 모두 본문만 회수한다.
+   * 버리는 셈이라 OpenAI 와 동작이 어긋났고, 지금은 양쪽 모두 본문만 남긴다.
    */
-  it("MAX_TOKENS로 잘린 응답도 본문만 회수한다", async () => {
+  it("MAX_TOKENS로 잘린 응답도 본문만 남긴다", async () => {
     const event = `data: ${JSON.stringify({
       candidates: [
         { finishReason: "MAX_TOKENS", content: { parts: [{ text: '{"content":"잘린 답변' }] } },

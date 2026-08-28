@@ -3,15 +3,7 @@
 import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
@@ -21,8 +13,10 @@ import { ExifPanel } from "@/features/photo-detail/_components/ExifPanel";
 import { ExifPanelSkeleton } from "@/features/photo-detail/_components/ExifPanelSkeleton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { PHOTO_QUERY_KEY } from "@/features/photo-detail/_hooks/use-photo-detail-session";
+import { usePhotoImageStatus } from "@/features/photo-detail/_hooks/use-photo-image-status";
 import { usePhotoModal } from "@/features/photo-detail/_hooks/use-photo-modal";
+import { usePhotoModalViewport } from "@/features/photo-detail/_hooks/use-photo-modal-viewport";
+import { usePhotoPanelSheet } from "@/features/photo-detail/_hooks/use-photo-panel-sheet";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useImageZoom } from "@/hooks/use-image-zoom";
 import { useMounted } from "@/hooks/use-mounted";
@@ -31,8 +25,10 @@ import { useOverlayLayer } from "@/hooks/use-overlay-layer";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
+import { buildPhotoModalSlides } from "@/features/photo-detail/_lib/photo-modal-slides";
 import { readPhotoNeighbors } from "@/features/photo-detail/_lib/photo-neighbors";
 
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { Photo } from "@/types/photo";
@@ -45,33 +41,15 @@ type Props = {
   tags: Tag[];
   photoIds?: string[];
   onClose?: () => void;
+  /** 배경을 페이드로 띄울지. 패널은 이 값과 무관하게 `revealed` 를 따라 들어온다. */
   animateOnOpen?: boolean;
   revealed?: boolean;
   onImageReady?: (id: string) => void;
   chatTarget?: boolean;
 };
 
-type ImageStatus = "loaded" | "failed";
-
-type Slide = {
-  key: string;
-  item: Photo | null;
-  current: boolean;
-};
-
 const EASE = [0.22, 1, 0.36, 1] as const;
-const MOBILE_QUERY = "(max-width: 900px)";
-const COLLAPSE_TOUCH_THRESHOLD = 56;
-const CLOSE_WHEEL_THRESHOLD = 80;
 const CHROME_TRANSITION = { duration: 0.2, ease: EASE } as const;
-
-const subscribeMobile = (onChange: () => void) => {
-  const query = window.matchMedia(MOBILE_QUERY);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-const readMobile = () => window.matchMedia(MOBILE_QUERY).matches;
-const readServerMobile = () => false;
 
 /**
  * 사진 상세 — 데스크톱 라이트박스 / 모바일 바텀시트(탭으로 peek↔확장).
@@ -79,16 +57,7 @@ const readServerMobile = () => false;
  * AnimatePresence로 열림/닫힘 페이드+스케일(exit 포함). URL(?photo=)이 열림 상태의 단일 출처.
  * 이전·현재·다음 세 장을 트랙에 올려 모바일에서 좌우로 끌어 넘길 수 있게 한다.
  *
- * @param {Props} props
- * @param {Photo[]} props.photos
- * @param {Tag[]} props.tags
- * @param {string[] | undefined} props.photoIds
- * @param {(() => void) | undefined} props.onClose
- * @param {boolean | undefined} props.animateOnOpen
- * @param {boolean | undefined} props.revealed
- * @param {((id: string) => void) | undefined} props.onImageReady
- * @param {boolean | undefined} props.chatTarget 열린 사진을 챗봇 화면 문맥으로 등록할지 여부.
- * @returns {ReactPortal | null}
+ * @param props.chatTarget 열린 사진을 챗봇 화면 문맥으로 등록할지 여부.
  */
 const PhotoModal = ({
   photos,
@@ -101,27 +70,24 @@ const PhotoModal = ({
   chatTarget = false,
 }: Props) => {
   const { dict, lang } = useLang();
-  const [expanded, setExpanded] = useState(false);
-  const [photoChromeVisible, setPhotoChromeVisible] = useState(true);
-  // 이웃으로 미리 그려 둔 이미지가 현재로 승격돼도 onLoad는 다시 뛰지 않는다.
-  // 사진별 결과를 누적해야 승격 직후 스피너가 다시 덮지 않는다.
-  const [imageStatus, setImageStatus] = useState<ReadonlyMap<string, ImageStatus>>(() => new Map());
-  // 재시도할 때마다 슬라이드 키를 바꿔 img 를 다시 마운트한다. 같은 src 는 그냥 두면 다시 받지 않는다.
-  const [retryCounts, setRetryCounts] = useState<ReadonlyMap<string, number>>(() => new Map());
+  const sheet = usePhotoPanelSheet();
+  const images = usePhotoImageStatus();
 
   const searchParams = useSearchParams();
 
   // usePhotoModal 이 반환하는 photo 로는 그 호출의 인자를 만들 수 없어 URL 에서 직접 읽는다.
-  const activePhotoId = searchParams.get(PHOTO_QUERY_KEY);
-  const activeStatus = activePhotoId != null ? imageStatus.get(activePhotoId) : undefined;
+  const activePhotoId = searchParams.get(DETAIL_QUERY_KEYS.photo);
+  const activeStatus = activePhotoId != null ? images.statusOf(activePhotoId) : undefined;
 
   // 실패도 결판이 난 상태다. 스피너를 걷고 오류를 보여 준다.
   const imgLoaded = activeStatus != null;
   const imgFailed = activeStatus === "failed";
-  const mobile = useSyncExternalStore(subscribeMobile, readMobile, readServerMobile);
-  const navigationLocked = mobile && expanded;
-  const isTopLayer = useOverlayLayer(Boolean(photos.length));
-  const showPhotoChrome = !navigationLocked && photoChromeVisible;
+  const mobile = usePhotoModalViewport();
+  const navigationLocked = mobile && sheet.expanded;
+  /* 열려 있는 동안만 stack 에 오른다. 이 컴포넌트는 퇴장 연출을 위해 닫힌 뒤에도 마운트된
+     채로 남으므로, 마운트 여부로 판정하면 다른 오버레이가 Escape 를 넘겨받지 못한다. */
+  const isTopLayer = useOverlayLayer(activePhotoId != null);
+  const showPhotoChrome = !navigationLocked && sheet.chromeVisible;
   const {
     photo,
     open,
@@ -144,19 +110,17 @@ const PhotoModal = ({
       : null,
   );
   const [seenId, setSeenId] = useState<string | undefined>(photo?.id);
-  const touchStartY = useRef<number | null>(null);
-  const collapsePullStartY = useRef<number | null>(null);
-  const wheelTravel = useRef(0);
   const dismissSurfaceRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
 
   // 사진이 바뀌면(prev/next·열기) 패널과 크롬을 기본 상태로 — effect 없이 render-time reseed.
   if (photo && photo.id !== seenId) {
     setSeenId(photo.id);
-    setExpanded(false);
-    setPhotoChromeVisible(true);
+    sheet.reset();
   }
+  // useDialog 를 쓰지 않는다. 셋의 활성 조건이 서로 다르다 — 트랩은 진입 애니메이션이
+  // 끝난 뒤(open && revealed), 스크롤 잠금은 열리는 즉시(open), 최상위 판정은 사진이
+  // 있는 동안(photos.length)이다. 하나로 묶으면 셋 중 둘의 시점이 바뀐다.
   const trapRef = useFocusTrap(open && revealed);
   const mounted = useMounted();
   useScrollLock(open);
@@ -172,52 +136,15 @@ const PhotoModal = ({
   const canNavigateNext = imgLoaded && !navigationLocked;
   // 이웃이 아직 없으면 밀어 보여 줄 그림이 없다. 넘기기는 하되 애니메이션만 건너뛴다.
   const canPeekPrev =
-    neighbors.previous != null && imageStatus.get(neighbors.previous.id) === "loaded";
-  const canPeekNext = neighbors.next != null && imageStatus.get(neighbors.next.id) === "loaded";
+    neighbors.previous != null && images.statusOf(neighbors.previous.id) === "loaded";
+  const canPeekNext = neighbors.next != null && images.statusOf(neighbors.next.id) === "loaded";
   const tagLabels = photo
     ? photo.tags.map((id) => {
         const found = tagById.get(id);
         return found ? pickText(found, lang) : id;
       })
     : [];
-  const slideKey = (id: string, suffix = "") => `${id}${suffix}@${retryCounts.get(id) ?? 0}`;
-  const slides: Slide[] = photo
-    ? [
-        {
-          key: neighbors.previous ? slideKey(neighbors.previous.id) : "empty-previous",
-          item: neighbors.previous,
-          current: false,
-        },
-        { key: slideKey(photo.id), item: photo, current: true },
-        {
-          // 사진이 2장이면 이전과 다음이 같은 문서라 키가 겹친다.
-          key:
-            neighbors.next == null
-              ? "empty-next"
-              : slideKey(
-                  neighbors.next.id,
-                  neighbors.next.id === neighbors.previous?.id ? "#next" : "",
-                ),
-          item: neighbors.next,
-          current: false,
-        },
-      ]
-    : [];
-
-  const markImage = useCallback((id: string, status: ImageStatus) => {
-    setImageStatus((current) =>
-      current.get(id) === status ? current : new Map(current).set(id, status),
-    );
-  }, []);
-
-  const retryImage = useCallback((id: string) => {
-    setImageStatus((current) => {
-      const rest = new Map(current);
-      rest.delete(id);
-      return rest;
-    });
-    setRetryCounts((current) => new Map(current).set(id, (current.get(id) ?? 0) + 1));
-  }, []);
+  const slides = photo ? buildPhotoModalSlides(photo, neighbors, images.retryCountOf) : [];
 
   const {
     stageRef: zoomSurfaceRef,
@@ -228,7 +155,7 @@ const PhotoModal = ({
     enabled: open && revealed && isTopLayer && !navigationLocked,
     // 재시도는 슬라이드 key 를 바꿔 표면 노드를 교체하므로 재시도 횟수까지
     // resetKey 에 포함해야 리스너가 새 노드로 옮겨 붙는다.
-    resetKey: photo ? `${photo.id}@${retryCounts.get(photo.id) ?? 0}` : "",
+    resetKey: photo ? `${photo.id}@${images.retryCountOf(photo.id)}` : "",
     getMaxScale: (stage) => {
       if (!photo) return 3;
       const { w, h } = photo.image;
@@ -248,7 +175,7 @@ const PhotoModal = ({
     consumeDragged,
     swipeSurfaceRef: trackRef,
   } = useOverlayDrag({
-    enabled: mobile && open && revealed && !expanded && !zoomed,
+    enabled: mobile && open && revealed && !sheet.expanded && !zoomed,
     onDismiss: close,
     surfaceRef: dismissSurfaceRef,
     canStart: (target) => {
@@ -313,52 +240,6 @@ const PhotoModal = ({
     track.style.transform = "translate3d(0, 0, 0)";
   }, [photo?.id, trackRef]);
 
-  const collapsePanel = (panel: HTMLElement) => {
-    touchStartY.current = null;
-    collapsePullStartY.current = null;
-    wheelTravel.current = 0;
-    panel.scrollTo({ top: 0 });
-    setExpanded(false);
-    setPhotoChromeVisible(true);
-  };
-
-  const expandPanel = (panel: HTMLElement) => {
-    wheelTravel.current = 0;
-    collapsePullStartY.current = null;
-    panel.scrollTo({ top: 0 });
-    setExpanded(true);
-  };
-
-  const onPanelScroll = (event: React.UIEvent<HTMLElement>) => {
-    if (!expanded && event.currentTarget.scrollTop > 8) expandPanel(event.currentTarget);
-  };
-
-  const onPanelTouchMove = (event: React.TouchEvent<HTMLElement>) => {
-    const nextY = event.touches[0]?.clientY;
-    if (nextY == null) return;
-    const panel = event.currentTarget;
-
-    if (!expanded && touchStartY.current != null) {
-      const openTravel = nextY - touchStartY.current;
-      if (openTravel < -8) {
-        touchStartY.current = nextY;
-        expandPanel(panel);
-      }
-      return;
-    }
-
-    // 펼친 상태에서는 최상단에서 아래로 당겨도 모달이 아닌 EXIF 패널만 축소한다.
-    if (panel.scrollTop > 1) {
-      collapsePullStartY.current = null;
-      return;
-    }
-    if (collapsePullStartY.current == null || nextY < collapsePullStartY.current) {
-      collapsePullStartY.current = nextY;
-      return;
-    }
-    if (nextY - collapsePullStartY.current > COLLAPSE_TOUCH_THRESHOLD) collapsePanel(panel);
-  };
-
   if (!mounted) return null;
 
   return createPortal(
@@ -376,8 +257,8 @@ const PhotoModal = ({
           aria-hidden={revealed ? undefined : true}
           inert={!revealed}
           initial={animateOnOpen ? { opacity: 0 } : false}
-          // 온디맨드 경로는 별도 pending 프레임이 로딩 전환을 소유한다.
-          // 그 아래 모달까지 투명하게 만들면 pending 제거 직후 페이지가 비친다.
+          // 배경(스크림)에만 걸리는 플래그다. 온디맨드 경로는 pending 프레임이 로딩 전환을
+          // 소유하므로, 그 아래 배경까지 투명하게 만들면 pending 제거 직후 페이지가 비친다.
           animate={{ opacity: animateOnOpen ? (revealed ? 1 : 0) : 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
@@ -386,22 +267,18 @@ const PhotoModal = ({
           onTouchEnd={onTouchEnd}
           onTouchCancel={onTouchCancel}
         >
-          <button
-            type="button"
-            className={styles.scrim}
-            aria-label={dict.closeLabel}
-            onClick={close}
-          />
+          {/* 화면 전체를 덮는 요소라 button 이면 트랩의 첫 탭 스톱이 되고, 헤더 닫기 버튼과
+              이름이 같아 낭독기의 버튼 목록에 "닫기"가 둘 나온다. 닫기 수단은 그 버튼과
+              Escape 가 이미 제공한다. */}
+          <div className={styles.scrim} aria-hidden="true" onClick={close} />
           <m.div
             ref={dismissSurfaceRef}
             className={styles.inner}
             data-photo-modal-frame
-            initial={animateOnOpen ? { opacity: 0, scale: 0.985 } : false}
-            animate={
-              animateOnOpen
-                ? { opacity: revealed ? 1 : 0, scale: revealed ? 1 : 0.985 }
-                : { opacity: 1, y: 0 }
-            }
+            /* 패널의 등장·퇴장은 두 경로가 같다. `animateOnOpen` 이 가르는 것은 배경뿐이다.
+               온디맨드 경로의 배경은 로딩 프레임이 이미 띄워 둔 상태라 다시 페이드하지 않는다. */
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={{ opacity: revealed ? 1 : 0, scale: revealed ? 1 : 0.985 }}
             exit={{ opacity: 0, scale: 0.985 }}
             transition={{ duration: 0.28, ease: EASE }}
           >
@@ -417,11 +294,8 @@ const PhotoModal = ({
                 if ((event.target as HTMLElement).closest("button")) return;
                 // 더블탭 확대와 겹치지 않도록 단일탭 동작은 판정 시간만큼 보류된다.
                 handleStageClick(() => {
-                  if (mobile && expanded && panelRef.current) {
-                    collapsePanel(panelRef.current);
-                  } else {
-                    setPhotoChromeVisible((visible) => !visible);
-                  }
+                  if (mobile && sheet.expanded) sheet.collapse();
+                  else sheet.toggleChrome();
                 });
               }}
             >
@@ -432,7 +306,7 @@ const PhotoModal = ({
                         같은 요소에 두면 서로 덮는다. */}
                     <div ref={current ? zoomSurfaceRef : undefined} className={styles.zoomSurface}>
                       {/* 실패한 이미지는 걷어 낸다. 깨진 그림 위에 오류 문구를 겹치지 않는다. */}
-                      {item && imageStatus.get(item.id) !== "failed" ? (
+                      {item && images.statusOf(item.id) !== "failed" ? (
                         <Image
                           src={item.image.url}
                           alt={current ? alt : ""}
@@ -446,8 +320,8 @@ const PhotoModal = ({
                           // 이웃은 화면 밖이라 lazy 로 두면 엔진 휴리스틱에 따라 로드가 미뤄지고,
                           // 그러면 스와이프 커밋 조건이 열리지 않는다.
                           loading="eager"
-                          onLoad={() => markImage(item.id, "loaded")}
-                          onError={() => markImage(item.id, "failed")}
+                          onLoad={() => images.markLoaded(item.id)}
+                          onError={() => images.markFailed(item.id)}
                         />
                       ) : null}
                     </div>
@@ -460,7 +334,7 @@ const PhotoModal = ({
                   <button
                     type="button"
                     className={styles.retry}
-                    onClick={() => retryImage(photo.id)}
+                    onClick={() => images.retry(photo.id)}
                   >
                     {dict.errorRetry}
                   </button>
@@ -505,8 +379,10 @@ const PhotoModal = ({
                     type="button"
                     className={`${styles.nav} ${styles.prev}`}
                     aria-label={dict.previousImageLabel}
-                    onClick={prev}
-                    disabled={!canNavigatePrev}
+                    aria-disabled={!canNavigatePrev}
+                    onClick={() => {
+                      if (canNavigatePrev) prev();
+                    }}
                     initial={{ opacity: 0, x: -6, y: "-50%" }}
                     animate={{ opacity: 1, x: 0, y: "-50%" }}
                     exit={{ opacity: 0, x: -6, y: "-50%" }}
@@ -521,8 +397,10 @@ const PhotoModal = ({
                     type="button"
                     className={`${styles.nav} ${styles.next}`}
                     aria-label={dict.nextImageLabel}
-                    onClick={next}
-                    disabled={!canNavigateNext}
+                    aria-disabled={!canNavigateNext}
+                    onClick={() => {
+                      if (canNavigateNext) next();
+                    }}
                     initial={{ opacity: 0, x: 6, y: "-50%" }}
                     animate={{ opacity: 1, x: 0, y: "-50%" }}
                     exit={{ opacity: 0, x: 6, y: "-50%" }}
@@ -535,60 +413,18 @@ const PhotoModal = ({
             </div>
             <aside
               id="photo-modal-scroll-container"
-              ref={panelRef}
-              className={`${styles.panel} ${expanded ? styles.expanded : ""}`}
+              {...sheet.panelProps}
+              className={`${styles.panel} ${sheet.expanded ? styles.expanded : ""}`}
               data-custom-scroll-container
-              onScroll={onPanelScroll}
-              onTouchStart={(event) => {
-                const startY = event.touches[0]?.clientY ?? null;
-                touchStartY.current = startY;
-                collapsePullStartY.current =
-                  expanded && event.currentTarget.scrollTop <= 1 ? startY : null;
-              }}
-              onTouchMove={onPanelTouchMove}
-              onTouchEnd={() => {
-                touchStartY.current = null;
-                collapsePullStartY.current = null;
-              }}
-              onWheel={(event) => {
-                const panel = event.currentTarget;
-
-                if (expanded) {
-                  // 최상단에 닿기 전의 역스크롤은 축소 임계치에 누적하지 않는다.
-                  if (panel.scrollTop > 1 || event.deltaY >= 0) {
-                    wheelTravel.current = 0;
-                    return;
-                  }
-                  wheelTravel.current += event.deltaY;
-                  if (wheelTravel.current < -CLOSE_WHEEL_THRESHOLD) collapsePanel(panel);
-                  return;
-                }
-
-                const sameDirection =
-                  wheelTravel.current === 0 ||
-                  Math.sign(wheelTravel.current) === Math.sign(event.deltaY);
-                wheelTravel.current = sameDirection
-                  ? wheelTravel.current + event.deltaY
-                  : event.deltaY;
-
-                if (wheelTravel.current > 8 && !expanded) {
-                  expandPanel(panel);
-                }
-              }}
             >
               <button
                 type="button"
                 className={styles.handleButton}
-                aria-label={expanded ? dict.collapsePhotoInfoLabel : dict.expandPhotoInfoLabel}
-                aria-expanded={expanded}
-                onClick={(event) => {
-                  const panel = event.currentTarget.closest("aside");
-                  if (expanded && panel) {
-                    collapsePanel(panel);
-                  } else if (panel) {
-                    expandPanel(panel);
-                  }
-                }}
+                aria-label={
+                  sheet.expanded ? dict.collapsePhotoInfoLabel : dict.expandPhotoInfoLabel
+                }
+                aria-expanded={sheet.expanded}
+                onClick={sheet.toggleExpanded}
               >
                 <span className={styles.handle} />
               </button>

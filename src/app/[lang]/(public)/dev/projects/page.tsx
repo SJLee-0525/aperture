@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { CardGridPageSkeleton } from "@/components/PublicPageSkeletons";
+import { CardGridPageSkeleton } from "@/components/skeletons/CardGridPageSkeleton";
 import { DevProjectsView } from "@/features/dev/_components/DevProjectsView";
 
 import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
@@ -30,8 +30,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * 개발 — 프로젝트 (/dev/projects): 카드 그리드 + 상세 모달(?project= 딥링크, useSearchParams) → Suspense.
- *
- * @returns {Promise<JSX.Element>}
  */
 export default async function DevProjectsPage() {
   const [projects, articleLinks] = await Promise.all([

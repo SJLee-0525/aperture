@@ -10,9 +10,6 @@ const FOCUSABLE =
  * - 컨테이너로 포커스 이동(첫 진입), Tab/Shift+Tab을 내부로 순환
  * - 비활성화 시 직전 포커스 요소로 복귀
  * 컨테이너에는 tabIndex={-1} 필요.
- *
- * @param {boolean} active
- * @returns {RefObject<HTMLDivElement | null>}
  */
 const useFocusTrap = (active: boolean) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -28,9 +25,12 @@ const useFocusTrap = (active: boolean) => {
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
+      // CSSOM 명세상 computed position 이 fixed 인 요소의 offsetParent 는 항상 null 이다.
+      // 라이트박스의 닫기·이전·다음 버튼이 전부 fixed 라 offsetParent 로 거르면 트랩 안에
+      // 스크림 하나만 남아 키보드로 그 버튼들에 닿을 수 없다.
       const items = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
         (el) =>
-          el.offsetParent !== null &&
+          el.getClientRects().length > 0 &&
           !el.hasAttribute("hidden") &&
           el.getAttribute("aria-hidden") !== "true",
       );

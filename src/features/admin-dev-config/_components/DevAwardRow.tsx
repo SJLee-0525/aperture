@@ -2,6 +2,7 @@
 
 import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import type { DevAward } from "@/types/dev";
 
@@ -28,18 +29,6 @@ const FIELDS: { key: Field; label: string }[] = [
 
 /**
  * 개발 수상 한 행 — 연도 + 수상명·등위·설명(ko/en) + 정렬/삭제.
- *
- * @param {Props} props
- * @param {DevAward} props.award
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, value: string) => void} props.onEditYear
- * @param {(index: number, value: string) => void} props.onEditProject
- * @param {(index: number, field: Field, lang: 'ko' | 'en', value: string) => void} props.onEditField
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const DevAwardRow = ({
   award,
@@ -100,7 +89,7 @@ const DevAwardRow = ({
     <div className={styles.controls}>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="위로"
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
@@ -109,14 +98,14 @@ const DevAwardRow = ({
       </button>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="아래로"
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
         <Icon name="arrowDown" size={14} />
       </button>
-      <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
+      <button type="button" className={row.delete} onClick={() => onRemove(index)}>
         삭제
       </button>
     </div>

@@ -3,8 +3,11 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useSiteAdmin } from "@/features/admin-site/_hooks/use-site-admin";
+
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -12,10 +15,20 @@ import styles from "./AdminSiteEditor.module.css";
 
 /** 관리자 소개 — 사진 소개 페이지(/photo/about)의 바이오만 편집. 조립만, 로직은 useSiteAdmin.
  *
- * @returns {JSX.Element}
  *  이름·연락 링크는 about 에 노출되지 않으므로 여기 없음(전역/연락 CMS 추가 시 그쪽에서 편집). */
 const AdminSitePage = () => {
-  const { bio, status, error, saving, saved, editBio, save } = useSiteAdmin();
+  const {
+    confirmLeave,
+    recovery,
+    applyRecovered,
+    bio,
+    status,
+    error,
+    saving,
+    saved,
+    editBio,
+    save,
+  } = useSiteAdmin();
 
   return (
     <div className={styles.page}>
@@ -36,6 +49,16 @@ const AdminSitePage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>바이오 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>
@@ -64,13 +87,21 @@ const AdminSitePage = () => {
             </p>
           ) : null}
 
-          {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
+          {/* 저장 후 화면이 바뀌지 않아 이 문구가 유일한 성공 신호다. */}
+          <p className={styles.state} role="status">
+            {saved ? "저장되었습니다." : ""}
+          </p>
 
           <div className={styles.actions}>
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN_PHOTO} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_PHOTO}
+              disabled={saving}
+              onNavigate={guardedNavigate(confirmLeave)}
+            >
               취소
             </AdminButton>
           </div>

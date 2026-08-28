@@ -83,8 +83,8 @@ const collect = (blocks: ArticleBlock[]): TextAndCode =>
  *
  * Markdown 표식·링크 주소·코드 fence 표식은 트리에 남아 있지 않아 자연히 빠진다.
  *
- * @param {ArticleDocument} document 정규화된 본문.
- * @returns {number} 올림한 분 단위. 아무리 짧아도 1 이다.
+ * @param document 정규화된 본문.
+ * @returns 올림한 분 단위. 아무리 짧아도 1 이다.
  */
 const articleReadingMinutes = (document: ArticleDocument): number => {
   const { text, codeLines } = collect(document.blocks);

@@ -16,7 +16,6 @@ type ArticleTagsStatus = "loading" | "ready" | "error";
  * 저장소 거부 문구와 같은 수치를 화면에 미리 보여 주는 값이다. 다만 검증의 최종
  * 방어선은 저장소(`removeTag`)다 — 이 훅의 수치는 화면 갱신 이전일 수 있다.
  *
- * @returns {{ tags: DevArticleTag[]; usage: Record<string, number>; status: ArticleTagsStatus; error: string | null; createTag: (tag: DevArticleTag) => Promise<void>; saveLabels: (tag: DevArticleTag) => Promise<boolean>; removeTag: (id: string) => Promise<void> }}
  *   `createTag` 는 실패를 throw 해 추가 폼이 자리에서 보여 주고, `saveLabels`/`removeTag` 는
  *   실패를 `error` 로 남긴다. `saveLabels` 는 성공 여부를 돌려줘 행이 편집 상태를 정리하게 한다.
  */

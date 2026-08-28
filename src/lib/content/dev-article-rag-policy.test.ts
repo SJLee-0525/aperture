@@ -7,8 +7,8 @@ import type { DevArticle } from "@/types/dev-article";
 /**
  * 정책 테스트용 글을 만든다. 기본값은 발행 상태다.
  *
- * @param {Partial<DevArticle>} overrides 바꿀 필드.
- * @returns {DevArticle} 테스트 글.
+ * @param overrides 바꿀 필드.
+ * @returns 테스트 글.
  */
 const article = (overrides: Partial<DevArticle> = {}): DevArticle => ({
   id: "a1",

@@ -1,0 +1,54 @@
+.contact {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--s-10) var(--s-6) var(--s-16);
+}
+
+.contactHead {
+  padding-bottom: var(--s-4);
+}
+
+.contactTitle {
+  margin-top: var(--s-3);
+}
+
+.contactLead {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 60ch;
+  margin-top: var(--s-5);
+}
+
+.contactSocials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 0 var(--s-6);
+  border-bottom: 1px solid var(--line);
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding: var(--s-8) 0;
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+
+.contactField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+@media (max-width: 560px) {
+  .contactGrid {
+    grid-template-columns: 1fr;
+  }
+}

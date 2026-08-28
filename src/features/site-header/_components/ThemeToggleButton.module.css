@@ -16,7 +16,7 @@
   background: var(--surface-2);
   color: var(--text);
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .btn {
     width: 34px;
     height: 34px;

@@ -1,0 +1,81 @@
+/* 에러·404 공유 스타일 — editorial 톤(액센트 라벨 + serif 헤드라인 + 본문 + 액션). */
+.main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--s-6);
+  background: var(--bg);
+}
+.inner {
+  width: 100%;
+  max-width: 640px;
+}
+.label {
+  margin-bottom: var(--s-4);
+  font-family: var(--font-sans);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.title {
+  margin: 0 0 var(--s-4);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  /* 한국어는 음절 단위로 끊기지 않게 단어 경계에서만 줄바꿈 + 줄 길이 균형 */
+  word-break: keep-all;
+  text-wrap: balance;
+}
+.body {
+  margin: 0 0 var(--s-10);
+  max-width: 46ch;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--text-2);
+  word-break: keep-all;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+.retry {
+  padding: var(--s-3) var(--s-6);
+  background: var(--accent);
+  color: var(--text-inverse);
+  border: none;
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.retry:hover {
+  background: var(--accent-press);
+}
+.home {
+  display: inline-block;
+  padding: 11px 22px;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-size: var(--t-small);
+  font-weight: 600;
+  transition: background var(--dur) var(--ease);
+}
+.home:hover {
+  background: var(--surface-2);
+}
+.digest {
+  margin: var(--s-8) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-3);
+}

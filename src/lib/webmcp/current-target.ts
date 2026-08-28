@@ -8,9 +8,9 @@ import { stripLangPrefix, stripTrailingSlash } from "@/lib/i18n/locale-path";
  * "이 사진 어디서 찍었어?" 같은 발화에서 에이전트가 대화 기록의 낡은 id 를 채워 넣어
  * 엉뚱한 항목을 답하게 된다(W5 평가에서 실제 발생). 화면 상태를 도구가 직접 읽어 막는다.
  *
- * @param {unknown} raw 에이전트가 넘긴 id 인자(검증 전).
- * @param {string} queryKey 모달 딥링크 query key — "photo" · "work" · "project".
- * @returns {string | null} 인자 우선, 없으면 현재 열린 항목의 id, 둘 다 없으면 null.
+ * @param raw 에이전트가 넘긴 id 인자(검증 전).
+ * @param queryKey 모달 딥링크 query key — "photo" · "work" · "project".
+ * @returns 인자 우선, 없으면 현재 열린 항목의 id, 둘 다 없으면 null.
  */
 const resolveTargetId = (raw: unknown, queryKey: string): string | null => {
   if (typeof raw === "string" && raw.trim()) return raw.trim();
@@ -25,7 +25,7 @@ const resolveTargetId = (raw: unknown, queryKey: string): string | null => {
  * 경로 정규화(`stripTrailingSlash`)와 판정(`matchDevArticleSlug`) 모두 챗봇 화면 문맥과 같은
  * 함수를 쓴다 — 규칙을 두 벌 들면 한쪽만 고쳤을 때 두 표면의 "현재 글" 이 갈라진다.
  *
- * @returns {string | null} 상세 지면이면 slug, 아니면 null.
+ * @returns 상세 지면이면 slug, 아니면 null.
  */
 const resolveCurrentArticleSlug = (): string | null => {
   if (typeof window === "undefined") return null;

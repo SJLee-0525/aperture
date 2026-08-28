@@ -3,10 +3,15 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { useWorkEditor } from "@/features/admin-music-works/_hooks/use-work-editor";
 
 import { fromDateValue, toDateValue } from "@/features/admin-music-works/_lib/work-form-data";
+
+import { issueFor } from "@/lib/admin/field-issue";
 
 import type { MusicWork } from "@/types/music";
 
@@ -22,14 +27,15 @@ type Props = {
 /**
  * 공유 연주 폼 — 이중언어 필드 + 일시·프로그램·포스터·예매 + 저장.
  *
- * @param {Props} props
- * @param {string} props.workId
- * @param {MusicWork | undefined} props.initial - 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.initial - 있으면 수정 모드.
  */
 const WorkForm = ({ workId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     form,
+    issues,
+    formRef,
     isEdit,
     error,
     saving,
@@ -45,58 +51,52 @@ const WorkForm = ({ workId, initial }: Props) => {
   } = useWorkEditor(workId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "연주 수정" : "새 연주"}</h1>
-      </header>
-
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+    <AdminFormShell
+      title={isEdit ? "연주 수정" : "새 연주"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving || uploading}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+          field="title"
+          error={issueFor(issues, "title.ko")}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>부제 (작곡가 · 작품번호)</h2>
-        <div className={styles.grid2}>
-          <AdminField label="부제 (한국어)">
-            <AdminInput
-              value={form.subtitle.ko}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="부제 (English)">
-            <AdminInput
-              value={form.subtitle.en}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+      <section className={base.section}>
+        <h2 className={base.legend}>부제 (작곡가 · 작품번호)</h2>
+        <LocalizedFieldPair
+          label="부제"
+          value={form.subtitle}
+          onChange={(next) => patch({ subtitle: next })}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>일시</h2>
-        <div className={styles.grid2}>
-          <AdminField label="공연 날짜">
+      <section className={base.section}>
+        <h2 className={base.legend}>일시</h2>
+        <div className={base.grid2}>
+          <AdminField
+            label="공연 날짜"
+            required
+            field="performedAt"
+            error={issueFor(issues, "performedAt")}
+          >
             <AdminInput
               type="date"
               value={toDateValue(form.performedAt)}
-              onChange={(e) =>
-                e.target.value ? patch({ performedAt: fromDateValue(e.target.value) }) : null
-              }
+              onChange={(e) => patch({ performedAt: fromDateValue(e.target.value) })}
+              required
             />
           </AdminField>
           <AdminField label="시각">
@@ -109,67 +109,38 @@ const WorkForm = ({ workId, initial }: Props) => {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>장소</h2>
-        <div className={styles.grid2}>
-          <AdminField label="장소 (한국어)">
-            <AdminInput
-              value={form.venue.ko}
-              onChange={(e) => patch({ venue: { ...form.venue, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="장소 (English)">
-            <AdminInput
-              value={form.venue.en}
-              onChange={(e) => patch({ venue: { ...form.venue, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+      <section className={base.section}>
+        <h2 className={base.legend}>장소</h2>
+        <LocalizedFieldPair
+          label="장소"
+          value={form.venue}
+          onChange={(next) => patch({ venue: next })}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>분류 (리사이틀 · 협연 · 갈라)</h2>
-        <div className={styles.grid2}>
-          <AdminField label="분류 (한국어)">
-            <AdminInput
-              value={form.category.ko}
-              onChange={(e) => patch({ category: { ...form.category, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="분류 (English)">
-            <AdminInput
-              value={form.category.en}
-              onChange={(e) => patch({ category: { ...form.category, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+      <section className={base.section}>
+        <h2 className={base.legend}>분류 (리사이틀 · 협연 · 갈라)</h2>
+        <LocalizedFieldPair
+          label="분류"
+          value={form.category}
+          onChange={(next) => patch({ category: next })}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>설명</h2>
-        <div className={styles.grid2}>
-          <AdminField label="설명 (한국어)">
-            <AdminInput
-              multiline
-              rows={4}
-              value={form.description.ko}
-              onChange={(e) => patch({ description: { ...form.description, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="설명 (English)">
-            <AdminInput
-              multiline
-              rows={4}
-              value={form.description.en}
-              onChange={(e) => patch({ description: { ...form.description, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+      <section className={base.section}>
+        <h2 className={base.legend}>설명</h2>
+        <LocalizedFieldPair
+          label="설명"
+          value={form.description}
+          onChange={(next) => patch({ description: next })}
+          multiline
+          rows={4}
+        />
       </section>
 
-      <section className={styles.section}>
+      <section className={base.section}>
         <div className={styles.arrayHead}>
-          <h2 className={styles.legend}>프로그램 (곡명 · 언어 무관)</h2>
+          <h2 className={base.legend}>프로그램 (곡명 · 언어 무관)</h2>
           <AdminButton variant="secondary" size="xs" onClick={addProgram}>
             + 곡 추가
           </AdminButton>
@@ -199,8 +170,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         )}
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>포스터</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>포스터</h2>
         <PosterUploadField
           workId={workId}
           poster={form.poster.url ? form.poster : null}
@@ -209,8 +180,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>예매</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>예매</h2>
         <AdminField label="예매 링크">
           <AdminInput
             value={form.ticketUrl}
@@ -220,8 +191,8 @@ const WorkForm = ({ workId, initial }: Props) => {
         </AdminField>
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -230,22 +201,7 @@ const WorkForm = ({ workId, initial }: Props) => {
           <span>공개 (방문자에게 표시)</span>
         </label>
       </section>
-
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={styles.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving || uploading}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving || uploading}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 

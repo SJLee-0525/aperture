@@ -8,7 +8,7 @@ import {
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 const STORAGE_IMAGE =
-  "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2F1.webp?alt=media";
+  "https://mock-storage.aperture.invalid/v0/b/demo.appspot.com/o/dev-blog%2Fa%2F1.webp?alt=media";
 
 describe("insertAtSelection", () => {
   it("커서 자리에 빈 줄로 띄워 넣는다", () => {

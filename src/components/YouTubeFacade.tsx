@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./YouTubeFacade.module.css";
 
@@ -31,24 +32,34 @@ type Props = {
  *
  * 썸네일은 `i.ytimg.com`, 재생은 `youtube.com/embed` 를 쓰며 두 호스트 모두 전역 CSP 에 열려 있다.
  *
- * @param {Props} props
- * @param {string} props.videoId 11 자 영상 ID. 주소가 아니라 ID 를 받아 embed 주소를 여기서 조립한다.
+ * @param props.videoId 11 자 영상 ID. 주소가 아니라 ID 를 받아 embed 주소를 여기서 조립한다.
  *   빈 문자열이면 재생할 수 없는 항목으로 보고 자리 그림만 그린다(관리자가 아직 ID 를 넣지 않은 경우).
- * @param {string} props.title 재생 버튼과 iframe 의 accessible name. 비우면 영상을 구분할 수 없다.
- * @param {string | undefined} props.source 제목 아래 한 줄. 없으면 그리지 않는다.
- * @param {boolean} props.playing true 가 되면 iframe 으로 바뀌고 자동 재생한다.
+ * @param props.title 재생 버튼과 iframe 의 accessible name. 비우면 영상을 구분할 수 없다.
+ * @param props.source 제목 아래 한 줄. 없으면 그리지 않는다.
+ * @param props.playing true 가 되면 iframe 으로 바뀌고 자동 재생한다.
  *   재생할 ID 가 없으면 true 여도 썸네일을 유지한다.
- * @param {() => void} props.onPlay 썸네일을 눌렀을 때 호출한다.
- * @param {string | undefined} props.className 바깥 비율 상자에 덧붙일 클래스.
- * @returns {JSX.Element}
+ * @param props.onPlay 썸네일을 눌렀을 때 호출한다.
+ * @param props.className 바깥 비율 상자에 덧붙일 클래스.
  */
 const YouTubeFacade = ({ videoId, title, source, playing, onPlay, className }: Props) => {
   const playable = videoId.length > 0;
+  const [failedThumbnailId, setFailedThumbnailId] = useState<string | null>(null);
+  const playerRef = useRef<HTMLIFrameElement>(null);
+  const started = playing && playable;
+  const usePlaceholder = !playable || failedThumbnailId === videoId;
+
+  // 재생하면 포커스를 가진 버튼이 iframe 으로 교체된다. 옮기지 않으면 포커스가 body 로
+  // 떨어져 다음 Tab 이 지면 처음부터 다시 시작한다. 영상 카드가 여럿이라 매번 반복된다.
+  useEffect(() => {
+    if (!started) return;
+    playerRef.current?.focus({ preventScroll: true });
+  }, [started]);
 
   return (
     <div className={className ? `${styles.frame} ${className}` : styles.frame}>
-      {playing && playable ? (
+      {started ? (
         <iframe
+          ref={playerRef}
           className={styles.player}
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
           title={title}
@@ -59,13 +70,18 @@ const YouTubeFacade = ({ videoId, title, source, playing, onPlay, className }: P
         <button type="button" className={styles.trigger} onClick={onPlay} aria-label={title}>
           <Image
             src={
-              playable ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : PLACEHOLDER_THUMBNAIL
+              usePlaceholder
+                ? PLACEHOLDER_THUMBNAIL
+                : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
             }
             alt=""
             fill
             sizes="(max-width: 720px) 100vw, 590px"
             className={styles.thumbnail}
             draggable={false}
+            onError={() => {
+              if (!usePlaceholder) setFailedThumbnailId(videoId);
+            }}
           />
           <div className={styles.overlay}>
             <div className={styles.title}>{title}</div>

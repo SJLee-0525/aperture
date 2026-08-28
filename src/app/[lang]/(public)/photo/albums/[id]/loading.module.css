@@ -1,16 +1,11 @@
 /* 앨범 상세 로딩 셸 — AlbumDetailView.module.css hero(300px) + 메이슨리 그리드 흉내. */
-.frame {
-  height: var(--public-content-height);
-  max-height: var(--public-content-height);
-  overflow: hidden;
-}
 
 .hero {
   margin-bottom: var(--s-8);
 }
 
 .main {
-  max-width: 1180px;
+  max-width: var(--page-max);
   margin: 0 auto;
   padding: 0 var(--s-6) var(--s-16);
 }

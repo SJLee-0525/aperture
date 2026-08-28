@@ -12,12 +12,17 @@ import type { ChatMessage } from "@/types/chat";
 import type { Lang } from "@/types/lang";
 
 type ChatSuccessResponse = { message: Omit<ChatMessage, "id"> };
-type ChatErrorResponse = { error?: { code?: string; message?: string } };
+/*
+ * 서버는 `code` 도 함께 보내지만 화면은 읽지 않는다. 문구가 이미 언어별로 완성돼 있고,
+ * 재시도 여부는 `retryable` 이 따로 알려 준다. 읽지 않는 필드를 타입에 두면 화면이 코드로
+ * 분기하는 것처럼 보인다.
+ */
+type ChatErrorResponse = { error?: { message?: string } };
 type ChatStreamEvent =
   | { type: "status"; status: "portfolio-search" }
   | { type: "delta"; content: string }
   | { type: "done"; message: Omit<ChatMessage, "id"> }
-  | { type: "error"; code?: string; message: string; retryable?: boolean };
+  | { type: "error"; message: string; retryable?: boolean };
 
 class ChatPublicError extends Error {
   readonly retryable: boolean;
@@ -77,36 +82,43 @@ const readEventStream = async (response: Response, onEvent: (event: ChatStreamEv
     onEvent(event);
   };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      const event: unknown = JSON.parse(line);
+  // 서버가 스트림 도중 오류 이벤트를 보내는 정상 경로에서도 여기서 예외가 나간다.
+  // reader 를 풀지 않으면 그 스트림이 잠긴 채 남는다. sse-stream.ts 와 같은 형태다.
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      buffer += decoder.decode(value, { stream: !done });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const event: unknown = JSON.parse(line);
+        if (!isStreamEvent(event)) throw new Error("Invalid chat stream event");
+        emit(event);
+      }
+      if (done) break;
+    }
+    if (buffer.trim()) {
+      const event: unknown = JSON.parse(buffer);
       if (!isStreamEvent(event)) throw new Error("Invalid chat stream event");
       emit(event);
     }
-    if (done) break;
+    if (!terminalSeen) throw new Error("Chat stream ended before a terminal event");
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
   }
-  if (buffer.trim()) {
-    const event: unknown = JSON.parse(buffer);
-    if (!isStreamEvent(event)) throw new Error("Invalid chat stream event");
-    emit(event);
-  }
-  if (!terminalSeen) throw new Error("Chat stream ended before a terminal event");
 };
 
 /**
  * 챗봇 메시지와 요청 상태를 관리한다. 화면 정보는 전송 직전 URL에서 읽는다.
  *
- * @param {Lang} lang 응답 및 오류 문구에 사용할 언어.
- * @param {(() => string | null) | undefined} getExcludedTargetKey 사용자가 제외한 항목의
+ * @param lang 응답 및 오류 문구에 사용할 언어.
+ * @param getExcludedTargetKey 사용자가 제외한 항목의
  * `"type:id"` 키를 전송 시점에 읽는 함수.
- * @param {(() => ChatScreenTarget | null) | undefined} getScreenTarget 입력창에 표시된 화면
+ * @param getScreenTarget 입력창에 표시된 화면
  * 항목을 전송 시점에 읽는 함수.
- * @returns {{ messages: ChatMessage[]; isReplying: boolean; retry: (messageId: string) => boolean; send: (rawQuestion: string) => boolean }} 메시지 목록과 전송 API.
+ * @returns 메시지 목록과 전송 API.
  */
 const useChat = (
   lang: Lang,
@@ -248,6 +260,9 @@ const useChat = (
           });
         })
         .catch((error: unknown) => {
+          // 요청을 끊지 않으면 서버의 cancel 훅이 호출되지 않아, 방문자가 이미 오류
+          // 화면을 보는 동안에도 진행 중인 LLM 요청이 끝까지 토큰을 소비한다.
+          controller.abort();
           if (error instanceof DOMException && error.name === "AbortError") return;
           const content =
             error instanceof ChatPublicError ? error.message : DICTIONARY[lang].chatErrorFallback;
@@ -266,6 +281,9 @@ const useChat = (
           setMessages(messagesRef.current);
         })
         .finally(() => {
+          // 참조를 버리기 전에 끊는다. 순서를 바꾸면 언마운트 abort 가 null 을 보고
+          // 아무것도 중단하지 못한다.
+          controller.abort();
           if (requestRef.current === controller) requestRef.current = null;
           replyingRef.current = false;
           setIsReplying(false);

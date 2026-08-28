@@ -2,6 +2,7 @@
 
 import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import type { SiteLink } from "@/types/site";
 
@@ -19,21 +20,11 @@ type Props = {
 
 /**
  * 연락처 링크 한 행 — label·href 입력 + 위/아래 이동 + 삭제.
- *
- * @param {Props} props
- * @param {SiteLink} props.link
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, field: keyof SiteLink, value: string) => void} props.onEdit
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Props) => (
   <li className={styles.row}>
     <label className={styles.field}>
-      <span className={styles.srLabel}>라벨</span>
+      <span className="sr-only">라벨</span>
       <AdminInput
         size="sm"
         value={link.label}
@@ -43,7 +34,7 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
     </label>
 
     <label className={styles.field}>
-      <span className={styles.srLabel}>주소</span>
+      <span className="sr-only">주소</span>
       <AdminInput
         size="sm"
         value={link.href}
@@ -55,7 +46,7 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
     <div className={styles.controls}>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="위로"
         disabled={isFirst}
         onClick={() => onMove(index, -1)}
@@ -64,14 +55,14 @@ const LinkRow = ({ link, index, isFirst, isLast, onEdit, onMove, onRemove }: Pro
       </button>
       <button
         type="button"
-        className={styles.move}
+        className={row.move}
         aria-label="아래로"
         disabled={isLast}
         onClick={() => onMove(index, 1)}
       >
         <Icon name="arrowDown" size={14} />
       </button>
-      <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
+      <button type="button" className={row.delete} onClick={() => onRemove(index)}>
         삭제
       </button>
     </div>

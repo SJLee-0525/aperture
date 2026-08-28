@@ -22,12 +22,11 @@ type DevArticleRemoveResult = { imageCleanupWarning: string | null };
 /**
  * 관리자 화면이 보는 저장소 경계.
  *
- * 화면은 mock 인지 Firestore 인지 몰라야 한다는 것이 이 타입의 존재 이유다(계획 §2).
- * 지금은 브라우저 로컬 구현만 있고, B5 에서 `listCrud` + `admin-list-rest` projection 을
- * 같은 모양으로 감싸 끼운다. 그래서 `list` 는 목록 행 필드만, `get` 은 본문까지 돌려주는
- * 두 갈래로 나눠 둔다 — Firestore 로 바뀌어도 읽는 양이 그대로여야 한다.
+ * 화면은 mock 인지 실데이터인지 몰라야 한다는 것이 이 타입의 존재 이유다.
+ * `list` 는 목록 행 필드만, `get` 은 본문까지 돌려준다. 저장소 구현이 바뀌어도
+ * 읽는 양이 그대로여야 한다 — 목록 화면이 수십 KB 짜리 Markdown 본문을 끌어오지 않는다.
  *
- * 목록 정렬은 여기서 하지 않는다. 초안은 `publishedAt` 이 없어 Firestore 쿼리로 자리를
+ * 목록 정렬은 여기서 하지 않는다. 초안은 `publishedAt` 이 없어 DB 정렬로 자리를
  * 정할 수 없고, 관리자 목록의 정렬 규칙은 화면 쪽 순수 함수(`dev-article-sort`)가 갖는다.
  */
 type DevArticleRepository = {
@@ -55,11 +54,11 @@ let cached: DevArticleRepository | null = null;
  * 지금 쓸 저장소를 고른다. 첫 호출 결과를 재사용하므로 hook 의 의존성 배열에 그대로 넣어도
  * 매 렌더마다 새 어댑터가 생기지 않는다.
  *
- * mock 소스면 브라우저 로컬 저장소를, 실데이터면 Firestore 구현을 준다. 두 구현 모두
- * 도메인 규칙(`dev-article-domain`)을 공유하고, 팩토리는 호출 시점까지 Firebase 를
+ * mock 소스면 브라우저 로컬 저장소를, 실데이터면 Supabase 구현을 준다. 두 구현 모두
+ * 도메인 규칙(`dev-article-domain`)을 공유하고, 팩토리는 호출 시점까지 Supabase 를
  * 건드리지 않는 closure 조립만 한다.
  *
- * @returns {DevArticleRepository} 현재 콘텐츠 소스에 맞는 저장소.
+ * @returns 현재 콘텐츠 소스에 맞는 저장소.
  */
 const getDevArticleRepository = (): DevArticleRepository => {
   cached ??= shouldUseMockContent()

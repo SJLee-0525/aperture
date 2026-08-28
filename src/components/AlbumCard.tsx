@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { PHOTO_GRID_IMAGE_SIZES } from "@/constants/breakpoints";
+import { countLabel } from "@/lib/format/count-label";
+
 import styles from "./AlbumCard.module.css";
 
 type Props = {
@@ -16,15 +19,7 @@ type Props = {
 /**
  * 앨범 카드 — 정사각 커버 + 장수 배지 + 제목·부제.
  *
- * @param {Props} props
- * @param {string} props.href
- * @param {string | null} props.coverUrl
- * @param {string} props.coverAlt
- * @param {number} props.count
- * @param {string} props.title
- * @param {string} props.subtitle
- * @param {boolean | undefined} props.priority LCP 보호 — 첫 화면에 들어오는 카드만 eager 로드.
- * @returns {JSX.Element}
+ * @param props.priority LCP 보호 — 첫 화면에 들어오는 카드만 eager 로드.
  */
 const AlbumCard = ({
   href,
@@ -42,7 +37,7 @@ const AlbumCard = ({
           src={coverUrl}
           alt={coverAlt}
           fill
-          sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
+          sizes={PHOTO_GRID_IMAGE_SIZES}
           className={styles.img}
           draggable={false}
           priority={priority}
@@ -53,7 +48,7 @@ const AlbumCard = ({
     <div className={styles.info}>
       <div className={styles.title}>{title}</div>
       <div className={styles.meta}>
-        {subtitle} · {count} photos
+        {subtitle} · {countLabel(count, "photo")}
       </div>
     </div>
   </Link>

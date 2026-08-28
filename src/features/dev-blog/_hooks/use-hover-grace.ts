@@ -21,7 +21,7 @@ type HoverGrace = {
  * 인디케이터와 패널 사이에 빈틈이 있으면 그 사이를 지나는 동안 닫혔다 열리기를 반복한다.
  * 유예 시간 안에 다시 들어오면 예약된 닫기를 취소해 그 깜빡임을 없앤다.
  *
- * @returns {HoverGrace} 열림 상태와 진입·이탈·즉시 닫기 핸들러.
+ * @returns 열림 상태와 진입·이탈·즉시 닫기 핸들러.
  */
 const useHoverGrace = (): HoverGrace => {
   const [open, setOpen] = useState(false);

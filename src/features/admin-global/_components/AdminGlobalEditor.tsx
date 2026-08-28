@@ -4,8 +4,11 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { LinkRow } from "@/features/admin-global/_components/LinkRow";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useGlobalAdmin } from "@/features/admin-global/_hooks/use-global-admin";
+
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -13,11 +16,12 @@ import styles from "./AdminGlobalEditor.module.css";
 
 /**
  * 관리자 전역 — 메인(/) 랜딩(순환 타이핑·리드) + 연락(/contact) 리드·링크 편집. 조립만, 로직은 useGlobalAdmin.
- *
- * @returns {JSX.Element}
  */
 const AdminGlobalPage = () => {
   const {
+    confirmLeave,
+    recovery,
+    applyRecovered,
     tagline,
     landingLead,
     contactLead,
@@ -55,6 +59,16 @@ const AdminGlobalPage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>
               순환 타이핑 역할 (‘·’ 로 구분 · 예: Photographer · Pianist · Developer)
@@ -158,13 +172,21 @@ const AdminGlobalPage = () => {
             </p>
           ) : null}
 
-          {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
+          {/* 저장 후 화면이 바뀌지 않아 이 문구가 유일한 성공 신호다. */}
+          <p className={styles.state} role="status">
+            {saved ? "저장되었습니다." : ""}
+          </p>
 
           <div className={styles.actions}>
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN}
+              disabled={saving}
+              onNavigate={guardedNavigate(confirmLeave)}
+            >
               취소
             </AdminButton>
           </div>

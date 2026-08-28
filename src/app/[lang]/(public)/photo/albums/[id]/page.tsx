@@ -3,25 +3,24 @@ import { cache, Suspense } from "react";
 
 import { AlbumDetailView } from "@/features/albums/_components/AlbumDetailView";
 
+import { albumPageDescription } from "@/features/albums/_lib/album-page-copy";
 import {
   resolveAlbumCover,
   resolveAlbumCoverPreview,
 } from "@/features/albums/_lib/resolve-album-cover";
+import { toAlbumGalleryPhotos } from "@/features/albums/_lib/to-album-gallery-photos";
 
-import { getAlbum, getAlbums, getPhotos, getTags } from "@/lib/content/photo";
+import { getAlbum, getAlbums, getPhotos } from "@/lib/content/photo";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 import type { Lang } from "@/types/lang";
-import type { Photo } from "@/types/photo";
 import type { Metadata } from "next";
 
 import AlbumDetailLoading from "./loading";
 
 /**
  * 공개 앨범 id들을 미리 프리렌더 — lang은 상위 [lang] layout의 generateStaticParams가 공급
- *
- * @returns {Promise<{ id: string }[]>}
  */
 export async function generateStaticParams() {
   const albums = await getAlbums();
@@ -50,18 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = pickText(album.title, lang);
-  const koSubtitle = pickText(album.subtitle, "ko");
-  const enSubtitle = pickText(album.subtitle, "en");
-  const koTitle = pickText(album.title, "ko");
-  const enTitle = pickText(album.title, "en");
-  const description = {
-    ko: koSubtitle
-      ? `${koTitle} — ${koSubtitle}. 사진작가 이성준의 사진 앨범.`
-      : `${koTitle} — 사진작가 이성준의 사진 앨범.`,
-    en: enSubtitle
-      ? `${enTitle} — ${enSubtitle}. A photo album by photographer Sungjoon Lee.`
-      : `${enTitle} — a photo album by photographer Sungjoon Lee.`,
-  };
+  const description = albumPageDescription(album);
   const coverUrl = resolveAlbumCover(album, photos);
   const pathname = `/photo/albums/${id}`;
   const base = pageMetadata({ lang, title: album.title, description, pathname });
@@ -81,18 +69,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AlbumDetailPage({ params }: Props) {
   const { id } = await params;
-  const [{ album, photos }, tags] = await Promise.all([getAlbumPageData(id), getTags()]);
+  const { album, photos } = await getAlbumPageData(id);
   if (!album) notFound();
 
-  const byId = new Map(photos.map((photo) => [photo.id, photo]));
-  const albumPhotos = album.photoIds
-    .map((photoId) => byId.get(photoId))
-    .filter((photo): photo is Photo => photo != null);
-  const coverUrl = resolveAlbumCoverPreview(album, albumPhotos);
+  /* 그리드는 타일이 쓰는 필드만 받는다. 상세는 열 때 /api/photos/[id] 가 채우므로
+     EXIF·좌표를 포함한 전체 Photo 와 태그 사전을 이 화면에 직렬화하지 않는다. */
+  const coverUrl = resolveAlbumCoverPreview(album, photos);
 
   return (
     <Suspense fallback={<AlbumDetailLoading />}>
-      <AlbumDetailView album={album} photos={albumPhotos} coverUrl={coverUrl} tags={tags} />
+      <AlbumDetailView
+        album={album}
+        photos={toAlbumGalleryPhotos(album, photos)}
+        coverUrl={coverUrl}
+      />
     </Suspense>
   );
 }

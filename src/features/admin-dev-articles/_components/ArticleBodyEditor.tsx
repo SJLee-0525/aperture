@@ -14,6 +14,7 @@ import {
   insertAtSelection,
   youtubeMarkdown,
 } from "@/features/admin-dev-articles/_lib/markdown-insert";
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
 
 import type { ArticleBodyUploader } from "@/features/admin-dev-articles/_lib/article-image-uploader";
 
@@ -29,17 +30,15 @@ type Props = {
 /**
  * 한국어 Markdown 본문 편집기 — 삽입 도구 · 편집/미리보기 토글 · 도움말.
  *
- * 편집과 미리보기를 동시에 렌더하지 않는다(계획 §3). 넓은 화면에서도 두 패널을 나란히 두면
+ * 편집과 미리보기를 동시에 렌더하지 않는다(07-dev-blog §3). 넓은 화면에서도 두 패널을 나란히 두면
  * 입력 영역이 절반으로 줄고, 미리보기는 서버 요청이라 보지 않는 동안 계속 부를 이유도 없다.
  *
  * 이미지는 파일 선택 뒤 인라인 입력에서 대체 텍스트를 받아 업로드하고 커서 자리에 삽입한다.
  * 업로더는 주입받으므로 이 컴포넌트는 저장 위치를 모른다.
  *
- * @param {Props} props
- * @param {string} props.value 본문 원문.
- * @param {ArticleBodyUploader} props.upload 이미지 업로더.
- * @param {(next: string) => void} props.onChange 본문이 바뀌었을 때.
- * @returns {JSX.Element}
+ * @param props.value 본문 원문.
+ * @param props.upload 이미지 업로더.
+ * @param props.onChange 본문이 바뀌었을 때.
  */
 const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -55,7 +54,7 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
 
   // 삽입은 업로드가 끝난 뒤에도 일어난다. 그때 `props.value` 는 업로드를 시작하던 시점의
   // 값이라, 그 값으로 본문을 통째로 바꾸면 올리는 동안 입력한 글이 사라진다. textarea 는
-  // 업로드 중에도 열려 있으므로 최신 본문을 따로 붙들어 둔다.
+  // 업로드 중에도 열려 있으므로 최신 본문을 ref 에 따로 보관한다.
   const latestValue = useRef(value);
   useEffect(() => {
     latestValue.current = value;
@@ -88,6 +87,12 @@ const ArticleBodyEditor = ({ value, upload, onChange }: Props) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+
+    const validationError = validateUploadableImage(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setError(null);
     setPendingAlt("");

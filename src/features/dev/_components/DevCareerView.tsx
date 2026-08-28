@@ -1,10 +1,12 @@
 "use client";
 
-import { Modal } from "@/components/Modal";
+import { AwardDetailModal } from "@/components/AwardDetailModal";
+import { AwardList } from "@/components/AwardList";
 import { TimelineList } from "@/components/TimelineList";
 import { DevStackSection } from "@/features/dev/_components/DevStackSection";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 
+import { useDevAwardTools } from "@/features/dev/_hooks/use-dev-tools";
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useQueryModal } from "@/hooks/use-query-modal";
 
@@ -22,16 +24,16 @@ import styles from "./DevCareerView.module.css";
  * 수상 행은 `?award=` 딥링크 모달을 열며, 뒤로가기로 닫히는 계약은 `useQueryModal` 이 담당한다.
  * 비어 있는 항목(학력·경력·수상·스택)은 각각 렌더하지 않아 빈 라벨만 남지 않게 한다.
  *
- * @param {{ config: DevConfig }} props
- * @param {DevConfig} props.config - education·timeline·awards·stack 을 소비한다. 나머지 필드는 소개 페이지 소관이다.
- * @returns {JSX.Element}
+ * @param props.config - education·timeline·awards·stack 을 소비한다. 나머지 필드는 소개 페이지 소관이다.
  */
 const DevCareerView = ({ config }: { config: DevConfig }) => {
   const { dict, lang } = useLang();
   const { active: selectedAward, open, select, close } = useQueryModal("award", config.awards);
+  // WebMCP 도구 — 미지원 브라우저에선 no-op(어댑터 기능 감지).
+  useDevAwardTools(config.awards);
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.devCareerNav}</h1>
 
       {config.education.length > 0 ? (
@@ -65,52 +67,46 @@ const DevCareerView = ({ config }: { config: DevConfig }) => {
       )}
 
       {config.awards.length > 0 ? (
-        <section className={`${styles.awards} ${styles.stacked}`}>
-          <div className={styles.sectionLabel}>{dict.devAwardsLabel}</div>
-          {config.awards.map((award) => (
-            <button
-              type="button"
-              key={award.id}
-              className={styles.awardRow}
-              onClick={() => select(award.id)}
-            >
-              <span className={styles.awardYear}>{award.year}</span>
-              <span className={styles.awardName}>{pickText(award.name, lang)}</span>
-              <span className={styles.awardPlace}>{pickText(award.place, lang)}</span>
-            </button>
-          ))}
-          <div className={styles.end} />
-        </section>
+        <AwardList
+          label={dict.devAwardsLabel}
+          awards={config.awards.map((award) => ({
+            id: award.id,
+            year: award.year,
+            name: pickText(award.name, lang),
+            place: pickText(award.place, lang),
+          }))}
+          onSelect={select}
+        />
       ) : null}
 
       <DevStackSection stack={config.stack} className={styles.stackSection} />
 
-      <Modal
+      <AwardDetailModal
+        award={
+          selectedAward
+            ? {
+                year: selectedAward.year,
+                name: pickText(selectedAward.name, lang),
+                place: pickText(selectedAward.place, lang),
+                description: pickText(selectedAward.description, lang),
+              }
+            : null
+        }
+        label={dict.devAwardsLabel}
+        closeLabel={dict.closeLabel}
         open={open}
         onClose={close}
-        closeLabel={dict.closeLabel}
-        maxWidth={600}
-        crumb={selectedAward ? `${dict.devAwardsLabel} · ${selectedAward.year}` : ""}
-        label={selectedAward ? pickText(selectedAward.name, lang) : ""}
       >
-        {selectedAward ? (
-          <div>
-            <div className={styles.modalYear}>{selectedAward.year}</div>
-            <div className={styles.modalName}>{pickText(selectedAward.name, lang)}</div>
-            <div className={styles.modalPlace}>{pickText(selectedAward.place, lang)}</div>
-            <p className={styles.modalDescription}>{pickText(selectedAward.description, lang)}</p>
-            {selectedAward.projectId ? (
-              <LocalizedLink
-                className={styles.projectLink}
-                href={devProjectRoute(selectedAward.projectId)}
-                prefetch={false}
-              >
-                {dict.devAwardProjectLink} <span aria-hidden="true">↗</span>
-              </LocalizedLink>
-            ) : null}
-          </div>
+        {selectedAward?.projectId ? (
+          <LocalizedLink
+            className={styles.projectLink}
+            href={devProjectRoute(selectedAward.projectId)}
+            prefetch={false}
+          >
+            {dict.devAwardProjectLink} <span aria-hidden="true">↗</span>
+          </LocalizedLink>
         ) : null}
-      </Modal>
+      </AwardDetailModal>
     </main>
   );
 };

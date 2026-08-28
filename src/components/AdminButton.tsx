@@ -4,10 +4,11 @@ import type { ComponentProps, MouseEvent } from "react";
 
 import styles from "./AdminButton.module.css";
 
-type AdminButtonVariant = "primary" | "secondary";
+type AdminButtonVariant = "primary" | "secondary" | "danger";
 type AdminButtonSize = "md" | "sm" | "xs";
 
 type AdminButtonOwnProps = {
+  /** danger 는 되돌릴 수 없는 동작에 쓴다. 강조(primary)는 안전한 쪽이 가져간다. */
   variant: AdminButtonVariant;
   /** md 44px · sm 40px · xs 36px. 기본 md. */
   size?: AdminButtonSize;

@@ -7,9 +7,6 @@ import { type RefObject, useCallback } from "react";
  * 행 폭·위치는 언어(개발 ↔ Development)와 뷰포트 폭에 따라 달라져 CSS 퍼센트로는 맞출 수 없어 실측한다.
  * 값은 ref 로 직접 스타일에 써서 리렌더 없이 CSS 전환만 태운다. 색·세기는 CSS `:has()` 가 담당.
  * 이벤트는 포인터·포커스 양쪽을 받으므로 currentTarget 만 요구한다.
- *
- * @param {RefObject<HTMLElement | null>} heroRef
- * @returns {{ onRowEnter: (event: { currentTarget: HTMLElement }) => void; onRowLeave: () => void }}
  */
 const useSectionGlow = (heroRef: RefObject<HTMLElement | null>) => {
   const onRowEnter = useCallback(

@@ -8,9 +8,9 @@ import { Skeleton } from "@/components/Skeleton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
-import { pickText } from "@/lib/i18n/pick-text";
+import { setCursorLoading } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
 
-import { setCursorLoading } from "@/utils/custom-cursor-events";
+import { pickText } from "@/lib/i18n/pick-text";
 
 import type { DevProject, DevProjectCardData } from "@/types/dev";
 import type { DevArticleProjectLink } from "@/types/dev-article";
@@ -26,7 +26,7 @@ const DetailSkeleton = ({ hasMedia = true, label }: { hasMedia?: boolean; label?
   >
     {hasMedia ? (
       <div className={detailStyles.media}>
-        <Skeleton className={styles.skeletonMedia} aspectRatio={16 / 9} />
+        <Skeleton aspectRatio={16 / 9} />
       </div>
     ) : null}
 
@@ -41,18 +41,18 @@ const DetailSkeleton = ({ hasMedia = true, label }: { hasMedia?: boolean; label?
       <Skeleton width={88} height={39} radius={6} />
     </div>
 
-    <div className={detailStyles.secL}>
+    <h3 className={detailStyles.secL}>
       <Skeleton width={96} height={20} />
-    </div>
+    </h3>
     <div className={styles.skeletonCopy}>
       <Skeleton height={14} />
       <Skeleton width="94%" height={14} />
       <Skeleton width="72%" height={14} />
     </div>
 
-    <div className={detailStyles.secL}>
+    <h3 className={detailStyles.secL}>
       <Skeleton width={76} height={20} />
-    </div>
+    </h3>
     <div className={detailStyles.mtags}>
       {[72, 94, 64, 86].map((width) => (
         <Skeleton key={width} width={width} height={27} radius={999} />
@@ -85,14 +85,6 @@ type Props = {
 
 /**
  * 프로젝트 상세 데이터와 무거운 모달 UI를 실제 선택 시에만 불러온다.
- *
- * @param {Props} props
- * @param {DevProjectCardData | null} props.project
- * @param {DevArticleProjectLink[]} props.articles
- * @param {boolean} props.open
- * @param {() => void} props.onClose
- * @param {string} props.endpoint
- * @returns {JSX.Element | null}
  */
 const OnDemandDevProjectDetail = ({ project, articles, open, onClose, endpoint }: Props) => {
   const { dict, lang } = useLang();

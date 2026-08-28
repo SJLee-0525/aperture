@@ -1,4 +1,4 @@
-import type { LegalDocument } from "@/features/legal/_lib/legal-documents";
+import type { LegalDocument } from "@/features/legal/_lib/legal/legal-document";
 
 import styles from "./LegalDocumentView.module.css";
 
@@ -10,9 +10,7 @@ type LegalDocumentViewProps = {
 /**
  * 정책과 안내 문서가 공유하는 정적 레이아웃. 원문은 상위 페이지에서 주입한다.
  *
- * @param {LegalDocumentViewProps} props
- * @param {LegalDocument} props.document - 제목, 시행일과 본문 섹션으로 구성된 문서.
- * @returns {JSX.Element}
+ * @param props.document - 제목, 시행일과 본문 섹션으로 구성된 문서.
  */
 const LegalDocumentView = ({ document }: LegalDocumentViewProps) => (
   <main className={styles.main}>

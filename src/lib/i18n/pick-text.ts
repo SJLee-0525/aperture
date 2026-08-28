@@ -4,10 +4,6 @@ import type { LocalizedText } from "@/types/localized";
 /**
  * LocalizedText에서 현재 언어의 문자열을 꺼낸다.
  * 번역이 비어 있으면 en → ko 순으로 폴백 (영어를 다 안 채워도 화면이 깨지지 않음).
- *
- * @param {LocalizedText} text
- * @param {Lang} lang
- * @returns {string}
  */
 const pickText = (text: LocalizedText, lang: Lang): string =>
   text[lang] || text.en || text.ko || "";

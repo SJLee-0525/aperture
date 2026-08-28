@@ -37,9 +37,9 @@ const IMAGE_CLEANUP_WARNING =
  * 발행 상태가 그대로여도 재검증이 필요하다. 초안일 때 열려 404로 캐시된 상세는 컬렉션 태그
  * 무효화로 갱신되지 않아, 발행한 뒤 몇 번을 다시 저장해도 그대로 404로 남는다.
  *
- * @param {DevArticle | undefined} previous 쓰기 직전 저장본. 새 글이면 없다.
- * @param {DevArticleInput} next 저장할 값.
- * @returns {boolean} 쓰기 전후 중 한 번이라도 발행 상태면 true.
+ * @param previous 쓰기 직전 저장본. 새 글이면 없다.
+ * @param next 저장할 값.
+ * @returns 쓰기 전후 중 한 번이라도 발행 상태면 true.
  */
 const touchesPublishedPath = (previous: DevArticle | undefined, next: DevArticleInput): boolean =>
   Boolean(previous?.published) || next.published;
@@ -48,8 +48,7 @@ const touchesPublishedPath = (previous: DevArticle | undefined, next: DevArticle
  * 글 상세 경로 두 언어를 라우트 캐시에서 지우도록 요청한다.
  * 발행 전에 열려 캐시로 남은 상세 404는 태그 무효화로 갱신되지 않기 때문이다.
  *
- * @param {string} slug 대상 글의 slug. 비어 있으면 아무것도 하지 않는다.
- * @returns {void}
+ * @param slug 대상 글의 slug. 비어 있으면 아무것도 하지 않는다.
  */
 const revalidateArticlePaths = (slug: string): void => {
   if (!slug) return;
@@ -60,11 +59,11 @@ const revalidateArticlePaths = (slug: string): void => {
 };
 
 /**
- * `DevArticleInput` 을 `listCrud` 가 받는 입력으로 좁힌다. `createdAt`/`updatedAt` 은
+ * `DevArticleInput` 을 `documentCrud` 가 받는 입력으로 좁힌다. `createdAt`/`updatedAt` 은
  * 서버 타임스탬프가 소유하므로 입력에 없어도 된다 — 타입만 맞춘다.
  *
- * @param {DevArticleInput} input 저장할 도메인 필드.
- * @returns {Omit<DevArticle, "id">} listCrud 입력 형태의 같은 값.
+ * @param input 저장할 도메인 필드.
+ * @returns documentCrud 입력 형태의 같은 값.
  */
 const asCrudInput = (input: DevArticleInput): Omit<DevArticle, "id"> =>
   input as Omit<DevArticle, "id">;
@@ -74,9 +73,9 @@ const asCrudInput = (input: DevArticleInput): Omit<DevArticle, "id"> =>
  * 빈 배열과 비교하므로, 저장 직전 서버 데이터로 한 번 더 확인하는 것이 최종 방어선이다.
  * 조회와 쓰기 사이의 race 는 관리자 1명 전제로 허용한다.
  *
- * @param {string} slug 저장하려는 slug.
- * @param {string} selfId 편집 중인 글의 문서 ID.
- * @returns {Promise<void>} 사용 가능하면 완료된다.
+ * @param slug 저장하려는 slug.
+ * @param selfId 편집 중인 글의 문서 ID.
+ * @returns 사용 가능하면 완료된다.
  * @throws {Error} 다른 글이 이미 쓰는 slug 일 때.
  */
 const assertSlugAvailable = async (slug: string, selfId: string): Promise<void> => {
@@ -89,9 +88,9 @@ const assertSlugAvailable = async (slug: string, selfId: string): Promise<void> 
  * 발행 조건 검사에 필요한 주변 데이터를 서버에서 모아 도메인 검사를 태운다.
  * mock 과 달리 연관 프로젝트의 존재·공개 여부까지 실제 projection 으로 확인한다.
  *
- * @param {string} id 발행하려는 글의 문서 ID.
- * @param {DevArticleInput} input 발행하려는 저장 값.
- * @returns {Promise<void>} 조건을 만족하면 완료된다.
+ * @param id 발행하려는 글의 문서 ID.
+ * @param input 발행하려는 저장 값.
+ * @returns 조건을 만족하면 완료된다.
  * @throws {Error} 발행 조건을 만족하지 않을 때.
  */
 const assertPublishableLive = async (id: string, input: DevArticleInput): Promise<void> => {
@@ -110,16 +109,16 @@ const assertPublishableLive = async (id: string, input: DevArticleInput): Promis
 };
 
 /**
- * Firestore 에 붙는 블로그 글 저장소. 기반 CRUD(`devArticlesCrud`)는 저장·캐시 갱신·RAG
+ * Supabase 에 붙는 블로그 글 저장소. 기반 CRUD(`devArticlesCrud`)는 저장·캐시 갱신·RAG
  * 정책만 알고, 도메인 규칙 — slug 유일성·최초 발행 스탬프·발행 조건 — 은 mock 구현과
  * 같은 `dev-article-domain` 모듈을 여기서 얹는다. 검사 지점도 mock 과 같다:
  * 발행 상태로 저장되는 모든 경로(`create`/`update`/`setPublished`).
  *
- * 도메인 규칙용 previous 읽기와 listCrud 정책의 스냅샷 읽기가 각 1회씩 발생한다.
+ * 도메인 규칙용 previous 읽기와 documentCrud 정책의 스냅샷 읽기가 각 1회씩 발생한다.
  * 관리자 1명·저장 빈도 기준으로 수용하는 이중 읽기다.
  *
- * @param {() => Date} [now] 시스템 시각. 테스트가 고정할 수 있게 주입받는다.
- * @returns {DevArticleRepository} Firestore 에 붙은 관리자 CRUD.
+ * @param [now] 시스템 시각. 테스트가 고정할 수 있게 주입받는다.
+ * @returns Supabase 에 붙은 관리자 CRUD.
  */
 const createLiveDevArticleRepository = (
   now: () => Date = () => new Date(),
@@ -167,7 +166,7 @@ const createLiveDevArticleRepository = (
       firstPublishedAt: previous.firstPublishedAt,
     };
     if (published) await assertPublishableLive(id, input);
-    // listCrud.setPublished 는 published 만 바꾸므로 최초 발행 스탬프를 위해 update 경로를 쓴다.
+    // documentCrud.setPublished 는 published 만 바꾸므로 최초 발행 스탬프를 위해 update 경로를 쓴다.
     // RAG 정책은 작업 이름 없이 전후 상태만 보므로 계약이 같다.
     await devArticlesCrud.update(id, asCrudInput(stampFirstPublished(input, previous, now)));
     if (touchesPublishedPath(previous, input)) revalidateArticlePaths(previous.slug);

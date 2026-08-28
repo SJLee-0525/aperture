@@ -7,7 +7,7 @@ export const contentType = "image/png";
 
 /**
  * 사이트 기본 Open Graph 이미지를 생성한다.
- * @returns {Promise<ImageResponse>} 브랜드 워드마크가 포함된 PNG 응답.
+ * @returns 브랜드 워드마크가 포함된 PNG 응답.
  */
 export default async function OpenGraphImage() {
   return createSiteImage();

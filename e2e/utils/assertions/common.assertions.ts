@@ -14,9 +14,11 @@ const commonAssertions = {
   },
 
   async closeDialog(page: Page) {
-    const dialog = page.getByRole("dialog");
-    await dialog.getByRole("button", { name: "닫기" }).last().click();
-    await expect(dialog).toBeHidden();
+    const dialogs = page.getByRole("dialog");
+    await dialogs.getByRole("button", { name: "닫기" }).last().click();
+    // 사진 상세는 ready 모달과 퇴장 중인 pending 모달이 잠시 겹칠 수 있다.
+    // 단일 요소용 toBeHidden 대신 모든 모달이 걷히는 닫기 계약을 확인한다.
+    await expect(dialogs).toHaveCount(0);
   },
 };
 

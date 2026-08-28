@@ -17,8 +17,8 @@ const mocks = vi.hoisted(() => ({
   musicList: vi.fn(),
   musicUpdate: vi.fn(),
   readDimensions: vi.fn(),
-  updateAlbum: vi.fn(),
-  updatePhoto: vi.fn(),
+  patchAlbum: vi.fn(),
+  patchPhoto: vi.fn(),
   uploadDevPreview: vi.fn(),
   uploadDevThumbnail: vi.fn(),
   uploadMusicPosterPreview: vi.fn(),
@@ -36,17 +36,17 @@ vi.mock("@/features/image-upload/_lib/read-dimensions", () => ({
 }));
 vi.mock("@/lib/supabase/albums", () => ({
   listAlbumsAdmin: mocks.listAlbumsAdmin,
-  updateAlbum: mocks.updateAlbum,
+  patchAlbum: mocks.patchAlbum,
 }));
 vi.mock("@/lib/supabase/dev", () => ({
-  devProjects: { list: mocks.devList, update: mocks.devUpdate },
+  devProjects: { list: mocks.devList, patchData: mocks.devUpdate },
 }));
 vi.mock("@/lib/supabase/photos", () => ({
   listPhotosAdmin: mocks.listPhotosAdmin,
-  updatePhoto: mocks.updatePhoto,
+  patchPhoto: mocks.patchPhoto,
 }));
 vi.mock("@/lib/supabase/music", () => ({
-  musicWorks: { list: mocks.musicList, update: mocks.musicUpdate },
+  musicWorks: { list: mocks.musicList, patchData: mocks.musicUpdate },
 }));
 vi.mock("@/lib/supabase/auth", () => ({
   getAdminAccessToken: async () => mocks.accessToken,
@@ -180,10 +180,10 @@ describe("migrateImageThumbnails", () => {
       total: 9,
     });
 
-    expect(mocks.updatePhoto).not.toHaveBeenCalled();
+    expect(mocks.patchPhoto).not.toHaveBeenCalled();
     expect(mocks.musicUpdate).not.toHaveBeenCalled();
     expect(mocks.devUpdate).not.toHaveBeenCalled();
-    expect(mocks.updateAlbum).not.toHaveBeenCalled();
+    expect(mocks.patchAlbum).not.toHaveBeenCalled();
     expect(progress).toHaveBeenLastCalledWith({ stage: "완료", completed: 1, total: 1 });
   });
 
@@ -233,7 +233,7 @@ describe("migrateImageThumbnails", () => {
       },
       body: JSON.stringify({ url: photoImage.url }),
     });
-    expect(mocks.updatePhoto).toHaveBeenCalledWith(
+    expect(mocks.patchPhoto).toHaveBeenCalledWith(
       "photo-1",
       expect.objectContaining({
         image: expect.objectContaining({ thumbnail: thumbnail("photo") }),
@@ -263,7 +263,7 @@ describe("migrateImageThumbnails", () => {
         ],
       }),
     );
-    expect(mocks.updateAlbum).toHaveBeenCalledWith(
+    expect(mocks.patchAlbum).toHaveBeenCalledWith(
       "album-1",
       expect.objectContaining({
         cover: expect.objectContaining({
@@ -286,7 +286,7 @@ describe("migrateImageThumbnails", () => {
     expect(mocks.uploadPhotoPreview).toHaveBeenCalledOnce();
     expect(mocks.compressThumbnailToWebp).not.toHaveBeenCalled();
     expect(mocks.uploadPhotoThumbnail).not.toHaveBeenCalled();
-    expect(mocks.updatePhoto).toHaveBeenCalledWith(
+    expect(mocks.patchPhoto).toHaveBeenCalledWith(
       "photo-1",
       expect.objectContaining({
         image: expect.objectContaining({ thumbnail: existingThumbnail }),
@@ -300,7 +300,7 @@ describe("migrateImageThumbnails", () => {
 
     await expect(migrateImageThumbnails(false)).rejects.toThrow("관리자 로그인이 필요합니다.");
     expect(fetch).not.toHaveBeenCalled();
-    expect(mocks.updatePhoto).not.toHaveBeenCalled();
+    expect(mocks.patchPhoto).not.toHaveBeenCalled();
   });
 
   it("원본 다운로드 API 오류 메시지를 그대로 전달한다", async () => {

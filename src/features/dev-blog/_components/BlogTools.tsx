@@ -31,10 +31,8 @@ type Props = { articles: ArticleToolData[]; tags: DevArticleTag[] };
  * 게이트는 청크만 막는다. `articles`·`tags` 는 client component 의 prop 이라 지원 여부와
  * 무관하게 RSC payload 로 직렬화된다.
  *
- * @param {Props} props
- * @param {ArticleToolData[]} props.articles 공개 글 투영.
- * @param {DevArticleTag[]} props.tags 태그 사전 전체.
- * @returns {JSX.Element | null}
+ * @param props.articles 공개 글 투영.
+ * @param props.tags 태그 사전 전체.
  */
 const BlogTools = ({ articles, tags }: Props) => {
   const supported = useSyncExternalStore(subscribeNothing, isWebMcpSupported, () => false);

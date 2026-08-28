@@ -12,12 +12,13 @@ const MOBILE_QUERY = "(max-width: 900px)";
 
 const navigation = vi.hoisted(() => ({
   back: vi.fn(),
+  replace: vi.fn(),
   pathname: "/ko/photo",
   searchParams: new URLSearchParams("photo=p2"),
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ back: navigation.back, replace: vi.fn() }),
+  useRouter: () => ({ back: navigation.back, replace: navigation.replace }),
   usePathname: () => navigation.pathname,
   useSearchParams: () => navigation.searchParams,
 }));
@@ -165,10 +166,13 @@ describe("PhotoModal", () => {
     render(<PhotoModal photos={photos} tags={[]} photoIds={ALL_IDS} />);
     const nextButton = screen.getByRole("button", { name: "다음 사진" }) as HTMLButtonElement;
 
-    expect(nextButton.disabled).toBe(true);
+    expect(nextButton.disabled).toBe(false);
+    expect(nextButton.getAttribute("aria-disabled")).toBe("true");
+    fireEvent.click(nextButton);
+    expect(navigation.replace).not.toHaveBeenCalled();
 
     act(() => loadAll());
-    expect(nextButton.disabled).toBe(false);
+    expect(nextButton.getAttribute("aria-disabled")).toBe("false");
   });
 
   it("이웃 상세를 아직 못 받았어도 이동 버튼은 열려 있다", () => {
@@ -178,8 +182,8 @@ describe("PhotoModal", () => {
     act(() => loadAll());
 
     const buttonOf = (name: string) => screen.getByRole("button", { name }) as HTMLButtonElement;
-    expect(buttonOf("다음 사진").disabled).toBe(false);
-    expect(buttonOf("이전 사진").disabled).toBe(false);
+    expect(buttonOf("다음 사진").getAttribute("aria-disabled")).toBe("false");
+    expect(buttonOf("이전 사진").getAttribute("aria-disabled")).toBe("false");
   });
 
   describe("이미지 로드 실패", () => {
@@ -204,9 +208,9 @@ describe("PhotoModal", () => {
       failCurrent();
 
       expect(document.querySelector("[aria-hidden='true'] span")).toBeNull();
-      expect(
-        (screen.getByRole("button", { name: "다음 사진" }) as HTMLButtonElement).disabled,
-      ).toBe(false);
+      expect(screen.getByRole("button", { name: "다음 사진" }).getAttribute("aria-disabled")).toBe(
+        "false",
+      );
     });
 
     it("재시도하면 그 이미지를 다시 요청한다", () => {

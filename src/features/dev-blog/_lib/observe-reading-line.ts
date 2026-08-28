@@ -5,9 +5,9 @@
  * 교차 상태가 바뀌지 않아 콜백이 오지 않는다. 빠르게 스크롤하면 그 요소를 건너뛴 채 직전
  * 판정에 멈춘다. 프레임마다 위치를 직접 재면 이동 속도와 무관하게 값이 맞는다.
  *
- * @param {() => void} measure 위치를 재고 상태를 갱신하는 함수. 구독 즉시 한 번,
+ * @param measure 위치를 재고 상태를 갱신하는 함수. 구독 즉시 한 번,
  *   이후에는 한 프레임에 최대 한 번 호출한다.
- * @returns {() => void} 구독 해제 함수.
+ * @returns 구독 해제 함수.
  */
 const observeReadingLine = (measure: () => void): (() => void) => {
   let frame = 0;

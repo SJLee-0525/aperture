@@ -1,61 +1,29 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { useDetailQuerySession } from "@/hooks/use-detail-query-session";
+
+import type { DetailQueryKey } from "@/constants/routes";
 
 /**
- * URL 쿼리(?param=id)로 열리는 상세 모달 상태 — 딥링크·검색 결과에서 항목을 바로 열 수 있게 한다.
- * id 매칭 항목을 돌려주고, select/close 는 쿼리만 갱신(스크롤 유지). ESC·스크림 닫기는 Modal 이 처리.
- * usePhotoModal(?photo=)의 단일 항목 버전 — 음악 연주(?work=)·수상(?award=)·개발 프로젝트(?project=) 공용.
- * 소비 컴포넌트는 useSearchParams 를 쓰므로 상위에 Suspense 경계가 필요하다.
+ * `useDetailQuerySession` 에 항목 해석을 얹은 상세 모달 상태.
+ * 사진 상세는 목록을 들고 있지 않아 세션만 직접 쓴다.
  *
- * @param {string} param
- * @param {T[]} items
- * @returns {{ active: T | null; open: boolean; select: (id: string | null) => void; close: () => void }}
+ * @returns active 는 query id 와 일치하는 항목. 없으면 null 이고 query 는 지워진다.
  */
-const useQueryModal = <T extends { id: string }>(param: string, items: T[]) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const openedHere = useRef(false);
-  const searchParamsRef = useRef(searchParams);
-
-  useEffect(() => {
-    searchParamsRef.current = searchParams;
-  }, [searchParams]);
-
-  const activeId = searchParams.get(param);
+const useQueryModal = <T extends { id: string }>(param: DetailQueryKey, items: T[]) => {
+  const { activeId, close, goto } = useDetailQuerySession(param);
   const active = activeId ? (items.find((item) => item.id === activeId) ?? null) : null;
 
-  const select = useCallback(
-    (id: string | null) => {
-      const params = new URLSearchParams(searchParamsRef.current.toString());
-      if (id) {
-        params.set(param, id);
-        openedHere.current = true;
-      } else {
-        params.delete(param);
-      }
-      const qs = params.toString();
-      const href = qs ? `${pathname}?${qs}` : pathname;
-      if (id) pushCurrentUrl(href);
-      else replaceCurrentUrl(href);
-    },
-    [pathname, param],
-  );
+  // 비공개로 바뀐 항목의 공유 링크처럼 매칭되는 항목이 없으면 모달이 열리지 않는데 query 는
+  // URL 에 남는다. 목록만 보이는 화면에서 왜 안 열리는지 알 수 없고 뒤로가기도 어긋난다.
+  useEffect(() => {
+    if (activeId == null || active != null) return;
+    goto(null);
+  }, [activeId, active, goto]);
 
-  const close = useCallback(() => {
-    if (openedHere.current) {
-      openedHere.current = false;
-      router.back();
-      return;
-    }
-    select(null);
-  }, [router, select]);
-
-  return { active, open: active != null, select, close };
+  return { active, open: active != null, select: goto, close };
 };
 
 export { useQueryModal };

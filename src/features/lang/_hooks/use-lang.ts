@@ -6,8 +6,6 @@ import { LangContext } from "@/features/lang/_components/LangProvider";
 
 /**
  * 현재 언어 + UI 사전 + 전환 함수 — LangProvider 하위에서만 사용 가능
- *
- * @returns {LangContextValue}
  */
 const useLang = () => {
   const context = useContext(LangContext);

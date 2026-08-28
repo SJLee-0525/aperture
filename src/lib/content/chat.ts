@@ -2,6 +2,7 @@ import { compareByPublishedAtDesc } from "@/lib/content/article-order";
 import { getContentSource, type ContentSource } from "@/lib/content/content-source";
 import { getDevConfig } from "@/lib/content/dev";
 import { getDevArticleTags } from "@/lib/content/dev-articles";
+import { publishedInOrder } from "@/lib/content/mock-list";
 import { getMusicConfig } from "@/lib/content/music";
 import { getSite } from "@/lib/content/site";
 import { fetchChatDevProjects } from "@/lib/supabase/public/dev";
@@ -54,12 +55,13 @@ const pickPublicFields = async (): Promise<
     ]);
 
   return {
-    devProjects: MOCK_DEV_PROJECTS,
-    musicWorks: music.MOCK_MUSIC_WORKS,
-    musicAwards: music.MOCK_MUSIC_AWARDS,
-    musicMedia: music.MOCK_MUSIC_MEDIA,
-    photos: MOCK_PHOTOS,
-    albums: MOCK_ALBUMS,
+    devProjects: publishedInOrder(MOCK_DEV_PROJECTS),
+    musicWorks: publishedInOrder(music.MOCK_MUSIC_WORKS),
+    musicAwards: publishedInOrder(music.MOCK_MUSIC_AWARDS),
+    musicMedia: publishedInOrder(music.MOCK_MUSIC_MEDIA),
+    photos: publishedInOrder(MOCK_PHOTOS),
+    albums: publishedInOrder(MOCK_ALBUMS),
+    // 글은 order 가 아니라 발행일 정렬이라 공용 헬퍼를 쓰지 않는다.
     articles: MOCK_DEV_ARTICLES.filter(({ published }) => published)
       .map(({ id, slug, title, summary, cover, tags, publishedAt }) => ({
         id,

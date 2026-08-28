@@ -370,4 +370,51 @@ describe("useChat", () => {
       "답변을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
     );
   });
+
+  /**
+   * 스트림 도중 오류 이벤트는 서버의 정상 경로다. 그때마다 reader 가 잠긴 채 남고
+   * 요청이 살아 있으면, 방문자가 이미 오류 화면을 보는 동안에도 서버의 LLM 요청이
+   * 끝까지 출력 토큰을 소비한다.
+   */
+  it("스트림 오류 뒤 reader 를 풀고 요청을 중단한다", async () => {
+    const cancel = vi.fn().mockResolvedValue(undefined);
+    const releaseLock = vi.fn();
+    const chunks = [
+      `${JSON.stringify({ type: "delta", content: "부" })}\n`,
+      `${JSON.stringify({ type: "error", message: "실패했습니다." })}\n`,
+    ];
+    let index = 0;
+    const body = {
+      getReader: () => ({
+        read: async () =>
+          index < chunks.length
+            ? { done: false, value: new TextEncoder().encode(chunks[index++]) }
+            : { done: true, value: undefined },
+        cancel,
+        releaseLock,
+      }),
+    };
+    let signal: AbortSignal | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+        signal = init.signal ?? undefined;
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          headers: new Headers({ "Content-Type": "application/x-ndjson" }),
+          body,
+        });
+      }),
+    );
+    const { result } = renderHook(() => useChat("ko"));
+
+    act(() => result.current.send("사진"));
+    await waitFor(() => expect(result.current.isReplying).toBe(false));
+
+    expect(cancel).toHaveBeenCalled();
+    expect(releaseLock).toHaveBeenCalled();
+    expect(signal?.aborted).toBe(true);
+    expect(result.current.messages.at(-1)?.error).toBeDefined();
+  });
 });

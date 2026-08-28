@@ -3,17 +3,22 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
+
 import {
   emptyProjectInput,
   prepareProjectInput,
   projectToInput,
 } from "@/features/admin-dev-projects/_lib/project-form-data";
+import { validateProjectInput } from "@/features/admin-dev-projects/_lib/validate-project-input";
 import { imagePaths, removeUnreferencedImages } from "@/features/image-upload/_lib/asset-lifecycle";
 
 import { ROUTES } from "@/constants/routes";
 import { getDevProjectRepository } from "@/lib/admin/dev-project-repository";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { DevProjectInput } from "@/lib/supabase/dev";
 import type { DevProject } from "@/types/dev";
 import type { ImageMeta } from "@/types/image";
@@ -29,10 +34,19 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   );
   const [tagDraft, setTagDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "devProjects",
+    projectId,
+    form,
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const initialPaths = useRef(new Set(imagePaths([initial?.cover, ...(initial?.images ?? [])])));
   const uploadedPaths = useRef(new Set<string>());
+
+  const applyForm = (next: typeof form) => setForm(next);
 
   const patch = (next: Partial<DevProjectInput>) =>
     setForm((previous) => ({ ...previous, ...next }));
@@ -112,14 +126,18 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   };
   const onUploadPendingChange = useCallback((pending: boolean) => setUploading(pending), []);
   const cancel = async () => {
+    if (!confirmLeave()) return;
+    clearRecovery();
     await removeUnreferencedImages(uploadedPaths.current, []).catch(() => undefined);
     router.replace(ROUTES.ADMIN_DEV_PROJECTS);
   };
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (!form.title.ko.trim()) {
-      setError("제목(한국어)을 입력하세요.");
+    const nextIssues = validateProjectInput(form);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -133,6 +151,8 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
         [...initialPaths.current, ...uploadedPaths.current],
         imagePaths([input.cover, ...input.images]),
       ).catch(() => undefined);
+      markSaved(form);
+      clearRecovery();
       router.replace(ROUTES.ADMIN_DEV_PROJECTS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -141,7 +161,12 @@ const useProjectEditor = (projectId: string, initial?: DevProject) => {
   };
 
   return {
+    recovery,
+    applyForm,
+    dirty,
     form,
+    issues,
+    formRef,
     isEdit,
     tagDraft,
     setTagDraft,

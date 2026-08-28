@@ -226,6 +226,22 @@ describe("chat rate limiter", () => {
     expect(fallback).not.toHaveBeenCalled();
   });
 
+  // 429 는 무료 티어의 일일 명령 상한이다. 설정 오류로 분류하면 자격증명과 폴백이
+  // 멀쩡한 상태로 그날 남은 시간 동안 모든 방문자에게 챗이 꺼진다.
+  it("Upstash 사용량 초과(429)는 인스턴스 limiter 로 물러난다", async () => {
+    const fallback = vi.fn().mockReturnValue({ allowed: true, retryAfterSeconds: 0 });
+    const limit = createUpstashChatRateLimiter({
+      url: "https://example.upstash.io",
+      token: "secret",
+      fetcher: vi.fn().mockResolvedValue(Response.json({ error: "limit" }, { status: 429 })),
+      fallback,
+    });
+    const clientRequest = request("203.0.113.1");
+
+    await expect(limit(clientRequest)).resolves.toEqual({ allowed: true, retryAfterSeconds: 0 });
+    expect(fallback).toHaveBeenCalledWith(clientRequest);
+  });
+
   it("Upstash 환경변수가 없으면 동기 인스턴스 limiter를 선택한다", () => {
     const local = createConfiguredChatRateLimiter({});
 

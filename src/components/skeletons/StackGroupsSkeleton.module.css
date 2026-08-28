@@ -1,0 +1,41 @@
+/* DevCareerView.module.css .stackSection 미러 — 타임라인과 스택 사이 여백. */
+.stackSection {
+  margin-top: clamp(56px, 7vw, 88px);
+}
+
+/* DevStackSection.module.css .heading 이 차지하는 높이만 예약한다(h1 한 줄 + 아래 여백). */
+.stackHeading {
+  height: calc(var(--t-h1) * 1.3);
+  margin-bottom: var(--s-6);
+}
+
+.stackGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+
+.stackGroup {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--s-4);
+  padding-bottom: var(--s-8);
+  border-bottom: 1px solid var(--line);
+}
+/* 실제 스택도 마지막 그룹에는 선을 긋지 않는다. */
+.stackGroup:last-child {
+  border-bottom: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+@media (max-width: 640px) {
+  .stackGroup {
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+  }
+}

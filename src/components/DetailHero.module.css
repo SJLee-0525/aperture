@@ -1,11 +1,18 @@
+/* 히어로 안의 요소는 모두 같은 선에서 시작한다. 사이트 헤더와 같은 --page-max 열이고
+   그 안쪽에 좌우 var(--s-6) 패딩을 둔다. 배경만 전폭이라 껍데기에는 좌우 패딩이 없다.
+   버튼은 absolute 라 시작선을 직접 계산하고 텍스트는 같은 값을 min() 으로 얻는다.
+   두 식이 어긋나면 제목과 버튼의 왼쪽 선이 갈린다. */
 .hero {
+  --detail-hero-column: var(--page-max);
+  --detail-hero-gutter: calc(max(0px, (100% - var(--detail-hero-column)) / 2) + var(--s-6));
+
   position: relative;
   min-height: var(--detail-hero-min-height, 300px);
   display: flex;
   align-items: flex-end;
   /* 위쪽은 복귀·공유 버튼(36px)이 앉는 자리를 비운다 — 내용이 길어지는 좁은 화면에서
      제목 첫 줄이 버튼 아래로 파고들지 않게 한다. */
-  padding: calc(var(--s-12) + 36px + var(--s-6)) var(--s-6) var(--s-6);
+  padding: calc(var(--s-12) + 36px + var(--s-6)) 0 var(--s-6);
   margin-bottom: var(--s-8);
   overflow: hidden;
 }
@@ -24,7 +31,7 @@
 .back {
   position: absolute;
   top: var(--s-5);
-  left: var(--s-6);
+  left: var(--detail-hero-gutter);
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -45,7 +52,7 @@
 .share {
   position: absolute;
   top: var(--s-5);
-  right: var(--s-6);
+  right: var(--detail-hero-gutter);
   z-index: 2;
   width: 36px;
   height: 36px;
@@ -68,7 +75,8 @@
 .heroText {
   position: relative;
   z-index: 1;
-  width: 100%;
+  width: min(100% - var(--s-6) * 2, var(--detail-hero-column) - var(--s-6) * 2);
+  margin: 0 auto;
 }
 
 /* 대표 이미지가 없는 지면 — 어두운 사진 위를 전제한 스타일을 전부 되돌린다.

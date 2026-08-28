@@ -13,10 +13,6 @@
   min-height: clamp(480px, 72vh, 680px);
 }
 
-.skeletonMedia {
-  width: 100%;
-}
-
 .skeletonHead > span,
 .skeletonCopy > span {
   flex: none;

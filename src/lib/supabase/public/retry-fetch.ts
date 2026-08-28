@@ -7,9 +7,9 @@ const BASE_DELAY_MS = 400;
 /**
  * 대기 중 요청이 중단되면 남은 시간을 기다리지 않고 끝낸다.
  *
- * @param {number} ms 대기 시간.
- * @param {AbortSignal | null} [signal] 호출자가 넘긴 취소 신호.
- * @returns {Promise<void>} 시간이 지나거나 중단되면 이행한다.
+ * @param ms 대기 시간.
+ * @param [signal] 호출자가 넘긴 취소 신호.
+ * @returns 시간이 지나거나 중단되면 이행한다.
  */
 const delay = (ms: number, signal?: AbortSignal | null): Promise<void> =>
   new Promise((resolve) => {
@@ -39,9 +39,9 @@ const isRetriableStatus = (status: number): boolean => status >= 500;
  * 원본 연결이 한 번 ETIMEDOUT 되는 것만으로 배포가 깨지지 않게 한다.
  * 대상은 읽기 전용 요청이므로 같은 요청을 다시 보내도 데이터가 바뀌지 않는다.
  *
- * @param {string} url 요청 URL.
- * @param {RequestInit} [init] fetch 옵션. `signal` 이 중단되면 재시도하지 않는다.
- * @returns {Promise<Response>} 마지막 시도의 응답. 모든 시도가 던지면 마지막 오류를 그대로 던진다.
+ * @param url 요청 URL.
+ * @param [init] fetch 옵션. `signal` 이 중단되면 재시도하지 않는다.
+ * @returns 마지막 시도의 응답. 모든 시도가 던지면 마지막 오류를 그대로 던진다.
  */
 const fetchWithRetry = async (url: string, init?: RequestInit): Promise<Response> => {
   for (let attempt = 1; ; attempt += 1) {

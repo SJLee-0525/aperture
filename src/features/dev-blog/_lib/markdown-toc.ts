@@ -15,8 +15,8 @@ type ArticleTocItem = ArticleTocEntry & { children: ArticleTocEntry[] };
  * id 는 여기서 새로 만들지 않고 정규화 단계가 붙인 값을 그대로 쓴다.
  * 목차·본문 heading·URL fragment 가 어긋나면 목차를 눌러도 엉뚱한 곳으로 간다.
  *
- * @param {ArticleDocument} document 정규화된 본문.
- * @returns {ArticleTocItem[]} 문서 순서를 유지한 두 단계 목차. heading 이 없으면 빈 배열.
+ * @param document 정규화된 본문.
+ * @returns 문서 순서를 유지한 두 단계 목차. heading 이 없으면 빈 배열.
  */
 const buildArticleToc = (document: ArticleDocument): ArticleTocItem[] => {
   const items: ArticleTocItem[] = [];

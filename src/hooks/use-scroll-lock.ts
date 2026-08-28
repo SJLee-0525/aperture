@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect } from "react";
 
+import { MOBILE_NAVIGATION_MAX_WIDTH } from "@/constants/breakpoints";
+
 const useBrowserLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 type NormalizedScrollLockOptions = Required<ScrollLockOptions>;
@@ -56,7 +58,7 @@ const applyActiveLock = () => {
     return;
   }
 
-  const mobile = window.innerWidth <= 767;
+  const mobile = window.innerWidth <= MOBILE_NAVIGATION_MAX_WIDTH;
   const shouldFixBody = mobile && options.fixBodyOnMobile;
   const wasFixed = bodyIsFixed;
 
@@ -118,8 +120,6 @@ const acquireScrollLock = (options: ScrollLockOptions): (() => void) => {
 
 /**
  * body가 fixed로 잠겨 window.scrollY가 실제 위치와 무관해진 상태인지 — 스크롤 관찰자가 잠금 중 점프를 무시할 때 사용.
- *
- * @returns {boolean}
  */
 const isScrollLockFixingBody = () => activeLocks.size > 0 && bodyIsFixed;
 
@@ -131,10 +131,6 @@ const isScrollLockFixingBody = () => activeLocks.size > 0 && bodyIsFixed;
  * 잠글 때 스크롤바가 사라지며 콘텐츠가 우측으로 밀린다.
  * → 사라지는 스크롤바 폭을 padding-right 로 보정해 모달 열림 시 가로 흔들림을 제거.
  * (오버레이 스크롤바 환경에선 폭이 0이라 보정 없음.)
- *
- * @param {boolean} locked
- * @param {ScrollLockOptions} [options]
- * @returns {void}
  */
 const useScrollLock = (locked: boolean, options: ScrollLockOptions = {}) => {
   useBrowserLayoutEffect(() => {
@@ -145,3 +141,4 @@ const useScrollLock = (locked: boolean, options: ScrollLockOptions = {}) => {
 };
 
 export { isScrollLockFixingBody, useScrollLock };
+export type { ScrollLockOptions };

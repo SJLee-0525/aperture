@@ -46,18 +46,48 @@ const config = [
         {
           // 여러 feature가 소비하는 횡단 기능. 일반 feature와 달리 다른 feature를 참조할 수 없다.
           // dev-blog: 공개 상세와 관리자 편집기가 같은 Markdown 계약·본문 렌더러를 쓴다.
+          // admin-shell: 관리자 셸과 목록·수정 라우트의 공용 골격을 열네 개 admin feature 가 쓴다.
+          // pointer-chrome: 커서와 스크롤바가 지도·상세·글 어디에서든 같은 계약으로 뜬다.
           type: "platform",
-          pattern: "src/features/(lang|theme|image-upload|photo-detail|dev-blog)",
+          pattern:
+            "src/features/(lang|theme|image-upload|photo-detail|dev-blog|admin-shell|pointer-chrome)",
         },
         { type: "feature", pattern: "src/features/*", capture: ["featureName"] },
         {
+          // src 최상위의 실제 폴더만 적는다. 없는 이름을 적어 두면 목록이 늘 맞아 보이지만,
+          // 빠진 폴더는 어느 element 에도 매칭되지 않아 default: "allow" 로 떨어진다.
+          // lib 이 그 상태였다 — 역방향 import 를 막는 규칙이 lib 을 보지 못했다.
           type: "shared",
-          pattern:
-            "src/(components|hooks|utils|stores|api|services|constants|schemas|providers|i18n|types|assets|styles)",
+          pattern: "src/(components|hooks|constants|types|assets|lib|mocks)",
         },
       ],
+      // src 최상위 파일. Next.js 가 위치를 정하므로 폴더로 묶을 수 없다
+      // (proxy·instrumentation 은 이 경로에 있어야 인식된다).
+      // element 패턴은 폴더를 매칭하므로 파일 분류는 이쪽에 적는다.
+      "boundaries/files": [{ category: "root", pattern: "src/*.ts" }],
     },
     rules: {
+      // 어느 element 에도 속하지 않는 파일을 막는다. 새 최상위 폴더를 만들고 위 목록에
+      // 더하지 않으면 그 폴더는 default: "allow" 로 떨어져 경계 규칙이 통째로 비껴간다.
+      "boundaries/no-unknown-files": "error",
+      "boundaries/no-unknown-dependencies": "error",
+      // `../` 금지와 barrel 금지는 CLAUDE.md 컨벤션인데 강제하는 것이 hook 경고뿐이었다.
+      // hook 은 로컬 편집에서만 돌고 CI 는 보지 못한다.
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["../*", "../**"],
+              message: "상대경로 import 금지. src/ 전체가 @/* 로 매핑되므로 alias 를 쓴다.",
+            },
+            {
+              group: ["@/**/index", "@/**/index.*"],
+              message: "barrel export 금지. 대상 파일 경로를 직접 import 한다.",
+            },
+          ],
+        },
+      ],
       "boundaries/dependencies": [
         "error",
         {

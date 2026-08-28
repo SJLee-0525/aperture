@@ -19,9 +19,9 @@ type Props = { stack: DevStackGroup[]; className?: string };
  * 칩 배경·글자색은 관리자가 기술마다 입력한 데이터라 전역 토큰으로 대체할 수 없고 인라인 style로 넣는다.
  * 각 칩은 그 기술명으로 통합검색을 여는 링크이며, 로케일 프리픽스는 `LocalizedLink`가 붙인다.
  *
- * @param {DevStackGroup[]} props.stack - 비어 있으면 제목까지 통째로 렌더하지 않는다. 학력·수상 섹션과 같은 규칙이다.
- * @param {string | undefined} props.className - 앞 블록과의 간격처럼 배치는 호출부가 정한다.
- * @returns {JSX.Element | null} stack이 비면 null.
+ * @param props.stack - 비어 있으면 제목까지 통째로 렌더하지 않는다. 학력·수상 섹션과 같은 규칙이다.
+ * @param props.className - 앞 블록과의 간격처럼 배치는 호출부가 정한다.
+ * @returns stack이 비면 null.
  */
 const DevStackSection = ({ stack, className }: Props) => {
   const { dict } = useLang();
@@ -34,7 +34,7 @@ const DevStackSection = ({ stack, className }: Props) => {
       <div className={styles.groups}>
         {stack.map((group) => (
           <div key={group.category} className={styles.group}>
-            <div className="u-label">{group.category}</div>
+            <h3 className="u-label">{group.category}</h3>
             <div className={styles.chips}>
               {group.items.map((item) => (
                 <LocalizedLink

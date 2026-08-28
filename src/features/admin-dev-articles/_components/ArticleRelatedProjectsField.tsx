@@ -1,8 +1,12 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+
+import { moveItem } from "@/lib/collection/move-item";
 
 import type { DevProjectOption } from "@/features/admin-dev-articles/_lib/dev-project-options";
+import type { MoveOffset } from "@/lib/collection/move-item";
 
 import styles from "./ArticleForm.module.css";
 
@@ -13,25 +17,20 @@ type Props = {
 };
 
 /**
- * 연관 프로젝트 선택. 고른 순서가 곧 상세에서 보여 줄 순서다(계획 §7).
+ * 연관 프로젝트 선택. 고른 순서가 곧 상세에서 보여 줄 순서다(07-dev-blog §7).
  *
  * 목록에 없는 id(삭제된 프로젝트)도 행으로 남긴다. 조용히 빼면 관계가 사라진 것을 모른 채
  * 발행하게 되고, 공개 화면에서만 카드가 비어 보인다. 비공개 프로젝트는 고를 수 있지만
  * 발행 조건 검사가 막는다 — 글을 먼저 쓰고 프로젝트를 나중에 공개하는 순서를 허용하기 위해서다.
  *
- * @param {Props} props
- * @param {DevProjectOption[]} props.projects 고를 수 있는 프로젝트 전체.
- * @param {string[]} props.selected 고른 프로젝트 id. 배열 순서가 표시 순서다.
- * @param {(next: string[]) => void} props.onChange 선택이나 순서가 바뀌었을 때.
- * @returns {JSX.Element}
+ * @param props.projects 고를 수 있는 프로젝트 전체.
+ * @param props.selected 고른 프로젝트 id. 배열 순서가 표시 순서다.
+ * @param props.onChange 선택이나 순서가 바뀌었을 때.
  */
 const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) => {
-  const move = (index: number, step: number) => {
-    const target = index + step;
-    if (target < 0 || target >= selected.length) return;
-    const next = [...selected];
-    [next[index], next[target]] = [next[target], next[index]];
-    onChange(next);
+  const move = (index: number, step: MoveOffset) => {
+    const next = moveItem(selected, index, step);
+    if (next !== selected) onChange(next);
   };
 
   const label = (id: string) => projects.find((project) => project.id === id)?.title.ko ?? id;
@@ -78,7 +77,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
               {missing(id) ? <span className={styles.orderedWarn}>{missing(id)}</span> : null}
               <button
                 type="button"
-                className={styles.move}
+                className={row.move}
                 aria-label={`${label(id)} 위로`}
                 disabled={index === 0}
                 onClick={() => move(index, -1)}
@@ -87,7 +86,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
               </button>
               <button
                 type="button"
-                className={styles.move}
+                className={row.move}
                 aria-label={`${label(id)} 아래로`}
                 disabled={index === selected.length - 1}
                 onClick={() => move(index, 1)}
@@ -96,7 +95,7 @@ const ArticleRelatedProjectsField = ({ projects, selected, onChange }: Props) =>
               </button>
               <button
                 type="button"
-                className={styles.remove}
+                className={row.delete}
                 onClick={() => onChange(selected.filter((item) => item !== id))}
               >
                 제외

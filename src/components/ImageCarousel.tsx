@@ -40,16 +40,6 @@ type LightboxSessionProps = Pick<
 
 /**
  * 확대 탐색 인덱스를 원본 캐러셀 상태와 격리한다.
- *
- * @param {LightboxSessionProps} props
- * @param {ImageMeta[]} props.images
- * @param {number} props.initialIndex
- * @param {string} props.alt
- * @param {string} props.closeLabel
- * @param {string} props.previousLabel
- * @param {string} props.nextLabel
- * @param {(index: number) => void} props.onExit
- * @returns {JSX.Element}
  */
 const LightboxSession = ({
   images,

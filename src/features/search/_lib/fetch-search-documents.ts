@@ -11,8 +11,6 @@ import { createSearchDocuments } from "./search-documents";
 
 /**
  * 전 섹션 published 콘텐츠를 모아 검색 문서로 투영 — /search 페이지와 /api/search-index 가 공유.
- *
- * @returns {Promise<SearchDocument[]>}
  */
 const fetchSearchDocuments = async (): Promise<SearchDocument[]> => {
   const [photos, albums, works, awards, media, projects, articles, articleTags] = await Promise.all(

@@ -4,8 +4,8 @@ import type { ArticleMarkdownIssue } from "@/features/dev-blog/_lib/markdown-nod
 /**
  * 발행을 막는 사유의 한국어 문구 단일 출처.
  *
- * B2 는 Markdown 검증 결과를 코드로만 돌려주고 문구를 미뤄 뒀다. 관리자 화면이 생긴 지금
- * 미리보기 패널과 발행 버튼 안내가 같은 문장을 써야 해서 여기 한 곳에 모은다.
+ * Markdown 검증은 결과를 코드로만 돌려준다. 미리보기 패널과 발행 버튼 안내가 같은
+ * 문장을 써야 해서 문구는 여기 한 곳에 모은다.
  * 관리자 화면은 한국어 전용이라 사전(ko/en)을 거치지 않는다 — 기존 `/admin/*` 화면과 같다.
  *
  * 각 문장은 무엇이 잘못됐는지와 무엇을 하면 되는지를 함께 적는다. 원인만 적으면
@@ -46,8 +46,8 @@ const PUBLISH_ISSUE_MESSAGES = {
 /**
  * Markdown 검증 결과 한 건을 원문 위치와 함께 읽을 수 있는 문장으로 만든다.
  *
- * @param {ArticleMarkdownIssue} issue 검증 결과.
- * @returns {string} `12번째 줄 — …` 형태의 안내. detail 이 있으면 괄호로 덧붙인다.
+ * @param issue 검증 결과.
+ * @returns `12번째 줄 — …` 형태의 안내. detail 이 있으면 괄호로 덧붙인다.
  */
 const markdownIssueMessage = (issue: ArticleMarkdownIssue): string => {
   const detail = issue.detail ? ` (${issue.detail})` : "";
@@ -57,8 +57,8 @@ const markdownIssueMessage = (issue: ArticleMarkdownIssue): string => {
 /**
  * 발행 조건 한 건을 문장으로 만든다.
  *
- * @param {DevArticlePublishIssue} issue 발행 조건 검사 결과.
- * @returns {string} 안내 문장. detail 이 있으면 괄호로 덧붙인다.
+ * @param issue 발행 조건 검사 결과.
+ * @returns 안내 문장. detail 이 있으면 괄호로 덧붙인다.
  */
 const publishIssueMessage = (issue: DevArticlePublishIssue): string =>
   `${PUBLISH_ISSUE_MESSAGES[issue.code]}${issue.detail ? ` (${issue.detail})` : ""}`;

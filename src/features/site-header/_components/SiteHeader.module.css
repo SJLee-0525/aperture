@@ -16,11 +16,11 @@
   align-items: center;
   gap: var(--s-3);
   height: 58px;
-  max-width: 1180px;
+  max-width: var(--page-max);
   margin: 0 auto;
   padding: 0 var(--s-3) 0 var(--s-4);
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .inner {
     height: 76px;
     gap: var(--s-3);
@@ -37,7 +37,7 @@
   color: var(--text);
   transform: translateY(2px);
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .brand {
     font-size: 1.35rem;
     padding: 4px 8px;
@@ -55,7 +55,7 @@
   height: 100%;
   gap: 2px;
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .mega {
     display: flex;
   }
@@ -150,12 +150,18 @@
   gap: 2px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 899px) {
   :global(html[data-mobile-menu-open]) .header {
     background: transparent;
     border-color: transparent;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+  /* 시트가 열리면 언어·테마 토글은 시트 안으로 옮겨 간다. 헤더에 그대로 두면 시트 위에
+     보이는데 포커스 트랩 밖이라 키보드로 닿을 수 없다. 버거는 닫기 수단이라 남는다. */
+  :global(html[data-mobile-menu-open]) .controls > :not([data-mobile-menu-trigger]) {
+    opacity: 0;
+    visibility: hidden;
   }
   .header {
     transition: none;
@@ -180,8 +186,8 @@
     opacity: 0;
     visibility: hidden;
   }
-  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-trigger],
-  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-layer] {
+  /* 시트(포털)는 body 직속이라 `.header` 하위 선택자로 매칭되지 않는다. 버거만 남는다. */
+  :global(html[data-mobile-navigation-hidden]) .header [data-mobile-menu-trigger] {
     pointer-events: auto;
   }
 }

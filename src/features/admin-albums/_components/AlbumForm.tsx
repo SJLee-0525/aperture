@@ -1,14 +1,15 @@
 "use client";
 
-import { AdminButton } from "@/components/AdminButton";
-import { AdminField } from "@/components/AdminField";
-import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
+import base from "@/features/admin-shell/_components/admin-form.module.css";
+import { AdminFormShell } from "@/features/admin-shell/_components/AdminFormShell";
 
 import { useAlbumEditor } from "@/features/admin-albums/_hooks/use-album-editor";
 
+import { issueFor } from "@/lib/admin/field-issue";
+
 import type { Album } from "@/types/album";
 
-import styles from "./AlbumForm.module.css";
 import { AlbumPhotoPicker } from "./AlbumPhotoPicker";
 
 type Props = {
@@ -20,15 +21,16 @@ type Props = {
 /**
  * 공유 앨범 폼 — 이중언어 제목·부제 + 사진 선택/순서/커버 + 저장.
  *
- * @param {Props} props
- * @param {string} props.albumId
- * @param {Album | undefined} props.initial - 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.initial - 있으면 수정 모드.
  */
 const AlbumForm = ({ albumId, initial }: Props) => {
   const {
+    recovery,
+    applyForm,
     cancel,
     error,
+    formRef,
+    issues,
     form,
     isEdit,
     patch,
@@ -44,50 +46,40 @@ const AlbumForm = ({ albumId, initial }: Props) => {
   } = useAlbumEditor(albumId, initial);
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
-      <header className={styles.head}>
-        <h1 className={styles.title}>{isEdit ? "앨범 수정" : "새 앨범"}</h1>
-      </header>
-
-      <section className={styles.section}>
-        <h2 className={styles.legend}>제목</h2>
-        <div className={styles.grid2}>
-          <AdminField label="제목 (한국어)" required>
-            <AdminInput
-              value={form.title.ko}
-              onChange={(e) => patch({ title: { ...form.title, ko: e.target.value } })}
-              required
-            />
-          </AdminField>
-          <AdminField label="제목 (English)">
-            <AdminInput
-              value={form.title.en}
-              onChange={(e) => patch({ title: { ...form.title, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+    <AdminFormShell
+      title={isEdit ? "앨범 수정" : "새 앨범"}
+      formRef={formRef}
+      onSubmit={submit}
+      onCancel={cancel}
+      busy={saving}
+      saving={saving}
+      error={error}
+      recovery={recovery}
+      onRestore={(restored) => applyForm(restored as typeof form)}
+    >
+      <section className={base.section}>
+        <h2 className={base.legend}>제목</h2>
+        <LocalizedFieldPair
+          label="제목"
+          value={form.title}
+          onChange={(next) => patch({ title: next })}
+          required
+          field="title"
+          error={issueFor(issues, "title.ko")}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>부제</h2>
-        <div className={styles.grid2}>
-          <AdminField label="부제 (한국어)">
-            <AdminInput
-              value={form.subtitle.ko}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, ko: e.target.value } })}
-            />
-          </AdminField>
-          <AdminField label="부제 (English)">
-            <AdminInput
-              value={form.subtitle.en}
-              onChange={(e) => patch({ subtitle: { ...form.subtitle, en: e.target.value } })}
-            />
-          </AdminField>
-        </div>
+      <section className={base.section}>
+        <h2 className={base.legend}>부제</h2>
+        <LocalizedFieldPair
+          label="부제"
+          value={form.subtitle}
+          onChange={(next) => patch({ subtitle: next })}
+        />
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.legend}>사진 · 순서 · 커버</h2>
+      <section className={base.section}>
+        <h2 className={base.legend}>사진 · 순서 · 커버</h2>
         <AlbumPhotoPicker
           photos={photos}
           status={photoStatus}
@@ -97,11 +89,13 @@ const AlbumForm = ({ albumId, initial }: Props) => {
           onToggle={togglePhoto}
           onReorder={reorderPhotos}
           onSetCover={setCover}
+          field="photoIds"
+          validationError={issueFor(issues, "photoIds")}
         />
       </section>
 
-      <section className={styles.section}>
-        <label className={styles.checkbox}>
+      <section className={base.section}>
+        <label className={base.checkbox}>
           <input
             type="checkbox"
             checked={form.published}
@@ -110,22 +104,7 @@ const AlbumForm = ({ albumId, initial }: Props) => {
           <span>공개 (방문자에게 표시)</span>
         </label>
       </section>
-
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className={styles.actions}>
-        <AdminButton variant="primary" type="submit" disabled={saving}>
-          {saving ? "저장 중…" : "저장"}
-        </AdminButton>
-        <AdminButton variant="secondary" onClick={cancel} disabled={saving}>
-          취소
-        </AdminButton>
-      </div>
-    </form>
+    </AdminFormShell>
   );
 };
 

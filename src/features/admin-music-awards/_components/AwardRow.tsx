@@ -1,9 +1,8 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import Link from "next/link";
+import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
 
+import { ADMIN_UNNAMED } from "@/constants/admin-labels";
 import { adminMusicAwardRoute } from "@/constants/routes";
 
 import type { MusicAward } from "@/types/music";
@@ -12,6 +11,8 @@ import styles from "./AwardRow.module.css";
 
 type Props = {
   award: MusicAward;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -19,64 +20,25 @@ type Props = {
 /**
  * 정렬 가능한 수상 행 — 드래그 핸들·연도·수상명·장소·공개 토글·수정/삭제.
  *
- * @param {Props} props
- * @param {MusicAward} props.award
- * @param {(id: string, next: boolean) => void} props.onTogglePublished
- * @param {(id: string) => void} props.onDelete
- * @returns {JSX.Element}
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
  */
-const AwardRow = ({ award, onTogglePublished, onDelete }: Props) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: award.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const onDeleteClick = () => {
-    if (window.confirm(`"${award.name.ko || "이름 없음"}" 수상을 삭제할까요?`)) {
-      onDelete(award.id);
-    }
-  };
-
+const AwardRow = ({ award, publishBusy, onTogglePublished, onDelete }: Props) => {
   return (
-    <li ref={setNodeRef} style={style} className={styles.row}>
-      <button
-        type="button"
-        className={styles.handle}
-        aria-label="순서 이동"
-        {...attributes}
-        {...listeners}
-      >
-        ⠿
-      </button>
-
+    <AdminSortableRow
+      id={award.id}
+      publishedBusy={publishBusy}
+      published={award.published}
+      onTogglePublished={(next) => onTogglePublished(award.id, next)}
+      editHref={adminMusicAwardRoute(award.id)}
+      onDelete={() => onDelete(award.id)}
+      confirmDelete={{ name: award.name.ko || ADMIN_UNNAMED, noun: "수상" }}
+    >
       <span className={styles.year}>{award.year || "—"}</span>
 
-      <span className={styles.name}>{award.name.ko || "이름 없음"}</span>
+      <span className={styles.name}>{award.name.ko || ADMIN_UNNAMED}</span>
 
       <span className={styles.place}>{award.place}</span>
-
-      <button
-        type="button"
-        className={`${styles.badge} ${award.published ? styles.badgeOn : ""}`}
-        onClick={() => onTogglePublished(award.id, !award.published)}
-      >
-        {award.published ? "공개" : "비공개"}
-      </button>
-
-      <span className={styles.actions}>
-        <Link href={adminMusicAwardRoute(award.id)} className={styles.edit}>
-          수정
-        </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
-          삭제
-        </button>
-      </span>
-    </li>
+    </AdminSortableRow>
   );
 };
 

@@ -11,8 +11,8 @@ import type { ArticleLinkTarget } from "@/features/dev-blog/_lib/markdown-nodes"
  * 한쪽만 느슨해지고, 전역 CSP 의 `upgrade-insecure-requests` 가 어차피 HTTPS 로 올린다.
  * `javascript:`·`data:`·프로토콜 상대 주소(`//host`)는 여기서 전부 빈 문자열이 된다.
  *
- * @param {string} raw Markdown 이 준 링크 주소.
- * @returns {{ href: string; target: ArticleLinkTarget } | null} 허용된 링크, 아니면 null.
+ * @param raw Markdown 이 준 링크 주소.
+ * @returns 허용된 링크, 아니면 null.
  */
 const resolveArticleLink = (raw: string): { href: string; target: ArticleLinkTarget } | null => {
   const href = normalizePublicHref(raw, { allowMailto: true });
@@ -29,8 +29,8 @@ const resolveArticleLink = (raw: string): { href: string; target: ArticleLinkTar
  * 임의 외부 이미지를 허용하면 방문자의 요청이 그 호스트로 나가 IP 와 방문 시각이 새고,
  * CSP `img-src` 에 없는 주소는 어차피 브라우저가 막아 빈 칸만 남는다.
  *
- * @param {string} raw Markdown 이 준 이미지 주소.
- * @returns {string | null} 허용된 주소, 아니면 null.
+ * @param raw Markdown 이 준 이미지 주소.
+ * @returns 허용된 주소, 아니면 null.
  */
 const resolveArticleImageSource = (raw: string): string | null => {
   const source = raw.trim();

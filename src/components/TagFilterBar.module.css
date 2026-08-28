@@ -38,7 +38,7 @@
   place-items: center;
   width: 16px;
   height: 100%;
-  padding: 0 5px;
+  padding: 0 6px;
   border: 0;
   color: var(--text-2);
   cursor: pointer;
@@ -48,13 +48,13 @@
 }
 .arrowStart {
   left: 0;
-  background: linear-gradient(to right, var(--bg) 65%, transparent);
-  justify-content: start;
+  background: linear-gradient(to right, var(--bg) 75%, transparent);
+  justify-content: center;
 }
 .arrowEnd {
   right: 0;
-  background: linear-gradient(to left, var(--bg) 65%, transparent);
-  justify-content: end;
+  background: linear-gradient(to left, var(--bg) 75%, transparent);
+  justify-content: center;
 }
 .scroller[data-overflow-start="true"] .arrowStart,
 .scroller[data-overflow-end="true"] .arrowEnd {

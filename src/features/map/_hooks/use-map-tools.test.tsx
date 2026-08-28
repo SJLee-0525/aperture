@@ -2,7 +2,7 @@
 import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 import type { WebMcpExecute } from "@/lib/webmcp/model-context";
 
 const adapter = vi.hoisted(() => ({

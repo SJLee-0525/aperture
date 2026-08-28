@@ -3,7 +3,7 @@
 import { useLang } from "@/features/lang/_hooks/use-lang";
 import { useModelContextTool } from "@/hooks/use-model-context-tool";
 
-import { devProjectRoute } from "@/constants/routes";
+import { devProjectRoute, ROUTES } from "@/constants/routes";
 import { localizePath } from "@/lib/i18n/locale-path";
 import { pickText } from "@/lib/i18n/pick-text";
 import { resolveTargetId } from "@/lib/webmcp/current-target";
@@ -17,7 +17,7 @@ import {
 } from "@/lib/webmcp/tool-schemas";
 
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
-import type { DevProjectCardData } from "@/types/dev";
+import type { DevAward, DevProjectCardData } from "@/types/dev";
 
 const LIST_TOOL: WebMcpToolDefinition = {
   name: "list_projects",
@@ -63,18 +63,20 @@ const OPEN_TOOL: WebMcpToolDefinition = {
  * 기술 태그에서 대소문자와 `.js` 접미사 차이를 제거한다.
  * 에이전트는 "React" 라고 묻는데 데이터는 "React.js" 라 정확 일치만으로는 어긋난다(W5 평가).
  * React와 React Router처럼 다른 기술이 섞이지 않도록 정확히 비교한다.
- *
- * @param {string} value
- * @returns {string}
  */
+const LIST_AWARDS_TOOL: WebMcpToolDefinition = {
+  name: "list_dev_awards",
+  description: "List development awards with year and the career page path.",
+  inputSchema: objectSchema({ limit: limitProperty() }),
+  annotations: { readOnlyHint: true, untrustedContentHint: false },
+};
+
 const normalizeTech = (value: string): string => value.trim().toLowerCase().replace(/\.js$/, "");
 
 /**
  * 정규화한 기술 태그가 정확히 일치하는지 확인한다.
  *
- * @param {DevProjectCardData} project
- * @param {string} tech 에이전트가 넘긴 기술 태그 인자.
- * @returns {boolean}
+ * @param tech 에이전트가 넘긴 기술 태그 인자.
  */
 const matchesTech = (project: DevProjectCardData, tech: string): boolean => {
   const needle = normalizeTech(tech);
@@ -84,9 +86,8 @@ const matchesTech = (project: DevProjectCardData, tech: string): boolean => {
 /**
  * 개발 프로젝트 조회와 상세 열기를 제공하는 WebMCP 도구.
  *
- * @param {DevProjectCardData[]} projects 서버 투영 프로젝트 카드(techTags 포함).
- * @param {(id: string | null) => void} select 상세 모달을 여는 함수.
- * @returns {void}
+ * @param projects 서버 투영 프로젝트 카드(techTags 포함).
+ * @param select 상세 모달을 여는 함수.
  */
 const useDevTools = (projects: DevProjectCardData[], select: (id: string | null) => void): void => {
   const { lang } = useLang();
@@ -142,4 +143,31 @@ const useDevTools = (projects: DevProjectCardData[], select: (id: string | null)
   });
 };
 
-export { useDevTools };
+/**
+ * /dev/career 수상 목록의 WebMCP 도구 — DevCareerView 안에서 마운트한다.
+ *
+ * 음악 수상만 도구를 갖고 개발 수상은 없어, 같은 개념을 에이전트가 한쪽에서만 볼 수
+ * 있었다. 두 섹션의 도구 이름과 출력 형태를 맞춘다.
+ *
+ * @param awards 서버가 내려준 공개 수상 목록.
+ */
+const useDevAwardTools = (awards: DevAward[]): void => {
+  const { lang } = useLang();
+
+  useModelContextTool(LIST_AWARDS_TOOL, (args) => {
+    if (awards.length === 0) return "No awards are published yet.";
+    return formatToolItems(awards, args.limit, (award) =>
+      // 장소가 빈 수상이 있어 " · · " 로 벌어지지 않게 빈 조각을 걸러 붙인다.
+      [
+        String(award.year),
+        pickText(award.name, lang),
+        pickText(award.place, lang),
+        localizePath(lang, `${ROUTES.DEV_CAREER}?award=${award.id}`),
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    );
+  });
+};
+
+export { useDevAwardTools, useDevTools };

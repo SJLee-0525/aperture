@@ -8,6 +8,13 @@ const useIntroReady = (): boolean => {
   useEffect(() => {
     const start = () => setReady(true);
     const splash = document.querySelector<HTMLElement>("[data-intro-splash]");
+    // 자손의 animationend 도 버블링으로 올라온다. { once: true } 는 자손 이벤트에도
+    // 리스너를 떼므로 target 검사와 함께 쓸 수 없다. 직접 해제한다.
+    const onAnimationEnd = (event: AnimationEvent) => {
+      if (event.target !== splash) return;
+      splash?.removeEventListener("animationend", onAnimationEnd);
+      start();
+    };
     const computedStyle = splash && getComputedStyle(splash);
     const covering =
       !!computedStyle &&
@@ -20,13 +27,13 @@ const useIntroReady = (): boolean => {
       return () => cancelAnimationFrame(frame);
     }
 
-    splash.addEventListener("animationend", start, { once: true });
+    splash.addEventListener("animationend", onAnimationEnd);
     const fallback = window.setTimeout(
       start,
       (parseFloat(computedStyle.animationDuration) || 1.4) * 1000 + 300,
     );
     return () => {
-      splash.removeEventListener("animationend", start);
+      splash.removeEventListener("animationend", onAnimationEnd);
       window.clearTimeout(fallback);
     };
   }, []);

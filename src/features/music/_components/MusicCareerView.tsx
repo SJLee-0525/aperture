@@ -1,6 +1,7 @@
 "use client";
 
-import { Modal } from "@/components/Modal";
+import { AwardDetailModal } from "@/components/AwardDetailModal";
+import { AwardList } from "@/components/AwardList";
 import { TimelineList } from "@/components/TimelineList";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -19,11 +20,6 @@ type Props = { config: MusicConfig; awards: MusicAward[] };
 
 /**
  * 경력 (/music/career) — 학력 + 경력 타임라인 + 수상(클릭 시 상세 모달, ?award= 딥링크).
- *
- * @param {Props} props
- * @param {MusicConfig} props.config
- * @param {MusicAward[]} props.awards
- * @returns {JSX.Element}
  */
 const MusicCareerView = ({ config, awards }: Props) => {
   const { dict, lang } = useLang();
@@ -39,7 +35,7 @@ const MusicCareerView = ({ config, awards }: Props) => {
     entries.map((entry) => ({ period: entry.period, text: pickText(entry.title, lang) }));
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.musicCareerNav}</h1>
 
       <TimelineList label={dict.musicEducationLabel} rows={toRows(config.education)} />
@@ -49,40 +45,33 @@ const MusicCareerView = ({ config, awards }: Props) => {
         className={styles.stacked}
       />
 
-      <section className={styles.awards}>
-        <div className={styles.awLabel}>{dict.musicAwardsNav}</div>
-        {awards.map((award) => (
-          <button
-            type="button"
-            key={award.id}
-            className={styles.row}
-            onClick={() => select(award.id)}
-          >
-            <span className={styles.yr}>{award.year}</span>
-            <span className={styles.an}>{pickText(award.name, lang)}</span>
-            <span className={styles.ap}>{award.place}</span>
-          </button>
-        ))}
-        <div className={styles.awEnd} />
-      </section>
+      <AwardList
+        label={dict.musicAwardsNav}
+        awards={awards.map((award) => ({
+          id: award.id,
+          year: award.year,
+          name: pickText(award.name, lang),
+          place: award.place,
+        }))}
+        onSelect={select}
+      />
 
-      <Modal
+      <AwardDetailModal
+        award={
+          selected
+            ? {
+                year: selected.year,
+                name: pickText(selected.name, lang),
+                place: selected.place,
+                description: pickText(selected.description, lang),
+              }
+            : null
+        }
+        label={dict.musicAwardsNav}
+        closeLabel={dict.closeLabel}
         open={open}
         onClose={close}
-        closeLabel={dict.closeLabel}
-        maxWidth={600}
-        crumb={selected ? `${dict.musicAwardsNav} · ${selected.year}` : ""}
-        label={selected ? pickText(selected.name, lang) : ""}
-      >
-        {selected ? (
-          <div className={styles.award}>
-            <div className={styles.ay}>{selected.year}</div>
-            <div className={styles.awName}>{pickText(selected.name, lang)}</div>
-            <div className={styles.awPlace}>{selected.place}</div>
-            <p className={styles.ad}>{pickText(selected.description, lang)}</p>
-          </div>
-        ) : null}
-      </Modal>
+      />
     </main>
   );
 };

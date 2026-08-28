@@ -35,8 +35,8 @@ type ArticleParseResult = {
  * 순수 함수라 같은 입력에는 항상 같은 결과가 나오며 코드 색칠은 여기서 하지 않는다
  * (문법 데이터를 클라이언트로 보내지 않으려고 서버 전용 단계로 분리했다).
  *
- * @param {string} markdown 관리자가 저장한 한국어 원문.
- * @returns {ArticleParseResult} 렌더 트리와 발행을 막을 사유 목록.
+ * @param markdown 관리자가 저장한 한국어 원문.
+ * @returns 렌더 트리와 발행을 막을 사유 목록.
  */
 const parseArticleMarkdown = (markdown: string): ArticleParseResult =>
   normalizeArticleTree(

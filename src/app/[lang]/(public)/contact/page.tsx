@@ -23,8 +23,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * 연락처 — mailto 폼 + 직접 연락(사이트 링크). site/config 에서 링크·메일 주소 수급.
- *
- * @returns {Promise<JSX.Element>}
  */
 export default async function ContactPage() {
   const site = await getSite();

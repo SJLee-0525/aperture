@@ -1,3 +1,4 @@
+import { withoutId } from "@/lib/admin/without-id";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { hasText } from "@/lib/i18n/has-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
@@ -26,11 +27,7 @@ const emptyProjectInput = (): DevProjectInput => ({
   published: false,
 });
 
-const projectToInput = (project: DevProject): DevProjectInput => {
-  const { id: _id, ...input } = project;
-  void _id;
-  return input;
-};
+const projectToInput = (project: DevProject): DevProjectInput => withoutId(project);
 
 const cleanTroubleshooting = (items: DevTroubleshooting[]): DevTroubleshooting[] =>
   items

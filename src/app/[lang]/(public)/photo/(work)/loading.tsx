@@ -9,12 +9,10 @@ const CHIP_WIDTHS = [64, 88, 52];
 
 /**
  * 작업(홈) RSC fetch 동안의 스켈레톤 — 검색은 내비게이션에 두고 툴바·FilterBar·메이슨리를 실제 셸과 정합한다.
- *
- * @returns {JSX.Element}
  */
 export default function WorkLoading() {
   return (
-    <main className={styles.main} aria-busy="true">
+    <main className="u-page-main u-loading-shell" aria-busy="true">
       <div className={styles.toolbar}>
         <div className={styles.titleLine}>
           <Skeleton width={76} height={32} />

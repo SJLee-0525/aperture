@@ -4,8 +4,9 @@ import Image from "next/image";
 import { useRef, useState, type ChangeEvent } from "react";
 
 import { AdminButton } from "@/components/AdminButton";
-import { AdminField } from "@/components/AdminField";
-import { AdminInput } from "@/components/AdminInput";
+import { LocalizedFieldPair } from "@/components/LocalizedFieldPair";
+
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
 
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 
@@ -25,14 +26,12 @@ type Props = {
 /**
  * 대표 이미지와 그 대체 텍스트.
  *
- * 대체 텍스트에는 제목을 되풀이하지 않고 이미지 자체를 설명한다(계획 §2). 목록 카드와 상세
+ * 대체 텍스트에는 제목을 되풀이하지 않고 이미지 자체를 설명한다(07-dev-blog §2). 목록 카드와 상세
  * hero 가 같은 값을 쓰므로 한 번만 적는다. 이미지를 지우면 폼이 대체 텍스트도 함께 비운다.
  *
- * @param {Props} props
- * @param {DevArticleInput} props.form 현재 폼 값.
- * @param {ArticleCoverUploader} props.upload 주입받은 업로더. mock 단계에서는 fixture 주소를 준다.
- * @param {(next: Partial<DevArticleInput>) => void} props.onPatch 폼 일부를 갱신한다.
- * @returns {JSX.Element}
+ * @param props.form 현재 폼 값.
+ * @param props.upload 주입받은 업로더. mock 단계에서는 fixture 주소를 준다.
+ * @param props.onPatch 폼 일부를 갱신한다.
  */
 const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +44,12 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
     // 같은 파일을 다시 골라도 change 가 오도록 값을 비운다.
     event.target.value = "";
     if (!file) return;
+
+    const validationError = validateUploadableImage(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setUploading(true);
     setError(null);
@@ -96,22 +101,12 @@ const ArticleCoverField = ({ form, upload, onPatch }: Props) => {
             <input ref={inputRef} type="file" accept="image/*" hidden onChange={onFileChange} />
           </div>
 
-          <div className={styles.grid2}>
-            <AdminField label="대체 텍스트 (한국어)">
-              <AdminInput
-                value={coverAlt.ko}
-                disabled={!form.cover}
-                onChange={(event) => onPatch({ coverAlt: { ...coverAlt, ko: event.target.value } })}
-              />
-            </AdminField>
-            <AdminField label="대체 텍스트 (English)">
-              <AdminInput
-                value={coverAlt.en}
-                disabled={!form.cover}
-                onChange={(event) => onPatch({ coverAlt: { ...coverAlt, en: event.target.value } })}
-              />
-            </AdminField>
-          </div>
+          <LocalizedFieldPair
+            label="대체 텍스트"
+            value={coverAlt}
+            onChange={(next) => onPatch({ coverAlt: next })}
+            disabled={!form.cover}
+          />
 
           {error ? (
             <p className={styles.error} role="alert">

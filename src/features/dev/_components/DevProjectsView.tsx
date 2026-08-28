@@ -28,11 +28,6 @@ type Props = {
 
 /**
  * 프로젝트 목록과 URL 기반 상세 선택을 조율한다.
- *
- * @param {Props} props
- * @param {DevProjectCardData[]} props.projects
- * @param {Record<string, DevArticleProjectLink[]>} props.articlesByProject
- * @returns {JSX.Element}
  */
 const DevProjectsView = ({ projects, articlesByProject }: Props) => {
   const { dict, lang } = useLang();
@@ -52,7 +47,7 @@ const DevProjectsView = ({ projects, articlesByProject }: Props) => {
       : NO_ARTICLES;
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.devProjectsNav}</h1>
       {projects.length === 0 ? (
         <p className={styles.empty}>{dict.comingSoon}</p>

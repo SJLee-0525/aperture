@@ -8,10 +8,11 @@ import { preloadPhotoModal } from "@/features/photo-detail/_components/OnDemandP
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
+import { countLabel } from "@/lib/format/count-label";
 import { formatCoords } from "@/lib/format/format-coords";
 import { pickText } from "@/lib/i18n/pick-text";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 
 import styles from "./LocationList.module.css";
 
@@ -21,10 +22,6 @@ type Props = {
 
 /**
  * 촬영 위치 리스트 — 스크롤 컨테이너 근처에 들어온 48px 썸네일만 마운트한다.
- *
- * @param {Props} props
- * @param {MapLocation[]} props.locations
- * @returns {JSX.Element}
  */
 const LocationList = ({ locations }: Props) => {
   const { dict, lang } = useLang();
@@ -71,8 +68,8 @@ const LocationList = ({ locations }: Props) => {
       data-custom-scroll-scope="local"
     >
       <div className={styles.head}>
-        <span className="u-label">{dict.locationsLabel}</span>
-        <span className={styles.count}>{locations.length} spots</span>
+        <h2 className="u-label">{dict.locationsLabel}</h2>
+        <span className={styles.count}>{countLabel(locations.length, "spot")}</span>
       </div>
       {locations.map((location) => (
         <LocalizedLink

@@ -21,8 +21,6 @@ import { SearchSuggestions, optionId } from "./SearchSuggestions";
  * 데스크톱 헤더 검색 (모바일은 CSS로 숨김 — 모바일 검색은 버거 메뉴 안). 제출 시 통합 검색
  * 페이지(/search?q=)로 이동. 입력 중에는 검색 인덱스(포커스 시 lazy load) 상위 매치를
  * 자동완성으로 제안 — 방향키로 고르고 Enter/클릭 시 해당 콘텐츠 딥링크로 바로 이동.
- *
- * @returns {JSX.Element}
  */
 const SearchBox = () => {
   const router = useRouter();
@@ -80,7 +78,8 @@ const SearchBox = () => {
         autoComplete="off"
         role="combobox"
         aria-expanded={showList}
-        aria-controls={listboxId}
+        // 닫힌 동안에는 그 id 를 가진 요소가 없다. ARIA 1.2 는 팝업이 없을 때 생략을 허용한다.
+        aria-controls={showList ? listboxId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={active >= 0 ? optionId(listboxId, active) : undefined}
         placeholder={dict.searchPlaceholder}

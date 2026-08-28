@@ -1,7 +1,7 @@
 import type { DevArticleTag } from "@/types/dev-article-tag";
 
 /**
- * 블로그 태그 사전 mock — Firebase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
+ * 블로그 태그 사전 mock — Supabase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
  * 실운영 사전은 관리자 CMS 가 `devArticleTags` 컬렉션에 기록한다.
  *
  * 기술명은 번역 대상이 아니라 ko·en 이 같고, 서술형 태그만 언어별 라벨을 갖는다.

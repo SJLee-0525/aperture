@@ -4,8 +4,11 @@ import { AdminButton } from "@/components/AdminButton";
 import { AdminField } from "@/components/AdminField";
 import { AdminInput } from "@/components/AdminInput";
 import { TimelineRow } from "@/features/admin-music-config/_components/TimelineRow";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useMusicConfigAdmin } from "@/features/admin-music-config/_hooks/use-music-config-admin";
+
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -16,11 +19,12 @@ import styles from "./AdminMusicConfigEditor.module.css";
 
 /**
  * 음악 설정 — 소개글 + 경력·학력 타임라인 편집. 조립만, 로직은 useMusicConfigAdmin.
- *
- * @returns {JSX.Element}
  */
 const AdminMusicConfigPage = () => {
   const {
+    confirmLeave,
+    recovery,
+    applyRecovered,
     intro,
     career,
     education,
@@ -39,18 +43,13 @@ const AdminMusicConfigPage = () => {
 
   /**
    * career·education 두 타임라인 섹션을 같은 마크업으로 렌더.
-   *
-   * @param {TimelineKey} groupKey
-   * @param {string} label
-   * @param {TimelineEntry[]} entries
-   * @returns {JSX.Element}
    */
   const renderTimeline = (groupKey: TimelineKey, label: string, entries: TimelineEntry[]) => (
     <section className={styles.section}>
       <div className={styles.arrayHead}>
         <h2 className={styles.legend}>{label}</h2>
         <AdminButton variant="secondary" size="xs" onClick={() => addEntry(groupKey)}>
-          + 항목 추가
+          {`+ ${label} 추가`}
         </AdminButton>
       </div>
 
@@ -94,6 +93,16 @@ const AdminMusicConfigPage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>소개글 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>
@@ -125,13 +134,21 @@ const AdminMusicConfigPage = () => {
             </p>
           ) : null}
 
-          {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
+          {/* 저장 후 화면이 바뀌지 않아 이 문구가 유일한 성공 신호다. */}
+          <p className={styles.state} role="status">
+            {saved ? "저장되었습니다." : ""}
+          </p>
 
           <div className={styles.actions}>
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN_MUSIC} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_MUSIC}
+              disabled={saving}
+              onNavigate={guardedNavigate(confirmLeave)}
+            >
               취소
             </AdminButton>
           </div>

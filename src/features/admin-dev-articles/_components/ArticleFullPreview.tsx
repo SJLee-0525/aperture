@@ -8,7 +8,7 @@ import { ArticleDetailView } from "@/features/dev-blog/_components/ArticleDetail
 import { useMounted } from "@/hooks/use-mounted";
 
 import { adminIdToken } from "@/features/admin-dev-articles/_lib/admin-id-token";
-import { readArticleRecovery } from "@/features/admin-dev-articles/_lib/dev-article-recovery";
+import { fromStoredArticleInput } from "@/features/admin-dev-articles/_lib/dev-article-recovery";
 import { getDevArticleRepository } from "@/features/admin-dev-articles/_lib/dev-article-repository";
 import {
   previewArticleMarkdown,
@@ -16,7 +16,9 @@ import {
 } from "@/features/admin-dev-articles/_lib/preview-article-markdown";
 import { articleReadingMinutes } from "@/features/dev-blog/_lib/markdown-reading-time";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminDevArticleRoute } from "@/constants/routes";
+import { articleRecoverySlot, readFormRecovery } from "@/lib/admin/form-recovery";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import type { DevArticle } from "@/types/dev-article";
@@ -34,14 +36,12 @@ type Status = "loading" | "ready" | "missing" | "error";
  * 관리자 전용 전체 페이지 미리보기 — 마지막으로 **저장한** 글을 공개 지면과 같은 컴포넌트로 그린다.
  *
  * 편집기 옆 미리보기가 저장 전 값을 보여 주는 것과 다르다. 여기서는 저장소에서 다시 읽으므로
- * 저장하지 않은 변경은 반영되지 않는다. 그 상태를 숨기지 않고 위에 안내를 띄운다(계획 §5) —
+ * 저장하지 않은 변경은 반영되지 않는다. 그 상태를 숨기지 않고 위에 안내를 띄운다(07-dev-blog §5) —
  * 저장한 줄 알고 확인하다가 다른 글을 보고 있는 상황을 막는다.
  *
  * 관리자 인증 안에서만 열리며 sitemap·검색·RAG·WebMCP 어디에도 등록하지 않는다.
  *
- * @param {Props} props
- * @param {string} props.articleId 미리 볼 글의 문서 ID.
- * @returns {JSX.Element}
+ * @param props.articleId 미리 볼 글의 문서 ID.
  */
 const ArticleFullPreview = ({ articleId }: Props) => {
   const mounted = useMounted();
@@ -50,7 +50,14 @@ const ArticleFullPreview = ({ articleId }: Props) => {
   const [error, setError] = useState<string | null>(null);
 
   const unsaved = useMemo(
-    () => (mounted ? readArticleRecovery(window.localStorage, articleId) !== null : false),
+    () =>
+      mounted
+        ? readFormRecovery(
+            window.localStorage,
+            articleRecoverySlot(articleId),
+            fromStoredArticleInput,
+          ) !== null
+        : false,
     [mounted, articleId],
   );
 
@@ -104,7 +111,7 @@ const ArticleFullPreview = ({ articleId }: Props) => {
 
       {loaded ? (
         <ArticleDetailView
-          title={pickText(loaded.article.title, "ko") || "제목 없음"}
+          title={pickText(loaded.article.title, "ko") || ADMIN_UNTITLED}
           summary={pickText(loaded.article.summary, "ko")}
           cover={loaded.article.cover}
           coverAlt={loaded.article.coverAlt ? pickText(loaded.article.coverAlt, "ko") : ""}

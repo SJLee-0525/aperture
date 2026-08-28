@@ -97,6 +97,10 @@ declare
 begin
   -- 파라미터 이름이 컬럼과 겹치므로 함수명으로 수식한다. 수식을 빼면 컬럼끼리
   -- 비교가 되어 조건이 항상 참이 된다.
+  --
+  -- `=` 는 조기 종료라 비교 시간이 일치 바이트 수를 드러낸다. 그래도 상수 시간 비교로
+  -- 바꾸지 않는다. 여기서 새어 나갈 수 있는 값은 저장된 SHA-256 hex 이고, 이 함수를
+  -- 통과하려면 그 해시가 아니라 원문 시크릿이 필요하다.
   if not exists (
     select 1 from private.webhook_secrets w
     where w.name = 'sentry_alert'
@@ -137,6 +141,10 @@ $$;
 /*
  * 선점한 행에 판정 결과와 전송 여부를 기록한다.
  * completed_at 이 null 로 남은 행은 선점 뒤 처리가 끊긴 전달이다.
+ *
+ * 호출자가 alert_id 를 지정하며 소유권은 검증하지 않는다. 시크릿을 아는 쪽이면 임의의 행을
+ * 덮어쓸 수 있다는 뜻이고, 이 시크릿 하나가 claim 과 complete 두 함수의 전 권한을 연다.
+ * 시크릿을 서버 환경변수 밖으로 내보내지 않는 것이 경계 전부다.
  */
 create or replace function public.complete_sentry_alert(secret text, alert_id uuid, result jsonb)
 returns void

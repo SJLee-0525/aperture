@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { memo } from "react";
 
+import { ImageFallback } from "@/components/ImageFallback";
+
 import { pickText } from "@/lib/i18n/pick-text";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -51,26 +53,7 @@ const DevProjectCard = memo(function DevProjectCard({
             priority={priority}
           />
         ) : (
-          <>
-            <Image
-              src="/dev-project-image"
-              alt=""
-              fill
-              sizes="(max-width: 720px) 100vw, 560px"
-              className={`${styles.coverImg} ${styles.fallbackLight}`}
-              draggable={false}
-              unoptimized
-            />
-            <Image
-              src="/dev-project-image-dark"
-              alt=""
-              fill
-              sizes="(max-width: 720px) 100vw, 560px"
-              className={`${styles.coverImg} ${styles.fallbackDark}`}
-              draggable={false}
-              unoptimized
-            />
-          </>
+          <ImageFallback />
         )}
       </div>
       <div className={styles.cardBody}>

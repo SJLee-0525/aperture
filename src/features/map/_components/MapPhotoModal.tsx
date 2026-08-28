@@ -5,7 +5,7 @@ type Props = {
 };
 
 const MapPhotoModal = ({ photoIds }: Props) => {
-  return <OnDemandPhotoModal photoIds={photoIds} endpoint="/api/photo-map" />;
+  return <OnDemandPhotoModal photoIds={photoIds} endpoint="/api/photo-map" chatTarget />;
 };
 
 export { MapPhotoModal };

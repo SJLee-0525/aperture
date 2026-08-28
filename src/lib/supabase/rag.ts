@@ -1,8 +1,7 @@
 import "server-only";
 
-import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 import { paginateAll } from "@/lib/supabase/paginate-all";
-import { fetchWithRetry } from "@/lib/supabase/public/retry-fetch";
+import { restFetch } from "@/lib/supabase/rest-client";
 
 import type { RagChunk, RagSection, RagSyncTarget, StoredRagChunkMeta } from "@/types/rag";
 
@@ -33,17 +32,6 @@ type ExistingDocument = { id: string; embeddingModel: string };
 type MatchedRagChunk = StoredRagChunkMeta & { vectorScore: number };
 
 type ReplacementScope = { sourceTypes: string[]; sourceId?: string; section?: RagSection };
-
-const restUrl = (params: URLSearchParams) => `${supabaseUrl()}/rest/v1/${TABLE}?${params}`;
-
-/** publishable key 는 apikey 헤더로만 보낸다. Authorization 은 사용자 토큰 전용이다. */
-const baseHeaders = (): Record<string, string> => ({ apikey: supabasePublishableKey() });
-
-const adminHeaders = (accessToken: string): Record<string, string> => ({
-  ...baseHeaders(),
-  Authorization: `Bearer ${accessToken}`,
-  "Content-Type": "application/json",
-});
 
 /**
  * 업스트림 원문은 서버 로그에만 남긴다 — 응답에 실으면 컬럼·정책명 같은 내부
@@ -100,10 +88,13 @@ const listAllRows = <Row>(
 ): Promise<Row[]> => {
   params.set("order", "id.asc");
   return paginateAll<Row>(async (offset, size) => {
-    const response = await fetch(restUrl(params), {
+    const response = await restFetch({
+      path: TABLE,
+      params,
+      accessToken,
       // Range 의 끝은 포함이라 요청 크기에서 하나를 뺀다.
-      headers: { ...adminHeaders(accessToken), Range: `${offset}-${offset + size - 1}` },
-      cache: "no-store",
+      headers: { Range: `${offset}-${offset + size - 1}` },
+      retry: true,
     });
     if (response.status === 416) return [];
     if (!response.ok) {
@@ -117,7 +108,6 @@ const listAllRows = <Row>(
 /**
  * 전체 저장 청크의 id·모델키를 읽는다. 벡터 컬럼을 projection 에서 빼는 것이
  * 핵심이다 — 포함하면 응답이 문서당 수 KB 로 커진다.
- * Firestore 시절의 full resource name 대신 행 id 를 그대로 비교 키로 쓴다.
  */
 const listRagDocumentMeta = async (accessToken: string): Promise<ExistingDocument[]> => {
   const params = new URLSearchParams({ select: "id,embedding_model" });
@@ -167,14 +157,41 @@ const assertStorableVectors = (chunks: RagChunk[], vectors: number[][]) => {
  * @param accessToken 관리자 access token — 인가는 RLS 가 한다.
  * @param target 증분 갱신 대상. 없으면 전체 색인을 교체한다.
  */
-const replaceRagDocuments = async (
+/**
+ * 상한 검사가 만든 교체 계획.
+ *
+ * `staleIds` 만 넘기면 다른 청크로 계산한 목록이 들어와도 타입이 막지 못한다. 계획이 어떤
+ * 청크에서 나왔는지를 함께 들고 다녀 그 상태를 오류로 바꾼다.
+ */
+type RagReplacementPlan = {
+  readonly staleIds: string[];
+  readonly chunkIds: ReadonlySet<string>;
+};
+
+/** 계획을 만든 청크와 지금 저장하려는 청크가 같은지. */
+const sameChunkIds = (chunkIds: ReadonlySet<string>, chunks: RagChunk[]): boolean =>
+  chunkIds.size === new Set(chunks.map(({ id }) => id)).size &&
+  chunks.every(({ id }) => chunkIds.has(id));
+
+/**
+ * 갱신 후 문서 수가 상한을 넘는지 임베딩 전에 확인한다.
+ *
+ * 단순히 청크 수만 세면 되는 검사가 아니다. 교체 범위에서 사라질 기존 문서(`staleIds`)를
+ * 알아야 최종 개수가 나오고, 그 목록은 DB 조회가 필요하다. 그래서 route 가 직접 세지 않고
+ * 이 함수를 부른다. 임베딩 뒤에 부르면 상한을 넘긴 요청이 전부 유료로 임베딩된 뒤
+ * 거절되고 저장은 한 건도 되지 않는다.
+ *
+ * @param accessToken 관리자 access token — 인가는 RLS 가 한다.
+ * @param chunks 저장할 청크.
+ * @param target 증분 갱신 대상. 없으면 전체 색인을 교체한다.
+ * @returns 이번 갱신의 교체 계획. `replaceRagDocuments` 에 그대로 넘겨 조회를 아낀다.
+ * @throws {Error} 갱신 후 문서 수가 `MAX_DOCUMENTS` 를 넘을 때.
+ */
+const assertWithinDocumentLimit = async (
   accessToken: string,
   chunks: RagChunk[],
-  vectors: number[][],
-  model: string,
   target?: RagSyncTarget,
-): Promise<void> => {
-  assertStorableVectors(chunks, vectors);
+): Promise<RagReplacementPlan> => {
   const existingIds = target
     ? await listScopedIds(accessToken, replacementScopeFor(target))
     : (await listRagDocumentMeta(accessToken)).map(({ id }) => id);
@@ -183,6 +200,29 @@ const replaceRagDocuments = async (
   if (staleIds.length + chunks.length > MAX_DOCUMENTS) {
     throw new Error(`RAG 문서가 ${MAX_DOCUMENTS}개를 초과해 한 번에 갱신할 수 없습니다.`);
   }
+  return { staleIds, chunkIds: nextIds };
+};
+
+/**
+ * 청크와 벡터를 저장하고 이번 갱신으로 사라진 문서를 지운다.
+ *
+ * @param plan 임베딩 앞에서 미리 검사했다면 그 결과. 없으면 여기서 다시 센다.
+ * @throws {Error} 계획이 지금 저장하려는 청크와 다를 때. 그대로 쓰면 상한 검사가
+ *   건너뛰어지고 삭제 대상도 틀린다.
+ */
+const replaceRagDocuments = async (
+  accessToken: string,
+  chunks: RagChunk[],
+  vectors: number[][],
+  model: string,
+  target?: RagSyncTarget,
+  plan?: RagReplacementPlan,
+): Promise<void> => {
+  assertStorableVectors(chunks, vectors);
+  if (plan && !sameChunkIds(plan.chunkIds, chunks)) {
+    throw new Error("RAG 교체 계획이 저장하려는 청크와 다릅니다.");
+  }
+  const { staleIds } = plan ?? (await assertWithinDocumentLimit(accessToken, chunks, target));
   for (let start = 0; start < chunks.length; start += UPSERT_CHUNK_SIZE) {
     const rows = chunks.slice(start, start + UPSERT_CHUNK_SIZE).map((chunk, index) => ({
       id: chunk.id,
@@ -195,11 +235,13 @@ const replaceRagDocuments = async (
       embedding_model: model,
       published: true,
     }));
-    const response = await fetch(restUrl(new URLSearchParams()), {
+    // 쓰기라 재시도하지 않는다. 같은 upsert 가 두 번 나가면 이전 청크가 되살아날 수 있다.
+    const response = await restFetch({
+      path: TABLE,
       method: "POST",
-      headers: { ...adminHeaders(accessToken), Prefer: "resolution=merge-duplicates" },
-      body: JSON.stringify(rows),
-      cache: "no-store",
+      accessToken,
+      headers: { Prefer: "resolution=merge-duplicates" },
+      body: rows,
     });
     if (!response.ok) {
       await logUpstreamError("upsert", response);
@@ -215,11 +257,7 @@ const replaceRagDocuments = async (
         .map(quoteInListValue)
         .join(",")})`,
     );
-    const response = await fetch(restUrl(params), {
-      method: "DELETE",
-      headers: adminHeaders(accessToken),
-      cache: "no-store",
-    });
+    const response = await restFetch({ path: TABLE, params, method: "DELETE", accessToken });
     if (!response.ok) {
       await logUpstreamError("delete", response);
       throw new Error(`이전 임베딩 삭제 실패 (${response.status})`);
@@ -241,17 +279,18 @@ const matchRagChunks = async (input: {
   prioritize?: { sourceType: string; sourceId: string };
   signal?: AbortSignal;
 }): Promise<MatchedRagChunk[]> => {
-  const response = await fetchWithRetry(`${supabaseUrl()}/rest/v1/rpc/match_rag_chunks`, {
+  // rpc 지만 읽기 전용이라 재시도해도 저장 상태가 바뀌지 않는다.
+  const response = await restFetch({
+    path: "rpc/match_rag_chunks",
     method: "POST",
-    headers: { ...baseHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify({
+    body: {
       query_embedding: input.queryVector,
       target_sections: input.sections,
       model_key: input.modelKey,
       prioritize_source_type: input.prioritize?.sourceType ?? null,
       prioritize_source_id: input.prioritize?.sourceId ?? null,
-    }),
-    cache: "no-store",
+    },
+    retry: true,
     ...(input.signal ? { signal: input.signal } : {}),
   });
   if (!response.ok) {
@@ -281,4 +320,10 @@ const matchRagChunks = async (input: {
   }));
 };
 
-export { listRagDocumentMeta, matchRagChunks, replaceRagDocuments, replacementScopeFor };
+export {
+  assertWithinDocumentLimit,
+  listRagDocumentMeta,
+  matchRagChunks,
+  replaceRagDocuments,
+  replacementScopeFor,
+};

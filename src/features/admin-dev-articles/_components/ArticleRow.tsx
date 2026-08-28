@@ -3,9 +3,12 @@
 import Link from "next/link";
 
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+import { AdminRow } from "@/features/admin-shell/_components/AdminRow";
 
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminDevArticleRoute } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD, formatLocalYMD } from "@/lib/format/format-date";
 
 import type { AdminDevArticleListItem } from "@/types/admin";
 
@@ -14,6 +17,8 @@ import styles from "./ArticleRow.module.css";
 type Props = {
   article: AdminDevArticleListItem;
   pinBusy: boolean;
+  /** 이 행의 공개 토글이 저장 중이다. 형제 행 여섯과 같은 가드다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onTogglePinned: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
@@ -29,25 +34,48 @@ type Props = {
  * 고정은 편집 폼이 아니라 이 행에만 둔다. 글 내용이 아니라 목록에서의 배치 결정이고,
  * 두 곳에 두면 어느 값이 최신인지 알 수 없다.
  *
- * @param {Props} props
- * @param {AdminDevArticleListItem} props.article 본문을 뺀 목록 행.
- * @param {boolean} props.pinBusy 이 행의 고정 요청이 진행 중이다. 낙관적 갱신이라 연타하면
+ * @param props.article 본문을 뺀 목록 행.
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
+ * @param props.pinBusy 이 행의 고정 요청이 진행 중이다. 낙관적 갱신이라 연타하면
  *   화면과 서버 상태가 어긋난다.
- * @param {(id: string, next: boolean) => void} props.onTogglePublished 공개 상태를 바꾼다.
- * @param {(id: string, next: boolean) => void} props.onTogglePinned 고정 상태를 바꾼다.
- * @param {(id: string) => void} props.onDelete 확인 후 글을 지운다.
- * @returns {JSX.Element}
+ * @param props.onTogglePublished 공개 상태를 바꾼다.
+ * @param props.onTogglePinned 고정 상태를 바꾼다.
+ * @param props.onDelete 확인 후 글을 지운다.
  */
-const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDelete }: Props) => {
-  const title = article.title.ko || "제목 없음";
-  const onDeleteClick = () => {
-    if (window.confirm(`"${title}" 글을 삭제할까요?`)) {
-      onDelete(article.id);
-    }
-  };
+const ArticleRow = ({
+  article,
+  pinBusy,
+  publishBusy,
+  onTogglePublished,
+  onTogglePinned,
+  onDelete,
+}: Props) => {
+  const title = article.title.ko || ADMIN_UNTITLED;
 
   return (
-    <li className={styles.row}>
+    <AdminRow
+      published={article.published}
+      publishedBusy={publishBusy}
+      publishedLabels={{ on: "공개", off: "초안" }}
+      onTogglePublished={(next) => onTogglePublished(article.id, next)}
+      editHref={adminDevArticleRoute(article.id)}
+      onDelete={() => onDelete(article.id)}
+      confirmDelete={{ name: title, noun: "글" }}
+      beforeBadge={
+        /* 아이콘만 두고 색으로 상태를 나눈다. 이름은 고정하고 상태는 aria-pressed 가 전한다.
+           이름까지 뒤집으면 보조기술이 "고정 해제, 눌림" 처럼 반대되는 두 신호를 함께 읽는다. */
+        <button
+          type="button"
+          className={`${row.badge} ${row.badgeIcon} ${article.pinned ? row.badgeOn : ""}`}
+          aria-pressed={article.pinned}
+          aria-label={`${title} 고정`}
+          disabled={pinBusy}
+          onClick={() => onTogglePinned(article.id, !article.pinned)}
+        >
+          <Icon name="pin" size={14} />
+        </button>
+      }
+    >
       <span className={styles.main}>
         <Link href={adminDevArticleRoute(article.id)} className={styles.title}>
           {title}
@@ -61,40 +89,10 @@ const ArticleRow = ({ article, pinBusy, onTogglePublished, onTogglePinned, onDel
 
       <span className={styles.date}>
         {article.publishedAt
-          ? formatYMD(article.publishedAt)
-          : `수정 ${formatYMD(article.updatedAt)}`}
+          ? formatEventYMD(article.publishedAt)
+          : `수정 ${formatLocalYMD(article.updatedAt)}`}
       </span>
-
-      {/* 아이콘만 두고 색으로 상태를 나눈다. 이름은 고정하고 상태는 aria-pressed 가 전한다.
-          이름까지 뒤집으면 보조기술이 "고정 해제, 눌림" 처럼 반대되는 두 신호를 함께 읽는다. */}
-      <button
-        type="button"
-        className={`${styles.badge} ${styles.pinBadge} ${article.pinned ? styles.badgeOn : ""}`}
-        aria-pressed={article.pinned}
-        aria-label={`${title} 고정`}
-        disabled={pinBusy}
-        onClick={() => onTogglePinned(article.id, !article.pinned)}
-      >
-        <Icon name="pin" size={14} />
-      </button>
-
-      <button
-        type="button"
-        className={`${styles.badge} ${article.published ? styles.badgeOn : ""}`}
-        onClick={() => onTogglePublished(article.id, !article.published)}
-      >
-        {article.published ? "공개" : "초안"}
-      </button>
-
-      <span className={styles.actions}>
-        <Link href={adminDevArticleRoute(article.id)} className={styles.edit}>
-          수정
-        </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
-          삭제
-        </button>
-      </span>
-    </li>
+    </AdminRow>
   );
 };
 

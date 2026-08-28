@@ -8,8 +8,11 @@ import { DevEducationRow } from "@/features/admin-dev-config/_components/DevEduc
 import { DevTimelineRow } from "@/features/admin-dev-config/_components/DevTimelineRow";
 import { InterviewRow } from "@/features/admin-dev-config/_components/InterviewRow";
 import { StackGroupRow } from "@/features/admin-dev-config/_components/StackGroupRow";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useDevConfigAdmin } from "@/features/admin-dev-config/_hooks/use-dev-config-admin";
+
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -17,10 +20,20 @@ import styles from "./DevConfigEditor.module.css";
 
 /** 개발 설정 — 소개 리드·인터뷰·기술 스택·학력·경력·수상 편집. 조립만, 로직은 편집 Module과 hook.
  *
- * @returns {JSX.Element}
  *  (연락처·소셜은 /contact, 히어로 타이핑은 랜딩 소관 → 여기 없음.) */
 const DevConfigEditor = () => {
-  const { config, status, error, saving, saved, edit, save } = useDevConfigAdmin();
+  const {
+    confirmLeave,
+    recovery,
+    applyRecovered,
+    config,
+    status,
+    error,
+    saving,
+    saved,
+    edit,
+    save,
+  } = useDevConfigAdmin();
 
   return (
     <div className={styles.page}>
@@ -39,6 +52,16 @@ const DevConfigEditor = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <section className={styles.section}>
             <h2 className={styles.legend}>소개 리드 (첫 문장 = 요약 헤드라인)</h2>
             <div className={styles.grid2}>
@@ -73,7 +96,7 @@ const DevConfigEditor = () => {
                 size="xs"
                 onClick={() => edit({ type: "education.add" })}
               >
-                + 항목 추가
+                + 학력 추가
               </AdminButton>
             </div>
             {config.education.length === 0 ? (
@@ -247,7 +270,7 @@ const DevConfigEditor = () => {
                 size="xs"
                 onClick={() => edit({ type: "timeline.add" })}
               >
-                + 항목 추가
+                + 경력 추가
               </AdminButton>
             </div>
             {config.timeline.length === 0 ? (
@@ -289,13 +312,21 @@ const DevConfigEditor = () => {
             </p>
           ) : null}
 
-          {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
+          {/* 저장 후 화면이 바뀌지 않아 이 문구가 유일한 성공 신호다. */}
+          <p className={styles.state} role="status">
+            {saved ? "저장되었습니다." : ""}
+          </p>
 
           <div className={styles.actions}>
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN_DEV} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_DEV}
+              disabled={saving}
+              onNavigate={guardedNavigate(confirmLeave)}
+            >
               취소
             </AdminButton>
           </div>

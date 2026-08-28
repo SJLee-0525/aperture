@@ -25,8 +25,8 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
 /**
  * 글 전체에서 관리자 목록에 필요한 필드만 고른다.
  *
- * @param {DevArticle} article 저장된 글 전체.
- * @returns {AdminDevArticleListItem} 목록 행에 필요한 필드만.
+ * @param article 저장된 글 전체.
+ * @returns 목록 행에 필요한 필드만.
  */
 const toListItem = (article: DevArticle): AdminDevArticleListItem => ({
   id: article.id,
@@ -43,7 +43,7 @@ const toListItem = (article: DevArticle): AdminDevArticleListItem => ({
  * mock 글과 태그로 저장소를 채운다. 공개 화면이 읽는 것과 같은 원본이라 관리자 목록과
  * 공개 목록이 같은 글로 시작한다(이후 관리자 쪽 수정은 mock 파일에 되돌아가지 않는다).
  *
- * @returns {Promise<DevArticleStore>} seed 한 글과 태그.
+ * @returns seed 한 글과 태그.
  */
 const seedStore = async (): Promise<DevArticleStore> => {
   const [{ MOCK_DEV_ARTICLES }, { MOCK_DEV_ARTICLE_TAGS }] = await Promise.all([
@@ -54,18 +54,18 @@ const seedStore = async (): Promise<DevArticleStore> => {
 };
 
 /**
- * 브라우저 로컬 저장소를 Firestore 대신 쓰는 관리자 저장소.
+ * 브라우저 로컬 저장소를 Supabase 대신 쓰는 관리자 저장소.
  *
- * 개발 중에는 Firebase 대신 브라우저 저장소를 사용한다. 여기 저장한 글은
+ * 개발 중에는 Supabase 대신 브라우저 저장소를 사용한다. 여기 저장한 글은
  * 브라우저에만 남고 공개 페이지(서버가 `mocks/dev-articles.ts` 를 읽는다)에는 나타나지 않는다.
  *
  * `firstPublishedAt` 스탬프를 여기서 찍는다. 발행은 폼 저장과 목록 토글 두 경로로 들어오는데,
  * 저장소가 모든 쓰기의 유일한 통로라 규칙을 한 번만 적으면 된다.
  *
- * @param {() => Storage} getStorage 저장소를 여는 함수. 모듈 로드 시점이 아니라 호출 시점에
+ * @param getStorage 저장소를 여는 함수. 모듈 로드 시점이 아니라 호출 시점에
  *   `window` 를 건드리려고 함수로 받는다(관리자 페이지도 서버에서 한 번 평가된다).
- * @param {() => Date} [now] 시스템 시각. 테스트가 고정할 수 있게 주입받는다.
- * @returns {DevArticleRepository} 로컬 저장소에 붙은 관리자 CRUD.
+ * @param [now] 시스템 시각. 테스트가 고정할 수 있게 주입받는다.
+ * @returns 로컬 저장소에 붙은 관리자 CRUD.
  */
 const createLocalDevArticleRepository = (
   getStorage: () => Storage,
@@ -85,7 +85,7 @@ const createLocalDevArticleRepository = (
   /**
    * 저장소를 읽고, 비어 있거나 형이 깨졌으면 mock 으로 다시 채운다.
    *
-   * @returns {Promise<DevArticleStore>} 현재 글과 태그.
+   * @returns 현재 글과 태그.
    */
   const load = async (): Promise<DevArticleStore> => {
     const storage = getStorage();
@@ -102,8 +102,7 @@ const createLocalDevArticleRepository = (
   /**
    * 저장소를 덮어쓴다.
    *
-   * @param {DevArticleStore} store 저장할 전체 상태.
-   * @returns {void}
+   * @param store 저장할 전체 상태.
    */
   const save = (store: DevArticleStore): void => {
     if (writeDevArticleStore(getStorage(), store)) return;
@@ -116,10 +115,9 @@ const createLocalDevArticleRepository = (
    * mock 저장소에는 프로젝트 목록이 없으므로 연관 프로젝트 공개 여부는 검사하지 않는다.
    * 공개 상세 화면은 비공개 프로젝트를 다시 걸러 낸다.
    *
-   * @param {string} id 발행하려는 글의 문서 ID.
-   * @param {DevArticleInput} input 발행하려는 저장 값.
-   * @param {DevArticleStore} store 중복 slug·태그 사전을 볼 현재 저장소.
-   * @returns {void}
+   * @param id 발행하려는 글의 문서 ID.
+   * @param input 발행하려는 저장 값.
+   * @param store 중복 slug·태그 사전을 볼 현재 저장소.
    * @throws {Error} 발행 조건을 만족하지 않을 때.
    */
   const assertPublishable = (id: string, input: DevArticleInput, store: DevArticleStore): void =>
@@ -128,6 +126,22 @@ const createLocalDevArticleRepository = (
       knownTagIds: store.tags.map((tag) => tag.id),
       publishableProjectIds: input.relatedProjectIds,
     });
+
+  /**
+   * slug 중복을 발행 여부와 무관하게 막는다. live 저장소가 같은 시점에 같은 검사를 한다.
+   * 발행할 때만 보면 초안 두 개를 같은 slug 로 만들 수 있어, 개발과 E2E 에서 오류가
+   * 나는 시점이 실제 배포와 달라진다.
+   *
+   * @param slug 저장하려는 slug.
+   * @param selfId 편집 중인 글의 문서 ID.
+   * @param store 현재 저장소.
+   * @throws {Error} 다른 글이 이미 쓰는 slug 일 때.
+   */
+  const assertSlugAvailable = (slug: string, selfId: string, store: DevArticleStore): void => {
+    if (store.articles.some((article) => article.id !== selfId && article.slug === slug)) {
+      throw new Error(`이미 사용 중인 slug 입니다: ${slug}`);
+    }
+  };
 
   return {
     newId: () => crypto.randomUUID(),
@@ -142,6 +156,7 @@ const createLocalDevArticleRepository = (
         if (store.articles.some((article) => article.id === id)) {
           throw new Error("같은 ID의 글이 이미 있습니다.");
         }
+        assertSlugAvailable(input.slug, id, store);
         if (input.published) assertPublishable(id, input, store);
         const stamped = now();
         save({
@@ -165,6 +180,7 @@ const createLocalDevArticleRepository = (
         const store = await load();
         const previous = store.articles.find((article) => article.id === id);
         if (!previous) throw new Error("수정할 글을 찾지 못했습니다.");
+        assertSlugAvailable(input.slug, id, store);
         if (input.published) assertPublishable(id, input, store);
         save({
           ...store,

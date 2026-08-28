@@ -10,8 +10,8 @@ const ROUTABLE_METHODS = new Set(["GET", "HEAD"]);
 /**
  * 언어가 없는 랜딩만 사용자 선호에 따라 선택한다. 명시적 `/ko`·`/en` 경로는 matcher 밖이다.
  *
- * @param {NextRequest} request - 루트 matcher가 전달한 Next.js 요청.
- * @returns {NextResponse} GET·HEAD의 307 언어 이동 또는 그 밖의 메서드 통과 응답.
+ * @param request - 루트 matcher가 전달한 Next.js 요청.
+ * @returns GET·HEAD의 307 언어 이동 또는 그 밖의 메서드 통과 응답.
  */
 export function proxy(request: NextRequest): NextResponse {
   if (!ROUTABLE_METHODS.has(request.method)) return NextResponse.next();

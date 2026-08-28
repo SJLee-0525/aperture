@@ -51,9 +51,13 @@ mock 콘텐츠는 단순한 테스트 대역이 아니라 공개 UI를 완전히
 - 데스크톱은 상단 mega-menu와 전역 검색을 사용한다.
 - 모바일은 앱바, 버거 메뉴와 섹션별 하단 탭을 사용한다.
 - 사진, 연주, 수상, 개발 프로젝트 상세는 별도 페이지가 아니라 query 기반 모달이다.
-- query key는 각각 `photo`, `work`, `award`, `project`다.
+- query key는 각각 `photo`, `work`, `award`, `project`이며 `DETAIL_QUERY_KEYS` 가 단일 출처다.
+- `detail query session`: 상세 모달의 URL·history 규칙. 첫 열기만 history entry 를 쌓고, 그때만 닫기가 뒤로가기를 쓴다. 열린 채로 다른 항목으로 옮기는 것은 새 진입이 아니라 교체다.
+- 사진은 타일과 지도 핀이 세션 밖에서도 상세를 연다. 그 경로도 entry 를 쌓으므로 세션이 `openedOutside` 로 그 사실을 받는다.
 - 앨범 상세와 블로그 본문만 경로를 사용한다: `/photo/albums/[id]`, `/dev/articles/[slug]`.
 - 모달은 열기, 콘텐츠 확인, 닫기와 URL query 동기화가 사용자에게 관찰 가능해야 한다.
+- `dialog`: 포커스 트랩·스크롤 잠금·Escape·격리·최상위 판정이 함께 켜지고 함께 꺼지는 오버레이. `useDialog` 가 그 조립을 갖는다.
+- `pointer chrome`: 커스텀 커서와 커스텀 스크롤바. 서로를 import 하지 않고 `pointer-chrome-contract` 의 DOM 표시로만 만난다.
 
 ## Architecture boundaries
 
@@ -66,6 +70,8 @@ Next.js App Router 단일 앱이며 의존 방향은 `app → features → compo
 - `lib/monitoring`: Sentry 오류 관측. 공개 브라우저에서는 오류 보고 동의 후 로드하고, 관리자에서는 UID 확인 후 시작한다. 서버·엣지는 최소 수집 설정으로 항상 실행한다(ADR-0004).
 - `mocks`: 결정적인 공개 데모 콘텐츠
 - `admin`: 인증된 CMS이며 공개 E2E에서 제외
+- `platform` feature: 여러 feature 가 소비하는 횡단 기능. 일반 feature 와 달리 다른 feature 를 참조할 수 없다 — `lang`·`theme`·`image-upload`·`photo-detail`·`dev-blog`·`admin-shell`·`pointer-chrome`
+- `admin token gate`: 관리자 표면의 공통 전처리. `lib/auth/admin-gate` 가 토큰 검증·스로틀·실패 표현을 한 벌로 갖는다 — route 는 `adminGateResponse`, server action 은 `requireAdminToken`.
 
 공개 페이지의 서버 읽기는 PostgREST를 사용하고 관리 기능은 supabase-js를 사용한다. E2E mock 모드는 이 외부 경계를 통과하지 않는다. 지도 타일과 외부 링크는 제3자 시스템이므로 E2E는 앱의 컨테이너, 링크와 위치 데이터까지만 검증한다.
 

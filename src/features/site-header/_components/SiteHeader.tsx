@@ -22,9 +22,7 @@ import styles from "./SiteHeader.module.css";
  * 셸은 서버에서 렌더하고 상호작용하는 자식(mega-menu·언어·테마·모바일 메뉴·검색)만 클라이언트로
  * 내려간다. 그 자식들은 각자 `LangProvider` 컨텍스트를 읽으므로 언어를 넘겨받지 않는다.
  *
- * @param {{ lang: Lang }} props
- * @param {Lang} props.lang 워드마크 링크의 로케일 프리픽스와 사전 언어.
- * @returns {JSX.Element}
+ * @param props.lang 워드마크 링크의 로케일 프리픽스와 사전 언어.
  */
 const SiteHeader = ({ lang }: { lang: Lang }) => {
   const dict = DICTIONARY[lang];

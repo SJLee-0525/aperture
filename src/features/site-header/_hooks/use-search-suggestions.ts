@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
@@ -16,9 +16,6 @@ const SUGGEST_DEBOUNCE_MS = 120;
  * 검색창 자동완성 상태 — loadIndex 를 포커스 시점에 호출하면 인덱스를 lazy load 한다
  * (검색 안 쓰는 방문자 비용 0). 입력은 짧은 디바운스 후 in-memory 대조로 추천을 갱신한다.
  * 데스크톱 SearchBox 와 모바일 버거 메뉴 검색이 공유한다.
- *
- * @param {string} query
- * @returns {{ suggestions: SearchSuggestion[]; loadIndex: () => void }}
  */
 const useSearchSuggestions = (query: string) => {
   const { lang } = useLang();
@@ -33,10 +30,21 @@ const useSearchSuggestions = (query: string) => {
   // 빈 입력은 즉시 반영(렌더 파생) — 지운 검색창 밑에 직전 질의 추천이 잔상으로 남지 않게.
   const effectiveQuery = query.trim() ? debouncedQuery : query;
 
+  // 인덱스 fetch 중에 라우트가 바뀌면 사라진 컴포넌트에 setState 가 간다.
+  const aliveRef = useRef(true);
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
+
   const loadIndex = () => {
     void loadSearchIndex()
-      .then(setDocuments)
-      .catch(() => {}); // 실패 시 자동완성만 조용히 비활성 — 제출 검색(/search)은 그대로 동작
+      .then((documents) => {
+        if (aliveRef.current) setDocuments(documents);
+      })
+      .catch(() => {}); // 실패 시 자동완성만 조용히 비활성. 제출 검색(/search)은 그대로 동작
   };
 
   const suggestions = useMemo(

@@ -8,17 +8,6 @@
 
 /* 화면에는 두지 않는다. 카드의 고정 배지가 이 자리의 이유를 이미 설명한다.
    영역 이름은 남겨야 보조기술이 아래 목록과 구분해 읽는다. */
-.heading {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
 
 /* 보기 토글과 무관하게 1열이다. 카드 자체는 `ArticleCard` 의 list 모양을 쓴다. */
 .list {

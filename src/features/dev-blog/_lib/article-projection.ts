@@ -1,6 +1,7 @@
 import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
 
 import type { DevArticle } from "@/types/dev-article";
+import type { DevArticleTag } from "@/types/dev-article-tag";
 import type { ImageMeta } from "@/types/image";
 import type { LocalizedText } from "@/types/localized";
 
@@ -34,8 +35,8 @@ type DevArticleSummary = {
  * 맡아 같은 요청의 다른 projection 과 결과를 나눠 쓴다. 색칠(shiki)은 하지 않는다 —
  * 목록에는 코드 블록을 그리지 않는다.
  *
- * @param {DevArticle} article 공개 글 한 건.
- * @returns {DevArticleSummary} 본문을 뺀 요약. 읽기 시간은 1분 이상이다.
+ * @param article 공개 글 한 건.
+ * @returns 본문을 뺀 요약. 읽기 시간은 1분 이상이다.
  */
 const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
   id: article.id,
@@ -54,11 +55,23 @@ const toDevArticleSummary = (article: DevArticle): DevArticleSummary => ({
 /**
  * 목록 전체를 요약으로 바꾼다. 입력 순서를 그대로 지킨다 — 정렬은 getter 가 이미 마쳤다.
  *
- * @param {readonly DevArticle[]} articles 발행일 내림차순으로 정렬된 공개 글.
- * @returns {DevArticleSummary[]} 같은 순서의 요약 목록.
+ * @param articles 발행일 내림차순으로 정렬된 공개 글.
+ * @returns 같은 순서의 요약 목록.
  */
 const toDevArticleSummaries = (articles: readonly DevArticle[]): DevArticleSummary[] =>
   articles.map(toDevArticleSummary);
 
-export { toDevArticleSummaries, toDevArticleSummary };
+/**
+ * 태그 id 를 화면에 쓸 라벨로 바꾼다. 사전에 없는 id 는 그대로 둔다.
+ *
+ * 상세 화면은 이 함수를 두 번 부른다. 하나는 방문자 언어로, 하나는 JSON-LD 용 한국어로다.
+ * `lang` 이 인자인 이유가 그것이다.
+ */
+const resolveArticleTagLabels = (
+  tagIds: readonly string[],
+  tags: readonly DevArticleTag[],
+  lang: "ko" | "en",
+): string[] => tagIds.map((id) => tags.find((tag) => tag.id === id)?.[lang] ?? id);
+
+export { resolveArticleTagLabels, toDevArticleSummaries, toDevArticleSummary };
 export type { DevArticleSummary };

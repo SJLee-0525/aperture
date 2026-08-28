@@ -44,7 +44,7 @@
 }
 .note {
   font-size: var(--t-micro);
-  color: var(--text-4);
+  color: var(--text-3);
 }
 
 .grid2 {
@@ -70,7 +70,7 @@
   gap: var(--s-2);
 }
 .chip {
-  height: 30px;
+  height: 32px;
   padding: 0 var(--s-3);
   background: var(--surface-1);
   border: 1px solid var(--line);
@@ -97,39 +97,11 @@
 }
 .inlineField {
   flex: 1;
-  min-width: 120px;
+  --admin-field-min-width: 120px;
 }
 
 /* 본문 흐름에 잠깐 얹히는 작업 패널의 껍데기. 배치는 쓰는 쪽 클래스가 정한다.
    왼쪽 액센트 선은 오류 목록(.issues)의 danger 선과 같은 역할이다. */
-.panel {
-  padding: var(--s-4);
-  background: var(--surface-1);
-  border: 1px solid var(--line);
-  border-left: 2px solid var(--accent);
-  border-radius: var(--r-sm);
-}
-
-.recovery {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-3);
-}
-.recoveryNote {
-  flex: 1;
-  min-width: 200px;
-  font-size: var(--t-small);
-  color: var(--text-2);
-}
-/* 두 버튼은 항상 같은 줄에 붙어 있는다. 문구만 위로 접힌다. */
-.recoveryActions {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: var(--s-2);
-}
-
 .remove {
   height: 36px;
   padding: 0 var(--s-4);
@@ -177,24 +149,6 @@
   color: var(--danger);
   font-size: var(--t-micro);
 }
-.move {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  color: var(--text-3);
-  font-size: var(--t-micro);
-  cursor: pointer;
-}
-.move:disabled {
-  color: var(--text-4);
-  cursor: not-allowed;
-}
-
 .cover {
   display: flex;
   align-items: stretch;
@@ -277,14 +231,6 @@
 @media (max-width: 640px) {
   .grid2 {
     grid-template-columns: 1fr;
-  }
-
-  .recoveryNote {
-    min-width: 100%;
-  }
-  .recoveryActions {
-    width: 100%;
-    justify-content: flex-end;
   }
 
   /* 체크박스가 한 줄을 차지하고 버튼은 다음 줄에 오른쪽으로 모인다. */

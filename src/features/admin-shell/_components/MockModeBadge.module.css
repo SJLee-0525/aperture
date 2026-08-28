@@ -1,4 +1,9 @@
+/* 상단 바 바로 아래에 붙어 함께 따라온다. 긴 폼을 스크롤하는 동안 mock 안내가 사라지면
+   실데이터로 착각한 채 작업하게 된다. 위치는 .bar 의 height(60px)와 맞춘다. */
 .banner {
+  position: sticky;
+  top: 60px;
+  z-index: 9;
   display: flex;
   align-items: center;
   gap: var(--s-3);

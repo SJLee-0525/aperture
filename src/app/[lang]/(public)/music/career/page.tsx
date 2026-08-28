@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
+import { TimelinePageSkeleton } from "@/components/skeletons/TimelinePageSkeleton";
 import { MusicCareerView } from "@/features/music/_components/MusicCareerView";
 
 import { getMusicAwards, getMusicConfig } from "@/lib/content/music";
@@ -26,8 +26,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * 음악 — 경력 (/music/career): 학력·경력 타임라인 + 수상. 수상 모달 ?award= 딥링크(useSearchParams) → Suspense.
- *
- * @returns {Promise<JSX.Element>}
  */
 export default async function MusicCareerPage() {
   const [config, awards] = await Promise.all([getMusicConfig(), getMusicAwards()]);

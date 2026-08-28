@@ -8,8 +8,6 @@ import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants/storage-keys";
  * 테마 상태의 단일 원천은 React state가 아니라 html[data-theme] 속성.
  * SSR은 테마를 모르므로 state로 들면 hydration mismatch가 필연 —
  * DOM 속성만 플립하고 아이콘 전환은 CSS([data-theme] 셀렉터)가 담당한다.
- *
- * @returns {{ toggleTheme: () => void }}
  */
 const useThemeToggle = () => {
   const toggleTheme = () => {

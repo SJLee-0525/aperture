@@ -158,6 +158,26 @@ describe("resolveScreenContext", () => {
     ).resolves.toBeUndefined();
   });
 
+  /**
+   * 관리자가 사진을 비공개로 바꾼 뒤, 그 딥링크를 이미 열어 둔 방문자가 질문하는 경우.
+   * 최신 조회 성공과 조회 실패를 같이 다루면 비공개 항목의 제목·장소·EXIF 가
+   * 캐시 스냅샷에서 되살아나 프롬프트에 실린다.
+   */
+  it("최신 조회가 성공했는데 항목이 없으면 캐시로 되살리지 않는다", async () => {
+    const withoutPhoto = buildScreenContextLookup({ ...source, photos: [] }, "ko");
+
+    await expect(
+      resolveScreenContext(
+        { type: "photo", id: "p01" },
+        { ...deps, getFreshScreenLookup: () => Promise.resolve(withoutPhoto) },
+      ),
+    ).resolves.toBeUndefined();
+    // 캐시에는 아직 남아 있다는 것을 같이 고정한다.
+    await expect(resolveScreenContext({ type: "photo", id: "p01" }, deps)).resolves.toContain(
+      "# SCREEN_CONTEXT",
+    );
+  });
+
   it("fresh lookup이 실패하면 캐시 항목으로 답변을 계속한다", async () => {
     const getFreshScreenLookup = vi.fn(() => Promise.reject(new Error("firestore unavailable")));
 

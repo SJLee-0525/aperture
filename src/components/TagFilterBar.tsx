@@ -39,13 +39,11 @@ const SCROLL_EDGE_SLACK = 1;
  * 전체를 표현하는 방식이 다르므로, 이 컴포넌트는 전체를 `null` 하나로만 다루고 변환은 호출부가 한다.
  * 태그 사전 타입도 지면마다 달라 `{id, label}` 로 정규화해 받는다.
  *
- * @param {Props} props
- * @param {TagFilterItem[]} props.items 표시 순서대로의 태그. 라벨은 호출부가 현재 언어로 고른 값이다.
- * @param {string | null} props.activeId 선택된 태그 id. `null` 이면 `전체` 칩이 활성이다.
- * @param {string} props.allLabel `전체` 칩의 라벨.
- * @param {(id: string | null) => void} props.onSelect 칩을 누를 때 호출한다. `전체` 는 `null` 을 넘긴다.
- * @param {ReactNode | undefined} props.trailing 칩 행 오른쪽 도구(필터 팝오버 등). 없으면 칩이 폭을 모두 쓴다.
- * @returns {JSX.Element}
+ * @param props.items 표시 순서대로의 태그. 라벨은 호출부가 현재 언어로 고른 값이다.
+ * @param props.activeId 선택된 태그 id. `null` 이면 `전체` 칩이 활성이다.
+ * @param props.allLabel `전체` 칩의 라벨.
+ * @param props.onSelect 칩을 누를 때 호출한다. `전체` 는 `null` 을 넘긴다.
+ * @param props.trailing 칩 행 오른쪽 도구(필터 팝오버 등). 없으면 칩이 폭을 모두 쓴다.
  */
 const TagFilterBar = ({ items, activeId, allLabel, onSelect, trailing }: Props) => {
   const scrollerRef = useRef<HTMLDivElement>(null);

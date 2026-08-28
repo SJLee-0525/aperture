@@ -120,7 +120,7 @@ describe("OpenAI chat provider", () => {
     ).rejects.toMatchObject({ kind: "rate-limit" });
   });
 
-  it("max_output_tokens 잘림(response.incomplete)이면 스트리밍된 본문만 회수한다", async () => {
+  it("max_output_tokens 잘림(response.incomplete)이면 스트리밍된 본문만 남긴다", async () => {
     const event = (type: string, body: object) =>
       `event: ${type}\ndata: ${JSON.stringify({ type, ...body })}\n\n`;
     const truncated = '{"content":"긴 답변이 여기서 잘렸습니다';

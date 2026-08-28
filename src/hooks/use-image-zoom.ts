@@ -61,12 +61,8 @@ const distanceBetween = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
  *   리스너 재바인딩이 `resetKey` 를 신호로 삼는다.
  * - `enabled` 가 꺼지면(하위 레이어로 내려가면) 즉시 배율 1 로 리셋된다.
  *
- * @param {Options} options
- * @param {boolean} options.enabled
- * @param {string} options.resetKey
- * @param {((stage: HTMLElement) => number) | undefined} options.getMaxScale 최대 배율. 표면 노드를 받아 이미지 해상도 대비로 계산할 수 있다. 기본 3.
- * @param {((zoomed: boolean) => void) | undefined} options.onZoomChange 줌 경계 전환시만 호출.
- * @returns {{ stageRef: RefObject<HTMLDivElement | null>; zoomed: boolean; reset: (animate?: boolean) => void; handleStageClick: (onSingleTap: () => void) => void }}
+ * @param options.getMaxScale 최대 배율. 표면 노드를 받아 이미지 해상도 대비로 계산할 수 있다. 기본 3.
+ * @param options.onZoomChange 줌 경계 전환시만 호출.
  */
 const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options) => {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -91,8 +87,10 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
 
   const readMaxScale = useCallback(() => {
     const node = stageRef.current;
-    const raw = (node && latestRef.current.getMaxScale?.(node)) || MAX_SCALE_DEFAULT;
-    return Number.isFinite(raw) ? Math.max(1, raw) : MAX_SCALE_DEFAULT;
+    // `||` 는 0 과 NaN 을 기본값으로 바꿔 버려 아래 유한성 검사가 무한대만 잡게 된다.
+    // 이미지 dimension 이 0 인 데이터에서 배율이 조용히 3 이 되는 것을 막는다.
+    const raw = node ? latestRef.current.getMaxScale?.(node) : undefined;
+    return typeof raw === "number" && Number.isFinite(raw) ? Math.max(1, raw) : MAX_SCALE_DEFAULT;
   }, []);
 
   const clearPendingSingleTap = useCallback(() => {
@@ -114,22 +112,51 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     latestRef.current.onZoomChange?.(next);
   }, []);
 
+  /**
+   * 표면과 그 부모의 치수. 제스처 한 번 동안은 바뀌지 않는다.
+   *
+   * 직전 프레임의 `style.transform` 쓰기가 레이아웃을 무효화한 상태에서 다음 프레임이
+   * `offsetWidth` 를 읽으면 강제 동기 레이아웃이 프레임마다 일어난다. 제스처 시작에 한 번
+   * 재고 그 뒤로는 캐시를 쓴다.
+   */
+  const metricsRef = useRef<{ width: number; height: number; rect: DOMRect } | null>(null);
+
+  const invalidateMetrics = useCallback(() => {
+    metricsRef.current = null;
+  }, []);
+
+  const readMetrics = useCallback(() => {
+    const cached = metricsRef.current;
+    if (cached) return cached;
+    const node = stageRef.current;
+    const parent = node?.parentElement;
+    if (!node || !parent) return null;
+    const next = {
+      width: node.offsetWidth,
+      height: node.offsetHeight,
+      rect: parent.getBoundingClientRect(),
+    };
+    metricsRef.current = next;
+    return next;
+  }, []);
+
   /** 오프셋을 표면 크기 기준으로 클램프해 적용한다. transition 은 여기서만 결정된다. */
   const commitTransform = useCallback(
     (scale: number, tx: number, ty: number, animate: boolean) => {
       const node = stageRef.current;
-      if (!node) return;
+      const metrics = readMetrics();
+      if (!node || !metrics) return;
       const next: Transform = {
         scale,
-        tx: clampOffset(tx, node.offsetWidth, scale),
-        ty: clampOffset(ty, node.offsetHeight, scale),
+        tx: clampOffset(tx, metrics.width, scale),
+        ty: clampOffset(ty, metrics.height, scale),
       };
       transformRef.current = next;
       node.style.transition = animate && !prefersReducedMotion() ? ZOOM_TRANSITION : "none";
       node.style.transform = `translate3d(${next.tx}px, ${next.ty}px, 0) scale(${next.scale})`;
       syncZoomed();
     },
-    [syncZoomed],
+    [readMetrics, syncZoomed],
   );
 
   /** 초점 f 아래에 있는 표면 점을 고정한 채 배율만 바꾼다. */
@@ -148,12 +175,15 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
   );
 
   /** 포인터 클라이언트 좌표를 비변환 부모 중심 기준 오프셋으로 바꾼다. */
-  const toLocalPoint = useCallback((clientX: number, clientY: number): Point | null => {
-    const parent = stageRef.current?.parentElement;
-    if (!parent) return null;
-    const rect = parent.getBoundingClientRect();
-    return { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 };
-  }, []);
+  const toLocalPoint = useCallback(
+    (clientX: number, clientY: number): Point | null => {
+      const metrics = readMetrics();
+      if (!metrics) return null;
+      const { rect } = metrics;
+      return { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 };
+    },
+    [readMetrics],
+  );
 
   const resetInternal = useCallback(
     (animate: boolean) => {
@@ -230,8 +260,14 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
   // enabled 해제와 슬라이드 전환은 페인트 전에 배율 1 을 확정한다. 남은 transform 이
   // 새 슬라이드의 첫 프레임에 나타나지 않아야 한다.
   useLayoutEffect(() => {
+    invalidateMetrics();
     resetInternal(false);
-  }, [enabled, resetKey, resetInternal]);
+  }, [enabled, invalidateMetrics, resetKey, resetInternal]);
+
+  useEffect(() => {
+    window.addEventListener("resize", invalidateMetrics);
+    return () => window.removeEventListener("resize", invalidateMetrics);
+  }, [invalidateMetrics]);
 
   useEffect(() => {
     const node = stageRef.current;
@@ -242,6 +278,8 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     };
 
     const onTouchStart = (event: TouchEvent) => {
+      // 제스처 사이에 모달 레이아웃이 바뀔 수 있다(모바일 EXIF 패널 펼침). 시작마다 다시 잰다.
+      invalidateMetrics();
       const [first, second] = [event.touches[0], event.touches[1]];
       if (first && second) {
         // 브라우저 페이지 핀치줌이 시작되기 전에 터치를 가로챈다.
@@ -404,6 +442,7 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     };
 
     const onWheel = (event: WheelEvent) => {
+      invalidateMetrics();
       // 스크롤이 잠긴 오버레이라 표면 위 휠은 줌 전용이다.
       event.preventDefault();
       const delta = event.deltaMode === 1 ? event.deltaY * WHEEL_LINE_HEIGHT : event.deltaY;
@@ -420,7 +459,12 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     };
 
     const onMouseDown = (event: MouseEvent) => {
+      invalidateMetrics();
       if (event.button !== 0 || transformRef.current.scale <= ZOOM_EPSILON) return;
+      // 창 밖에서 버튼을 놓아 mouseup 이 유실되면 직전 팬의 리스너가 window 에 남는다.
+      // 새 리스너를 얹기 전에 걷어내지 않으면 두 클로저가 각자의 시작점으로
+      // commitTransform 을 불러 이미지가 두 위치 사이를 오간다.
+      removeWindowListeners();
       // 이미지 드래그·텍스트 선택 대신 팬을 시작한다.
       event.preventDefault();
       const start = { ...transformRef.current };
@@ -499,6 +543,7 @@ const useImageZoom = ({ enabled, resetKey, getMaxScale, onZoomChange }: Options)
     clearPendingSingleTap,
     commitTransform,
     enabled,
+    invalidateMetrics,
     readMaxScale,
     removeWindowListeners,
     resetInternal,

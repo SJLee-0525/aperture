@@ -2,8 +2,8 @@
 .view {
   display: grid;
   grid-template-columns: 320px 1fr;
-  height: calc(100dvh - 76px);
-  max-height: calc(100dvh - 76px);
+  height: calc(100dvh - var(--public-header-height));
+  max-height: calc(100dvh - var(--public-header-height));
   min-height: 520px;
   overflow: hidden;
 }
@@ -34,13 +34,17 @@
   min-height: 340px;
   background: var(--map-land);
 }
-@media (max-width: 760px) {
+@media (max-width: 899px) {
   .view {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(240px, 52%) minmax(0, 48%);
-    height: calc(100dvh - 58px - var(--mobile-tab-bar-height) - env(safe-area-inset-bottom, 0px));
+    height: calc(
+      100dvh - var(--public-header-height) - var(--mobile-tab-bar-height) -
+        env(safe-area-inset-bottom, 0px)
+    );
     max-height: calc(
-      100dvh - 58px - var(--mobile-tab-bar-height) - env(safe-area-inset-bottom, 0px)
+      100dvh - var(--public-header-height) - var(--mobile-tab-bar-height) -
+        env(safe-area-inset-bottom, 0px)
     );
     min-height: 520px;
   }

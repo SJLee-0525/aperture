@@ -20,8 +20,6 @@ type Props = {
 /**
  * 통합 검색 결과 (/search?q=) 표시. 대조와 조립은 `buildSearchGroups` 가 끝낸 뒤 들어온다.
  * 인덱스 매치와 블로그 본문 매치가 모두 반영된 확정 목록만 이 컴포넌트에 들어온다.
- *
- * @returns {JSX.Element}
  */
 const SearchResults = ({ q, lang, groups, total }: Props) => {
   const dict = DICTIONARY[lang];
@@ -44,7 +42,7 @@ const SearchResults = ({ q, lang, groups, total }: Props) => {
         groups.map((group) => (
           <section key={group.key} className={styles.group} data-section={group.section}>
             <div className={styles.groupHead}>
-              <span className="u-label">{group.label}</span>
+              <h2 className="u-label">{group.label}</h2>
               <span className={styles.gcount}>{group.hits.length}</span>
             </div>
             <ul className={styles.list}>

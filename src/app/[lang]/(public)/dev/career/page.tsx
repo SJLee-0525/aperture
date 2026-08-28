@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { TimelinePageSkeleton } from "@/components/PublicPageSkeletons";
+import { TimelinePageSkeleton } from "@/components/skeletons/TimelinePageSkeleton";
 import { DevCareerView } from "@/features/dev/_components/DevCareerView";
 
 import { getDevConfig } from "@/lib/content/dev";
@@ -27,8 +27,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * 개발 — 경력 (/dev/career): 학력·경력 타임라인 + 수상 + 기술 스택.
  * 수상 모달이 `?award=` 를 읽으므로 Suspense 경계가 필요하다.
- *
- * @returns {Promise<JSX.Element>}
  */
 export default async function DevCareerPage() {
   const config = await getDevConfig();

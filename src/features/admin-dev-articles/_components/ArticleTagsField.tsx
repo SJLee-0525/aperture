@@ -23,15 +23,13 @@ type Props = {
  * 태그 선택과 새 태그 추가.
  *
  * 글에는 라벨이 아니라 id 를 저장한다 — 라벨을 고쳐도 글을 건드리지 않아야 하기 때문이다
- * (계획 §5). 새 태그의 id 는 영어 라벨에서 만들고, 비었으면 한국어 라벨을 로마자로 바꾼다.
+ * (07-dev-blog §5). 새 태그의 id 는 영어 라벨에서 만들고, 비었으면 한국어 라벨을 로마자로 바꾼다.
  * 라벨이 공백뿐이면 추가 버튼을 잠그고, id 중복은 저장소가 거부해 문구로 보여 준다.
  *
- * @param {Props} props
- * @param {DevArticleTag[]} props.tags 사전에 있는 태그 전체.
- * @param {string[]} props.selected 이 글이 고른 태그 id.
- * @param {(next: string[]) => void} props.onChange 고른 태그가 바뀌었을 때.
- * @param {(tag: DevArticleTag) => Promise<void>} props.onCreate 사전에 태그를 더한다. 실패하면 예외를 던진다.
- * @returns {JSX.Element}
+ * @param props.tags 사전에 있는 태그 전체.
+ * @param props.selected 이 글이 고른 태그 id.
+ * @param props.onChange 고른 태그가 바뀌었을 때.
+ * @param props.onCreate 사전에 태그를 더한다. 실패하면 예외를 던진다.
  */
 const ArticleTagsField = ({ tags, selected, onChange, onCreate }: Props) => {
   const [ko, setKo] = useState("");

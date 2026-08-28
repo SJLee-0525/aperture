@@ -8,7 +8,7 @@
 .scrim {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.66);
+  background: var(--scrim-strong);
   backdrop-filter: blur(6px);
 }
 
@@ -51,8 +51,8 @@
   width: 40px;
   height: 40px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-chrome-line);
+  background: var(--glass-chrome-bg);
   backdrop-filter: blur(8px);
   color: var(--text-inverse);
   cursor: pointer;
@@ -113,11 +113,11 @@
   .panel {
     position: relative;
     gap: var(--s-3);
-    max-height: 30vh;
+    max-height: 30dvh;
     padding-top: var(--s-8);
     border-top: 1px solid var(--line);
     border-left: 0;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.28);
+    box-shadow: var(--shadow-sheet);
   }
 
   .handle {

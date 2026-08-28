@@ -1,16 +1,7 @@
+import { SUPABASE_COLLECTIONS } from "@/constants/collections";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import type { CollectionId } from "@/constants/collections";
-
-/** 수동 정렬 테이블별 일괄 갱신 RPC. dev_articles 는 수동 정렬이 없어 대상이 아니다. */
-const SORT_RPC: Partial<Record<CollectionId, string>> = {
-  photos: "update_photos_sort_orders",
-  albums: "update_albums_sort_orders",
-  musicWorks: "update_music_works_sort_orders",
-  musicAwards: "update_music_awards_sort_orders",
-  musicMedia: "update_music_media_sort_orders",
-  devProjects: "update_dev_projects_sort_orders",
-};
+import type { SortableCollectionId } from "@/constants/collections";
 
 type SortOrder = { id: string; order: number };
 
@@ -21,13 +12,16 @@ type SortOrder = { id: string; order: number };
  * 대조해야 부분 반영을 실패로 잡을 수 있다. 중복 ID 는 행 수 대조를 무의미하게
  * 만들어 호출 전에 거른다.
  *
- * @param {SortOrder[]} orders 바뀐 항목만 담은 정렬 목록. 비어 있으면 아무것도 하지 않는다.
- * @returns {Promise<void>} 전 항목이 반영되면 완료된다.
+ * @param collection 수동 정렬을 갖는 컬렉션.
+ * @param orders 바뀐 항목만 담은 정렬 목록. 비어 있으면 아무것도 하지 않는다.
+ * @returns 전 항목이 반영되면 완료된다.
  */
-const updateSortOrders = async (collection: CollectionId, orders: SortOrder[]): Promise<void> => {
+const updateSortOrders = async (
+  collection: SortableCollectionId,
+  orders: SortOrder[],
+): Promise<void> => {
   if (orders.length === 0) return;
-  const rpc = SORT_RPC[collection];
-  if (!rpc) throw new Error(`정렬 RPC 가 없는 컬렉션입니다: ${collection}`);
+  const rpc = SUPABASE_COLLECTIONS[collection].sortRpc;
   if (new Set(orders.map(({ id }) => id)).size !== orders.length) {
     throw new Error("중복된 정렬 대상이 있습니다.");
   }

@@ -8,10 +8,12 @@ import {
   compressToWebp,
 } from "@/features/image-upload/_lib/compress";
 import { readDimensions } from "@/features/image-upload/_lib/read-dimensions";
+import { validateUploadableImage } from "@/features/image-upload/_lib/validate-uploadable-image";
 
 import { getAdminImageStore } from "@/lib/admin/image-store";
 import { extractExif, type ExtractedExif } from "@/lib/exif/extract";
 
+import type { UploadStage } from "@/features/image-upload/_lib/upload-progress";
 import type { ImageMeta } from "@/types/image";
 
 /** 업로드 파이프라인 산출물 — 관리자 폼 자동 채움에 필요한 값 일체. */
@@ -25,17 +27,21 @@ type UploadResult = {
 /**
  * 파일 선택 → EXIF 추출(압축 前) → webp 압축 → Storage 업로드 → 산출물 반환.
  * photoId 는 문서 저장 전에 선발급된 ID(newPhotoId) — Storage 경로 확정용.
- *
- * @param {string} photoId
- * @returns {{ process: (file: File) => Promise<UploadResult | null>; pending: boolean; error: string | null }}
  */
 const useImageUpload = (photoId: string) => {
   const [pending, setPending] = useState(false);
+  const [stage, setStage] = useState<UploadStage>("idle");
   const [error, setError] = useState<string | null>(null);
 
   const process = useCallback(
     async (file: File): Promise<UploadResult | null> => {
+      const validationError = validateUploadableImage(file);
+      if (validationError) {
+        setError(validationError);
+        return null;
+      }
       setPending(true);
+      setStage("reading");
       setError(null);
       try {
         const imageStore = getAdminImageStore();
@@ -46,11 +52,13 @@ const useImageUpload = (photoId: string) => {
         // ③ 메인 webp 를 먼저 만들고 그것을 줄여 프리뷰·썸네일을 얻는다.
         // 원본을 셋이 각자 디코딩하면 4천만 화소 사진에서 메모리가 세 배로 늘어,
         // 모바일 Safari 가 탭을 종료하면서 업로드가 실패한다.
+        setStage("compressing");
         const compressed = await compressToWebp(file);
         const [preview, thumbnail] = await Promise.all([
           compressPreviewToWebp(compressed),
           compressThumbnailToWebp(compressed),
         ]);
+        setStage("uploading");
         const [stored, previewSize, thumbnailSize, mainUpload, previewUpload, thumbnailUpload] =
           await Promise.all([
             readDimensions(compressed),
@@ -77,12 +85,13 @@ const useImageUpload = (photoId: string) => {
         return null;
       } finally {
         setPending(false);
+        setStage("idle");
       }
     },
     [photoId],
   );
 
-  return { process, pending, error };
+  return { process, pending, stage, error };
 };
 
 export { useImageUpload };

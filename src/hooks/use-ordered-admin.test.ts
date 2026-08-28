@@ -92,3 +92,65 @@ describe("useOrderedAdmin — 일괄 정렬 계약", () => {
     expect(result.current.error).toBe("순서 저장에 실패했습니다.");
   });
 });
+
+describe("useOrderedAdmin — 공개 토글 연타 가드", () => {
+  it("저장이 끝나기 전의 재요청은 무시한다", async () => {
+    let release: () => void = () => {};
+    const adapter = adapterOf({
+      setPublished: vi.fn(() => new Promise<void>((resolve) => (release = resolve))),
+    });
+    const { result } = await renderReady(adapter);
+
+    act(() => {
+      void result.current.togglePublished("a", false);
+      void result.current.togglePublished("a", true);
+    });
+
+    expect(adapter.setPublished).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      release();
+    });
+  });
+
+  it("진행 중인 행을 publishPendingIds 로 알린다", async () => {
+    let release: () => void = () => {};
+    const adapter = adapterOf({
+      setPublished: vi.fn(() => new Promise<void>((resolve) => (release = resolve))),
+    });
+    const { result } = await renderReady(adapter);
+
+    act(() => {
+      void result.current.togglePublished("a", false);
+    });
+    await waitFor(() => expect(result.current.publishPendingIds.has("a")).toBe(true));
+
+    await act(async () => {
+      release();
+    });
+    await waitFor(() => expect(result.current.publishPendingIds.has("a")).toBe(false));
+  });
+
+  it("다른 행은 동시에 바꿀 수 있다", async () => {
+    const adapter = adapterOf();
+    const { result } = await renderReady(adapter);
+
+    await act(async () => {
+      await Promise.all([
+        result.current.togglePublished("a", false),
+        result.current.togglePublished("b", false),
+      ]);
+    });
+
+    expect(adapter.setPublished).toHaveBeenCalledTimes(2);
+  });
+
+  it("저장이 끝나면 같은 행을 다시 바꿀 수 있다", async () => {
+    const adapter = adapterOf();
+    const { result } = await renderReady(adapter);
+
+    await act(() => result.current.togglePublished("a", false));
+    await act(() => result.current.togglePublished("a", true));
+
+    expect(adapter.setPublished).toHaveBeenCalledTimes(2);
+  });
+});

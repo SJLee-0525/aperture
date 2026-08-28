@@ -23,14 +23,16 @@ test.describe("Photo", () => {
 
     const pendingArea = page.locator('[data-photo-modal-image-area="pending"]');
     await expect(pendingArea).toBeVisible();
+    // 진입 scale transform은 시각 크기만 바꾼다. 스켈레톤과 실제 영역의 레이아웃
+    // 높이 계약을 보려면 transform을 포함하는 rect가 아니라 offsetHeight를 비교한다.
     const pendingHeight = await pendingArea.evaluate(
-      (element) => element.getBoundingClientRect().height,
+      (element) => (element as HTMLElement).offsetHeight,
     );
 
     const readyArea = page.locator('[data-photo-modal-image-area="ready"]');
     await expect(readyArea).toBeAttached();
     const readyHeight = await readyArea.evaluate(
-      (element) => element.getBoundingClientRect().height,
+      (element) => (element as HTMLElement).offsetHeight,
     );
 
     expect(Math.abs(pendingHeight - readyHeight)).toBeLessThanOrEqual(1);
@@ -77,10 +79,13 @@ test.describe("Photo", () => {
     await expect(pending).toHaveCount(0);
 
     const opacity = await page.locator("[data-photo-modal-root]").evaluate((root) => ({
-      root: getComputedStyle(root).opacity,
-      frame: getComputedStyle(root.querySelector("[data-photo-modal-frame]")!).opacity,
+      root: Number(getComputedStyle(root).opacity),
+      frame: Number(getComputedStyle(root.querySelector("[data-photo-modal-frame]")!).opacity),
     }));
-    expect(opacity).toEqual({ root: "1", frame: "1" });
+    // 계약은 프레임이 걷히는 순간 페이지가 비치지 않는다는 것이다. 이징의 마지막
+    // 천분의 몇(0.999988)은 화면에서 구분되지 않으므로 정확히 1 을 요구하지 않는다.
+    expect(opacity.root).toBeGreaterThan(0.99);
+    expect(opacity.frame).toBeGreaterThan(0.99);
   });
 
   test.describe("모바일 좌우 스와이프", () => {
@@ -97,6 +102,18 @@ test.describe("Photo", () => {
               (nodes) =>
                 nodes.length === 3 && nodes.every((node) => (node as HTMLImageElement).complete),
             ),
+        )
+        .toBe(true);
+      // 모달은 진입 연출이 끝난 뒤부터 스와이프를 받는다. dialogOpened 는 role 만 보고
+      // Playwright 는 opacity 0 도 visible 로 세므로, 그 시점은 아직 연출 중일 수 있다.
+      // 시간이 아니라 연출의 종료 상태를 기다린다.
+      await expect
+        .poll(() =>
+          page.locator("[data-photo-modal-frame]").evaluate((node) => {
+            const style = getComputedStyle(node);
+            const settled = new DOMMatrixReadOnly(style.transform).a === 1;
+            return style.opacity === "1" && settled;
+          }),
         )
         .toBe(true);
       return page.locator("[data-photo-modal-track]");
@@ -176,6 +193,11 @@ test.describe("Photo", () => {
     await photoAssertions.openAlbum(page);
   });
 
+  test("앨범 상세는 그 앨범의 사진만 앨범이 정한 순서로 보여 준다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "구성은 뷰포트와 무관하다");
+    await photoAssertions.albumShowsOnlyItsPhotosInOrder(page);
+  });
+
   test("지도 위치를 클릭해 사진 모달을 열고 닫는다", async ({ page }) => {
     await page.goto("/ko/photo/map");
     await photoAssertions.openMapPhoto(page);
@@ -243,7 +265,7 @@ test.describe("Photo", () => {
     await page.getByRole("button", { name: "필터" }).click();
     const historyLength = await page.evaluate(() => window.history.length);
 
-    const minSlider = page.getByLabel("min mm");
+    const minSlider = page.getByLabel("초점거리 최솟값");
     await minSlider.focus();
     await page.keyboard.press("ArrowRight");
 

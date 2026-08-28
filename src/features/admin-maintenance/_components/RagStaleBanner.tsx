@@ -11,8 +11,6 @@ import styles from "./RagStaleBanner.module.css";
 /**
  * RAG stale 잔류 경고 배너 — 관리자 전 화면 상단(AdminLayoutClient 마운트).
  * unpublish/삭제 자동 동기화가 실패해 남은 청크를 알리고 원클릭 전체 동기화를 제공한다.
- *
- * @returns {JSX.Element | null}
  */
 const RagStaleBanner = () => {
   const { dismiss, error, staleCount, sync, syncing, visible } = useRagStaleAlert();
@@ -27,13 +25,18 @@ const RagStaleBanner = () => {
         {error ? <span className={styles.error}> 동기화 실패: {error}</span> : null}
       </p>
       <div className={styles.actions}>
-        <Link href={ROUTES.ADMIN_MAINTENANCE} className={styles.detail}>
+        <Link href={ROUTES.ADMIN_MAINTENANCE} className={styles.action}>
           자세히
         </Link>
-        <button type="button" className={styles.later} onClick={dismiss} disabled={syncing}>
+        <button type="button" className={styles.action} onClick={dismiss} disabled={syncing}>
           나중에
         </button>
-        <button type="button" className={styles.sync} onClick={sync} disabled={syncing}>
+        <button
+          type="button"
+          className={`${styles.action} ${styles.sync}`}
+          onClick={sync}
+          disabled={syncing}
+        >
           {syncing ? "동기화 중…" : "지금 동기화"}
         </button>
       </div>

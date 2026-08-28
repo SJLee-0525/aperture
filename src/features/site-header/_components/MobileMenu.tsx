@@ -7,19 +7,21 @@ import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/CloseIcon";
 import { Icon } from "@/components/Icon";
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
+import { LangMenu } from "@/features/site-header/_components/LangMenu";
 import {
   MOBILE_MENU_OPEN_ATTRIBUTE,
   MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE,
 } from "@/features/site-header/_components/MobileNavigationVisibility";
+import { ThemeToggleButton } from "@/features/site-header/_components/ThemeToggleButton";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
+import { MOBILE_NAVIGATION_QUERY } from "@/constants/breakpoints";
 import { CONTACT_NAV, MEGA_MENU, type NavSection } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
-import { sectionFromPath } from "@/constants/sections";
 import { localizePath } from "@/lib/i18n/locale-path";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 import styles from "./MobileMenu.module.css";
 
@@ -28,9 +30,6 @@ import styles from "./MobileMenu.module.css";
  * 데스크톱은 CSS로 버거 숨김(mega-menu 사용). 버거 + 오버레이를 한 컴포넌트로 캡슐화.
  * 검색은 제출로 /search 만 연다 — 자동완성 드롭다운은 데스크톱(SearchBox) 전용.
  */
-/** CSS 브레이크포인트(767px)와 동기 — 버거·시트가 표시되는 폭. */
-const MOBILE_QUERY = "(max-width: 767px)";
-
 const MobileMenu = () => {
   const { dict, lang } = useLang();
   const pathname = usePathname();
@@ -41,11 +40,12 @@ const MobileMenu = () => {
   const [expanded, setExpanded] = useState<NavSection | null>(null);
   const [query, setQuery] = useState("");
   const restoreHiddenChromeRef = useRef(false);
-  const panelRef = useFocusTrap(open);
-
   // body fixed·root overflow 잠금은 둘 다 sticky 헤더를 문서 최상단(-scrollY)으로 밀어낸다.
   // 메뉴는 헤더(로고·토글)가 시트 위에 계속 보여야 하므로 body overflow 승격 잠금만 사용한다.
-  useScrollLock(open, { fixBodyOnMobile: false, lockRootOnMobile: false });
+  const { panelRef } = useDialog(open, {
+    scrollLock: { fixBodyOnMobile: false, lockRootOnMobile: false },
+    escape: () => setOpen(false),
+  });
 
   const openMenu = () => {
     // 그룹(아코디언)이 있는 섹션만 펼친 채로 연다 — home·contact 는 그룹 없음.
@@ -61,21 +61,11 @@ const MobileMenu = () => {
   };
   const close = () => setOpen(false);
 
-  // Escape 로 닫기
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
-
   // 데스크톱 폭으로 전환되면 자동으로 닫는다 — 데스크톱은 mega-menu 가 담당하고
   // 버거가 CSS 로 숨겨져 시트를 닫을 수단이 없어진다(스크롤 잠금도 걸린 채 남는다).
   useEffect(() => {
     if (!open) return;
-    const media = window.matchMedia(MOBILE_QUERY);
+    const media = window.matchMedia(MOBILE_NAVIGATION_QUERY);
     const onChange = () => {
       if (!media.matches) setOpen(false);
     };
@@ -204,14 +194,20 @@ const MobileMenu = () => {
                   >
                     {dict[CONTACT_NAV.labelKey]}
                   </LocalizedLink>
+
+                  {/* 헤더의 언어·테마 토글은 시트가 열리면 시트 위에 보이지만 트랩 밖이라
+                      키보드로 닿을 수 없었다. 시트가 여는 동안은 이쪽이 그 둘을 갖는다. */}
+                  <div className={styles.sheetControls}>
+                    <LangMenu placement="above-start" />
+                    <ThemeToggleButton />
+                    <button type="button" className={styles.sheetClose} onClick={close}>
+                      {dict.menuCloseLabel}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                className={styles.scrim}
-                aria-label={dict.menuCloseLabel}
-                onClick={close}
-              />
+              {/* 시트 아래 남은 지면. 닫기 수단은 위 버튼과 헤더 버거, Escape 가 갖는다. */}
+              <div className={styles.scrim} aria-hidden="true" onClick={close} />
             </div>,
             document.body,
           )

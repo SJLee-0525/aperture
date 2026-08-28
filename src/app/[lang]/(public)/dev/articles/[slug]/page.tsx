@@ -7,13 +7,14 @@ import { ArticleRelatedProjects } from "@/features/dev-blog/_components/ArticleR
 import { ArticleScreenTarget } from "@/features/dev-blog/_components/ArticleScreenTarget";
 import { BlogTools } from "@/features/dev-blog/_components/BlogTools";
 
-import { toDevProjectCards } from "@/features/dev/_lib/dev-project-card";
+import { toDevProjectCardsByIds } from "@/features/dev/_lib/dev-project-card";
 import { analyzeArticle } from "@/features/dev-blog/_lib/article-analysis";
 import {
   buildArticleJsonLd,
   serializeJsonLdScript,
 } from "@/features/dev-blog/_lib/article-json-ld";
 import {
+  resolveArticleTagLabels,
   toDevArticleSummaries,
   toDevArticleSummary,
 } from "@/features/dev-blog/_lib/article-projection";
@@ -35,8 +36,6 @@ import DevArticleLoading from "./loading";
 
 /**
  * 공개 글 slug 를 미리 프리렌더 — lang 은 상위 [lang] layout 의 generateStaticParams 가 공급한다.
- *
- * @returns {Promise<{ slug: string }[]>}
  */
 export async function generateStaticParams() {
   const articles = await getDevArticles();
@@ -97,9 +96,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  *
  * 초안은 공개 getter 가 돌려주지 않으므로 여기서 404 가 된다. 발행 상태를 화면에서 다시
  * 판단하지 않는 것이 초안이 새는 경로를 하나로 줄이는 방법이다.
- *
- * @param {Props} props
- * @returns {Promise<JSX.Element>}
  */
 export default async function DevArticlePage({ params }: Props) {
   const { lang, slug } = await params;
@@ -114,18 +110,14 @@ export default async function DevArticlePage({ params }: Props) {
   const { article, document, highlights, readingMinutes } = data;
   const summary = toDevArticleSummary(article);
   const canonicalUrl = absoluteUrl(localizePath("ko", devArticleRoute(slug)));
-  const tagLabels = article.tags.map((id) => tags.find((tag) => tag.id === id)?.[lang] ?? id);
-  // 지정 순서를 지키되 공개 목록에 없는 프로젝트(비공개·삭제)는 빠진다.
-  const projectById = new Map(toDevProjectCards(projects).map((card) => [card.id, card]));
-  const relatedProjects = article.relatedProjectIds
-    .map((id) => projectById.get(id))
-    .filter((card) => card !== undefined);
+  const tagLabels = resolveArticleTagLabels(article.tags, tags, lang);
+  const relatedProjects = toDevProjectCardsByIds(article.relatedProjectIds, projects);
 
   const jsonLd = buildArticleJsonLd({
     article,
     canonicalUrl,
     imageUrl: article.cover ? absoluteUrl(article.cover.url) : null,
-    tagLabels: article.tags.map((id) => tags.find((tag) => tag.id === id)?.ko ?? id),
+    tagLabels: resolveArticleTagLabels(article.tags, tags, "ko"),
   });
 
   return (

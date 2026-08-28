@@ -17,6 +17,26 @@ const COLLECTIONS = {
 
 type CollectionId = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
 
+/**
+ * Supabase 테이블을 갖는 컬렉션. `ragDocuments` 는 공개 읽기 경로가 아니라 RPC 로만
+ * 조회하므로 서술자가 없다. 이 타입 덕분에 서술자 조회가 `undefined` 를 돌려주지 않고,
+ * 소비처의 `?? "리터럴"` 폴백과 런타임 throw 가 필요 없어진다.
+ */
+type TableCollectionId = Exclude<CollectionId, typeof COLLECTIONS.RAG_DOCUMENTS>;
+
+/**
+ * 관리자가 드래그로 순서를 정하는 컬렉션. 나머지는 정렬 축이 다르거나 목록이 아니다
+ * (`devArticles` 는 발행일, `site`·`devArticleTags` 는 목록 화면이 없다).
+ * 이 타입이 정렬 RPC 이름의 존재를 타입으로 보장한다.
+ */
+type SortableCollectionId =
+  | typeof COLLECTIONS.PHOTOS
+  | typeof COLLECTIONS.ALBUMS
+  | typeof COLLECTIONS.MUSIC_WORKS
+  | typeof COLLECTIONS.MUSIC_AWARDS
+  | typeof COLLECTIONS.MUSIC_MEDIA
+  | typeof COLLECTIONS.DEV_PROJECTS;
+
 /** site 컬렉션의 고정 문서 ID */
 const SITE_DOC = "config"; // 전역 + 사진
 const SITE_MUSIC_DOC = "music"; // 음악 섹션 설정
@@ -27,7 +47,7 @@ type SupabaseCollectionDescriptor = {
   table: string;
   /** PostgREST select 목록. 테이블마다 스칼라 구성이 달라 공통 기본값을 두지 않는다. */
   select: string;
-  /** PostgREST order 파라미터. 기존 Firestore 쿼리의 정렬 계약과 같다. */
+  /** PostgREST order 파라미터. 정렬에는 항상 id 2차 키가 붙는다. */
   order: string;
   /** published 게이트 컬럼 존재 여부. site 문서·태그 사전에는 없다. */
   hasPublished: boolean;
@@ -37,8 +57,12 @@ type SupabaseCollectionDescriptor = {
   scalars: Record<string, string>;
 };
 
-const listDescriptor = (table: string): SupabaseCollectionDescriptor => ({
+/** 드래그 정렬 결과를 한 번에 저장하는 RPC 이름을 반드시 갖는 서술자. */
+type SortableCollectionDescriptor = SupabaseCollectionDescriptor & { sortRpc: string };
+
+const listDescriptor = (table: string, sortRpc: string): SortableCollectionDescriptor => ({
   table,
+  sortRpc,
   select: "id,published,sort_order,data",
   // id 2차 키가 없으면 동점(sort_order) 행의 상대 순서가 정의되지 않는다.
   // 신규 항목이 전부 order 0 으로 생성되므로 동점은 기본 상태다.
@@ -48,14 +72,17 @@ const listDescriptor = (table: string): SupabaseCollectionDescriptor => ({
   scalars: { published: "published", order: "sort_order" },
 });
 
-/** ragDocuments 는 공개 읽기 경로가 아니라 여기 없다 — RAG 는 M6에서 RPC 로 조회한다. */
-const SUPABASE_COLLECTIONS: Partial<Record<CollectionId, SupabaseCollectionDescriptor>> = {
-  [COLLECTIONS.PHOTOS]: listDescriptor("photos"),
-  [COLLECTIONS.ALBUMS]: listDescriptor("albums"),
-  [COLLECTIONS.MUSIC_WORKS]: listDescriptor("music_works"),
-  [COLLECTIONS.MUSIC_AWARDS]: listDescriptor("music_awards"),
-  [COLLECTIONS.MUSIC_MEDIA]: listDescriptor("music_media"),
-  [COLLECTIONS.DEV_PROJECTS]: listDescriptor("dev_projects"),
+const SUPABASE_COLLECTIONS: Record<
+  Exclude<TableCollectionId, SortableCollectionId>,
+  SupabaseCollectionDescriptor
+> &
+  Record<SortableCollectionId, SortableCollectionDescriptor> = {
+  [COLLECTIONS.PHOTOS]: listDescriptor("photos", "update_photos_sort_orders"),
+  [COLLECTIONS.ALBUMS]: listDescriptor("albums", "update_albums_sort_orders"),
+  [COLLECTIONS.MUSIC_WORKS]: listDescriptor("music_works", "update_music_works_sort_orders"),
+  [COLLECTIONS.MUSIC_AWARDS]: listDescriptor("music_awards", "update_music_awards_sort_orders"),
+  [COLLECTIONS.MUSIC_MEDIA]: listDescriptor("music_media", "update_music_media_sort_orders"),
+  [COLLECTIONS.DEV_PROJECTS]: listDescriptor("dev_projects", "update_dev_projects_sort_orders"),
   [COLLECTIONS.DEV_ARTICLES]: {
     table: "dev_articles",
     select: "id,published,pinned,slug,published_at,created_at,updated_at,data",
@@ -92,5 +119,16 @@ const SUPABASE_COLLECTIONS: Partial<Record<CollectionId, SupabaseCollectionDescr
   },
 };
 
-export { COLLECTIONS, SITE_DOC, SITE_MUSIC_DOC, SITE_DEV_DOC, SUPABASE_COLLECTIONS };
-export type { CollectionId };
+/**
+ * 논리 컬렉션 이름을 물리 테이블명으로 바꾼다.
+ *
+ * 테이블명을 아는 곳은 여기 하나다. 소비처가 `SUPABASE_COLLECTIONS[x]?.table ?? "리터럴"`
+ * 로 읽으면 서술자가 사라져도 오류 없이 동작해 계약이 무력해진다.
+ *
+ * @param collection 테이블을 가진 논리 컬렉션.
+ * @returns Postgres 테이블명.
+ */
+const tableFor = (collection: TableCollectionId): string => SUPABASE_COLLECTIONS[collection].table;
+
+export { COLLECTIONS, SITE_DOC, SITE_MUSIC_DOC, SITE_DEV_DOC, SUPABASE_COLLECTIONS, tableFor };
+export type { CollectionId, SortableCollectionId, TableCollectionId };

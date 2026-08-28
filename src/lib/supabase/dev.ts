@@ -1,61 +1,60 @@
 import { documentCacheTag } from "@/constants/cache";
-import { COLLECTIONS, SITE_DEV_DOC, SUPABASE_COLLECTIONS } from "@/constants/collections";
+import { COLLECTIONS, SITE_DEV_DOC, tableFor } from "@/constants/collections";
 import { EMPTY_DEV_CONFIG } from "@/constants/empty-configs";
 import { requestRagSync } from "@/lib/ai/request-rag-sync";
 import { requestPublicRevalidate } from "@/lib/cache/request-revalidate";
-import { normalizeDevAwards } from "@/lib/content/normalize-dev-awards";
-import { normalizeTroubleshooting } from "@/lib/content/normalize-troubleshooting";
-import { asText } from "@/lib/i18n/as-text";
+import { isDangerousStoredHref } from "@/lib/security/public-url";
 import { toJson } from "@/lib/supabase/admin/row-codec";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { listCrud } from "@/lib/supabase/list-crud";
+import { decodeDevConfig, decodeDevProject } from "@/lib/supabase/decode/dev";
+import { sortableListCrud } from "@/lib/supabase/list-crud";
 import { deleteDevProjectImages } from "@/lib/supabase/storage";
 
 import type { DevConfig, DevProject } from "@/types/dev";
 
-const SITE_TABLE = SUPABASE_COLLECTIONS[COLLECTIONS.SITE]?.table ?? "site_documents";
+const SITE_TABLE = tableFor(COLLECTIONS.SITE);
 
 /**
  * 프로젝트 행의 다국어 필드와 배열 기본값을 정규화한다.
  *
- * @param {string} id 프로젝트 문서 ID.
- * @param {Record<string, unknown>} d 병합된 프로젝트 문서 필드.
- * @returns {DevProject} 관리자 화면에서 사용하는 프로젝트 모델.
+ * @param id 프로젝트 문서 ID.
+ * @param d 병합된 프로젝트 문서 필드.
+ * @returns 관리자 화면에서 사용하는 프로젝트 모델.
  */
-const toDevProject = (id: string, d: Record<string, unknown>): DevProject => ({
-  id,
-  title: asText(d.title),
-  category: asText(d.category),
-  year: (d.year as string) ?? "",
-  period: asText(d.period),
-  position: asText(d.position),
-  summary: asText(d.summary),
-  overview: asText(d.overview),
-  features: (d.features as DevProject["features"]) ?? [],
-  roles: (d.roles as DevProject["roles"]) ?? [],
-  troubleshooting: normalizeTroubleshooting(d.troubleshooting),
-  achievements: (d.achievements as DevProject["achievements"]) ?? [],
-  techTags: (d.techTags as string[]) ?? [],
-  links: (d.links as DevProject["links"]) ?? [],
-  cover: (d.cover as DevProject["cover"]) ?? null,
-  images: (d.images as DevProject["images"]) ?? [],
-  order: (d.order as number) ?? 0,
-  published: (d.published as boolean) ?? false,
-});
 
-const devProjectsCrud = listCrud<DevProject>(
+const devProjectsCrud = sortableListCrud<DevProject>(
   COLLECTIONS.DEV_PROJECTS,
-  toDevProject,
+  decodeDevProject,
   "프로젝트",
   "project",
 );
+
+/** 폼을 거치지 않는 쓰기도 브라우저에서 실행 가능한 링크를 저장하지 않는다. */
+const assertStorableProjectLinks = (input: Pick<DevProjectInput, "links">): void => {
+  if (input.links.some(({ href }) => isDangerousStoredHref(href))) {
+    throw new Error("프로젝트 링크에 사용할 수 없는 주소입니다.");
+  }
+};
+
 const devProjects = {
   ...devProjectsCrud,
+  create: async (id: string, input: DevProjectInput): Promise<void> => {
+    assertStorableProjectLinks(input);
+    await devProjectsCrud.create(id, input);
+  },
+  update: async (id: string, input: DevProjectInput): Promise<void> => {
+    assertStorableProjectLinks(input);
+    await devProjectsCrud.update(id, input);
+  },
+  patchData: async (id: string, patch: Partial<DevProjectInput>): Promise<void> => {
+    if (patch.links) assertStorableProjectLinks({ links: patch.links });
+    await devProjectsCrud.patchData(id, patch);
+  },
   /**
    * 프로젝트 문서를 삭제한 뒤 해당 프로젝트의 Storage 이미지도 정리한다.
    *
-   * @param {string} id 삭제할 프로젝트 문서 ID.
-   * @returns {Promise<void>} 문서 삭제와 이미지 정리가 끝나면 완료된다.
+   * @param id 삭제할 프로젝트 문서 ID.
+   * @returns 문서 삭제와 이미지 정리가 끝나면 완료된다.
    */
   remove: async (id: string): Promise<void> => {
     await devProjectsCrud.remove(id);
@@ -66,7 +65,7 @@ const devProjects = {
 /**
  * 소개 문구, 인터뷰, 기술 스택과 이력을 담은 개발 설정 문서를 읽는다.
  *
- * @returns {Promise<DevConfig>} 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
+ * @returns 저장된 설정. 문서가 없으면 빈 설정을 반환한다.
  */
 const getDevConfigAdmin = async (): Promise<DevConfig> => {
   const { data, error } = await getSupabaseClient()
@@ -76,22 +75,14 @@ const getDevConfigAdmin = async (): Promise<DevConfig> => {
     .maybeSingle();
   if (error) throw new Error("개발 설정을 불러오지 못했습니다.");
   if (!data) return EMPTY_DEV_CONFIG;
-  const d = (data.data as Record<string, unknown> | null) ?? {};
-  return {
-    heroLead: asText(d.heroLead),
-    interview: (d.interview as DevConfig["interview"]) ?? [],
-    stack: (d.stack as DevConfig["stack"]) ?? [],
-    education: (d.education as DevConfig["education"]) ?? [],
-    timeline: (d.timeline as DevConfig["timeline"]) ?? [],
-    awards: normalizeDevAwards(d.awards),
-  };
+  return decodeDevConfig((data.data as Record<string, unknown> | null) ?? {});
 };
 
 /**
  * 개발 설정 문서 전체를 저장하고 공개 캐시와 RAG 문서를 갱신한다.
  *
- * @param {DevConfig} config 저장할 개발 소개와 이력 설정.
- * @returns {Promise<void>} 저장과 RAG 동기화가 끝나면 완료된다.
+ * @param config 저장할 개발 소개와 이력 설정.
+ * @returns 저장과 RAG 동기화가 끝나면 완료된다.
  */
 const updateDevConfig = async (config: DevConfig): Promise<void> => {
   const { data, error } = await getSupabaseClient()

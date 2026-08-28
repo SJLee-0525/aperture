@@ -58,18 +58,11 @@ const prefersReducedMotion = () =>
  * `onSwipe` 를 넘길 때만 좌우 넘기기가 켜진다. 이때 반환된 `swipeSurfaceRef` 를
  * 움직일 요소에 붙인다.
  *
- * @param {Options} options
- * @param {boolean} options.enabled
- * @param {() => void} options.onDismiss
- * @param {RefObject<HTMLElement | null>} options.surfaceRef 아래로 끌 때 움직일 요소.
- * @param {RefObject<HTMLElement | null> | undefined} options.scrimRef 화면에 고정한 채 드래그 거리만큼 딤을 낮출 스크림. 오버레이 전체를 움직이면 뒤 지면이 매 프레임 다시 그려진다.
- * @param {((target: EventTarget | null) => boolean) | undefined} options.canStart
- * @param {((target: EventTarget | null) => boolean) | undefined} options.canSwipeStart
- * @param {((direction: SwipeDirection) => boolean) | undefined} options.canSwipeCommit 넘길 수 없으면 저항만 준다.
- * @param {((direction: SwipeDirection) => boolean) | undefined} options.canSwipePeek 옆 칸이 그려져 있는지. 아니면 애니메이션 없이 넘긴다.
- * @param {(() => number) | undefined} options.getSwipeStageWidth 한 칸 이동 거리. 0 이면 넘기지 않는다.
- * @param {((direction: SwipeDirection) => void) | undefined} options.onSwipe
- * @returns {{ onTouchStart: (event: React.TouchEvent<HTMLElement>) => void; onTouchMove: (event: React.TouchEvent<HTMLElement>) => void; onTouchEnd: () => void; onTouchCancel: () => void; consumeDragged: () => boolean; swipeSurfaceRef: RefObject<HTMLDivElement | null> }}
+ * @param options.surfaceRef 아래로 끌 때 움직일 요소.
+ * @param options.scrimRef 화면에 고정한 채 드래그 거리만큼 딤을 낮출 스크림. 오버레이 전체를 움직이면 뒤 지면이 매 프레임 다시 그려진다.
+ * @param options.canSwipeCommit 넘길 수 없으면 저항만 준다.
+ * @param options.canSwipePeek 옆 칸이 그려져 있는지. 아니면 애니메이션 없이 넘긴다.
+ * @param options.getSwipeStageWidth 한 칸 이동 거리. 0 이면 넘기지 않는다.
  */
 const useOverlayDrag = ({
   enabled,
@@ -101,16 +94,18 @@ const useOverlayDrag = ({
 
   const resetSurface = useCallback(
     (animate: boolean) => {
+      // 모션 최소화에서는 복귀도 즉시다. 같은 훅의 resetSwipeSurface 와 규칙이 갈리면 안 된다.
+      const withTransition = animate && !prefersReducedMotion();
       const surface = surfaceRef.current;
       if (surface) {
-        surface.style.transition = animate ? RESET_TRANSITION : "none";
+        surface.style.transition = withTransition ? RESET_TRANSITION : "none";
         surface.style.transform = "translate3d(0, 0, 0)";
         surface.style.opacity = "1";
       }
       if (scrimRef) {
         const scrim = scrimRef.current;
         if (scrim) {
-          scrim.style.transition = animate ? RESET_TRANSITION : "none";
+          scrim.style.transition = withTransition ? RESET_TRANSITION : "none";
           scrim.style.opacity = "1";
         }
       }
@@ -155,8 +150,12 @@ const useOverlayDrag = ({
     gesture.current.active = false;
     gesture.current.direction = "pending";
     cancelScheduled();
+    // 닫기 애니메이션 도중 enabled 가 꺼지면 예약만 사라지고 화면 밖으로 옮겨 둔
+    // 인라인 transform 이 남는다. 오버레이가 보이지 않는 채 마운트되어 스크롤 잠금이
+    // 유지되고 onDismiss 도 호출되지 않는다.
+    resetSurface(false);
     resetSwipeSurface(false);
-  }, [enabled, cancelScheduled, resetSwipeSurface]);
+  }, [enabled, cancelScheduled, resetSurface, resetSwipeSurface]);
 
   // 언마운트 뒤 예약이 실행되면 사라진 오버레이의 닫기·이동이 호출된다.
   useEffect(() => cancelScheduled, [cancelScheduled]);
@@ -300,23 +299,29 @@ const useOverlayDrag = ({
         resetSurface(true);
         return;
       }
+      // 닫기 연출을 생략하면 기다릴 이유도 없다. 애니메이션 없이 지연만 남기면
+      // 아무 일도 일어나지 않는 170ms 가 그대로 체감된다.
+      const animated = !prefersReducedMotion();
       const surface = surfaceRef.current;
       if (surface) {
-        surface.style.transition = DISMISS_TRANSITION;
+        surface.style.transition = animated ? DISMISS_TRANSITION : "none";
         surface.style.transform = "translate3d(0, 100dvh, 0)";
         surface.style.opacity = "0";
       }
       if (scrimRef) {
         const scrim = scrimRef.current;
         if (scrim) {
-          scrim.style.transition = DISMISS_TRANSITION;
+          scrim.style.transition = animated ? DISMISS_TRANSITION : "none";
           scrim.style.opacity = "0";
         }
       }
-      dismissTimer.current = window.setTimeout(() => {
-        dismissTimer.current = 0;
-        onDismiss();
-      }, DISMISS_DELAY);
+      dismissTimer.current = window.setTimeout(
+        () => {
+          dismissTimer.current = 0;
+          onDismiss();
+        },
+        animated ? DISMISS_DELAY : 0,
+      );
       return;
     }
 

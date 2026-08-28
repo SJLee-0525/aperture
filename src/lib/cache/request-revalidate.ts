@@ -129,9 +129,8 @@ const flushSoon = (): void => {
  * 진행 중인 요청은 취소하지 않는다. `pagehide` 는 뒤로 가기 캐시로 들어갈 때도 발생하며,
  * 복원되면 그 요청이 그대로 끝난다.
  *
- * @param {{ persisted?: boolean }} [options] `persisted` 는 뒤로 가기 캐시 진입 신호다.
+ * @param [options] `persisted` 는 뒤로 가기 캐시 진입 신호다.
  *   요청이 끝났다는 보장이 아니라, 페이지가 살아 있어 콜백이 이어진다는 뜻이다.
- * @returns {void}
  */
 const flushPendingRevalidateToFailureStore = (options: { persisted?: boolean } = {}): void => {
   const pending = takePending();
@@ -163,9 +162,6 @@ const flushPendingRevalidateToFailureStore = (options: { persisted?: boolean } =
  * 관리자 쓰기 성공 직후 공개 페이지 ISR 재검증을 요청 — fire-and-forget.
  * 저장은 이미 DB 에 반영된 뒤라, 재검증 실패는 "최대 revalidate 주기만큼 늦게 보임"일 뿐
  * 데이터 유실이 아니다 → 저장 UX 를 막지 않고 실패는 경고 로그만 남긴다.
- *
- * @param {string[]} tags
- * @returns {void}
  */
 const requestPublicRevalidate = (...tags: string[]): void => {
   tags.forEach((tag) => pendingTags.add(tag));
@@ -178,8 +174,7 @@ const requestPublicRevalidate = (...tags: string[]): void => {
  * 발행 전에 렌더되어 캐시로 남은 404는 태그 무효화로 갱신되지 않는다.
  * 발행·발행 취소·삭제처럼 경로의 존재 여부가 바뀌는 쓰기에서 사용한다.
  *
- * @param {string[]} paths 리터럴 공개 경로 (`/ko/dev/articles/slug`).
- * @returns {void}
+ * @param paths 리터럴 공개 경로 (`/ko/dev/articles/slug`).
  */
 const requestPublicPathRevalidate = (...paths: string[]): void => {
   paths.forEach((path) => pendingPaths.add(path));

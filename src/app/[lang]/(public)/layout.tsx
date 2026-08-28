@@ -13,6 +13,7 @@ import { WebMcpTools } from "@/features/webmcp/_components/WebMcpTools";
 
 import { GA_MEASUREMENT_ID } from "@/features/analytics/_lib/ga-measurement-id";
 
+import { DICTIONARY } from "@/constants/dictionary";
 import { toLang } from "@/constants/langs";
 import { getSite } from "@/lib/content/site";
 import { SENTRY_DSN } from "@/lib/monitoring/monitoring-dsn";
@@ -29,11 +30,6 @@ type Props = { children: React.ReactNode; params: Promise<{ lang: string }> };
  * 공개(방문자) 레이아웃 — chrome(헤더 + 모바일 탭바) 마운트는 여기서만. 푸터 연락 링크·태그라인은 site/config.
  *
  * 헤더·푸터는 서버 컴포넌트라 언어를 컨텍스트가 아니라 `[lang]` 세그먼트에서 받는다.
- *
- * @param {Props} props
- * @param {ReactNode} props.children
- * @param {Promise<{ lang: string }>} props.params
- * @returns {Promise<JSX.Element>}
  */
 const PublicLayout = async ({ children, params }: Props) => {
   const [{ lang: segment }, site] = await Promise.all([params, getSite()]);
@@ -47,6 +43,11 @@ const PublicLayout = async ({ children, params }: Props) => {
       monitoringEnabled={Boolean(SENTRY_DSN)}
       forceBanner={forceConsentBanner}
     >
+      {/* 셸의 어떤 컨트롤보다 먼저 오는 포커스 대상이어야 한다. 데스크톱 탭 경로가
+          워드마크·mega-menu 세 그룹·연락·언어·테마·검색으로 길어 본문이 뒤에 있다. */}
+      <a href="#page-content" className="sr-only u-skip-link">
+        {DICTIONARY[lang].skipToContent}
+      </a>
       <PublicImageProtection />
       <MobileNavigationVisibility />
       <SectionAccent />

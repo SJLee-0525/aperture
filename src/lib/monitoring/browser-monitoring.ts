@@ -23,8 +23,8 @@ let queue: Promise<void> = Promise.resolve();
  * 시작·중지 작업을 체인에 붙여 순서를 보장한다. 실패는 삼킨다.
  * 모니터링 초기화 실패가 사이트 동작을 깨는 역전을 만들지 않는다.
  *
- * @param {() => Promise<void>} operation - 직렬로 실행할 작업.
- * @returns {Promise<void>} 이 작업까지의 체인.
+ * @param operation - 직렬로 실행할 작업.
+ * @returns 이 작업까지의 체인.
  */
 const enqueue = (operation: () => Promise<void>): Promise<void> => {
   queue = queue.then(operation).catch(() => undefined);
@@ -35,8 +35,8 @@ const enqueue = (operation: () => Promise<void>): Promise<void> => {
  * 요청한 모드로 모니터링을 시작한다. DSN 미설정이면 no-op(킬 스위치),
  * 같은 모드로 이미 초기화돼 있으면 아무것도 하지 않는다.
  *
- * @param {BrowserMonitoringMode} mode - `public`(동의 후) 또는 `admin`.
- * @returns {Promise<void>} 시작 완료.
+ * @param mode - `public`(동의 후) 또는 `admin`.
+ * @returns 시작 완료.
  */
 const startBrowserMonitoring = (mode: BrowserMonitoringMode): Promise<void> =>
   enqueue(async () => {
@@ -50,7 +50,7 @@ const startBrowserMonitoring = (mode: BrowserMonitoringMode): Promise<void> =>
  * 모니터링을 중지하고 상태를 비운다. 동의 철회 시 호출된다.
  * 시작된 적이 없으면 no-op이다(SDK 청크를 새로 받지 않는다).
  *
- * @returns {Promise<void>} 중지 완료.
+ * @returns 중지 완료.
  */
 const stopBrowserMonitoring = (): Promise<void> =>
   enqueue(async () => {

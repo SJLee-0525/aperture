@@ -2,9 +2,6 @@ import type { Coords } from "@/types/coords";
 
 /**
  * {lat,lng} → "35.6586° N, 139.7454° E"
- *
- * @param {Coords} coords
- * @returns {string}
  */
 const formatCoords = (coords: Coords): string => {
   const ns = coords.lat >= 0 ? "N" : "S";

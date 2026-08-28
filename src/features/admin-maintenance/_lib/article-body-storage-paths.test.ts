@@ -7,9 +7,9 @@ const HOST = "https://firebasestorage.googleapis.com";
 /**
  * 실 업로더가 만드는 형태의 다운로드 URL 을 만든다.
  *
- * @param {string} path 인코딩 전 객체 경로.
- * @param {string} [query] URL 쿼리. 기본은 토큰이 붙은 실 서비스 형태.
- * @returns {string} `…/o/{encoded}?{query}` 다운로드 URL.
+ * @param path 인코딩 전 객체 경로.
+ * @param [query] URL 쿼리. 기본은 토큰이 붙은 실 서비스 형태.
+ * @returns `…/o/{encoded}?{query}` 다운로드 URL.
  */
 const downloadUrl = (path: string, query = "alt=media&token=abc123"): string =>
   `${HOST}/v0/b/demo.appspot.com/o/${encodeURIComponent(path)}?${query}`;

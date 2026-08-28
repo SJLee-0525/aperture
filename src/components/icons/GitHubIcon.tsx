@@ -1,9 +1,5 @@
 /**
  * GitHub 로고 (fill)
- *
- * @param {{ size?: number }} props
- * @param {number | undefined} props.size
- * @returns {JSX.Element}
  */
 const GitHubIcon = ({ size = 17 }: { size?: number }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} fill="currentColor" aria-hidden="true">

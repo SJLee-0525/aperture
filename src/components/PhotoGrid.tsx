@@ -1,9 +1,11 @@
 "use client";
 
 import { AnimatePresence, m } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 import { PhotoTile } from "@/components/PhotoTile";
+
+import { PHOTO_GRID_BREAKPOINTS, PHOTO_GRID_DESKTOP_COLUMNS } from "@/constants/breakpoints";
 
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Lang } from "@/types/lang";
@@ -20,7 +22,22 @@ type Props = {
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const columnCountFor = (width: number) => (width <= 760 ? 2 : width <= 1100 ? 3 : 4);
+
+const COLUMN_QUERIES = PHOTO_GRID_BREAKPOINTS.map(({ maxWidth, columns }) => ({
+  query: `(max-width: ${maxWidth}px)`,
+  columns,
+}));
+
+const subscribeColumns = (onChange: () => void) => {
+  const lists = COLUMN_QUERIES.map(({ query }) => window.matchMedia(query));
+  lists.forEach((list) => list.addEventListener("change", onChange));
+  return () => lists.forEach((list) => list.removeEventListener("change", onChange));
+};
+const readColumns = () =>
+  COLUMN_QUERIES.find(({ query }) => window.matchMedia(query).matches)?.columns ??
+  PHOTO_GRID_DESKTOP_COLUMNS;
+/* 서버는 폭을 모른다. hydration 직후 실제 폭으로 교정되므로 SSR 값은 데스크톱으로 둔다. */
+const readServerColumns = () => PHOTO_GRID_DESKTOP_COLUMNS;
 
 /**
  * 사진 그리드 — 행 우선 메이슨리 또는 정사각(grid).
@@ -29,23 +46,12 @@ const columnCountFor = (width: number) => (width <= 760 ? 2 : width <= 1100 ? 3 
  * 뷰 토글(메이슨리↔정사각) 시에도 layout 이 타일 크기·위치 변화를 부드럽게 잇는다.
  * initial={false} — 최초 로드는 애니메이션 없이 즉시(LCP 보호, 페이지 전환 페이드로 충분).
  *
- * @param {Props} props
- * @param {GalleryPhoto[]} props.photos
- * @param {Lang} props.lang
- * @param {boolean} props.square
- * @param {string} props.emptyLabel
- * @param {(() => void) | undefined} props.onTilePreload - 타일 hover/focus 시 상세 모달 리소스 프리로드
- * @returns {JSX.Element}
+ * @param props.onTilePreload - 타일 hover/focus 시 상세 모달 리소스 프리로드
  */
 const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) => {
-  const [columnCount, setColumnCount] = useState(4);
-
-  useEffect(() => {
-    const sync = () => setColumnCount(columnCountFor(window.innerWidth));
-    sync();
-    window.addEventListener("resize", sync);
-    return () => window.removeEventListener("resize", sync);
-  }, []);
+  // useState + effect 로 두면 첫 클라이언트 렌더가 데스크톱 열 수로 한 번 그려진 뒤
+  // 다시 깔린다. 모바일에서 열 4개가 2×2 로 접혀 사진이 잘못 배치된 화면이 지나갔다.
+  const columnCount = useSyncExternalStore(subscribeColumns, readColumns, readServerColumns);
 
   const columns = useMemo(() => {
     const distributed: Array<Array<{ photo: GalleryPhoto; index: number }>> = Array.from(
@@ -107,6 +113,8 @@ const PhotoGrid = ({ photos, lang, square, emptyLabel, onTilePreload }: Props) =
           <m.p
             key="empty"
             className={styles.empty}
+            // 필터로 결과가 0 이 되는 순간 삽입되므로 낭독기가 그때 읽는다.
+            role="status"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

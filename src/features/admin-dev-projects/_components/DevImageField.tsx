@@ -3,11 +3,17 @@
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
 import { Icon } from "@/components/Icon";
+import { UploadProgress } from "@/features/image-upload/_components/UploadProgress";
 
 import { useDevImageUpload } from "@/features/image-upload/_hooks/use-dev-image-upload";
 
+import { moveItem } from "@/lib/collection/move-item";
+
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
+
+import type { MoveOffset } from "@/lib/collection/move-item";
 
 import styles from "./DevImageField.module.css";
 
@@ -26,14 +32,8 @@ type Props = {
  * 개발 프로젝트 이미지 필드 — 대표(cover) 1장 + 갤러리(images) 여러 장.
  * cover·gallery 모두 useDevImageUpload(projectId) 로 webp 압축 후 Storage 업로드.
  *
- * @param {Props} props
- * @param {string} props.projectId
- * @param {ImageMeta | null} props.cover - 목록 대표 이미지 — 없으면 플레이스홀더.
- * @param {ImageMeta[]} props.images - 상세 모달 갤러리 이미지들.
- * @param {(cover: ImageMeta | null) => void} props.onCoverChange
- * @param {(images: ImageMeta[]) => void} props.onImagesChange
- * @param {(pending: boolean) => void} props.onPendingChange
- * @returns {JSX.Element}
+ * @param props.cover - 목록 대표 이미지 — 없으면 플레이스홀더.
+ * @param props.images - 상세 모달 갤러리 이미지들.
  */
 const DevImageField = ({
   projectId,
@@ -43,7 +43,8 @@ const DevImageField = ({
   onImagesChange,
   onPendingChange,
 }: Props) => {
-  const { process, processBatch, pending, pendingCount, error } = useDevImageUpload(projectId);
+  const { process, processBatch, pending, stage, completed, total, error } =
+    useDevImageUpload(projectId);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const coverPreviewUrl = imageThumbnailUrl(cover);
@@ -70,12 +71,9 @@ const DevImageField = ({
 
   const removeImage = (index: number) => onImagesChange(images.filter((_, i) => i !== index));
 
-  const moveImage = (index: number, offset: -1 | 1) => {
-    const target = index + offset;
-    if (target < 0 || target >= images.length) return;
-    const next = [...images];
-    [next[index], next[target]] = [next[target], next[index]];
-    onImagesChange(next);
+  const moveImage = (index: number, offset: MoveOffset) => {
+    const next = moveItem(images, index, offset);
+    if (next !== images) onImagesChange(next);
   };
 
   return (
@@ -95,17 +93,22 @@ const DevImageField = ({
           )}
         </div>
         <div className={styles.controls}>
-          <label className={styles.button}>
+          <AdminButton
+            variant="secondary"
+            size="sm"
+            disabled={pending}
+            onClick={() => coverInputRef.current?.click()}
+          >
             {cover?.url ? "대표 교체" : "대표 선택"}
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              className={styles.input}
-              disabled={pending}
-              onChange={onCoverSelect}
-            />
-          </label>
+          </AdminButton>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            disabled={pending}
+            onChange={onCoverSelect}
+          />
           {cover?.url ? (
             <button
               type="button"
@@ -123,18 +126,23 @@ const DevImageField = ({
       <div className={styles.galleryBlock}>
         <div className={styles.galleryHead}>
           <span className={styles.subLabel}>갤러리 (상세 모달)</span>
-          <label className={styles.button}>
+          <AdminButton
+            variant="secondary"
+            size="xs"
+            disabled={pending}
+            onClick={() => galleryInputRef.current?.click()}
+          >
             + 이미지 추가
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className={styles.input}
-              disabled={pending}
-              onChange={onGallerySelect}
-            />
-          </label>
+          </AdminButton>
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            disabled={pending}
+            onChange={onGallerySelect}
+          />
         </div>
 
         {images.length === 0 ? (
@@ -186,11 +194,7 @@ const DevImageField = ({
         )}
       </div>
 
-      {pending ? (
-        <p className={styles.note} aria-live="polite">
-          이미지 처리 중… 남은 파일 {pendingCount}개
-        </p>
-      ) : null}
+      <UploadProgress stage={stage} completed={completed} total={total} />
       {error ? (
         <p className={styles.error} role="alert">
           {error}

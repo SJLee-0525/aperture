@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -14,6 +15,7 @@ import { AnalyticsConsentBanner } from "@/features/analytics/_components/Analyti
 
 import {
   type TrackingConsent,
+  cleanupStoredAnalyticsConsent,
   getAnalyticsConsentSnapshot,
   setBrowserAnalyticsConsent,
   subscribeAnalyticsConsent,
@@ -58,23 +60,21 @@ const GoogleAnalytics = dynamic(
   { ssr: false },
 );
 
-/** @returns {() => void} 아무 작업도 하지 않는 구독 해제 함수. */
+/** @returns 아무 작업도 하지 않는 구독 해제 함수. */
 const subscribeNoop = (): (() => void) => () => undefined;
-/** @returns {boolean} 클라이언트 hydration 완료 스냅샷. */
+/** @returns 클라이언트 hydration 완료 스냅샷. */
 const clientHydratedSnapshot = (): boolean => true;
-/** @returns {boolean} 서버 렌더 중 hydration 스냅샷. */
+/** @returns 서버 렌더 중 hydration 스냅샷. */
 const serverHydratedSnapshot = (): boolean => false;
 
 /**
  * 공개 트리의 동의 상태와 두 소비자(GA · Sentry 오류 모니터링)의 로딩을 한 경계에서
  * 관리한다. 두 클라이언트 코드 모두 허용 상태에서만 별도 청크로 불러온다(ADR-0004).
  *
- * @param {AnalyticsConsentProviderProps} props
- * @param {boolean} props.gaEnabled - 유효한 GA4 측정 ID가 있는지 여부.
- * @param {boolean} props.monitoringEnabled - Sentry DSN이 구성돼 있는지 여부.
- * @param {React.ReactNode} props.children - 동의 경계 안의 공개 페이지 트리.
- * @param {boolean} [props.forceBanner=false] - 개발 환경에서 배너만 강제로 표시할지 여부.
- * @returns {JSX.Element}
+ * @param props.gaEnabled - 유효한 GA4 측정 ID가 있는지 여부.
+ * @param props.monitoringEnabled - Sentry DSN이 구성돼 있는지 여부.
+ * @param props.children - 동의 경계 안의 공개 페이지 트리.
+ * @param [props.forceBanner=false] - 개발 환경에서 배너만 강제로 표시할지 여부.
  */
 const AnalyticsConsentProvider = ({
   gaEnabled,
@@ -83,14 +83,16 @@ const AnalyticsConsentProvider = ({
   forceBanner = false,
 }: AnalyticsConsentProviderProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** 설정 버튼으로 연 경우의 복귀 대상. 자동 노출에서는 비어 있다. */
+  const settingsTriggerRef = useRef<HTMLElement | null>(null);
   const [previewDismissed, setPreviewDismissed] = useState(false);
   const consentUiEnabled = gaEnabled || monitoringEnabled || forceBanner;
 
   /**
    * 동의 선택 변경을 구독하고 철회가 감지되면 React 갱신 전에 GA를 차단한다.
    *
-   * @param {() => void} listener - 외부 스토어 변경을 React에 알리는 콜백.
-   * @returns {() => void} 동의 선택 구독 해제 함수.
+   * @param listener - 외부 스토어 변경을 React에 알리는 콜백.
+   * @returns 동의 선택 구독 해제 함수.
    */
   const subscribeConsent = useCallback(
     (listener: () => void) =>
@@ -100,7 +102,7 @@ const AnalyticsConsentProvider = ({
       }),
     [],
   );
-  /** @returns {TrackingConsent | null} UI가 활성화된 경우의 현재 동의 선택. */
+  /** @returns UI가 활성화된 경우의 현재 동의 선택. */
   const getConsentSnapshot = useCallback(
     () => (consentUiEnabled ? getAnalyticsConsentSnapshot() : null),
     [consentUiEnabled],
@@ -117,6 +119,12 @@ const AnalyticsConsentProvider = ({
     serverHydratedSnapshot,
   );
 
+  // 저장소 정리는 getSnapshot 이 아니라 여기서 한다. getSnapshot 은 순수해야 한다.
+  useEffect(() => {
+    if (!consentUiEnabled) return;
+    cleanupStoredAnalyticsConsent();
+  }, [consentUiEnabled]);
+
   // 오류 보고를 허용하면 public 모드로 시작한다. 철회하거나 선택하지 않으면 중지한다.
   // 컨트롤러가 중복 시작·전환 경쟁을 직렬화하므로 여기서는 상태만 전달한다.
   useEffect(() => {
@@ -131,18 +139,23 @@ const AnalyticsConsentProvider = ({
   /**
    * 배너 선택을 저장하고 현재 설정 UI를 닫는다.
    *
-   * @param {TrackingConsent} value - 방문자가 저장한 분석·오류 기록 선택.
-   * @returns {void}
+   * @param value - 방문자가 저장한 분석·오류 기록 선택.
    */
   const decide = useCallback((value: TrackingConsent) => {
     setSettingsOpen(false);
     setPreviewDismissed(true);
     setBrowserAnalyticsConsent(value);
+    // 설정 버튼으로 연 배너를 닫으면 그 버튼으로 돌아간다. 배너가 사라지면서 포커스가
+    // body 로 떨어지면 다음 Tab 이 지면 처음부터 다시 시작한다.
+    settingsTriggerRef.current?.focus();
+    settingsTriggerRef.current = null;
   }, []);
 
-  /** @returns {void} 동의 UI가 구성된 경우 설정 배너를 다시 연다. */
+  /** @returns 동의 UI가 구성된 경우 설정 배너를 다시 연다. */
   const openSettings = useCallback(() => {
     if (consentUiEnabled) {
+      settingsTriggerRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setPreviewDismissed(false);
       setSettingsOpen(true);
     }
@@ -165,6 +178,7 @@ const AnalyticsConsentProvider = ({
           gaEnabled={gaEnabled}
           monitoringEnabled={monitoringEnabled}
           initialConsent={consent}
+          reopened={settingsOpen}
           onDecide={decide}
         />
       ) : null}

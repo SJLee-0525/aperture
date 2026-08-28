@@ -38,11 +38,10 @@ type Props = {
  *
  * heading 이 둘 미만이면 렌더하지 않는다.
  *
- * @param {Props} props
- * @param {ArticleTocItem[]} props.items 본문에서 만든 목차. h2 와 그 아래 h3 다.
- * @param {string} props.zoneSelector 본문 래퍼 선택자 — 이 구간에 있는 동안에만 목차가 보인다.
- * @param {Lang} props.lang 라벨 언어.
- * @returns {JSX.Element | null} 항목이 둘 미만이거나 본문 구간 밖이면 null.
+ * @param props.items 본문에서 만든 목차. h2 와 그 아래 h3 다.
+ * @param props.zoneSelector 본문 래퍼 선택자 — 이 구간에 있는 동안에만 목차가 보인다.
+ * @param props.lang 라벨 언어.
+ * @returns 항목이 둘 미만이거나 본문 구간 밖이면 null.
  */
 const ArticleToc = ({ items, zoneSelector, lang }: Props) => {
   const dict = DICTIONARY[lang];

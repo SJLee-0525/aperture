@@ -16,6 +16,8 @@
   outline-offset: 2px;
 }
 
+/* 320px 에서 브랜드 131px + 우측 157px + 좌우 패딩 32px = 320px 로 딱 맞는다.
+   넘치지는 않지만 여유가 0 이므로 이 줄에 요소를 더할 때 다시 잰다. */
 .bar {
   position: sticky;
   top: 0;

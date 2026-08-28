@@ -1,8 +1,0 @@
-.state {
-  font-size: var(--t-body);
-  color: var(--text-3);
-}
-.stateError {
-  font-size: var(--t-body);
-  color: var(--danger);
-}

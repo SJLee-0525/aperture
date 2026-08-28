@@ -6,7 +6,7 @@ import { ARTICLE_HERO_MIN_HEIGHT } from "@/features/dev-blog/_lib/article-hero-h
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { ROUTES } from "@/constants/routes";
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { localizePath } from "@/lib/i18n/locale-path";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -38,17 +38,15 @@ type Props = {
  * 대표 이미지의 초점 위치는 다루지 않는다 — `ImageMeta` 에 해당 필드가 없고, 넣으려면 업로더와
  * 관리자 폼, 기존 문서 이행까지 함께 바뀐다. 지금은 가운데를 기준으로 잘라 쓴다.
  *
- * @param {Props} props
- * @param {string} props.title 현재 언어 제목.
- * @param {string} props.summary 현재 언어 요약. 비면 표시하지 않는다.
- * @param {ImageMeta | null} props.cover 대표 이미지. `null` 이면 타이포그래피형 히어로가 된다.
- * @param {string} props.coverAlt 관리자가 적은 대체 텍스트. 제목을 반복하지 않는다.
- * @param {Date | null} props.publishedAt 발행일. 없으면(초안 미리보기) 발행일 자리를 비운다.
- * @param {number} props.readingMinutes 본문에서 센 예상 읽기 시간.
- * @param {string[]} props.tagLabels 현재 언어로 해석한 태그 라벨.
- * @param {Lang} props.lang 복귀 링크의 로케일 프리픽스와 사전 언어를 고른다.
- * @param {string | undefined} props.shareUrl 공유할 canonical 주소. 생략하면 현재 주소를 공유한다.
- * @returns {JSX.Element}
+ * @param props.title 현재 언어 제목.
+ * @param props.summary 현재 언어 요약. 비면 표시하지 않는다.
+ * @param props.cover 대표 이미지. `null` 이면 타이포그래피형 히어로가 된다.
+ * @param props.coverAlt 관리자가 적은 대체 텍스트. 제목을 반복하지 않는다.
+ * @param props.publishedAt 발행일. 없으면(초안 미리보기) 발행일 자리를 비운다.
+ * @param props.readingMinutes 본문에서 센 예상 읽기 시간.
+ * @param props.tagLabels 현재 언어로 해석한 태그 라벨.
+ * @param props.lang 복귀 링크의 로케일 프리픽스와 사전 언어를 고른다.
+ * @param props.shareUrl 공유할 canonical 주소. 생략하면 현재 주소를 공유한다.
  */
 const ArticleHero = ({
   title,
@@ -92,7 +90,7 @@ const ArticleHero = ({
           <div className={styles.metaGroup}>
             <p className={styles.meta}>
               {publishedAt ? (
-                <time dateTime={publishedAt.toISOString()}>{formatYMD(publishedAt)}</time>
+                <time dateTime={publishedAt.toISOString()}>{formatEventYMD(publishedAt)}</time>
               ) : (
                 <span>{dict.articleDraftLabel}</span>
               )}

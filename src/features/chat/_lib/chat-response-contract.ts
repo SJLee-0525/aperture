@@ -23,10 +23,6 @@ const CONTACT_DRAFT_DESCRIPTION =
  * 두 제공자가 같은 응답 계약을 쓰도록 한 곳에서 만든다.
  * OpenAI Structured Outputs(strict) 는 모든 object 에 additionalProperties:false 를 요구하고
  * Gemini responseJsonSchema 는 이 키를 받지 않으므로 strict 플래그로만 분기한다.
- *
- * @param {{ strict: boolean }} options
- * @param {boolean} options.strict
- * @returns {{ properties: Record<string, unknown>; required: string[]; additionalProperties?: boolean | undefined; type: string }}
  */
 const buildChatResponseSchema = ({ strict }: { strict: boolean }) => {
   const object = (properties: Record<string, unknown>, required: string[]) => ({
@@ -123,13 +119,10 @@ const parseChatResult = (text: string): ChatProviderResult => {
 };
 
 /**
- * 출력 토큰 상한에 걸려 구조화 JSON 이 미완성일 때 본문만 회수한다.
- * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 동일하므로
- * "본문 확정 + links/references 포기"가 "다 보여주고 오류"보다 항상 낫다.
- * 두 제공자 모두 이 경로를 쓰므로 메인·서브를 바꿔도 잘림 처리 방식이 달라지지 않는다.
- *
- * @param {string} text
- * @returns {ChatProviderResult}
+ * 출력 토큰 상한에 걸려 구조화 JSON 이 미완성이면 본문만 남기고 나머지 필드는 버린다.
+ * 스트리밍 중 사용자에게 이미 보인 텍스트가 contentFromPartialJson 산출과 같으므로,
+ * 링크·참조 파싱이 실패해도 화면에 그려진 본문은 그대로 확정된다.
+ * 두 제공자가 이 경로를 함께 쓴다. 메인·서브를 바꿔도 잘림 처리가 달라지지 않는다.
  */
 const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   try {
@@ -137,7 +130,7 @@ const parseOrSalvageChatResult = (text: string): ChatProviderResult => {
   } catch (error) {
     const content = truncateUtf16Safely(contentFromPartialJson(text), MAX_RESPONSE_CHARS).trim();
     if (!content) throw error;
-    // 잘린 JSON에서는 본문만 회수한다. 나머지 구조화 필드는 모두 버린다.
+    // 잘린 JSON 에서는 본문만 남긴다. 나머지 구조화 필드는 모두 버린다.
     return { content, contactDraft: null };
   }
 };
@@ -175,8 +168,8 @@ const CONTENT_KEY_LOOKBACK = 32;
  * 이스케이프 시퀀스를 자르지 않고 디코딩할 수 있는 앞부분의 길이.
  * 조각 경계가 `\` 나 미완성 `\uXXXX` 한가운데에 놓이면 그 앞까지만 돌려준다.
  *
- * @param {string} value JSON 문자열 본문의 원문 조각.
- * @returns {number} 지금 디코딩해도 되는 길이.
+ * @param value JSON 문자열 본문의 원문 조각.
+ * @returns 지금 디코딩해도 되는 길이.
  */
 const safeDecodeLength = (value: string): number => {
   let index = 0;
@@ -206,8 +199,8 @@ const safeDecodeLength = (value: string): number => {
  * 실패를 빈 문자열이 아니라 `null` 로 구분한다. 호출부가 원문을 소비할지 정하려면
  * "디코딩 결과가 비었다" 와 "디코딩이 깨졌다" 를 구분해야 한다.
  *
- * @param {string} raw 따옴표를 뺀 원문 조각.
- * @returns {string | null} 디코딩 결과. 깨진 조각이면 `null`.
+ * @param raw 따옴표를 뺀 원문 조각.
+ * @returns 디코딩 결과. 깨진 조각이면 `null`.
  */
 const decodeJsonStringSegment = (raw: string): string | null => {
   try {
@@ -230,9 +223,9 @@ const isLowSurrogate = (code: number): boolean => code >= 0xdc00 && code <= 0xdf
  * 순회는 code unit 단위다. `for...of` 는 코드 포인트 단위라 이미 온전한 짝을 한 덩어리로
  * 주어 판정이 어긋난다.
  *
- * @param {string} held 앞 조각에서 보류한 상위 서로게이트. 없으면 빈 문자열.
- * @param {string} decoded 이번에 디코딩한 조각.
- * @returns {{ text: string; held: string }} 방출할 문자열과 다음으로 넘길 보류분.
+ * @param held 앞 조각에서 보류한 상위 서로게이트. 없으면 빈 문자열.
+ * @param decoded 이번에 디코딩한 조각.
+ * @returns 방출할 문자열과 다음으로 넘길 보류분.
  */
 const pairSurrogates = (held: string, decoded: string): { text: string; held: string } => {
   let text = "";
@@ -271,9 +264,6 @@ const pairSurrogates = (held: string, decoded: string): { text: string; held: st
  * 원문 디코딩이 깨지면 `error` 에 사유를 남기고 이후 방출을 멈춘다. 호출부는 결과를
  * 확정하기 전에 `error` 를 확인해야 한다. 이 값을 무시하면 깨진 구간이 빠진 답변이
  * 완성된 답변으로 나간다.
- *
- * @param {(delta: string) => void} onContentDelta
- * @returns {{ push(chunk: string): void; readonly serialized: string; readonly error: Error | null }}
  */
 const createStreamingContentCollector = (onContentDelta: (delta: string) => void) => {
   let serialized = "";

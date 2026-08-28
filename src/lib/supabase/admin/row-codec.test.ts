@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { encodeArticleRow, encodeListRow } from "@/lib/supabase/admin/row-codec";
-import { mergeRow } from "@/lib/supabase/public/transport";
+import { mergeRow } from "@/lib/supabase/row-merge";
 
 describe("row-codec — 목록 컬렉션", () => {
   it("order·published 를 스칼라로 분리하고 data 에 남기지 않는다", () => {
@@ -61,6 +61,27 @@ describe("row-codec — 목록 컬렉션", () => {
     expect(merged.data.title).toEqual(input.title);
     expect(merged.data.tags).toEqual(input.tags);
   });
+  // 디코더가 결측 날짜에 쓰는 epoch 를 그대로 저장하면 편집 한 번으로 1970-01-01 이
+  // 공연일·촬영일로 영속된다. 키를 빼서 원래의 결측을 보존한다.
+  it("epoch 날짜는 키를 생략해 원래의 결측을 보존한다", () => {
+    const row = encodeListRow("w1", {
+      order: 0,
+      published: false,
+      performedAt: new Date(0),
+      title: { ko: "제목", en: "Title" },
+    });
+
+    expect("performedAt" in row.data).toBe(false);
+    expect(row.data.title).toEqual({ ko: "제목", en: "Title" });
+  });
+
+  it("유효한 날짜는 그대로 저장한다", () => {
+    const performedAt = new Date("2026-03-14T10:30:00.000Z");
+
+    const row = encodeListRow("w1", { order: 0, published: false, performedAt });
+
+    expect(row.data.performedAt).toBe(performedAt.toISOString());
+  });
 });
 
 describe("row-codec — dev_articles", () => {
@@ -87,12 +108,25 @@ describe("row-codec — dev_articles", () => {
       published: true,
       pinned: true,
       slug: "chunking",
-      publishedAt: null,
+      publishedAt: new Date("2026-02-01T00:00:00.000Z"),
       body: "# 본문",
     });
 
     expect("pinned" in row).toBe(false);
     expect("pinned" in row.data).toBe(false);
+  });
+
+  // 발행 조건 검사는 메모리 상의 Date 로 이미 통과한 뒤다. 여기서 조용히 null 로
+  // 강등하면 published 인데 published_at 이 NULL 인 글이 정렬 맨 뒤로 가라앉는다.
+  it("발행 상태인데 publishedAt 이 Date 가 아니면 던진다", () => {
+    expect(() =>
+      encodeArticleRow("a1", {
+        published: true,
+        slug: "chunking",
+        publishedAt: "2026-02-01T00:00:00.000Z",
+        body: "# 본문",
+      }),
+    ).toThrow("publishedAt");
   });
 
   it("초안의 publishedAt null 을 보존하고 DB 소유 타임스탬프는 쓰지 않는다", () => {

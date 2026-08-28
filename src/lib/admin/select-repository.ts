@@ -9,9 +9,9 @@ import { shouldUseMockContent } from "@/lib/content/content-source";
  * 새 어댑터가 생기지 않는다. 콘텐츠 소스는 빌드 시 인라인되는 env 로 정해져 세션 중에
  * 바뀌지 않으니 첫 결과를 계속 써도 안전하다.
  *
- * @param {() => T} createMock mock 구현을 만드는 함수.
- * @param {() => T} createLive live(Firestore) 구현을 만드는 함수.
- * @returns {() => T} 현재 콘텐츠 소스에 맞는 저장소를 돌려주는 getter.
+ * @param createMock mock 구현을 만드는 함수.
+ * @param createLive live(Supabase) 구현을 만드는 함수.
+ * @returns 현재 콘텐츠 소스에 맞는 저장소를 돌려주는 getter.
  */
 const selectRepository = <T>(createMock: () => T, createLive: () => T): (() => T) => {
   let cached: T | null = null;

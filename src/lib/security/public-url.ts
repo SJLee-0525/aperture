@@ -12,10 +12,10 @@ const EMAIL_ADDRESS = /^[^\s@/?#]+@[^\s@/?#]+\.[^\s@/?#]+$/;
  * 공개 콘텐츠 링크를 실행 가능한 안전한 스킴으로 제한한다.
  * 외부 링크는 HTTPS만, 내부 링크는 절대 경로와 해시만 허용한다.
  *
- * @param {unknown} value Firestore 또는 관리자 폼에서 전달된 링크 후보 값.
- * @param {PublicUrlOptions} [options] 링크 스킴 허용 범위.
- * @param {boolean} [options.allowMailto] 단순 이메일 주소만 포함한 `mailto:` 링크를 허용할지 여부.
- * @returns {string} 공백을 정리한 안전한 링크. 값이나 스킴이 허용되지 않으면 빈 문자열.
+ * @param value DB 또는 관리자 폼에서 전달된 링크 후보 값.
+ * @param [options] 링크 스킴 허용 범위.
+ * @param [options.allowMailto] 단순 이메일 주소만 포함한 `mailto:` 링크를 허용할지 여부.
+ * @returns 공백을 정리한 안전한 링크. 값이나 스킴이 허용되지 않으면 빈 문자열.
  */
 const normalizePublicHref = (value: unknown, options: PublicUrlOptions = {}): string => {
   if (typeof value !== "string") return "";
@@ -59,8 +59,8 @@ const STORABLE_SCHEMES = new Set(["http:", "https:", "mailto:"]);
  * 안전하므로 통과시킨다. 막는 것은 `javascript:` 처럼 관리자 화면에서 링크로 그려질 때
  * 실행되는 스킴이다.
  *
- * @param {unknown} value 저장하려는 링크 값.
- * @returns {boolean} 저장하면 안 되는 값이면 true. 빈 값과 상대 경로는 false.
+ * @param value 저장하려는 링크 값.
+ * @returns 저장하면 안 되는 값이면 true. 빈 값과 상대 경로는 false.
  */
 const isDangerousStoredHref = (value: unknown): boolean => {
   if (typeof value !== "string") return false;
@@ -74,12 +74,12 @@ const isDangerousStoredHref = (value: unknown): boolean => {
 };
 
 /**
- * Firestore의 알 수 없는 링크 배열에서 공개해도 안전한 항목만 남긴다.
+ * DB 의 알 수 없는 링크 배열에서 공개해도 안전한 항목만 남긴다.
  *
- * @param {unknown} value Firestore에서 디코딩한 링크 배열 후보 값.
- * @param {PublicUrlOptions} [options] 각 링크에 적용할 스킴 허용 범위.
- * @param {boolean} [options.allowMailto] 단순 `mailto:` 링크를 허용할지 여부.
- * @returns {SiteLink[]} 라벨과 주소가 모두 유효한 정규화된 공개 링크 목록.
+ * @param value DB 에서 디코딩한 링크 배열 후보 값.
+ * @param [options] 각 링크에 적용할 스킴 허용 범위.
+ * @param [options.allowMailto] 단순 `mailto:` 링크를 허용할지 여부.
+ * @returns 라벨과 주소가 모두 유효한 정규화된 공개 링크 목록.
  */
 const sanitizePublicLinks = (value: unknown, options: PublicUrlOptions = {}): SiteLink[] => {
   if (!Array.isArray(value)) return [];
@@ -96,10 +96,10 @@ const sanitizePublicLinks = (value: unknown, options: PublicUrlOptions = {}): Si
 /**
  * 관리자 입력을 정리하고 불완전하거나 위험한 링크는 저장 전에 거부한다.
  *
- * @param {SiteLink[]} links 관리자 폼에서 편집한 링크 목록.
- * @param {PublicUrlOptions} [options] 각 링크에 적용할 스킴 허용 범위.
- * @param {boolean} [options.allowMailto] 단순 `mailto:` 링크를 허용할지 여부.
- * @returns {SiteLink[]} 빈 행을 제거하고 라벨과 주소의 공백을 정리한 링크 목록.
+ * @param links 관리자 폼에서 편집한 링크 목록.
+ * @param [options] 각 링크에 적용할 스킴 허용 범위.
+ * @param [options.allowMailto] 단순 `mailto:` 링크를 허용할지 여부.
+ * @returns 빈 행을 제거하고 라벨과 주소의 공백을 정리한 링크 목록.
  * @throws {Error} 내용이 있는 행의 라벨이 비었거나 주소가 허용된 형식이 아닐 때.
  */
 const preparePublicLinks = (links: SiteLink[], options: PublicUrlOptions = {}): SiteLink[] =>
@@ -119,8 +119,8 @@ const preparePublicLinks = (links: SiteLink[], options: PublicUrlOptions = {}): 
 /**
  * 검증된 `mailto:` 링크에서 연락 폼 수신 이메일 주소만 추출한다.
  *
- * @param {unknown} value 이메일 링크 후보 값.
- * @returns {string} 쿼리와 해시가 없는 단일 이메일 주소. 유효하지 않으면 빈 문자열.
+ * @param value 이메일 링크 후보 값.
+ * @returns 쿼리와 해시가 없는 단일 이메일 주소. 유효하지 않으면 빈 문자열.
  */
 const mailtoAddress = (value: unknown): string => {
   const href = normalizePublicHref(value, { allowMailto: true });

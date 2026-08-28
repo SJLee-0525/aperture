@@ -7,7 +7,7 @@ import { AnalyticsConsentContext } from "@/features/analytics/_components/Analyt
 /**
  * 가장 가까운 분석 동의 Provider의 상태와 설정 열기 함수를 반환한다.
  *
- * @returns {NonNullable<React.ContextType<typeof AnalyticsConsentContext>>} 현재 분석 동의 Context.
+ * @returns 현재 분석 동의 Context.
  * @throws {Error} Provider 밖에서 호출한 경우.
  */
 const useAnalyticsConsent = () => {

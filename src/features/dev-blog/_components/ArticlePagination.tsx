@@ -18,12 +18,11 @@ type Props = {
  * 갱신은 `pushCurrentUrl` 이 맡는다(같은 pathname 으로의 라우터 이동이 Next 16 에서 no-op).
  * 현재 페이지는 `aria-current="page"` 로 알리며 색 대비만으로 구분하지 않는다.
  *
- * @param {Props} props
- * @param {number} props.page 현재 페이지(1부터).
- * @param {number} props.pageCount 전체 페이지 수.
- * @param {UIDict} props.dict 현재 언어 사전 — 이동 버튼의 accessible name 에 쓴다.
- * @param {(page: number) => void} props.onSelect 페이지를 고를 때 호출한다. 현재 페이지는 호출하지 않는다.
- * @returns {JSX.Element | null} 페이지가 하나면 null.
+ * @param props.page 현재 페이지(1부터).
+ * @param props.pageCount 전체 페이지 수.
+ * @param props.dict 현재 언어 사전 — 이동 버튼의 accessible name 에 쓴다.
+ * @param props.onSelect 페이지를 고를 때 호출한다. 현재 페이지는 호출하지 않는다.
+ * @returns 페이지가 하나면 null.
  */
 const ArticlePagination = ({ page, pageCount, dict, onSelect }: Props) => {
   if (pageCount <= 1) return null;

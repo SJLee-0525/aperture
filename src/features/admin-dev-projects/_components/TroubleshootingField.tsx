@@ -18,8 +18,6 @@ type TextFieldKey = "title" | "problem" | "solution" | "result";
 
 /**
  * 새 항목 — 폼 상태에서는 result 를 항상 채워 undefined 분기를 없앤다(저장 시 빈 값이면 키 생략).
- *
- * @returns {DevTroubleshooting}
  */
 const emptyEntry = (): DevTroubleshooting => ({
   title: { ...EMPTY_TEXT },
@@ -29,6 +27,8 @@ const emptyEntry = (): DevTroubleshooting => ({
 });
 
 /** 항목별 제목/문제/해결/결과(ko·en) 필드 정의 — 렌더 순서 그대로. */
+const LANG_LABEL = { ko: "한국어", en: "English" } as const;
+
 const FIELDS: { key: TextFieldKey; label: string; multiline: boolean }[] = [
   { key: "title", label: "제목", multiline: false },
   { key: "problem", label: "문제", multiline: true },
@@ -38,11 +38,6 @@ const FIELDS: { key: TextFieldKey; label: string; multiline: boolean }[] = [
 
 /**
  * 트러블슈팅 구조화 편집 필드 — 항목 추가/삭제 + 항목당 제목·문제·해결·결과 ko/en 입력.
- *
- * @param {Props} props
- * @param {DevTroubleshooting[]} props.entries
- * @param {(entries: DevTroubleshooting[]) => void} props.onChange
- * @returns {JSX.Element}
  */
 const TroubleshootingField = ({ entries, onChange }: Props) => {
   const add = () => onChange([...entries, emptyEntry()]);
@@ -61,7 +56,7 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
     <div className={styles.wrap}>
       <div className={styles.head}>
         <AdminButton variant="secondary" size="xs" onClick={add}>
-          + 항목 추가
+          + 트러블슈팅 추가
         </AdminButton>
       </div>
 
@@ -73,7 +68,14 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
             <li key={index} className={styles.card}>
               <div className={styles.cardHead}>
                 <span className={styles.cardIndex}>#{index + 1}</span>
-                <button type="button" className={styles.remove} onClick={() => remove(index)}>
+                <button
+                  type="button"
+                  className={styles.remove}
+                  onClick={() => {
+                    // 카드 하나에 제목·문제·해결·결과의 ko/en 여덟 칸이 들어 있다.
+                    if (window.confirm(`트러블슈팅 #${index + 1} 을 삭제할까요?`)) remove(index);
+                  }}
+                >
                   삭제
                 </button>
               </div>
@@ -88,16 +90,22 @@ const TroubleshootingField = ({ entries, onChange }: Props) => {
                           multiline
                           tone="raised"
                           rows={2}
+                          aria-label={`트러블슈팅 ${index + 1} ${label} (${LANG_LABEL[langKey]})`}
+                          name={`troubleshooting.${index}.${key}.${langKey}`}
+                          autoComplete="off"
                           value={entry[key]?.[langKey] ?? ""}
-                          placeholder={langKey === "ko" ? "한국어" : "English"}
+                          placeholder={LANG_LABEL[langKey]}
                           onChange={(e) => edit(index, key, langKey, e.target.value)}
                         />
                       ) : (
                         <AdminInput
                           key={langKey}
                           tone="raised"
+                          aria-label={`트러블슈팅 ${index + 1} ${label} (${LANG_LABEL[langKey]})`}
+                          name={`troubleshooting.${index}.${key}.${langKey}`}
+                          autoComplete="off"
                           value={entry[key]?.[langKey] ?? ""}
-                          placeholder={langKey === "ko" ? "한국어" : "English"}
+                          placeholder={LANG_LABEL[langKey]}
                           onChange={(e) => edit(index, key, langKey, e.target.value)}
                         />
                       ),

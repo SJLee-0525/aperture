@@ -8,10 +8,10 @@ import type { DevArticleTag } from "@/types/dev-article-tag";
  *
  * 표시용 라벨과 목적이 다르다. 화면에 그리는 라벨은 현재 로케일 한 값이라 이 함수를 쓰지 않는다.
  *
- * @param {readonly string[]} tagIds 글에 저장된 태그 id.
- * @param {readonly DevArticleTag[]} tags 블로그 태그 사전.
- * @param {{ includeId?: boolean }} [options] `includeId` 가 참이면 id 도 토큰에 포함한다.
- * @returns {string[]} 입력 순서를 지킨 중복 없는 토큰.
+ * @param tagIds 글에 저장된 태그 id.
+ * @param tags 블로그 태그 사전.
+ * @param [options] `includeId` 가 참이면 id 도 토큰에 포함한다.
+ * @returns 입력 순서를 지킨 중복 없는 토큰.
  */
 const articleTagTokens = (
   tagIds: readonly string[],

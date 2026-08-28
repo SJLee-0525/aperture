@@ -286,14 +286,39 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
     mocks.buildRagChunks.mockReturnValue([chunkOf("photo-a")]);
     mocks.generateEmbeddings.mockResolvedValue([[0.1, 0.2]]);
-    const fetchMock = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
     vi.stubGlobal("fetch", fetchMock);
 
     const response = await POST(request());
 
     expect(response.status).toBe(502);
-    // 부분 갱신 차단 — 검증이 쓰기 시작 전에 실패하므로 조회조차 하지 않는다.
-    expect(fetchMock).not.toHaveBeenCalled();
+    // 부분 갱신 차단 — 검증이 쓰기 시작 전에 실패한다. 상한 선검사의 조회는 읽기뿐이다.
+    expect(calls(fetchMock).every(({ init }) => init.method === undefined)).toBe(true);
+  });
+
+  /**
+   * 상한 검사가 임베딩 뒤에 있으면 상한을 넘긴 요청이 전부 유료로 임베딩된 뒤 거절되고
+   * 저장은 한 건도 되지 않는다. 그 낭비를 막는 것이 선검사의 목적이다.
+   */
+  it("문서 수 상한을 넘기면 임베딩을 호출하기 전에 거절한다", async () => {
+    mocks.verifyAdminIdToken.mockResolvedValue(true);
+    mocks.getRagSourceData.mockResolvedValue(EMPTY_SOURCE);
+    mocks.buildRagChunks.mockReturnValue([chunkOf("photo-a")]);
+    const fullPage = Array.from({ length: 1000 }, (_, index) => ({
+      id: `old-${index}`,
+      embedding_model: "m@512",
+    }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(fullPage))
+      .mockResolvedValueOnce(jsonResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(502);
+    expect(mocks.generateEmbeddings).not.toHaveBeenCalled();
+    expect(calls(fetchMock).every(({ init }) => init.method === undefined)).toBe(true);
   });
 
   it("업스트림 오류 원문은 응답에 싣지 않고 상태 코드는 502 를 유지한다", async () => {
@@ -319,8 +344,10 @@ describe("POST /api/admin/portfolio-embeddings", () => {
     const result = (await response.json()) as { error: string };
 
     expect(response.status).toBe(502);
-    expect(result.error).toBe("임베딩 저장 실패 (500)");
+    // 상태 코드도 업스트림 상세를 드러내지 않는다. 제공자 오류 메시지에는 모델명·엔드포인트가 섞인다.
+    expect(result.error).toBe("임베딩 생성에 실패했습니다.");
     expect(result.error).not.toContain("secret");
+    expect(result.error).not.toContain("500");
     expect(errorSpy.mock.calls.some(([line]) => String(line).includes("secret"))).toBe(true);
     errorSpy.mockRestore();
   });

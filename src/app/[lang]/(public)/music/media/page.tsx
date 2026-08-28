@@ -23,8 +23,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * 음악 — 영상 (/music/media).
- *
- * @returns {Promise<JSX.Element>}
  */
 export default async function MusicMediaPage() {
   const media = await getMusicMedia();

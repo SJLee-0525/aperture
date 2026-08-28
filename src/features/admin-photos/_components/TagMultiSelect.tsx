@@ -17,11 +17,6 @@ type Props = {
 
 /**
  * 태그 사전(getTags)을 칩으로 토글 — 선택된 id[] 를 상위 폼에 반영. 라벨은 ko.
- *
- * @param {Props} props
- * @param {string[]} props.selected
- * @param {(next: string[]) => void} props.onChange
- * @returns {JSX.Element}
  */
 const TagMultiSelect = ({ selected, onChange }: Props) => {
   const [tags, setTags] = useState<Tag[]>([]);

@@ -1,0 +1,39 @@
+.cardGrid {
+  display: grid;
+  gap: clamp(16px, 2.4vw, 24px);
+}
+
+.posterGrid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.projectGrid,
+.mediaGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: var(--s-4);
+}
+
+@media (max-width: 900px) {
+  .posterGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .projectGrid,
+  .mediaGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .posterGrid {
+    grid-template-columns: 1fr;
+  }
+}

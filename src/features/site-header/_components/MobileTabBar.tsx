@@ -9,8 +9,8 @@ import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { MOBILE_TABS } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
-import { sectionFromPath } from "@/constants/sections";
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
+import { sectionFromPath } from "@/lib/navigation/section-from-path";
 
 import styles from "./MobileTabBar.module.css";
 
@@ -21,8 +21,6 @@ const isTabActive = (href: string, pathname: string): boolean =>
 
 /**
  * 모바일 하단 탭바 — 현재 섹션(사진/음악/개발)의 탭 세트. 랜딩(home)에선 숨김. 데스크톱은 CSS로 숨김.
- *
- * @returns {JSX.Element | null}
  */
 const MobileTabBar = () => {
   const { dict } = useLang();
@@ -34,17 +32,21 @@ const MobileTabBar = () => {
   if (section !== "photo" && section !== "music" && section !== "dev") return null;
 
   return (
-    <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel}>
-      {MOBILE_TABS[section].map((tab) => (
-        <LocalizedLink
-          key={tab.href}
-          href={tab.href}
-          className={`${styles.tab} ${isTabActive(tab.href, pathname) ? styles.active : ""}`}
-        >
-          <Icon name={tab.icon} size={22} />
-          <span>{dict[tab.labelKey]}</span>
-        </LocalizedLink>
-      ))}
+    <nav className={styles.tabbar} aria-label={dict.mobileNavigationLabel} data-mobile-tab-bar>
+      {MOBILE_TABS[section].map((tab) => {
+        const active = isTabActive(tab.href, pathname);
+        return (
+          <LocalizedLink
+            key={tab.href}
+            href={tab.href}
+            aria-current={active ? "page" : undefined}
+            className={`${styles.tab} ${active ? styles.active : ""}`}
+          >
+            <Icon name={tab.icon} size={22} />
+            <span>{dict[tab.labelKey]}</span>
+          </LocalizedLink>
+        );
+      })}
     </nav>
   );
 };

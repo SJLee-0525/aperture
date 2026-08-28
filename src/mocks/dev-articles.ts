@@ -1,11 +1,13 @@
+import { MOCK_STORAGE_ORIGIN } from "@/constants/security-headers";
+
 import type { DevArticle } from "@/types/dev-article";
 
 /**
  * Markdown 본문을 줄 단위로 조립한다.
  * 본문에 fenced code block 이 들어가서 template literal 로 쓰면 backtick 을 전부 이스케이프해야 한다.
  *
- * @param {...string} rows 본문 한 줄씩. 빈 문자열이 빈 줄이다.
- * @returns {string} 줄바꿈으로 이은 Markdown 원문.
+ * @param rows 본문 한 줄씩. 빈 문자열이 빈 줄이다.
+ * @returns 줄바꿈으로 이은 Markdown 원문.
  */
 const body = (...rows: string[]): string => rows.join("\n");
 
@@ -14,17 +16,17 @@ const body = (...rows: string[]): string => rows.join("\n");
  * 본문 이미지는 관리자 Storage origin 만 통과하므로(`markdown-url-policy`) 로컬 파일로 바꿀 수 없다.
  */
 const storageImage = (articleId: string, name: string) =>
-  `https://firebasestorage.googleapis.com/v0/b/aperture-demo.appspot.com/o/dev-blog%2F${articleId}%2F${name}.webp?alt=media`;
+  `${MOCK_STORAGE_ORIGIN}/dev-blog/${articleId}/${name}.webp`;
 
 /**
  * 본문 이미지 한 줄. title 자리의 크기는 실제 업로드가 적어 주는 값과 같은 형식이라,
  * mock 으로도 이미지 도착 전 자리 예약을 확인할 수 있다.
  *
- * @param {string} alt 대체 텍스트.
- * @param {string} articleId 글 ID.
- * @param {string} name 파일 이름.
- * @param {[number, number]} [size] 원본 픽셀 크기. 생략하면 크기를 모르는 옛 글이 된다.
- * @returns {string} Markdown 한 줄.
+ * @param alt 대체 텍스트.
+ * @param articleId 글 ID.
+ * @param name 파일 이름.
+ * @param [size] 원본 픽셀 크기. 생략하면 크기를 모르는 옛 글이 된다.
+ * @returns Markdown 한 줄.
  */
 const bodyImage = (alt: string, articleId: string, name: string, size?: [number, number]): string =>
   `![${alt}](${storageImage(articleId, name)}${size ? ` "${size[0]}x${size[1]}"` : ""})`;
@@ -41,7 +43,7 @@ const coverImage = (file: string, path: string) => ({
 });
 
 /**
- * 개발 블로그 mock — Firebase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
+ * 개발 블로그 mock — Supabase 미설정(로컬 dev·자동화 테스트)에서만 폴백으로 쓴다.
  *
  * 글 목록은 Markdown 계약의 경계 사례를 나눠 담는다. 한 글에 몰아넣으면
  * 어느 규칙이 깨졌는지 실패 메시지에서 구분되지 않는다.

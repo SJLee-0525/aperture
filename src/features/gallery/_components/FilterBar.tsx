@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { Icon } from "@/components/Icon";
 import { RangeSlider } from "@/components/RangeSlider";
@@ -8,9 +8,10 @@ import { Select } from "@/components/Select";
 import { TagFilterBar } from "@/components/TagFilterBar";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 
 import { pickText } from "@/lib/i18n/pick-text";
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo/filter-query";
 
 import type { Tag } from "@/types/tag";
 
@@ -36,9 +37,6 @@ type Props = {
 
 /**
  * 태그 칩 + 필터 팝오버(카메라·초점거리·초기화). 카메라·초점거리는 사진 EXIF에서 파생.
- *
- * @param {Props} props
- * @returns {JSX.Element}
  */
 const FilterBar = (props: Props) => {
   const { dict, lang } = useLang();
@@ -51,16 +49,10 @@ const FilterBar = (props: Props) => {
     [props.tags, lang],
   );
 
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      triggerRef.current?.focus();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  useEscapeKey(open, () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  });
 
   return (
     <TagFilterBar
@@ -113,6 +105,8 @@ const FilterBar = (props: Props) => {
                     low={props.focalMin}
                     high={props.focalMax}
                     unit="mm"
+                    minLabel={dict.rangeMinLabel.replace("{name}", dict.focalLabel)}
+                    maxLabel={dict.rangeMaxLabel.replace("{name}", dict.focalLabel)}
                     onChange={props.onFocal}
                     onChangeEnd={props.onFocalCommit}
                     onChangeCancel={props.onFocalCancel}

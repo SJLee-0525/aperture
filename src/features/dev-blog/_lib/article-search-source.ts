@@ -31,9 +31,9 @@ type ArticleSearchSource = {
 /**
  * 글 목록과 태그 사전을 검색 색인용 투영으로 바꾼다.
  *
- * @param {readonly DevArticle[]} articles 공개된 글 목록.
- * @param {readonly DevArticleTag[]} tags 블로그 태그 사전.
- * @returns {ArticleSearchSource[]} 입력 순서를 지킨 검색 투영.
+ * @param articles 공개된 글 목록.
+ * @param tags 블로그 태그 사전.
+ * @returns 입력 순서를 지킨 검색 투영.
  */
 const toArticleSearchSources = (
   articles: readonly DevArticle[],

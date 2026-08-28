@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 
+import { useUnsavedForm } from "@/features/admin-shell/_hooks/use-unsaved-form";
+
 import {
   articleToInput,
   emptyArticleInput,
@@ -18,6 +20,7 @@ import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-articl
 import { parseArticleMarkdown } from "@/features/dev-blog/_lib/markdown-parse";
 
 import { adminDevArticleRoute } from "@/constants/routes";
+import { formFingerprint } from "@/lib/admin/form-fingerprint";
 
 import type { useArticleReferences } from "@/features/admin-dev-articles/_hooks/use-article-references";
 import type { DevArticle } from "@/types/dev-article";
@@ -27,25 +30,22 @@ type References = ReturnType<typeof useArticleReferences>;
 /**
  * 폼 값의 지문. 저장 이후 바뀐 것이 있는지 비교하는 데만 쓴다.
  *
- * @param {DevArticleInput} input 비교할 폼 값.
- * @returns {string} 직렬화한 값.
+ * @param input 비교할 폼 값.
+ * @returns 직렬화한 값.
  */
-const fingerprint = (input: DevArticleInput): string => JSON.stringify(input);
-
 /**
  * 글 편집 폼의 상태와 저장.
  *
  * slug 는 관리자가 직접 고치기 전까지 제목을 따라간다. 한 번 고치면 그 뒤로는 제목이 바뀌어도
  * 건드리지 않는다 — 주소를 정해 둔 뒤 제목만 다듬는 것이 흔한 순서다. 이미 발행한 글
- * (`firstPublishedAt`)이면 아예 잠근다(계획 §2).
+ * (`firstPublishedAt`)이면 아예 잠근다(07-dev-blog §2).
  *
  * 발행 조건은 저장 직전이 아니라 입력하는 동안 계속 계산한다. 발행 버튼 옆에 무엇이 모자란지
  * 보여 주려면 값이 항상 있어야 하고, 저장 함수도 같은 결과를 다시 확인한다.
  *
- * @param {string} articleId 새 글이면 미리 발급한 ID, 편집이면 기존 문서 ID.
- * @param {References} references 태그·프로젝트·다른 글 주소.
- * @param {DevArticle} [initial] 편집 중인 글의 저장본. 새 글이면 없다.
- * @returns {{ form: DevArticleInput; patch: (next: Partial<DevArticleInput>) => void; isEdit: boolean; slugLocked: boolean; onSlugChange: (value: string) => void; markdownIssues: ReturnType<typeof parseArticleMarkdown>["issues"]; publishIssues: ReturnType<typeof checkArticlePublishable>; dirty: boolean; saving: boolean; savedAt: Date | null; error: string | null; save: () => Promise<boolean>; markSaved: (input: DevArticleInput) => void }}
+ * @param articleId 새 글이면 미리 발급한 ID, 편집이면 기존 문서 ID.
+ * @param references 태그·프로젝트·다른 글 주소.
+ * @param [initial] 편집 중인 글의 저장본. 새 글이면 없다.
  */
 const useArticleEditor = (articleId: string, references: References, initial?: DevArticle) => {
   const router = useRouter();
@@ -62,7 +62,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   // 마지막으로 저장한 값의 지문. ref 가 아니라 state 다 — `dirty` 를 렌더 중 파생값으로
   // 계산하려면 이 값이 바뀔 때 다시 렌더돼야 한다.
   const [savedFingerprint, setSavedFingerprint] = useState(() =>
-    fingerprint(initial ? articleToInput(initial) : emptyArticleInput()),
+    formFingerprint(initial ? articleToInput(initial) : emptyArticleInput()),
   );
 
   const slugLocked = Boolean(initial?.firstPublishedAt);
@@ -83,7 +83,10 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
 
   // 저장 여부는 상태가 아니라 두 값의 차이다. updater 안에서 setDirty 를 부르면 렌더 도중
   // 다른 상태를 갱신하게 되고, 복구본 적용·저장처럼 두 값이 함께 움직이는 경로에서 어긋난다.
-  const dirty = useMemo(() => fingerprint(form) !== savedFingerprint, [form, savedFingerprint]);
+  const dirty = useMemo(() => formFingerprint(form) !== savedFingerprint, [form, savedFingerprint]);
+  // 열한 개 폼과 같은 가드에 등록한다. 등록하지 않으면 셸 헤더의 워드마크·사이트 보기·
+  // 로그아웃이 편집 중에도 경고 없이 이동한다.
+  const confirmLeave = useUnsavedForm(dirty);
 
   const onSlugChange = useCallback(
     (value: string) => {
@@ -114,7 +117,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
   );
 
   const markSaved = useCallback((input: DevArticleInput) => {
-    setSavedFingerprint(fingerprint(input));
+    setSavedFingerprint(formFingerprint(input));
   }, []);
 
   const save = useCallback(async (): Promise<boolean> => {
@@ -136,7 +139,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
       markSaved(input);
       setSavedAt(new Date());
       // 새 글은 저장과 함께 편집 주소로 옮긴다. 다시 저장하면 같은 문서를 고쳐야 한다.
-      // 문서가 실제로 생겼으니 탭이 들고 있던 "저장 전 새 글 ID"도 놓아 준다.
+      // 문서가 실제로 생겼으므로 탭에 저장해 둔 "저장 전 새 글 ID"도 지운다.
       if (!isEdit) {
         clearNewArticleId(window.sessionStorage);
         router.replace(adminDevArticleRoute(articleId));
@@ -171,6 +174,7 @@ const useArticleEditor = (articleId: string, references: References, initial?: D
     markdownIssues,
     publishIssues,
     dirty,
+    confirmLeave,
     saving,
     savedAt,
     error,

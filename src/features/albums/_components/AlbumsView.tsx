@@ -31,10 +31,6 @@ type Props = {
 
 /**
  * 앨범 그리드 — 커버·장수는 서버에서 투영된 카드 데이터를 그대로 표시.
- *
- * @param {Props} props
- * @param {AlbumCardData[]} props.albums
- * @returns {JSX.Element}
  */
 const AlbumsView = ({ albums }: Props) => {
   const { dict, lang } = useLang();
@@ -43,7 +39,7 @@ const AlbumsView = ({ albums }: Props) => {
 
   if (albums.length === 0) {
     return (
-      <main className={styles.main}>
+      <main className="u-page-main">
         <h1 className={styles.title}>{dict.albumsNav}</h1>
         <p className={styles.empty}>{dict.emptyAlbums}</p>
       </main>
@@ -51,7 +47,7 @@ const AlbumsView = ({ albums }: Props) => {
   }
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.albumsNav}</h1>
       <m.div className={styles.grid} variants={GRID} initial="hidden" animate="show">
         {albums.map((album, index) => {

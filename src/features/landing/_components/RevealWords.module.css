@@ -7,11 +7,15 @@
   padding-bottom: 0.16em;
   margin-bottom: -0.16em;
 }
+/* LandingView 의 `.row` 와 같은 이유로 게이트한다. 단어는 마스크 아래로
+   물러난 상태에서 시작하므로 transform 도 함께 게이트해야 보인다. */
+:global(html[data-js]) .word {
+  opacity: 0;
+  transform: translateY(120%);
+}
 .word {
   display: inline-block;
-  opacity: 0;
-  /* 마스크 아래로 완전히 숨는 값 — 위 padding(0.16em)보다 큰 여유(0.2 × 행높이)를 확보한다. */
-  transform: translateY(120%);
+  /* 위 게이트의 translateY(120%) 는 padding(0.16em)보다 큰 여유(0.2 × 행높이)를 둔다. */
   will-change: transform;
 }
 .wordVisible {

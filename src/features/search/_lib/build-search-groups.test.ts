@@ -13,10 +13,6 @@ import type { SearchDocument } from "@/types/search";
 
 /**
  * 서버(search-documents)와 같은 정규화 경로로 픽스처 인덱스를 만든다.
- *
- * @param {string} title
- * @param {string} [body]
- * @returns {{ title: string; body: string; choseong: string }}
  */
 const indexFor = (title: string, body = "") => ({
   title: normalizeForSearch(title),

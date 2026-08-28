@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+import { UploadProgress } from "@/features/image-upload/_components/UploadProgress";
+
 import { usePosterUpload } from "@/features/image-upload/_hooks/use-poster-upload";
 
 import { imageThumbnailUrl, type ImageMeta } from "@/types/image";
@@ -21,15 +24,10 @@ type Props = {
  * 연주 포스터 업로드 필드 — 파일 선택 → webp 압축 → Storage(music/{workId}/) 업로드.
  * 사진과 달리 EXIF 추출은 없다(usePosterUpload).
  *
- * @param {Props} props
- * @param {string} props.workId
- * @param {ImageMeta | null} props.poster - 현재 폼에 설정된 포스터(미리보기용) — 없으면 플레이스홀더.
- * @param {(poster: ImageMeta | null) => void} props.onChange
- * @param {(pending: boolean) => void} props.onPendingChange
- * @returns {JSX.Element}
+ * @param props.poster - 현재 폼에 설정된 포스터(미리보기용) — 없으면 플레이스홀더.
  */
 const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props) => {
-  const { process, pending, error } = usePosterUpload(workId);
+  const { process, pending, stage, error } = usePosterUpload(workId);
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrl = imageThumbnailUrl(poster);
 
@@ -60,26 +58,26 @@ const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props)
         ) : (
           <span className={styles.placeholder}>미리보기</span>
         )}
-        {pending ? (
-          <span className={styles.pending}>
-            <span className={styles.spinner} aria-hidden="true" />
-            처리 중…
-          </span>
-        ) : null}
+        {pending ? <span className={styles.spinner} aria-hidden="true" /> : null}
       </div>
 
       <div className={styles.controls}>
-        <label className={styles.button}>
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          disabled={pending}
+          onClick={() => inputRef.current?.click()}
+        >
           {poster?.url ? "포스터 교체" : "포스터 선택"}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className={styles.input}
-            disabled={pending}
-            onChange={onSelect}
-          />
-        </label>
+        </AdminButton>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          disabled={pending}
+          onChange={onSelect}
+        />
         {poster?.url ? (
           <button
             type="button"
@@ -91,6 +89,7 @@ const PosterUploadField = ({ workId, poster, onChange, onPendingChange }: Props)
           </button>
         ) : null}
         <p className={styles.note}>포스터 이미지를 업로드합니다. (webp 압축)</p>
+        <UploadProgress stage={stage} />
         {error ? (
           <p className={styles.error} role="alert">
             {error}

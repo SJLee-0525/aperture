@@ -8,8 +8,8 @@ import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 import { useIntroDelay } from "@/features/landing/_hooks/use-intro-delay";
 import { useIntroReady } from "@/features/landing/_hooks/use-intro-ready";
 import { useSectionGlow } from "@/features/landing/_hooks/use-section-glow";
+import { useTyping } from "@/features/landing/_hooks/use-typing";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useTyping } from "@/hooks/use-typing";
 
 import { LANDING_EASE, LANDING_REVEAL_DELAY } from "@/features/landing/_lib/landing-motion";
 
@@ -46,13 +46,6 @@ const ROW_STAGGER = 0.09;
 
 /**
  * 타이핑 상태와 역할 색상 갱신을 랜딩의 정적 콘텐츠에서 격리한다.
- *
- * @param {{ accentRef: RefObject<HTMLElement | null>; reducedMotion: boolean | null; roles: string[]; started: boolean; }} props
- * @param {RefObject<HTMLElement | null>} props.accentRef
- * @param {boolean | null} props.reducedMotion
- * @param {string[]} props.roles
- * @param {boolean} props.started
- * @returns {JSX.Element}
  */
 const LandingTyping = ({
   accentRef,
@@ -65,7 +58,8 @@ const LandingTyping = ({
   roles: string[];
   started: boolean;
 }) => {
-  const { text: typed, index } = useTyping(started ? roles : NO_ROLES);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const { text: typed, index } = useTyping(started ? roles : NO_ROLES, lineRef);
   const roleAccent = ROLE_ACCENT[roles[index]] ?? "var(--accent)";
 
   useEffect(() => {
@@ -74,6 +68,7 @@ const LandingTyping = ({
 
   return (
     <m.div
+      ref={lineRef}
       className={styles.type}
       initial={{ opacity: 0, y: 14 }}
       animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
@@ -133,10 +128,7 @@ LandingNav.displayName = "LandingNav";
  * 이름과 역할 타이핑, 소개, 섹션 링크를 보여 주는 랜딩 화면.
  * 역할은 tagline을 가운뎃점으로 나눠 만들며 스플래시가 끝난 뒤 애니메이션을 시작한다.
  *
- * @param {{ tagline: LocalizedText; landingLead: LocalizedText }} props
- * @param {LocalizedText} props.tagline 역할 목록을 만드는 다국어 문구.
- * @param {LocalizedText} props.landingLead
- * @returns {JSX.Element}
+ * @param props.tagline 역할 목록을 만드는 다국어 문구.
  */
 const LandingView = ({
   tagline,

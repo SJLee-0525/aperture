@@ -1,5 +1,6 @@
 import { EMPTY_MUSIC_CONFIG } from "@/constants/empty-configs";
 import { shouldUseMockContent } from "@/lib/content/content-source";
+import { publishedInOrder } from "@/lib/content/mock-list";
 import {
   fetchMusicConfig,
   fetchPublishedMusicAwards,
@@ -12,19 +13,19 @@ import type { MusicAward, MusicConfig, MusicMedia, MusicWork } from "@/types/mus
 const getMusicWorks = async (): Promise<MusicWork[]> => {
   if (!shouldUseMockContent()) return fetchPublishedMusicWorks();
   const { MOCK_MUSIC_WORKS } = await import("@/mocks/music");
-  return MOCK_MUSIC_WORKS.filter((item) => item.published).sort((a, b) => a.order - b.order);
+  return publishedInOrder(MOCK_MUSIC_WORKS);
 };
 
 const getMusicAwards = async (): Promise<MusicAward[]> => {
   if (!shouldUseMockContent()) return fetchPublishedMusicAwards();
   const { MOCK_MUSIC_AWARDS } = await import("@/mocks/music");
-  return MOCK_MUSIC_AWARDS.filter((item) => item.published).sort((a, b) => a.order - b.order);
+  return publishedInOrder(MOCK_MUSIC_AWARDS);
 };
 
 const getMusicMedia = async (): Promise<MusicMedia[]> => {
   if (!shouldUseMockContent()) return fetchPublishedMusicMedia();
   const { MOCK_MUSIC_MEDIA } = await import("@/mocks/music");
-  return MOCK_MUSIC_MEDIA.filter((item) => item.published).sort((a, b) => a.order - b.order);
+  return publishedInOrder(MOCK_MUSIC_MEDIA);
 };
 
 const getMusicConfig = async (): Promise<MusicConfig> => {

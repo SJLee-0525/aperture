@@ -254,10 +254,6 @@ const ContactForm = ({ to }: { to: string }) => {
 
 /**
  * 연락처 화면. Web3Forms 발송 폼과 직접 연락 버튼을 제공한다.
- *
- * @param {{ site: SiteConfig }} props
- * @param {SiteConfig} props.site
- * @returns {JSX.Element}
  */
 const ContactView = ({ site }: { site: SiteConfig }) => {
   const { dict, lang } = useLang();

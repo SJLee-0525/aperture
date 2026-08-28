@@ -74,6 +74,7 @@ type UIDict = {
   musicBook: string;
   musicProgram: string;
   primaryNavLabel: string;
+  skipToContent: string;
   footerSitemapLabel: string;
   menuOpenLabel: string;
   menuCloseLabel: string;
@@ -96,6 +97,7 @@ type UIDict = {
   accessibilityNav: string;
   cookieSettingsLabel: string;
   analyticsConsentLabel: string;
+  analyticsConsentAnnounce: string;
   analyticsConsentTitle: string;
   analyticsConsentBody: string;
   analyticsConsentAnalyticsLabel: string;
@@ -149,13 +151,12 @@ type UIDict = {
   chatWelcome: string;
   chatErrorFallback: string;
   // 커스텀 스크롤바 aria
-  scrollPageLabel: string;
-  scrollModalLabel: string;
-  scrollListLabel: string;
   allTag: string;
   filterLabel: string;
   cameraLabel: string;
   focalLabel: string;
+  rangeMinLabel: string;
+  rangeMaxLabel: string;
   resetLabel: string;
   emptyResults: string;
   emptyAlbums: string;
@@ -280,6 +281,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicBook: "예매하기",
     musicProgram: "프로그램",
     primaryNavLabel: "주요 메뉴",
+    skipToContent: "본문 바로가기",
     footerSitemapLabel: "사이트맵",
     menuOpenLabel: "메뉴 열기",
     menuCloseLabel: "메뉴 닫기",
@@ -302,6 +304,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     accessibilityNav: "접근성",
     cookieSettingsLabel: "개인정보 및 쿠키 설정",
     analyticsConsentLabel: "선택적 데이터 수집 설정",
+    analyticsConsentAnnounce: "선택적 데이터 수집 설정 안내가 화면 아래에 나타났습니다.",
     analyticsConsentTitle: "선택적 데이터 수집 설정",
     analyticsConsentBody:
       "아래 항목은 서로 독립적으로 선택할 수 있습니다. 모두 거부해도 사이트의 모든 기능을 이용할 수 있습니다.",
@@ -366,13 +369,12 @@ const DICTIONARY: Record<Lang, UIDict> = {
     ],
     chatWelcome: "안녕하세요. 사진, 음악, 개발 작업에 관해 무엇이든 물어보세요.",
     chatErrorFallback: "답변을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-    scrollPageLabel: "페이지 스크롤",
-    scrollModalLabel: "모달 스크롤",
-    scrollListLabel: "내부 목록 스크롤",
     allTag: "전체",
     filterLabel: "필터",
     cameraLabel: "카메라",
     focalLabel: "초점거리",
+    rangeMinLabel: "{name} 최솟값",
+    rangeMaxLabel: "{name} 최댓값",
     resetLabel: "초기화",
     emptyResults: "검색 결과가 없습니다",
     emptyAlbums: "아직 등록된 앨범이 없습니다",
@@ -492,6 +494,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     musicBook: "Book tickets",
     musicProgram: "Programme",
     primaryNavLabel: "Primary navigation",
+    skipToContent: "Skip to content",
     footerSitemapLabel: "Sitemap",
     menuOpenLabel: "Open menu",
     menuCloseLabel: "Close menu",
@@ -514,6 +517,8 @@ const DICTIONARY: Record<Lang, UIDict> = {
     accessibilityNav: "Accessibility",
     cookieSettingsLabel: "Privacy & cookie settings",
     analyticsConsentLabel: "Optional data collection settings",
+    analyticsConsentAnnounce:
+      "A notice about optional data collection appeared at the bottom of the page.",
     analyticsConsentTitle: "Optional data collection settings",
     analyticsConsentBody:
       "Choose each item independently. You can use every site feature if you decline both.",
@@ -578,13 +583,12 @@ const DICTIONARY: Record<Lang, UIDict> = {
     ],
     chatWelcome: "Hello. Ask me anything about the photography, music, or development work.",
     chatErrorFallback: "The response could not be loaded. Please try again shortly.",
-    scrollPageLabel: "Page scroll",
-    scrollModalLabel: "Modal scroll",
-    scrollListLabel: "List scroll",
     allTag: "All",
     filterLabel: "Filter",
     cameraLabel: "Camera",
     focalLabel: "Focal length",
+    rangeMinLabel: "Minimum {name}",
+    rangeMaxLabel: "Maximum {name}",
     resetLabel: "Reset",
     emptyResults: "No results found",
     emptyAlbums: "No albums yet",

@@ -17,10 +17,10 @@ const SCREEN_CONTEXT_RULES = `
 /**
  * 언어, 공개 프로필, 현재 화면 정보를 하나의 시스템 지침으로 조합한다.
  *
- * @param {Lang} lang 답변 언어.
- * @param {string} profileContext 서버가 조회한 공개 프로필 문맥.
- * @param {string | undefined} screenContext 현재 열린 항목의 서버 검증 문맥.
- * @returns {string} 채팅 provider에 전달할 시스템 지침.
+ * @param lang 답변 언어.
+ * @param profileContext 서버가 조회한 공개 프로필 문맥.
+ * @param screenContext 현재 열린 항목의 서버 검증 문맥.
+ * @returns 채팅 provider에 전달할 시스템 지침.
  */
 const buildChatInstructions = (
   lang: Lang,

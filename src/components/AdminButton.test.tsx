@@ -92,4 +92,20 @@ describe("AdminButton", () => {
     expect(button.className).toContain("custom");
     expect(button.className).toContain("secondary");
   });
+
+  it("danger 변형은 파괴적 동작 표시를 갖는다", () => {
+    render(<AdminButton variant="danger">확인 후 삭제</AdminButton>);
+
+    expect(screen.getByRole("button", { name: "확인 후 삭제" }).className).toContain("danger");
+  });
+
+  it("danger 도 disabled 를 받는다", () => {
+    render(
+      <AdminButton variant="danger" disabled>
+        삭제
+      </AdminButton>,
+    );
+
+    expect((screen.getByRole("button", { name: "삭제" }) as HTMLButtonElement).disabled).toBe(true);
+  });
 });

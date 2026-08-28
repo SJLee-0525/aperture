@@ -2,10 +2,6 @@ import { ICON_STROKE_PROPS } from "./stroke-props";
 
 /**
  * YouTube 글리프 (라인 + 재생 삼각형)
- *
- * @param {{ size?: number }} props
- * @param {number | undefined} props.size
- * @returns {JSX.Element}
  */
 const YouTubeIcon = ({ size = 17 }: { size?: number }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" {...ICON_STROKE_PROPS}>

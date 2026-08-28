@@ -1,4 +1,4 @@
-import { STORAGE_IMAGE_HOSTS } from "@/constants/security-headers";
+import { LEGACY_FIREBASE_STORAGE_HOST } from "@/constants/security-headers";
 import { supabaseUrl } from "@/lib/supabase/config";
 
 /**
@@ -17,8 +17,8 @@ const URL_PATTERN = /https:\/\/[^\s)"'<>\]]+/g;
  * Supabase 공개 URL 에서 객체 경로를 뽑는다. 경로 세그먼트가 그대로 남는 형태라
  * 정규식 대신 URL 파싱으로 origin·프리픽스를 정확히 대조한다.
  *
- * @param {string} candidate 본문에서 찾은 URL 후보.
- * @returns {string | null} 디코딩된 객체 경로. 이 프로젝트의 공개 객체가 아니면 `null`.
+ * @param candidate 본문에서 찾은 URL 후보.
+ * @returns 디코딩된 객체 경로. 이 프로젝트의 공개 객체가 아니면 `null`.
  */
 const supabaseObjectPath = (candidate: string): string | null => {
   const origin = supabaseUrl();
@@ -40,11 +40,11 @@ const supabaseObjectPath = (candidate: string): string | null => {
 /**
  * Firebase 다운로드 URL 에서 객체 경로를 뽑는다.
  *
- * @param {string} candidate 본문에서 찾은 URL 후보.
- * @returns {string | null} 디코딩된 객체 경로. 허용 호스트가 아니면 `null`.
+ * @param candidate 본문에서 찾은 URL 후보.
+ * @returns 디코딩된 객체 경로. 허용 호스트가 아니면 `null`.
  */
 const firebaseObjectPath = (candidate: string): string | null => {
-  if (!STORAGE_IMAGE_HOSTS.some((host) => candidate.startsWith(`${host}/`))) return null;
+  if (!candidate.startsWith(`${LEGACY_FIREBASE_STORAGE_HOST}/`)) return null;
   const encoded = FIREBASE_OBJECT_PATH_PATTERN.exec(candidate)?.[1];
   if (!encoded) return null;
   try {
@@ -61,8 +61,8 @@ const firebaseObjectPath = (candidate: string): string | null => {
  * 놓치면 참조 집합이 비어 **본문 이미지 전체가 미사용 삭제 후보가 된다.**
  * `dev-blog/` 경로만 반환하며, 디코딩할 수 없는 URL 과 다른 폴더는 정리 범위가 아니라 제외한다.
  *
- * @param {string} body 글의 Markdown 원문.
- * @returns {string[]} 중복을 제거한 `dev-blog/` 객체 경로 목록.
+ * @param body 글의 Markdown 원문.
+ * @returns 중복을 제거한 `dev-blog/` 객체 경로 목록.
  */
 const articleBodyStoragePaths = (body: string): string[] => {
   const paths = new Set<string>();

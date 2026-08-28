@@ -10,6 +10,7 @@ import { ArticleIssueList } from "@/features/admin-dev-articles/_components/Arti
 import { ArticleMetaFields } from "@/features/admin-dev-articles/_components/ArticleMetaFields";
 import { ArticleRelatedProjectsField } from "@/features/admin-dev-articles/_components/ArticleRelatedProjectsField";
 import { ArticleTagsField } from "@/features/admin-dev-articles/_components/ArticleTagsField";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 
 import { useArticleEditor } from "@/features/admin-dev-articles/_hooks/use-article-editor";
 import { useArticleRecovery } from "@/features/admin-dev-articles/_hooks/use-article-recovery";
@@ -22,7 +23,7 @@ import {
 import { clearNewArticleId } from "@/features/admin-dev-articles/_lib/new-article-id";
 
 import { adminDevArticlePreviewRoute, ROUTES } from "@/constants/routes";
-import { formatShotAt } from "@/lib/format/format-date";
+import { formatLocalTimestamp } from "@/lib/format/format-date";
 
 import type { DevArticle } from "@/types/dev-article";
 
@@ -39,12 +40,10 @@ type Props = {
  *
  * 조립만 하고 상태는 훅이 갖는다. 발행은 별도 버튼이 아니라 폼의 공개 상태이며, 저장할 때
  * 발행 조건을 만족하지 않으면 저장 자체를 하지 않는다 — 조건을 만족하지 못한 채 공개로 넘어간
- * 문서가 남는 것을 막는다. 초안 저장에는 조건을 걸지 않는다(계획 §3).
+ * 문서가 남는 것을 막는다. 초안 저장에는 조건을 걸지 않는다(07-dev-blog §3).
  *
- * @param {Props} props
- * @param {string} props.articleId 새 글이면 미리 발급한 ID, 수정이면 문서 ID.
- * @param {DevArticle | undefined} props.initial 있으면 수정 모드.
- * @returns {JSX.Element}
+ * @param props.articleId 새 글이면 미리 발급한 ID, 수정이면 문서 ID.
+ * @param props.initial 있으면 수정 모드.
  */
 const ArticleForm = ({ articleId, initial }: Props) => {
   const router = useRouter();
@@ -64,7 +63,7 @@ const ArticleForm = ({ articleId, initial }: Props) => {
   // 취소는 편집을 버리는 동작이다. 링크로 두면 복구본과 이 탭이 잡아 둔 새 글 ID가 남아
   // 다음에 새 글을 열 때 버린 편집본이 다시 제안된다.
   const cancelEditing = () => {
-    if (editor.dirty && !window.confirm("저장하지 않은 변경을 버릴까요?")) return;
+    if (!editor.confirmLeave()) return;
     recovery.abandon();
     if (!editor.isEdit) clearNewArticleId(window.sessionStorage);
     router.replace(ROUTES.ADMIN_DEV_ARTICLES);
@@ -76,31 +75,19 @@ const ArticleForm = ({ articleId, initial }: Props) => {
         <h1 className={styles.title}>{editor.isEdit ? "글 수정" : "새 글"}</h1>
         <div className={styles.headState}>
           {editor.dirty ? <span>저장하지 않은 변경</span> : null}
-          {editor.savedAt ? <span>저장 {formatShotAt(editor.savedAt)}</span> : null}
+          {editor.savedAt ? <span>저장 {formatLocalTimestamp(editor.savedAt)}</span> : null}
         </div>
       </header>
 
       {recovery.pending ? (
-        <div className={`${styles.panel} ${styles.recovery}`}>
-          <p className={styles.recoveryNote}>
-            저장하지 않은 편집본이 있습니다 ({formatShotAt(new Date(recovery.pending.savedAt))}).
-          </p>
-          <div className={styles.recoveryActions}>
-            <AdminButton
-              variant="secondary"
-              size="xs"
-              onClick={() => {
-                const restored = recovery.restore();
-                if (restored) editor.applyForm(restored);
-              }}
-            >
-              복구하기
-            </AdminButton>
-            <button type="button" className={styles.remove} onClick={recovery.discard}>
-              버리기
-            </button>
-          </div>
-        </div>
+        <RecoveryNotice
+          savedAt={recovery.pending.savedAt}
+          onRestore={() => {
+            const restored = recovery.restore();
+            if (restored) editor.applyForm(restored);
+          }}
+          onDiscard={recovery.discard}
+        />
       ) : null}
 
       {references.error ? (

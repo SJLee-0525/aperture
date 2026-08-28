@@ -1,9 +1,9 @@
 import { Newsreader, Noto_Serif_KR, Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 
-import { CustomCursor } from "@/features/custom-cursor/_components/CustomCursor";
-import { CustomScrollbar } from "@/features/custom-scrollbar/_components/CustomScrollbar";
 import { LangProvider } from "@/features/lang/_components/LangProvider";
 import { MotionProvider } from "@/features/motion/_components/MotionProvider";
+import { CustomCursor } from "@/features/pointer-chrome/_components/CustomCursor";
+import { CustomScrollbar } from "@/features/pointer-chrome/_components/CustomScrollbar";
 
 import { THEME_INIT_SCRIPT } from "@/features/theme/_lib/theme-script";
 
@@ -89,9 +89,9 @@ export const viewport: Viewport = {
 
 /**
  * 전역 메타데이터, 폰트, 테마, 언어 공급자를 설치하는 루트 레이아웃.
- * @param {Readonly<{ children: React.ReactNode }>} props 레이아웃 하위 콘텐츠.
- * @param {React.ReactNode} props.children 모든 애플리케이션 라우트.
- * @returns {JSX.Element} 전역 html·body 셸.
+ * @param props 레이아웃 하위 콘텐츠.
+ * @param props.children 모든 애플리케이션 라우트.
+ * @returns 전역 html·body 셸.
  */
 export default function RootLayout({
   children,

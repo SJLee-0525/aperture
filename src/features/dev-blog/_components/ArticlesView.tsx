@@ -19,6 +19,7 @@ import {
   sliceArticlesPage,
 } from "@/features/dev-blog/_lib/article-list-query";
 
+import { countLabel } from "@/lib/format/count-label";
 import { pickText } from "@/lib/i18n/pick-text";
 import { pushCurrentUrl, replaceCurrentUrl } from "@/lib/navigation/replace-current-url";
 
@@ -50,10 +51,8 @@ type Props = {
  * 화면에 반영되지 않는데 주소에는 남아 잘못된 링크가 공유되기 때문이다. 이 정규화는 replace 라
  * 뒤로가기 기록을 늘리지 않는다.
  *
- * @param {Props} props
- * @param {DevArticleSummary[]} props.articles 발행일 내림차순으로 정렬된 공개 글 요약 전체. 페이지 나누기는 이 화면이 한다.
- * @param {DevArticleTag[]} props.tags 통제 태그 사전. 칩 순서이자 `?tag=` 검증 기준이다.
- * @returns {JSX.Element}
+ * @param props.articles 발행일 내림차순으로 정렬된 공개 글 요약 전체. 페이지 나누기는 이 화면이 한다.
+ * @param props.tags 통제 태그 사전. 칩 순서이자 `?tag=` 검증 기준이다.
  */
 const ArticlesView = ({ articles, tags }: Props) => {
   const { dict, lang } = useLang();
@@ -111,8 +110,12 @@ const ArticlesView = ({ articles, tags }: Props) => {
   const visible = sliceArticlesPage(filtered, page);
 
   return (
-    <main className={styles.main}>
-      <PageToolbar title={dict.devArticlesNav} count={`${filtered.length} articles`}>
+    <main className="u-page-main">
+      <PageToolbar
+        title={dict.devArticlesNav}
+        count={countLabel(filtered.length, "article")}
+        countLive
+      >
         <ViewToggle
           options={[
             { id: "grid", label: dict.viewGrid, icon: "square" },
@@ -158,7 +161,7 @@ const ArticlesView = ({ articles, tags }: Props) => {
       ) : (
         <>
           <section aria-labelledby={LIST_HEADING_ID}>
-            <h2 id={LIST_HEADING_ID} className={styles.heading}>
+            <h2 id={LIST_HEADING_ID} className="sr-only">
               {dict.articlesAll}
             </h2>
             <ul className={styles.list} data-view={state.view}>

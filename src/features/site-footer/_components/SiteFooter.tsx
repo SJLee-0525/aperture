@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { SocialGlyph } from "@/components/SocialGlyph";
+import { SitemapLink } from "@/features/site-footer/_components/SitemapLink";
 
 import { DICTIONARY } from "@/constants/dictionary";
 import { CONTACT_NAV, MEGA_MENU } from "@/constants/navigation";
@@ -24,12 +25,7 @@ const GITHUB_URL = "https://github.com/SJLee-0525";
  * 언어는 컨텍스트가 아니라 `[lang]` 세그먼트에서 온 props로 받는다. 서버에서 렌더해야
  * 정적 마크업이 클라이언트 번들에 들어가지 않는다.
  *
- * @param {{ lang: Lang; tagline: LocalizedText; links: SiteLink[]; privacyControls?: React.ReactNode }} props
- * @param {Lang} props.lang
- * @param {LocalizedText} props.tagline
- * @param {SiteLink[]} props.links
- * @param {React.ReactNode | undefined} props.privacyControls - 법적 문서 링크 옆에 주입할 쿠키 설정 UI.
- * @returns {JSX.Element}
+ * @param props.privacyControls - 법적 문서 링크 옆에 주입할 쿠키 설정 UI.
  */
 const SiteFooter = ({
   lang,
@@ -72,24 +68,24 @@ const SiteFooter = ({
         <nav className={styles.sitemap} aria-label={dict.footerSitemapLabel}>
           {MEGA_MENU.map((section) => (
             <div key={section.section} className={styles.col} data-section={section.section}>
-              <Link href={localizePath(lang, section.href)} className={styles.colTitle}>
+              <SitemapLink lang={lang} href={section.href} className={styles.colTitle}>
                 {dict[section.labelKey]}
-              </Link>
+              </SitemapLink>
               <ul className={styles.colLinks}>
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={localizePath(lang, link.href)} className={styles.colLink}>
+                    <SitemapLink lang={lang} href={link.href} className={styles.colLink}>
                       {dict[link.labelKey]}
-                    </Link>
+                    </SitemapLink>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
           <div className={styles.col} data-section="contact">
-            <Link href={localizePath(lang, CONTACT_NAV.href)} className={styles.colTitle}>
+            <SitemapLink lang={lang} href={CONTACT_NAV.href} className={styles.colTitle}>
               {dict[CONTACT_NAV.labelKey]}
-            </Link>
+            </SitemapLink>
           </div>
         </nav>
       </div>

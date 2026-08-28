@@ -45,8 +45,8 @@ const MAX_ARTICLE_IMAGE_DIMENSION = 16_384;
  * 형식이 맞지 않는 title 은 issue 로 보고하지 않는다. 이 자리는 원래 표준 Markdown 의
  * 설명 title 이고 지금까지 버려졌으므로, 임의 title 이 든 기존 글의 발행을 막으면 안 된다.
  *
- * @param {string | null | undefined} title mdast image 노드의 title.
- * @returns {{ width: number; height: number } | null} 크기. 읽을 수 없으면 `null`.
+ * @param title mdast image 노드의 title.
+ * @returns 크기. 읽을 수 없으면 `null`.
  */
 const parseImageDimensions = (
   title: string | null | undefined,
@@ -88,10 +88,10 @@ const report = (
 /**
  * 깊이 상한을 넘었는지 본다. 넘었으면 문서에서 처음 한 번만 issue 로 남긴다.
  *
- * @param {NormalizeContext} context issue 수집기.
- * @param {Parameters<typeof pointOf>[0]} node 상한을 넘어선 지점의 노드.
- * @param {number} depth 지금 들어와 있는 단계.
- * @returns {boolean} 상한을 넘었으면 true — 호출부는 더 내려가지 않는다.
+ * @param context issue 수집기.
+ * @param node 상한을 넘어선 지점의 노드.
+ * @param depth 지금 들어와 있는 단계.
+ * @returns 상한을 넘었으면 true — 호출부는 더 내려가지 않는다.
  */
 const exceedsDepth = (
   context: NormalizeContext,
@@ -112,10 +112,10 @@ const exceedsDepth = (
  * 블록·인라인과 같은 깊이 계약을 쓴다. 이 경로에도 중첩이 들어오기 때문이다 —
  * 제목 안의 강조, 지시자 인자 안의 링크가 모두 여기로 내려온다.
  *
- * @param {PhrasingContent[]} nodes 평문으로 바꿀 인라인 노드.
- * @param {NormalizeContext} context issue 수집기.
- * @param {number} depth 지금 들어와 있는 단계.
- * @returns {string} 서식을 뗀 글자. 상한을 넘은 가지는 빈 문자열이 된다.
+ * @param nodes 평문으로 바꿀 인라인 노드.
+ * @param context issue 수집기.
+ * @param depth 지금 들어와 있는 단계.
+ * @returns 서식을 뗀 글자. 상한을 넘은 가지는 빈 문자열이 된다.
  */
 const toPlainText = (nodes: PhrasingContent[], context: NormalizeContext, depth: number): string =>
   nodes
@@ -135,10 +135,10 @@ const toPlainText = (nodes: PhrasingContent[], context: NormalizeContext, depth:
  *
  * 참조 문법(`[글자][라벨]`)도 같은 규칙을 따른다. 주소는 버리되 글자는 남긴다.
  *
- * @param {PhrasingContent[]} nodes mdast 인라인 노드.
- * @param {NormalizeContext} context issue 수집기.
- * @param {number} depth 지금 들어와 있는 단계. 자식으로 내려갈 때만 오른다.
- * @returns {ArticleInline[]} 렌더 가능한 인라인 노드.
+ * @param nodes mdast 인라인 노드.
+ * @param context issue 수집기.
+ * @param depth 지금 들어와 있는 단계. 자식으로 내려갈 때만 오른다.
+ * @returns 렌더 가능한 인라인 노드.
  */
 const toInlines = (
   nodes: PhrasingContent[],
@@ -192,8 +192,8 @@ const toInlines = (
  * 문단이 이미지 하나만 담고 있는지 본다.
  * Markdown 에서 이미지 한 줄은 문단으로 감싸이므로, 이 모양일 때만 이미지 블록으로 승격한다.
  *
- * @param {PhrasingContent[]} children 문단의 자식.
- * @returns {PhrasingContent | null} 단독 이미지 노드, 아니면 null.
+ * @param children 문단의 자식.
+ * @returns 단독 이미지 노드, 아니면 null.
  */
 const standaloneImage = (children: PhrasingContent[]): PhrasingContent | null => {
   const meaningful = children.filter((node) => !(node.type === "text" && !node.value.trim()));
@@ -210,9 +210,9 @@ type CaptionAttachment = "attached" | "no-image" | "already-captioned";
  * 실패를 두 갈래로 나눠 돌려준다. 둘을 뭉뚱그리면 이미지에 캡션을 두 번 단 글에도
  * "앞에 이미지가 없다" 는 사실과 다른 사유가 붙고, 그 문장을 보고는 고칠 데를 찾을 수 없다.
  *
- * @param {ArticleBlock[]} blocks 지금까지 만든 블록.
- * @param {string} text 캡션 평문.
- * @returns {CaptionAttachment} 붙였으면 `attached`, 아니면 실패 사유.
+ * @param blocks 지금까지 만든 블록.
+ * @param text 캡션 평문.
+ * @returns 붙였으면 `attached`, 아니면 실패 사유.
  */
 const attachCaption = (blocks: ArticleBlock[], text: string): CaptionAttachment => {
   const previous = blocks.at(-1);
@@ -225,10 +225,10 @@ const attachCaption = (blocks: ArticleBlock[], text: string): CaptionAttachment 
 /**
  * 블록 노드를 허용 목록으로 옮긴다.
  *
- * @param {RootContent[]} nodes mdast 블록 노드.
- * @param {NormalizeContext} context issue 수집기.
- * @param {number} depth 지금 들어와 있는 단계. 목록 항목과 인용 안으로 내려갈 때만 오른다.
- * @returns {ArticleBlock[]} 렌더 가능한 블록.
+ * @param nodes mdast 블록 노드.
+ * @param context issue 수집기.
+ * @param depth 지금 들어와 있는 단계. 목록 항목과 인용 안으로 내려갈 때만 오른다.
+ * @returns 렌더 가능한 블록.
  */
 const toBlocks = (
   nodes: RootContent[],
@@ -375,8 +375,8 @@ const toBlocks = (
  * 노드만 보므로, 허용 목록에 없는 요소는 렌더 대상이 될 수 없고 발행을 막는 issue 로만 남는다.
  * heading id 는 문서마다 새로 발급해 목차·본문·URL fragment 가 같은 값을 쓰게 한다.
  *
- * @param {Root} root `mdast-util-from-markdown` 이 만든 트리.
- * @returns {{ document: ArticleDocument; issues: ArticleMarkdownIssue[] }} 렌더 트리와 발행 차단 사유.
+ * @param root `mdast-util-from-markdown` 이 만든 트리.
+ * @returns 렌더 트리와 발행 차단 사유.
  */
 const normalizeArticleTree = (
   root: Root,

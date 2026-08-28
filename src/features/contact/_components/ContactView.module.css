@@ -109,7 +109,6 @@
 }
 .input:focus,
 .textarea:focus {
-  outline: none;
   border-color: var(--accent);
   background: var(--bg);
 }

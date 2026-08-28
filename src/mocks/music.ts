@@ -5,7 +5,7 @@ const NO_POSTER = { url: "", path: "", w: 0, h: 0 };
 
 /**
  * 음악 섹션 mock — design/ver_2/music.js 이식(ko) + en 번역.
- * Firebase 미설정(로컬 dev·데모)에서만 폴백으로 쓰인다. 실운영 데이터는 관리자 CMS(Phase B2)로 입력.
+ * Supabase 미설정(로컬 dev·데모)에서만 폴백으로 쓰인다. 실운영 데이터는 관리자 CMS 로 입력한다.
  */
 const MOCK_MUSIC_WORKS: MusicWork[] = [
   {

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
+import { ImageFallback } from "@/components/ImageFallback";
 import { TableScrollRegion } from "@/components/TableScrollRegion";
 import { ArticleCodeBlock } from "@/features/dev-blog/_components/ArticleCodeBlock";
 import { ArticleYouTube } from "@/features/dev-blog/_components/ArticleYouTube";
@@ -40,15 +41,11 @@ const EXTERNAL_LINK_REL = "noreferrer noopener";
 const FALLBACK_IMAGE_SIZE = { w: 1600, h: 1000 } as const;
 
 /**
- * 이미지를 불러오지 못했을 때 표시하는 워드마크.
- * 빈 영역 대신 개발 섹션에서 사용하는 이미지를 보여 준다.
- *
- * 라이트박스는 두 테마 모두 어두운 scrim 위에 뜨므로 그쪽은 항상 dark 를 쓴다.
+ * 확대 뷰에서 불러오지 못한 이미지 자리에 넣는 워드마크.
+ * 라이트박스는 두 테마 모두 어두운 scrim 위에 뜨므로 어두운 판을 쓴다.
+ * 본문 자리에는 이 URL 이 아니라 `ImageFallback` 이 들어간다.
  */
-const BROKEN_IMAGE_FALLBACK = {
-  light: "/dev-project-image",
-  dark: "/dev-project-image-dark",
-} as const;
+const BROKEN_IMAGE_FALLBACK = "/dev-project-image-dark";
 
 /** 위 워드마크의 실제 크기. 라이트박스 스테이지 비율과 본문 자리 예약에 함께 쓴다. */
 const BROKEN_IMAGE_SIZE = { w: SITE_IMAGE_SIZE.width, h: SITE_IMAGE_SIZE.height } as const;
@@ -115,10 +112,9 @@ type RenderContext = {
  * 실려 온 이미지의 원본 크기를 올려 보내고 자리표시 비율을 걷는다.
  * 클래스를 DOM 에서 직접 떼는 이유는 크기를 알게 될 때마다 본문 트리를 다시 만들지 않기 위해서다.
  *
- * @param {HTMLImageElement} node 크기를 읽을 이미지 요소.
- * @param {string} src 라이트박스가 쓰는 이미지 주소.
- * @param {RenderContext} context 본문 렌더 문맥.
- * @returns {void}
+ * @param node 크기를 읽을 이미지 요소.
+ * @param src 라이트박스가 쓰는 이미지 주소.
+ * @param context 본문 렌더 문맥.
  */
 const measureImage = (node: HTMLImageElement, src: string, context: RenderContext): void => {
   if (!node.naturalWidth || !node.naturalHeight) return;
@@ -220,25 +216,8 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
               onClick={() => context.onOpenImage(context.imageIndex.get(block.src) ?? 0)}
             >
               {context.brokenImages[block.src] ? (
-                // 로드에 실패하면 테마에 맞는 워드마크를 표시한다.
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={BROKEN_IMAGE_FALLBACK.light}
-                    alt={block.alt}
-                    width={BROKEN_IMAGE_SIZE.w}
-                    height={BROKEN_IMAGE_SIZE.h}
-                    className={styles.fallbackLight}
-                  />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={BROKEN_IMAGE_FALLBACK.dark}
-                    alt={block.alt}
-                    width={BROKEN_IMAGE_SIZE.w}
-                    height={BROKEN_IMAGE_SIZE.h}
-                    className={styles.fallbackDark}
-                  />
-                </>
+                // 로드에 실패하면 워드마크로 자리를 채운다. 이름은 감싸는 버튼이 갖는다.
+                <ImageFallback flow className={styles.brokenFigure} />
               ) : (
                 <>
                   {/* 전역 설정이 Vercel 최적화를 끄고 Storage 파일을 그대로 보내므로 next/image
@@ -254,7 +233,14 @@ const renderBlocks = (blocks: ArticleBlock[], context: RenderContext): ReactNode
                     // 캐시에 있는 이미지는 hydration 전에 load 가 끝나 onLoad 가 잡히지 않는다.
                     // 마운트 시점에 이미 완료됐으면 여기서 크기를 읽는다.
                     ref={(node) => {
-                      if (node?.complete) measureImage(node, block.src, context);
+                      if (!node?.complete) return;
+                      // SSR 문서를 받는 동안 이미지 요청이 먼저 실패하면 hydration 뒤에는
+                      // onError 가 다시 오지 않는다. complete 이면서 크기가 0인 상태로 복구한다.
+                      if (!node.naturalWidth || !node.naturalHeight) {
+                        context.onImageError(block.src);
+                        return;
+                      }
+                      measureImage(node, block.src, context);
                     }}
                     loading="lazy"
                     decoding="async"
@@ -303,11 +289,9 @@ type Props = { document: ArticleDocument; lang: Lang; highlights: ArticleCodeHig
  * 본문은 한국어 원문 하나뿐이라 컨테이너에 `lang="ko"` 를 못 박는다. 영어 경로에서도 같은
  * 원문을 보여 주므로, 이 표시가 없으면 보조 기술과 브라우저 번역이 문서 언어를 잘못 읽는다.
  *
- * @param {Props} props
- * @param {ArticleDocument} props.document `parseArticleMarkdown` 이 만든 렌더 트리.
- * @param {Lang} props.lang 내부 링크에 붙일 언어 프리픽스. 본문 언어와는 별개다.
- * @param {ArticleCodeHighlights} props.highlights 코드 블록 색칠 결과. 키가 없는 블록은 색 없이 그린다.
- * @returns {JSX.Element}
+ * @param props.document `parseArticleMarkdown` 이 만든 렌더 트리.
+ * @param props.lang 내부 링크에 붙일 언어 프리픽스. 본문 언어와는 별개다.
+ * @param props.highlights 코드 블록 색칠 결과. 키가 없는 블록은 색 없이 그린다.
  */
 const ArticleBody = ({ document, lang, highlights }: Props) => {
   const dict = DICTIONARY[lang];
@@ -345,7 +329,7 @@ const ArticleBody = ({ document, lang, highlights }: Props) => {
         // 로드에 실패한 이미지도 목록에 남겨 탐색 인덱스를 유지한다.
         // 확대 뷰는 두 테마 모두 어두운 scrim 위라 워드마크도 dark 를 쓴다.
         brokenImages[src]
-          ? { url: BROKEN_IMAGE_FALLBACK.dark, path: src, ...BROKEN_IMAGE_SIZE }
+          ? { url: BROKEN_IMAGE_FALLBACK, path: src, ...BROKEN_IMAGE_SIZE }
           : {
               url: src,
               path: src,

@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/CloseIcon";
 import { ShareButton } from "@/components/ShareButton";
 
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
 import styles from "./Modal.module.css";
 
@@ -31,18 +28,7 @@ type Props = {
  * document.body 로 포털 — 헤더/섹션 래퍼의 stacking context 밖으로 빼내 네비 뒤에 가리지 않게 한다.
  * 스크림 클릭·ESC·스크롤 잠금. 음악·개발 상세 공용 순수 UI. 액센트는 상위 [data-section] 이 결정.
  *
- * @param {Props} props
- * @param {boolean} props.open
- * @param {() => void} props.onClose
- * @param {string} props.closeLabel
- * @param {string | undefined} props.crumb
- * @param {string | undefined} props.label
- * @param {number | undefined} props.maxWidth
- * @param {boolean | undefined} props.mobileFull - 모바일(≤640px)에서 패널을 화면 꽉 채움 — 콘텐츠 긴 상세 모달용(프로젝트·연주).
- * @param {string | undefined} props.shareTitle
- * @param {string | undefined} props.shareLabel
- * @param {ReactNode} props.children
- * @returns {ReactPortal | null}
+ * @param props.mobileFull - 모바일(≤640px)에서 패널을 화면 꽉 채움 — 콘텐츠 긴 상세 모달용(프로젝트·연주).
  */
 const Modal = ({
   open,
@@ -56,21 +42,7 @@ const Modal = ({
   shareLabel,
   children,
 }: Props) => {
-  useScrollLock(open);
-  const isTopLayer = useOverlayLayer(open);
-  const panelRef = useFocusTrap(open);
-
-  useEffect(() => {
-    if (!open || !isTopLayer) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [isTopLayer, open, onClose]);
+  const { panelRef } = useDialog(open, { escape: onClose });
 
   // 모달은 클라 상호작용으로만 열린다(초기 SSR·hydration 시 open=false) → typeof 가드로 충분.
   if (!open || typeof document === "undefined") return null;

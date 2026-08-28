@@ -76,7 +76,7 @@ describe("articleBlockText", () => {
   it("이미지는 대체 텍스트와 캡션만 남기고 주소는 버린다", () => {
     const text = textOf(
       [
-        "![구조 다이어그램](https://firebasestorage.googleapis.com/a.webp)",
+        "![구조 다이어그램](https://mock-storage.aperture.invalid/a.webp)",
         "",
         "::caption[읽는 순서]",
       ].join("\n"),

@@ -2,10 +2,10 @@
 import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo-filter-query";
-import { buildPhotoFilterHref, parsePhotoFilterQuery } from "@/lib/photo-filter-query";
+import { ALL, FOCAL_MAX, FOCAL_MIN } from "@/lib/photo/filter-query";
+import { buildPhotoFilterHref, parsePhotoFilterQuery } from "@/lib/photo/filter-query";
 
-import type { PhotoFilterState } from "@/lib/photo-filter-query";
+import type { PhotoFilterState } from "@/lib/photo/filter-query";
 import type { WebMcpExecute, WebMcpToolDefinition } from "@/lib/webmcp/model-context";
 import type { GalleryPhoto } from "@/types/gallery-photo";
 import type { Tag } from "@/types/tag";

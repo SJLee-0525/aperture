@@ -3,6 +3,14 @@ import type { LocalizedText } from "@/types/localized";
 import type { RagChunk, RagSection } from "@/types/rag";
 
 const localized = (value: LocalizedText) => [value.ko, value.en].filter(Boolean).join(" / ");
+
+/**
+ * 라벨과 값을 잇되 값이 비면 줄 자체를 만들지 않는다.
+ * 템플릿 리터럴로 이으면 값이 비어도 라벨 때문에 항상 truthy 가 되어,
+ * 빈 문서에서도 라벨만 든 청크가 만들어지고 나머지 청크를 stale 로 지운다.
+ */
+const labeled = (label: string, value: string): string | null =>
+  value ? `${label}: ${value}` : null;
 const chunkId = (section: RagSection, type: string, sourceId: string, key: string) =>
   encodeURIComponent(`${section}:${type}:${sourceId}:${key}`);
 const chunk = (
@@ -29,7 +37,7 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
   const chunks: Array<RagChunk | null> = [];
   chunks.push(
     chunk("profile", "profile", "site", "intro", [
-      `이름/Name: ${localized(data.site.name)}`,
+      labeled("이름/Name", localized(data.site.name)),
       localized(data.site.tagline),
       localized(data.site.landingLead),
       localized(data.site.contactLead),
@@ -37,7 +45,10 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
     chunk("photography", "profile", "site", "bio", [localized(data.site.bio)]),
     chunk("development", "devConfig", "dev", "intro-stack", [
       localized(data.devConfig.heroLead),
-      `기술/Stack: ${data.devConfig.stack.flatMap((group) => group.items.map((item) => item.name)).join(", ")}`,
+      labeled(
+        "기술/Stack",
+        data.devConfig.stack.flatMap((group) => group.items.map((item) => item.name)).join(", "),
+      ),
     ]),
     chunk("music", "musicConfig", "music", "intro", [localized(data.musicConfig.intro)]),
   );
@@ -45,24 +56,24 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
   data.devProjects.forEach((project) => {
     chunks.push(
       chunk("development", "project", project.id, "overview", [
-        `프로젝트/Project: ${localized(project.title)}`,
+        labeled("프로젝트/Project", localized(project.title)),
         localized(project.category),
         localized(project.summary),
         localized(project.overview),
-        `역할/Role: ${localized(project.position)}`,
-        `기술/Tech: ${project.techTags.join(", ")}`,
+        labeled("역할/Role", localized(project.position)),
+        labeled("기술/Tech", project.techTags.join(", ")),
       ]),
       chunk("development", "project", project.id, "work", [
-        ...project.features.map((item) => `기능/Feature: ${localized(item)}`),
-        ...project.roles.map((item) => `담당/Work: ${localized(item)}`),
-        ...project.achievements.map((item) => `성과/Achievement: ${localized(item)}`),
+        ...project.features.map((item) => labeled("기능/Feature", localized(item))),
+        ...project.roles.map((item) => labeled("담당/Work", localized(item))),
+        ...project.achievements.map((item) => labeled("성과/Achievement", localized(item))),
       ]),
       ...project.troubleshooting.map((item, index) =>
         chunk("development", "project", project.id, `troubleshooting-${index}`, [
-          `트러블슈팅/Troubleshooting: ${localized(item.title)}`,
-          `문제/Problem: ${localized(item.problem)}`,
-          `해결/Solution: ${localized(item.solution)}`,
-          item.result ? `결과/Result: ${localized(item.result)}` : null,
+          labeled("트러블슈팅/Troubleshooting", localized(item.title)),
+          labeled("문제/Problem", localized(item.problem)),
+          labeled("해결/Solution", localized(item.solution)),
+          item.result ? labeled("결과/Result", localized(item.result)) : null,
         ]),
       ),
     );
@@ -101,7 +112,7 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
   data.musicWorks.forEach((work) =>
     chunks.push(
       chunk("music", "musicWork", work.id, "work", [
-        `연주/Performance: ${localized(work.title)}`,
+        labeled("연주/Performance", localized(work.title)),
         localized(work.subtitle),
         localized(work.category),
         localized(work.venue),
@@ -150,9 +161,9 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
   data.photos.forEach((photo) =>
     chunks.push(
       chunk("photography", "photo", photo.id, "photo", [
-        `사진/Photo: ${localized(photo.title)}`,
-        `장소/Place: ${localized(photo.place)}`,
-        `태그/Tags: ${photo.tags.map((id) => tagById.get(id) ?? id).join(", ")}`,
+        labeled("사진/Photo", localized(photo.title)),
+        labeled("장소/Place", localized(photo.place)),
+        labeled("태그/Tags", photo.tags.map((id) => tagById.get(id) ?? id).join(", ")),
         photo.camera,
         photo.lens,
       ]),
@@ -161,7 +172,7 @@ const buildRagChunks = (data: RagSourceData): RagChunk[] => {
   data.albums.forEach((album) =>
     chunks.push(
       chunk("photography", "album", album.id, "album", [
-        `앨범/Album: ${localized(album.title)}`,
+        labeled("앨범/Album", localized(album.title)),
         localized(album.subtitle),
       ]),
     ),

@@ -37,7 +37,8 @@
   margin-bottom: var(--s-1);
 }
 .emptyHint {
-  margin-top: var(--s-0);
+  /* p 의 UA margin-block 을 끊는다. globals 에 p 리셋이 없어 지우면 1em 이 되살아난다. */
+  margin-top: 0;
   font-size: var(--t-small);
   color: var(--text-3);
 }
@@ -68,7 +69,7 @@
 .gcount {
   font-family: var(--font-mono);
   font-size: var(--t-micro);
-  color: var(--text-4);
+  color: var(--text-3);
 }
 
 .list {

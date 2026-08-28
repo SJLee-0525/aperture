@@ -12,7 +12,7 @@ import { buildArticleToc } from "@/features/dev-blog/_lib/markdown-toc";
 import type { ArticleCodeHighlights } from "@/features/dev-blog/_lib/markdown-highlight-map";
 
 const STORAGE_IMAGE =
-  "https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
+  "https://mock-storage.aperture.invalid/v0/b/demo.appspot.com/o/dev-blog%2Fa%2Fb.webp?alt=media";
 
 const renderMarkdown = (
   markdown: string,
@@ -104,6 +104,32 @@ describe("ArticleBody", () => {
       expect(screen.getByAltText("구조도").className).toBe("");
     } finally {
       // prototype 을 되돌리지 않으면 뒤따르는 테스트의 이미지도 실려 온 것으로 보인다.
+      for (const key of ["complete", "naturalWidth", "naturalHeight"]) {
+        Reflect.deleteProperty(HTMLImageElement.prototype, key);
+      }
+    }
+  });
+
+  it("hydration 전에 실패한 이미지는 error 이벤트 없이도 자리 그림으로 바꾼다", () => {
+    Object.defineProperty(HTMLImageElement.prototype, "complete", {
+      configurable: true,
+      get: () => true,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
+      configurable: true,
+      get: () => 0,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalHeight", {
+      configurable: true,
+      get: () => 0,
+    });
+
+    try {
+      const { container } = renderMarkdown(`![구조도](${STORAGE_IMAGE})`);
+
+      expect(screen.queryByAltText("구조도")).toBeNull();
+      expect(container.querySelector("figure img")).toBeNull();
+    } finally {
       for (const key of ["complete", "naturalWidth", "naturalHeight"]) {
         Reflect.deleteProperty(HTMLImageElement.prototype, key);
       }

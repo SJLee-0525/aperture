@@ -3,6 +3,7 @@
 import { AdminButton } from "@/components/AdminButton";
 import { AdminInput } from "@/components/AdminInput";
 import { Icon } from "@/components/Icon";
+import row from "@/features/admin-shell/_components/admin-row.module.css";
 
 import type { DevStackGroup, DevStackItem } from "@/types/dev";
 
@@ -23,9 +24,6 @@ type Props = {
 
 /**
  * 유효한 hex 색이면 그대로, 아니면 미리보기용 기본색. color input 은 hex 만 받으므로 보정.
- *
- * @param {string} value
- * @returns {string}
  */
 const toColorValue = (value: string): string =>
   /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000";
@@ -33,19 +31,6 @@ const toColorValue = (value: string): string =>
 /**
  * 기술 스택 그룹 한 항목 — 카테고리 + 항목들(이름·배경색·글자색).
  * 색은 관리자가 지정하는 데이터라 <input type="color"> 값·인라인 style 로 다룬다.
- *
- * @param {Props} props
- * @param {DevStackGroup} props.group
- * @param {number} props.index
- * @param {boolean} props.isFirst
- * @param {boolean} props.isLast
- * @param {(index: number, value: string) => void} props.onEditCategory
- * @param {(index: number) => void} props.onAddItem
- * @param {(index: number, itemIndex: number, field: keyof DevStackItem, value: string) => void} props.onEditItem
- * @param {(index: number, itemIndex: number) => void} props.onRemoveItem
- * @param {(index: number, offset: -1 | 1) => void} props.onMove
- * @param {(index: number) => void} props.onRemove
- * @returns {JSX.Element}
  */
 const StackGroupRow = ({
   group,
@@ -72,7 +57,7 @@ const StackGroupRow = ({
       <div className={styles.controls}>
         <button
           type="button"
-          className={styles.move}
+          className={row.move}
           aria-label="위로"
           disabled={isFirst}
           onClick={() => onMove(index, -1)}
@@ -81,14 +66,23 @@ const StackGroupRow = ({
         </button>
         <button
           type="button"
-          className={styles.move}
+          className={row.move}
           aria-label="아래로"
           disabled={isLast}
           onClick={() => onMove(index, 1)}
         >
           <Icon name="arrowDown" size={14} />
         </button>
-        <button type="button" className={styles.delete} onClick={() => onRemove(index)}>
+        <button
+          type="button"
+          className={row.delete}
+          onClick={() => {
+            // 카테고리 하나가 아니라 그 안의 기술 칩 전체가 함께 사라진다.
+            const count = group.items.length;
+            const label = count > 0 ? `기술 ${count}개와 함께 ` : "";
+            if (window.confirm(`"${group.category}" 그룹을 ${label}삭제할까요?`)) onRemove(index);
+          }}
+        >
           그룹 삭제
         </button>
       </div>

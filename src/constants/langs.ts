@@ -8,9 +8,6 @@ const DEFAULT_LANG: Lang = "ko";
 
 /**
  * 임의 문자열(URL 세그먼트·저장값)이 지원 언어인지 판별하는 타입 가드
- *
- * @param {string} value
- * @returns {value is Lang}
  */
 const isLang = (value: string): value is Lang => (LANGS as readonly string[]).includes(value);
 
@@ -21,8 +18,7 @@ const isLang = (value: string): value is Lang => (LANGS as readonly string[]).in
  * 세그먼트로 `DICTIONARY` 를 인덱싱하는 자리는 "/fr/dev" 같은 요청에서도 던지지 않아야 한다.
  * 던지면 응답이 404 가 아니라 500 이 된다.
  *
- * @param {string} value URL 에서 온 검증 전 세그먼트.
- * @returns {Lang}
+ * @param value URL 에서 온 검증 전 세그먼트.
  */
 const toLang = (value: string): Lang => (isLang(value) ? value : DEFAULT_LANG);
 

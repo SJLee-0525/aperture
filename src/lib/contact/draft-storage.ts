@@ -1,0 +1,170 @@
+import { SESSION_STORAGE_KEYS } from "@/constants/storage-keys";
+
+import type { ContactDraft } from "@/types/chat";
+
+/** 채팅 응답과 sessionStorage가 함께 사용하는 연락 초안 필드 길이 상한. */
+const CONTACT_DRAFT_LIMITS = {
+  name: 100,
+  email: 254,
+  message: 2_000,
+} as const;
+
+/** sessionStorage에 저장하는 탭 단위 일회성 연락 초안. */
+type StoredContactDraftV1 = {
+  version: 1;
+  createdAt: number;
+  expiresAt: number;
+  name: string;
+  email: string;
+  message: string;
+};
+
+/** 연락 페이지로 이동하는 동안 초안을 보관하는 시간. */
+const CONTACT_DRAFT_TTL_MS = 10 * 60 * 1000;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * 저장할 연락 필드의 형식과 길이를 검사한다.
+ *
+ * @param name 이름. 빈 문자열을 허용한다.
+ * @param email 이메일. 빈 문자열을 허용한다.
+ * @param message 문의 내용.
+ * @returns 모든 필드가 저장 계약을 만족하면 true.
+ */
+const isValidFields = (name: string, email: string, message: string): boolean =>
+  Boolean(message.trim()) &&
+  message.length <= CONTACT_DRAFT_LIMITS.message &&
+  name.length <= CONTACT_DRAFT_LIMITS.name &&
+  (email === "" || (email.length <= CONTACT_DRAFT_LIMITS.email && EMAIL_PATTERN.test(email)));
+
+/**
+ * 연락 초안을 검증해 sessionStorage에 저장한다.
+ * storage 예외(SecurityError 등)는 실패(false)로 삼키고, 호출부는 실패해도
+ * 일반 /contact 링크로 이동을 계속한다.
+ *
+ * @returns 저장 성공 여부.
+ */
+const writeContactDraft = (
+  storage: Pick<Storage, "setItem" | "removeItem">,
+  draft: ContactDraft,
+  now = Date.now(),
+): boolean => {
+  const name = draft.name ?? "";
+  const email = draft.email ?? "";
+  if (!isValidFields(name, email, draft.message)) return false;
+
+  const stored: StoredContactDraftV1 = {
+    version: 1,
+    createdAt: now,
+    expiresAt: now + CONTACT_DRAFT_TTL_MS,
+    name,
+    email,
+    message: draft.message,
+  };
+  try {
+    storage.setItem(SESSION_STORAGE_KEYS.CONTACT_DRAFT, JSON.stringify(stored));
+  } catch {
+    return false;
+  }
+  scheduleContactDraftExpiry(storage);
+  return true;
+};
+
+/** 예약된 만료 타이머. 다음 쓰기가 이걸 취소하고 새로 잡는다. */
+let expiryTimer: number | null = null;
+
+/**
+ * TTL 이 지나면 초안을 실제로 지운다.
+ *
+ * `parseStored` 의 만료 검사는 읽는 시점에만 돈다. 방문자가 연락 페이지로 가지 않으면 이름과
+ * 이메일, 본문이 담긴 JSON 이 탭을 닫을 때까지 남아, 처리방침이 적은 "최대 10분" 과 어긋난다.
+ * 탭을 떠날 때도 지워 타이머가 돌기 전에 화면을 닫는 경우를 함께 덮는다.
+ *
+ * 서버 렌더에는 `window` 가 없으므로 아무것도 예약하지 않는다.
+ */
+const scheduleContactDraftExpiry = (storage: Pick<Storage, "removeItem">): void => {
+  if (typeof window === "undefined") return;
+
+  const drop = () => {
+    try {
+      storage.removeItem(SESSION_STORAGE_KEYS.CONTACT_DRAFT);
+    } catch {
+      // 저장소를 쓸 수 없으면 남는 값도 없다.
+    }
+  };
+
+  // 같은 탭에서 초안을 다시 쓰면 이전 예약은 필요 없다. 취소하지 않으면 쓰기 횟수만큼
+  // 타이머가 쌓이고, 먼저 잡힌 예약이 새 초안을 지운다.
+  if (expiryTimer !== null) window.clearTimeout(expiryTimer);
+  expiryTimer = window.setTimeout(drop, CONTACT_DRAFT_TTL_MS);
+  window.addEventListener("pagehide", drop, { once: true });
+};
+
+/**
+ * 배열이 아닌 객체인지 확인한다.
+ *
+ * @param value 확인할 값.
+ * @returns 일반 객체이면 true.
+ */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+/**
+ * 저장된 JSON을 읽어 아직 유효한 연락 필드만 반환한다.
+ *
+ * @param raw sessionStorage에서 읽은 JSON 문자열.
+ * @param now 만료 여부를 판단할 현재 시각(ms).
+ * @returns 유효한 초안 필드. 검증에 실패하면 null.
+ */
+const parseStored = (
+  raw: string,
+  now: number,
+): Pick<StoredContactDraftV1, "name" | "email" | "message"> | null => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!isRecord(parsed) || parsed.version !== 1) return null;
+  const { createdAt, expiresAt, name, email, message } = parsed;
+  if (!Number.isInteger(createdAt) || !Number.isInteger(expiresAt)) return null;
+  // 시계 조작·손상 값 방어: 만료 전이어야 하고, 생성이 미래이거나 수명이 TTL을 넘으면 거부.
+  if (
+    (expiresAt as number) <= now ||
+    (createdAt as number) > now ||
+    (expiresAt as number) - (createdAt as number) > CONTACT_DRAFT_TTL_MS
+  ) {
+    return null;
+  }
+  if (typeof name !== "string" || typeof email !== "string" || typeof message !== "string") {
+    return null;
+  }
+  if (!isValidFields(name, email, message)) return null;
+  return { name, email, message };
+};
+
+/**
+ * 연락 초안을 한 번만 읽는다. 값을 읽은 직후 삭제하며, 삭제하지 못하면 사용하지 않는다.
+ */
+const takeContactDraft = (
+  storage: Pick<Storage, "getItem" | "removeItem">,
+  now = Date.now(),
+): Pick<StoredContactDraftV1, "name" | "email" | "message"> | null => {
+  let raw: string | null;
+  try {
+    raw = storage.getItem(SESSION_STORAGE_KEYS.CONTACT_DRAFT);
+  } catch {
+    return null;
+  }
+  if (raw === null) return null;
+  try {
+    storage.removeItem(SESSION_STORAGE_KEYS.CONTACT_DRAFT);
+  } catch {
+    return null;
+  }
+  return parseStored(raw, now);
+};
+
+export { CONTACT_DRAFT_LIMITS, CONTACT_DRAFT_TTL_MS, takeContactDraft, writeContactDraft };

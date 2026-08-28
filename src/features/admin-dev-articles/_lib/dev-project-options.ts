@@ -13,7 +13,7 @@ type DevProjectOption = { id: string; title: LocalizedText; published: boolean }
  * 나중에 공개하는 순서가 있다), 대신 발행 조건 검사가 공개 상태를 확인한다.
  * mock/live 분기는 프로젝트 repository 가 이미 갖고 있어 여기서 다시 가르지 않는다.
  *
- * @returns {Promise<DevProjectOption[]>} 초안을 포함한 전체 프로젝트. 실패하면 빈 목록으로
+ * @returns 초안을 포함한 전체 프로젝트. 실패하면 빈 목록으로
  *   두지 않고 오류를 올려 폼이 "불러오지 못함"을 보여 준다.
  */
 const loadDevProjectOptions = async (): Promise<DevProjectOption[]> =>

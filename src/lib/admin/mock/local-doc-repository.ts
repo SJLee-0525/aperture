@@ -47,8 +47,8 @@ type LocalDocRepositoryConfig<TDoc extends Record<string, unknown>> = {
  * 화면이든 자기가 소유한 필드를 통째로 만들어 보내므로 지금은 두 동작이 같은 결과를 낸다.
  * 부분 중첩 쓰기를 하는 화면이 생기면 이 차이가 드러나므로 그때 함께 정한다.
  *
- * @param {LocalDocRepositoryConfig<TDoc>} config 문서별 선언.
- * @returns {LocalDocRepository<TDoc>} 로컬 저장소에 붙은 설정 문서 읽기·쓰기.
+ * @param config 문서별 선언.
+ * @returns 로컬 저장소에 붙은 설정 문서 읽기·쓰기.
  */
 const createLocalDocRepository = <TDoc extends Record<string, unknown>>(
   config: LocalDocRepositoryConfig<TDoc>,
@@ -58,7 +58,7 @@ const createLocalDocRepository = <TDoc extends Record<string, unknown>>(
   /**
    * 저장소를 읽고, 비어 있거나 형이 깨졌으면 mock 으로 다시 채운다.
    *
-   * @returns {Promise<TDoc>} seed 기본값 위에 저장본을 덮은 현재 문서.
+   * @returns seed 기본값 위에 저장본을 덮은 현재 문서.
    */
   const load = async (): Promise<TDoc> => {
     const storage = config.getStorage();
@@ -78,8 +78,7 @@ const createLocalDocRepository = <TDoc extends Record<string, unknown>>(
   /**
    * 문서를 덮어쓴다. 실패는 사용자에게 드러낸다.
    *
-   * @param {TDoc} doc 저장할 문서 전체.
-   * @returns {void}
+   * @param doc 저장할 문서 전체.
    */
   const save = (doc: TDoc): void => {
     if (writeLocalStore(config.getStorage(), config.key, config.version, doc)) return;

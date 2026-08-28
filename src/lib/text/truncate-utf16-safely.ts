@@ -5,9 +5,9 @@
  * 화면에 대체 문자로 보인다. 상한은 code unit 기준을 그대로 두고 끝에 남은 앞쪽 절반만
  * 떼어 내, 길이 계산에 기대는 기존 예산 계약을 바꾸지 않는다.
  *
- * @param {string} value 자를 문자열.
- * @param {number} maxCodeUnits 허용하는 최대 code unit 수.
- * @returns {string} 상한 이내로 자른 문자열.
+ * @param value 자를 문자열.
+ * @param maxCodeUnits 허용하는 최대 code unit 수.
+ * @returns 상한 이내로 자른 문자열.
  */
 const truncateUtf16Safely = (value: string, maxCodeUnits: number): string => {
   if (maxCodeUnits <= 0) return "";

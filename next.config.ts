@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 
 import packageJson from "./package.json" with { type: "json" };
 import { SECURITY_HEADERS } from "./src/constants/security-headers";
+import { assertDeployableAdminSession } from "./src/lib/auth/assert-deployable-admin-session";
 import { assertDeployableContentSource } from "./src/lib/content/assert-deployable-content-source";
 import { supabaseUrl } from "./src/lib/supabase/config";
 
@@ -33,14 +34,9 @@ const nextConfig: NextConfig = {
     // 업로드 단계에서 메인(2048px)·썸네일(320px) WebP를 직접 생성한다.
     // Vercel Image Optimization 한도에 의존하지 않고 Storage 파일을 그대로 전달한다.
     unoptimized: true,
-    // Supabase 공개 버킷이 이미지 원본이다. Firebase 패턴은 이전 완료(M8)까지 유지한다.
+    // Supabase 공개 버킷이 이미지 원본이다.
     remotePatterns: [
       ...supabaseImagePatterns(),
-      {
-        protocol: "https",
-        hostname: "firebasestorage.googleapis.com",
-        pathname: "/v0/b/**",
-      },
       {
         protocol: "https",
         hostname: "i.ytimg.com",
@@ -61,6 +57,12 @@ const nextConfig: NextConfig = {
       { source: "/music/:path*", destination: "/ko/music/:path*", permanent: true },
       { source: "/dev/:path*", destination: "/ko/dev/:path*", permanent: true },
       { source: "/contact", destination: "/ko/contact", permanent: true },
+      // 법적 문서는 외부(스토어·서비스 등록)에 무-로케일 URL 로 등록될 수 있다.
+      {
+        source: "/:legalDoc(privacy|terms|accessibility)",
+        destination: "/ko/:legalDoc",
+        permanent: true,
+      },
       { source: "/search", destination: "/ko/search", permanent: true },
       { source: "/albums", destination: "/ko/photo/albums", permanent: true },
       { source: "/albums/:id", destination: "/ko/photo/albums/:id", permanent: true },
@@ -121,6 +123,7 @@ const sentryConfig = withSentryConfig(nextConfig, {
  */
 const config = (phase: string): NextConfig => {
   assertDeployableContentSource(phase);
+  assertDeployableAdminSession(phase);
   return sentryConfig;
 };
 

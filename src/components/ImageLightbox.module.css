@@ -15,7 +15,7 @@
   inset: 0;
   border: 0;
   padding: 0;
-  background: rgba(0, 0, 0, 0.82);
+  background: var(--scrim-stage);
   cursor: zoom-out;
   animation: lbfade 0.25s linear;
 }
@@ -55,7 +55,7 @@
 }
 .stage {
   position: relative;
-  max-height: 88vh;
+  max-height: 88dvh;
   animation: lbpop 0.3s var(--ease-spring);
   cursor: pointer;
 }
@@ -96,15 +96,15 @@
   height: 40px;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--glass-chrome-bg);
+  border: 1px solid var(--glass-chrome-line);
   color: var(--text-inverse);
   line-height: 1;
   cursor: pointer;
   transition: background var(--dur) var(--ease);
 }
 .close:hover:not([data-cursor-snapped]) {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--glass-chrome-bg-hover);
 }
 
 .nav {
@@ -116,8 +116,8 @@
   height: 42px;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--glass-chrome-bg);
+  border: 1px solid var(--glass-chrome-line);
   color: var(--text-inverse);
   line-height: 1;
   cursor: pointer;
@@ -125,12 +125,18 @@
     background var(--dur) var(--ease),
     opacity var(--dur) var(--ease);
 }
-.nav:hover:not(:disabled):not([data-cursor-snapped]) {
-  background: rgba(0, 0, 0, 0.6);
+.nav:hover:not([aria-disabled="true"]):not([data-cursor-snapped]) {
+  background: var(--glass-chrome-bg-hover);
 }
-.nav:disabled {
+.nav[aria-disabled="true"] {
   opacity: 0.3;
   cursor: default;
+}
+/* 어두운 사진 위에 뜨는 크롬이라 globals 의 액센트 링은 대비를 보장하지 못한다. */
+.close:focus-visible,
+.nav:focus-visible {
+  outline: 2px solid var(--text-inverse);
+  outline-offset: 2px;
 }
 .prev {
   left: 16px;

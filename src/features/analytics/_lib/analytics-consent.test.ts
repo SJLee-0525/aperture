@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   ANALYTICS_CONSENT_MAX_AGE_MS,
+  cleanupStoredAnalyticsConsent,
   getAnalyticsConsentSnapshot,
   parseAnalyticsConsent,
   readAnalyticsConsent,
@@ -96,7 +97,7 @@ describe("tracking consent storage", () => {
     expect(getAnalyticsConsentSnapshot()).toBeNull();
   });
 
-  it("같은 저장값은 한 번만 파싱하고 레거시 키도 최초 조회에서만 정리한다", () => {
+  it("같은 저장값은 한 번만 파싱한다", () => {
     window.localStorage.setItem(
       STORAGE_KEYS.CONSENT,
       JSON.stringify({ ...CHOICE, expiresAt: NOW + 1 }),
@@ -104,18 +105,43 @@ describe("tracking consent storage", () => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
     const parse = vi.spyOn(JSON, "parse");
-    const getItem = vi.spyOn(Storage.prototype, "getItem");
-    const legacyKeys = new Set<string>([
-      LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT,
-      LEGACY_STORAGE_KEYS.COMBINED_CONSENT,
-    ]);
 
     const first = getAnalyticsConsentSnapshot();
     const second = getAnalyticsConsentSnapshot();
 
     expect(second).toBe(first);
     expect(parse).toHaveBeenCalledTimes(1);
-    expect(getItem.mock.calls.filter(([key]) => legacyKeys.has(String(key)))).toHaveLength(2);
+  });
+
+  // useSyncExternalStore 의 getSnapshot 은 순수해야 한다. 저장소 정리는 provider 의 effect 몫이다.
+  it("스냅샷 조회는 저장소에 쓰지 않는다", () => {
+    window.localStorage.setItem(LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT, "granted");
+    window.localStorage.setItem(STORAGE_KEYS.CONSENT, "손상된 값");
+    const removeItem = vi.spyOn(Storage.prototype, "removeItem");
+
+    expect(getAnalyticsConsentSnapshot()).toBeNull();
+
+    expect(removeItem).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem(LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT)).toBe("granted");
+  });
+
+  it("정리 함수가 레거시 키와 손상된 값을 지우고 레거시 조회는 한 번만 한다", () => {
+    window.localStorage.setItem(LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT, "granted");
+    window.localStorage.setItem(STORAGE_KEYS.CONSENT, "손상된 값");
+    const getItem = vi.spyOn(Storage.prototype, "getItem");
+    const legacyKeys = new Set<string>([
+      LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT,
+      LEGACY_STORAGE_KEYS.COMBINED_CONSENT,
+    ]);
+
+    cleanupStoredAnalyticsConsent();
+    cleanupStoredAnalyticsConsent();
+
+    // 아래 검증도 getItem 을 부르므로 호출 수를 먼저 센다.
+    const legacyReads = getItem.mock.calls.filter(([key]) => legacyKeys.has(String(key))).length;
+    expect(legacyReads).toBe(2);
+    expect(window.localStorage.getItem(LEGACY_STORAGE_KEYS.ANALYTICS_CONSENT)).toBeNull();
+    expect(window.localStorage.getItem(STORAGE_KEYS.CONSENT)).toBeNull();
   });
 
   it("브라우저 storage가 차단돼도 선택 저장 함수가 throw하지 않는다", () => {

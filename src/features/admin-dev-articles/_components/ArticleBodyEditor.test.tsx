@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ArticleBodyEditor } from "@/features/admin-dev-articles/_components/ArticleBodyEditor";
 
@@ -81,5 +81,18 @@ describe("ArticleBodyEditor", () => {
     await waitFor(() => expect(textarea.scrollTop).toBe(KEPT_SCROLL_TOP));
     // 커서가 본문 끝이 아니라 삽입한 조각 뒤에 있어야 이어서 쓸 수 있다.
     expect(textarea.selectionStart).toBeLessThan(textarea.value.length);
+  });
+
+  it("이미지가 아닌 파일은 대체 텍스트를 받기 전에 거부한다", () => {
+    const rejectedUpload = Object.assign(vi.fn(upload), { variant: "body" as const });
+    render(<ArticleBodyEditor value="" upload={rejectedUpload} onChange={vi.fn()} />);
+
+    fireEvent.change(document.querySelector('input[type="file"]') as HTMLInputElement, {
+      target: { files: [new File([], "document.pdf", { type: "application/pdf" })] },
+    });
+
+    expect(screen.getByRole("alert").textContent).toContain("이미지 파일만");
+    expect(screen.queryByLabelText(/대체 텍스트/)).toBeNull();
+    expect(rejectedUpload).not.toHaveBeenCalled();
   });
 });

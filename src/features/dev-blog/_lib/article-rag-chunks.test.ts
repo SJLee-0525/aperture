@@ -119,7 +119,7 @@ describe("articleRagChunks", () => {
     const chunks = articleRagChunks(MOCK_DEV_ARTICLES[0], []);
     const text = chunks.map(({ text: value }) => value).join("\n");
 
-    expect(text).not.toContain("firebasestorage");
+    expect(text).not.toContain("mock-storage");
     expect(text).not.toContain("youtube.com");
   });
 
@@ -129,7 +129,7 @@ describe("articleRagChunks", () => {
         body: [
           "## 절",
           "",
-          `![구조도](https://firebasestorage.googleapis.com/a.webp "2048x1365")`,
+          `![구조도](https://mock-storage.aperture.invalid/a.webp "2048x1365")`,
         ].join("\n"),
       }),
       [],

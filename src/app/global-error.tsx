@@ -14,13 +14,14 @@ type Props = {
  * 이 컴포넌트는 루트 레이아웃을 "대체"하므로 자체 <html>/<body>를 렌더해야 하고,
  * LangProvider·globals.css·폰트·테마에 접근할 수 없다 → i18n·토큰 불가라 영어 고정 + 인라인 스타일로 자급.
  * 색은 Aperture 라이트 토큰과 동일하게 하드코딩(예외적으로 허용).
+ * 문구가 영어 고정이므로 문서 언어도 영어다.
  * 오류 전송은 동의 뒤 로드된 SDK가 있을 때만 일어난다 — Provider 밖이라 동의 상태를
  * 다시 읽지 않고, 미로드 시 포워더가 no-op이다(ADR-0004).
  *
- * @param {Props} props 전역 오류 복구 동작.
- * @param {Error & { digest?: string }} props.error 루트 레이아웃 렌더 중 포착한 오류.
- * @param {() => void} props.reset 애플리케이션을 다시 렌더링하는 콜백.
- * @returns {JSX.Element} 자체 html·body를 포함한 최상위 오류 화면.
+ * @param props 전역 오류 복구 동작.
+ * @param props.error 루트 레이아웃 렌더 중 포착한 오류.
+ * @param props.reset 애플리케이션을 다시 렌더링하는 콜백.
+ * @returns 자체 html·body를 포함한 최상위 오류 화면.
  */
 export default function GlobalError({ error, reset }: Props) {
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function GlobalError({ error, reset }: Props) {
   }, [error]);
 
   return (
-    <html lang="ko">
+    <html lang="en">
       <body
         style={{
           margin: 0,

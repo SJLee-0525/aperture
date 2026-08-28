@@ -59,7 +59,7 @@ describe("toArticleSearchSources", () => {
             "const skipped = 1;",
             "```",
             "",
-            "![대체 텍스트](https://firebasestorage.googleapis.com/a.webp)",
+            "![대체 텍스트](https://mock-storage.aperture.invalid/a.webp)",
           ].join("\n"),
         }),
       ],

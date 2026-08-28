@@ -1,12 +1,4 @@
 /* 작업(홈) 로딩 셸 — GalleryView.module.css .main/.toolbar + TagFilterBar.module.css .bar/.tagbar + 메이슨리 흉내. */
-.main {
-  max-width: 1180px;
-  height: var(--public-content-height);
-  max-height: var(--public-content-height);
-  margin: 0 auto;
-  overflow: hidden;
-  padding: var(--s-8) var(--s-6) var(--s-16);
-}
 .toolbar {
   display: flex;
   align-items: flex-end;

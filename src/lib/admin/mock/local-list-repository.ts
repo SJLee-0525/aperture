@@ -11,12 +11,12 @@ type ListEntity = { id: string; order: number; published: boolean };
 /**
  * `order`가 같을 때 문서 ID로 정렬한다.
  *
- * Firestore 는 문서 경로를 코드 포인트 순으로 비교한다. `localeCompare` 는 로케일에 따라
+ * live 정렬은 id 를 코드 포인트 순으로 비교한다. `localeCompare` 는 로케일에 따라
  * 대소문자·기호 순서가 달라져 같은 데이터가 브라우저마다 다른 순서로 보일 수 있다.
  *
- * @param {string} a 앞 문서 ID.
- * @param {string} b 뒤 문서 ID.
- * @returns {number} `Array.prototype.sort` 비교 결과.
+ * @param a 앞 문서 ID.
+ * @param b 뒤 문서 ID.
+ * @returns `Array.prototype.sort` 비교 결과.
  */
 const compareDocumentId = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -39,7 +39,7 @@ type LocalListRepositoryConfig<TEntity extends ListEntity, TListItem> = {
   getStorage: () => Storage;
 };
 
-/** 목록 컬렉션 mock 저장소가 제공하는 CRUD — live(listCrud + REST projection)와 같은 모양. */
+/** 목록 컬렉션 mock 저장소가 제공하는 CRUD — live(sortableListCrud + REST projection)와 같은 모양. */
 type LocalListRepository<TEntity extends ListEntity, TListItem> = {
   newId: () => string;
   list: () => Promise<TListItem[]>;
@@ -54,8 +54,8 @@ type LocalListRepository<TEntity extends ListEntity, TListItem> = {
 /**
  * ISO 문자열을 Date 로 되돌린다.
  *
- * @param {unknown} value 저장된 시각 값.
- * @returns {Date | null} 유효한 시각. 형식이 어긋나면 null.
+ * @param value 저장된 시각 값.
+ * @returns 유효한 시각. 형식이 어긋나면 null.
  */
 const toDate = (value: unknown): Date | null => {
   if (typeof value !== "string") return null;
@@ -64,7 +64,7 @@ const toDate = (value: unknown): Date | null => {
 };
 
 /**
- * Firestore 를 대신하는 목록 컬렉션 mock 저장소 팩토리.
+ * live 저장소를 대신하는 목록 컬렉션 mock 저장소 팩토리.
  *
  * 컬렉션마다 다른 키, seed, 목록 투영을 받아 공통 CRUD를 제공한다. 검증은
  * 최소 불변조건만 확인한다.
@@ -74,8 +74,8 @@ const toDate = (value: unknown): Date | null => {
  * mock 저장은 브라우저에만 남으므로 공개 캐시와 RAG 후처리를 호출하지 않는다.
  * 브라우저에만 남고 공개 화면·RAG 에 반영되지 않으며, 그 사실은 관리자 배지가 알린다.
  *
- * @param {LocalListRepositoryConfig<TEntity, TListItem>} config 컬렉션별 선언.
- * @returns {LocalListRepository<TEntity, TListItem>} 로컬 저장소에 붙은 관리자 CRUD.
+ * @param config 컬렉션별 선언.
+ * @returns 로컬 저장소에 붙은 관리자 CRUD.
  */
 const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   config: LocalListRepositoryConfig<TEntity, TListItem>,
@@ -96,8 +96,8 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   /**
    * 항목 하나의 최소 불변조건을 확인하고 Date 필드를 되살린다.
    *
-   * @param {unknown} value 저장된 항목.
-   * @returns {TEntity | null} 계약을 만족하면 항목, 아니면 null.
+   * @param value 저장된 항목.
+   * @returns 계약을 만족하면 항목, 아니면 null.
    */
   const toEntity = (value: unknown): TEntity | null => {
     if (!isRecord(value)) return null;
@@ -116,8 +116,8 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   /**
    * 봉투에서 꺼낸 값을 항목 배열로 되돌린다. 하나라도 어긋나면 전체를 버린다.
    *
-   * @param {unknown} value 봉투에 담겨 있던 값.
-   * @returns {TEntity[] | null} 검증을 통과한 전체 항목, 아니면 null.
+   * @param value 봉투에 담겨 있던 값.
+   * @returns 검증을 통과한 전체 항목, 아니면 null.
    */
   const decode = (value: unknown): TEntity[] | null => {
     if (!Array.isArray(value)) return null;
@@ -128,7 +128,7 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   /**
    * 저장소를 읽고, 비어 있거나 형이 깨졌으면 mock 으로 다시 채운다.
    *
-   * @returns {Promise<TEntity[]>} 현재 전체 항목.
+   * @returns 현재 전체 항목.
    */
   const load = async (): Promise<TEntity[]> => {
     const storage = config.getStorage();
@@ -148,8 +148,7 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   /**
    * 저장소를 덮어쓰고 실패하면 오류를 반환한다.
    *
-   * @param {TEntity[]} entities 저장할 전체 항목.
-   * @returns {void}
+   * @param entities 저장할 전체 항목.
    */
   const save = (entities: TEntity[]): void => {
     if (writeLocalStore(config.getStorage(), config.key, config.version, entities)) return;
@@ -161,9 +160,8 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
   /**
    * 항목 하나를 바꾼 사본을 저장한다. 대상이 없으면 실패를 알린다.
    *
-   * @param {string} id 바꿀 항목의 ID.
-   * @param {(entity: TEntity) => TEntity} mutate 바꾼 항목을 돌려주는 함수.
-   * @returns {Promise<void>}
+   * @param id 바꿀 항목의 ID.
+   * @param mutate 바꾼 항목을 돌려주는 함수.
    */
   const patch = async (id: string, mutate: (entity: TEntity) => TEntity): Promise<void> => {
     const entities = await load();
@@ -221,9 +219,14 @@ const createLocalListRepository = <TEntity extends ListEntity, TListItem>(
     setPublished: (id, published) =>
       enqueue(() => patch(id, (entity) => ({ ...entity, published }))),
 
+    // live 는 삭제된 행 수가 0 이면 실패로 처리한다. 여기서 조용히 성공하면 없는 항목을
+    // 지운 화면이 mock 에서만 정상으로 보인다.
     remove: (id) =>
       enqueue(async () => {
         const entities = await load();
+        if (!entities.some((entity) => entity.id === id)) {
+          throw new Error(`삭제할 ${config.label}을(를) 찾지 못했습니다.`);
+        }
         save(entities.filter((entity) => entity.id !== id));
       }),
   };

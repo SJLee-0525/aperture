@@ -14,12 +14,9 @@ import { PortfolioSearchStatus } from "@/features/chat/_components/PortfolioSear
 import { LocalizedLink } from "@/features/lang/_components/LocalizedLink";
 
 import { useChat } from "@/features/chat/_hooks/use-chat";
+import { useChatScreenTarget } from "@/features/chat/_hooks/use-chat-screen-target";
 import { useLang } from "@/features/lang/_hooks/use-lang";
-import { useChatScreenTarget } from "@/hooks/use-chat-screen-target";
-import { useDialogIsolation } from "@/hooks/use-dialog-isolation";
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-import { useOverlayLayer } from "@/hooks/use-overlay-layer";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useDialog } from "@/hooks/use-dialog";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -106,9 +103,11 @@ const ChatPanel = ({ open, onClose }: Props) => {
     getScreenTarget,
   );
   const titleId = useId();
-  useDialogIsolation(open, "[data-chat-overlay]");
-  const panelRef = useFocusTrap(open);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const { panelRef, overlayRef } = useDialog(open, {
+    scrollLock: { fixBodyOnMobile: false },
+    isolate: true,
+    escape: onClose,
+  });
   const listRef = useRef<HTMLDivElement>(null);
   const messageListAtBottomRef = useRef(true);
   const viewportTransitionRef = useRef(false);
@@ -117,20 +116,6 @@ const ChatPanel = ({ open, onClose }: Props) => {
     messages.findLast(
       (message) => message.id !== "welcome" && message.role === "assistant" && !message.pending,
     )?.content ?? "";
-
-  useScrollLock(open, { fixBodyOnMobile: false });
-  const isTopLayer = useOverlayLayer(open);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (open && isTopLayer && event.key === "Escape") {
-        event.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isTopLayer, onClose, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -204,7 +189,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
       body.style.height = bodyHeight;
       window.scrollTo(scrollX, scrollY);
     };
-  }, [open]);
+  }, [open, overlayRef]);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -283,7 +268,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
                         <i />
                         <i />
                       </span>
-                      <span className={message.pendingStatus ? undefined : styles.srOnly}>
+                      <span className={message.pendingStatus ? undefined : "sr-only"}>
                         {message.pendingStatus === "portfolio-search" ? (
                           <PortfolioSearchStatus key={lang} lang={lang} />
                         ) : (
@@ -373,7 +358,7 @@ const ChatPanel = ({ open, onClose }: Props) => {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
           {announcement}
         </div>
 

@@ -11,10 +11,13 @@ import {
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 import { AdminButton } from "@/components/AdminButton";
+import { RecoveryNotice } from "@/features/admin-shell/_components/RecoveryNotice";
 import { TagAddForm } from "@/features/admin-tags/_components/TagAddForm";
 import { TagRow } from "@/features/admin-tags/_components/TagRow";
 
 import { useTagsAdmin } from "@/features/admin-tags/_hooks/use-tags-admin";
+
+import { guardedNavigate } from "@/features/admin-shell/_lib/guarded-navigate";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -22,12 +25,24 @@ import styles from "./AdminTagsEditor.module.css";
 
 /**
  * 관리자 태그 사전 — 추가·편집·삭제·드래그 정렬. 조립만, 로직은 useTagsAdmin.
- *
- * @returns {JSX.Element}
  */
 const AdminTagsPage = () => {
-  const { tags, status, error, saving, saved, editLabel, addTag, removeTag, reorder, save } =
-    useTagsAdmin();
+  const {
+    confirmLeave,
+    recovery,
+    applyRecovered,
+    usage,
+    tags,
+    status,
+    error,
+    saving,
+    saved,
+    editLabel,
+    addTag,
+    removeTag,
+    reorder,
+    save,
+  } = useTagsAdmin();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -55,6 +70,16 @@ const AdminTagsPage = () => {
 
       {status === "ready" ? (
         <>
+          {recovery.pending ? (
+            <RecoveryNotice
+              savedAt={recovery.pending.savedAt}
+              onRestore={() => {
+                const restored = recovery.restore();
+                if (restored) applyRecovered(restored);
+              }}
+              onDiscard={recovery.discard}
+            />
+          ) : null}
           <TagAddForm onAdd={addTag} />
 
           {tags.length === 0 ? (
@@ -66,7 +91,13 @@ const AdminTagsPage = () => {
               <SortableContext items={tags.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                 <ul className={styles.list}>
                   {tags.map((tag) => (
-                    <TagRow key={tag.id} tag={tag} onEditLabel={editLabel} onDelete={removeTag} />
+                    <TagRow
+                      key={tag.id}
+                      tag={tag}
+                      usedCount={usage[tag.id] ?? 0}
+                      onEditLabel={editLabel}
+                      onDelete={removeTag}
+                    />
                   ))}
                 </ul>
               </SortableContext>
@@ -79,13 +110,21 @@ const AdminTagsPage = () => {
             </p>
           ) : null}
 
-          {saved ? <p className={styles.state}>저장되었습니다.</p> : null}
+          {/* 저장 후 화면이 바뀌지 않아 이 문구가 유일한 성공 신호다. */}
+          <p className={styles.state} role="status">
+            {saved ? "저장되었습니다." : ""}
+          </p>
 
           <div className={styles.actions}>
             <AdminButton variant="primary" onClick={save} disabled={saving}>
               {saving ? "저장 중…" : "저장"}
             </AdminButton>
-            <AdminButton variant="secondary" href={ROUTES.ADMIN} disabled={saving}>
+            <AdminButton
+              variant="secondary"
+              href={ROUTES.ADMIN_PHOTO}
+              disabled={saving}
+              onNavigate={guardedNavigate(confirmLeave)}
+            >
               취소
             </AdminButton>
           </div>

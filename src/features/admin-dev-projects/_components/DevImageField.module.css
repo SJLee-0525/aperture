@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-4);
+  color: var(--text-3);
   font-size: var(--t-small);
 }
 
@@ -87,32 +87,6 @@
   display: flex;
   align-items: center;
   gap: var(--s-2);
-}
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  height: 36px;
-  padding: 0 var(--s-4);
-  background: var(--surface-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-size: var(--t-small);
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color var(--dur) var(--ease);
-}
-.button:hover {
-  border-color: var(--text-3);
-}
-.input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
 }
 
 .move {

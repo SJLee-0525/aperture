@@ -23,6 +23,20 @@ const CHAT_LIMITS = {
   maxTotalChars: 8_000,
 } as const;
 
+/** UTF-8 한 글자의 최대 바이트. 한국어는 3, 이모지는 서로게이트 쌍까지 4다. */
+const MAX_UTF8_BYTES_PER_CHAR = 4;
+/** role·lang·context 와 JSON 구두점이 차지하는 여유분. */
+const ENVELOPE_BYTES = 4_000;
+
+/**
+ * 요청 본문 바이트 상한. 스키마가 허용하는 대화가 반드시 통과하도록 문자 상한에서 파생한다.
+ *
+ * 두 값을 따로 정하면 관계가 깨진다. 실제로 20,000 바이트 고정값이던 시절, 스키마가
+ * 허용하는 한국어 8,000자 대화(약 24,000 바이트)가 파싱 전에 413 으로 거절됐고
+ * 방문자 화면에는 메시지 수도 길이도 한도 안이라 회복할 단서가 없었다.
+ */
+const MAX_BODY_BYTES = CHAT_LIMITS.maxTotalChars * MAX_UTF8_BYTES_PER_CHAR + ENVELOPE_BYTES;
+
 class ChatRequestError extends Error {
   readonly code: ChatErrorCode;
 
@@ -78,5 +92,5 @@ const parseChatRequest = (value: unknown): ChatRequest => {
   return context ? { messages, lang: value.lang, context } : { messages, lang: value.lang };
 };
 
-export { CHAT_LIMITS, ChatRequestError, parseChatRequest };
+export { CHAT_LIMITS, ChatRequestError, MAX_BODY_BYTES, parseChatRequest };
 export type { ChatRequestMessage };

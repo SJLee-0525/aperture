@@ -37,8 +37,6 @@ const AlbumsContent = async () => {
  *
  * 셸을 동기로 두고 fetch 를 자식으로 내린다. 상위 `albums/loading.tsx` 경계는 `[id]` 상세
  * 전환에도 함께 쓰여 목록 모양을 그릴 수 없다.
- *
- * @returns {JSX.Element}
  */
 export default function AlbumsPage() {
   return (

@@ -1,0 +1,193 @@
+/* 관리자 목록 행의 공통 부품. 엔티티 행 일곱과 설정 편집기 행 다섯이 나눠 쓴다.
+   핸들과 공개 배지는 선택 사항이다. 태그 사전 행에는 배지가 없고, 글 행에는 핸들이 없다. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  list-style: none;
+}
+
+/* 인라인 입력이 두 칸 들어가는 행(태그 사전)은 간격을 한 단계 좁힌다. */
+.rowDense {
+  gap: var(--s-3);
+}
+
+.handle {
+  flex: none;
+  width: 28px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-4);
+  font-size: var(--t-h3);
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+  transition: color var(--dur) var(--ease);
+}
+.handle:hover {
+  color: var(--text-2);
+}
+.handle:active {
+  cursor: grabbing;
+}
+
+/* 저장 중에는 disabled 로 잠근다. 공개 토글과 글 고정 토글이 같은 표현을 쓴다. */
+.badge {
+  flex: none;
+  height: 28px;
+  padding: 0 var(--s-3);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.badge:hover:not(:disabled) {
+  border-color: var(--line-strong);
+}
+.badge:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+/* 아이콘 하나만 담는 배지. 글자 배지와 padding 이 달라 같은 파일에 둔다.
+   다른 모듈에서 padding 을 덮으면 CSS 주입 순서가 승자를 정해 화면마다 달라진다. */
+.badgeIcon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  padding: 0;
+}
+
+.badgeOn {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+/* 배열 항목의 위·아래 이동 버튼. 설정 편집기 행 다섯이 쓴다. */
+.move {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-body);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.move:hover:not(:disabled) {
+  border-color: var(--text-3);
+  color: var(--text);
+}
+.move:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.edit {
+  min-height: 32px;
+  padding: 0 var(--s-2);
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--t-small);
+  color: var(--text-2);
+  transition: color var(--dur) var(--ease);
+}
+.edit:hover {
+  color: var(--text);
+}
+
+/* 파괴적 동작이라 정지 상태에서도 수정과 구분돼야 한다. hover 에서만 색이 갈리면
+   확인창을 반복해 보다가 습관적으로 누르게 된다. 색 대신 테두리로 나눈다.
+   --danger 를 정지 상태의 글자색으로 쓰면 라이트에서 대비가 4.5:1 에 못 미친다. */
+.delete {
+  flex: none;
+  min-height: 32px;
+  padding: 0 var(--s-3);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text-3);
+  font-size: var(--t-small);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.delete:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.delete:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* 썸네일이 있는 네 행이 같은 규칙을 쓴다. 치수만 각 행이 자기 모듈에서 정한다.
+   두 모듈의 클래스가 한 요소에 겹치지만 프로퍼티가 갈라져 있어 주입 순서가 결과를
+   바꾸지 않는다. 여기에 width·height 를 더하면 그 순간 순서 의존이 생긴다. */
+.thumb {
+  position: relative;
+  flex: none;
+  background: var(--photo-bg);
+  overflow: hidden;
+}
+.thumbImg {
+  object-fit: cover;
+}
+
+/* 제목 칸. 남는 폭을 차지하고 넘치면 말줄임한다. */
+.title {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  font-size: var(--t-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 제목 옆의 짧은 값(장수·연도·날짜). 좁은 화면에서는 감춘다. */
+.meta {
+  flex: none;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+}
+
+@media (max-width: 640px) {
+  .meta {
+    display: none;
+  }
+  .row {
+    gap: var(--s-3);
+    padding: var(--s-3);
+  }
+  /* 좁은 화면에서는 인라인 입력이 줄을 넘겨야 한다. */
+  .rowDense {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+}

@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 type ContentSource = "mock" | "live";
 
 /**
- * 콘텐츠 소스 스위치. getter 들이 실 Firestore 대신 mock 을 쓸지 결정한다.
+ * 콘텐츠 소스 스위치. getter 들이 실데이터 대신 mock 을 쓸지 결정한다.
  *
  * - 기본: **개발(`npm run dev`)에선 mock 우선** — 실 컬렉션이 비어도 UI가 채워져 테스트가 쉽다.
  *   음악·개발 섹션이 완성되기 전까지의 편의 (사용자 요청).
@@ -15,8 +15,6 @@ type ContentSource = "mock" | "live";
  *    아닌 변수는 번들에 인라인되지 않는다). 그래서 판정은 빌드 시점 한 곳으로 올렸다 —
  *    `next.config.ts` 가 부르는 `assertDeployableContentSource`. 여기서는 빌드가 확정한
  *    플래그를 읽기만 한다.
- *
- * @returns {boolean}
  */
 const mockContentEnabled = (): boolean => {
   const flag = process.env.NEXT_PUBLIC_USE_MOCK;
@@ -28,8 +26,6 @@ const mockContentEnabled = (): boolean => {
 /**
  * 개발 환경은 Supabase 설정이 없으면 mock 으로 동작할 수 있지만, 운영 환경에서는
  * 설정 누락을 콘텐츠 없음으로 위장하지 않는다. 명시적 mock 빌드만 예외다.
- *
- * @returns {boolean}
  */
 const shouldUseMockContent = (): boolean => {
   if (mockContentEnabled()) return true;

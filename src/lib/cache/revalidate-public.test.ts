@@ -25,16 +25,17 @@ describe("revalidatePublicPages", () => {
     mocks.verifyAdminIdToken.mockResolvedValue(true);
   });
 
-  it("변경된 Firestore 태그만 중복 제거해 무효화한다", async () => {
-    await revalidatePublicPages("token", [
-      "firestore:photos",
-      "firestore:photos",
-      "firestore:albums",
-    ]);
+  it("변경된 태그만 중복 제거해 무효화한다", async () => {
+    await revalidatePublicPages("token", ["db:photos", "db:photos", "db:albums"]);
 
-    expect(mocks.updateTag.mock.calls).toEqual([["firestore:photos"], ["firestore:albums"]]);
-    expect(mocks.revalidateTag).toHaveBeenCalledOnce();
-    expect(mocks.revalidateTag).toHaveBeenCalledWith(CHAT_PROFILE_CACHE_TAG, "max");
+    expect(mocks.updateTag.mock.calls).toEqual([
+      ["db:photos"],
+      ["db:albums"],
+      // 챗 프로필도 즉시 만료다. stale 표시로 두면 방금 비공개로 바꾼 항목이
+      // 다음 질문의 답변에 그대로 실린다.
+      [CHAT_PROFILE_CACHE_TAG],
+    ]);
+    expect(mocks.revalidateTag).not.toHaveBeenCalled();
   });
 
   it("리터럴 공개 경로의 라우트 캐시를 함께 지운다", async () => {

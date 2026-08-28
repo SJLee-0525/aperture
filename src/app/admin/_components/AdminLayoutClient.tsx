@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { RagStaleBanner } from "@/features/admin-maintenance/_components/RagStaleBanner";
 import { RevalidateFailureBanner } from "@/features/admin-maintenance/_components/RevalidateFailureBanner";
 import { AdminChrome } from "@/features/admin-shell/_components/AdminChrome";
+import { AdminMonitoring } from "@/features/admin-shell/_components/AdminMonitoring";
 import { AuthGuard } from "@/features/auth/_components/AuthGuard";
-import { AdminMonitoring } from "@/features/monitoring/_components/AdminMonitoring";
 
 import { useRevalidateFlushOnLeave } from "@/features/admin-maintenance/_hooks/use-revalidate-flush-on-leave";
 
@@ -18,10 +18,6 @@ import type { ReactNode } from "react";
 /**
  * 관리자 클라이언트 셸. 서버 레이아웃은 noindex 메타데이터를 내보내고,
  * 경로에 따른 로그인/관리자 크롬 분기는 이 컴포넌트가 담당한다.
- *
- * @param {{ children: ReactNode }} props
- * @param {ReactNode} props.children
- * @returns {JSX.Element}
  */
 const AdminLayoutClient = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();

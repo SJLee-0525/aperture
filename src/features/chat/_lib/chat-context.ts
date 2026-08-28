@@ -27,6 +27,7 @@ const CONTEXT_TARGET_BY_PATH: Readonly<
   Partial<Record<string, { type: ChatContextTarget; queryKey: string | null }>>
 > = {
   [ROUTES.PHOTO]: { type: "photo", queryKey: "photo" },
+  [ROUTES.PHOTO_MAP]: { type: "photo", queryKey: "photo" },
   [ROUTES.MUSIC]: { type: "work", queryKey: "work" },
   [ROUTES.MUSIC_CAREER]: { type: "award", queryKey: "award" },
   [ROUTES.DEV_PROJECTS]: { type: "project", queryKey: "project" },
@@ -72,8 +73,8 @@ const PATHNAME_PATTERN = /^\/[A-Za-z0-9\-/]*$/;
 /**
  * 배열이 아닌 객체인지 확인한다.
  *
- * @param {unknown} value 확인할 값.
- * @returns {value is Record<string, unknown>} 일반 객체이면 true.
+ * @param value 확인할 값.
+ * @returns 일반 객체이면 true.
  */
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -82,8 +83,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  * 로케일이 포함된 공개 pathname을 정규화한다. 마지막 slash 하나는 제거한다.
  * 클라이언트 빌더와 서버 파서가 같은 함수를 쓴다.
  *
- * @param {string} raw
- * @returns {string | null} 정규화된 pathname 또는 null(비허용)
+ * @returns 정규화된 pathname 또는 null(비허용)
  */
 const normalizeContextPathname = (raw: string): string | null => {
   if (raw.length === 0 || raw.length > MAX_PATHNAME_CHARS) return null;
@@ -105,8 +105,7 @@ const normalizeContextPathname = (raw: string): string | null => {
 /**
  * 정규화된 pathname의 상세 모달 매핑 조회
  *
- * @param {string} pathname 로케일 포함 정규화 경로
- * @returns {{ type: ChatContextTarget; queryKey: string } | null}
+ * @param pathname 로케일 포함 정규화 경로
  */
 const contextTargetForPath = (
   pathname: string,
@@ -124,10 +123,10 @@ const contextTargetForPath = (
  * target id의 형식과 길이를 검사한다.
  *
  * 서버가 이 값으로 DB 문서 한 건을 직접 읽으므로 경로 구분자와 query 문자를 허용하지 않는다.
- * 기존 Firestore 자동 ID와 이 저장소가 쓰는 수동 ID가 모두 이 문자 집합 안에 있다.
+ * 구형 자동 생성 ID 와 이 저장소가 쓰는 수동 ID 가 모두 이 문자 집합 안에 있다.
  *
- * @param {unknown} raw 요청 또는 query에서 읽은 값.
- * @returns {string | null} 정리한 id. 유효하지 않으면 null.
+ * @param raw 요청 또는 query에서 읽은 값.
+ * @returns 정리한 id. 유효하지 않으면 null.
  */
 const parseTargetId = (raw: unknown): string | null => {
   if (typeof raw !== "string") return null;
@@ -139,8 +138,8 @@ const parseTargetId = (raw: unknown): string | null => {
 /**
  * 직렬화한 화면 문맥이 요청별 byte 제한 안에 있는지 확인한다.
  *
- * @param {ChatContext} context 정규화된 화면 문맥.
- * @returns {boolean} UTF-8 JSON이 제한 이하이면 true.
+ * @param context 정규화된 화면 문맥.
+ * @returns UTF-8 JSON이 제한 이하이면 true.
  */
 const withinByteBudget = (context: ChatContext): boolean =>
   new TextEncoder().encode(JSON.stringify(context)).byteLength <= MAX_CONTEXT_BYTES;
@@ -152,10 +151,8 @@ const withinByteBudget = (context: ChatContext): boolean =>
  * 글 상세처럼 id가 URL에 없는 경로는 화면이 등록해 둔 target에서 문서 ID를 읽는다.
  * slug를 대신 쓰지 않는 이유는 문서 ID가 바뀌지 않는 식별자이기 때문이다.
  *
- * @param {string} pathname window.location.pathname (로케일 포함)
- * @param {URLSearchParams} searchParams
- * @param {{ type: string; id: string } | null} [screenTarget] 화면이 등록한 상세 항목.
- * @returns {ChatContext | undefined}
+ * @param pathname window.location.pathname (로케일 포함)
+ * @param [screenTarget] 화면이 등록한 상세 항목.
  */
 const buildChatContext = (
   pathname: string,
@@ -183,9 +180,6 @@ const buildChatContext = (
  * 요청 본문의 화면 문맥을 서버에서 검증한다.
  * 검증 실패는 예외를 던지지 않는다. pathname이 비허용이면 문맥 전체를,
  * openTarget이 경로와 맞지 않으면 openTarget만 버리고 채팅은 계속된다.
- *
- * @param {unknown} value
- * @returns {ChatContext | undefined}
  */
 const parseChatContext = (value: unknown): ChatContext | undefined => {
   if (!isRecord(value) || typeof value.pathname !== "string") return undefined;

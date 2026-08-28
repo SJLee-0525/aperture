@@ -1,8 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { PHOTO_GRID_IMAGE_SIZES } from "@/constants/breakpoints";
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 import { pickText } from "@/lib/i18n/pick-text";
-import { pushCurrentUrl } from "@/lib/navigation/replace-current-url";
+import { openDetailQuery } from "@/lib/navigation/detail-query-url";
 
 import { imagePreviewUrl } from "@/types/image";
 
@@ -24,13 +28,8 @@ type Props = {
 /**
  * 사진 타일 — 클릭 시 ?photo= 딥링크(상세 모달). 호버 시 제목·노출값 오버레이.
  *
- * @param {Props} props
- * @param {GalleryPhoto} props.photo
- * @param {Lang} props.lang
- * @param {boolean | undefined} props.square
- * @param {boolean | undefined} props.priority - LCP 보호 — 상단(첫 화면)에 오는 타일만 eager 로드
- * @param {(() => void) | undefined} props.onPreload - hover/focus/터치 시작 시 상세 모달 리소스 프리로드
- * @returns {JSX.Element}
+ * @param props.priority - LCP 보호 — 상단(첫 화면)에 오는 타일만 eager 로드
+ * @param props.onPreload - hover/focus/터치 시작 시 상세 모달 리소스 프리로드
  */
 const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }: Props) => {
   const title = pickText(photo.title, lang);
@@ -61,9 +60,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }:
           return;
         }
         event.preventDefault();
-        const url = new URL(window.location.href);
-        url.searchParams.set("photo", photo.id);
-        pushCurrentUrl(`${url.pathname}${url.search}${url.hash}`);
+        openDetailQuery(DETAIL_QUERY_KEYS.photo, photo.id);
       }}
     >
       <Image
@@ -71,7 +68,7 @@ const PhotoTile = ({ photo, lang, square = false, priority = false, onPreload }:
         alt={title}
         fill
         priority={priority}
-        sizes="(max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
+        sizes={PHOTO_GRID_IMAGE_SIZES}
         className={styles.photo}
         draggable={false}
       />

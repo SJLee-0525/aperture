@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { useFormDirty } from "@/features/admin-shell/_hooks/use-form-dirty";
+import { useFormRecovery } from "@/features/admin-shell/_hooks/use-form-recovery";
+
+import { formRecoverySlot } from "@/lib/admin/form-recovery";
 import { getSiteConfigRepository } from "@/lib/admin/site-config-repository";
+import { moveItem } from "@/lib/collection/move-item";
 import { EMPTY_TEXT } from "@/lib/i18n/empty-text";
 import { preparePublicLinks } from "@/lib/security/public-url";
 
@@ -17,8 +22,6 @@ const EMPTY_LINK: SiteLink = { label: "", href: "" };
  * 관리자 전역(랜딩·연락) 상태 관리 — tagline(순환 타이핑)·landingLead·contactLead·links 편집.
  * site/config에서 편집 필드를 로드하고, 저장 시 이 화면이 소유한 필드만 병합한다.
  * 페이지 컴포넌트는 이 훅이 돌려주는 값만 렌더한다(SRP).
- *
- * @returns {{ tagline: LocalizedText; landingLead: LocalizedText; contactLead: LocalizedText; links: SiteLink[]; status: Status; error: string | null; saving: boolean; saved: boolean; editTagline: (field: 'ko' | 'en', value: string) => void; editLandingLead: (field: 'ko' | 'en', value: string) => void; editContactLead: (field: 'ko' | 'en', value: string) => void; addLink: () => void; editLink: (index: number, field: keyof SiteLink, value: string) => void; removeLink: (index: number) => void; moveLink: (index: number, offset: -1 | 1) => void; save: () => Promise<void> }}
  */
 const useGlobalAdmin = () => {
   const [tagline, setTagline] = useState<LocalizedText>(EMPTY_TEXT);
@@ -29,6 +32,18 @@ const useGlobalAdmin = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { dirty, confirmLeave, markSaved } = useFormDirty({
+    tagline,
+    landingLead,
+    contactLead,
+    links,
+  });
+  const recovery = useFormRecovery(
+    formRecoverySlot("globalConfig", "globalConfig"),
+    { tagline, landingLead, contactLead, links },
+    dirty,
+  );
+  const { clear: clearRecovery } = recovery;
 
   useEffect(() => {
     let alive = true;
@@ -40,6 +55,12 @@ const useGlobalAdmin = () => {
         setLandingLead(loaded.landingLead);
         setContactLead(loaded.contactLead);
         setLinks(loaded.links);
+        markSaved({
+          tagline: loaded.tagline,
+          landingLead: loaded.landingLead,
+          contactLead: loaded.contactLead,
+          links: loaded.links,
+        });
         setStatus("ready");
       })
       .catch((caught: Error) => {
@@ -50,7 +71,7 @@ const useGlobalAdmin = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [markSaved]);
 
   const editTagline = useCallback((field: "ko" | "en", value: string) => {
     setTagline((prev) => ({ ...prev, [field]: value }));
@@ -79,17 +100,23 @@ const useGlobalAdmin = () => {
   }, []);
   /** 위/아래 버튼 순서 이동(offset: -1 위, +1 아래). */
   const moveLink = useCallback((index: number, offset: -1 | 1) => {
-    setLinks((prev) => {
-      const target = index + offset;
-      if (target < 0 || target >= prev.length) return prev;
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    setLinks((prev) => moveItem(prev, index, offset));
     setSaved(false);
   }, []);
 
   /** 이 화면이 소유한 전역 필드만 저장한다. */
+  const applyRecovered = (next: {
+    tagline: LocalizedText;
+    landingLead: LocalizedText;
+    contactLead: LocalizedText;
+    links: SiteLink[];
+  }) => {
+    setTagline(next.tagline);
+    setLandingLead(next.landingLead);
+    setContactLead(next.contactLead);
+    setLinks(next.links);
+  };
+
   const save = useCallback(async () => {
     setError(null);
     setSaving(true);
@@ -103,14 +130,19 @@ const useGlobalAdmin = () => {
       });
       setLinks(preparedLinks);
       setSaved(true);
+      markSaved({ tagline, landingLead, contactLead, links });
+      clearRecovery();
     } catch (caught) {
       setError((caught as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [tagline, landingLead, contactLead, links]);
+  }, [tagline, landingLead, contactLead, links, markSaved, clearRecovery]);
 
   return {
+    confirmLeave,
+    recovery,
+    applyRecovered,
     tagline,
     landingLead,
     contactLead,

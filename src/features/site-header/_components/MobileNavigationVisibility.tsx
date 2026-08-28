@@ -5,9 +5,11 @@ import { useEffect } from "react";
 
 import { isScrollLockFixingBody } from "@/hooks/use-scroll-lock";
 
+import { MOBILE_NAVIGATION_QUERY } from "@/constants/breakpoints";
+
 const MOBILE_NAVIGATION_HIDDEN_ATTRIBUTE = "data-mobile-navigation-hidden";
 const MOBILE_MENU_OPEN_ATTRIBUTE = "data-mobile-menu-open";
-const MOBILE_QUERY = "(max-width: 767px)";
+
 const TOP_THRESHOLD = 16;
 const HIDE_START = 96;
 const HIDE_DISTANCE = 24;
@@ -16,15 +18,13 @@ const SHOW_DISTANCE = 48;
 /**
  * 모바일에서 스크롤 방향에 따라 상·하단 내비게이션 chrome을 전환한다.
  * 잦은 scroll 값을 React 상태로 올리지 않고 루트 속성 하나만 변경해 하위 컴포넌트 리렌더를 피한다.
- *
- * @returns {null}
  */
 const MobileNavigationVisibility = () => {
   const pathname = usePathname();
 
   useEffect(() => {
     const root = document.documentElement;
-    const media = window.matchMedia(MOBILE_QUERY);
+    const media = window.matchMedia(MOBILE_NAVIGATION_QUERY);
     let lastY = Math.max(window.scrollY, 0);
     let upwardDistance = 0;
     let downwardDistance = 0;

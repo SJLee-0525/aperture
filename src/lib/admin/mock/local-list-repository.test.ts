@@ -120,6 +120,12 @@ describe("createLocalListRepository", () => {
     await expect(repo.setPublished("없는-id", true)).rejects.toThrow("찾지 못했습니다");
   });
 
+  it("없는 항목 삭제를 live 와 같이 실패로 처리한다", async () => {
+    const repo = repository(memoryStorage());
+
+    await expect(repo.remove("없는-id")).rejects.toThrow("찾지 못했습니다");
+  });
+
   it("순서와 공개 상태만 바꾼다", async () => {
     const repo = repository(memoryStorage());
 

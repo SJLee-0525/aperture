@@ -9,7 +9,7 @@ import { pickText } from "@/lib/i18n/pick-text";
 import { countLabel, formatToolItems } from "@/lib/webmcp/tool-output";
 import { limitProperty, objectSchema } from "@/lib/webmcp/tool-schemas";
 
-import type { MapLocation } from "@/features/map/_types/map-location";
+import type { MapLocation } from "@/features/map/_lib/map-location";
 import type { WebMcpToolDefinition } from "@/lib/webmcp/model-context";
 
 const LIST_TOOL: WebMcpToolDefinition = {
@@ -24,8 +24,7 @@ const LIST_TOOL: WebMcpToolDefinition = {
 /**
  * /photo/map 의 WebMCP 도구 — 좌표는 사진 EXIF 에서 온 공개 데이터다.
  *
- * @param {MapLocation[]} locations 좌표 있는 공개 사진의 위치 투영.
- * @returns {void}
+ * @param locations 좌표 있는 공개 사진의 위치 투영.
  */
 const useMapTools = (locations: MapLocation[]): void => {
   const { lang } = useLang();

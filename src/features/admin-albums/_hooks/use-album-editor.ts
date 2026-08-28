@@ -2,19 +2,23 @@
 
 import { arrayMove } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+
+import { useEditorSession } from "@/features/admin-shell/_hooks/use-editor-session";
 
 import {
   albumToInput,
   emptyAlbumInput,
-  normalizeAlbumInput,
-  validateAlbumInput,
+  prepareAlbumInput,
 } from "@/features/admin-albums/_lib/album-form-data";
+import { validateAlbumInput } from "@/features/admin-albums/_lib/validate-album-input";
 
 import { ROUTES } from "@/constants/routes";
 import { getAlbumRepository } from "@/lib/admin/album-repository";
+import { focusFirstIssue } from "@/lib/admin/field-issue";
 import { getPhotoRepository } from "@/lib/admin/photo-repository";
 
+import type { FieldIssue } from "@/lib/admin/field-issue";
 import type { AlbumInput } from "@/lib/supabase/albums";
 import type { AdminPhotoListItem } from "@/types/admin";
 import type { Album } from "@/types/album";
@@ -31,6 +35,13 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   const [photoStatus, setPhotoStatus] = useState<PhotoStatus>("loading");
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<FieldIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { dirty, confirmLeave, markSaved, recovery, clearRecovery } = useEditorSession(
+    "albums",
+    albumId,
+    form,
+  );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -51,6 +62,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
       active = false;
     };
   }, []);
+
+  const applyForm = (next: typeof form) => setForm(next);
 
   const patch = useCallback(
     (next: Partial<AlbumInput>) => setForm((current) => ({ ...current, ...next })),
@@ -93,19 +106,26 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
     [availableIds, form.photoIds, photoStatus],
   );
 
-  const cancel = useCallback(() => router.replace(ROUTES.ADMIN_ALBUMS), [router]);
+  const cancel = useCallback(() => {
+    if (!confirmLeave()) return;
+    clearRecovery();
+    router.replace(ROUTES.ADMIN_ALBUMS);
+  }, [confirmLeave, router, clearRecovery]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
 
-    const normalized = normalizeAlbumInput({ ...form, photoIds: selectedPhotoIds });
+    // 형제 다섯은 폼 값을 그대로 검증하는데 앨범만 정규화 뒤를 본다. 검증 대상인
+    // photoIds 가 폼이 아니라 선택 상태에서 오고, coverPhotoId 보정도 그 뒤에 확정된다.
+    const normalized = prepareAlbumInput({ ...form, photoIds: selectedPhotoIds });
     const input = {
       ...normalized,
       cover: photos.find((photo) => photo.id === normalized.coverPhotoId)?.image ?? null,
     };
-    const validationError = validateAlbumInput(input);
-    if (validationError) {
-      setError(validationError);
+    const nextIssues = validateAlbumInput(input);
+    setIssues(nextIssues);
+    if (nextIssues.length > 0) {
+      focusFirstIssue(formRef.current, nextIssues);
       return;
     }
 
@@ -115,6 +135,8 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
       await (isEdit
         ? albumRepository.update(albumId, input)
         : albumRepository.create(albumId, input));
+      markSaved(form);
+      clearRecovery();
       router.replace(ROUTES.ADMIN_ALBUMS);
     } catch (caught) {
       setError((caught as Error).message);
@@ -123,6 +145,11 @@ const useAlbumEditor = (albumId: string, initial?: Album) => {
   };
 
   return {
+    recovery,
+    applyForm,
+    dirty,
+    formRef,
+    issues,
     cancel,
     error,
     form,

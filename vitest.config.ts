@@ -8,41 +8,34 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: [
-        "src/features/**/_lib/*.ts",
-        // 관리자 mock 저장소 — repository 조립 모듈은 firebase 를 끌고 오므로 순수 구현만 잰다.
-        "src/lib/admin/mock/*.ts",
-        "src/lib/admin/select-repository.ts",
-        "src/lib/photo-filter-query.ts",
-        "src/lib/contact-draft-storage.ts",
-        "src/lib/search/*.ts",
-        "src/lib/i18n/*.ts",
-        "src/lib/format/*.ts",
-        "src/lib/exif/*.ts",
-        "src/lib/geo/*.ts",
-        "src/lib/content/normalize-troubleshooting.ts",
-        "src/hooks/use-query-modal.ts",
-        "src/hooks/use-focus-trap.ts",
-        "src/hooks/use-image-zoom.ts",
-        "src/hooks/use-overlay-drag.ts",
-        "src/hooks/use-scroll-lock.ts",
-        "src/features/contact/_hooks/use-contact-form.ts",
-        "src/features/contact/_hooks/use-contact-draft.ts",
-        "src/features/dev-blog/_components/ArticlesView.tsx",
-        "src/features/dev-blog/_hooks/use-hover-grace.ts",
-        "src/features/search/_components/SearchResults.tsx",
-        "src/components/DetailHero.tsx",
-        "src/components/Modal.tsx",
-        "src/components/PageToolbar.tsx",
-        "src/components/TagFilterBar.tsx",
-        "src/components/ViewToggle.tsx",
+      // allowlist 가 아니라 제외 목록이다. 명시한 것만 재면 새 코드가 게이트 밖에서
+      // 태어나고, 이미 테스트가 있는 파일조차 수치에 잡히지 않는다.
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.d.ts",
+        // 폴백 데이터와 Storybook 카탈로그는 단위 테스트 대상이 아니다.
+        "src/mocks/**",
+        "src/**/*.stories.tsx",
+        // Next.js 가 규약으로 부르는 라우트 껍데기. fetch 와 features 조립만 한다.
+        // route.ts 는 요청을 다루므로 여기 없다.
+        "src/app/**/{layout,template,loading,page,not-found,error,global-error,sitemap,robots}.{ts,tsx}",
+        // Next.js 가 진입점으로 직접 부르는 파일. 단위 테스트로 부를 수 없다.
+        "src/instrumentation*.ts",
+        "src/proxy.ts",
       ],
-      exclude: ["src/**/*.test.{ts,tsx}"],
+      // 전역 값은 실측에서 시작하는 래칫이다. glob 에 걸린 파일도 전역 계산에 그대로
+      // 들어가므로(vitest 는 glob 대상을 전역 맵에서 빼지 않는다) 아래 두 값은 전역을
+      // 대체하지 않고 더 높은 기준을 덧씌운다.
       thresholds: {
-        statements: 85,
-        branches: 80,
-        functions: 85,
-        lines: 85,
+        statements: 64,
+        branches: 63,
+        functions: 56,
+        lines: 65,
+        "src/features/**/_lib/**": { statements: 85, branches: 80, functions: 85, lines: 85 },
+        // functions 만 아직 낮다. 재export 뿐인 모듈(albums.ts)과 브라우저 구독 API 가
+        // 남아 있어 _lib 과 같은 85 에 닿지 않는다.
+        "src/lib/**": { statements: 85, branches: 80, functions: 78, lines: 85 },
       },
     },
   },

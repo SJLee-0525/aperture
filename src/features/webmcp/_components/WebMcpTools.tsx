@@ -22,9 +22,7 @@ const subscribeNothing = () => () => {};
  * 서버 스냅샷은 항상 false 라 SSR 마크업이 변하지 않고, 클라이언트 스냅샷이
  * 기능 감지를 대신한다. WebMCP 는 순수 프로그레시브 인핸스먼트다.
  *
- * @param {{ profile: WebMcpProfile }} props
- * @param {WebMcpProfile} props.profile 전역 도구에 전달할 site config 최소 투영.
- * @returns {JSX.Element | null}
+ * @param props.profile 전역 도구에 전달할 site config 최소 투영.
  */
 const WebMcpTools = ({ profile }: { profile: WebMcpProfile }) => {
   const supported = useSyncExternalStore(subscribeNothing, isWebMcpSupported, () => false);

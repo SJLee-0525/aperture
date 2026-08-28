@@ -16,8 +16,7 @@ let loaded: SentryModule | null = null;
 /**
  * 컨트롤러가 SDK 로드/해제 시 포워딩 대상을 갱신한다.
  *
- * @param {SentryModule | null} module - 로드된 SDK 모듈, 철회 시 `null`.
- * @returns {void}
+ * @param module - 로드된 SDK 모듈, 철회 시 `null`.
  */
 const setLoadedSentry = (module: SentryModule | null): void => {
   loaded = module;
@@ -26,8 +25,7 @@ const setLoadedSentry = (module: SentryModule | null): void => {
 /**
  * App Router 클라이언트 내비게이션 시작을 SDK에 전달한다. SDK 미로드 시 no-op.
  *
- * @param {Parameters<SentryModule["captureRouterTransitionStart"]>} args - href·navigationType.
- * @returns {void}
+ * @param args - href·navigationType.
  */
 export const onRouterTransitionStart = (
   ...args: Parameters<SentryModule["captureRouterTransitionStart"]>
@@ -38,8 +36,7 @@ export const onRouterTransitionStart = (
 /**
  * 로드된 SDK가 있을 때만 오류를 전송한다. Provider 밖(global-error 등)에서 사용한다.
  *
- * @param {unknown} error - 포착한 오류.
- * @returns {void}
+ * @param error - 포착한 오류.
  */
 const captureExceptionIfLoaded = (error: unknown): void => {
   loaded?.captureException(error);

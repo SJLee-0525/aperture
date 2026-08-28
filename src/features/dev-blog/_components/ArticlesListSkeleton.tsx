@@ -11,11 +11,9 @@ const CARD_COUNT = 4;
  *
  * 치수는 사진 작업 목록 스켈레톤과 맞춘다 — 두 지면이 같은 툴바 컴포넌트를 쓰므로 값이
  * 어긋나면 로딩에서 본문으로 넘어갈 때 첫 줄이 흔들린다.
- *
- * @returns {JSX.Element}
  */
 const ArticlesListSkeleton = () => (
-  <main className={styles.main} aria-busy="true">
+  <main className="u-page-main" aria-busy="true">
     <div className={styles.toolbar}>
       <Skeleton width={76} height={32} />
       <div className={styles.tools}>

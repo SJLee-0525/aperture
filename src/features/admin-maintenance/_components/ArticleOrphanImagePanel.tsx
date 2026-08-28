@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { AdminButton } from "@/components/AdminButton";
+
 import {
   deleteOrphanArticleImages,
   OrphanConfirmationRequiredError,
@@ -19,8 +21,8 @@ import base from "./ImageMigrationPanel.module.css";
 /**
  * 바이트 수를 관리자 표에 읽기 좋은 단위로 줄인다.
  *
- * @param {number} bytes 파일 크기.
- * @returns {string} KB/MB 로 반올림한 문자열.
+ * @param bytes 파일 크기.
+ * @returns KB/MB 로 반올림한 문자열.
  */
 const formatBytes = (bytes: number): string => {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
@@ -31,8 +33,8 @@ const formatBytes = (bytes: number): string => {
 /**
  * 업로드 시각을 표에 맞는 짧은 형식으로 만든다.
  *
- * @param {Date} value 업로드 시각.
- * @returns {string} `YYYY-MM-DD HH:mm` 형식.
+ * @param value 업로드 시각.
+ * @returns `YYYY-MM-DD HH:mm` 형식.
  */
 const formatUploadedAt = (value: Date): string =>
   `${value.toISOString().slice(0, 10)} ${value.toTimeString().slice(0, 5)}`;
@@ -43,8 +45,6 @@ const formatUploadedAt = (value: Date): string =>
  * 원본·프리뷰·썸네일 한 벌이 모두 미참조이고 업로드한 지 24시간이 지난 것만 찾는다.
  * 삭제 직전에 같은 기준으로 다시 확인하며, Storage를 연결하지 않는 mock 모드에서는
  * 실행할 수 없다.
- *
- * @returns {JSX.Element}
  */
 const ArticleOrphanImagePanel = () => {
   const mock = shouldUseMockContent();
@@ -133,7 +133,7 @@ const ArticleOrphanImagePanel = () => {
 
   return (
     <section className={base.panel}>
-      <h1 className={base.title}>사용되지 않는 블로그 이미지</h1>
+      <h2 className={base.title}>사용되지 않는 블로그 이미지</h2>
       <p className={base.description}>
         한 이미지의 원본·프리뷰·썸네일을 한 벌로 묶어, <strong>셋 다 어디에도 쓰이지 않고</strong>{" "}
         업로드한 지 24시간이 지났을 때만 정리 대상으로 봅니다. 하나라도 쓰이고 있으면 그 이미지는
@@ -143,16 +143,17 @@ const ArticleOrphanImagePanel = () => {
       </p>
 
       <div className={base.actions}>
-        <button type="button" disabled={pending || mock} onClick={rescan}>
+        <AdminButton variant="primary" size="sm" disabled={pending || mock} onClick={rescan}>
           삭제 대상 다시 확인
-        </button>
-        <button
-          type="button"
+        </AdminButton>
+        <AdminButton
+          variant="danger"
+          size="sm"
           disabled={pending || mock || (scan?.groups.length ?? 0) === 0}
           onClick={removeAll}
         >
           확인 후 삭제
-        </button>
+        </AdminButton>
       </div>
 
       {mock ? (
@@ -185,9 +186,14 @@ const ArticleOrphanImagePanel = () => {
                 쓰이지 않고 업로드한 지 24시간이 지나, 위 삭제 버튼과 같은 조건을 만족합니다. 경로를
                 복사해 Storage에서 직접 정리할 수 있습니다.
               </p>
-              <button type="button" className={styles.copy} onClick={copyKeptPaths}>
+              <AdminButton
+                variant="secondary"
+                size="xs"
+                className={styles.copy}
+                onClick={copyKeptPaths}
+              >
                 {copied ? "복사함" : "경로 복사"}
-              </button>
+              </AdminButton>
               <ul className={styles.keptList}>
                 {scan.keptFiles.map((file) => (
                   <li key={file.path} className={styles.path} title={file.path}>

@@ -15,8 +15,7 @@ const LIST_TAIL_RESERVE = 16;
  * limit 인자를 기본 8, 최대 20 범위로 정규화한다.
  * 스키마는 number 지만 에이전트가 "3" 같은 문자열 숫자를 보내는 위반이 흔해 함께 받는다.
  *
- * @param {unknown} raw 에이전트가 넘긴 limit 인자(검증 전).
- * @returns {number}
+ * @param raw 에이전트가 넘긴 limit 인자(검증 전).
  */
 const clampLimit = (raw: unknown): number => {
   const parsed =
@@ -34,9 +33,8 @@ const clampLimit = (raw: unknown): number => {
  * 목록 줄을 문자 제한 안에서 이어 붙이고
  * 표시하지 못한 건수(totalCount 대비)를 `+N more` 로 알린다.
  *
- * @param {string[]} lines 이미 limit 로 잘린 표시 후보 줄들.
- * @param {number} totalCount 필터 후 전체 건수 — 생략 건수 계산의 기준.
- * @returns {string}
+ * @param lines 이미 limit 로 잘린 표시 후보 줄들.
+ * @param totalCount 필터 후 전체 건수 — 생략 건수 계산의 기준.
  */
 const formatToolList = (lines: string[], totalCount: number): string => {
   const included: string[] = [];
@@ -57,10 +55,9 @@ const formatToolList = (lines: string[], totalCount: number): string => {
  * 목록 제한, 줄 변환, 문자 제한을 차례로 적용한다.
  *
  * @template T
- * @param {T[]} items 필터까지 끝난 전체 항목.
- * @param {unknown} rawLimit 에이전트가 넘긴 limit 인자(검증 전).
- * @param {(item: T) => string} toLine 항목을 한 줄로 바꾸는 함수.
- * @returns {string}
+ * @param items 필터까지 끝난 전체 항목.
+ * @param rawLimit 에이전트가 넘긴 limit 인자(검증 전).
+ * @param toLine 항목을 한 줄로 바꾸는 함수.
  */
 const formatToolItems = <T>(items: T[], rawLimit: unknown, toLine: (item: T) => string): string =>
   formatToolList(items.slice(0, clampLimit(rawLimit)).map(toLine), items.length);
@@ -68,19 +65,14 @@ const formatToolItems = <T>(items: T[], rawLimit: unknown, toLine: (item: T) => 
 /**
  * 개수에 맞는 단수형 또는 복수형 단위를 반환한다.
  *
- * @param {number} count
- * @param {string} singular 단수형 단위. 복수형은 기본 s 를 붙인다.
- * @param {string} [plural] 불규칙 복수형이 필요할 때만.
- * @returns {string}
+ * @param singular 단수형 단위. 복수형은 기본 s 를 붙인다.
+ * @param [plural] 불규칙 복수형이 필요할 때만.
  */
 const countLabel = (count: number, singular: string, plural = `${singular}s`): string =>
   `${count} ${count === 1 ? singular : plural}`;
 
 /**
  * 단일 텍스트가 제한을 넘으면 말줄임표를 붙여 자른다.
- *
- * @param {string} text
- * @returns {string}
  */
 const clampToolText = (text: string): string =>
   text.length <= TOOL_OUTPUT_BUDGET ? text : `${text.slice(0, TOOL_OUTPUT_BUDGET - 1)}…`;

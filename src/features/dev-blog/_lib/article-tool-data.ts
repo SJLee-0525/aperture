@@ -28,9 +28,8 @@ type ArticleToolData = {
  * 공개 글 목록을 도구용 투영으로 바꾼다. 서버 컴포넌트가 한 번 만들어 넘긴다 —
  * 도구는 새 데이터 소스를 만들지 않는다(ADR-0003).
  *
- * @param {readonly DevArticle[]} articles 공개된 글. 발행일 내림차순 정렬을 그대로 지킨다.
- * @param {readonly DevArticleTag[]} tags 블로그 태그 사전.
- * @returns {ArticleToolData[]}
+ * @param articles 공개된 글. 발행일 내림차순 정렬을 그대로 지킨다.
+ * @param tags 블로그 태그 사전.
  */
 const toArticleToolData = (
   articles: readonly DevArticle[],

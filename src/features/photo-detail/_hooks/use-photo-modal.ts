@@ -2,21 +2,15 @@
 
 import { useCallback, useEffect, useMemo } from "react";
 
-import { usePhotoDetailSession } from "@/features/photo-detail/_hooks/use-photo-detail-session";
+import { useDetailQuerySession } from "@/hooks/use-detail-query-session";
+
+import { DETAIL_QUERY_KEYS } from "@/constants/routes";
 
 import type { Photo } from "@/types/photo";
 
 /**
  * 사진 상세 모달 상태 — URL(?photo=id)이 단일 출처(딥링크·공유).
  * prev/next는 photoIds(생략 시 photos)를 순환하므로 상세 사진을 일부만 캐시해도 전체 탐색 순서를 유지한다.
- *
- * @param {Photo[]} photos
- * @param {boolean} [navigationEnabled]
- * @param {(id: string) => void} [onNavigateStart]
- * @param {string[]} [photoIds]
- * @param {() => void} [onClose]
- * @param {boolean} [keyboardEnabled]
- * @returns {{ photo: Photo | null; open: boolean; close: () => void; next: () => void; prev: () => void; navigationIds: string[]; index: number }}
  */
 const usePhotoModal = (
   photos: Photo[],
@@ -26,7 +20,11 @@ const usePhotoModal = (
   onClose?: () => void,
   keyboardEnabled = true,
 ) => {
-  const { activeId, close: closeSession, goto } = usePhotoDetailSession();
+  const {
+    activeId,
+    close: closeSession,
+    goto,
+  } = useDetailQuerySession(DETAIL_QUERY_KEYS.photo, { openedOutside: true });
   const navigationIds = useMemo(
     () => photoIds ?? photos.map((photo) => photo.id),
     [photoIds, photos],
@@ -54,6 +52,9 @@ const usePhotoModal = (
     [navigationEnabled, index, navigationIds, onNavigateStart, goto],
   );
 
+  // Escape 와 좌우 이동이 같은 리스너에 있고 게이트가 top-layer 가 아니라 `keyboardEnabled`
+  // 다. 모달이 스스로 키보드를 넘기는 구간(모바일 패널 펼침)을 표현하므로 `useEscapeKey` 로
+  // 옮기면 그 조건이 사라진다.
   useEffect(() => {
     if (!open || !keyboardEnabled) return;
     const onKey = (event: KeyboardEvent) => {

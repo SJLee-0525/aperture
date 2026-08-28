@@ -26,8 +26,8 @@ import type { BrowserMonitoringMode } from "@/lib/monitoring/browser-monitoring"
  * - `admin`: Replay를 사용하지 않아 로그인 폼과 미공개 초안을 녹화하지 않는다.
  *   `area:admin` 태그로 공개 이슈와 분리한다.
  *
- * @param {BrowserMonitoringMode} mode - 초기화할 트리 구분.
- * @returns {Promise<void>} 초기화 완료.
+ * @param mode - 초기화할 트리 구분.
+ * @returns 초기화 완료.
  */
 const initBrowserMonitoring = async (mode: BrowserMonitoringMode): Promise<void> => {
   if (Sentry.getClient()) {
@@ -93,7 +93,7 @@ const initBrowserMonitoring = async (mode: BrowserMonitoringMode): Promise<void>
  * Replay 리스너와 버퍼를 명시적으로 중지하고 탭 세션 식별자를 제거한다.
  * `Sentry.close()`는 클라이언트 전송만 비활성화하며 Replay teardown을 수행하지 않는다.
  *
- * @returns {Promise<void>} Replay 정리 완료.
+ * @returns Replay 정리 완료.
  */
 const stopReplayRecording = async (): Promise<void> => {
   const replay = Sentry.getReplay();
@@ -108,7 +108,7 @@ const stopReplayRecording = async (): Promise<void> => {
 /**
  * 현재 클라이언트를 flush 후 닫고 포워더를 비운다. 동의 철회·모드 전환 시 호출된다.
  *
- * @returns {Promise<void>} 종료 완료.
+ * @returns 종료 완료.
  */
 const closeBrowserMonitoring = async (): Promise<void> => {
   setLoadedSentry(null);

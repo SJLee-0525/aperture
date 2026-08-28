@@ -18,9 +18,14 @@ let browserClient: SupabaseClient | null = null;
  * 서버 토큰 검증은 이 싱글턴을 쓰지 않는다. 세션 지속 옵션이 다르므로
  * `lib/auth/verify-admin-id-token.ts` 가 별도 서버 클라이언트를 갖는다.
  *
- * @returns {SupabaseClient} 세션을 localStorage 에 지속하는 브라우저 클라이언트.
+ * @returns 세션을 localStorage 에 지속하는 브라우저 클라이언트.
  */
 const getSupabaseClient = (): SupabaseClient =>
-  (browserClient ??= createClient(supabaseUrl(), supabasePublishableKey()));
+  (browserClient ??= createClient(supabaseUrl(), supabasePublishableKey(), {
+    // 이 앱의 로그인 경로는 `signInWithPassword` 하나뿐이다. URL 조각에서 세션을 읽는 기능은
+    // 쓰이지 않으면서 입력 표면만 늘린다.
+    // 비밀번호 재설정이나 이메일 확인 링크를 도입하면 그 흐름이 이 옵션을 요구하므로 되돌린다.
+    auth: { detectSessionInUrl: false },
+  }));
 
 export { getSupabaseClient };

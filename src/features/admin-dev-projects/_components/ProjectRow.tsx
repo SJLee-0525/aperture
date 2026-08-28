@@ -1,10 +1,11 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import Link from "next/link";
 
+import row from "@/features/admin-shell/_components/admin-row.module.css";
+import { AdminSortableRow } from "@/features/admin-shell/_components/AdminSortableRow";
+
+import { ADMIN_UNTITLED } from "@/constants/admin-labels";
 import { adminDevProjectRoute } from "@/constants/routes";
 
 import { imageThumbnailUrl } from "@/types/image";
@@ -15,6 +16,8 @@ import styles from "./ProjectRow.module.css";
 
 type Props = {
   project: AdminDevProjectListItem;
+  /** 이 행의 공개 토글이 저장 중이다. 연타하면 화면과 서버 상태가 어긋난다. */
+  publishBusy: boolean;
   onTogglePublished: (id: string, next: boolean) => void;
   onDelete: (id: string) => void;
 };
@@ -22,75 +25,36 @@ type Props = {
 /**
  * 정렬 가능한 프로젝트 행 — 드래그 핸들·대표 썸네일·제목·연도·공개 토글·수정/삭제.
  *
- * @param {Props} props
- * @param {AdminDevProjectListItem} props.project
- * @param {(id: string, next: boolean) => void} props.onTogglePublished
- * @param {(id: string) => void} props.onDelete
- * @returns {JSX.Element}
+ * @param props.publishBusy 이 행의 공개 토글이 저장 중이다.
  */
-const ProjectRow = ({ project, onTogglePublished, onDelete }: Props) => {
+const ProjectRow = ({ project, publishBusy, onTogglePublished, onDelete }: Props) => {
   const previewUrl = imageThumbnailUrl(project.cover);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: project.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const onDeleteClick = () => {
-    if (window.confirm(`"${project.title.ko || "제목 없음"}" 프로젝트를 삭제할까요?`)) {
-      onDelete(project.id);
-    }
-  };
-
   return (
-    <li ref={setNodeRef} style={style} className={styles.row}>
-      <button
-        type="button"
-        className={styles.handle}
-        aria-label="순서 이동"
-        {...attributes}
-        {...listeners}
-      >
-        ⠿
-      </button>
-
-      <span className={styles.thumb}>
+    <AdminSortableRow
+      id={project.id}
+      publishedBusy={publishBusy}
+      published={project.published}
+      onTogglePublished={(next) => onTogglePublished(project.id, next)}
+      editHref={adminDevProjectRoute(project.id)}
+      onDelete={() => onDelete(project.id)}
+      confirmDelete={{ name: project.title.ko || ADMIN_UNTITLED, noun: "프로젝트" }}
+    >
+      <span className={`${row.thumb} ${styles.thumb}`}>
         {previewUrl ? (
           <Image
             src={previewUrl}
             alt={project.title.ko || "프로젝트"}
             fill
             sizes="64px"
-            className={styles.thumbImg}
+            className={row.thumbImg}
           />
         ) : null}
       </span>
 
-      <span className={styles.title}>{project.title.ko || "제목 없음"}</span>
+      <span className={row.title}>{project.title.ko || ADMIN_UNTITLED}</span>
 
-      <span className={styles.year}>{project.year || "—"}</span>
-
-      <button
-        type="button"
-        className={`${styles.badge} ${project.published ? styles.badgeOn : ""}`}
-        onClick={() => onTogglePublished(project.id, !project.published)}
-      >
-        {project.published ? "공개" : "비공개"}
-      </button>
-
-      <span className={styles.actions}>
-        <Link href={adminDevProjectRoute(project.id)} className={styles.edit}>
-          수정
-        </Link>
-        <button type="button" className={styles.delete} onClick={onDeleteClick}>
-          삭제
-        </button>
-      </span>
-    </li>
+      <span className={row.meta}>{project.year || "—"}</span>
+    </AdminSortableRow>
   );
 };
 

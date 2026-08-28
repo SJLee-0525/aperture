@@ -5,8 +5,8 @@ import type { DevAward } from "@/types/dev";
 /**
  * 구형 site/dev 문서의 수상에도 안정적인 ID와 새 필드 기본값을 채운다.
  *
- * @param {unknown} value Firestore에서 읽은 개발 수상 목록.
- * @returns {DevAward[]} ID가 중복되지 않고 필수 필드가 채워진 수상 목록.
+ * @param value DB 에서 읽은 개발 수상 목록.
+ * @returns ID가 중복되지 않고 필수 필드가 채워진 수상 목록.
  */
 const normalizeDevAwards = (value: unknown): DevAward[] => {
   if (!Array.isArray(value)) return [];

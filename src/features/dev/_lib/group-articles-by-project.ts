@@ -6,14 +6,14 @@ import type { DevArticleProjectLink } from "@/types/dev-article";
  * 관계는 글에만 저장되므로 프로젝트 쪽 목록은 매번 이 계산으로 만든다. 입력 순서를 그대로
  * 옮겨 담아 각 프로젝트의 글도 발행일 내림차순이 된다.
  *
- * @param {readonly DevArticleProjectLink[]} articles 발행일 내림차순의 공개 글 관계 목록.
- * @returns {Record<string, DevArticleProjectLink[]>} 프로젝트 id → 그 프로젝트를 지목한 글.
+ * @param articles 발행일 내림차순의 공개 글 관계 목록.
+ * @returns 프로젝트 id → 그 프로젝트를 지목한 글.
  *   글이 하나도 없는 프로젝트는 키 자체가 없다.
  */
 const groupArticlesByProject = (
   articles: readonly DevArticleProjectLink[],
 ): Record<string, DevArticleProjectLink[]> => {
-  // 프로젝트 id 는 관리자가 정하는 Firestore 문서 ID 다. `__proto__`·`constructor` 를 객체
+  // 프로젝트 id 는 관리자가 정하는 행 ID 다. `__proto__`·`constructor` 를 객체
   // 리터럴 키로 쓰면 프로토타입 값을 읽거나 대입하게 되므로 Map 으로 모은다.
   const grouped = new Map<string, DevArticleProjectLink[]>();
 

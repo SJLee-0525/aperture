@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { ImageFallback } from "@/components/ImageFallback";
 import { Modal } from "@/components/Modal";
 
 import { useLang } from "@/features/lang/_hooks/use-lang";
@@ -9,7 +10,7 @@ import { useMusicWorkTools } from "@/features/music/_hooks/use-music-tools";
 import { useQueryModal } from "@/hooks/use-query-modal";
 import { useRegisterChatScreenTarget } from "@/hooks/use-register-chat-screen-target";
 
-import { formatYMD } from "@/lib/format/format-date";
+import { formatEventYMD } from "@/lib/format/format-date";
 import { pickText } from "@/lib/i18n/pick-text";
 
 import { imagePreviewUrl } from "@/types/image";
@@ -23,18 +24,11 @@ const FIRST_ROW_POSTERS = 1;
 
 /**
  * 프로그램 곡 순번 2자리 표기 (01, 02, …)
- *
- * @param {number} n
- * @returns {string}
  */
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
  * 연주 목록 (/music) — 포스터 그리드. 클릭 시 프로그램·예매 모달.
- *
- * @param {{ works: MusicWork[] }} props
- * @param {MusicWork[]} props.works
- * @returns {JSX.Element}
  */
 const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   const { dict, lang } = useLang();
@@ -47,7 +41,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
   );
 
   return (
-    <main className={styles.main}>
+    <main className="u-page-main">
       <h1 className={styles.title}>{dict.musicWorksNav}</h1>
       {works.length === 0 ? (
         <p className={styles.empty}>{dict.comingSoon}</p>
@@ -73,7 +67,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                     priority={index < FIRST_ROW_POSTERS}
                   />
                 ) : (
-                  "POSTER"
+                  <ImageFallback />
                 )}
                 <span className={styles.tag}>{pickText(work.category, lang)}</span>
               </div>
@@ -81,7 +75,7 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                 <div className={styles.wt}>{pickText(work.title, lang)}</div>
                 <div className={styles.ws}>{pickText(work.subtitle, lang)}</div>
                 <div className={styles.wm}>
-                  {formatYMD(work.performedAt)} · {pickText(work.venue, lang)}
+                  {formatEventYMD(work.performedAt)} · {pickText(work.venue, lang)}
                 </div>
               </div>
             </button>
@@ -113,14 +107,14 @@ const MusicWorksView = ({ works }: { works: MusicWork[] }) => {
                   draggable={false}
                 />
               ) : (
-                "POSTER"
+                <ImageFallback />
               )}
             </div>
             <div>
               <div className={styles.rt}>{pickText(selected.title, lang)}</div>
               <div className={styles.rsub}>{pickText(selected.subtitle, lang)}</div>
               <div className={styles.rmeta}>
-                {formatYMD(selected.performedAt)} · {selected.time}
+                {formatEventYMD(selected.performedAt)} · {selected.time}
               </div>
               <div className={styles.rv}>{pickText(selected.venue, lang)}</div>
               {selected.ticketUrl.trim() ? (

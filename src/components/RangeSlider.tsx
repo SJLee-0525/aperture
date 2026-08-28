@@ -10,6 +10,10 @@ type Props = {
   low: number;
   high: number;
   unit?: string;
+  /** 낮은 쪽 손잡이의 접근 이름. "min mm" 처럼 무엇의 최소인지 없는 이름을 막는다. */
+  minLabel: string;
+  /** 높은 쪽 손잡이의 접근 이름. */
+  maxLabel: string;
   onChange: (low: number, high: number) => void;
   /** pointerup, keyup, blur에서 현재 범위를 전달한다. */
   onChangeEnd?: (low: number, high: number) => void;
@@ -21,16 +25,7 @@ type Props = {
  * 듀얼 핸들 레인지 슬라이더 (초점거리 min~max). 두 range input을 겹쳐 thumb만 조작 가능.
  * onChange는 드래그 틱마다, onChangeEnd는 조작이 끝났을 때 한 번 호출된다.
  *
- * @param {Props} props
- * @param {number} props.min
- * @param {number} props.max
- * @param {number} props.low
- * @param {number} props.high
- * @param {string | undefined} props.unit
- * @param {(low: number, high: number) => void} props.onChange
- * @param {((low: number, high: number) => void) | undefined} props.onChangeEnd
- * @param {(() => void) | undefined} props.onChangeCancel
- * @returns {JSX.Element} 두 개의 native range input으로 만든 범위 슬라이더.
+ * @returns 두 개의 native range input으로 만든 범위 슬라이더.
  */
 const RangeSlider = ({
   min,
@@ -38,6 +33,8 @@ const RangeSlider = ({
   low,
   high,
   unit = "",
+  minLabel,
+  maxLabel,
   onChange,
   onChangeEnd,
   onChangeCancel,
@@ -103,7 +100,8 @@ const RangeSlider = ({
           value={low}
           onChange={changeOf("low")}
           className={styles.input}
-          aria-label={`min ${unit}`}
+          aria-label={minLabel}
+          aria-valuetext={`${low}${unit}`}
           {...endHandlers("low")}
         />
         <input
@@ -113,7 +111,8 @@ const RangeSlider = ({
           value={high}
           onChange={changeOf("high")}
           className={styles.input}
-          aria-label={`max ${unit}`}
+          aria-label={maxLabel}
+          aria-valuetext={`${high}${unit}`}
           {...endHandlers("high")}
         />
       </div>

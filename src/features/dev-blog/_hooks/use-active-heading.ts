@@ -13,8 +13,8 @@ import { READING_LINE_PX } from "@/features/dev-blog/_lib/reading-line";
  *
  * 위치는 프레임마다 직접 잰다. 이유는 `observeReadingLine` 에 적어 두었다.
  *
- * @param {readonly string[]} ids 문서 순서대로의 heading id.
- * @returns {string | null} 현재 heading id. 아직 첫 heading 위쪽이면 null.
+ * @param ids 문서 순서대로의 heading id.
+ * @returns 현재 heading id. 아직 첫 heading 위쪽이면 null.
  */
 const useActiveHeading = (ids: readonly string[]): string | null => {
   const [activeId, setActiveId] = useState<string | null>(null);

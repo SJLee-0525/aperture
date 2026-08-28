@@ -33,6 +33,32 @@ describe("readSseStream", () => {
     expect(payloads).toEqual(['{"a":1}', '{"b":2}']);
   });
 
+  // \r 과 \n 은 단일 바이트라 종결자가 TCP 조각 경계에 걸릴 수 있다. 조각마다 CRLF 를
+  // 치환하면 그 경우를 놓쳐 이벤트 두 개가 한 블록으로 합쳐진다.
+  it("CRLF 종결자가 조각 경계에 걸려도 이벤트를 나눈다", async () => {
+    const payloads: string[] = [];
+
+    await readSseStream(
+      responseOf(['data: {"a":1}\r\n\r', '\ndata: {"b":2}\r\n\r\n']),
+      new AbortController().signal,
+      (payload) => payloads.push(payload),
+    );
+
+    expect(payloads).toEqual(['{"a":1}', '{"b":2}']);
+  });
+
+  it("CRLF 를 쓰는 제공자의 여러 줄 data 를 LF 로 합친다", async () => {
+    const payloads: string[] = [];
+
+    await readSseStream(
+      responseOf(["data: first\r\ndata: second\r\n\r\n"]),
+      new AbortController().signal,
+      (payload) => payloads.push(payload),
+    );
+
+    expect(payloads).toEqual(["first\nsecond"]);
+  });
+
   it("조각 경계가 이벤트 경계와 어긋나도 블록을 복원한다", async () => {
     const payloads: string[] = [];
 

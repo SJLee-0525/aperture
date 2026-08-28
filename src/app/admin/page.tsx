@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { AdminHubGrid } from "@/features/admin-shell/_components/AdminHubGrid";
 
 import { useAuth } from "@/features/auth/_hooks/use-auth";
 
 import { ROUTES } from "@/constants/routes";
 
-import styles from "./page.module.css";
+import type { HubCard } from "@/features/admin-shell/_components/AdminHubGrid";
 
-/** 관리자 섹션 허브 — 섹션 단위로 묶고 각 허브에서 세부 관리로 진입. href 없으면 "곧 제공". */
-const SECTIONS: { key: string; label: string; desc: string; href?: string }[] = [
+/** 관리자 섹션 허브 — 섹션 단위로 묶고 각 허브에서 세부 관리로 진입. */
+const SECTIONS: HubCard[] = [
   {
     key: "photo",
     label: "사진",
@@ -46,34 +46,11 @@ const AdminHomePage = () => {
   const { user } = useAuth();
 
   return (
-    <div className={styles.page}>
-      <header className={styles.head}>
-        <h1 className={styles.title}>대시보드</h1>
-        <p className={styles.hello}>{user?.email ?? "관리자"} 님, 환영합니다.</p>
-      </header>
-
-      <div className={styles.grid}>
-        {SECTIONS.map((section) =>
-          section.href ? (
-            <Link
-              key={section.key}
-              href={section.href}
-              className={`${styles.card} ${styles.cardLink}`}
-            >
-              <span className={`${styles.badge} ${styles.badgeReady}`}>관리 →</span>
-              <h2 className={styles.cardTitle}>{section.label}</h2>
-              <p className={styles.cardDesc}>{section.desc}</p>
-            </Link>
-          ) : (
-            <div key={section.key} className={styles.card}>
-              <span className={styles.badge}>곧 제공</span>
-              <h2 className={styles.cardTitle}>{section.label}</h2>
-              <p className={styles.cardDesc}>{section.desc}</p>
-            </div>
-          ),
-        )}
-      </div>
-    </div>
+    <AdminHubGrid
+      title="대시보드"
+      lead={`${user?.email ?? "관리자"} 님, 환영합니다.`}
+      cards={SECTIONS}
+    />
   );
 };
 

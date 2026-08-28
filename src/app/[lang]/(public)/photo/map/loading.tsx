@@ -6,12 +6,10 @@ const SPOT_COUNT = 7;
 
 /**
  * 지도 RSC fetch 동안의 스켈레톤 — MapView 셸(위치 리스트 320px + 지도 stage)을 흉내.
- *
- * @returns {JSX.Element}
  */
 export default function MapLoading() {
   return (
-    <div className={styles.view} aria-busy="true">
+    <main className={styles.view} aria-busy="true">
       <aside className={styles.list}>
         <div className={styles.head}>
           <Skeleton width={80} height={11} />
@@ -29,6 +27,6 @@ export default function MapLoading() {
       </aside>
       {/* 지도 stage는 MapCanvas 로딩과 동일하게 정적 map-land 블록(펄스 없음) */}
       <div className={styles.stage} aria-hidden />
-    </div>
+    </main>
   );
 }
