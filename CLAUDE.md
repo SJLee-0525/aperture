@@ -207,9 +207,10 @@ src/
 │   ├── admin-global/  admin-maintenance/  # 전역 설정 편집기 · 유지보수 도구
 │   └── admin-*/                # 섹션별 폼(_components/) + use-*-admin hook(_hooks/, dnd-kit 정렬) — 사진·음악·개발
 ├── components/                 # ★ 순수 재사용 UI — 비즈니스 로직·DB 접근 금지, props만
-│   └── (PhotoTile, Modal, ExifList, Chip, MapPin, FrameCard, SectionHeading, WorkPoster, ProjectCard, YouTubeFacade …) + 각 .module.css
-├── lib/supabase/               # client.ts, auth.ts, storage.ts, 컬렉션별 쓰기(photos/albums/music/dev/dev-articles/site), list-crud.ts, admin-list.ts, rag.ts
-│   ├── public/                 # 공개 읽기 = PostgREST fetch (transport.ts + 섹션별 디코더) ★ 서버 렌더 경로
+│   └── (PhotoTile, PhotoGrid, Modal, Chip, ExifStrip, DetailHero, AwardList, AwardDetailModal, TimelineList, ShareButton, YouTubeFacade …) + 각 .module.css
+├── lib/supabase/               # client.ts, auth.ts, storage.ts, 컬렉션별 쓰기(photos/albums/music/dev/dev-articles/site), list-crud.ts, admin-list.ts, rag.ts, rest-client.ts, row-merge.ts
+│   ├── public/                 # 공개 읽기 = PostgREST fetch (transport.ts + 섹션별 fetcher) ★ 서버 렌더 경로
+│   ├── decode/                 # 행 → 도메인 모델 순수 디코더 한 벌(공개·관리자 공용) + public-sanitize
 │   └── admin/                  # require-admin-session, row-codec, sort-rpc
 ├── lib/admin/                  # 관리자 저장소 경계 — 컬렉션별 *-repository.ts 가 mock(로컬)↔live(Supabase) 선택 ★ + mock/(로컬 저장 구현)
 ├── lib/content/                # 공개 페이지 getter — mock↔Supabase 교체 지점 ★ (get-photos/albums/music-*/dev-*/site)
