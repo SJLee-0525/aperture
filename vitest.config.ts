@@ -33,8 +33,9 @@ export default defineConfig({
         functions: 56,
         lines: 65,
         "src/features/**/_lib/**": { statements: 85, branches: 80, functions: 85, lines: 85 },
-        // 관리자 쓰기 경계와 공개 읽기 경로에 테스트가 붙으면 _lib 과 같은 값까지 올린다.
-        "src/lib/**": { statements: 83, branches: 80, functions: 73, lines: 85 },
+        // functions 만 아직 낮다. 재export 뿐인 모듈(albums.ts)과 브라우저 구독 API 가
+        // 남아 있어 _lib 과 같은 85 에 닿지 않는다.
+        "src/lib/**": { statements: 85, branches: 80, functions: 78, lines: 85 },
       },
     },
   },
