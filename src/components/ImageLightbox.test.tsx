@@ -136,6 +136,17 @@ describe("ImageLightbox", () => {
     expect(scrollTo).toHaveBeenCalledExactlyOnceWith({ left: 2 * 400, behavior: "smooth" });
   });
 
+  it("첫 이미지의 이전 버튼은 포커스 가능한 비활성 상태다", () => {
+    render(<ImageLightbox {...baseProps()} index={0} />);
+    fireEvent.load(screen.getAllByTestId("slide-image")[0]!);
+    const previous = screen.getByLabelText("이전 이미지") as HTMLButtonElement;
+
+    expect(previous.disabled).toBe(false);
+    expect(previous.getAttribute("aria-disabled")).toBe("true");
+    fireEvent.click(previous);
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
   it("확대가 시작되면 트랙을 현재 인덱스 위치로 재고정한다", () => {
     const surface = mount();
 
@@ -177,7 +188,7 @@ describe("ImageLightbox", () => {
     pinchZoom(surface);
     scrollTo.mockClear();
     const nextButton = screen.getByLabelText("다음 이미지") as HTMLButtonElement;
-    expect(nextButton.disabled).toBe(false);
+    expect(nextButton.getAttribute("aria-disabled")).toBe("false");
     fireEvent.click(nextButton);
 
     expect(track().dataset.zoomed).toBeUndefined();
@@ -191,7 +202,7 @@ describe("ImageLightbox", () => {
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).not.toHaveBeenCalled();
     expect(track().dataset.zoomed).toBeUndefined();
-    expect((screen.getByLabelText("다음 이미지") as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.getByLabelText("다음 이미지").getAttribute("aria-disabled")).toBe("false");
 
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalledOnce();

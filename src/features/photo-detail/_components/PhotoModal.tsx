@@ -380,8 +380,10 @@ const PhotoModal = ({
                     type="button"
                     className={`${styles.nav} ${styles.prev}`}
                     aria-label={dict.previousImageLabel}
-                    onClick={prev}
-                    disabled={!canNavigatePrev}
+                    aria-disabled={!canNavigatePrev}
+                    onClick={() => {
+                      if (canNavigatePrev) prev();
+                    }}
                     initial={{ opacity: 0, x: -6, y: "-50%" }}
                     animate={{ opacity: 1, x: 0, y: "-50%" }}
                     exit={{ opacity: 0, x: -6, y: "-50%" }}
@@ -396,8 +398,10 @@ const PhotoModal = ({
                     type="button"
                     className={`${styles.nav} ${styles.next}`}
                     aria-label={dict.nextImageLabel}
-                    onClick={next}
-                    disabled={!canNavigateNext}
+                    aria-disabled={!canNavigateNext}
+                    onClick={() => {
+                      if (canNavigateNext) next();
+                    }}
                     initial={{ opacity: 0, x: 6, y: "-50%" }}
                     animate={{ opacity: 1, x: 0, y: "-50%" }}
                     exit={{ opacity: 0, x: 6, y: "-50%" }}

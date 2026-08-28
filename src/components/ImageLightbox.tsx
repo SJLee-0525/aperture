@@ -339,8 +339,11 @@ const ImageLightbox = ({
             type="button"
             className={`${styles.nav} ${styles.prev}`}
             aria-label={previousLabel}
-            disabled={!loaded || index === 0}
-            onClick={() => goTo(index - 1)}
+            aria-disabled={!loaded || index === 0}
+            onClick={() => {
+              if (!loaded || index === 0) return;
+              goTo(index - 1);
+            }}
             initial={{ opacity: 0, x: -6, y: "-50%" }}
             animate={{ opacity: 1, x: 0, y: "-50%" }}
             exit={{ opacity: 0, x: -6, y: "-50%" }}
@@ -355,8 +358,11 @@ const ImageLightbox = ({
             type="button"
             className={`${styles.nav} ${styles.next}`}
             aria-label={nextLabel}
-            disabled={!loaded || index === count - 1}
-            onClick={() => goTo(index + 1)}
+            aria-disabled={!loaded || index === count - 1}
+            onClick={() => {
+              if (!loaded || index === count - 1) return;
+              goTo(index + 1);
+            }}
             initial={{ opacity: 0, x: 6, y: "-50%" }}
             animate={{ opacity: 1, x: 0, y: "-50%" }}
             exit={{ opacity: 0, x: 6, y: "-50%" }}

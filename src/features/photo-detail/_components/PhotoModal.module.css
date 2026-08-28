@@ -146,7 +146,7 @@
 }
 /* 이미지 로딩 중과 모바일에서 EXIF 패널을 펼친 동안 이동이 잠긴다. 후자는 지속 상태라
    버튼이 정상처럼 보이면서 반응하지 않으면 고장으로 읽힌다. */
-.nav:disabled {
+.nav[aria-disabled="true"] {
   opacity: 0.3;
   cursor: default;
 }

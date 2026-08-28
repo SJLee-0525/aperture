@@ -125,10 +125,10 @@
     background var(--dur) var(--ease),
     opacity var(--dur) var(--ease);
 }
-.nav:hover:not(:disabled):not([data-cursor-snapped]) {
+.nav:hover:not([aria-disabled="true"]):not([data-cursor-snapped]) {
   background: var(--glass-chrome-bg-hover);
 }
-.nav:disabled {
+.nav[aria-disabled="true"] {
   opacity: 0.3;
   cursor: default;
 }

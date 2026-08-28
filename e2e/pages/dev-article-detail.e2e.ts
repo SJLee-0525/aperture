@@ -230,8 +230,8 @@ test.describe("개발 블로그 상세", () => {
    * jsdom 에는 레이아웃이 없어 getClientRects 가 늘 비어 있다. 이 결함은 실제 브라우저
    * 에서만 재현되므로 단위 테스트가 아니라 여기서 고정한다.
    *
-   * 양 끝 이미지에서는 넘길 수 없는 쪽 버튼이 disabled 라 순환 대상이 아니다.
-   * 그래서 첫 이미지와 두 번째 이미지에서 각각 열어 세 버튼을 모두 확인한다.
+   * 양 끝의 이동 버튼도 aria-disabled 로 탭 순서에 남는다. 이동 직후 버튼이 잠겨도
+   * 포커스가 body 로 빠지지 않아야 컨테이너의 keydown 트랩이 계속 동작한다.
    */
   test("라이트박스 안에서 Tab 이 fixed 버튼들에 닿는다", async ({ page }) => {
     await page.goto(ARTICLE);
@@ -253,25 +253,22 @@ test.describe("개발 블로그 상세", () => {
       return [...labels];
     };
 
-    const labelsAfterOpening = async (nth: number): Promise<string[]> => {
-      await zoom.nth(nth).scrollIntoViewIfNeeded();
-      await zoom.nth(nth).click();
-      await expect(lightbox).toBeVisible();
-      const labels = await tabThroughTrap();
-      await page.keyboard.press("Escape");
-      await expect(lightbox).toBeHidden();
-      return labels;
-    };
+    await zoom.first().scrollIntoViewIfNeeded();
+    await zoom.first().click();
+    await expect(lightbox).toBeVisible();
 
-    // 첫 이미지: 닫기와 다음 버튼이 활성이다.
-    const fromFirst = await labelsAfterOpening(0);
-    expect(fromFirst).toContain("닫기");
-    expect(fromFirst).toContain("다음 이미지");
+    const labels = await tabThroughTrap();
+    expect(labels).toEqual(expect.arrayContaining(["닫기", "이전 이미지", "다음 이미지"]));
 
-    // 마지막 이미지: 이전 버튼이 활성이다.
-    const fromLast = await labelsAfterOpening((await zoom.count()) - 1);
-    expect(fromLast).toContain("닫기");
-    expect(fromLast).toContain("이전 이미지");
+    const next = lightbox.getByRole("button", { name: "다음 이미지" });
+    await next.click();
+    await expect(next).toHaveAttribute("aria-disabled", "true");
+    await expect(next).toBeFocused();
+
+    await page.keyboard.press("Tab");
+    await expect
+      .poll(() => lightbox.evaluate((node) => node.contains(document.activeElement)))
+      .toBe(true);
   });
 
   // 프리렌더 목록 밖 경로는 요청-시 렌더되고, 그 응답의 상태 코드는 스트리밍이 시작된 뒤라
