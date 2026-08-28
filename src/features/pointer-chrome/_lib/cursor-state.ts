@@ -3,6 +3,10 @@ import {
   type CursorMode,
   type ScrollbarAxis,
 } from "@/features/pointer-chrome/_lib/cursor-mode";
+import {
+  CURSOR_ACCENT_VAR,
+  DATA_CURSOR_SNAPPED,
+} from "@/features/pointer-chrome/_lib/pointer-chrome-contract";
 
 import { stripLangPrefix } from "@/lib/i18n/locale-path";
 
@@ -93,9 +97,9 @@ const createCursorState = ({
   // 자신을 끄게 해서 커서 면칠과 기초 호버 배경이 겹치지 않게 한다.
   const setSnapped = (next: HTMLElement | null) => {
     if (next === snapped) return;
-    if (snapped) delete snapped.dataset.cursorSnapped;
+    if (snapped) snapped.removeAttribute(DATA_CURSOR_SNAPPED);
     snapped = next;
-    if (snapped) snapped.dataset.cursorSnapped = "true";
+    if (snapped) snapped.setAttribute(DATA_CURSOR_SNAPPED, "true");
   };
 
   const setMode = (next: CursorMode) => {
@@ -126,8 +130,8 @@ const createCursorState = ({
       (stripLangPrefix(getPathname()) === "/" ? LANDING_CURSOR_ACCENT : "var(--accent)");
     if (accent === currentAccent) return;
     currentAccent = accent;
-    cursor.style.setProperty("--cursor-accent", accent);
-    autoScrollAnchor.style.setProperty("--cursor-accent", accent);
+    cursor.style.setProperty(CURSOR_ACCENT_VAR, accent);
+    autoScrollAnchor.style.setProperty(CURSOR_ACCENT_VAR, accent);
   };
 
   const measureTarget = () => {
