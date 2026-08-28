@@ -92,4 +92,3 @@ const requireAdminToken = async (
 };
 
 export { adminGateResponse, requireAdminToken };
-export type { AdminGateOptions };

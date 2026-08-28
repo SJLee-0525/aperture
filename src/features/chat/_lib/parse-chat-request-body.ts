@@ -82,4 +82,3 @@ const parseChatRequestBody = async (request: Request): Promise<ParsedChatBody> =
 };
 
 export { parseChatRequestBody };
-export type { ParsedChatBody };

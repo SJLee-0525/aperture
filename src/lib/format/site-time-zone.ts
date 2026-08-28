@@ -65,5 +65,4 @@ const instantFromSiteWallClock = (wall: WallClock): Date => {
   return new Date(guess - (seenUtc - guess));
 };
 
-export { instantFromSiteWallClock, SITE_TIME_ZONE, siteWallClock };
-export type { WallClock };
+export { instantFromSiteWallClock, siteWallClock };

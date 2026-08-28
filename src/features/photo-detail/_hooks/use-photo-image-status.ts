@@ -52,4 +52,3 @@ const usePhotoImageStatus = (): PhotoImageStatus => {
 };
 
 export { usePhotoImageStatus };
-export type { ImageStatus, PhotoImageStatus };

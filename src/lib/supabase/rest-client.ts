@@ -55,4 +55,3 @@ const restFetch = (request: RestRequest): Promise<Response> => {
 };
 
 export { restFetch };
-export type { RestRequest };

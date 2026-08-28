@@ -46,4 +46,3 @@ const bearerToken = (request: Request): string => {
 };
 
 export { authorizeAdminToken, bearerToken };
-export type { AdminAuthVerdict };

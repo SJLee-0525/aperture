@@ -193,4 +193,3 @@ const generateChatMessage = async (options: GenerateChatMessageOptions) => {
 };
 
 export { generateChatMessage };
-export type { GenerateChatMessageOptions };

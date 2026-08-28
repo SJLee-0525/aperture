@@ -190,4 +190,4 @@ const findCssClassClashes = ({ files, readCss }) => {
 
 const readCssFile = (path) => readFileSync(path, "utf8");
 
-export { findCssClassClashes, propsByClass, readCssFile, ROOT, toPosix };
+export { findCssClassClashes, readCssFile, ROOT, toPosix };

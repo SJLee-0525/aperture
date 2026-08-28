@@ -65,4 +65,3 @@ const enforceChatQuota = async (
 };
 
 export { enforceChatQuota };
-export type { ChatQuotaVerdict };

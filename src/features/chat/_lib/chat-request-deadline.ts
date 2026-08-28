@@ -53,4 +53,3 @@ const createChatRequestDeadline = (
 };
 
 export { createChatRequestDeadline };
-export type { ChatRequestDeadline };

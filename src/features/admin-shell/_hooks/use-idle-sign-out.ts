@@ -47,4 +47,4 @@ const useIdleSignOut = (onIdle: () => void, idleLimitMs: number = IDLE_LIMIT_MS)
   }, [idleLimitMs]);
 };
 
-export { IDLE_LIMIT_MS, useIdleSignOut };
+export { useIdleSignOut };

@@ -56,4 +56,3 @@ const AwardList = ({ awards, label, className, onSelect }: Props) => {
 };
 
 export { AwardList };
-export type { AwardRow };

@@ -20,4 +20,3 @@ const clientAddress = (headers: HeaderLookup): string => {
 };
 
 export { clientAddress };
-export type { HeaderLookup };

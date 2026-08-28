@@ -45,4 +45,3 @@ const buildPhotoModalSlides = (
 };
 
 export { buildPhotoModalSlides };
-export type { PhotoModalSlide };

@@ -100,4 +100,4 @@ const useFormRecovery = <T>(
   return { pending: handled ? null : found, restore, discard: clear, clear, abandon };
 };
 
-export { FORM_RECOVERY_DEBOUNCE_MS, useFormRecovery };
+export { useFormRecovery };

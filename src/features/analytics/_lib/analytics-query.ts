@@ -29,4 +29,4 @@ const analyticsQuery = (search: URLSearchParams | string): string => {
   return kept.toString();
 };
 
-export { analyticsQuery, ANALYTICS_QUERY_ALLOWLIST };
+export { analyticsQuery };

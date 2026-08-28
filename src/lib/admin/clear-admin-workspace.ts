@@ -51,4 +51,3 @@ const clearAdminWorkspace = (local: StorageLike, session: StorageLike): void => 
 };
 
 export { clearAdminWorkspace };
-export type { StorageLike };

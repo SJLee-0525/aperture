@@ -109,4 +109,3 @@ const recordAdminAuthFailure = async (options: ThrottleOptions = {}): Promise<vo
 };
 
 export { checkAdminAuthThrottle, FAILURE_LIMIT, recordAdminAuthFailure, WINDOW_MS };
-export type { AdminAuthThrottleState };

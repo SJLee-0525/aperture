@@ -43,4 +43,4 @@ const UnsavedGuardProvider = ({ children }: { children: ReactNode }) => {
 /** 셸 밖(로그인 화면 등)에서는 null 이므로 가드 없이 동작한다. */
 const useUnsavedGuardContext = (): UnsavedGuardValue | null => useContext(UnsavedGuardContext);
 
-export { LEAVE_MESSAGE, UnsavedGuardProvider, useUnsavedGuardContext };
+export { UnsavedGuardProvider, useUnsavedGuardContext };

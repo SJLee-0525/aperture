@@ -378,4 +378,4 @@ export {
   resolveReferencesWithRefresh,
   selectProfileBlocks,
 };
-export type { ProfileBlock, ProfileSnapshot };
+export type { ProfileSnapshot };

@@ -174,4 +174,3 @@ const usePhotoPanelSheet = (): PhotoPanelSheet => {
 };
 
 export { usePhotoPanelSheet };
-export type { PhotoPanelSheet };

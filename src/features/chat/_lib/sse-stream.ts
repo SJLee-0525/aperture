@@ -85,4 +85,4 @@ const readSseStream = async (
   }
 };
 
-export { MAX_STREAM_CHARS, readSseStream };
+export { readSseStream };

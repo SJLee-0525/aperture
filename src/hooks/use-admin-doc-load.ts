@@ -45,4 +45,3 @@ const useAdminDocLoad = <T>(getRepository: () => DocReader<T>, id: string) => {
 };
 
 export { useAdminDocLoad };
-export type { AdminDocStatus };

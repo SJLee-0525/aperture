@@ -28,10 +28,6 @@ const TRIAGE_INSTRUCTIONS = [
   "State uncertainty in confidence rather than hedging inside the text fields.",
 ].join("\n");
 
-/** 지시문과 데이터를 가르는 표시. `TRIAGE_INSTRUCTIONS` 가 같은 이름을 언급한다. */
-const ALERT_DATA_START = "----- BEGIN ALERT DATA -----";
-const ALERT_DATA_END = "----- END ALERT DATA -----";
-
 const frameLine = (frame: SentryAlertSummary["frames"][number]): string => {
   const location = [frame.filename, frame.lineno].filter(Boolean).join(":");
   return `  at ${frame.function ?? "(anonymous)"}${location ? ` (${location})` : ""}`;
@@ -74,4 +70,4 @@ const buildTriageInput = (alert: SentryAlertSummary): string => {
   return lines.join("\n");
 };
 
-export { ALERT_DATA_END, ALERT_DATA_START, buildTriageInput, TRIAGE_INSTRUCTIONS };
+export { buildTriageInput, TRIAGE_INSTRUCTIONS };

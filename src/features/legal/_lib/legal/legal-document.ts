@@ -14,4 +14,4 @@ type LegalDocument = {
 /** 공용 레이아웃으로 제공하는 문서 종류. */
 type LegalDocumentKind = "privacy" | "terms" | "accessibility";
 
-export type { LegalDocument, LegalDocumentKind, LegalSection };
+export type { LegalDocument, LegalDocumentKind };
