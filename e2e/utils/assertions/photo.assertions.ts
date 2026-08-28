@@ -49,7 +49,7 @@ const photoAssertions = {
   async openMapPhoto(page: Page) {
     await page.locator("aside").getByRole("link").first().click();
     await expect(page).toHaveURL(/[?&]photo=/);
-    await expect(page.getByRole("dialog").last()).toBeVisible();
+    await commonAssertions.dialogOpened(page, "새벽의 항구");
     await commonAssertions.closeDialog(page);
   },
 };

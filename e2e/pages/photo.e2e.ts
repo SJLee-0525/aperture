@@ -23,14 +23,16 @@ test.describe("Photo", () => {
 
     const pendingArea = page.locator('[data-photo-modal-image-area="pending"]');
     await expect(pendingArea).toBeVisible();
+    // 진입 scale transform은 시각 크기만 바꾼다. 스켈레톤과 실제 영역의 레이아웃
+    // 높이 계약을 보려면 transform을 포함하는 rect가 아니라 offsetHeight를 비교한다.
     const pendingHeight = await pendingArea.evaluate(
-      (element) => element.getBoundingClientRect().height,
+      (element) => (element as HTMLElement).offsetHeight,
     );
 
     const readyArea = page.locator('[data-photo-modal-image-area="ready"]');
     await expect(readyArea).toBeAttached();
     const readyHeight = await readyArea.evaluate(
-      (element) => element.getBoundingClientRect().height,
+      (element) => (element as HTMLElement).offsetHeight,
     );
 
     expect(Math.abs(pendingHeight - readyHeight)).toBeLessThanOrEqual(1);
