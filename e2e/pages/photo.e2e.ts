@@ -99,6 +99,20 @@ test.describe("Photo", () => {
             ),
         )
         .toBe(true);
+      // 모달은 진입 연출이 끝난 뒤부터 스와이프를 받는다. dialogOpened 는 role 만 보고
+      // Playwright 는 opacity 0 도 visible 로 세므로, 그 시점은 아직 연출 중일 수 있다.
+      // 시간이 아니라 연출의 종료 상태를 기다린다.
+      await expect
+        .poll(() =>
+          page
+            .locator("[data-photo-modal-frame]")
+            .evaluate((node) => {
+              const style = getComputedStyle(node);
+              const settled = new DOMMatrixReadOnly(style.transform).a === 1;
+              return style.opacity === "1" && settled;
+            }),
+        )
+        .toBe(true);
       return page.locator("[data-photo-modal-track]");
     };
 
