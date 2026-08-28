@@ -43,9 +43,9 @@ Bing Webmaster Tools의 `Import from Google Search Console` 로 Google 속성을
 
 체크:
 
-- [ ] `main` 의 로컬 커밋이 전부 push 됐는가 (`git log --oneline origin/main..HEAD` 가 비어야 함)
-- [ ] Vercel Production 배포가 최신 커밋으로 성공했는가
-- [ ] `https://sungjoon.works/ko` 가 200인가
+- [x] `main` 의 로컬 커밋이 전부 push 됐는가 (`git log --oneline origin/main..HEAD` 가 비어야 함)
+- [x] Vercel Production 배포가 최신 커밋으로 성공했는가
+- [x] `https://sungjoon.works/ko` 가 200인가
 
 ---
 

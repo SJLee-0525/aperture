@@ -6,11 +6,11 @@
 
 ## 1. 관찰 기간 중 확인 (2~3일에 한 번, 5분)
 
-- [ ] keep-alive: GitHub Actions 의 `Supabase keep-alive` 가 3일 간격으로 성공하는지 확인한다. 실패가 이어지면 Supabase 장애 또는 secrets 문제이므로 로그를 확인하고 수동 dispatch 로 다시 실행한다
-- [ ] Supabase 대시보드: 일시정지 예고 배너가 없는지 확인한다(가장 중요). Usage 의 egress(월 5GB), DB 용량(500MB), Storage(1GB) 추이가 완만한지 본다
-- [ ] 콘텐츠 저장 왕복: 관리자 저장 시 "RAG 자동 갱신 실패" 경고가 없고 공개 페이지에 revalidate 주기 안에 반영되는지 확인한다. 평소 편집이 곧 검증이라 별도 작업은 없다
-- [ ] 챗봇·검색: 가끔 챗 질문과 본문 검색이 정상 응답하는지 확인한다. Vercel 함수 로그의 `[chat-input]`(프롬프트 크기)과 `[chat-rag]`(청크 수) 값이 비정상적으로 크지 않은지 본다
-- [ ] Sentry·Vercel 로그: Supabase 호출 실패(4xx/5xx)가 반복되는 새 오류가 없는지 확인한다
+- [x] keep-alive: GitHub Actions 의 `Supabase keep-alive` 가 3일 간격으로 성공하는지 확인한다. 실패가 이어지면 Supabase 장애 또는 secrets 문제이므로 로그를 확인하고 수동 dispatch 로 다시 실행한다
+- [x] Supabase 대시보드: 일시정지 예고 배너가 없는지 확인한다(가장 중요). Usage 의 egress(캐시 5GB + 비캐시 5GB 각각), DB 용량(500MB), Storage(1GB) 추이가 완만한지 본다
+- [x] 콘텐츠 저장 왕복: 관리자 저장 시 "RAG 자동 갱신 실패" 경고가 없고 공개 페이지에 revalidate 주기 안에 반영되는지 확인한다. 평소 편집이 곧 검증이라 별도 작업은 없다
+- [x] 챗봇·검색: 가끔 챗 질문과 본문 검색이 정상 응답하는지 확인한다. Vercel 함수 로그의 `[chat-input]`(프롬프트 크기)과 `[chat-rag]`(청크 수) 값이 비정상적으로 크지 않은지 본다
+- [x] Sentry·Vercel 로그: Supabase 호출 실패(4xx/5xx)가 반복되는 새 오류가 없는지 확인한다
 
 ### 문제 발생 시 롤백
 

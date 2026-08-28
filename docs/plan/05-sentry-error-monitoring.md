@@ -70,7 +70,7 @@ Sentry 청크를 내려받지 않는다. 동의를 철회하면 Replay 리스너
 - [x] Vercel Production과 Preview에 `NEXT_PUBLIC_SENTRY_DSN` 등록
 - [x] `NEXT_PUBLIC_SENTRY_DATA_REGION=US|DE`가 DSN ingest 지역과 일치하는지 확인
 - [x] `SENTRY_AUTH_TOKEN`을 Vercel Sensitive 환경변수로 등록
-- [ ] Vercel의 **Automatically expose System Environment Variables** 활성화
+- [x] Vercel의 **Automatically expose System Environment Variables** 활성화
 - [x] Sentry Developer 플랜의 이벤트 보유기간이 30일인지 확인
 - [x] Sentry 프로젝트의 Spike Protection 활성화
 - [x] 서버 측 Data Scrubbing 활성화 후 인증·쿠키·본문 규칙 확인

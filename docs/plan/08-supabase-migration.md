@@ -150,7 +150,7 @@ create policy "admin write" on photos
 ### M0 — 결정·측정·준비
 
 ADR-0005를 Accepted로 확정한다. Firebase 콘솔에서 월 Storage 다운로드 트래픽을 확인해
-egress 10GB와 비교한다(Storage 사용량 약 70MB는 확인 완료). Supabase 프로젝트를
+egress 10GB(캐시 5GB + 비캐시 5GB 각각)와 비교한다(Storage 사용량 약 70MB는 확인 완료). Supabase 프로젝트를
 ap-northeast-2 리전에 생성하고 관리자 계정 1개와 `app_metadata.role = "admin"`을 설정한다.
 
 ### M1 — 스키마·RLS·버킷·keep-alive

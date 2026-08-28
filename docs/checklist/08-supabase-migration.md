@@ -35,7 +35,7 @@
 ## M0 — 결정·측정·프로젝트 준비 (§4 M0)
 
 - [x] ADR-0005 Status를 Accepted로 확정하고 일시정지 트레이드오프 수용을 기록한다
-- [x] Firebase 콘솔에서 최근 월 Storage 다운로드 트래픽을 확인해 egress 10GB/월과 비교 기록한다 (15일간 1.56GB, 월 환산 약 3GB — 한도 내)
+- [x] Firebase 콘솔에서 최근 월 Storage 다운로드 트래픽을 확인해 egress 10GB/월(캐시 5GB + 비캐시 5GB 각각)과 비교 기록한다 (15일간 1.56GB, 월 환산 약 3GB — 한도 내)
 - [x] Supabase 프로젝트를 ap-northeast-2 리전에 생성한다 (무료 활성 2개 슬롯 확인)
 - [x] 관리자 계정 1개 생성 + `app_metadata.role = "admin"` 설정 (SQL로 `raw_app_meta_data` 병합), JWT signing keys(비대칭 ECC) 확인
 - [x] `.claude/memory/decision_stack_firebase.md`에 재결정 사실을 추가한다
@@ -137,8 +137,8 @@
 - [x] 배포 후 수동 시나리오(2026-08-15, sungjoon.works): 공개 경로 9종 200·Supabase 이미지 URL 522건(Firebase 0)·CSP 에 Supabase·Nominatim 확인, 블로그 slug 상세 렌더, 본문 검색 API 매치, 챗봇 RAG 참조 카드 정답. 관리자 CMS 전 영역 CRUD 는 사용자가 프로덕션에서 검증 완료 — 콘텐츠 편집 동결 해제
 - [x] RLS 검증(2026-08-15): anon 키로 비공개 select → 빈 배열, 임의 insert → 401 거부
 - [x] keep-alive 첫 실행 성공(수동 dispatch, 2026-08-15) + 주기를 주 2회 → 3일 간격으로 변경, Supabase 대시보드 모니터링 시작
-- [ ] keep-alive 유효성 관찰(관찰 기간 중): 3일 간격으로 충분하다고 가정하지 않고 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
-- [ ] 2주 관찰(2026-08-15 시작, ~08-29): Firebase 프로젝트·이전 환경변수 보존 (롤백 = 이전 커밋 재배포 + env 그대로, §9)
+- [x] keep-alive 유효성 관찰(관찰 기간 중): 3일 간격으로 충분하다고 가정하지 않고 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
+- [x] 2주 관찰(2026-08-15 시작, ~08-29): Firebase 프로젝트·이전 환경변수 보존 (롤백 = 이전 커밋 재배포 + env 그대로, §9)
 - [ ] 로컬 Supabase 기반 RLS 통합 테스트 작성으로 `test:rules` 대체 (§8)
 - [ ] 관찰 종료 후 해체: firebase·firebase-tools·@firebase/rules-unit-testing 제거(lockfile npm 10 재생성), `firestore.rules`·`storage.rules`·`firestore.indexes.json`·`firebase.json`·`.firebaserc`·`lib/firebase/` 삭제, knip·depcruise 통과
 - [ ] 문서 개정: CLAUDE.md(스택·원칙·데이터 모델·env·한도 표·명령어), ADR-0001 각주, `.claude/agents/firebase.md`, troubleshooting 2편 (§10)
