@@ -68,9 +68,6 @@ const ROUTES = {
 const albumRoute = (id: string) => `${ROUTES.PHOTO_ALBUMS}/${id}`;
 
 /**
- * 관리자 사진 수정 경로
- */
-/**
  * 신규 작성 경로. 목록 경로 뒤에 `/new` 를 붙인다.
  *
  * 리터럴로 두면 목록 경로를 바꿀 때 수정 경로 함수 여덟은 따라오고 이쪽 일곱만
@@ -81,6 +78,9 @@ const albumRoute = (id: string) => `${ROUTES.PHOTO_ALBUMS}/${id}`;
  */
 const adminNewRoute = (listRoute: string) => `${listRoute}/new`;
 
+/**
+ * 관리자 사진 수정 경로
+ */
 const adminPhotoRoute = (id: string) => `${ROUTES.ADMIN_PHOTOS}/${id}`;
 
 /**
