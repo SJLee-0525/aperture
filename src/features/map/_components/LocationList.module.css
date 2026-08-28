@@ -11,7 +11,7 @@
   .list {
     border-right: 0;
     border-top: 1px solid var(--line);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.16);
+    box-shadow: var(--shadow-sheet);
     background: var(--bg);
     padding-top: var(--s-4);
   }

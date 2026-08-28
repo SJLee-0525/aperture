@@ -117,7 +117,7 @@
     padding-top: var(--s-8);
     border-top: 1px solid var(--line);
     border-left: 0;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.28);
+    box-shadow: var(--shadow-sheet);
   }
 
   .handle {

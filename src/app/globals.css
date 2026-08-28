@@ -121,11 +121,15 @@
   --scrim: rgba(0, 0, 0, 0.55);
   --scrim-strong: rgba(0, 0, 0, 0.66);
   --scrim-stage: rgba(0, 0, 0, 0.82);
+  /* 위 3층보다 옅다. 뒤를 blur 로 흐리는 오버레이가 쓴다. 덮는 대신 초점만 옮긴다. */
+  --scrim-soft: rgba(0, 0, 0, 0.22);
   --map-land: #eceef0;
   --map-road: #ffffff;
   --map-water: #dfe6ee;
   --shadow-card: 0 1px 2px rgba(17, 17, 20, 0.04), 0 8px 24px rgba(17, 17, 20, 0.06);
   --shadow-pop: 0 24px 60px rgba(17, 17, 20, 0.18);
+  /* 모바일 바텀 시트가 위로 드리우는 그림자. 지도 위치 목록과 사진 상세 패널이 공유한다. */
+  --shadow-sheet: 0 -12px 40px rgba(17, 17, 20, 0.16);
   color-scheme: light;
 }
 
@@ -152,11 +156,13 @@
   --scrim: rgba(0, 0, 0, 0.7);
   --scrim-strong: rgba(0, 0, 0, 0.81);
   --scrim-stage: rgba(0, 0, 0, 0.9);
+  --scrim-soft: rgba(0, 0, 0, 0.37);
   --map-land: #161618;
   --map-road: #2a2a30;
   --map-water: #10171f;
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 28px rgba(0, 0, 0, 0.45);
   --shadow-pop: 0 30px 70px rgba(0, 0, 0, 0.7);
+  --shadow-sheet: 0 -12px 40px rgba(0, 0, 0, 0.55);
 
   --accent: #4da3ff;
   --accent-soft: rgba(43, 149, 255, 0.16);

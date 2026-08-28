@@ -193,7 +193,7 @@
   .panel {
     border-left: 0;
     border-top: 1px solid var(--line);
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.28);
+    box-shadow: var(--shadow-sheet);
     max-height: 30dvh;
     transition: max-height 0.3s var(--ease);
     overscroll-behavior-y: contain;
