@@ -349,8 +349,16 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
   (`@/hooks` + `@/features/*/_hooks`) → `@/features/*/_lib` → (`@/lib` + `@/constants`) → `import type`(경로 무관 전체 알파벳순) →
   상대경로/CSS 모듈. `eslint.config.mjs`의 `import/order`가 강제 + `eslint --fix`로 자동 정렬.
 - UI 표시 문자열은 ko/en 사전 경유 / 영어 코드·변수명. **전 섹션 콘텐츠 이중언어**(음악·개발 포함)
+  - **예외 — 관리자 화면(`/admin/*`·`features/admin-*`)은 사전을 경유하지 않는다.** 관리자는 본인
+    1명이고 한국어 고정이므로 번역 대상이 없는 문자열에 간접층을 더하지 않는다. 공개 화면은 예외가
+    아니다. 다만 **문자열 안에 화살표·기호를 넣지 않는다** — 스크린리더가 읽어 버린다.
 - **스타일 = CSS Modules** (컴포넌트별 `.module.css`, 짝 `.tsx`와 같은 폴더에 동거 — features에선 `_components/` 안). 색·간격은 `globals.css`의 `:root` 변수 경유
   (디자인 `tokens.css` 이식). **hex 직박 금지**, 다크모드는 `[data-theme]` 셀렉터, **섹션 액센트는 `[data-section]`**.
+  - **예외 — 사진·이미지·영상 위에 얹는 오버레이의 테마 무관 고정색은 `rgba()` 직접 사용을 허용한다.**
+    사진은 `[data-theme]`을 따라 바뀌지 않으므로 토큰화하면 의도가 흐려진다. 조건을
+    `[data-variant="image"]` 셀렉터나 CSS 주석으로 드러낸다.
+  - 이 예외는 **오버레이에만** 적용된다. 테마를 따라야 하는 표면·그림자·스크림은 여전히 토큰
+    (`--scrim` 계열·`--shadow-card`·`--shadow-pop`) 경유다. 사진 위라도 배경이 테마에 따라 바뀌면 토큰이다.
 - **features/ 내부 = 타입별 하위폴더**(`_components/`·`_hooks/`·`_lib/`) — 위 「디렉토리 구조」 섹션 참조.
 - **관리자 UI = 공용 프리미티브(AdminButton·AdminInput·AdminField) + 용어·치수 규칙** — [docs/admin-ui-conventions.md](docs/admin-ui-conventions.md)
 - **공개 화면 = 지면 열(`--page-max`·`.u-page-main`)·스크림 3층·포커스 링 소유권·`.sr-only`** — [docs/public-ui-conventions.md](docs/public-ui-conventions.md)
