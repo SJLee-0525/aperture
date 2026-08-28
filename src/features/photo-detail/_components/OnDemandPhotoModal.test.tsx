@@ -8,11 +8,12 @@ import { OnDemandPhotoModal } from "@/features/photo-detail/_components/OnDemand
 import type { Photo } from "@/types/photo";
 
 const photoModalRender = vi.hoisted(() => vi.fn());
+let activePhotoId = "p1";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ back: vi.fn() }),
   usePathname: () => "/photo",
-  useSearchParams: () => new URLSearchParams("photo=p1"),
+  useSearchParams: () => new URLSearchParams(`photo=${activePhotoId}`),
 }));
 vi.mock("next/dynamic", () => ({
   default: () => {
@@ -56,8 +57,40 @@ const flushCycles = async () => {
 describe("OnDemandPhotoModal fetch 회귀", () => {
   afterEach(() => {
     cleanup();
+    activePhotoId = "p1";
     photoModalRender.mockClear();
     vi.unstubAllGlobals();
+  });
+
+  it("열린 세션에서 미로딩 사진으로 이동해도 모달 셸을 다시 숨기지 않는다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ photos: ["p3", "p1", "p2"].map(serialized), tags: [] }),
+      }),
+    );
+
+    const view = render(
+      <OnDemandPhotoModal photoIds={["p1", "p2", "p3"]} endpoint="/api/photos" />,
+    );
+
+    await waitFor(() => expect(photoModalRender).toHaveBeenCalled());
+    const firstProps = photoModalRender.mock.calls.at(-1)?.[0] as {
+      onImageReady: (id: string) => void;
+    };
+    act(() => firstProps.onImageReady("p1"));
+    await waitFor(() =>
+      expect(photoModalRender.mock.calls.at(-1)?.[0]).toMatchObject({ revealed: true }),
+    );
+
+    activePhotoId = "p2";
+    view.rerender(<OnDemandPhotoModal photoIds={["p1", "p2", "p3"]} endpoint="/api/photos" />);
+
+    expect(photoModalRender.mock.calls.at(-1)?.[0]).toMatchObject({
+      animateOnOpen: true,
+      revealed: true,
+    });
   });
 
   it("캐시 여부와 무관하게 이미지가 준비되는 순간 실제 모달을 드러낸다", async () => {

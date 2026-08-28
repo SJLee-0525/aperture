@@ -76,14 +76,19 @@ const OnDemandPhotoModal = ({
     initialTags,
   );
   const [readyId, setReadyId] = useState<string | null>(null);
+  /** 현재 detail query session 을 처음 연 사진. 사진 교체로는 바꾸지 않는다. */
   const [openedId, setOpenedId] = useState<string | null>(null);
   /** 이번 열기에서 로딩 프레임이 등장했는지. 한 번 뜨면 닫을 때까지 유지한다. */
   const [pendingShown, setPendingShown] = useState(false);
 
-  /* 뒤로가기로 닫으면 close() 를 거치지 않는다. 다 본 사진의 id 가 남아 있으면 같은 사진을
-     다시 열 때 판정이 이전 열기의 상태를 그대로 물려받는다. */
-  if (openedId !== activeId) {
+  /* 뒤로가기로 닫으면 close() 를 거치지 않는다. query 의 null 경계에서 세션 상태를
+     초기화하되, 열린 채 다른 사진으로 이동하는 것은 새 진입이 아니라 교체로 취급한다. */
+  if (openedId == null && activeId != null) {
     setOpenedId(activeId);
+    setReadyId(null);
+    setPendingShown(false);
+  } else if (openedId != null && activeId == null) {
+    setOpenedId(null);
     setReadyId(null);
     setPendingShown(false);
   }
@@ -97,7 +102,8 @@ const OnDemandPhotoModal = ({
   }, [activeId, photoIds]);
   const knownActiveId = activeId ? photoIds.includes(activeId) : false;
   const mounted = useMounted();
-  const waiting = activeId != null && readyId !== activeId;
+  // 로딩 프레임은 세션의 첫 사진에만 쓴다. 이후 사진은 열린 모달 안의 이미지 로더가 맡는다.
+  const waiting = activeId != null && readyId == null;
   const pendingRef = useFocusTrap(pendingShown && waiting && mounted);
   // 로딩 프레임도 닫을 수 있어야 한다. 사진이 늦게 오는 동안 Escape 가 듣지 않으면
   // 방문자는 닫기 버튼을 찾기 전까지 갇힌다.
@@ -134,7 +140,7 @@ const OnDemandPhotoModal = ({
           /* 로딩 프레임이 뜨지 않은 열기에서는 이 모달이 스크림과 패널을 함께 띄운다.
              프레임이 이미 스크림을 올렸다면 배경은 그대로 두고 패널만 등장한다. */
           animateOnOpen={!pendingShown}
-          revealed={readyId === activeId}
+          revealed={readyId != null}
           onImageReady={setReadyId}
           chatTarget={chatTarget}
         />
