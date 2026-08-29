@@ -101,5 +101,5 @@ type ChatContext = {
 | 전송 기록 UI            | [`ChatSentContext.tsx`](../../src/features/chat/_components/ChatSentContext.tsx)                                                                                   |
 | 채팅 제공자와 의도 분류 | [`chat-provider.ts`](../../src/features/chat/_lib/chat-provider.ts), [`openai-intent-classifier.ts`](../../src/features/chat/_lib/openai-intent-classifier.ts)     |
 | RAG 색인과 검색         | [`rag-chunks.ts`](../../src/lib/ai/rag-chunks.ts), [`rag-search.ts`](../../src/lib/ai/rag-search.ts), [`rag.ts`](../../src/lib/supabase/rag.ts)                    |
-| 사진 필터 URL           | [`photo-filter-query.ts`](../../src/lib/photo-filter-query.ts)                                                                                                     |
-| 연락 초안               | [`contact-draft.ts`](../../src/features/chat/_lib/contact-draft.ts), [`contact-draft-storage.ts`](../../src/lib/contact-draft-storage.ts)                          |
+| 사진 필터 URL           | [`filter-query.ts`](../../src/lib/photo/filter-query.ts)                                                                                                           |
+| 연락 초안               | [`contact-draft.ts`](../../src/features/chat/_lib/contact-draft.ts), [`use-contact-draft.ts`](../../src/features/contact/_hooks/use-contact-draft.ts)              |

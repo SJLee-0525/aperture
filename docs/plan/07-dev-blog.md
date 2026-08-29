@@ -1,6 +1,6 @@
 # 개발 블로그 개편 계획
 
-> 상태: **B1–B7 구현 완료** (WebMCP Tool Inspector 평가만 남음)
+> 상태: **B1–B7 구현 및 WebMCP Tool Inspector 평가 완료**
 > 작성일: 2026-08-11
 > 관련 계획: [통합 포트폴리오 v2](00-plan-v2.md), [챗봇](01-profile-chatbot.md), [WebMCP](04-webmcp-agent-tools.md), [화면 문맥 챗봇](06-chat-screen-context.md)
 > 목적: 개발 섹션의 소개·경력·기술 구조를 정리하고, 관리자가 Markdown으로 작성한 한국어 블로그를 공개 검색·프로젝트·챗봇·WebMCP와 연결한다.

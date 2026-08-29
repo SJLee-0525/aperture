@@ -1,6 +1,6 @@
 # Supabase 이전 구현 계획
 
-> 상태: **계획 (미착수)** — 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md), 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
+> 상태: **구현·관찰·Firebase 해체 완료** (2026-08-29). 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md), 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 체크리스트: [`docs/checklist/08-supabase-migration.md`](../checklist/08-supabase-migration.md)
 > 원칙: 서버 0대, 월 $0 유지. RLS가 보안 경계의 전부. 공개 읽기의 ISR + 태그 무효화 전략은 그대로 유지한다.
 

@@ -1,7 +1,8 @@
 # WebMCP 에이전트 도구 구현 계획
 
-> 상태: **W1~W5 완료 · WebMCP 14개 표면 검증 완료** (2026-08-11)
-> 명령형 도구 13종과 선언형 연락 폼 1종을 5차 평가까지 검증했다. 실행 기록과 수정 내역은
+> 상태: **W1~W5 완료 · WebMCP 16개 표면 검증 완료** (2026-08-11, 블로그 도구 추가 검증 포함)
+> 처음 구현한 명령형 도구 13종과 선언형 연락 폼 1종을 5차 평가까지 검증했고, 이후 블로그 도구
+> 2종도 확인했다. 실행 기록과 수정 내역은
 > [webmcp-tool-eval](../troubleshooting/webmcp-tool-eval.md)에 정리했다.
 > 결정 근거: [ADR-0003](../adr/0003-webmcp-agent-tools.md)
 > 관련 결정: [ADR-0002 경로 기반 i18n](../adr/0002-path-based-i18n.md), [03-browser-language-entry-routing](03-browser-language-entry-routing.md)
