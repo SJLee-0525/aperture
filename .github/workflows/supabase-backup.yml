@@ -28,8 +28,9 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       BACKUP_AGE_RECIPIENT: ${{ secrets.BACKUP_AGE_RECIPIENT }}
-      RCLONE_CONFIG_B64: ${{ secrets.RCLONE_CONFIG_B64 }}
-      BACKUP_REMOTE: ${{ vars.SUPABASE_BACKUP_REMOTE }}
+      B2_APPLICATION_KEY_ID: ${{ secrets.B2_APPLICATION_KEY_ID }}
+      B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+      B2_BUCKET: ${{ vars.B2_BUCKET }}
       BACKUP_LABEL: ${{ inputs.label || 'scheduled' }}
 
     steps:

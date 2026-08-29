@@ -143,7 +143,7 @@
 - [x] 관찰 종료 기준값 기록(2026-08-29): Free·서울 리전·Healthy, DB 0.032GB, Storage 0.076GB, Egress 0.25GB·Cached Egress 0.13GB, API 4xx/5xx 0, RAG 424청크·원본 242/242, `media` 831개·77,603,202 bytes
 - [x] Firebase Storage URL 전수 검사(2026-08-29): JSONB `data` 8개 테이블에서 Firebase 호스트 0건 확인
 - [x] 로컬 Supabase 기반 RLS 통합 테스트로 `test:rules` 대체 — CI에서 Postgres RLS·정렬 RPC·Storage 2 suites, 8 tests 통과(2026-08-29)
-- [ ] Supabase 무료 플랜 백업 자동화: DB·`media`를 age로 암호화해 Google Drive에 주간 보관하고 첫 백업 복구 훈련 통과
+- [ ] Supabase 무료 플랜 백업 자동화: DB·`media`를 age로 암호화해 Backblaze B2에 주간 보관하고 첫 백업 복구 훈련 통과
 - [ ] 관찰 종료 후 해체: firebase·firebase-tools·@firebase/rules-unit-testing 제거(lockfile npm 10 재생성), `firestore.rules`·`storage.rules`·`firestore.indexes.json`·`firebase.json`·`.firebaserc`·`lib/firebase/` 삭제, knip·depcruise 통과
 - [ ] 문서 개정: CLAUDE.md(스택·원칙·데이터 모델·env·한도 표·명령어), ADR-0001 각주, `.claude/agents/firebase.md`, troubleshooting 2편 (§10)
 - [ ] GCP 예산 알림·카드 등록 정리, Firebase 프로젝트 최종 삭제

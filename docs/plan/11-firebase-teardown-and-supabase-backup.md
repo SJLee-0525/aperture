@@ -8,7 +8,7 @@
 
 2주 관찰을 마친 Supabase를 유일한 운영 데이터 소스로 확정하고 Firebase의 코드, 환경변수,
 프로젝트를 순서대로 제거한다. Firebase 프로젝트를 삭제하기 전에 로컬 RLS 통합 테스트와
-외부 백업을 준비한다. 백업은 GitHub 저장소에 넣지 않고 암호화한 파일만 Google Drive에
+외부 백업을 준비한다. 백업은 GitHub 저장소에 넣지 않고 암호화한 파일만 Backblaze B2에
 보관한다.
 
 ## 2. 해체 전 기준값
@@ -112,7 +112,7 @@ Usage의 Storage 0.076GB와 SQL 합계 77,603,202 bytes는 표시 단위와 반�
 2. `npm run test:rules`가 로컬 Supabase 테스트를 실행한다.
 3. Firebase 패키지, Rules, 설정 파일과 런타임 호스트 허용 목록을 제거한다.
 4. 8개 JSONB 테이블에서 Firebase Storage URL이 0건이다.
-5. Supabase DB와 `media` 버킷 백업이 Google Drive에 생성되고 복호화 검증을 통과한다.
+5. Supabase DB와 `media` 버킷 백업이 Backblaze B2에 생성되고 복호화 검증을 통과한다.
 6. 코드 해체 후 전체 품질 게이트와 프로덕션 스모크가 통과한다.
 7. Vercel의 Firebase 환경변수를 제거한 배포가 정상이다.
 8. Firebase Auth, Storage, 프로젝트를 삭제하고 GCP 결제 표면을 정리한다.
@@ -161,31 +161,38 @@ Firebase 프로젝트 삭제 직전에는 수동으로 `pre-firebase-teardown` �
 3. 테이블 행 수, RAG 청크 수, Storage 객체 수와 바이트를 `manifest.txt`에 기록한다.
 4. 각 파일의 SHA-256을 만든다.
 5. 백업 디렉터리를 tar.gz로 묶는다.
-6. age 공개키로 암호화한다. 복호화 개인키는 GitHub와 Google Drive에 두지 않는다.
-7. rclone OAuth 설정으로 Google Drive의 `Backups/aperture/`에 업로드한다.
+6. age 공개키로 암호화한다. 복호화 개인키는 GitHub와 Backblaze B2에 두지 않는다.
+7. bucket 전용 B2 Application Key로 private bucket의 `aperture/` prefix에 업로드한다.
 8. 업로드된 파일의 존재와 크기를 다시 조회한다.
 9. 러너의 평문 dump와 Storage 파일은 job 종료와 함께 폐기한다.
 
 필요한 GitHub Actions secret은 다음과 같다.
 
-| Secret                  | 용도                                      |
-| ----------------------- | ----------------------------------------- |
-| `SUPABASE_DB_URL`       | Session pooler 연결 문자열                |
-| `SUPABASE_DB_PASSWORD`  | CLI link에 쓰는 프로젝트 DB 비밀번호      |
-| `SUPABASE_ACCESS_TOKEN` | linked 프로젝트의 Storage 접근            |
-| `SUPABASE_PROJECT_REF`  | 프로젝트 식별자                           |
-| `RCLONE_CONFIG_B64`     | base64로 인코딩한 Google Drive OAuth 설정 |
-| `BACKUP_AGE_RECIPIENT`  | 백업 암호화 공개키                        |
+| Secret                  | 용도                                 |
+| ----------------------- | ------------------------------------ |
+| `SUPABASE_DB_URL`       | Session pooler 연결 문자열           |
+| `SUPABASE_DB_PASSWORD`  | CLI link에 쓰는 프로젝트 DB 비밀번호 |
+| `SUPABASE_ACCESS_TOKEN` | linked 프로젝트의 Storage 접근       |
+| `SUPABASE_PROJECT_REF`  | 프로젝트 식별자                      |
+| `B2_APPLICATION_KEY_ID` | bucket 전용 B2 Application Key ID    |
+| `B2_APPLICATION_KEY`    | bucket 전용 B2 Application Key       |
+| `BACKUP_AGE_RECIPIENT`  | 백업 암호화 공개키                   |
 
-DB URL, OAuth refresh token, dump 파일은 로그에 출력하지 않는다. 백업 파일은 저장소나 GitHub
+Repository Variable `B2_BUCKET`에는 private bucket 이름을 넣는다. DB URL, B2 Application Key,
+dump 파일은 로그에 출력하지 않는다. 백업 파일은 저장소나 GitHub
 Actions artifact에 올리지 않는다. 보관 정책은 주간 백업 최근 8개와 월간 백업 최근 12개를
 기본값으로 삼되, 자동 삭제는 첫 복구 훈련 이후에 켠다.
+
+B2 bucket은 public access를 끄고 백업 전용으로 만든다. Application Key는 이 bucket 하나로
+범위를 제한하고 읽기·쓰기 권한과 S3/rclone 호환에 필요한 bucket 목록 권한만 부여한다. master
+application key는 사용하지 않는다. GitHub Actions에는 Key ID와 Key를 각각 secret으로 저장하고,
+키가 노출되거나 백업 자동화를 폐기할 때 즉시 폐기한다.
 
 ### 4.5 백업 복구 훈련
 
 최초 자동 백업은 업로드 성공만으로 완료 처리하지 않는다.
 
-- Google Drive에서 암호화 파일을 내려받는다.
+- Backblaze B2에서 암호화 파일을 내려받는다.
 - 오프라인 개인키로 복호화하고 SHA-256 검증을 통과시킨다.
 - roles, schema, data SQL 파일과 `media` 디렉터리를 확인한다.
 - 가능하면 새 로컬 Supabase 스택에 schema와 data를 복구한다.
@@ -204,7 +211,7 @@ Auth 사용자는 기본 `supabase db dump`의 복구 대상이 아니다. 장�
 - Firebase Auth 관리자 계정과 Storage를 삭제한다.
 - Firebase 프로젝트를 마지막에 삭제한다.
 - GCP 예산 알림과 카드 등록을 정리한다.
-- 해체에만 쓴 Supabase CLI access token과 Google Drive OAuth 권한을 검토한다. 백업 자동화에
+- 해체에만 쓴 Supabase CLI access token과 B2 Application Key 권한을 검토한다. 백업 자동화에
   필요한 자격증명은 최소 권한으로 다시 발급하거나 유지한다.
 
 ## 5. 중단 조건
@@ -213,7 +220,7 @@ Auth 사용자는 기본 `supabase db dump`의 복구 대상이 아니다. 장�
 
 - JSONB 전수 검사에서 Firebase URL이 발견됨
 - 로컬 RLS 테스트가 권한 우회를 발견함
-- Google Drive 백업이 없거나 복호화되지 않음
+- Backblaze B2 백업이 없거나 복호화되지 않음
 - 복구한 DB 또는 Storage 수량이 기준값과 다름
 - Firebase 환경변수 제거 배포에서 공개 화면이나 관리자 기능이 실패함
 

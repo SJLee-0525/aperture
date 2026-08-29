@@ -7,7 +7,9 @@ required=(
   SUPABASE_PROJECT_REF
   SUPABASE_ACCESS_TOKEN
   BACKUP_AGE_RECIPIENT
-  RCLONE_CONFIG_B64
+  B2_APPLICATION_KEY_ID
+  B2_APPLICATION_KEY
+  B2_BUCKET
 )
 
 for name in "${required[@]}"; do
@@ -30,9 +32,14 @@ if [[ ! "$backup_label" =~ ^[a-zA-Z0-9._-]+$ ]]; then
   exit 1
 fi
 
+if [[ ! "$B2_BUCKET" =~ ^[a-zA-Z0-9-]+$ ]]; then
+  echo "B2_BUCKET은 영문, 숫자, 하이픈만 사용할 수 있습니다." >&2
+  exit 1
+fi
+
 backup_timestamp="$(date -u +'%Y-%m-%dT%H-%M-%SZ')"
 backup_name="aperture-${backup_label}-${backup_timestamp}"
-backup_remote="${BACKUP_REMOTE:-gdrive:Backups/aperture}"
+backup_remote="b2:${B2_BUCKET}/aperture"
 work_root="$(mktemp -d)"
 backup_dir="${work_root}/${backup_name}"
 rclone_config="${work_root}/rclone.conf"
@@ -44,7 +51,13 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "${backup_dir}/database" "${backup_dir}/storage"
-printf '%s' "$RCLONE_CONFIG_B64" | base64 --decode > "$rclone_config"
+{
+  echo "[b2]"
+  echo "type = b2"
+  printf 'account = %s\n' "$B2_APPLICATION_KEY_ID"
+  printf 'key = %s\n' "$B2_APPLICATION_KEY"
+  echo "hard_delete = false"
+} > "$rclone_config"
 chmod 600 "$rclone_config"
 
 supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
@@ -143,7 +156,7 @@ remote_size="$(
 local_size="$(stat -c '%s' "$encrypted_file")"
 
 if [[ "$remote_size" != "$local_size" ]]; then
-  echo "Google Drive 업로드 크기가 다릅니다: local=${local_size}, remote=${remote_size}" >&2
+  echo "Backblaze B2 업로드 크기가 다릅니다: local=${local_size}, remote=${remote_size}" >&2
   exit 1
 fi
 
