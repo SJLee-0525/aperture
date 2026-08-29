@@ -52,8 +52,9 @@
 
 ### 2.3 인프라·계정 정리 (코드 머지·배포 확인 후)
 
-- [x] GitHub Actions 기반 주간 백업을 추가한다: DB roles/schema/data + `media` 버킷 + manifest·SHA-256을 age로 암호화해 Backblaze B2에 업로드 — 코드·셸 구문 검증 완료, 첫 원격 실행은 secrets 등록 후 확인
-- [ ] 첫 자동 백업을 로컬에서 복호화하고 DB 행 수·RAG 청크·Storage 객체 수를 기준값과 대조한다
+- [x] GitHub Actions 기반 주간 백업을 추가한다: DB roles/schema/data + `media` 버킷 + manifest·SHA-256을 age로 암호화해 Backblaze B2에 업로드. 2026-08-29 첫 원격 백업 78,865,575 bytes 업로드 성공
+- [x] 첫 자동 백업 패키지를 로컬에서 검증한다: B2 다운로드, age 복호화, gzip, SHA-256 통과. DB dump 3종과 Storage 831개·77,603,202 bytes 확인. RAG는 백업 시점 425행으로 관찰 종료 기준보다 1행 증가
+- [x] 빈 Supabase 프로젝트에 DB와 Storage를 실제 복원한다. 2026-08-29 DB 행 수, Storage 831개 파일 비교, Auth 사용자 1명과 admin claim, RLS, admin CRUD·정렬 RPC·Storage 쓰기와 공개 읽기 통과. Storage 정책이 기본 dump에서 빠지는 문제를 찾아 이후 백업에 관리 스키마 SQL을 포함
 - [ ] Firebase 삭제 직전 `pre-firebase-teardown` 수동 백업을 만들고 Backblaze B2의 파일 존재·크기를 확인한다
 - [ ] Vercel 에서 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거하고 재배포 1회로 정상을 확인한다
 - [ ] Firebase 콘솔: Auth 관리자 계정, Storage 데이터, 프로젝트 순서로 삭제한다. 프로젝트 삭제 뒤에는 Supabase 이전본이 유일본이 되고 되돌릴 수 없으므로 맨 마지막에 한다
