@@ -38,7 +38,7 @@
 
 - [x] 패키지 제거: `firebase`, `firebase-tools`, `@firebase/rules-unit-testing`. npm 10으로 lockfile 재생성·`ci --dry-run` 확인 — 2026-08-29
 - [x] 설정 파일 삭제: `firestore.rules`, `storage.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`, 기존 Rules 테스트 삭제 — 2026-08-29
-- [x] `test:rules` 대체: 로컬 Supabase 스택 기반 RLS 통합 테스트 작성. 비로그인·일반 사용자·관리자 CRUD, 정렬 RPC, Storage 권한 포함. 로컬 Docker 부재로 첫 실실행은 CI에서 확인 — 2026-08-29
+- [x] `test:rules` 대체: 로컬 Supabase 스택 기반 RLS 통합 테스트 작성. 비로그인·일반 사용자·관리자 CRUD, 정렬 RPC, Storage 권한 포함. CI 2 suites·8 tests 통과, fixture 정리와 스택 종료 확인 — 2026-08-29
 - [x] CSP 정리: Firebase Storage 호스트 제거, mock URL을 Supabase 형태로 교체 — 2026-08-29
 - [x] 잔존 참조 정리: 이미지 설정, 본문 Firebase `/o/` 파서, fixture, `.env.example` 과 과도기 문구 정리 — 2026-08-29
 - [ ] 검증: check·lint·knip·depcruise·test·build 통과. `rg -i firebase src` 결과가 0 또는 문서화된 예외만 남는다
