@@ -2,6 +2,7 @@
 
 > 상위 작업: [`docs/checklist/08-supabase-migration.md`](../checklist/08-supabase-migration.md) M8
 > 실행 체크리스트: [`docs/checklist/09-supabase-observation-teardown.md`](../checklist/09-supabase-observation-teardown.md)
+> 백업·복구 runbook: [`docs/troubleshooting/supabase-backup-and-restore.md`](../troubleshooting/supabase-backup-and-restore.md)
 > 기준 측정일: 2026-08-29 KST
 
 ## 1. 목표
@@ -159,12 +160,13 @@ Firebase 프로젝트 삭제 직전에는 수동으로 `pre-firebase-teardown` �
 1. Supabase CLI로 roles, schema, data를 각각 dump한다.
 2. `media` 버킷을 재귀 다운로드한다.
 3. 테이블 행 수, RAG 청크 수, Storage 객체 수와 바이트를 `manifest.txt`에 기록한다.
-4. 각 파일의 SHA-256을 만든다.
-5. 백업 디렉터리를 tar.gz로 묶는다.
-6. age 공개키로 암호화한다. 복호화 개인키는 GitHub와 Backblaze B2에 두지 않는다.
-7. bucket 전용 B2 Application Key로 private bucket의 `aperture/` prefix에 업로드한다.
-8. 업로드된 파일의 존재와 크기를 다시 조회한다.
-9. 러너의 평문 dump와 Storage 파일은 job 종료와 함께 폐기한다.
+4. 기본 schema dump에서 빠지는 Storage 정책을 `managed-schema/storage.sql`에 넣는다.
+5. 각 파일의 SHA-256을 만든다.
+6. 백업 디렉터리를 tar.gz로 묶는다.
+7. age 공개키로 암호화한다. 복호화 개인키는 GitHub와 Backblaze B2에 두지 않는다.
+8. bucket 전용 B2 Application Key로 private bucket의 `aperture/` prefix에 업로드한다.
+9. 업로드된 파일의 존재와 크기를 다시 조회한다.
+10. 러너의 평문 dump와 Storage 파일은 job 종료와 함께 폐기한다.
 
 필요한 GitHub Actions secret은 다음과 같다.
 
@@ -192,6 +194,9 @@ application key는 사용하지 않는다. GitHub Actions에는 Key ID와 Key를
 
 최초 자동 백업은 업로드 성공만으로 완료 처리하지 않는다.
 
+실행 명령, 새 컴퓨터 설정, 자격증명과 장애 기록은
+[`Supabase 백업과 복구 절차`](../troubleshooting/supabase-backup-and-restore.md)에 유지한다.
+
 - Backblaze B2에서 암호화 파일을 내려받는다.
 - 오프라인 개인키로 복호화하고 SHA-256 검증을 통과시킨다.
 - roles, schema, data SQL 파일과 `media` 디렉터리를 확인한다.
@@ -200,8 +205,12 @@ application key는 사용하지 않는다. GitHub Actions에는 Key ID와 Key를
 - Storage 831개 객체와 77,603,202 bytes를 기준값과 비교한다.
 - 절차와 결과를 checklist 09에 기록한다.
 
-Auth 사용자는 기본 `supabase db dump`의 복구 대상이 아니다. 장애 복구 시 관리자 계정 1개를
-다시 만들고 `app_metadata.role = 'admin'`을 설정한다. 이 절차를 복구 문서에 명시한다.
+2026-08-29 복구 훈련에서는 `auth.users`와 `auth.identities`, 비밀번호 해시,
+`app_metadata.role = 'admin'`이 data dump에서 복원됐다. 기존 세션은 새 프로젝트에서 쓸 수
+없으므로 다시 로그인한다. 로그인 실패 때만 관리자 계정을 다시 만들고 admin claim을 설정한다.
+
+기본 schema dump는 `storage`의 사용자 정책을 포함하지 않았다. 백업에
+`managed-schema/storage.sql`을 별도로 넣고 DB 복원 뒤 적용한다.
 
 ### 4.6 배포와 인프라 해체
 

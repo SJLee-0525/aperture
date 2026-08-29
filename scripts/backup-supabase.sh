@@ -50,7 +50,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "${backup_dir}/database" "${backup_dir}/storage"
+mkdir -p "${backup_dir}/database" "${backup_dir}/managed-schema" "${backup_dir}/storage"
+cp \
+  supabase/migrations/20260815060300_storage.sql \
+  "${backup_dir}/managed-schema/storage.sql"
 {
   echo "[b2]"
   echo "type = b2"
@@ -135,7 +138,7 @@ SQL
 
 (
   cd "$backup_dir"
-  find database storage -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+  find database managed-schema storage -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
 )
 
 tar -C "$work_root" -czf - "$backup_name" \
