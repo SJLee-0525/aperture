@@ -143,7 +143,9 @@
 - [x] 관찰 종료 기준값 기록(2026-08-29): Free·서울 리전·Healthy, DB 0.032GB, Storage 0.076GB, Egress 0.25GB·Cached Egress 0.13GB, API 4xx/5xx 0, RAG 424청크·원본 242/242, `media` 831개·77,603,202 bytes
 - [x] Firebase Storage URL 전수 검사(2026-08-29): JSONB `data` 8개 테이블에서 Firebase 호스트 0건 확인
 - [x] 로컬 Supabase 기반 RLS 통합 테스트로 `test:rules` 대체 — CI에서 Postgres RLS·정렬 RPC·Storage 2 suites, 8 tests 통과(2026-08-29)
-- [ ] Supabase 무료 플랜 백업 자동화: DB·`media`를 age로 암호화해 Backblaze B2에 주간 보관. 2026-08-29 첫 백업의 패키지 검증과 빈 프로젝트 실제 복구 훈련은 통과했다. Storage 정책을 포함한 새 형식 백업 검증과 `pre-firebase-teardown` 백업이 남았다. 절차는 [`Supabase 백업과 복구`](../troubleshooting/supabase-backup-and-restore.md)에 기록
+- [x] Supabase 무료 플랜 백업 자동화: DB·`media`를 age로 암호화해 Backblaze B2에 주간 보관. 2026-08-29 첫 백업의 패키지 검증과 빈 프로젝트 실제 복구 훈련, Storage 정책을 포함한 `post-restore-drill` 새 형식 백업 검증 통과. 절차는 [`Supabase 백업과 복구`](../troubleshooting/supabase-backup-and-restore.md)에 기록
+- [ ] B2 자동 삭제는 `post-restore-drill` 백업 검증과 Firebase 해체 후 설정한다. 예약 백업 prefix에만 약 70일 Lifecycle Rule을 적용하고 수동 백업은 제외
+- [x] Firebase 자체 백업은 생략한다. 2주 동안 Firebase 쓰기가 없었고 Supabase 운영·데이터 대조·빈 프로젝트 실제 복구가 통과했다. 검증된 `post-restore-drill` 백업을 Firebase 삭제 기준 최종 복구본으로 사용
 - [ ] 관찰 종료 후 해체: firebase·firebase-tools·@firebase/rules-unit-testing 제거(lockfile npm 10 재생성), `firestore.rules`·`storage.rules`·`firestore.indexes.json`·`firebase.json`·`.firebaserc`·`lib/firebase/` 삭제, knip·depcruise 통과
 - [ ] 문서 개정: CLAUDE.md(스택·원칙·데이터 모델·env·한도 표·명령어), ADR-0001 각주, `.claude/agents/firebase.md`, troubleshooting 2편 (§10)
 - [ ] GCP 예산 알림·카드 등록 정리, Firebase 프로젝트 최종 삭제

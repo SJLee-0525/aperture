@@ -118,6 +118,12 @@ Usage의 Storage 0.076GB와 SQL 합계 77,603,202 bytes는 표시 단위와 반�
 7. Vercel의 Firebase 환경변수를 제거한 배포가 정상이다.
 8. Firebase Auth, Storage, 프로젝트를 삭제하고 GCP 결제 표면을 정리한다.
 
+Firebase 자체 백업은 완료 조건에 넣지 않는다. 2026-08-15 이후 운영 쓰기는 Supabase에서만
+발생했고, 2주 관찰과 Firebase URL 전수 검사, Supabase 암호화 백업, 빈 프로젝트 실제 복구가
+통과했다. Firebase 데이터는 현재 운영본보다 오래됐다. managed Firestore export를 위해 Blaze
+플랜을 다시 활성화하지 않는다. 검증된 `post-restore-drill` Supabase 백업을 Firebase 삭제 기준
+최종 복구본으로 사용한다.
+
 ## 4. 실행 순서
 
 ### 4.1 기준값 보완
@@ -153,7 +159,8 @@ Usage의 Storage 0.076GB와 SQL 합계 77,603,202 bytes는 표시 단위와 반�
 ### 4.4 백업 자동화
 
 GitHub Actions에 `supabase-backup.yml`을 추가한다. 매주 1회와 수동 실행을 지원한다.
-Firebase 프로젝트 삭제 직전에는 수동으로 `pre-firebase-teardown` 백업을 만든다.
+2026-08-29에 만든 `post-restore-drill` 백업은 새 형식과 실제 복구 검증을 통과했고, 이후 운영
+데이터 변경이 없어 Firebase 삭제 기준 최종 복구본으로 확정했다.
 
 워크플로는 다음 순서로 실행한다.
 
@@ -182,8 +189,10 @@ Firebase 프로젝트 삭제 직전에는 수동으로 `pre-firebase-teardown` �
 
 Repository Variable `B2_BUCKET`에는 private bucket 이름을 넣는다. DB URL, B2 Application Key,
 dump 파일은 로그에 출력하지 않는다. 백업 파일은 저장소나 GitHub
-Actions artifact에 올리지 않는다. 보관 정책은 주간 백업 최근 8개와 월간 백업 최근 12개를
-기본값으로 삼되, 자동 삭제는 첫 복구 훈련 이후에 켠다.
+Actions artifact에 올리지 않는다. 자동 삭제는 `post-restore-drill` 백업 검증, Firebase
+해체와 안정화 확인 뒤에 켠다. 예약 백업은 약
+70일을 보관하고 수동·해체 직전 백업에는 자동 삭제를 적용하지 않는다. 월간 백업을 추가할 때는
+별도 prefix와 약 400일 규칙을 사용한다.
 
 B2 bucket은 public access를 끄고 백업 전용으로 만든다. Application Key는 이 bucket 하나로
 범위를 제한하고 읽기·쓰기 권한과 S3/rclone 호환에 필요한 bucket 목록 권한만 부여한다. master
@@ -212,11 +221,18 @@ application key는 사용하지 않는다. GitHub Actions에는 Key ID와 Key를
 기본 schema dump는 `storage`의 사용자 정책을 포함하지 않았다. 백업에
 `managed-schema/storage.sql`을 별도로 넣고 DB 복원 뒤 적용한다.
 
+훈련에 사용한 임시 Supabase 프로젝트 `tdxsqceamgxlyptkqtai`는 모든 검증을 마친 뒤
+2026-08-29 16:34 KST에 삭제했다. 운영 프로젝트 `jvvonzvzlooxxujfslcg`와 최종 복구본은
+그대로 유지한다.
+
 ### 4.6 배포와 인프라 해체
 
 - 코드 해체 후 check, lint, knip, depcruise, test, build와 필요한 E2E를 실행한다.
 - 배포 후 공개 경로, 관리자 로그인·저장, 이미지, 검색, 챗을 확인한다.
+- 검증된 `post-restore-drill` Supabase 백업을 Firebase 삭제 기준 최종 복구본으로 확인한다.
 - Vercel의 `NEXT_PUBLIC_FIREBASE_*`와 `NEXT_PUBLIC_ADMIN_UID`를 제거하고 재배포한다.
+- Firebase 별도 export는 만들지 않는다. 위 Supabase 최종 백업과 실제 복구 훈련 기록을 삭제
+  근거로 사용한다.
 - Firebase Auth 관리자 계정과 Storage를 삭제한다.
 - Firebase 프로젝트를 마지막에 삭제한다.
 - GCP 예산 알림과 카드 등록을 정리한다.
