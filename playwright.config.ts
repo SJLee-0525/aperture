@@ -10,7 +10,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
  * `/admin/*` 은 `AuthGuard` 를 지나야 하고, 그 통과 조건은 `isAdmin || testSession` 이다.
  * `testSession` 을 여는 `NEXT_PUBLIC_ADMIN_TEST_SESSION` 은 번들에 박히는 빌드 시점 값인데
  * `lib/auth/test-admin-session.ts` 가 프로덕션 빌드에서 그 값이 켜져 있으면 즉시 throw 한다 —
- * 인증 우회가 배포에 섞이지 않게 하려고 일부러 둔 가드다. 실 Firebase 계정도 쓰지 않으므로
+ * 인증 우회가 배포에 섞이지 않게 하려고 일부러 둔 가드다. 실 Supabase 계정도 쓰지 않으므로
  * `isAdmin` 도 참이 될 수 없다.
  *
  * 그래서 프로덕션 실행에서는 이 디렉터리를 아예 수집하지 않고, CI 의 `Admin E2E` 잡이 dev

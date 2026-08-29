@@ -83,7 +83,7 @@ Inspector에서 자연어로 요청해야 확인할 수 있다.
 ```
 AI calling tool "list_projects" with {"tech":"React"}
 Tool "list_projects" result: No projects use "React". Known tech tags: Next.js,
-React.js, TypeScript, CSS Modules, Firebase Auth, Firebase Storage, Firestore,
+React.js, TypeScript, CSS Modules, Supabase Auth, Supabase Storage, PostgreSQL,
 MapLibre GL, exifr, browser-image-compression, Canvas API, Motion, dnd-kit,
 Vitest, Playwright, i18n, ISR, RAG, Claude Design, Claude Code, OpenAI Codex,
 Google Antigravity, Electron, WebSocket, Web Audio API, AudioWorklet, Zustand,

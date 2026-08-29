@@ -21,7 +21,7 @@ color: blue
 
 **하지 않는 일** (다른 agent 책임):
 
-- Firestore 데이터 모델·Security Rules·인증 설계 → `firebase`
+- Supabase 데이터 모델·RLS·인증 설계 → `supabase`
 
 ## 반드시 참조
 
@@ -86,8 +86,8 @@ src/
 │   └── admin-*/                 # _components/*Form·*Row + _hooks/use-*-admin (dnd-kit 정렬) — 사진·음악·개발
 ├── components/                  # ★ 순수 재사용 UI — props 만. + 각 컴포넌트 .module.css
 │   └── PhotoTile, Modal, ExifList, Chip, RangeSlider, MapPin, FrameCard, StatBlock, SectionHeading, WorkPoster, ScheduleRow, ProjectCard, YouTubeFacade …
-├── lib/firebase/                # firebase agent 소관
-├── lib/content/                 # 공개 getter — mock↔Firestore 교체 지점 ★ (photos/albums/music-*/dev-*/site)
+├── lib/supabase/                # supabase agent 소관
+├── lib/content/                 # 공개 getter — mock↔Supabase 교체 지점 ★ (photos/albums/music-*/dev-*/site)
 ├── lib/i18n/                     # pick-text.ts (ko/en 폴백)
 ├── lib/exif/                     # exifr 래퍼 (사진 전용)
 ├── mocks/                        # design 데이터 이식본 (env 미설정 시 폴백 — photos/albums/music/dev/site)
@@ -102,7 +102,7 @@ src/
 | ------------- | -------------------------- | ------------------------------------ | ----------------- |
 | 역할          | 정말 컴포넌트(순수 UI)     | 기능들을 조합해서 만든 것            | 라우팅 껍데기     |
 | 비즈니스 로직 | ❌ 없음                    | ✅ 있음                              | ❌ (fetch + 조립) |
-| firebase 접근 | ❌ 금지 (hook 경고)        | ✅ `lib/firebase` 경유               | Server fetch 만   |
+| Supabase 접근 | ❌ 금지 (hook 경고)        | ✅ `lib/supabase` 경유               | Server fetch 만   |
 | 데이터        | props 로만                 | hook·SDK 로 직접                     | features 에 전달  |
 | 예시          | PhotoTile, Modal, ExifList | GalleryView, PhotoModal, ExportModal | page.tsx          |
 
@@ -117,7 +117,7 @@ import은 **같은 하위폴더면 `./`**(컴포넌트↔짝 CSS↔형제 컴포
 
 - **chrome(헤더/탭바)은 `(public)/layout.tsx`에서만 마운트.** page.tsx 직접 import 금지.
 - **AuthGuard 는 `admin/layout.tsx`에서만.** 비로그인 → `/admin/login` 리다이렉트.
-- **관리자 데이터 접근은 `lib/admin/*-repository.ts` 경유(B3.5).** 훅·페이지가 `lib/firebase/*` 를 직접 import 하지 않는다 — repository 가 mock(브라우저 로컬)/live(Firestore)를 고르고, mock 모드는 상단 MOCK 배지로 표시된다.
+- **관리자 데이터 접근은 feature별 repository 경유.** 훅·페이지가 `lib/supabase/*` 를 직접 import 하지 않는다 — repository 가 mock(브라우저 로컬)/live(Supabase)를 고르고, mock 모드는 상단 MOCK 배지로 표시된다.
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](../memory/feedback_srp_per_file.md)). `utils.ts`/`helpers.ts` 잡탕 파일 금지.
 
 ## 80% 작업 규칙
@@ -161,7 +161,7 @@ import { COLLECTIONS } from "@/constants/collections";
 
 ### 3. 데이터 페칭
 
-- **공개 페이지**: Server Component에서 Firestore REST 로 fetch + `revalidate`(ISR). `lib/content/get-*.ts` getter 경유(mock↔Firestore 교체 지점).
+- **공개 페이지**: Server Component에서 Supabase PostgREST로 fetch + `revalidate`(ISR). `lib/content/get-*.ts` getter 경유(mock↔Supabase 교체 지점).
   ```tsx
   export const revalidate = 3600; // 포트폴리오는 실시간성 불필요
   ```
@@ -181,7 +181,7 @@ import { COLLECTIONS } from "@/constants/collections";
 
 - `<img>` 직접 사용 금지(hook 경고). Storage 도메인은 `next.config` `remotePatterns` 등록.
 - **업로드 전 브라우저 압축 필수**: `browser-image-compression`, **webp, 긴 변 ~2048px**. Storage 다운로드 한도(1GB/일) 보호.
-  단 **EXIF 추출은 압축 前** (§firebase 업로드 흐름 — 압축이 EXIF 를 지운다).
+  단 **EXIF 추출은 압축 前** (§Supabase 업로드 흐름 — 압축이 EXIF 를 지운다).
 - 메이슨리 그리드는 CSS `columns`(디자인: 4→3→2단), lazy-load 기본. 라이트박스·내보내기·지도는 `next/dynamic`.
 
 ### 5. i18n (ko/en) — jh-portfolio 패턴 이식 (TipTap 은 없음)
@@ -283,7 +283,7 @@ export default async function WorkPage() {
 
 7. **이름 충돌 금지** — 라이브러리 래퍼는 다른 이름으로 (`increment` 감싼 함수를 `likePhoto` 로).
 8. **같은 종류 함수는 반환 타입 통일** — 목록 fetch 함수들은 모두 같은 형태.
-9. **숨은 로직 금지** — 부수효과(toast·상태변경)는 호출부(hook·핸들러)에서 명시적으로. `lib/firebase/` 에 toast 금지.
+9. **숨은 로직 금지** — 부수효과(toast·상태변경)는 호출부(hook·핸들러)에서 명시적으로. `lib/supabase/` 에 toast 금지.
 
 ### 응집도
 
@@ -318,15 +318,15 @@ PR/변경 마무리 전:
 **3계층 구분**
 
 - [ ] page.tsx 가 껍데기인가 (fetch + 조립만)
-- [ ] `components/` 에 비즈니스 로직·firebase·features import 없는가 (순수 UI, props 만)
+- [ ] `components/` 에 비즈니스 로직·Supabase·features import 없는가 (순수 UI, props 만)
 - [ ] 로직 있는 새 UI 가 `features/` 에 들어갔는가
 - [ ] 의존 방향이 app → features → components 인가
 
 ## 데이터·인증 관련 결정이 필요하면
 
-Firestore 스키마 변경, Rules 영향, 인증 흐름 변경은 직접 결정하지 말고 `firebase` agent 에 검토 요청:
+Supabase 스키마 변경, RLS 영향, 인증 흐름 변경은 직접 결정하지 말고 `supabase` agent 에 검토 요청:
 
 ```
-Agent({ subagent_type: "firebase",
+Agent({ subagent_type: "supabase",
         prompt: "앨범 커버를 소속 사진이 아닌 별도 업로드로 바꾸려는데 모델·Storage 정리 영향 검토 ..." })
 ```

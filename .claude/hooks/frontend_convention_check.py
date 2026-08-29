@@ -4,27 +4,20 @@
 src/ 안의 ts/tsx 에 Edit/Write 발생 시, 다음 패턴이 발견되면 stderr 로 경고
 (차단 X, exit 0). frontend agent self-check 보조용.
 
-검출 대상 (6종):
+검출 대상 (4종):
   1. relative-parent-import : ../ 로 거슬러 올라가는 상대경로 import
                               → @/ path alias 사용
   2. raw-img-tag            : <img ...> 직접 사용
                               → next/image <Image> 사용 (갤러리 사이트라 LCP 직결)
-  3. firestore-collection-literal : collection(db, "photos") 처럼 컬렉션명 문자열 직박
-                              → @/constants 의 COLLECTIONS 상수 경유
-                              (오타 한 글자 = 빈 화면 + Rules 미적용 사고)
-  4. firebase-admin-import  : firebase-admin import
-                              → 이 프로젝트는 서버리스 원칙상 admin SDK 금지
-                                (CLAUDE.md 아키텍처 원칙 #5)
-  5. components-impure-import : src/components/** 안에서 firebase 또는 @/features import
+  3. components-impure-import : src/components/** 안에서 Supabase 또는 @/features import
                               → components 는 순수 UI (props 만). 로직은 features/ 로
                                 (3계층 의존 방향 app → features → components)
-  6. barrel-file            : src/features/** · src/components/** 에 index.ts(x) 생성
+  4. barrel-file            : src/features/** · src/components/** 에 index.ts(x) 생성
                               → barrel export 금지. 직접 경로 import 사용
 
 제외:
   - 주석 줄 (`// ...`, `* ...`)
   - 라인 끝/안에 `// @convention-ignore` 마커
-  - src/constants/** (컬렉션명 정의처 자체)
   - 테스트 파일 (*.test.{ts,tsx}, *.spec.{ts,tsx})
 
 완벽한 AST 분석은 아니며 false positive 가능. 의도된 케이스는 줄 끝에
@@ -52,19 +45,9 @@ RELATIVE_PARENT_IMPORT = re.compile(
 # 2. <img 태그 직접 사용 (JSX)
 RAW_IMG_TAG = re.compile(r"<img[\s>]")
 
-# 3. Firestore 컬렉션명 문자열 직박: collection(db, "posts") / doc(db, "posts", id)
-FIRESTORE_COLLECTION_LITERAL = re.compile(
-    r"""\b(?:collection|doc|collectionGroup)\(\s*\w+\s*,\s*["'][\w/-]+["']"""
-)
-
-# 4. firebase-admin import
-FIREBASE_ADMIN_IMPORT = re.compile(
-    r"""(?:from|require\()\s*["']firebase-admin"""
-)
-
-# 5. components/ 안에서 firebase·features import (순수성 위반)
+# 3. components/ 안에서 Supabase·features import (순수성 위반)
 COMPONENTS_IMPURE_IMPORT = re.compile(
-    r"""(?:from|require\()\s*["'](?:@/lib/firebase|firebase/|@/features/)"""
+    r"""(?:from|require\()\s*["'](?:@/lib/supabase|@supabase/|@/features/)"""
 )
 
 
@@ -79,9 +62,6 @@ def is_target(p: Path) -> bool:
     if "src" not in parts_lc:
         return False
     if "node_modules" in parts_lc:
-        return False
-    # 컬렉션명 정의처 자체는 제외
-    if "constants" in parts_lc:
         return False
     name = p.name
     if name.endswith((".test.tsx", ".test.ts", ".spec.tsx", ".spec.ts")):
@@ -106,12 +86,6 @@ def scan(text: str, in_components: bool = False) -> list[tuple[int, str, str]]:
         for m in RAW_IMG_TAG.finditer(line):
             findings.append((i, "raw-img-tag", m.group(0)))
 
-        for m in FIRESTORE_COLLECTION_LITERAL.finditer(line):
-            findings.append((i, "firestore-collection-literal", m.group(0)))
-
-        for m in FIREBASE_ADMIN_IMPORT.finditer(line):
-            findings.append((i, "firebase-admin-import", m.group(0).strip()))
-
         if in_components:
             for m in COMPONENTS_IMPURE_IMPORT.finditer(line):
                 findings.append((i, "components-impure-import", m.group(0).strip()))
@@ -122,9 +96,7 @@ def scan(text: str, in_components: bool = False) -> list[tuple[int, str, str]]:
 HINT = {
     "relative-parent-import": "→ @/ path alias 사용 (예: @/features/gallery/GalleryView)",
     "raw-img-tag": "→ next/image <Image> 사용 (외부 URL 은 next.config remotePatterns 등록)",
-    "firestore-collection-literal": "→ @/constants 의 COLLECTIONS.PHOTOS 등 상수 경유",
-    "firebase-admin-import": "→ 금지. 서버리스 원칙 (CLAUDE.md #5). 클라이언트 SDK + Rules 로 해결",
-    "components-impure-import": "→ components 는 순수 UI (props 만). firebase·로직은 features/ 로",
+    "components-impure-import": "→ components 는 순수 UI (props 만). Supabase·로직은 features/ 로",
     "barrel-file": "→ barrel export 금지. index.ts 삭제하고 직접 경로 import",
 }
 

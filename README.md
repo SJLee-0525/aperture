@@ -84,7 +84,7 @@ src/
 design/           디자인 프로토타입과 제작 기록
 docs/             ADR과 운영 문서
 e2e/              공개 흐름 · 접근성 · 시각 회귀
-test/             Firebase Security Rules
+test/             Supabase RLS 통합 테스트
 ```
 
 주요 폴더: [`app`](./src/app) · [`features`](./src/features) · [`components`](./src/components) · [`lib`](./src/lib) · [`design`](./design/) · [`docs`](./docs/)
@@ -183,7 +183,7 @@ src/proxy.ts                        # 루트의 쿠키·Accept-Language 기반 3
 design/                             # 디자인 프로토타입, export, 제작 기록
 docs/                               # ADR, 운영·테스트 문서, 프로젝트 설명
 e2e/                                # Playwright 공개 흐름·접근성·시각 회귀
-test/                               # Firebase Security Rules 테스트
+test/                               # 로컬 Supabase RLS 통합 테스트
 ```
 
 </details>
@@ -235,9 +235,9 @@ npm run storybook       # 컴포넌트 Storybook
 
 ## 품질 검증
 
-TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중복을 정적 분석합니다. Vitest는 데이터 변환과 공용 로직을, Playwright는 데스크톱·모바일의 공개 탐색 흐름과 접근성을 검증합니다. 시각 회귀, Lighthouse CI와 Firebase Security Rules 테스트도 별도로 구성했습니다.
+TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중복을 정적 분석합니다. Vitest는 데이터 변환과 공용 로직을, Playwright는 데스크톱·모바일의 공개 탐색 흐름과 접근성을 검증합니다. 시각 회귀, Lighthouse CI와 로컬 Supabase RLS 통합 테스트도 별도로 구성했습니다.
 
-도구별 검사 범위와 명령은 [테스트 전략](./public/readme/testing.md)에서 확인할 수 있습니다. Firebase Rules 테스트에는 로컬 에뮬레이터와 Java 런타임이 필요할 수 있습니다.
+도구별 검사 범위와 명령은 [테스트 전략](./public/readme/testing.md)에서 확인할 수 있습니다. RLS 통합 테스트에는 Docker와 Supabase CLI가 필요합니다.
 
 ## 관련 문서
 

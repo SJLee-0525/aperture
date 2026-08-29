@@ -1,0 +1,49 @@
+name: Supabase encrypted backup
+
+on:
+  schedule:
+    # 매주 월요일 04:17 KST. keep-alive와 실행 시각을 겹치지 않는다.
+    - cron: "17 19 * * 0"
+  workflow_dispatch:
+    inputs:
+      label:
+        description: "백업 이름에 붙일 라벨"
+        required: false
+        default: "manual"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      BACKUP_AGE_RECIPIENT: ${{ secrets.BACKUP_AGE_RECIPIENT }}
+      B2_APPLICATION_KEY_ID: ${{ secrets.B2_APPLICATION_KEY_ID }}
+      B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+      B2_BUCKET: ${{ vars.B2_BUCKET }}
+      BACKUP_LABEL: ${{ inputs.label || 'scheduled' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install backup tools
+        run: sudo apt-get update && sudo apt-get install --yes age postgresql-client rclone
+
+      - name: Create and upload encrypted backup
+        run: bash scripts/backup-supabase.sh

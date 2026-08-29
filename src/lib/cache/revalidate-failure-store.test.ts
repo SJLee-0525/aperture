@@ -17,34 +17,34 @@ afterEach(() => {
 describe("revalidate-failure-store", () => {
   it("실패한 대상과 사유를 남긴다", () => {
     recordRevalidateFailure({
-      tags: ["firestore:devArticles"],
+      tags: ["supabase:dev-articles"],
       paths: ["/ko/dev/articles/a"],
       reason: "Unauthorized",
     });
 
     const failure = readRevalidateFailure();
-    expect(failure?.tags).toEqual(["firestore:devArticles"]);
+    expect(failure?.tags).toEqual(["supabase:dev-articles"]);
     expect(failure?.paths).toEqual(["/ko/dev/articles/a"]);
     expect(failure?.reason).toBe("Unauthorized");
   });
 
   it("연속 실패는 대상을 합쳐 한 번에 다시 시도할 수 있게 한다", () => {
-    recordRevalidateFailure({ tags: ["firestore:photos"], paths: [], reason: "1차" });
+    recordRevalidateFailure({ tags: ["supabase:photos"], paths: [], reason: "1차" });
     recordRevalidateFailure({
-      tags: ["firestore:photos", "firestore:devArticles"],
+      tags: ["supabase:photos", "supabase:dev-articles"],
       paths: ["/ko/dev/articles/a"],
       reason: "2차",
     });
 
     const failure = readRevalidateFailure();
     // 같은 태그가 두 번 들어가면 재시도가 같은 무효화를 두 번 보낸다.
-    expect(failure?.tags).toEqual(["firestore:photos", "firestore:devArticles"]);
+    expect(failure?.tags).toEqual(["supabase:photos", "supabase:dev-articles"]);
     expect(failure?.paths).toEqual(["/ko/dev/articles/a"]);
     expect(failure?.reason).toBe("2차");
   });
 
   it("재시도가 성공하면 기록이 사라진다", () => {
-    recordRevalidateFailure({ tags: ["firestore:photos"], paths: [], reason: "실패" });
+    recordRevalidateFailure({ tags: ["supabase:photos"], paths: [], reason: "실패" });
     clearRevalidateFailure();
 
     expect(readRevalidateFailure()).toBeNull();
@@ -54,14 +54,14 @@ describe("revalidate-failure-store", () => {
     const listener = vi.fn();
     const unsubscribe = subscribeRevalidateFailure(listener);
 
-    recordRevalidateFailure({ tags: ["firestore:photos"], paths: [], reason: "실패" });
+    recordRevalidateFailure({ tags: ["supabase:photos"], paths: [], reason: "실패" });
     expect(listener).toHaveBeenCalledTimes(1);
 
     clearRevalidateFailure();
     expect(listener).toHaveBeenCalledTimes(2);
 
     unsubscribe();
-    recordRevalidateFailure({ tags: ["firestore:albums"], paths: [], reason: "실패" });
+    recordRevalidateFailure({ tags: ["supabase:albums"], paths: [], reason: "실패" });
     expect(listener).toHaveBeenCalledTimes(2);
   });
 

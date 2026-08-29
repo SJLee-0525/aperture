@@ -58,15 +58,6 @@ const STORAGE_IMAGE_HOSTS = [
   ...(supabaseHost() ? [supabaseHost() as string] : []),
 ];
 
-/**
- * Supabase 이전 전에 올라간 본문 이미지의 호스트.
- *
- * 읽기 전용이다. `article-body-storage-paths.ts` 가 본문에서 참조 중인 객체 경로를 찾을 때만
- * 쓰고, CSP 와 이미지 출처 정책에는 넣지 않는다. 이 상수를 지우면 구형 URL 을 담은 글의
- * 참조 집합이 비어 그 글의 이미지 전부가 미사용 삭제 후보가 된다.
- */
-const LEGACY_FIREBASE_STORAGE_HOST = "https://firebasestorage.googleapis.com";
-
 const IMAGE_HOSTS = [...STORAGE_IMAGE_HOSTS, "https://i.ytimg.com", ...CARTO_HOSTS] as const;
 
 const YOUTUBE_FRAME_HOSTS = [
@@ -172,10 +163,4 @@ const SECURITY_HEADERS = [
   { key: CSP_HEADER_NAME, value: CONTENT_SECURITY_POLICY },
 ] as const;
 
-export {
-  buildContentSecurityPolicy,
-  LEGACY_FIREBASE_STORAGE_HOST,
-  MOCK_STORAGE_ORIGIN,
-  SECURITY_HEADERS,
-  STORAGE_IMAGE_HOSTS,
-};
+export { buildContentSecurityPolicy, MOCK_STORAGE_ORIGIN, SECURITY_HEADERS, STORAGE_IMAGE_HOSTS };

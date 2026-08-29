@@ -1,11 +1,4 @@
-import { LEGACY_FIREBASE_STORAGE_HOST } from "@/constants/security-headers";
 import { supabaseUrl } from "@/lib/supabase/config";
-
-/**
- * Firebase 다운로드 URL의 `/o/{percent-encoded path}` 구간에서 객체 경로를 찾는다.
- * 마이그레이션 이전에 저장된 본문이 아직 이 형태를 가질 수 있어 과도기 동안 유지한다.
- */
-const FIREBASE_OBJECT_PATH_PATTERN = /\/o\/([^\s)"'<>\]?#]+)/;
 
 /** Supabase 공개 객체 URL 의 경로 프리픽스. 서명 URL·변환 엔드포인트는 매칭되지 않는다. */
 const SUPABASE_PUBLIC_PREFIX = "/storage/v1/object/public/media/";
@@ -38,28 +31,10 @@ const supabaseObjectPath = (candidate: string): string | null => {
 };
 
 /**
- * Firebase 다운로드 URL 에서 객체 경로를 뽑는다.
- *
- * @param candidate 본문에서 찾은 URL 후보.
- * @returns 디코딩된 객체 경로. 허용 호스트가 아니면 `null`.
- */
-const firebaseObjectPath = (candidate: string): string | null => {
-  if (!candidate.startsWith(`${LEGACY_FIREBASE_STORAGE_HOST}/`)) return null;
-  const encoded = FIREBASE_OBJECT_PATH_PATTERN.exec(candidate)?.[1];
-  if (!encoded) return null;
-  try {
-    return decodeURIComponent(encoded);
-  } catch {
-    return null;
-  }
-};
-
-/**
  * 본문 Markdown 이 참조하는 블로그 Storage 객체 경로를 모두 찾는다.
  *
- * Supabase 공개 URL 과 마이그레이션 이전의 Firebase URL 을 모두 지원한다 — 한쪽이라도
- * 놓치면 참조 집합이 비어 **본문 이미지 전체가 미사용 삭제 후보가 된다.**
- * `dev-blog/` 경로만 반환하며, 디코딩할 수 없는 URL 과 다른 폴더는 정리 범위가 아니라 제외한다.
+ * Supabase 공개 URL 중 `dev-blog/` 경로만 반환한다. 디코딩할 수 없는 URL과 다른 폴더는
+ * 정리 범위가 아니므로 제외한다.
  *
  * @param body 글의 Markdown 원문.
  * @returns 중복을 제거한 `dev-blog/` 객체 경로 목록.
@@ -67,7 +42,7 @@ const firebaseObjectPath = (candidate: string): string | null => {
 const articleBodyStoragePaths = (body: string): string[] => {
   const paths = new Set<string>();
   for (const url of body.match(URL_PATTERN) ?? []) {
-    const decoded = supabaseObjectPath(url) ?? firebaseObjectPath(url);
+    const decoded = supabaseObjectPath(url);
     if (decoded?.startsWith("dev-blog/")) paths.add(decoded);
   }
   return [...paths];

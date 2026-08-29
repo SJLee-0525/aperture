@@ -349,9 +349,9 @@ C1~~C6, C8~~C13 을 커밋했다. **C7 만 남아 있고 선행 조건이 열린
 
 계획 진행 중 확인해야 하는 값이다. 확인 결과는 이 절에 기록한다.
 
-- [ ] 프로덕션에 Upstash/KV 자격증명이 있는가. 없으면 D2 fail-open 이라 AUTH-01 수정이 무동작이다.
+- [x] 프로덕션에 Upstash/KV 자격증명이 있는가. 없으면 D2 fail-open 이라 AUTH-01 수정이 무동작이다.
       `chat-rate-limit.ts:330` 이 `production && VERCEL` 에서만 에러를 내므로 설정 여부가 자명하지 않다
-- [ ] Web3Forms 대시보드에서 hCaptcha 가 필수로 켜져 있는가 (SEC-C-07)
-- [ ] Vercel 환경변수에 `NEXT_PUBLIC_FIREBASE_*`·`NEXT_PUBLIC_ADMIN_UID` 가 남아 있는가 (ENV-01)
-- [ ] 프로덕션 Supabase 에 Firebase origin 이미지 URL 이 남아 있는가 (C7 선행 조건)
-- [ ] GA 쿠키 삭제가 실제 배포 도메인에서 동작하는가 (SEC-C-06)
+- [x] Web3Forms 대시보드에서 hCaptcha 가 필수로 켜져 있는가 (SEC-C-07)
+- [x] Vercel 환경변수에 `NEXT_PUBLIC_FIREBASE_*`·`NEXT_PUBLIC_ADMIN_UID` 가 남아 있는가 (ENV-01)
+- [x] 프로덕션 Supabase 에 Firebase origin 이미지 URL 이 남아 있는가 (C7 선행 조건)
+- [x] GA 쿠키 삭제가 실제 배포 도메인에서 동작하는가 (SEC-C-06)

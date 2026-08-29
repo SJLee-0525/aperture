@@ -30,7 +30,7 @@
 - [x] 같은 `(issue_id, event_id)` 두 번째 호출이 `null` 인지 확인
 - [x] 열거값 밖 `severity` 가 CHECK 로 거부되는지 확인
 - [x] 배열 아닌 `recommendedActions` 가 함수에서 거부되는지 확인
-- [ ] 검증용 행 삭제 — `delete from public.sentry_alerts where issue_id = 'verify-1';`
+- [x] 검증용 행 삭제 — `delete from public.sentry_alerts where issue_id = 'verify-1';`
 
 ### 제공자
 
@@ -123,5 +123,5 @@ order by created_at desc
 limit 50;
 ```
 
-- [ ] 첫 배포 후 24시간과 7일 시점에 판정 품질과 LLM 호출량 확인
-- [ ] 판정이 반복해서 빗나가면 모델을 올리기 전에 입력 화이트리스트에 빠진 신호가 있는지 먼저 본다
+- [x] 첫 배포 후 24시간과 7일 시점에 판정 품질과 LLM 호출량 확인
+- [x] 판정이 반복해서 빗나가면 모델을 올리기 전에 입력 화이트리스트에 빠진 신호가 있는지 먼저 본다

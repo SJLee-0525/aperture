@@ -44,7 +44,7 @@ allowed-tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 2. 지도 = MapLibre+CARTO 실제 지도 — 디자인은 추상 SVG 맵
 3. 내보내기 해상도 "원본" 옵션 제거 (저장 webp 해상도까지만)
 4. 사진 상단바 `.avatar`(유저 아이콘) 제거 — 관리자 진입은 `/admin` 직접
-5. 음악·개발 콘텐츠 = Firestore CMS + ko/en (디자인은 정적 ko)
+5. 음악·개발 콘텐츠 = Supabase CMS + ko/en (디자인은 정적 ko)
 
 ### Step 5 — 차이 보고
 

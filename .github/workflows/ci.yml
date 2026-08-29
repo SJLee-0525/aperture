@@ -95,10 +95,6 @@ jobs:
           # 숨기고, 분석 동의 전용 스펙만 저장값을 제거해 이 테스트 ID를 사용한다.
           NEXT_PUBLIC_GA_ID: G-E2ETEST
           NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0"
-          # Firebase 공개 설정은 넣지 않는다. lib/firebase/client 가 Auth·Firestore·Storage 를
-          # 호출 시점에 만들어, 사전 렌더링이 Client Component 를 평가해도 설정을 요구하지 않는다.
-          # 이 잡이 더미 키 없이 통과하는 것이 그 지연이 살아 있다는 증거다.
-
       - name: Upload production build
         uses: actions/upload-artifact@v4
         with:
@@ -108,11 +104,11 @@ jobs:
           # 같은 CI 실행의 후속 작업에서만 쓰는 임시 산출물이다.
           retention-days: 1
 
-  # 실제 Firebase 프로젝트 대신 로컬 에뮬레이터로 보안 규칙을 검증한다.
+  # 실제 프로젝트 대신 로컬 Supabase 스택에서 RLS를 검증한다.
   rules:
-    name: Firebase security rules
+    name: Supabase RLS
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -124,16 +120,15 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Set up Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Firestore and Storage Rules tests
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Run Postgres and Storage RLS tests
         run: npm run test:rules
 
   e2e:

@@ -4,10 +4,7 @@
 Edit/Write 전 입력과 작업 후 파일을 모두 검사하고, 탐지 시 exit 2로 실패시킨다.
 탐지 키만 라인 번호와 함께 마스킹해서 보고. 시크릿 자체는 로그에 남기지 않음.
 
-이 프로젝트 특이사항:
-  - Firebase 웹 API 키(AIza…)는 공개되어도 보안 위험은 아니지만(보안은 Rules),
-    env 관리 원칙 위반이므로 경고 대상.
-  - GCP/Firebase 서비스 계정 private key 는 진짜 시크릿 — 최우선 경고.
+Google API 키와 private key도 사용 여부와 무관하게 저장소 하드코딩을 차단한다.
 
 비활성화: .claude/settings.json 의 PreToolUse와 PostToolUse에서 본 항목 제거.
 """
@@ -22,10 +19,10 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")  # Windows cp949 콘솔에서 한글 깨짐 방지
 
 PATTERNS: dict[str, re.Pattern[str]] = {
-    "GCP/Firebase private key (진짜 시크릿!)": re.compile(
+    "private key (진짜 시크릿!)": re.compile(
         r"-----BEGIN (?:RSA )?PRIVATE KEY-----"
     ),
-    "Google/Firebase API key (env로 이동 — 위험은 아니나 하드코딩 금지)": re.compile(
+    "Google API key (env로 이동 — 하드코딩 금지)": re.compile(
         r"AIza[0-9A-Za-z\-_]{35}"
     ),
     "OpenAI key": re.compile(r"sk-(?:(?:proj|svcacct)-)?[A-Za-z0-9_\-]{20,}"),

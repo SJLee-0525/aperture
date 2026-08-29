@@ -43,9 +43,9 @@ target 등록이 `OnDemandPhotoModal`에만 있어 앨범에서 연 사진은 �
 `chatTarget` 사용 여부만 전달한다. 이 구조에서는 앨범 사진과 이전·다음 사진 전환도 같은 경로로
 문맥을 갱신한다.
 
-### 2. 실제 Firestore 앨범 ID가 pathname 검증에서 탈락
+### 2. 실제 앨범 ID가 pathname 검증에서 탈락
 
-초기 테스트는 `city-night`처럼 소문자 slug만 사용했다. 실제 Firestore 문서 ID에는
+초기 테스트는 `city-night`처럼 소문자 slug만 사용했다. 이전 데이터에서 이어받은 실제 앨범 ID에는
 `9rhrRuIfN0eREKKOId77`처럼 대문자가 포함된다. 기존 pathname 정규식이 소문자만 허용해 실제 앨범
 상세 경로의 문맥 전체를 버렸다.
 
@@ -98,7 +98,7 @@ pathname과 `openTarget`으로 `/api/chat`을 호출한다. 두 결과가 다르
 
 ### 3. 경로 검증을 실제 ID로 재현
 
-사람이 만든 slug만으로 테스트하지 않는다. Firestore 자동 ID와 같은 대소문자 혼합 값을 사용한다.
+사람이 만든 slug만으로 테스트하지 않는다. 이전 데이터에서 이어받은 대소문자 혼합 ID도 사용한다.
 
 ```ts
 buildChatContext(
@@ -111,7 +111,7 @@ buildChatContext(
 
 ## 회귀 테스트
 
-- `chat-context.test.ts`: 대소문자 혼합 Firestore 앨범 ID의 build/parse 왕복
+- `chat-context.test.ts`: 대소문자 혼합 앨범 ID의 build/parse 왕복
 - `resolve-chat-screen-context.test.ts`: 같은 ID의 stale 캐시보다 최신 장소를 우선
 - `OnDemandPhotoModal.test.tsx`: `chatTarget`을 실제 `PhotoModal`로 전달
 - `chat.e2e.ts`: 앨범 딥링크에서 칩을 표시하고 요청 본문에 사진 target을 포함

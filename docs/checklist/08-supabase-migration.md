@@ -4,6 +4,7 @@
 > 결정 근거: [ADR-0005](../adr/0005-supabase-migration.md) · 조사: [`docs/research/firebase-to-supabase.md`](../research/firebase-to-supabase.md)
 > 사용법: 완료한 항목은 `- [x]`로 체크한다. 단계 순서(M0→M8)가 곧 의존 순서다. M7 전까지 프로덕션은 Firebase로 동작해야 한다.
 > 마지막 갱신: 2026-08-16 (M0~M7 완료, M8 진행 중 — PR #18 머지로 프로덕션 Supabase 전환, 배포 후 수동 시나리오·RLS·keep-alive 확인 완료. 잔여: 2주 관찰(~08-29) 후 해체. 관찰·해체 절차: [09-supabase-observation-teardown.md](09-supabase-observation-teardown.md))
+> 해체 실행 계획과 2026-08-29 기준값: [11-firebase-teardown-and-supabase-backup.md](../plan/11-firebase-teardown-and-supabase-backup.md)
 
 ## 진행 요약
 
@@ -35,7 +36,7 @@
 ## M0 — 결정·측정·프로젝트 준비 (§4 M0)
 
 - [x] ADR-0005 Status를 Accepted로 확정하고 일시정지 트레이드오프 수용을 기록한다
-- [x] Firebase 콘솔에서 최근 월 Storage 다운로드 트래픽을 확인해 egress 10GB/월과 비교 기록한다 (15일간 1.56GB, 월 환산 약 3GB — 한도 내)
+- [x] Firebase 콘솔에서 최근 월 Storage 다운로드 트래픽을 확인해 egress 10GB/월(캐시 5GB + 비캐시 5GB 각각)과 비교 기록한다 (15일간 1.56GB, 월 환산 약 3GB — 한도 내)
 - [x] Supabase 프로젝트를 ap-northeast-2 리전에 생성한다 (무료 활성 2개 슬롯 확인)
 - [x] 관리자 계정 1개 생성 + `app_metadata.role = "admin"` 설정 (SQL로 `raw_app_meta_data` 병합), JWT signing keys(비대칭 ECC) 확인
 - [x] `.claude/memory/decision_stack_firebase.md`에 재결정 사실을 추가한다
@@ -50,7 +51,7 @@
 - [x] 정렬 일괄 갱신 RPC 6개 작성 (수동 정렬 테이블별 템플릿 — `dev_articles` 제외, `security invoker` + `set search_path` + `revoke`/`grant execute`) — 부분 upsert는 `data jsonb not null` 검사로 실패하므로 금지 (§2.3)
 - [x] RLS: published 게이트 8개 테이블 + 전체 공개 2개 테이블, role 클레임 기반 admin write (§2.4)
 - [x] Storage 버킷 `media` 생성: 공개 read, `file_size_limit` 10MB, `allowed_mime_types image/*`, admin 클레임 write/delete 정책 (공개 URL 응답으로 버킷 존재 확인)
-- [x] keep-alive 워크플로 `.github/workflows/supabase-keepalive.yml`: 주 2회 cron + `workflow_dispatch`, PostgREST를 anon key(repo secrets)로 직접 호출 — 핑 경로(`site_documents` select)는 curl로 검증 완료. `schedule`은 main 머지 후에만 자동 실행되므로 그 전에는 수동 dispatch로 대신
+- [x] keep-alive 워크플로 `.github/workflows/supabase-keepalive.yml`: 주 2회 cron + `workflow_dispatch`, PostgREST를 publishable key(repo secrets)로 직접 호출 — 핑 경로(`site_documents` select)는 curl로 검증 완료. `schedule`은 main 머지 후에만 자동 실행되므로 그 전에는 수동 dispatch로 대신
 - [x] 원격 적용: `supabase link` + `supabase db push`로 마이그레이션 4개 적용 완료 (§4 M1 — 로컬 Docker 스택 없이 진행)
 - [x] anon 검증: 읽기 200(`photos`·`site_documents`·`rag_documents` 빈 배열), 쓰기 42501 거부, 정렬 RPC 실행 거부
 - [x] admin 검증: 관리자 JWT `app_metadata.role=admin`(ES256) 확인, insert 201 → 미발행 anon 비노출 → 정렬 RPC 204(`sort_order` 반영 + `updated_at` 트리거 동작) → 발행 후 anon 노출 → delete 204 왕복 통과
@@ -137,9 +138,12 @@
 - [x] 배포 후 수동 시나리오(2026-08-15, sungjoon.works): 공개 경로 9종 200·Supabase 이미지 URL 522건(Firebase 0)·CSP 에 Supabase·Nominatim 확인, 블로그 slug 상세 렌더, 본문 검색 API 매치, 챗봇 RAG 참조 카드 정답. 관리자 CMS 전 영역 CRUD 는 사용자가 프로덕션에서 검증 완료 — 콘텐츠 편집 동결 해제
 - [x] RLS 검증(2026-08-15): anon 키로 비공개 select → 빈 배열, 임의 insert → 401 거부
 - [x] keep-alive 첫 실행 성공(수동 dispatch, 2026-08-15) + 주기를 주 2회 → 3일 간격으로 변경, Supabase 대시보드 모니터링 시작
-- [ ] keep-alive 유효성 관찰(관찰 기간 중): 3일 간격으로 충분하다고 가정하지 않고 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
-- [ ] 2주 관찰(2026-08-15 시작, ~08-29): Firebase 프로젝트·이전 환경변수 보존 (롤백 = 이전 커밋 재배포 + env 그대로, §9)
-- [ ] 로컬 Supabase 기반 RLS 통합 테스트 작성으로 `test:rules` 대체 (§8)
+- [x] keep-alive 유효성 관찰(관찰 기간 중): 3일 간격으로 충분하다고 가정하지 않고 대시보드에서 일시정지 예고가 없는지 확인, 필요하면 일 1회로 상향 (§4 M1)
+- [x] 2주 관찰(2026-08-15 시작, ~08-29): Firebase 프로젝트·이전 환경변수 보존 (롤백 = 이전 커밋 재배포 + env 그대로, §9)
+- [x] 관찰 종료 기준값 기록(2026-08-29): Free·서울 리전·Healthy, DB 0.032GB, Storage 0.076GB, Egress 0.25GB·Cached Egress 0.13GB, API 4xx/5xx 0, RAG 424청크·원본 242/242, `media` 831개·77,603,202 bytes
+- [x] Firebase Storage URL 전수 검사(2026-08-29): JSONB `data` 8개 테이블에서 Firebase 호스트 0건 확인
+- [x] 로컬 Supabase 기반 RLS 통합 테스트로 `test:rules` 대체 — CI에서 Postgres RLS·정렬 RPC·Storage 2 suites, 8 tests 통과(2026-08-29)
+- [ ] Supabase 무료 플랜 백업 자동화: DB·`media`를 age로 암호화해 Backblaze B2에 주간 보관하고 첫 백업 복구 훈련 통과
 - [ ] 관찰 종료 후 해체: firebase·firebase-tools·@firebase/rules-unit-testing 제거(lockfile npm 10 재생성), `firestore.rules`·`storage.rules`·`firestore.indexes.json`·`firebase.json`·`.firebaserc`·`lib/firebase/` 삭제, knip·depcruise 통과
 - [ ] 문서 개정: CLAUDE.md(스택·원칙·데이터 모델·env·한도 표·명령어), ADR-0001 각주, `.claude/agents/firebase.md`, troubleshooting 2편 (§10)
 - [ ] GCP 예산 알림·카드 등록 정리, Firebase 프로젝트 최종 삭제

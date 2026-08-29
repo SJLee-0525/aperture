@@ -1,5 +1,9 @@
 # Firestore 공개 읽기 최적화
 
+> 역사 기록(2026-08-15 이전): 현재 운영 저장소는 Supabase다. 여기 적힌 Firestore 경로와
+> 캐시 태그는 제거됐으며, 같은 설계 의도는 PostgREST 공개 읽기와 `supabase:*` 캐시 태그로
+> 이어졌다. 당시 장애 원인과 전환 판단을 보존하기 위해 본문은 수정하지 않는다.
+
 ## 배경
 
 공개 페이지는 Next.js App Router의 정적 생성과 1시간 ISR을 사용하지만, `photos`·`albums`·`musicWorks` 같은 같은 Firestore 컬렉션을 여러 경로가 각자 조회했다. 페이지 출력은 경로별로 캐시되었지만 Firestore `runQuery` 결과는 경로 사이에서 공유되지 않았다.

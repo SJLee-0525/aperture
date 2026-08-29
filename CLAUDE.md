@@ -156,7 +156,7 @@
 - 사진 상세·연주 상세·프로젝트 상세는 **모달**(`?photo=`/`?work=`/`?project=` 딥링크), 행 ID가 식별자.
   앨범 상세 = `/photo/albums/[id]`. slug를 쓰는 콘텐츠는 블로그 글뿐이다.
 
-상세 설계·RLS 패턴은 [`firebase` agent](.claude/agents/firebase.md) 참조 (⚠️ 이름은 레거시 — 8/29 해체 시 supabase 에이전트로 개편 예정, [checklist 09](docs/checklist/09-supabase-observation-teardown.md) §2.2).
+상세 설계·RLS 패턴은 [`supabase` agent](.claude/agents/supabase.md) 참조.
 
 ## 디렉토리 구조 (단일 Next.js 앱, 루트 — 3계층: app → features → components)
 
@@ -294,16 +294,16 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=  # apikey 헤더 전용. 공개돼도 위�
 
 ## 무료 한도 가드
 
-| 리소스           | 무료 한도            | 이 프로젝트 대응                                                               |
-| ---------------- | -------------------- | ------------------------------------------------------------------------------ |
-| Supabase DB      | 500MB                | 본문·메타는 텍스트뿐. 이미지는 Storage 로 분리                                 |
-| Supabase Storage | 1GB                  | 업로드 전 3단 WebP 압축. Vercel 최적화 없이 용도별 파생본 직접 전송            |
-| Supabase egress  | 5GB/월               | 공개 페이지 ISR 캐싱(1시간)으로 DB 읽기 절약. 쓰기는 관리자만                  |
-| Supabase 가동    | 무활동 시 일시정지   | `supabase-keepalive.yml` 이 3일 간격으로 깨운다. 실패가 이어지면 수동 dispatch |
-| Vercel           | 100GB 대역폭/월      | next/image 최적화                                                              |
-| 지도 (CARTO)     | 무료 타일 (저트래픽) | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드                      |
-| 챗 요청 수       | 제공자별 무료 티어   | IP 분당 10회, 전역 하루 `CHAT_DAILY_LIMIT` 회. 넘으면 429                      |
-| 챗 입력량        | 제공자별 토큰 과금   | 하루 `CHAT_DAILY_INPUT_CHAR_LIMIT` 자. 넘으면 문맥을 빼고 답한다               |
+| 리소스           | 무료 한도                | 이 프로젝트 대응                                                               |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------------ |
+| Supabase DB      | 500MB                    | 본문·메타는 텍스트뿐. 이미지는 Storage 로 분리                                 |
+| Supabase Storage | 1GB                      | 업로드 전 3단 WebP 압축. Vercel 최적화 없이 용도별 파생본 직접 전송            |
+| Supabase egress  | 캐시 5GB + 비캐시 5GB/월 | 공개 페이지 ISR 캐싱(1시간)으로 DB 읽기 절약. 쓰기는 관리자만                  |
+| Supabase 가동    | 무활동 시 일시정지       | `supabase-keepalive.yml` 이 3일 간격으로 깨운다. 실패가 이어지면 수동 dispatch |
+| Vercel           | 100GB 대역폭/월          | next/image 최적화                                                              |
+| 지도 (CARTO)     | 무료 타일 (저트래픽)     | 키·카드·과금 없음. `/photo/map` 라우트에서만 dynamic 로드                      |
+| 챗 요청 수       | 제공자별 무료 티어       | IP 분당 10회, 전역 하루 `CHAT_DAILY_LIMIT` 회. 넘으면 429                      |
+| 챗 입력량        | 제공자별 토큰 과금       | 하루 `CHAT_DAILY_INPUT_CHAR_LIMIT` 자. 넘으면 문맥을 빼고 답한다               |
 
 > 상한이 둘인 이유는 요청 수만 세면 비용이 잡히지 않아서다. 글을 열어 둔 질문은 본문을 최대
 > 25,000자까지 함께 보내므로, 요청 수가 같아도 하루 비용이 몇 배로 벌어진다. 문자 예산을 넘기면
@@ -323,7 +323,7 @@ npm run test:e2e:admin # 관리자 흐름 E2E (dev 서버 기준)
 ```
 
 > RLS 정책 변경은 Supabase 대시보드/마이그레이션으로 적용한다.
-> `npm run test:rules`(Firebase 에뮬레이터)는 **레거시** — 8/29 해체 시 로컬 Supabase 기반 RLS 통합 테스트로 대체한다
+> `npm run test:rules`는 로컬 Supabase 스택에서 RLS·RPC·Storage 권한을 검증한다. Docker와 Supabase CLI가 필요하다.
 > ([checklist 09](docs/checklist/09-supabase-observation-teardown.md) §2.1).
 
 ### ⚠️ 의존성 추가 시 lockfile은 npm 10으로 재생성 (CI 필수)
@@ -469,11 +469,11 @@ const getUser = (id: string): User | null => users.get(id) ?? null;
 
 ## .claude 구성
 
-| 종류     | 항목                                                                                                                                                        |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`firebase`](.claude/agents/firebase.md) (데이터·RLS·인증 — 이름은 레거시, 8/29 개편 예정) |
-| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                                                        |
-| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                                                |
+| 종류     | 항목                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| agents   | [`frontend`](.claude/agents/frontend.md) (디자인 이식·UI·3섹션), [`supabase`](.claude/agents/supabase.md) (데이터·RLS·인증·Storage) |
+| commands | `/design-check` (디자인 충실도 점검), `/deploy-check` (배포 전 점검)                                                                |
+| hooks    | env_file_guard(차단), secret_scan(차단), frontend_convention_check(경고) — [README](.claude/hooks/README.md)                        |
 
 ## Agent skills
 

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 /**
  * 이 파일이 지키는 계약: **모듈을 불러오는 것만으로는 Supabase 클라이언트가 생기지 않는다.**
  *
- * firebase client.ts 와 같은 규약이다. 값으로 내보내면 설정 없는 mock 모드 개발과
+ * 지연 초기화 규약을 검증한다. 값으로 내보내면 설정 없는 mock 모드 개발과
  * 프리렌더 빌드가 import 시점 예외로 함께 막힌다. 생성은 호출 시점으로 미룬다.
  */
 describe("supabase client — 지연 초기화", () => {
