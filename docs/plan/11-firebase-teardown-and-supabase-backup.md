@@ -4,6 +4,7 @@
 > 실행 체크리스트: [`docs/checklist/09-supabase-observation-teardown.md`](../checklist/09-supabase-observation-teardown.md)
 > 백업·복구 runbook: [`docs/troubleshooting/supabase-backup-and-restore.md`](../troubleshooting/supabase-backup-and-restore.md)
 > 기준 측정일: 2026-08-29 KST
+> 상태: **백업 자동화·복구 훈련·Firebase 해체 완료**. B2 Lifecycle과 GCP 결제 정리는 후속 작업이다.
 
 ## 1. 목표
 
@@ -239,9 +240,20 @@ application key는 사용하지 않는다. GitHub Actions에는 Key ID와 Key를
 - 해체에만 쓴 Supabase CLI access token과 B2 Application Key 권한을 검토한다. 백업 자동화에
   필요한 자격증명은 최소 권한으로 다시 발급하거나 유지한다.
 
+#### 실행 결과 — 2026-08-29
+
+- `supabase/setup-cli@v3`를 적용한 CI가 통과하고 변경사항을 main에 반영했다.
+- 운영 배포에서 관리자 로그인·저장·정렬·Storage 업로드와 공개 페이지·대표 이미지를 확인했다.
+- anon 초안 미노출과 쓰기 거부를 다시 확인했다.
+- Vercel의 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거한 뒤 재배포와 운영 검증을 통과했다.
+- Firebase Auth 관리자 계정, Storage 데이터, Firebase 프로젝트를 순서대로 삭제했다.
+- Firebase 해체 완료 시각은 2026-08-29 20:58 KST다. Firebase 롤백 경로는 종료됐으며,
+  `aperture-post-restore-drill-2026-08-29T07-13-57Z`와 Supabase 복구 절차가 재해 복구 경로다.
+
 ## 5. 중단 조건
 
-다음 중 하나라도 발생하면 Firebase 프로젝트 삭제를 멈춘다.
+다음 항목은 Firebase 프로젝트 삭제 전 적용한 중단 조건이다. 2026-08-29 모든 조건을 통과하고
+프로젝트를 삭제했으므로 현재는 재실행 절차가 아니다.
 
 - JSONB 전수 검사에서 Firebase URL이 발견됨
 - 로컬 RLS 테스트가 권한 우회를 발견함
@@ -249,8 +261,8 @@ application key는 사용하지 않는다. GitHub Actions에는 Key ID와 Key를
 - 복구한 DB 또는 Storage 수량이 기준값과 다름
 - Firebase 환경변수 제거 배포에서 공개 화면이나 관리자 기능이 실패함
 
-코드 해체는 되돌릴 수 있지만 Firebase 프로젝트 삭제는 되돌릴 수 없다. 삭제 승인은 위 조건을
-모두 확인한 뒤 별도 단계로 남긴다.
+코드 해체는 되돌릴 수 있지만 Firebase 프로젝트 삭제는 되돌릴 수 없다. 삭제 전 위 조건을 모두
+확인했으며, 이후 복구는 Firebase 롤백이 아니라 Supabase 백업을 기준으로 한다.
 
 ## 6. 문서 마감
 

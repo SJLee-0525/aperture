@@ -3,7 +3,7 @@
 > 상위: [08-supabase-migration.md](08-supabase-migration.md) M8 · 계획 근거: [`docs/plan/08-supabase-migration.md`](../plan/08-supabase-migration.md) §8~§10
 > 실행 계획과 해체 전 기준값: [`docs/plan/11-firebase-teardown-and-supabase-backup.md`](../plan/11-firebase-teardown-and-supabase-backup.md)
 > 관찰 기간: **2026-08-15(PR #18 머지) ~ 2026-08-29**. 기간 중 이상이 없으면 아래 해체 절차를 순서대로 진행한다.
-> 관찰 기간에는 Firebase 프로젝트, Vercel 의 Firebase 환경변수, GCP 카드 등록을 건드리지 않는다. 셋이 롤백 경로다.
+> 관찰 기간에는 Firebase 프로젝트, Vercel 의 Firebase 환경변수, GCP 카드 등록을 롤백 경로로 보존했다. 2026-08-29 해체 완료 후 Firebase 롤백 경로는 종료됐다.
 
 ## 1. 관찰 기간 중 확인 (2~3일에 한 번, 5분)
 
@@ -28,6 +28,9 @@
 
 ### 문제 발생 시 롤백
 
+아래 절차는 Firebase 해체 전 관찰 기간에만 유효했다. 2026-08-29 Firebase 프로젝트를 삭제한
+뒤에는 이전 Firebase 배포로 롤백할 수 없으며, 검증된 Supabase 백업과 복구 절차를 사용한다.
+
 1. Vercel 대시보드에서 머지 이전 배포로 Instant Rollback 한다. Firebase 환경변수가 그대로라 이전 코드가 즉시 동작한다.
 2. 주의: 전환 이후 Supabase 에만 저장된 편집분은 Firestore 에 없다. 롤백하면 그 편집이 공개 화면에서 사라지므로, 롤백 전에 전환 이후 편집한 문서 목록을 적어 두고 복구 후 다시 반영한다.
 3. 원인을 수정하고 다시 배포해 복귀한다. 롤백이 3일을 넘겨도 keep-alive 가 계속 돌므로 Supabase 일시정지는 발생하지 않는다.
@@ -45,8 +48,8 @@
 
 ### 2.2 문서 개정
 
-- [x] `CLAUDE.md`: 스택 표(호스팅·인증·DB·이미지), 아키텍처 원칙(Rules 를 RLS 로), 데이터 모델(테이블 기준), 환경변수, 무료 한도 표, 개발 명령어(firebase CLI 제거)를 전면 개정한다 — 2026-08-20 완료. `test:rules`·firebase 에이전트는 해체 예정으로 표기만 남겼다
-- [ ] `docs/adr/0001-serverless-rag.md` 에 Supabase 전환 각주를 달고, ADR-0005 에 해체 완료를 기록한다
+- [x] `CLAUDE.md`: 스택 표(호스팅·인증·DB·이미지), 아키텍처 원칙(Rules를 RLS로), 데이터 모델(테이블 기준), 환경변수, 무료 한도 표와 개발 명령어를 Supabase 기준으로 개정. `test:rules`는 로컬 Supabase 통합 테스트를 실행하고 데이터 에이전트는 `supabase.md`를 사용 — 2026-08-29 완료
+- [x] `docs/adr/0001-serverless-rag.md`에 Supabase 전환·역사적 Firebase 결정 각주를 달고, ADR-0005에 2026-08-29 해체 완료와 최종 복구본을 기록한다
 - [x] `.claude/agents/firebase.md`를 `supabase.md`로 교체하고 hooks·deploy-check의 Firebase 전제 규칙을 제거 — 2026-08-29
 - [x] troubleshooting 문서의 현재 용어를 정리하고 Firestore 읽기 최적화 문서는 역사 기록으로 표시. `firestore-rules-deploy-gotcha` 메모리는 저장소에 남아 있지 않음을 확인 — 2026-08-29
 
@@ -60,8 +63,8 @@
 - [x] 검증된 `aperture-post-restore-drill-2026-08-29T07-13-57Z`를 Firebase 삭제 기준 최종 복구본으로 확정한다. 이후 운영 데이터 변경이 없어 별도 `pre-firebase-teardown` 백업은 만들지 않는다
 - [x] 복구 훈련용 Supabase 프로젝트 `tdxsqceamgxlyptkqtai`를 2026-08-29 16:34 KST에 삭제한다. 복구 검증 결과만 문서에 보관하고 운영 프로젝트 `jvvonzvzlooxxujfslcg`는 유지
 - [ ] Firebase 해체와 안정화 확인 뒤 B2 Lifecycle Rule을 설정한다. `aperture/aperture-scheduled-`만 업로드 후 70일에 숨기고 1일 뒤 삭제하며 수동 백업은 자동 삭제하지 않는다
-- [ ] Vercel 에서 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거하고 재배포 1회로 정상을 확인한다
-- [ ] Firebase 콘솔: Auth 관리자 계정, Storage 데이터, 프로젝트 순서로 삭제한다. 프로젝트 삭제 뒤에는 Supabase 이전본이 유일본이 되고 되돌릴 수 없으므로 맨 마지막에 한다
+- [x] Vercel에서 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거하고 재배포한다. 2026-08-29 관리자 로그인·저장·정렬·Storage 업로드, 공개 페이지·대표 이미지, anon 초안 미노출·쓰기 거부 재확인
+- [x] Firebase 콘솔에서 Auth 관리자 계정, Storage 데이터, Firebase 프로젝트 순서로 삭제한다 — 2026-08-29 20:58 KST 완료. 별도 Firebase export와 `pre-firebase-teardown` 백업은 만들지 않음
 - [ ] GCP: 예산 알림을 삭제하고 결제 계정 카드 등록을 해제한다 (카드 등록 표면 0 달성)
 - [ ] Supabase CLI access token(30일짜리)을 폐기하고, `~/Desktop/github/aperture-migration/` 스크립트 보관 여부를 정한다 (키는 이미 폐기됨)
 

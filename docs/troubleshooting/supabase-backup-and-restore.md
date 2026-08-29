@@ -305,6 +305,86 @@ Storage는 831개, 77,603,202 bytes여야 한다. 관리자 화면과 공개 페
 기존 비밀번호 로그인도 성공했다. 기존 세션은 새 프로젝트에서 쓸 수 없으므로 다시 로그인한다.
 로그인에 실패할 때만 관리자 계정을 다시 만들고 `app_metadata.role = 'admin'`을 설정한다.
 
+### 6.6 실제 장애에서 운영 프로젝트 전환
+
+복원 검증이 끝나도 새 프로젝트가 자동으로 운영 프로젝트가 되지는 않는다. 기존 운영 프로젝트를
+복구할 수 없거나 데이터 손상 때문에 새 프로젝트로 옮겨야 할 때만 아래 순서로 전환한다.
+
+1. 사용한 백업 이름, 생성 시각, 이전 project ref와 새 project ref를 기록한다.
+2. JSONB `data`의 이전 Storage origin을 새 project ref의 origin으로 바꾼다. 대상은 `photos`,
+   `albums`, `music_works`, `music_awards`, `music_media`, `dev_projects`, `dev_articles`,
+   `site_documents` 8개 테이블이다.
+3. 같은 8개 테이블에서 이전 origin이 0건인지 다시 센다.
+4. 새 Storage URL로 대표 이미지가 HTTP 200을 반환하는지 확인한다.
+5. Vercel의 `NEXT_PUBLIC_SUPABASE_URL`과 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`를 새 프로젝트
+   값으로 바꾸고 재배포한다.
+6. GitHub Actions의 keep-alive secrets `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`를 바꾼다.
+7. 백업 secrets `SUPABASE_DB_URL`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`를 새 프로젝트
+   값으로 바꾼다. 새 access token을 발급했다면 `SUPABASE_ACCESS_TOKEN`도 교체한다.
+8. `Supabase keep-alive`와 `Supabase encrypted backup`을 수동 실행한다.
+9. 관리자 로그인, DB 저장·읽기, 정렬 RPC, Storage 업로드·공개 읽기를 확인한다. anon 초안
+   미노출과 쓰기 거부도 다시 검사한다.
+10. 공개 페이지, 대표 이미지, 검색과 챗봇을 확인한 뒤 전환 완료 시각을 기록한다.
+
+Storage origin은 다음 형태의 문자열만 바꾼다. 경로나 JSON 구조를 다시 만들지 않는다.
+
+```text
+https://<old-project-ref>.supabase.co
+https://<new-project-ref>.supabase.co
+```
+
+한 테이블에서 먼저 행 수를 확인하고 transaction 안에서 치환한 뒤 나머지 테이블에 반복한다.
+
+```sql
+begin;
+
+select count(*) as rows_to_rewrite
+from public.photos
+where data::text like '%<old-project-ref>.supabase.co%';
+
+update public.photos
+set data = replace(
+  data::text,
+  'https://<old-project-ref>.supabase.co',
+  'https://<new-project-ref>.supabase.co'
+)::jsonb
+where data::text like '%<old-project-ref>.supabase.co%';
+
+select count(*) as remaining_old_origin_rows
+from public.photos
+where data::text like '%<old-project-ref>.supabase.co%';
+
+-- 결과가 예상과 맞으면 다음 둘 중 하나만 실행한다.
+commit;
+-- rollback;
+```
+
+`<old-project-ref>`와 `<new-project-ref>`는 실제 값으로 바꾼다. 예상보다 많은 행이 잡히거나 새
+URL의 이미지가 열리지 않으면 commit하지 않는다. 실제 장애 때는 먼저 `rollback;`로 연습한 뒤
+같은 transaction을 다시 실행해도 된다.
+
+이전 프로젝트가 접근 가능하더라도 전환 직후 삭제하지 않는다. 새 배포, keep-alive와 새 백업을
+확인한 뒤 삭제 여부를 결정한다. 기존 프로젝트를 유지할 수 없는 장애라면 이 단계는 건너뛴다.
+
+### 6.7 정기 검증과 복구 훈련
+
+주간 Actions 성공만으로 복구 가능성을 판단하지 않는다. 다음 주기를 기본 운영안으로 사용한다.
+
+| 주기                            | 작업                                                                    |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| 매주                            | `Supabase encrypted backup` 성공 여부와 B2 파일 크기 확인               |
+| 매월                            | 최신 예약 백업을 내려받아 age 복호화, gzip, SHA-256과 manifest 검증     |
+| 매년                            | 빈 Supabase 프로젝트에 DB·Storage를 복원하고 접근 검증 후 프로젝트 삭제 |
+| 백업 형식·복원 스크립트 변경 후 | 기다리지 않고 새 수동 백업을 만들어 전체 복구 훈련                      |
+
+검증 기록에는 날짜, 백업 파일명, DB 행 수, Storage 객체 수·바이트, Auth·RLS·RPC·Storage 결과와
+임시 프로젝트 삭제 여부를 남긴다. 실제 콘텐츠 수는 고정 기준값이 아니라 해당 백업의
+`manifest.txt`와 비교한다.
+
+새 컴퓨터로 바꾸거나 age 개인키 보관 위치를 옮겼다면 다음 정기일까지 기다리지 않고 5절의 패키지
+검증을 한 번 실행한다. 공개키와 개인키가 맞지 않거나 B2 remote를 읽지 못하면 그 컴퓨터는 복구
+장비로 사용할 수 없다.
+
 ## 7. 막혔던 지점
 
 ### Google Drive OAuth

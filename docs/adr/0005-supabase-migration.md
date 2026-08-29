@@ -11,6 +11,11 @@ Accepted — 2026-08-15 (조사: [`docs/research/firebase-to-supabase.md`](../re
 사용자 세션이 없는 웹훅 쓰기 경로에 적용했다. `security definer` 함수와 공유 시크릿으로 쓰기 범위를
 테이블 하나로 좁히는 방식이며, 이 ADR의 결정은 바뀌지 않는다.
 
+2026-08-29: 2주 관찰, 암호화 백업과 빈 프로젝트 실제 복구, 로컬 RLS 통합 테스트, Firebase
+환경변수 제거 배포의 운영 검증을 마쳤다. Firebase Auth·Storage·프로젝트를 순서대로 삭제해
+데이터 계층 이전과 Firebase 해체를 완료했다. 최종 복구 기준은
+`aperture-post-restore-drill-2026-08-29T07-13-57Z` Supabase 백업이다.
+
 ## Context
 
 Firestore Spark의 읽기 한도(5만/일)가 실사용에서 소진된다. 주범은 방문자 트래픽이 아니라

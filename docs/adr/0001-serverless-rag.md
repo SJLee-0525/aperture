@@ -13,6 +13,10 @@ Accepted. 저장 계층은 [ADR-0005](0005-supabase-migration.md) 가 대체했�
 
 ## Decision
 
+> 아래 Firebase·Firestore 항목은 이 ADR이 처음 채택됐을 때의 역사적 결정이다. 현재 저장소,
+> 관리자 인가와 RAG 조회 구현은 [ADR-0005](0005-supabase-migration.md)의 Supabase Postgres,
+> access token role claim, pgvector RPC 결정으로 대체됐다.
+
 - 채팅과 임베딩은 Vercel Route Handler에서 실행한다.
 - 채팅 키와 임베딩 키·모델·할당량은 환경변수로 분리한다.
 - 임베딩 모델은 `text-embedding-3-small`, 차원은 MRL 잘라내기 기본 512를 사용한다
