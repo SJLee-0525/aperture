@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["test/**/*.test.mjs", "lighthouserc.cjs", "e2e/fixtures/generate-exif-sample.mjs"],
+  "entry": [
+    "test/**/*.test.mjs",
+    "lighthouserc.cjs",
+    "e2e/fixtures/generate-exif-sample.mjs",
+    "scripts/verify-restored-supabase-access.mjs"
+  ],
   "ignore": ["design/**", "e2e/fixtures/google-font-responses.cjs"],
   "ignoreBinaries": ["supabase"],
   "ignoreDependencies": ["@opentelemetry/core"],
