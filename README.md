@@ -51,6 +51,7 @@
 - 한국어와 영어 콘텐츠를 같은 데이터 구조에서 관리합니다.
 - 공개 페이지는 [`src/lib/content`](./src/lib/content)의 getter만 사용하므로 mock과 Supabase를 교체할 수 있습니다.
 - 공개 데이터는 PostgREST로 읽고, 관리자 기능은 supabase-js로 인증·저장합니다. 접근 제어는 Postgres RLS가 담당합니다.
+- Supabase DB와 `media` Storage는 매주 age로 암호화해 Backblaze B2에 보관합니다. 백업은 빈 프로젝트에 실제 복원해 Auth, RLS, RPC와 Storage까지 검증했습니다.
 - 일반 검색은 브라우저에서 동작하고, 블로그 본문 일치만 서버에서 대조해 스니펫으로 보여 줍니다. 챗봇은 열린 사진·연주·수상·프로젝트를 공개 ID로 직접 조회하고, 범위가 넓은 질문에는 RAG 검색을 더합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
 - 내장 챗봇은 WebMCP를 사용하지 않습니다. WebMCP는 방문자가 데려온 외부 브라우저 에이전트가 공개 콘텐츠를 조회하고 현재 화면을 조작할 때만 사용합니다.
 - 의존 방향을 `app → features → components`로 제한해 라우팅, 사용자 행동, 공용 UI의 역할을 나눴습니다.
@@ -204,15 +205,38 @@ test/                               # 로컬 Supabase RLS 통합 테스트
 
 ## 로컬 실행
 
-Node.js 20.9 이상과 npm이 필요합니다.
+Node.js 20.9 이상과 npm이 필요합니다. CI와 `.nvmrc`는 Node.js 22를 사용합니다.
+
+`nvm`을 사용한다면 먼저 `nvm use`를 실행합니다.
 
 ```bash
 npm ci
-cp .env.example .env.local
 npm run dev
 ```
 
-기본 개발 모드는 외부 서비스 없이 둘러볼 수 있는 mock 콘텐츠를 사용합니다. 실제 Supabase 데이터를 확인하려면 `.env.local`에 필요한 값을 채우고 `NEXT_PUBLIC_USE_MOCK=0`으로 설정합니다. 환경변수의 역할과 보안 주의사항은 [.env.example](./.env.example)에 정리되어 있습니다.
+`http://localhost:3000`에서 공개 포트폴리오를 확인할 수 있습니다. 기본 개발 모드는 환경변수나
+외부 계정 없이 mock 콘텐츠를 사용합니다.
+
+관리자 화면까지 mock으로 둘러보려면 `.env.example`을 `.env.local`로 복사하고 다음 두 값만
+활성화합니다. 인증 우회는 개발 서버에서만 허용되며 프로덕션 빌드는 이 설정을 거부합니다.
+
+```dotenv
+NEXT_PUBLIC_USE_MOCK=1
+NEXT_PUBLIC_ADMIN_TEST_SESSION=1
+```
+
+실제 Supabase 데이터를 확인할 때는 `.env.local`에 URL과 publishable key를 넣고
+`NEXT_PUBLIC_USE_MOCK=0`으로 설정합니다. 전체 환경변수와 보안 주의사항은
+[.env.example](./.env.example)에 정리되어 있습니다.
+
+`npm run build`는 실제 배포 설정을 검사하는 명령입니다. Supabase 환경변수 없이 mock 기반
+프로덕션 빌드와 공개 흐름을 확인하려면 `npm run test:e2e`를 사용합니다. 처음 실행하기 전에는
+Playwright의 Chromium을 한 번 설치해야 합니다.
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
 
 ### 주요 명령어
 
@@ -228,6 +252,7 @@ npm run test:visual     # 핵심 공개 화면의 데스크톱·모바일 시각
 npm run test:chat-eval  # mock 챗봇 응답·RAG·참조 평가
 npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
+npm run test:rules      # 로컬 Supabase의 RLS·RPC·Storage 권한 통합 테스트
 npm run deps:check      # 의존 방향과 순환 의존성 검사
 npm run knip            # 미사용 파일·export·의존성 검사
 npm run storybook       # 컴포넌트 Storybook
@@ -250,17 +275,21 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 
 구현 결정과 운영 절차는 아래 문서에서 이어서 볼 수 있습니다.
 
-| 문서                                                                         | 내용                                        |
-| ---------------------------------------------------------------------------- | ------------------------------------------- |
-| [도메인 컨텍스트](./CONTEXT.md)                                              | 공개 영역, 아키텍처 경계와 E2E 계약         |
-| [언어 진입·동의 운영 문서](./docs/plan/03-browser-language-entry-routing.md) | 위험 분석, 테스트 사례, 배포와 트러블슈팅   |
-| [WebMCP 에이전트 도구](./docs/plan/04-webmcp-agent-tools.md)                 | 브라우저 에이전트용 도구 설계, 보안과 평가  |
-| [WebMCP 도구 평가 기록](./docs/troubleshooting/webmcp-tool-eval.md)          | 명령형 도구와 선언형 연락 폼 평가           |
-| [챗봇 화면 문맥 인식 계획](./docs/plan/06-chat-screen-context.md)            | URL 화면 문맥, 사진 필터와 연락 초안 전달   |
-| [개발 블로그 개편 계획](./docs/plan/07-dev-blog.md)                          | 블로그 정보 구조, Markdown 계약과 발행 흐름 |
-| [Supabase 이전 계획](./docs/plan/08-supabase-migration.md)                   | Firebase에서 Supabase로의 데이터 계층 이전  |
-| [오류 알림 AI 트리아지](./docs/plan/10-sentry-ai-triage.md)                  | Sentry 웹훅, LLM 판정과 Discord 알림 구성   |
-| [UI 품질 테스트](./docs/testing.md)                                          | 시각 회귀, 접근성, 언어·분석 동의 검증 방법 |
+| 문서                                                                                      | 내용                                            |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| [도메인 컨텍스트](./CONTEXT.md)                                                           | 공개 영역, 아키텍처 경계와 E2E 계약             |
+| [언어 진입·동의 운영 문서](./docs/plan/03-browser-language-entry-routing.md)              | 위험 분석, 테스트 사례, 배포와 트러블슈팅       |
+| [WebMCP 에이전트 도구](./docs/plan/04-webmcp-agent-tools.md)                              | 브라우저 에이전트용 도구 설계, 보안과 평가      |
+| [WebMCP 도구 평가 기록](./docs/troubleshooting/webmcp-tool-eval.md)                       | 명령형 도구와 선언형 연락 폼 평가               |
+| [챗봇 화면 문맥 인식 계획](./docs/plan/06-chat-screen-context.md)                         | URL 화면 문맥, 사진 필터와 연락 초안 전달       |
+| [개발 블로그 개편 계획](./docs/plan/07-dev-blog.md)                                       | 블로그 정보 구조, Markdown 계약과 발행 흐름     |
+| [Supabase 이전 결정](./docs/adr/0005-supabase-migration.md)                               | 데이터 계층 이전 결정과 Firebase 해체 완료 기록 |
+| [Supabase 이전 계획](./docs/plan/08-supabase-migration.md)                                | Firebase에서 Supabase로의 데이터 계층 이전      |
+| [Supabase 관찰·해체 체크리스트](./docs/checklist/09-supabase-observation-teardown.md)     | 관찰 기준값, 운영 검증과 Firebase 해체 결과     |
+| [Supabase 백업·복구](./docs/troubleshooting/supabase-backup-and-restore.md)               | B2 암호화 백업, 검증, 새 환경 설정과 복구 절차  |
+| [Firebase 해체·백업 자동화 계획](./docs/plan/11-firebase-teardown-and-supabase-backup.md) | 기준값, 최종 복구본과 인프라 해체 실행 기록     |
+| [오류 알림 AI 트리아지](./docs/plan/10-sentry-ai-triage.md)                               | Sentry 웹훅, LLM 판정과 Discord 알림 구성       |
+| [UI 품질 테스트](./docs/testing.md)                                                       | 시각 회귀, 접근성, 언어·분석 동의 검증 방법     |
 
 ### 코드 검토
 

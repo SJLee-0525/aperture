@@ -2,6 +2,12 @@
 
 품질 검사는 정적 코드 분석과 실행 기반 테스트로 나뉩니다. 실행 기반 테스트에서는 공개 포트폴리오의 주요 탐색 흐름, 관리자 데이터 변환, 외부 서비스 경계와 반응형 화면을 확인합니다.
 
+Playwright 테스트를 처음 실행하는 컴퓨터에서는 Chromium을 먼저 설치합니다.
+
+```bash
+npx playwright install chromium
+```
+
 ## 테스트 구성
 
 | 범위             | 도구                                                                | 확인하는 내용                              |
@@ -84,4 +90,4 @@ E2E는 지도와 외부 링크가 표시되는 지점까지 검사합니다. 지
 
 ## Supabase RLS
 
-[`Supabase RLS 테스트`](../../test/supabase-rls.test.mjs)는 로컬 Supabase 스택을 시작하고 격리된 fixture를 만든다. 비로그인 방문자의 공개 읽기와 쓰기 거부, 일반 사용자의 권한 제한, 관리자 CRUD·정렬 RPC·Storage 쓰기를 운영 데이터 없이 확인한다. 실행에는 Docker와 Supabase CLI가 필요하다.
+[`Supabase RLS 테스트`](../../test/supabase-rls.test.mjs)는 로컬 Supabase 스택을 시작하고 격리된 fixture를 만듭니다. 비로그인 방문자의 공개 읽기와 쓰기 거부, 일반 사용자의 권한 제한, 관리자 CRUD·정렬 RPC·Storage 쓰기를 운영 데이터 없이 확인합니다. 실행에는 Docker와 Supabase CLI가 필요합니다. 첫 실행에서는 Supabase Docker 이미지를 내려받기 때문에 시간이 더 걸릴 수 있습니다. 원격 프로젝트나 운영 데이터에는 연결하지 않습니다.
