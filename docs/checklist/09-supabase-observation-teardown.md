@@ -55,7 +55,11 @@
 - [x] GitHub Actions 기반 주간 백업을 추가한다: DB roles/schema/data + `media` 버킷 + manifest·SHA-256을 age로 암호화해 Backblaze B2에 업로드. 2026-08-29 첫 원격 백업 78,865,575 bytes 업로드 성공
 - [x] 첫 자동 백업 패키지를 로컬에서 검증한다: B2 다운로드, age 복호화, gzip, SHA-256 통과. DB dump 3종과 Storage 831개·77,603,202 bytes 확인. RAG는 백업 시점 425행으로 관찰 종료 기준보다 1행 증가
 - [x] 빈 Supabase 프로젝트에 DB와 Storage를 실제 복원한다. 2026-08-29 DB 행 수, Storage 831개 파일 비교, Auth 사용자 1명과 admin claim, RLS, admin CRUD·정렬 RPC·Storage 쓰기와 공개 읽기 통과. Storage 정책이 기본 dump에서 빠지는 문제를 찾아 이후 백업에 관리 스키마 SQL을 포함
-- [ ] Firebase 삭제 직전 `pre-firebase-teardown` 수동 백업을 만들고 Backblaze B2의 파일 존재·크기를 확인한다
+- [x] `post-restore-drill` 새 형식 백업을 생성하고 검증한다. 2026-08-29 age 복호화·SHA-256 통과, `managed-schema/storage.sql`과 정책 4개 포함, 앱 행 수와 Storage 831개·77,603,202 bytes 일치
+- [x] Firebase 자체 백업은 만들지 않는다. 관찰 기간 동안 Firebase 쓰기가 없었고 Firebase URL 0건, Supabase 기준값·백업·실제 복구가 모두 확인됐다. Firebase 데이터는 현재 Supabase보다 오래된 스냅샷이며, managed Firestore export를 위한 Blaze 재활성화도 하지 않는다
+- [x] 검증된 `aperture-post-restore-drill-2026-08-29T07-13-57Z`를 Firebase 삭제 기준 최종 복구본으로 확정한다. 이후 운영 데이터 변경이 없어 별도 `pre-firebase-teardown` 백업은 만들지 않는다
+- [x] 복구 훈련용 Supabase 프로젝트 `tdxsqceamgxlyptkqtai`를 2026-08-29 16:34 KST에 삭제한다. 복구 검증 결과만 문서에 보관하고 운영 프로젝트 `jvvonzvzlooxxujfslcg`는 유지
+- [ ] Firebase 해체와 안정화 확인 뒤 B2 Lifecycle Rule을 설정한다. `aperture/aperture-scheduled-`만 업로드 후 70일에 숨기고 1일 뒤 삭제하며 수동 백업은 자동 삭제하지 않는다
 - [ ] Vercel 에서 `NEXT_PUBLIC_FIREBASE_*` 6종을 제거하고 재배포 1회로 정상을 확인한다
 - [ ] Firebase 콘솔: Auth 관리자 계정, Storage 데이터, 프로젝트 순서로 삭제한다. 프로젝트 삭제 뒤에는 Supabase 이전본이 유일본이 되고 되돌릴 수 없으므로 맨 마지막에 한다
 - [ ] GCP: 예산 알림을 삭제하고 결제 계정 카드 등록을 해제한다 (카드 등록 표면 0 달성)

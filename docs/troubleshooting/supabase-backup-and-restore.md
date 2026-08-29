@@ -64,11 +64,14 @@ service role key, Auth 사용자 비밀번호에는 영향이 없다. TablePlus�
 GitHub의 `Actions > Supabase encrypted backup > Run workflow`에서 실행한다. `label`에는
 영문, 숫자, 점, 밑줄, 하이픈만 쓸 수 있다.
 
-Firebase 삭제 직전에는 다음 라벨을 사용한다.
+Firebase 삭제 전 최종 복구본을 새로 만들 필요가 있을 때는 다음 라벨을 사용할 수 있다.
 
 ```text
 pre-firebase-teardown
 ```
+
+2026-08-29 해체에서는 이후 운영 데이터 변경이 없으므로 새 백업을 만들지 않고 검증된
+`post-restore-drill` 백업을 최종 복구본으로 사용한다.
 
 성공 로그의 마지막에는 B2 경로와 암호화 파일 크기가 나온다.
 
@@ -324,6 +327,14 @@ Drive용 rclone remote는 이 백업에 쓰지 않는다.
 종료됐다. `supabase/config.toml`의 `project_id`가 `aperture.`로 끝나 Docker hostname이 잘못
 만들어진 것이 원인이었다. `project_id = "aperture"`로 바꾼 뒤 2 suites, 8 tests가 통과했다.
 
+### GitHub Actions의 Supabase CLI rate limit
+
+`supabase/setup-cli@v1`에서 `version: latest`를 사용하면 GitHub Releases API로 최신 CLI를
+조회한다. 공유 러너 IP의 비인증 API 한도가 소진되면 `Failed to resolve latest Supabase CLI
+release: rate limit exceeded`로 테스트 시작 전에 실패한다. 함께 표시되는 Node 20 지원 중단
+문구는 경고이며 이 실패의 원인이 아니다. RLS와 백업 workflow는 npm에서 CLI를 설치하는
+`supabase/setup-cli@v3`를 사용하고 설치된 버전을 로그에 남긴다.
+
 ### Storage 다운로드가 멈춘 것처럼 보임
 
 `supabase storage cp --recursive`는 파일마다 다운로드 로그를 남기지만 다음 파일을 처리하는
@@ -368,6 +379,7 @@ GitHub Actions는 임시 rclone 설정을 사용한다. 따라서 Actions 백업
 - Storage origin 191행을 복구 프로젝트 ref로 재작성하고 이전 origin 0건 확인
 - 복구 Storage 대표 이미지 HTTP 200 확인
 - RAG 청크의 이전·복구 Storage origin 모두 0건
+- 모든 검증을 마친 뒤 임시 복구 프로젝트 `tdxsqceamgxlyptkqtai`를 2026-08-29 16:34 KST에 삭제
 
 Auth, RLS, RPC, Storage 접근은 다음 명령으로 다시 검사할 수 있다.
 
@@ -380,6 +392,46 @@ DB와 Storage probe는 검사가 끝날 때 삭제한다.
 
 ## 8. 아직 남은 일
 
-- Storage 정책을 포함한 새 형식 백업을 한 번 생성하고 패키지 내용 확인
-- `pre-firebase-teardown` 라벨의 최종 수동 백업
-- B2 보관 정책 확정
+- Firebase 해체와 안정화 확인 뒤 B2 Lifecycle Rule 설정
+
+## 9. B2 보관과 자동 삭제
+
+B2 Lifecycle Rule은 지금 켜지 않는다. 다음 조건을 모두 만족한 뒤 설정한다.
+
+1. `post-restore-drill` 새 형식 백업에 `managed-schema/storage.sql`이 포함됨
+2. Firebase 해체 후 애플리케이션이 정상 동작함
+
+1번은 2026-08-29에 완료했다. `aperture-post-restore-drill-2026-08-29T07-13-57Z`를
+복호화하고 SHA-256을 검증했으며 Storage 정책 4개, 앱 행 수, Storage 831개·77,603,202
+bytes가 모두 확인됐다.
+
+Backblaze 콘솔의 `B2 Cloud Storage > Buckets > aperture-backups-sungjoon > Lifecycle
+Settings`에서 사용자 정의 규칙을 추가한다.
+
+| 항목                        | 값                             |
+| --------------------------- | ------------------------------ |
+| `fileNamePrefix`            | `aperture/aperture-scheduled-` |
+| `daysFromUploadingToHiding` | `70`                           |
+| `daysFromHidingToDeleting`  | `1`                            |
+
+주간 예약 백업 약 10개를 남기는 설정이다. Lifecycle 처리는 하루 단위이고 Actions 실행이 빠질
+수 있어 정확히 8개보다 여유를 둔다. 각 백업 파일명은 다르므로 `Keep Only Last Version`은 이
+구조에 맞지 않는다.
+
+prefix를 `aperture/`로 넓히지 않는다. 그렇게 하면 `post-restore-drill`을 포함한 수동 백업도
+자동 삭제 대상이 된다. 월간 백업을 추가한다면
+`aperture/aperture-monthly-` prefix로 분리하고 약 400일 보관 규칙을 별도로 둔다.
+
+`daysFromUploadingToHiding`만 설정하면 파일은 목록에서 숨겨져도 저장 용량을 계속 차지한다.
+용량을 줄이려면 `daysFromHidingToDeleting`도 설정해야 한다. 영구 삭제된 파일은 복구할 수 없다.
+
+## 10. Firebase 삭제 전 백업 결정
+
+Firebase 자체 export는 만들지 않는다. 2026-08-15부터 2주 동안 운영 쓰기는 Supabase에서만
+발생했다. Firebase Storage URL 전수 검사 결과는 0건이고, Supabase DB·Storage 백업을 빈
+프로젝트에 실제 복원해 Auth, RLS, CRUD, RPC와 이미지 응답까지 확인했다.
+
+Firebase 데이터는 현재 Supabase보다 오래된 스냅샷이다. managed Firestore export를 위해 Blaze
+플랜을 다시 활성화하지 않는다. 다운로드·복호화·SHA-256 검증을 통과한
+`aperture-post-restore-drill-2026-08-29T07-13-57Z`를 Firebase 삭제 기준 최종 복구본으로
+보관한다. 이 백업 이후 운영 데이터 변경이 없어 같은 내용의 백업을 다시 만들지 않는다.

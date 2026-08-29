@@ -81,9 +81,7 @@ try {
   });
   requireStatus(login, [200], "기존 관리자 로그인");
   accessToken = JSON.parse(login.text).access_token;
-  const claims = JSON.parse(
-    Buffer.from(accessToken.split(".")[1], "base64url").toString("utf8"),
-  );
+  const claims = JSON.parse(Buffer.from(accessToken.split(".")[1], "base64url").toString("utf8"));
   if (claims.app_metadata?.role !== "admin") {
     throw new Error("새 JWT에 app_metadata.role=admin이 없습니다.");
   }
@@ -106,9 +104,7 @@ try {
   requireStatus(createProbe, [201], "관리자 insert");
   dbProbeCreated = true;
 
-  const anonRead = await request(
-    `/rest/v1/photos?id=eq.${encodeURIComponent(probeId)}&select=id`,
-  );
+  const anonRead = await request(`/rest/v1/photos?id=eq.${encodeURIComponent(probeId)}&select=id`);
   requireStatus(anonRead, [200], "anon 초안 조회");
   if (JSON.parse(anonRead.text).length !== 0) {
     throw new Error("anon에게 복구 훈련용 초안이 노출됐습니다.");
@@ -153,33 +149,25 @@ try {
   requireStatus(upload, [200, 201], "관리자 Storage 업로드");
   storageProbeCreated = true;
 
-  const publicObject = await request(
-    `/storage/v1/object/public/media/${storagePath}`,
-  );
+  const publicObject = await request(`/storage/v1/object/public/media/${storagePath}`);
   requireStatus(publicObject, [200], "공개 Storage 읽기");
   console.log("관리자 Storage 쓰기와 공개 읽기 확인");
 } finally {
   if (storageProbeCreated) {
-    const removeStorage = await request(
-      `/storage/v1/object/media/${storagePath}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
+    const removeStorage = await request(`/storage/v1/object/media/${storagePath}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
     requireStatus(removeStorage, [200], "Storage probe 삭제");
   }
   if (dbProbeCreated) {
-    const removeDb = await request(
-      `/rest/v1/photos?id=eq.${encodeURIComponent(probeId)}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: "return=minimal",
-        },
+    const removeDb = await request(`/rest/v1/photos?id=eq.${encodeURIComponent(probeId)}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Prefer: "return=minimal",
       },
-    );
+    });
     requireStatus(removeDb, [204], "DB probe 삭제");
   }
 }

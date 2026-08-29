@@ -38,9 +38,12 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
           version: latest
+
+      - name: Show Supabase CLI version
+        run: supabase --version
 
       - name: Install backup tools
         run: sudo apt-get update && sudo apt-get install --yes age postgresql-client rclone
