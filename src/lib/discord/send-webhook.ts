@@ -1,4 +1,4 @@
-import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
+import type { DiscordEmbed } from "@/lib/discord/types";
 
 type SendResult = { ok: true } | { ok: false; error: string };
 
@@ -11,6 +11,8 @@ type SendOptions = {
    * 함수 실행 상한(maxDuration 60초) 안에서 기록 RPC 까지 끝나야 하기 때문이다.
    */
   budgetMs?: number;
+  /** 호출 도메인에 맞는 누락 환경변수 이름을 오류에 남긴다. */
+  configName?: string;
 };
 
 const DEFAULT_BUDGET_MS = 10_000;
@@ -45,7 +47,12 @@ const sendDiscordCard = async (
   options: SendOptions = {},
 ): Promise<SendResult> => {
   const url = webhookUrl?.trim();
-  if (!url) return { ok: false, error: "DISCORD_ALERT_WEBHOOK_URL is not configured" };
+  if (!url) {
+    return {
+      ok: false,
+      error: `${options.configName ?? "DISCORD_ALERT_WEBHOOK_URL"} is not configured`,
+    };
+  }
 
   const fetcher = options.fetcher ?? fetch;
   const sleep = options.sleep ?? defaultSleep;

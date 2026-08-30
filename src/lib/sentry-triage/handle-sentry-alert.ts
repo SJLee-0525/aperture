@@ -1,5 +1,5 @@
+import { sendDiscordCard } from "@/lib/discord/send-webhook";
 import { buildDiscordCard } from "@/lib/sentry-triage/discord-card";
-import { sendDiscordCard } from "@/lib/sentry-triage/send-discord-card";
 import { normalizeSentryAlert } from "@/lib/sentry-triage/sentry-alert-payload";
 import { getTriageProvider } from "@/lib/sentry-triage/triage-provider";
 import { getTriageRateLimiter } from "@/lib/sentry-triage/triage-rate-limit";

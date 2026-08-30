@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { sendDiscordCard } from "@/lib/sentry-triage/send-discord-card";
+import { sendDiscordCard } from "@/lib/discord/send-webhook";
 
 import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
 

@@ -1,3 +1,4 @@
+import type { DiscordEmbed } from "@/lib/discord/types";
 import type { SentryAlertSummary, TriageOutcome, TriageSeverity } from "@/types/sentry-alert";
 
 /**
@@ -31,17 +32,6 @@ const SEVERITY_LABEL: Record<TriageSeverity, string> = {
   high: "높음",
   medium: "보통",
   low: "낮음",
-};
-
-type DiscordEmbedField = { name: string; value: string; inline?: boolean };
-
-type DiscordEmbed = {
-  title: string;
-  url?: string;
-  description?: string;
-  color: number;
-  fields?: DiscordEmbedField[];
-  footer?: { text: string };
 };
 
 /**
