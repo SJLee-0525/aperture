@@ -22,8 +22,7 @@ PR에는 dependency review를 추가한다. 사람이 dependency를 바꾸거나
 기본 브랜치
   │
   ├─ Dependabot Alerts             알려진 취약점 상시 탐지
-  ├─ Dependabot Security Updates   패치가 가능하면 수정 PR 생성
-  └─ Dependabot Version Updates    매주 오래된 버전 확인
+  └─ Dependabot Security Updates   패치가 가능하면 수정 PR 생성
 
 Pull request
   │
@@ -40,11 +39,10 @@ Pull request
        └─ Discord 주간 리포트
 ```
 
-Dependabot alert와 security update는 월요일 스케줄을 기다리지 않는다. `dependabot.yml`의
-schedule은 version update 확인 시점을 정한다. GitHub 문서도 version update schedule과
-security update를 구분한다.
+Dependabot alert와 security update는 월요일 스케줄을 기다리지 않는다. 일반 version update
+PR은 만들지 않는다. `dependabot.yml`은 npm과 GitHub Actions의 security update PR에 label과
+실행 범위를 적용하기 위해 남긴다.
 
-- [Dependabot version update 스케줄](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/optimizing-pr-creation-version-updates)
 - [Dependabot security updates](https://docs.github.com/en/code-security/concepts/supply-chain-security/dependabot-security-updates)
 
 ## 3. 먼저 켤 저장소 설정
@@ -61,7 +59,8 @@ dependency부터 묶는다.
 
 ### 3.1 `dependabot.yml`
 
-`.github/dependabot.yml`에 npm과 GitHub Actions version update를 등록한다.
+`.github/dependabot.yml`에 npm과 GitHub Actions를 등록하되 일반 version update PR은 끈다.
+`schedule`은 ecosystem 설정의 필수 필드라 유지하며 security update의 탐지 시점을 늦추지 않는다.
 
 ```yaml
 version: 2
@@ -74,7 +73,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: "Asia/Seoul"
-    open-pull-requests-limit: 5
+    # 일반 버전 PR은 만들지 않고 security update PR만 허용한다.
+    open-pull-requests-limit: 0
     labels:
       - dependencies
 
@@ -85,15 +85,16 @@ updates:
       day: monday
       time: "09:20"
       timezone: "Asia/Seoul"
-    open-pull-requests-limit: 3
+    # 일반 버전 PR은 만들지 않고 security update PR만 허용한다.
+    open-pull-requests-limit: 0
     labels:
       - dependencies
       - github-actions
 ```
 
-version update PR을 한꺼번에 많이 열지 않도록 ecosystem별 상한을 둔다. Security update PR은
-별도 동작이며 이 값으로 제한하지 않는다. major update는 자동 merge하지 않는다. minor와
-patch도 기존 CI를 모두 통과한 뒤 사람이 merge한다.
+`open-pull-requests-limit: 0`은 일반 version update PR만 끈다. Security update PR은 계속
+생성되며 안전한 버전이 major에만 있어도 수정을 시도한다. 보안 PR도 기존 CI를 모두 통과한 뒤
+사람이 merge한다.
 
 ## 4. PR dependency review
 
@@ -463,7 +464,7 @@ npm run security:audit
 - [ ] Dependency graph, Dependabot alerts, security updates를 켠다.
 - [ ] `github.token`과 `vulnerability-alerts: read`로 alert API 권한 probe를 통과한다.
 - [ ] `.github/dependabot.yml`을 추가한다.
-- [ ] npm과 GitHub Actions version update 수동 실행으로 설정을 확인한다.
+- [ ] 일반 version update PR이 생성되지 않고 security update PR은 유지되는지 확인한다.
 
 ### P2. PR 방어
 

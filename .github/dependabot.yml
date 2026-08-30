@@ -8,7 +8,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: "Asia/Seoul"
-    open-pull-requests-limit: 5
+    # 일반 버전 PR은 만들지 않고 security update PR만 허용한다.
+    open-pull-requests-limit: 0
     labels:
       - dependencies
 
@@ -19,7 +20,8 @@ updates:
       day: monday
       time: "09:20"
       timezone: "Asia/Seoul"
-    open-pull-requests-limit: 3
+    # 일반 버전 PR은 만들지 않고 security update PR만 허용한다.
+    open-pull-requests-limit: 0
     labels:
       - dependencies
       - github-actions
