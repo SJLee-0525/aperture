@@ -74,7 +74,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "dependency-cruiser": "^18.1.1",
     "eslint": "^9",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.3.3",
     "eslint-plugin-boundaries": "^7.1.0",
     "eslint-plugin-import": "^2.32.0",
     "jscpd": "^5.0.14",
