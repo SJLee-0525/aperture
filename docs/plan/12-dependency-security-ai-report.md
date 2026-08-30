@@ -2,7 +2,7 @@
 
 > 관련 결정: [`docs/adr/0006-ai-error-triage-alerts.md`](../adr/0006-ai-error-triage-alerts.md)
 > 기준일: 2026-08-30 KST
-> 상태: 계획
+> 상태: P1부터 P4까지 완료, P5 운영 검증 중
 
 ## 1. 목표
 
@@ -465,17 +465,17 @@ npm run security:audit
 
 ### P1. GitHub 기본 기능
 
-- [ ] Dependency graph, Dependabot alerts, security updates를 켠다.
-- [ ] `github.token`과 `vulnerability-alerts: read`로 alert API 권한 probe를 통과한다.
-- [ ] `.github/dependabot.yml`을 추가한다.
-- [ ] 일반 version update PR이 생성되지 않고 security update PR은 유지되는지 확인한다.
+- [x] Dependency graph, Dependabot alerts, security updates를 켠다.
+- [x] `github.token`과 `vulnerability-alerts: read`로 alert API 권한 probe를 통과한다.
+- [x] `.github/dependabot.yml`을 추가한다.
+- [x] 일반 version update PR이 생성되지 않고 security update PR은 유지되는지 확인한다.
 
 ### P2. PR 방어
 
 - [x] dependency review workflow를 추가한다.
 - [x] 안전한 dependency PR이 통과하는지 확인한다.
-- [ ] 테스트 브랜치에서 High runtime 취약 dependency를 추가해 실패를 확인한다.
-- [ ] branch protection의 required check로 지정한다.
+- [x] 테스트 브랜치에서 High runtime 취약 dependency를 추가해 실패를 확인한다.
+- [x] branch protection의 required check로 지정한다.
 
 ### P3. 결정적 주간 리포트
 
@@ -493,8 +493,8 @@ npm run security:audit
 
 ### P5. 운영 검증
 
-- [ ] `workflow_dispatch`로 실데이터 리포트를 받는다.
-- [ ] Actions log에 secret과 전체 provider 응답이 없는지 확인한다.
+- [x] `workflow_dispatch`로 실데이터 리포트를 받는다.
+- [x] Actions log에 secret과 전체 provider 응답이 없는지 확인한다.
 - [ ] 다음 월요일 schedule 실행과 0건 리포트를 확인한다.
 - [ ] 첫 달의 alert 수, Dependabot PR 수, AI 판정 품질을 기록한다.
 
