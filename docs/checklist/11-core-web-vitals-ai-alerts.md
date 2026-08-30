@@ -216,25 +216,25 @@ npm run deps:check
 
 ### 3.1 입력과 schema
 
-- [ ] `triage-prompt.ts`에서 LLM 입력 필드를 화이트리스트로 만든다.
-- [ ] 원본 CrUX 응답, Lighthouse HTML, screenshot과 전체 audit details를 넣지 않는다.
-- [ ] target, scope, form factor, 현재와 이전 수치, 상태, collection period, Lighthouse audit 요약만 넣는다.
-- [ ] Lighthouse title과 displayValue를 신뢰하지 않는 문자열로 취급한다.
-- [ ] field와 lab의 차이, TBT가 INP 대체값이 아니라는 제한을 instructions에 넣는다.
-- [ ] 저장소에 실제로 있는 검증 명령만 prompt에 제공한다.
-- [ ] `PerformanceTriageResult` strict JSON schema와 parser를 만든다.
-- [ ] 문자열 길이, 배열 개수, enum과 추가 속성을 제한한다.
+- [x] `triage-prompt.ts`에서 LLM 입력 필드를 화이트리스트로 만든다.
+- [x] 원본 CrUX 응답, Lighthouse HTML, screenshot과 전체 audit details를 넣지 않는다.
+- [x] target, scope, form factor, 현재와 이전 수치, 상태, collection period, Lighthouse audit 요약만 넣는다.
+- [x] Lighthouse title과 displayValue를 신뢰하지 않는 문자열로 취급한다.
+- [x] field와 lab의 차이, TBT가 INP 대체값이 아니라는 제한을 instructions에 넣는다.
+- [x] 저장소에 실제로 있는 검증 명령만 prompt에 제공한다.
+- [x] `PerformanceTriageResult` strict JSON schema와 parser를 만든다.
+- [x] 문자열 길이, 배열 개수, enum과 추가 속성을 제한한다.
 
 ### 3.2 provider와 fallback
 
-- [ ] OpenAI provider를 구현한다.
-- [ ] Gemini provider를 구현한다.
-- [ ] primary 실패 후 fallback을 한 번 호출한다.
-- [ ] 각 provider에 timeout을 둔다.
+- [x] OpenAI provider를 구현한다.
+- [x] Gemini provider를 구현한다.
+- [x] primary 실패 후 fallback을 한 번 호출한다.
+- [x] 각 provider에 timeout을 둔다.
 - [ ] 양쪽 실패, schema 실패와 미설정을 기본 카드로 처리한다.
 - [ ] provider/model만 카드에 기록하고 원본 응답은 로그에 남기지 않는다.
-- [ ] 같은 fixture로 두 provider의 출력 계약을 검증한다.
-- [ ] audit 문자열 안의 prompt injection이 instructions를 바꾸지 않는지 테스트한다.
+- [x] 같은 fixture로 두 provider의 출력 계약을 검증한다.
+- [x] audit 문자열 안의 prompt injection이 instructions를 바꾸지 않는지 테스트한다.
 
 ### 3.3 카드 결합
 
