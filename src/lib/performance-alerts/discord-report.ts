@@ -111,3 +111,4 @@ export {
   embedLength,
   fitEmbed,
 };
+export type { PerformanceReport };

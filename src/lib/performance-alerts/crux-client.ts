@@ -212,3 +212,4 @@ const collectCruxRecords = async (
 };
 
 export { collectCruxRecords, CRUX_ENDPOINT, cruxQueries, normalizeCruxRecord, queryCruxRecord };
+export type { CollectedCruxResult, FieldMetric };

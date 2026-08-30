@@ -5,8 +5,10 @@ const SENT_ALERT_TTL_MS = 90 * 24 * 60 * 60 * 1_000;
 type SentAlert = { key: string; sentAt: string };
 type SnapshotMetric = {
   name: string;
-  value: number;
+  value: number | null;
   status: "good" | "needs_improvement" | "poor" | "insufficient_data";
+  insufficientReason?: "record_missing" | "metric_missing";
+  consecutiveCount?: number;
 };
 type SnapshotMeasurement = {
   scope: "origin" | "url" | "lab";
@@ -75,17 +77,40 @@ const nullableIsoDate = (value: unknown, label: string): string | null =>
 
 const parseMetric = (value: unknown, label: string): SnapshotMetric => {
   const metric = object(value, label);
+  const status = oneOf(
+    metric.status,
+    ["good", "needs_improvement", "poor", "insufficient_data"] as const,
+    `${label}.status`,
+  );
+  if (status === "insufficient_data") {
+    if (metric.value !== null) throw new Error(`Invalid snapshot ${label}.value`);
+    const consecutiveCount = metric.consecutiveCount;
+    if (
+      typeof consecutiveCount !== "number" ||
+      !Number.isSafeInteger(consecutiveCount) ||
+      consecutiveCount < 1
+    ) {
+      throw new Error(`Invalid snapshot ${label}.consecutiveCount`);
+    }
+    return {
+      name: string(metric.name, `${label}.name`),
+      value: null,
+      status,
+      insufficientReason: oneOf(
+        metric.insufficientReason,
+        ["record_missing", "metric_missing"] as const,
+        `${label}.insufficientReason`,
+      ),
+      consecutiveCount,
+    };
+  }
   if (typeof metric.value !== "number" || !Number.isFinite(metric.value) || metric.value < 0) {
     throw new Error(`Invalid snapshot ${label}.value`);
   }
   return {
     name: string(metric.name, `${label}.name`),
     value: metric.value,
-    status: oneOf(
-      metric.status,
-      ["good", "needs_improvement", "poor", "insufficient_data"] as const,
-      `${label}.status`,
-    ),
+    status,
   };
 };
 
@@ -189,3 +214,4 @@ const retainSentAlerts = (alerts: readonly SentAlert[], now: Date): SentAlert[] 
 };
 
 export { alertKey, parsePerformanceSnapshot, retainSentAlerts, SNAPSHOT_ARTIFACT_NAME };
+export type { PerformanceSnapshot, PerformanceTargetResult, SnapshotMeasurement, SnapshotMetric };

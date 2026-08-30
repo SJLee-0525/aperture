@@ -38,6 +38,26 @@ describe("parsePerformanceSnapshot", () => {
     });
   });
 
+  it("데이터 부족 사유와 연속 횟수를 보존한다", () => {
+    const snapshot = validSnapshot();
+    snapshot.targets[0]!.measurements[0]!.metrics = [
+      {
+        name: "record",
+        value: null,
+        status: "insufficient_data",
+        insufficientReason: "record_missing",
+        consecutiveCount: 4,
+      },
+    ] as never;
+    expect(parsePerformanceSnapshot(snapshot).targets[0]?.measurements[0]?.metrics[0]).toEqual({
+      name: "record",
+      value: null,
+      status: "insufficient_data",
+      insufficientReason: "record_missing",
+      consecutiveCount: 4,
+    });
+  });
+
   it.each([
     [
       "schema version",

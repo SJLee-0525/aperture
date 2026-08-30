@@ -1,0 +1,84 @@
+name: Core Web Vitals report
+
+on:
+  schedule:
+    - cron: "17 1 * * 2,5"
+  workflow_dispatch:
+    inputs:
+      send_baseline:
+        description: Send a Discord card even when every target is healthy
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: core-web-vitals-report
+  # 직전 실행의 snapshot을 비교 기준으로 쓰므로 두 실행을 겹치거나 취소하지 않는다.
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}
+      DISCORD_PERFORMANCE_WEBHOOK_URL: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK_URL }}
+      GITHUB_TOKEN: ${{ github.token }}
+      SEND_BASELINE: ${{ inputs.send_baseline == true && 'true' || 'false' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Locate Chromium
+        shell: bash
+        run: |
+          chromium_path="$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')"
+          echo "CHROME_PATH=$chromium_path" >> "$GITHUB_ENV"
+
+      - name: Run production Lighthouse
+        id: lighthouse
+        continue-on-error: true
+        run: npm run test:lighthouse:production
+
+      # 실패한 측정도 원인을 조사할 수 있어야 하므로 snapshot과 독립적으로 보존한다.
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-web-vitals-lighthouse
+          path: lighthouse-production-report/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Build performance report
+        id: performance-report
+        if: steps.lighthouse.outcome == 'success'
+        run: npm run performance:report
+
+      - name: Upload performance snapshot
+        if: steps.performance-report.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-web-vitals-snapshot
+          path: performance-snapshot.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Fail when Lighthouse failed
+        if: steps.lighthouse.outcome != 'success'
+        run: exit 1

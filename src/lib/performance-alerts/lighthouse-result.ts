@@ -146,3 +146,4 @@ const summarizeLighthouseRuns = (runs: LighthouseRun[]): LighthouseTargetResult[
 };
 
 export { aggregateValues, diagnosticsFrom, metricValues, summarizeLighthouseRuns };
+export type { LighthouseTargetResult };

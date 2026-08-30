@@ -152,7 +152,7 @@ npm run deps:check
 - [x] CLS의 절대 0.03 회귀를 계산한다.
 - [x] poor 첫 진입은 변화율 없이 알림 대상으로 만든다.
 - [x] field와 lab 판정을 별도 타입으로 유지한다.
-- [ ] URL별 CrUX가 없을 때 origin 결과를 해당 URL 결과로 복사하지 않는다.
+- [x] URL별 CrUX가 없을 때 origin 결과를 해당 URL 결과로 복사하지 않는다.
 - [x] `insufficient_data` 최초와 4회 연속 상태를 계산한다.
 - [x] 한 metric 누락과 record 전체 없음의 상태를 구분한다.
 - [x] 현재 collection period가 더 최근일 때만 field 회귀를 비교한다.
@@ -173,17 +173,17 @@ npm run deps:check
 - [x] artifact ZIP을 임시 디렉터리에 풀지 않고 예상된 JSON 한 개만 읽는다.
 - [x] path traversal이나 예상 밖 entry가 있는 ZIP을 거부한다.
 - [x] 이전 artifact가 없으면 cold start로 분류한다.
-- [ ] 손상 JSON, 다른 schema version과 GitHub API 실패를 서로 구분한다.
+- [x] 손상 JSON, 다른 schema version과 GitHub API 실패를 서로 구분한다.
 - [x] 비교를 생략한 이유를 Actions summary에 남긴다.
 - [x] 불완전한 현재 측정이 정상 snapshot을 덮지 않는 기준을 구현한다.
 
 ### 2.3 기본 Discord 카드
 
-- [ ] 기존 `src/lib/discord/send-webhook.ts`를 재사용한다.
+- [x] 기존 `src/lib/discord/send-webhook.ts`를 재사용한다.
 - [x] `src/lib/performance-alerts/discord-report.ts`를 만든다.
 - [x] field, lab, field와 lab 결합, 데이터 부족 카드를 각각 만든다.
-- [ ] 현재 값, 이전 값, 변화량, form factor와 collection period를 표시한다.
-- [ ] Lighthouse는 중앙값과 범위, partial 여부를 표시한다.
+- [x] 현재 값, 이전 값, 변화량, form factor와 collection period를 표시한다.
+- [x] Lighthouse는 중앙값과 범위, partial 여부를 표시한다.
 - [x] Actions run 링크와 artifact 이름을 넣는다.
 - [x] AI 분석이 없을 때도 원인 없는 수치 카드를 완성한다.
 - [x] Discord field별 길이와 embed 6,000자 제한을 전송 전에 적용한다.
@@ -197,9 +197,9 @@ npm run deps:check
 - [x] preflight, 이전 snapshot, CrUX, Lighthouse, 판정, 전송 순서를 명시한다.
 - [x] 외부 의존성을 주입해 단위 테스트에서 network와 process를 분리한다.
 - [x] CrUX와 Lighthouse 부분 실패가 plan 13의 실패 표와 같은 결과를 내는지 테스트한다.
-- [ ] Discord 실패 시 exit code 1로 끝낸다.
+- [x] Discord 실패 시 exit code 1로 끝낸다.
 - [x] 오류 메시지에서 URL query와 secret 형태를 제거한다.
-- [ ] `package.json`에 운영 측정 script를 추가한다.
+- [x] `package.json`에 운영 측정 script를 추가한다.
 
 P2 품질 게이트:
 
@@ -257,19 +257,19 @@ npm run deps:check
 
 ### 4.1 workflow
 
-- [ ] `.github/workflows/core-web-vitals-report.yml`을 만든다.
-- [ ] `schedule`에 `17 1 * * 2,5`를 넣는다.
-- [ ] `workflow_dispatch`에 boolean `send_baseline` 입력을 추가한다.
-- [ ] `permissions`를 `actions: read`, `contents: read`로 제한한다.
-- [ ] 고정 concurrency group과 `cancel-in-progress: false`를 설정한다.
-- [ ] Ubuntu, Node.js 22, npm cache와 `npm ci`를 설정한다.
-- [ ] Playwright Chromium을 설치하고 `CHROME_PATH`를 LHCI에 전달한다.
-- [ ] job timeout을 30분으로 둔다.
-- [ ] 이전 snapshot 다운로드는 현재 run을 제외한다.
-- [ ] 측정 script가 실패해도 디버깅 가능한 Lighthouse 결과를 artifact로 올린다.
-- [ ] 정상적으로 완성된 snapshot만 `core-web-vitals-snapshot` 이름으로 올린다.
-- [ ] snapshot과 Lighthouse 보고서의 `retention-days`를 90으로 둔다.
-- [ ] Actions summary에 target별 field와 lab 상태 표를 쓴다.
+- [x] `.github/workflows/core-web-vitals-report.yml`을 만든다.
+- [x] `schedule`에 `17 1 * * 2,5`를 넣는다.
+- [x] `workflow_dispatch`에 boolean `send_baseline` 입력을 추가한다.
+- [x] `permissions`를 `actions: read`, `contents: read`로 제한한다.
+- [x] 고정 concurrency group과 `cancel-in-progress: false`를 설정한다.
+- [x] Ubuntu, Node.js 22, npm cache와 `npm ci`를 설정한다.
+- [x] Playwright Chromium을 설치하고 `CHROME_PATH`를 LHCI에 전달한다.
+- [x] job timeout을 30분으로 둔다.
+- [x] 이전 snapshot 다운로드는 현재 run을 제외한다.
+- [x] 측정 script가 실패해도 디버깅 가능한 Lighthouse 결과를 artifact로 올린다.
+- [x] 정상적으로 완성된 snapshot만 `core-web-vitals-snapshot` 이름으로 올린다.
+- [x] snapshot과 Lighthouse 보고서의 `retention-days`를 90으로 둔다.
+- [x] Actions summary에 target별 field와 lab 상태 표를 쓴다.
 
 ### 4.2 repository 설정
 

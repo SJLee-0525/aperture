@@ -160,3 +160,4 @@ const judgeLab = (current: LabInput, previous?: LabInput): LabJudgement => {
 };
 
 export { judgeFieldMetric, judgeInsufficientData, judgeLab, performanceStatus };
+export type { LabInput, PerformanceStatus };
