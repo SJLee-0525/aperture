@@ -121,6 +121,23 @@ redirect loop와 다른 origin 이동은 허용하지 않는다.
 `core-web-vitals-lighthouse` artifact에서 해당 URL의 HTML과 JSON을 확인한다. 한 URL에서 두 번 이상
 실패하면 workflow도 실패하며 정상 snapshot을 덮지 않는다.
 
+첫 운영 검증에서 사용한 `lhci autorun`은 Lighthouse 프로세스가 한 번 실패하자 남은 URL을 측정하지
+않고 upload 단계 전에 종료했다. 현재는 운영 수집을 URL·회차별로 분리해 성공한 JSON과 HTML을 즉시
+저장한다. 실패한 회차는 15초 뒤 한 번 재시도하고, 그래도 실패하면 다음 회차와 URL을 계속 측정한다.
+URL별 3회 중 2회가 성공하면 `partial`로 report를 만들며 2회 미만이면 모든 대상을 측정한 뒤 workflow를
+실패시킨다.
+
+2026-08-31 KST 첫 baseline 실행에서는 10개 URL의 30회와 `/ko`의 첫 2회가 성공한 뒤 `/ko` 3회차
+문서 요청이 HTTP 403으로 끝났다. 그 결과 `/ko/contact`, report 생성, Discord 전송과 snapshot 업로드는
+실행되지 않았다. 같은 시각의 Vercel 애플리케이션 로그에는 관련 오류가 없었다. 요청이 애플리케이션에
+도달하기 전 엣지에서 응답했거나 로그에 기록되지 않은 일시 오류일 가능성이 있으므로, 현재 기록만으로
+403의 주체를 확정하지 않는다. 일시 재실행만으로 통과시키기보다 아래 항목을 함께 확인한다.
+
+- 실패한 시각의 배포 및 방화벽 로그에서 403 응답 주체와 적용된 규칙을 확인한다.
+- `collection-summary.json`에서 실패한 URL, 회차와 재시도 결과를 확인한다.
+- 성공한 JSON과 HTML이 `core-web-vitals-lighthouse` artifact에 남았는지 확인한다.
+- 한 URL의 성공이 2회 미만이면 report와 snapshot은 만들지 않으므로 원시 결과로 원인을 조사한다.
+
 ### AI 분석 실패
 
 provider 이름, model ID와 API key Secret 이름을 확인한다. primary가 실패하면 fallback을 한 번

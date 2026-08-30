@@ -3,7 +3,6 @@
   "entry": [
     "test/**/*.test.mjs",
     "lighthouserc.cjs",
-    "lighthouserc.production.cjs",
     "e2e/fixtures/generate-exif-sample.mjs",
     "scripts/verify-restored-supabase-access.mjs"
   ],

@@ -1,7 +1,7 @@
 # Core Web Vitals AI 알림 구현 체크리스트
 
 > 기준 계획: [plan 13](../plan/13-core-web-vitals-ai-alerts.md)
-> 상태: P1부터 P3 구현 완료, P4 운영 검증 전
+> 상태: P1부터 P3 구현 완료, P4 운영 검증 중
 > 이 문서는 구현 순서와 운영 설정을 기록한다. 수치 판정과 범위는 plan 13을 단일 출처로 삼는다.
 
 ## 0. 착수 전에 확정할 값
@@ -282,7 +282,9 @@ npm run deps:check
 - [x] Playwright Chromium을 설치하고 `CHROME_PATH`를 LHCI에 전달한다.
 - [x] job timeout을 30분으로 둔다.
 - [x] 이전 snapshot 다운로드는 현재 run을 제외한다.
-- [x] 측정 script가 실패해도 디버깅 가능한 Lighthouse 결과를 artifact로 올린다.
+- [x] 측정 script가 중간에 실패해도 수집이 끝난 Lighthouse 결과와 실행 요약을 artifact로 올린다.
+- [x] 각 회차를 독립 실행하고 실패한 회차는 15초 뒤 한 번 재시도한다.
+- [x] 한 URL에서 2회가 성공하면 `partial`로 계속하고, 2회 미만이면 나머지 URL까지 측정한 뒤 실패한다.
 - [x] 정상적으로 완성된 snapshot만 `core-web-vitals-snapshot` 이름으로 올린다.
 - [x] snapshot과 Lighthouse 보고서의 `retention-days`를 90으로 둔다.
 - [x] Actions summary에 target별 field와 lab 상태 표를 쓴다.
@@ -298,6 +300,16 @@ npm run deps:check
 - [x] Actions workflow 실패 알림을 받을 수 있는지 GitHub 계정 설정을 확인한다.
 
 ### 4.3 수동 운영 검증
+
+2026-08-31 KST 첫 baseline 실행 결과:
+
+- [x] `send_baseline=true`로 workflow를 수동 실행한다.
+- [x] secret 값이 Actions log에서 `***`로 마스킹되는지 확인한다.
+- [x] `/ko/contact`를 제외한 앞선 10개 URL은 각 3회, `/ko`는 2회까지 정상 측정됐다. 총 32회다.
+- [ ] `/ko` 3회차가 HTTP 403으로 실패했다. `/ko/contact` 측정, report 생성, Discord 전송과 snapshot
+      업로드는 실행되지 않았다.
+- [ ] 중간 실패 시에도 성공한 Lighthouse 결과를 보존하고, 한 URL에서 2회가 성공하면 `partial`로
+      계속 처리하는지 확인한다.
 
 - [ ] `send_baseline=true`로 수동 실행해 정상 카드를 받는다.
 - [ ] Actions log, summary와 artifact에 API key와 webhook URL이 없는지 확인한다.
