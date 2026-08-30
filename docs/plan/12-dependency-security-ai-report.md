@@ -172,6 +172,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DISCORD_SECURITY_WEBHOOK_URL: ${{ secrets.DISCORD_SECURITY_WEBHOOK_URL }}
+          DEPENDENCY_TRIAGE_PROVIDER: ${{ vars.DEPENDENCY_TRIAGE_PROVIDER }}
+          DEPENDENCY_TRIAGE_PROVIDER_API_KEY: ${{ secrets.DEPENDENCY_TRIAGE_PROVIDER_API_KEY }}
+          DEPENDENCY_TRIAGE_PROVIDER_MODEL: ${{ vars.DEPENDENCY_TRIAGE_PROVIDER_MODEL }}
+          DEPENDENCY_TRIAGE_FALLBACK_PROVIDER: ${{ vars.DEPENDENCY_TRIAGE_FALLBACK_PROVIDER }}
+          DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_API_KEY: ${{ secrets.DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_API_KEY }}
+          DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_MODEL: ${{ vars.DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_MODEL }}
+          DEPENDENCY_TRIAGE_MAX_ALERTS: "10"
         run: npm run security:report
 ```
 
@@ -299,10 +306,10 @@ Sentry 트리아지의 provider 코드는 오류 스택 전용이라 공유하�
 ```text
 DEPENDENCY_TRIAGE_PROVIDER=openai
 DEPENDENCY_TRIAGE_PROVIDER_API_KEY=
-DEPENDENCY_TRIAGE_PROVIDER_MODEL=
+DEPENDENCY_TRIAGE_PROVIDER_MODEL=gpt-5.6-luna
 DEPENDENCY_TRIAGE_FALLBACK_PROVIDER=gemini
 DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_API_KEY=
-DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_MODEL=
+DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_MODEL=gemini-3.5-flash-lite
 DEPENDENCY_TRIAGE_MAX_ALERTS=10
 DISCORD_SECURITY_WEBHOOK_URL=
 ```
@@ -465,8 +472,8 @@ npm run security:audit
 
 ### P2. PR 방어
 
-- [ ] dependency review workflow를 추가한다.
-- [ ] 안전한 dependency PR이 통과하는지 확인한다.
+- [x] dependency review workflow를 추가한다.
+- [x] 안전한 dependency PR이 통과하는지 확인한다.
 - [ ] 테스트 브랜치에서 High runtime 취약 dependency를 추가해 실패를 확인한다.
 - [ ] branch protection의 required check로 지정한다.
 
@@ -479,10 +486,10 @@ npm run security:audit
 
 ### P4. AI 분석
 
-- [ ] strict JSON schema를 정의한다.
-- [ ] OpenAI와 Gemini provider, fallback을 구현한다.
-- [ ] advisory description의 prompt injection fixture를 추가한다.
-- [ ] 두 provider 실패 시 기본 리포트가 나가는지 확인한다.
+- [x] strict JSON schema를 정의한다.
+- [x] OpenAI와 Gemini provider, fallback을 구현한다.
+- [x] advisory description의 prompt injection fixture를 추가한다.
+- [x] 두 provider 실패 시 기본 리포트가 나가도록 구현한다.
 
 ### P5. 운영 검증
 

@@ -1,4 +1,16 @@
-import type { DependencyScope, PriorityBand, Severity } from "@/lib/dependency-security/types";
+import type {
+  DependencyScope,
+  DependencySecurityFact,
+  PriorityBand,
+  Severity,
+} from "@/lib/dependency-security/types";
+
+const BAND_ORDER: Record<PriorityBand, number> = {
+  immediate: 0,
+  "this-week": 1,
+  planned: 2,
+  watch: 3,
+};
 
 const priorityFor = (severity: Severity, scope: DependencyScope): PriorityBand => {
   if (severity === "critical" || (severity === "high" && scope === "runtime")) return "immediate";
@@ -15,4 +27,13 @@ const isNewAlert = (createdAt: string, now: Date): boolean => {
   return age >= 0 && age <= 7 * 24 * 60 * 60 * 1_000;
 };
 
-export { isNewAlert, priorityFor };
+/** LLM 분석 상한을 넘을 때 긴급 구간과 EPSS가 높은 alert를 먼저 남긴다. */
+const sortForTriage = (facts: DependencySecurityFact[]): DependencySecurityFact[] =>
+  [...facts].sort(
+    (a, b) =>
+      BAND_ORDER[a.priority] - BAND_ORDER[b.priority] ||
+      (b.epssPercentage ?? -1) - (a.epssPercentage ?? -1) ||
+      a.alertNumber - b.alertNumber,
+  );
+
+export { isNewAlert, priorityFor, sortForTriage };

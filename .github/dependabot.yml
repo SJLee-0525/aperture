@@ -10,6 +10,11 @@ updates:
       timezone: "Asia/Seoul"
     # 일반 버전 PR은 만들지 않고 security update PR만 허용한다.
     open-pull-requests-limit: 0
+    # @lhci/cli@0.15.1의 버전 범위로는 tmp와 uuid의 수정 버전을 설치할 수 없다.
+    # 해당 제약이 해소된 @lhci/cli 릴리스가 나오면 이 예외를 제거한다.
+    ignore:
+      - dependency-name: tmp
+      - dependency-name: uuid
     labels:
       - dependencies
 
