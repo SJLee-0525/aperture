@@ -16,14 +16,13 @@
 ## 주요 기능
 
 - Photo, Music, Dev 세 영역을 연결하는 한국어·영어 포트폴리오
-- 사진, 앨범, 촬영 정보와 위치 기반 지도
-- 연주, 음악 경력, 수상 및 영상 아카이브
-- 기술 스택, 개발 프로젝트와 경력 소개
-- 코드 하이라이트, 목차와 태그 필터를 제공하는 Markdown 기반 개발 블로그
+- 사진·앨범·촬영 지도와 연주·경력·수상·영상 아카이브
+- 기술 스택·프로젝트·개발 경력과 코드 하이라이트·목차·태그 필터를 갖춘 Markdown 블로그
 - 공개 콘텐츠를 관리하는 개인용 Supabase CMS
 - 일반 검색, 현재 화면 문맥과 포트폴리오 RAG를 연결한 챗봇
 - 외부 브라우저 에이전트용 WebMCP 도구 15종과 선언형 연락 폼
 - Sentry 오류 알림을 LLM으로 판정해 Discord 카드로 보내는 트리아지 파이프라인
+- Dependabot alert를 LLM으로 분석해 Discord에 보내는 주간 의존성 보안 리포트
 - 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
 - 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
 - 개인정보처리방침, 사이트 이용 및 콘텐츠 정책, 접근성 안내
@@ -54,6 +53,7 @@
 - Supabase DB와 `media` Storage는 매주 age로 암호화해 Backblaze B2에 보관합니다. 백업은 빈 프로젝트에 실제 복원해 Auth, RLS, RPC와 Storage까지 검증했습니다.
 - 일반 검색은 브라우저에서 동작하고, 블로그 본문 일치만 서버에서 대조해 스니펫으로 보여 줍니다. 챗봇은 열린 사진·연주·수상·프로젝트를 공개 ID로 직접 조회하고, 범위가 넓은 질문에는 RAG 검색을 더합니다. 챗봇 요청은 IP당 분당 10회, 전역 일일 1,000회로 제한합니다.
 - 내장 챗봇은 WebMCP를 사용하지 않습니다. WebMCP는 방문자가 데려온 외부 브라우저 에이전트가 공개 콘텐츠를 조회하고 현재 화면을 조작할 때만 사용합니다.
+- Dependabot은 알려진 취약점을 계속 감시하고, PR의 Dependency Review는 새 High 이상 runtime 취약점이 `main`에 들어오는 것을 막습니다. 매주 월요일에는 열린 alert를 OpenAI 또는 Gemini가 분석해 Discord로 보냅니다.
 - 의존 방향을 `app → features → components`로 제한해 라우팅, 사용자 행동, 공용 UI의 역할을 나눴습니다.
 
 공개 페이지의 읽기 경로와 Admin의 쓰기 경로는 분리되어 있습니다. 외부 서비스까지 포함한 구성은 [프로젝트 아키텍처](./public/readme/architecture.md)에 정리했습니다.
@@ -67,6 +67,7 @@
 - OpenAI 임베딩을 사용하는 포트폴리오 RAG 검색
 - mdast 기반 Markdown 파싱과 서버 전용 Shiki 코드 하이라이트
 - Sentry 오류 모니터링과 LLM 기반 오류 트리아지 알림
+- Dependabot, Dependency Review와 LLM 기반 의존성 보안 리포트
 - Vitest, Playwright, Storybook, Lighthouse CI
 
 ## 프로젝트 구조
@@ -171,6 +172,7 @@ src/
 │   │   ├── admin/                  # 행 인코딩, 정렬 RPC, 세션 가드
 │   │   └── *.ts                    # supabase-js 클라이언트, CRUD, Storage, 인증, RAG
 │   ├── ai/                         # RAG 청크·검색·임베딩
+│   ├── dependency-security/        # Dependabot alert 정규화, LLM 분석과 Discord 리포트
 │   ├── search/                     # 일반 검색 점수와 추천
 │   ├── seo/ · metadata/            # canonical, hreflang, 공유 메타데이터
 │   └── i18n/ · security/ · cache/  # 다국어 유틸, URL 검증, 재검증
@@ -253,6 +255,7 @@ npm run test:chat-eval  # mock 챗봇 응답·RAG·참조 평가
 npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
 npm run test:rules      # 로컬 Supabase의 RLS·RPC·Storage 권한 통합 테스트
+npm run security:report # 열린 Dependabot alert를 분석해 Discord로 전송
 npm run deps:check      # 의존 방향과 순환 의존성 검사
 npm run knip            # 미사용 파일·export·의존성 검사
 npm run storybook       # 컴포넌트 Storybook
@@ -289,6 +292,8 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [Supabase 백업·복구](./docs/troubleshooting/supabase-backup-and-restore.md)               | B2 암호화 백업, 검증, 새 환경 설정과 복구 절차  |
 | [Firebase 해체·백업 자동화 계획](./docs/plan/11-firebase-teardown-and-supabase-backup.md) | 기준값, 최종 복구본과 인프라 해체 실행 기록     |
 | [오류 알림 AI 트리아지](./docs/plan/10-sentry-ai-triage.md)                               | Sentry 웹훅, LLM 판정과 Discord 알림 구성       |
+| [의존성 보안 AI 리포트 계획](./docs/plan/12-dependency-security-ai-report.md)             | Dependabot 탐지, AI 분석과 PR 방어 설계         |
+| [의존성 보안 리포트 설정](./docs/troubleshooting/dependency-security-report.md)           | GitHub 설정, 제공자 교체와 운영 확인 절차       |
 | [UI 품질 테스트](./docs/testing.md)                                                       | 시각 회귀, 접근성, 언어·분석 동의 검증 방법     |
 
 ### 코드 검토

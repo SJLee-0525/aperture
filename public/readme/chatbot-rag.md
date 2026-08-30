@@ -2,7 +2,118 @@
 
 포트폴리오 챗봇은 질문을 보낸 화면과 포트폴리오 검색 결과를 함께 참고합니다. 열린 사진, 연주, 수상 내역, 프로젝트, 블로그 글은 ID로 직접 조회하고, 열린 블로그 글은 본문 전체를 문맥으로 읽습니다. 범위가 넓은 질문은 RAG로 관련 청크를 찾습니다. 모델이 만든 링크, 참조 카드, 연락 초안은 서버 검증을 통과한 것만 화면에 표시합니다.
 
-![화면 문맥과 RAG를 포함한 챗봇 처리 흐름도](./chatbot-flowchart.webp)
+![화면 문맥, 하이브리드 RAG와 응답 검증을 포함한 챗봇 처리 흐름도](./chatbot-flowchart.webp)
+
+<details>
+<summary><strong>Mermaid 원본 펼쳐보기</strong></summary>
+
+<br>
+
+```mermaid
+flowchart TB
+  subgraph Client["브라우저"]
+    Page["현재 pathname과 열린 항목<br/>photo · work · award · project · article"]
+    Message["대화 이력과 질문"]
+    ChatUI["검증된 답변 UI<br/>본문 · 링크 · 참조 카드 · 연락 초안"]
+  end
+
+  subgraph Request["요청 경계"]
+    Route["POST /api/chat<br/>NDJSON stream 또는 JSON"]
+    Validate["요청 검증<br/>크기 · 메시지 수 · 언어 · 화면 문맥"]
+    Quota["사용량 판정<br/>IP 분당 제한 · 전역 일일 제한 · 입력 문자 예산"]
+    Deadline["요청 전체 제한 시간 55초"]
+  end
+
+  subgraph Intent["질문 해석"]
+    Classifier["의도 분류기<br/>영역 · 독립 검색어 · 키워드"]
+    Regex["정규식 fallback"]
+    Target["열린 target 공개 검증<br/>최신 단건 조회 · 공개 ID · URL 일치"]
+  end
+
+  subgraph Context["문맥 조립"]
+    Screen["SCREEN_CONTEXT<br/>열린 항목 직접 조회<br/>블로그 본문 최대 50,000자"]
+    Snapshot["1시간 프로필 스냅샷<br/>섹션 요약 · 참조 대조표"]
+    RagQuery["하이브리드 RAG<br/>질문 임베딩 + 키워드 점수"]
+    Vector["Supabase Postgres<br/>rag_documents · pgvector"]
+    Select["상위 40개 후보에서<br/>관련 청크 최대 10개 선택"]
+    Prompt["시스템 지침 조립<br/>프로필 문맥 + 화면 문맥 + 대화"]
+  end
+
+  subgraph Provider["답변 생성"]
+    Primary["Primary<br/>OpenAI 또는 Gemini"]
+    Before{"본문 출력 전에<br/>실패했는가?"}
+    Fallback["Fallback<br/>Gemini 또는 OpenAI"]
+    Structured["구조화 응답<br/>content · links · references · contactDraft"]
+  end
+
+  subgraph Guard["응답 검증"]
+    Complete{"JSON 응답이<br/>완전한가?"}
+    Recover["잘린 JSON 복구<br/>본문만 유지"]
+    Links["내부 링크 allowlist<br/>사진 query canonical 검증"]
+    References["공개 항목 재조회<br/>참조 카드 최대 3개"]
+    Draft["연락 초안 형식과 길이 검증<br/>자동 제출 금지"]
+    Events["NDJSON 이벤트<br/>status · delta · done · error"]
+  end
+
+  subgraph Indexing["콘텐츠 색인"]
+    Admin["Admin 콘텐츠 저장"]
+    Chunk["변경된 원본만<br/>의미 단위 청크 생성"]
+    Embed["OpenAI embedding<br/>text-embedding-3-small · 512차원"]
+  end
+
+  Page --> Route
+  Message --> Route
+  Route --> Validate --> Quota --> Deadline
+  Deadline --> Classifier
+  Classifier -. "실패" .-> Regex
+  Classifier --> Target
+  Regex --> Target
+
+  Target --> Screen
+  Target --> Snapshot
+  Classifier --> RagQuery
+  Snapshot --> RagQuery
+  RagQuery --> Vector --> Select
+  Target -. "열린 원본 우선 또는 중복 제외" .-> Select
+  Snapshot --> Prompt
+  Screen --> Prompt
+  Select --> Prompt
+
+  Prompt --> Primary --> Before
+  Before -- "예 또는 25초간 출력 없음" --> Fallback
+  Before -- "아니요" --> Structured
+  Fallback --> Structured
+  Primary -. "스트리밍 시작 후 실패<br/>fallback하지 않음" .-> Events
+
+  Structured --> Complete
+  Complete -- "아니요" --> Recover
+  Complete -- "예" --> Links
+  Complete -- "예" --> References
+  Complete -- "예" --> Draft
+  Recover --> Events
+  Links --> Events
+  References --> Events
+  Draft --> Events
+  Events --> ChatUI
+
+  Admin --> Chunk --> Embed --> Vector
+
+  classDef client fill:#eaf2ff,stroke:#4b74b8,color:#17233b;
+  classDef boundary fill:#f4f4f5,stroke:#71717a,color:#18181b;
+  classDef context fill:#eef8ee,stroke:#4f8a55,color:#18311b;
+  classDef provider fill:#fff4df,stroke:#c27a18,color:#3b2608;
+  classDef guard fill:#f8edff,stroke:#8b5aae,color:#2f173f;
+  classDef storage fill:#e8f7f6,stroke:#31827d,color:#123431;
+
+  class Page,Message,ChatUI client;
+  class Route,Validate,Quota,Deadline,Classifier,Regex,Target boundary;
+  class Screen,Snapshot,RagQuery,Select,Prompt context;
+  class Primary,Before,Fallback,Structured provider;
+  class Complete,Recover,Links,References,Draft,Events guard;
+  class Admin,Chunk,Embed,Vector storage;
+```
+
+</details>
 
 ## 세 가지 조회 경로
 
