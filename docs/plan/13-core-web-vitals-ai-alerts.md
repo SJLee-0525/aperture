@@ -353,7 +353,7 @@ CrUX와 Lighthouse가 모두 실패한 실행은 성능이 정상이라는 카�
 
 ### P2. 결정적 판정과 이력
 
-- [ ] Core Web Vitals 상태와 회귀 규칙을 순수 함수로 구현한다.
+- [x] Core Web Vitals 상태와 회귀 규칙을 순수 함수로 구현한다.
 - [ ] snapshot schema와 artifact 업로드를 구현한다.
 - [ ] 최근 성공 artifact 조회와 schema 불일치 폴백을 구현한다.
 - [ ] AI 없이 기본 Discord 카드를 전송한다.

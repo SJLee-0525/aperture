@@ -1,7 +1,7 @@
 # Core Web Vitals AI 알림 구현 체크리스트
 
 > 기준 계획: [plan 13](../plan/13-core-web-vitals-ai-alerts.md)
-> 상태: P1 구현 완료, P2 착수 전
+> 상태: P1 구현 완료, P2 판정·snapshot·기본 카드 구현 중
 > 이 문서는 구현 순서와 운영 설정을 기록한다. 수치 판정과 범위는 plan 13을 단일 출처로 삼는다.
 
 ## 0. 착수 전에 확정할 값
@@ -145,60 +145,60 @@ npm run deps:check
 
 ### 2.1 판정
 
-- [ ] `src/lib/performance-alerts/performance-status.ts`를 만든다.
-- [ ] LCP, INP, CLS의 good, needs improvement, poor 경계를 표 기반 테스트로 고정한다.
-- [ ] LCP와 INP의 15% 회귀를 계산한다.
-- [ ] 이전 값이 0이거나 없을 때 비율을 계산하지 않는다.
-- [ ] CLS의 절대 0.03 회귀를 계산한다.
-- [ ] poor 첫 진입은 변화율 없이 알림 대상으로 만든다.
-- [ ] field와 lab 판정을 별도 타입으로 유지한다.
+- [x] `src/lib/performance-alerts/performance-status.ts`를 만든다.
+- [x] LCP, INP, CLS의 good, needs improvement, poor 경계를 표 기반 테스트로 고정한다.
+- [x] LCP와 INP의 15% 회귀를 계산한다.
+- [x] 이전 값이 0이거나 없을 때 비율을 계산하지 않는다.
+- [x] CLS의 절대 0.03 회귀를 계산한다.
+- [x] poor 첫 진입은 변화율 없이 알림 대상으로 만든다.
+- [x] field와 lab 판정을 별도 타입으로 유지한다.
 - [ ] URL별 CrUX가 없을 때 origin 결과를 해당 URL 결과로 복사하지 않는다.
-- [ ] `insufficient_data` 최초와 4회 연속 상태를 계산한다.
-- [ ] 한 metric 누락과 record 전체 없음의 상태를 구분한다.
-- [ ] 현재 collection period가 더 최근일 때만 field 회귀를 비교한다.
-- [ ] 같은 collection period는 상태만 계산하고 회귀율과 중복 알림을 만들지 않는다.
-- [ ] 이전보다 오래된 collection period는 비교에서 제외한다.
-- [ ] Lighthouse LCP, CLS, score와 Total Blocking Time 회귀 규칙을 구현한다.
+- [x] `insufficient_data` 최초와 4회 연속 상태를 계산한다.
+- [x] 한 metric 누락과 record 전체 없음의 상태를 구분한다.
+- [x] 현재 collection period가 더 최근일 때만 field 회귀를 비교한다.
+- [x] 같은 collection period는 상태만 계산하고 회귀율과 중복 알림을 만들지 않는다.
+- [x] 이전보다 오래된 collection period는 비교에서 제외한다.
+- [x] Lighthouse LCP, CLS, score와 Total Blocking Time 회귀 규칙을 구현한다.
 
 ### 2.2 snapshot과 이전 artifact
 
-- [ ] `src/lib/performance-alerts/snapshot.ts`를 만든다.
-- [ ] `schemaVersion: 1` parser가 모든 중첩 필드를 런타임에서 검증하게 한다.
-- [ ] `measuredAt`, `sentAt`, collection period를 ISO 날짜로 검증한다.
-- [ ] `sentAlerts`의 90일 만료와 중복 제거를 구현한다.
-- [ ] 중복 키를 target, scope, form factor, metric, status, collection period로 만든다.
-- [ ] 같은 workflow의 최근 완료 실행 중 현재 run 이전의 성공 실행만 찾는다.
-- [ ] artifact 이름을 `core-web-vitals-snapshot`으로 고정한다.
-- [ ] 여러 artifact가 있으면 가장 최신의 만료되지 않은 하나만 선택한다.
-- [ ] artifact ZIP을 임시 디렉터리에 풀고 예상된 JSON 한 개만 읽는다.
-- [ ] path traversal이 있는 ZIP entry를 거부하거나 검증된 다운로드 도구를 사용한다.
-- [ ] 이전 artifact가 없으면 cold start로 분류한다.
+- [x] `src/lib/performance-alerts/snapshot.ts`를 만든다.
+- [x] `schemaVersion: 1` parser가 모든 중첩 필드를 런타임에서 검증하게 한다.
+- [x] `measuredAt`, `sentAt`, collection period를 ISO 날짜로 검증한다.
+- [x] `sentAlerts`의 90일 만료와 중복 제거를 구현한다.
+- [x] 중복 키를 target, scope, form factor, metric, status, collection period로 만든다.
+- [x] 같은 workflow의 최근 완료 실행 중 현재 run 이전의 성공 실행만 찾는다.
+- [x] artifact 이름을 `core-web-vitals-snapshot`으로 고정한다.
+- [x] 여러 artifact가 있으면 가장 최신의 만료되지 않은 하나만 선택한다.
+- [x] artifact ZIP을 임시 디렉터리에 풀지 않고 예상된 JSON 한 개만 읽는다.
+- [x] path traversal이나 예상 밖 entry가 있는 ZIP을 거부한다.
+- [x] 이전 artifact가 없으면 cold start로 분류한다.
 - [ ] 손상 JSON, 다른 schema version과 GitHub API 실패를 서로 구분한다.
-- [ ] 비교를 생략한 이유를 Actions summary에 남긴다.
-- [ ] 불완전한 현재 측정이 정상 snapshot을 덮지 않는 기준을 구현한다.
+- [x] 비교를 생략한 이유를 Actions summary에 남긴다.
+- [x] 불완전한 현재 측정이 정상 snapshot을 덮지 않는 기준을 구현한다.
 
 ### 2.3 기본 Discord 카드
 
 - [ ] 기존 `src/lib/discord/send-webhook.ts`를 재사용한다.
-- [ ] `src/lib/performance-alerts/discord-report.ts`를 만든다.
-- [ ] field, lab, field와 lab 결합, 데이터 부족 카드를 각각 만든다.
+- [x] `src/lib/performance-alerts/discord-report.ts`를 만든다.
+- [x] field, lab, field와 lab 결합, 데이터 부족 카드를 각각 만든다.
 - [ ] 현재 값, 이전 값, 변화량, form factor와 collection period를 표시한다.
 - [ ] Lighthouse는 중앙값과 범위, partial 여부를 표시한다.
-- [ ] Actions run 링크와 artifact 이름을 넣는다.
-- [ ] AI 분석이 없을 때도 원인 없는 수치 카드를 완성한다.
-- [ ] Discord field별 길이와 embed 6,000자 제한을 전송 전에 적용한다.
-- [ ] `allowed_mentions`가 빈 배열인지 테스트한다.
-- [ ] 정상 상태에서는 카드를 만들지 않는다.
-- [ ] `send_baseline=true`일 때만 정상 baseline 카드를 만든다.
+- [x] Actions run 링크와 artifact 이름을 넣는다.
+- [x] AI 분석이 없을 때도 원인 없는 수치 카드를 완성한다.
+- [x] Discord field별 길이와 embed 6,000자 제한을 전송 전에 적용한다.
+- [x] `allowed_mentions`가 빈 배열인지 테스트한다.
+- [x] 정상 상태에서는 카드를 만들지 않는다.
+- [x] `send_baseline=true`일 때만 정상 baseline 카드를 만든다.
 
 ### 2.4 orchestration script
 
-- [ ] `scripts/core-web-vitals-report.ts`를 만든다.
-- [ ] preflight, 이전 snapshot, CrUX, Lighthouse, 판정, 전송 순서를 명시한다.
-- [ ] 외부 의존성을 주입해 단위 테스트에서 network와 process를 분리한다.
-- [ ] CrUX와 Lighthouse 부분 실패가 plan 13의 실패 표와 같은 결과를 내는지 테스트한다.
+- [x] `scripts/core-web-vitals-report.ts`를 만든다.
+- [x] preflight, 이전 snapshot, CrUX, Lighthouse, 판정, 전송 순서를 명시한다.
+- [x] 외부 의존성을 주입해 단위 테스트에서 network와 process를 분리한다.
+- [x] CrUX와 Lighthouse 부분 실패가 plan 13의 실패 표와 같은 결과를 내는지 테스트한다.
 - [ ] Discord 실패 시 exit code 1로 끝낸다.
-- [ ] 오류 메시지에서 URL query와 secret 형태를 제거한다.
+- [x] 오류 메시지에서 URL query와 secret 형태를 제거한다.
 - [ ] `package.json`에 운영 측정 script를 추가한다.
 
 P2 품질 게이트:
