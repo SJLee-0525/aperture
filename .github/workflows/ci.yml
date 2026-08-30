@@ -96,7 +96,7 @@ jobs:
           NEXT_PUBLIC_GA_ID: G-E2ETEST
           NEXT_PUBLIC_FORCE_ANALYTICS_CONSENT_BANNER: "0"
       - name: Upload production build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: production-build
           path: .next-playwright-v7
@@ -178,7 +178,7 @@ jobs:
       - name: Upload Playwright reports
         # 테스트 실패 시에도 디버깅에 필요한 리포트를 보존한다.
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-reports
           path: |
@@ -222,7 +222,7 @@ jobs:
 
       - name: Upload Playwright reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-reports-admin
           path: |
@@ -275,7 +275,7 @@ jobs:
       - name: Upload Lighthouse reports
         # 기준 미달로 실패하더라도 분석할 수 있도록 결과를 업로드한다.
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lighthouse-reports
           path: lighthouse-report
@@ -304,7 +304,7 @@ jobs:
         run: npm run build-storybook
 
       - name: Upload Storybook
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storybook
           path: storybook-static
