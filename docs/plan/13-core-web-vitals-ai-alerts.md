@@ -366,6 +366,22 @@ Lighthouse 36회와 Chromium 설치 시간을 고려해 job timeout은 30분으�
 CrUX와 Lighthouse가 모두 실패한 실행은 성능이 정상이라는 카드를 만들지 않는다. 불완전한 측정값도
 직전 정상 snapshot을 대체하지 않는다.
 
+### 첫 운영 검증에서 확인한 구현 간극
+
+2026-08-31 KST baseline 실행에서 `/ko`의 세 번째 Lighthouse 요청이 HTTP 403으로 실패하자
+`lhci autorun`이 즉시 종료됐다. 앞서 성공한 32회 결과도 filesystem upload 단계까지 도달하지 못해
+artifact로 남지 않았고, `/ko/contact`와 이후 report 단계도 실행되지 않았다. 따라서 현재 workflow는
+위 표의 "Lighthouse 1회만 실패" 처리와 실패 시 진단 artifact 보존을 아직 충족하지 않는다.
+
+P4를 완료하기 전에 실행별 결과를 즉시 저장하고, 일시 오류를 제한적으로 재시도하며, 한 URL에서 2회가
+성공하면 `partial`로 계속 진행하는 orchestration을 보완한다. 최종 report를 만들 수 없는 경우에도
+수집된 원시 결과는 실패 진단용 artifact로 남긴다.
+
+이 간극은 운영 Lighthouse를 URL·회차별 독립 프로세스로 분리해 보완했다. 실패한 회차는 15초 뒤 한
+번 재시도하고, 재시도까지 실패해도 다음 회차와 URL을 계속 측정한다. URL별 성공이 2회면 `partial`로
+manifest에 포함하며 2회 미만인 URL이 있을 때만 수집 단계가 최종 실패한다. JSON과 HTML은 각 성공
+직후 저장하고 전체 시도 내역은 `collection-summary.json`에 남긴다.
+
 ## 14. 구현 순서
 
 ### P1. 측정 계약
@@ -373,7 +389,7 @@ CrUX와 Lighthouse가 모두 실패한 실행은 성능이 정상이라는 카�
 - [x] 대표 URL과 `SITE_URL` 검증을 구현한다.
 - [x] CrUX 응답을 화이트리스트 타입으로 정규화한다.
 - [x] 모바일 Lighthouse 3회 실행과 중앙값 계산을 구현한다.
-- [x] 현재 CI의 Lighthouse 설정과 운영 측정 설정을 분리한다.
+- [x] 현재 CI의 LHCI 설정과 운영 측정 script를 분리한다.
 
 ### P2. 결정적 판정과 이력
 
