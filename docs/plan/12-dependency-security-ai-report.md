@@ -154,28 +154,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  probe:
-    name: Probe Dependabot alerts API
+  report:
+    name: Send dependency security report
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - name: Check API access
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build and send report
         env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          response_file="${RUNNER_TEMP}/dependabot-alerts.json"
-          curl --fail-with-body \
-            --silent \
-            --show-error \
-            --output "${response_file}" \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer ${GH_TOKEN}" \
-            --header "X-GitHub-Api-Version: 2026-03-10" \
-            "https://api.github.com/repos/${REPOSITORY}/dependabot/alerts?state=open&per_page=1"
-          jq --exit-status 'type == "array"' "${response_file}" > /dev/null
-          alert_count=$(jq 'length' "${response_file}")
-          echo "Dependabot alerts API access OK. Returned ${alert_count} alert(s)."
+          GITHUB_TOKEN: ${{ github.token }}
+          DISCORD_SECURITY_WEBHOOK_URL: ${{ secrets.DISCORD_SECURITY_WEBHOOK_URL }}
+        run: npm run security:report
 ```
 
 GitHub Actions cron은 기본적으로 UTC다. `01:07 UTC`는 KST 월요일 10:07이다. 정각에는 예약
@@ -185,7 +182,8 @@ workflow가 몰려 지연되거나 누락될 수 있어 7분을 더한다. 수�
 API 호출에는 별도 PAT 대신 `${{ github.token }}`을 쓴다. Dependabot alert 조회에 필요한 권한은
 `security-events`가 아니라 `vulnerability-alerts: read`다.
 
-P1에서 위 `probe` job을 수동 실행해 실제 저장소의 alert를 1건만 요청한다.
+P1에서 probe job을 수동 실행해 기본 token의 API 접근을 확인했다. P3부터 같은 권한으로 전체
+페이지를 읽는다.
 
 실패하면 dependency graph와 Dependabot alerts 활성화 여부, workflow 권한, 조직과 저장소의
 Actions 정책, 저장소 식별자를 순서대로 확인한다. 이 조건이 모두 맞는데도 조직 정책이 기본
@@ -391,9 +389,8 @@ Discord 전송은 기존 Sentry 구현과 같은 규칙을 쓴다.
 - 400, 401, 404는 재시도하지 않음
 - webhook URL이나 API key를 로그에 출력하지 않음
 
-공용 전송 코드를 쓰려면 먼저 `src/lib/sentry-triage/send-discord-card.ts`를
-`src/lib/discord/send-webhook.ts`로 옮기고 Sentry가 새 모듈을 보게 한다. Dependency 코드가
-`sentry-triage`를 직접 import하지 않는다.
+공용 전송 코드는 `src/lib/discord/send-webhook.ts`에 둔다. Sentry와 dependency security가
+이 모듈을 사용하며 두 도메인이 서로의 모듈을 import하지 않는다.
 
 ## 11. 파일 구성
 
@@ -475,10 +472,10 @@ npm run security:audit
 
 ### P3. 결정적 주간 리포트
 
-- [ ] GitHub alert pagination과 화이트리스트 정규화를 구현한다.
-- [ ] package-lock 문맥과 priority 계산을 구현한다.
-- [ ] AI 없이 Discord 기본 리포트를 보낸다.
-- [ ] alert 0건, 여러 페이지, 패치 없음, 같은 package 여러 버전을 검증한다.
+- [x] GitHub alert pagination과 화이트리스트 정규화를 구현한다.
+- [x] package-lock 문맥과 priority 계산을 구현한다.
+- [x] AI 없이 Discord 기본 리포트를 구현한다.
+- [x] alert 0건, 여러 페이지, 패치 없음, 같은 package 여러 버전을 검증한다.
 
 ### P4. AI 분석
 
