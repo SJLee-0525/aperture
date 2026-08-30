@@ -150,7 +150,7 @@ const collectProductionLighthouse = async (
 };
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
-if (invokedPath === fileURLToPath(import.meta.url)) {
+const main = async (): Promise<void> => {
   const configuredSiteUrl = process.env.SITE_URL;
   if (!configuredSiteUrl) throw new Error("SITE_URL is required for production Lighthouse");
   const siteUrl = new URL(configuredSiteUrl);
@@ -168,7 +168,16 @@ if (invokedPath === fileURLToPath(import.meta.url)) {
   const urls = PERFORMANCE_TARGETS.map(({ path }) => `${siteUrl.origin}${path}`);
   const result = await collectProductionLighthouse(urls);
   if (!result.complete) process.exitCode = 1;
+};
+
+if (invokedPath === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    process.stderr.write(
+      `${error instanceof Error ? error.message : "Lighthouse collection failed"}\n`,
+    );
+    process.exitCode = 1;
+  });
 }
 
-export { collectProductionLighthouse, markRepresentativeRun, reportPaths, safeTargetName };
+export { collectProductionLighthouse, main, markRepresentativeRun, reportPaths, safeTargetName };
 export type { LighthouseAttempt, LighthouseManifestItem, LighthouseRunner };

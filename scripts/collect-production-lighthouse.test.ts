@@ -1,6 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import ts from "typescript";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -12,6 +13,12 @@ import {
 } from "./collect-production-lighthouse";
 
 const reportDirectory = resolve("lighthouse-production-report");
+
+const containsTopLevelAwait = (node: ts.Node): boolean => {
+  if (ts.isFunctionLike(node)) return false;
+  if (ts.isAwaitExpression(node)) return true;
+  return node.getChildren().some(containsTopLevelAwait);
+};
 
 const writeReport = async (outputPath: string, score = 0.9): Promise<void> => {
   const paths = reportPaths(outputPath);
@@ -25,6 +32,18 @@ afterEach(async () => {
 });
 
 describe("production Lighthouse collector", () => {
+  it("npm script와 같은 CJS 변환 경로에서 실행 파일을 시작한다", async () => {
+    const source = await readFile("scripts/collect-production-lighthouse.ts", "utf8");
+    const sourceFile = ts.createSourceFile(
+      "collect-production-lighthouse.ts",
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TS,
+    );
+    expect(sourceFile.statements.some(containsTopLevelAwait)).toBe(false);
+  });
+
   it("URL path를 파일명에 안전한 이름으로 바꾼다", () => {
     expect(safeTargetName("https://sungjoon.works/ko/dev/projects")).toBe("ko-dev-projects");
   });
