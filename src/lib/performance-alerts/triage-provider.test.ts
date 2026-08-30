@@ -23,7 +23,15 @@ const input = {
   formFactor: "phone",
   collectionPeriod: "2026-08-30",
   release: null,
-  metrics: [{ metric: "LCP", current: 4_500, previous: 3_000, status: "poor" }],
+  metrics: [
+    {
+      source: "field" as const,
+      metric: "LCP",
+      current: 4_500,
+      previous: 3_000,
+      status: "poor",
+    },
+  ],
   diagnostics: [],
 };
 

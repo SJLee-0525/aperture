@@ -23,6 +23,7 @@
 - 외부 브라우저 에이전트용 WebMCP 도구 15종과 선언형 연락 폼
 - Sentry 오류 알림을 LLM으로 판정해 Discord 카드로 보내는 트리아지 파이프라인
 - Dependabot alert를 LLM으로 분석해 Discord에 보내는 주간 의존성 보안 리포트
+- CrUX와 Lighthouse로 공개 URL 12개의 성능 회귀를 확인하고 AI 분석을 붙여 보내는 Discord 알림
 - 브라우저 언어와 명시적 선택을 반영하는 한국어·영어 최초 진입
 - 선택 전에는 Google tag를 로드하지 않는 분석 동의와 개인정보 설정
 - 개인정보처리방침, 사이트 이용 및 콘텐츠 정책, 접근성 안내
@@ -68,6 +69,7 @@
 - mdast 기반 Markdown 파싱과 서버 전용 Shiki 코드 하이라이트
 - Sentry 오류 모니터링과 LLM 기반 오류 트리아지 알림
 - Dependabot, Dependency Review와 LLM 기반 의존성 보안 리포트
+- Chrome UX Report, Lighthouse CI와 LLM 기반 Core Web Vitals 알림
 - Vitest, Playwright, Storybook, Lighthouse CI
 
 ## 프로젝트 구조
@@ -173,6 +175,7 @@ src/
 │   │   └── *.ts                    # supabase-js 클라이언트, CRUD, Storage, 인증, RAG
 │   ├── ai/                         # RAG 청크·검색·임베딩
 │   ├── dependency-security/        # Dependabot alert 정규화, LLM 분석과 Discord 리포트
+│   ├── performance-alerts/         # CrUX·Lighthouse 판정, snapshot 이력과 AI 성능 알림
 │   ├── search/                     # 일반 검색 점수와 추천
 │   ├── seo/ · metadata/            # canonical, hreflang, 공유 메타데이터
 │   └── i18n/ · security/ · cache/  # 다국어 유틸, URL 검증, 재검증
@@ -256,6 +259,8 @@ npm run test:chat-eval:live # 실제 제공자 응답 품질·지연 평가
 npm run test:coverage   # 커버리지 검사
 npm run test:rules      # 로컬 Supabase의 RLS·RPC·Storage 권한 통합 테스트
 npm run security:report # 열린 Dependabot alert를 분석해 Discord로 전송
+npm run test:lighthouse:production # 운영 URL 12개를 모바일 Lighthouse로 각 3회 측정
+npm run performance:report # CrUX·Lighthouse 결과를 판정하고 Discord와 snapshot에 기록
 npm run deps:check      # 의존 방향과 순환 의존성 검사
 npm run knip            # 미사용 파일·export·의존성 검사
 npm run storybook       # 컴포넌트 Storybook
@@ -294,6 +299,8 @@ TypeScript와 ESLint 외에도 순환 의존성, 미사용 코드와 코드 중�
 | [오류 알림 AI 트리아지](./docs/plan/10-sentry-ai-triage.md)                               | Sentry 웹훅, LLM 판정과 Discord 알림 구성       |
 | [의존성 보안 AI 리포트 계획](./docs/plan/12-dependency-security-ai-report.md)             | Dependabot 탐지, AI 분석과 PR 방어 설계         |
 | [의존성 보안 리포트 설정](./docs/troubleshooting/dependency-security-report.md)           | GitHub 설정, 제공자 교체와 운영 확인 절차       |
+| [Core Web Vitals AI 알림 계획](./docs/plan/13-core-web-vitals-ai-alerts.md)               | CrUX·Lighthouse 판정, 이력과 AI 알림 설계       |
+| [Core Web Vitals AI 알림 설정](./docs/troubleshooting/core-web-vitals-alerts.md)          | Actions 설정, 수동 실행과 실패 점검             |
 | [UI 품질 테스트](./docs/testing.md)                                                       | 시각 회귀, 접근성, 언어·분석 동의 검증 방법     |
 
 ### 코드 검토

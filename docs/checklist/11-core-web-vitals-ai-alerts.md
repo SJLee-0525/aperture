@@ -1,7 +1,7 @@
 # Core Web Vitals AI 알림 구현 체크리스트
 
 > 기준 계획: [plan 13](../plan/13-core-web-vitals-ai-alerts.md)
-> 상태: P1 구현 완료, P2 판정·snapshot·기본 카드 구현 중
+> 상태: P1부터 P3 구현 완료, P4 운영 검증 전
 > 이 문서는 구현 순서와 운영 설정을 기록한다. 수치 판정과 범위는 plan 13을 단일 출처로 삼는다.
 
 ## 0. 착수 전에 확정할 값
@@ -14,12 +14,20 @@
 
 - [x] `https://sungjoon.works/`가 언어 설정에 따라 같은 origin의 `/ko` 또는 `/en`으로 307 이동하는지
       확인한다. `/`는 방문자마다 목적지가 달라지므로 Lighthouse와 URL 단위 CrUX 측정 대상에는 넣지 않는다.
-- [x] 대표 경로 네 개가 운영 데이터와 외부 자원을 정상적으로 렌더하는지 브라우저에서 확인한다.
+- [x] 대표 경로 열두 개가 운영 데이터와 외부 자원을 정상적으로 렌더하는지 실제 preflight로 확인한다.
+  - `https://sungjoon.works/ko/dev/projects`
+  - `https://sungjoon.works/ko/dev/articles`
+  - `https://sungjoon.works/ko/dev`
+  - `https://sungjoon.works/ko/dev/career`
   - `https://sungjoon.works/ko`
   - `https://sungjoon.works/ko/photo`
+  - `https://sungjoon.works/ko/photo/about`
+  - `https://sungjoon.works/ko/photo/albums`
+  - `https://sungjoon.works/ko/photo/map`
   - `https://sungjoon.works/ko/music`
-  - `https://sungjoon.works/ko/dev`
-- [x] 네 경로 모두 redirect 없이 입력한 URL에 머무는 것을 확인했다.
+  - `https://sungjoon.works/ko/music/media`
+  - `https://sungjoon.works/ko/contact`
+- [x] 열두 경로 모두 redirect 없이 입력한 URL에 머무는 것을 확인했다.
 - [x] 최종 측정 URL을 확정했다. 다른 origin으로 이동하는 경로는 측정 목록에서 뺀다.
 - [x] Google Cloud 프로젝트에서 Chrome UX Report API를 켜고 API key를 발급한다.
 - [x] API key의 API 제한을 Chrome UX Report API 하나로 설정한다. GitHub-hosted runner는 호출 IP가
@@ -36,10 +44,18 @@
 SITE_URL=https://sungjoon.works
 root redirect=/ko 또는 /en, 측정 대상 아님
 최종 측정 URLs=
+- https://sungjoon.works/ko/dev/projects
+- https://sungjoon.works/ko/dev/articles
+- https://sungjoon.works/ko/dev
+- https://sungjoon.works/ko/dev/career
 - https://sungjoon.works/ko
 - https://sungjoon.works/ko/photo
+- https://sungjoon.works/ko/photo/about
+- https://sungjoon.works/ko/photo/albums
+- https://sungjoon.works/ko/photo/map
 - https://sungjoon.works/ko/music
-- https://sungjoon.works/ko/dev
+- https://sungjoon.works/ko/music/media
+- https://sungjoon.works/ko/contact
 CrUX key restriction=Chrome UX Report API
 CrUX probe=PHONE origin 404 NOT_FOUND (표본 없음, 키와 API 제한은 정상)
 Discord channel=#aperture-errors
@@ -52,7 +68,7 @@ artifact retention=90 days
 
 ### 1.1 타입과 대표 URL
 
-- [x] `config/performance-targets.json`에 대표 경로 네 개를 정의하고 TypeScript와 LHCI가 함께 읽는다.
+- [x] `config/performance-targets.json`에 대표 경로 열두 개를 정의하고 TypeScript와 LHCI가 함께 읽는다.
 - [x] `scripts/performance-targets.ts`에서 `PerformanceTarget` 계약을 검증한다.
 - [x] target ID가 snapshot과 Discord 중복 키에서 바뀌지 않는 식별자인지 테스트한다.
 - [x] `SITE_URL` 파서를 만든다.
@@ -79,7 +95,7 @@ artifact retention=90 days
   - `largest_contentful_paint`
   - `interaction_to_next_paint`
   - `cumulative_layout_shift`
-- [x] origin 2회와 URL별 2회, 총 10개 요청을 실행한다.
+- [x] origin 2회와 URL별 2회, 총 26개 요청을 실행한다.
 - [x] 요청별 timeout을 둔다.
 - [x] 제한된 횟수로 429와 5xx를 재시도하고 `Retry-After`가 있으면 따른다.
 - [x] 404 `NOT_FOUND`를 표본 없음으로 분류한다. 인증 실패나 잘못된 요청과 섞지 않는다.
@@ -96,7 +112,7 @@ artifact retention=90 days
 
 - [x] 운영 측정용 LHCI config를 별도 파일로 만든다.
 - [x] 기존 `lighthouserc.cjs`와 `npm run test:lighthouse`의 CI 계약을 바꾸지 않는다.
-- [x] 대표 URL 네 개와 `numberOfRuns: 3`을 설정한다.
+- [x] 대표 URL 열두 개와 `numberOfRuns: 3`을 설정한다.
 - [x] mobile form factor와 headless flag를 명시하고 실행 환경의 `CHROME_PATH`를 사용한다.
 - [x] filesystem target으로 JSON, HTML, `manifest.json`을 남긴다.
 - [x] fresh browser profile을 사용하고 동의 배너를 닫는 script를 넣지 않는다.
@@ -231,16 +247,16 @@ npm run deps:check
 - [x] Gemini provider를 구현한다.
 - [x] primary 실패 후 fallback을 한 번 호출한다.
 - [x] 각 provider에 timeout을 둔다.
-- [ ] 양쪽 실패, schema 실패와 미설정을 기본 카드로 처리한다.
-- [ ] provider/model만 카드에 기록하고 원본 응답은 로그에 남기지 않는다.
+- [x] 양쪽 실패, schema 실패와 미설정을 기본 카드로 처리한다.
+- [x] provider/model만 카드에 기록하고 원본 응답은 로그에 남기지 않는다.
 - [x] 같은 fixture로 두 provider의 출력 계약을 검증한다.
 - [x] audit 문자열 안의 prompt injection이 instructions를 바꾸지 않는지 테스트한다.
 
 ### 3.3 카드 결합
 
-- [ ] 기본 카드에 AI 요약, 사용자 영향, 원인 후보, 확인 순서와 confidence를 선택적으로 붙인다.
-- [ ] AI 필드가 길이 제한을 넘으면 정보 우선순위대로 줄인다.
-- [ ] AI 실패 카드와 AI 성공 카드가 같은 사실 수치를 표시하는지 테스트한다.
+- [x] 기본 카드에 AI 요약, 사용자 영향, 원인 후보, 확인 순서와 confidence를 선택적으로 붙인다.
+- [x] AI 필드가 길이 제한을 넘으면 정보 우선순위대로 줄인다.
+- [x] AI 실패 카드와 AI 성공 카드가 같은 사실 수치를 표시하는지 테스트한다.
 
 P3 품질 게이트:
 
@@ -273,20 +289,20 @@ npm run deps:check
 
 ### 4.2 repository 설정
 
-- [ ] Actions Variable `SITE_URL`을 등록한다.
-- [ ] Secret `CRUX_API_KEY`를 등록한다.
-- [ ] Secret `DISCORD_PERFORMANCE_WEBHOOK_URL`을 등록한다.
-- [ ] `PERFORMANCE_TRIAGE_PROVIDER`와 model을 Variables에 등록한다.
-- [ ] provider API key를 Secrets에 등록한다.
-- [ ] fallback provider와 model, API key를 같은 방식으로 등록한다.
-- [ ] Actions workflow 실패 알림을 받을 수 있는지 GitHub 계정 설정을 확인한다.
+- [x] Actions Variable `SITE_URL`을 등록한다.
+- [x] Secret `CRUX_API_KEY`를 등록한다.
+- [x] Secret `DISCORD_PERFORMANCE_WEBHOOK_URL`을 등록한다.
+- [x] `PERFORMANCE_TRIAGE_PROVIDER`와 model을 Variables에 등록한다.
+- [x] provider API key를 Secrets에 등록한다.
+- [x] fallback provider와 model, API key를 같은 방식으로 등록한다.
+- [x] Actions workflow 실패 알림을 받을 수 있는지 GitHub 계정 설정을 확인한다.
 
 ### 4.3 수동 운영 검증
 
 - [ ] `send_baseline=true`로 수동 실행해 정상 카드를 받는다.
 - [ ] Actions log, summary와 artifact에 API key와 webhook URL이 없는지 확인한다.
 - [ ] CrUX URL 데이터가 있는 target과 없는 target의 표시가 정확한지 확인한다.
-- [ ] HTML 보고서 네 개가 아니라 3회 실행분 모두 보존됐는지 확인한다.
+- [ ] URL별 3회, 총 36개의 Lighthouse JSON과 HTML이 보존됐는지 확인한다.
 - [ ] snapshot에 원본 API 응답이나 Lighthouse HTML이 들어 있지 않은지 확인한다.
 - [ ] 임시 임계값으로 lab 회귀 카드를 한 번 확인한 뒤 원래 값으로 되돌린다.
 - [ ] AI primary를 의도적으로 실패시켜 fallback 카드를 확인한다.
@@ -298,9 +314,9 @@ npm run deps:check
 ## 5. 문서와 마감
 
 - [ ] `.env.example`에는 GitHub Actions 전용 secret을 넣지 않고 주석으로 관리 위치만 안내한다.
-- [ ] `README.md`의 운영 자동화 목록과 디렉터리 구조를 갱신한다.
+- [x] `README.md`의 운영 자동화 목록과 디렉터리 구조를 갱신한다.
 - [ ] `docs/testing.md`에 로컬 fixture 테스트와 운영 LHCI 수동 실행법을 추가한다.
-- [ ] 장애 조사 절차를 `docs/troubleshooting/core-web-vitals-alerts.md`에 작성한다.
+- [x] 장애 조사 절차를 `docs/troubleshooting/core-web-vitals-alerts.md`에 작성한다.
 - [ ] `CLAUDE.md`에 성능 알림 모듈과 Actions 설정을 요약한다.
 - [ ] 개인정보처리방침을 바꾸지 않았음을 확인한다. 자체 RUM을 추가하지 않는 동안 새 방문자 데이터
       수신자는 없다.

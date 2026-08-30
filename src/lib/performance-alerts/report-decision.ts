@@ -21,6 +21,7 @@ import type {
   SnapshotMeasurement,
   SnapshotMetric,
 } from "@/lib/performance-alerts/snapshot";
+import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 
 type ReportTarget = { id: string; url: string };
 type DecisionInput = {
@@ -36,6 +37,7 @@ type DecisionInput = {
 };
 type PerformanceDecision = {
   cards: DiscordEmbed[];
+  triageInputs: Array<PerformanceTriageInput | null>;
   snapshot: PerformanceSnapshot;
   summary: string;
 };
@@ -353,6 +355,55 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
     const card = createPerformanceDiscordCard(report, input.sendBaseline);
     return card ? [card] : [];
   });
+  const triageInputs = reports.map((report): PerformanceTriageInput | null => {
+    if (report.kind === "baseline" || report.kind === "insufficient_data") return null;
+    const currentTarget = snapshot.targets.find((target) => target.url === report.targetUrl);
+    const previousTarget = input.previous?.targets.find(
+      (target) => target.url === report.targetUrl,
+    );
+    if (!currentTarget) return null;
+    const scopes =
+      report.kind === "lab"
+        ? ["lab"]
+        : report.kind === "combined"
+          ? ["url", "origin", "lab"]
+          : ["url", "origin"];
+    const measurements = currentTarget.measurements.filter((measurement) =>
+      scopes.includes(measurement.scope),
+    );
+    const metrics = measurements.flatMap((measurement) => {
+      const previous = previousTarget?.measurements.find(
+        (candidate) =>
+          candidate.scope === measurement.scope && candidate.formFactor === measurement.formFactor,
+      );
+      return measurement.metrics.flatMap((metric) =>
+        metric.value === null
+          ? []
+          : [
+              {
+                source: measurement.scope === "lab" ? ("lab" as const) : ("field" as const),
+                metric: metric.name,
+                current: metric.value,
+                previous:
+                  previous?.metrics.find((candidate) => candidate.name === metric.name)?.value ??
+                  null,
+                status: metric.status,
+              },
+            ],
+      );
+    });
+    const lighthouse = input.lighthouse.find((result) => result.url === report.targetUrl);
+    return {
+      target: report.targetUrl,
+      scope:
+        report.kind === "lab" ? "lab" : report.targetUrl === input.siteOrigin ? "origin" : "url",
+      formFactor: report.formFactor,
+      collectionPeriod: report.collectionPeriod ?? null,
+      release: input.release,
+      metrics,
+      diagnostics: lighthouse?.diagnostics ?? [],
+    };
+  });
   const statusRows = snapshot.targets.flatMap((target) =>
     target.measurements.map(
       (measurement) =>
@@ -368,7 +419,7 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
     "| --- | --- | --- | --- |",
     ...statusRows,
   ].join("\n");
-  return { cards, snapshot, summary };
+  return { cards, triageInputs, snapshot, summary };
 };
 
 export { buildPerformanceDecision };

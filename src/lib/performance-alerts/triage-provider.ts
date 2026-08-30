@@ -82,4 +82,4 @@ const getPerformanceTriageProvider = (): PerformanceTriageProvider => {
 };
 
 export { getPerformanceTriageProvider, withFallback };
-export type { PerformanceTriageProvider };
+export type { PerformanceTriageProvider, PerformanceTriageProviderResult };

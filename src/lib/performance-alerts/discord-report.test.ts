@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  attachPerformanceTriage,
   createPerformanceDiscordCard,
   DISCORD_EMBED_LIMIT,
   DISCORD_FIELD_LIMIT,
@@ -58,5 +59,52 @@ describe("createPerformanceDiscordCard", () => {
     });
     expect(card.fields?.every((field) => field.value.length <= DISCORD_FIELD_LIMIT)).toBe(true);
     expect(embedLength(card)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
+  });
+});
+
+describe("attachPerformanceTriage", () => {
+  it("기본 수치 field를 유지하고 AI 설명과 provider를 추가한다", () => {
+    const baseCard = createPerformanceDiscordCard({
+      ...base,
+      kind: "field",
+      fieldSummary: "LCP: 4500ms, 이전 3000ms, +50.0%",
+    })!;
+    const result = attachPerformanceTriage(baseCard, {
+      result: {
+        summary: "LCP 회귀가 확인됐습니다.",
+        userImpact: "첫 화면이 늦게 표시됩니다.",
+        likelyCauses: ["LCP 이미지 전달 지연"],
+        inspectFirst: ["LCP breakdown 진단"],
+        recommendedChecks: ["npm run test:lighthouse:production"],
+        confidence: "medium",
+      },
+      provider: "openai",
+      model: "model-id",
+    });
+    expect(result.fields?.find((field) => field.name === "Field")?.value).toBe(
+      "LCP: 4500ms, 이전 3000ms, +50.0%",
+    );
+    expect(result.fields?.find((field) => field.name === "AI 요약")?.value).toContain("LCP");
+    expect(result.footer?.text).toBe("openai/model-id · confidence medium");
+  });
+
+  it("긴 AI 설명도 Discord 전체 제한 안으로 줄인다", () => {
+    const result = attachPerformanceTriage(
+      { title: "경고", color: 0, fields: [{ name: "Field", value: "f".repeat(1_024) }] },
+      {
+        result: {
+          summary: "s".repeat(300),
+          userImpact: "u".repeat(300),
+          likelyCauses: Array(4).fill("c".repeat(200)),
+          inspectFirst: Array(4).fill("i".repeat(200)),
+          recommendedChecks: Array(4).fill("r".repeat(200)),
+          confidence: "low",
+        },
+        provider: "gemini",
+        model: "model-id",
+      },
+    );
+    expect(embedLength(result)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
+    expect(result.fields?.[0]?.name).toBe("Field");
   });
 });

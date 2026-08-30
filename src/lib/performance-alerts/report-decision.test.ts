@@ -102,6 +102,12 @@ describe("buildPerformanceDecision", () => {
     });
     expect(result.cards).toHaveLength(1);
     expect(result.cards[0]?.title).toContain("field 및 lab");
+    expect(result.triageInputs[0]).toMatchObject({
+      target: target.url,
+      scope: "url",
+      formFactor: "phone 및 Lighthouse mobile",
+    });
+    expect(result.triageInputs[0]?.metrics.some((metric) => metric.metric === "LCP")).toBe(true);
     expect(result.snapshot.sentAlerts.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -143,6 +149,7 @@ describe("buildPerformanceDecision", () => {
     };
     const result = buildPerformanceDecision({ ...input(), previous: prior, crux: [notFound] });
     expect(result.cards[0]?.title).toContain("데이터 부족");
+    expect(result.triageInputs[0]).toBeNull();
     expect(result.snapshot.targets[0]?.measurements[0]?.metrics[0]).toMatchObject({
       status: "insufficient_data",
       consecutiveCount: 4,

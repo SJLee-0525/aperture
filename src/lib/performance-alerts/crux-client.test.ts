@@ -125,20 +125,30 @@ describe("CrUX client", () => {
     });
   });
 
-  it("origin과 네 URL을 PHONE과 DESKTOP으로 나눠 열 건 조회한다", async () => {
-    const targets = ["/ko", "/ko/photo", "/ko/music", "/ko/dev"].map((path) => ({
-      id: path,
-      url: `https://sungjoon.works${path}`,
-    }));
+  it("origin과 열두 URL을 PHONE과 DESKTOP으로 나눠 스물여섯 건 조회한다", async () => {
+    const targets = [
+      "/ko/dev/projects",
+      "/ko/dev/articles",
+      "/ko/dev",
+      "/ko/dev/career",
+      "/ko/photo",
+      "/ko/photo/about",
+      "/ko/photo/albums",
+      "/ko/photo/map",
+      "/ko/music",
+      "/ko/music/media",
+      "/ko",
+      "/ko/contact",
+    ].map((path) => ({ id: path, url: `https://sungjoon.works${path}` }));
     const queries = cruxQueries("https://sungjoon.works", targets);
-    expect(queries).toHaveLength(10);
+    expect(queries).toHaveLength(26);
     expect(queries.slice(0, 2)).toEqual([
       { scope: "origin", identifier: "https://sungjoon.works", formFactor: "PHONE" },
       { scope: "origin", identifier: "https://sungjoon.works", formFactor: "DESKTOP" },
     ]);
     expect(queries.at(-1)).toEqual({
       scope: "url",
-      identifier: "https://sungjoon.works/ko/dev",
+      identifier: "https://sungjoon.works/ko/contact",
       formFactor: "DESKTOP",
     });
 
@@ -146,8 +156,8 @@ describe("CrUX client", () => {
     const collected = await collectCruxRecords("https://sungjoon.works", targets, "key", {
       request,
     });
-    expect(collected).toHaveLength(10);
-    expect(request).toHaveBeenCalledTimes(10);
+    expect(collected).toHaveLength(26);
+    expect(request).toHaveBeenCalledTimes(26);
     expect(collected.every(({ result }) => result.status === "not_found")).toBe(true);
   });
 

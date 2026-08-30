@@ -1,4 +1,5 @@
 import type { DiscordEmbed } from "@/lib/discord/types";
+import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
 
 const DISCORD_FIELD_LIMIT = 1_024;
 const DISCORD_EMBED_LIMIT = 6_000;
@@ -48,7 +49,7 @@ const fitEmbed = (embed: DiscordEmbed): DiscordEmbed => {
     title: truncate(embed.title, 256),
     description: embed.description ? truncate(embed.description, 1_000) : undefined,
     footer: embed.footer ? { text: truncate(embed.footer.text, 500) } : undefined,
-    fields: embed.fields?.slice(0, 5).map((field) => ({
+    fields: embed.fields?.slice(0, 10).map((field) => ({
       ...field,
       name: truncate(field.name, 256),
       value: truncate(field.value, DISCORD_FIELD_LIMIT),
@@ -59,6 +60,41 @@ const fitEmbed = (embed: DiscordEmbed): DiscordEmbed => {
     result.fields.pop();
   }
   return result;
+};
+
+/**
+ * AI 설명은 기존 수치 field 뒤에 추가해 성공과 실패 카드의 측정 사실을 동일하게 유지한다.
+ * provider 원본 응답은 받지 않고 schema 검증을 통과한 결과와 provider 식별자만 표시한다.
+ */
+const attachPerformanceTriage = (
+  embed: DiscordEmbed,
+  analysis: PerformanceTriageProviderResult,
+): DiscordEmbed => {
+  const result = analysis.result;
+  const explanation = [
+    { name: "AI 요약", value: result.summary },
+    { name: "사용자 영향", value: result.userImpact },
+    {
+      name: "원인 후보",
+      value: result.likelyCauses.length
+        ? result.likelyCauses.map((item) => `- ${item}`).join("\n")
+        : "근거 부족",
+    },
+    {
+      name: "확인 순서",
+      value: [...result.inspectFirst, ...result.recommendedChecks]
+        .map((item, index) => `${index + 1}. ${item}`)
+        .join("\n"),
+    },
+  ];
+  return fitEmbed({
+    ...embed,
+    description: "측정값은 코드가 판정했고 AI는 원인 후보와 확인 순서만 작성했습니다.",
+    fields: [...(embed.fields ?? []), ...explanation],
+    footer: {
+      text: `${analysis.provider}/${analysis.model} · confidence ${result.confidence}`,
+    },
+  });
 };
 
 /**
@@ -105,6 +141,7 @@ const createPerformanceDiscordCard = (
 };
 
 export {
+  attachPerformanceTriage,
   createPerformanceDiscordCard,
   DISCORD_EMBED_LIMIT,
   DISCORD_FIELD_LIMIT,

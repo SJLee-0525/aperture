@@ -1,4 +1,5 @@
 type TriageMetric = {
+  source: "field" | "lab";
   metric: string;
   current: number;
   previous: number | null;
@@ -52,7 +53,7 @@ const buildPerformanceTriageInput = (input: PerformanceTriageInput): string => {
     formFactor: input.formFactor,
     collectionPeriod: input.collectionPeriod,
     release: input.release,
-    metrics: input.metrics.slice(0, 8),
+    metrics: input.metrics.slice(0, 12),
   };
   const diagnostics = input.diagnostics.slice(0, 5).map((diagnostic) => ({
     id: clipped(diagnostic.id),

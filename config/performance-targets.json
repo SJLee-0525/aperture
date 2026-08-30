@@ -1,6 +1,14 @@
 [
-  { "id": "home", "path": "/ko" },
+  { "id": "dev-projects", "path": "/ko/dev/projects" },
+  { "id": "dev-articles", "path": "/ko/dev/articles" },
+  { "id": "dev", "path": "/ko/dev" },
+  { "id": "dev-career", "path": "/ko/dev/career" },
   { "id": "photo", "path": "/ko/photo" },
+  { "id": "photo-about", "path": "/ko/photo/about" },
+  { "id": "photo-albums", "path": "/ko/photo/albums" },
+  { "id": "photo-map", "path": "/ko/photo/map" },
   { "id": "music", "path": "/ko/music" },
-  { "id": "dev", "path": "/ko/dev" }
+  { "id": "music-media", "path": "/ko/music/media" },
+  { "id": "home", "path": "/ko" },
+  { "id": "contact", "path": "/ko/contact" }
 ]

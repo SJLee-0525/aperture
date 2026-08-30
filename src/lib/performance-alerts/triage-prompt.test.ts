@@ -14,7 +14,15 @@ describe("buildPerformanceTriageInput", () => {
       formFactor: "phone",
       collectionPeriod: "2026-08-30",
       release: "abc123",
-      metrics: [{ metric: "LCP", current: 4_500, previous: 3_000, status: "poor" }],
+      metrics: [
+        {
+          source: "field",
+          metric: "LCP",
+          current: 4_500,
+          previous: 3_000,
+          status: "poor",
+        },
+      ],
       diagnostics: [
         {
           id: "lcp-breakdown-insight",

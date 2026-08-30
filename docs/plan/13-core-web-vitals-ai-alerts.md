@@ -75,12 +75,36 @@ GitHub Actions (화·금 10:17 KST, 수동 실행 가능)
 
 ```ts
 type PerformanceTarget = {
-  id: "home" | "photo" | "music" | "dev";
-  path: "/ko" | "/ko/photo" | "/ko/music" | "/ko/dev";
+  id:
+    | "dev-projects"
+    | "dev-articles"
+    | "dev"
+    | "dev-career"
+    | "photo"
+    | "photo-about"
+    | "photo-albums"
+    | "photo-map"
+    | "music"
+    | "music-media"
+    | "home"
+    | "contact";
+  path:
+    | "/ko/dev/projects"
+    | "/ko/dev/articles"
+    | "/ko/dev"
+    | "/ko/dev/career"
+    | "/ko/photo"
+    | "/ko/photo/about"
+    | "/ko/photo/albums"
+    | "/ko/photo/map"
+    | "/ko/music"
+    | "/ko/music/media"
+    | "/ko"
+    | "/ko/contact";
 };
 ```
 
-첫 버전은 한국어 공개 URL 네 개를 측정한다. 영어 화면은 같은 컴포넌트와 자원을 사용하므로 별도
+한국어 공개 URL 열두 개를 측정한다. 영어 화면은 같은 컴포넌트와 자원을 사용하므로 별도
 측정하지 않는다. 두 언어의 콘텐츠 길이나 자원이 달라져 성능 특성이 갈리면 영어 URL을 목록에
 추가한다.
 
@@ -322,7 +346,7 @@ Discord는 보안 알림과 채널을 나눌 수 있도록 별도 webhook을 쓴
 같은 URL을 등록할 수 있다.
 
 같은 실행이 겹치지 않도록 고정 concurrency group을 사용하고 `cancel-in-progress: false`로 둔다.
-Lighthouse 12회와 Chromium 설치 시간을 고려해 job timeout은 30분으로 시작한다.
+Lighthouse 36회와 Chromium 설치 시간을 고려해 job timeout은 30분으로 시작한다.
 
 ## 13. 실패 처리
 
@@ -360,10 +384,10 @@ CrUX와 Lighthouse가 모두 실패한 실행은 성능이 정상이라는 카�
 
 ### P3. AI 분석
 
-- [ ] strict JSON schema와 길이 제한을 정의한다.
-- [ ] OpenAI, Gemini provider와 fallback을 구현한다.
-- [ ] Lighthouse의 외부 문구를 신뢰하지 않는 입력으로 처리한다.
-- [ ] LLM 실패 시 기본 카드가 유지되는지 검증한다.
+- [x] strict JSON schema와 길이 제한을 정의한다.
+- [x] OpenAI, Gemini provider와 fallback을 구현한다.
+- [x] Lighthouse의 외부 문구를 신뢰하지 않는 입력으로 처리한다.
+- [x] LLM 실패 시 기본 카드가 유지되는지 검증한다.
 
 ### P4. 운영 검증
 
