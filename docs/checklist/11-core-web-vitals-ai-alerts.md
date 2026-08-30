@@ -1,7 +1,7 @@
 # Core Web Vitals AI 알림 구현 체크리스트
 
 > 기준 계획: [plan 13](../plan/13-core-web-vitals-ai-alerts.md)
-> 상태: 착수 전
+> 상태: P1 구현 완료, P2 착수 전
 > 이 문서는 구현 순서와 운영 설정을 기록한다. 수치 판정과 범위는 plan 13을 단일 출처로 삼는다.
 
 ## 0. 착수 전에 확정할 값
@@ -52,70 +52,83 @@ artifact retention=90 days
 
 ### 1.1 타입과 대표 URL
 
-- [ ] `scripts/performance-targets.ts`에 `PerformanceTarget`과 대표 경로 네 개를 정의한다.
-- [ ] target ID가 snapshot과 Discord 중복 키에서 바뀌지 않는 식별자인지 테스트한다.
-- [ ] `SITE_URL` 파서를 만든다.
-  - [ ] HTTPS만 허용한다.
-  - [ ] username, password, port, path, query, fragment를 거부한다.
-  - [ ] trailing slash 유무를 같은 origin으로 정규화한다.
-- [ ] `/`의 언어 리다이렉트 계약을 별도로 확인한다.
-  - [ ] 응답 상태가 307인지 확인한다.
-  - [ ] `Location`의 origin이 `https://sungjoon.works`인지 확인한다.
-  - [ ] 최종 경로가 `/ko` 또는 `/en`인지 확인한다.
-  - [ ] 리다이렉트 결과를 대표 URL 목록이나 성능 snapshot에 추가하지 않는다.
-- [ ] 각 대표 URL을 GET해 2xx와 HTML content type을 확인한다.
-- [ ] redirect 최종 URL이 같은 origin인지 확인하고 최종 측정 URL로 저장한다.
-- [ ] 응답 실패, redirect loop, 다른 origin 이동을 구분해 오류를 낸다.
-- [ ] scheduled workflow SHA를 운영 release로 기록하지 않는다. 확인 가능한 release가 없으면 `null`을 쓴다.
+- [x] `config/performance-targets.json`에 대표 경로 네 개를 정의하고 TypeScript와 LHCI가 함께 읽는다.
+- [x] `scripts/performance-targets.ts`에서 `PerformanceTarget` 계약을 검증한다.
+- [x] target ID가 snapshot과 Discord 중복 키에서 바뀌지 않는 식별자인지 테스트한다.
+- [x] `SITE_URL` 파서를 만든다.
+  - [x] HTTPS만 허용한다.
+  - [x] username, password, port, path, query, fragment를 거부한다.
+  - [x] trailing slash 유무를 같은 origin으로 정규화한다.
+- [x] `/`의 언어 리다이렉트 계약을 별도로 확인한다.
+  - [x] 응답 상태가 307인지 확인한다.
+  - [x] `Location`의 origin이 `https://sungjoon.works`인지 확인한다.
+  - [x] 최종 경로가 `/ko` 또는 `/en`인지 확인한다.
+  - [x] 리다이렉트 결과를 대표 URL 목록이나 성능 snapshot에 추가하지 않는다.
+- [x] 각 대표 URL을 GET해 2xx와 HTML content type을 확인한다.
+- [x] redirect 최종 URL이 같은 origin인지 확인하고 최종 측정 URL로 저장한다.
+- [x] 응답 실패, redirect loop, 다른 origin 이동을 구분해 오류를 낸다.
+- [x] scheduled workflow SHA를 운영 release로 기록하지 않는다. 확인 가능한 release가 없으면 `null`을 쓴다.
 
 ### 1.2 CrUX client
 
-- [ ] `src/lib/performance-alerts/crux-client.ts`를 만든다.
-- [ ] endpoint는 `https://chromeuxreport.googleapis.com/v1/records:queryRecord`로 고정한다.
-- [ ] POST body에는 `origin` 또는 `url` 중 하나만 넣는다.
-- [ ] `PHONE`, `DESKTOP`을 각각 조회한다.
-- [ ] metric 요청 목록을 아래 세 개로 제한한다.
+- [x] `src/lib/performance-alerts/crux-client.ts`를 만든다.
+- [x] endpoint는 `https://chromeuxreport.googleapis.com/v1/records:queryRecord`로 고정한다.
+- [x] POST body에는 `origin` 또는 `url` 중 하나만 넣는다.
+- [x] `PHONE`, `DESKTOP`을 각각 조회한다.
+- [x] metric 요청 목록을 아래 세 개로 제한한다.
   - `largest_contentful_paint`
   - `interaction_to_next_paint`
   - `cumulative_layout_shift`
-- [ ] origin 2회와 URL별 2회, 총 10개 요청을 실행한다.
-- [ ] 요청별 timeout을 둔다.
-- [ ] 제한된 횟수로 429와 5xx를 재시도하고 `Retry-After`가 있으면 따른다.
-- [ ] 404 `NOT_FOUND`를 표본 없음으로 분류한다. 인증 실패나 잘못된 요청과 섞지 않는다.
-- [ ] p75를 정규화한다.
-  - [ ] LCP와 INP 정수를 millisecond로 보존한다.
-  - [ ] 문자열 CLS를 유한한 숫자로 변환한다.
-  - [ ] 음수, `NaN`, 무한대와 누락 값을 거부한다.
-- [ ] histogram density 세 개를 good, needs improvement, poor 비율로 변환한다.
-- [ ] density 합이 반올림 오차 범위에서 1인지 검사한다.
-- [ ] record 단위 collection period의 시작일과 종료일을 검증한다.
-- [ ] API key가 포함된 요청 URL과 원본 응답을 로그에 남기지 않는다.
+- [x] origin 2회와 URL별 2회, 총 10개 요청을 실행한다.
+- [x] 요청별 timeout을 둔다.
+- [x] 제한된 횟수로 429와 5xx를 재시도하고 `Retry-After`가 있으면 따른다.
+- [x] 404 `NOT_FOUND`를 표본 없음으로 분류한다. 인증 실패나 잘못된 요청과 섞지 않는다.
+- [x] p75를 정규화한다.
+  - [x] LCP와 INP 정수를 millisecond로 보존한다.
+  - [x] 문자열 CLS를 유한한 숫자로 변환한다.
+  - [x] 음수, `NaN`, 무한대와 누락 값을 거부한다.
+- [x] histogram density 세 개를 good, needs improvement, poor 비율로 변환한다.
+- [x] density 합이 반올림 오차 범위에서 1인지 검사한다.
+- [x] record 단위 collection period의 시작일과 종료일을 검증한다.
+- [x] API key가 포함된 요청 URL과 원본 응답을 로그에 남기지 않는다.
 
 ### 1.3 운영 Lighthouse
 
-- [ ] 운영 측정용 LHCI config를 별도 파일로 만든다.
-- [ ] 기존 `lighthouserc.cjs`와 `npm run test:lighthouse`의 CI 계약을 바꾸지 않는다.
-- [ ] 대표 URL 네 개와 `numberOfRuns: 3`을 설정한다.
-- [ ] mobile preset과 headless Chromium 경로를 명시한다.
-- [ ] filesystem target으로 JSON, HTML, `manifest.json`을 남긴다.
-- [ ] fresh browser profile을 사용하고 동의 배너를 닫는 script를 넣지 않는다.
-- [ ] `src/lib/performance-alerts/lighthouse-result.ts`를 만든다.
-- [ ] 각 URL과 metric에 대해 세 실행의 중앙값, 최솟값, 최댓값을 계산한다.
-- [ ] LCP, CLS, TTFB, FCP, Total Blocking Time, Speed Index, performance score만 snapshot에 남긴다.
-- [ ] `isRepresentativeRun`인 보고서에서 허용한 audit를 최대 5개 읽는다.
-- [ ] audit의 id, title, numericValue, displayValue만 남기고 HTML과 screenshot은 버린다.
-- [ ] 한 번 실패하면 남은 두 값 중 나쁜 값을 사용하고 `partial` 상태를 기록한다.
-- [ ] 두 번 이상 실패하면 해당 URL 측정을 실패로 처리한다.
+- [x] 운영 측정용 LHCI config를 별도 파일로 만든다.
+- [x] 기존 `lighthouserc.cjs`와 `npm run test:lighthouse`의 CI 계약을 바꾸지 않는다.
+- [x] 대표 URL 네 개와 `numberOfRuns: 3`을 설정한다.
+- [x] mobile form factor와 headless flag를 명시하고 실행 환경의 `CHROME_PATH`를 사용한다.
+- [x] filesystem target으로 JSON, HTML, `manifest.json`을 남긴다.
+- [x] fresh browser profile을 사용하고 동의 배너를 닫는 script를 넣지 않는다.
+- [x] `src/lib/performance-alerts/lighthouse-result.ts`를 만든다.
+- [x] 각 URL과 metric에 대해 세 실행의 중앙값, 최솟값, 최댓값을 계산한다.
+- [x] LCP, CLS, TTFB, FCP, Total Blocking Time, Speed Index, performance score만 snapshot에 남긴다.
+- [x] `isRepresentativeRun`인 보고서에서 허용한 audit를 최대 5개 읽는다.
+- [x] audit의 id, title, numericValue, displayValue만 남기고 HTML과 screenshot은 버린다.
+- [x] 한 번 실패하면 남은 두 값 중 나쁜 값을 사용하고 `partial` 상태를 기록한다.
+- [x] 두 번 이상 실패하면 해당 URL 측정을 실패로 처리한다.
 
 ### 1.4 P1 테스트와 확인
 
-- [ ] URL 파서와 redirect 검증 단위 테스트를 작성한다.
-- [ ] CrUX 정상 응답 fixture를 PHONE과 DESKTOP 각각 만든다.
-- [ ] URL 데이터 없음, metric 일부 누락, 문자열 CLS, 400, 403, 404, 429, 500, timeout을 테스트한다.
-- [ ] Lighthouse 3회, 1회 실패, 2회 실패, representative run 누락과 audit 누락을 테스트한다.
-- [ ] 로컬 fixture로 snapshot 직전의 정규화 결과를 출력해 눈으로 확인한다.
-- [ ] 실제 CrUX API를 수동으로 한 번 호출하고 secret이 로그에 없는지 확인한다.
-- [ ] 운영 URL 한 개를 LHCI로 세 번 실행해 실행 시간과 결과 파일 구조를 확인한다.
+- [x] URL 파서와 redirect 검증 단위 테스트를 작성한다.
+- [x] CrUX 정상 응답 fixture를 PHONE과 DESKTOP 각각 만든다.
+- [x] URL 데이터 없음, metric 일부 누락, 문자열 CLS, 400, 403, 404, 429, 500, timeout을 테스트한다.
+- [x] Lighthouse 3회, 1회 실패, 2회 실패, representative run 누락과 audit 누락을 테스트한다.
+- [x] 로컬 fixture로 snapshot 직전의 정규화 결과를 출력해 눈으로 확인한다.
+- [x] 실제 CrUX API를 수동으로 한 번 호출하고 secret이 로그에 없는지 확인한다.
+- [x] 운영 URL 한 개를 LHCI로 세 번 실행해 실행 시간과 결과 파일 구조를 확인한다.
+
+실측 기록 (2026-08-31 KST):
+
+```text
+target=https://sungjoon.works/ko
+runs=3
+performance scores=0.86, 0.87, 0.87
+median LCP=4,086.477ms
+median CLS=0.000013416491307439514
+median TBT=7ms
+reports=JSON 3개, HTML 3개, representative run 1개
+```
 
 P1 품질 게이트:
 
@@ -124,6 +137,8 @@ npm test -- performance
 npm run check
 npm run lint
 npm run format:check
+npm run knip
+npm run deps:check
 ```
 
 ## 2. P2 판정, snapshot과 기본 카드

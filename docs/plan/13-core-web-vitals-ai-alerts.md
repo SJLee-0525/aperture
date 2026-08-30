@@ -92,7 +92,7 @@ CrUX는 URL 표본이 부족할 수 있으므로 origin 조회를 항상 함께 
 - HTTPS URL이고 path, query, fragment가 없는 origin인지
 - 대표 URL을 GET했을 때 최종 응답이 2xx HTML인지
 - redirect의 최종 URL이 `SITE_URL`과 같은 origin인지
-- 최종 URL을 canonical 측정 URL로 기록했는지
+- redirect 뒤의 최종 측정 URL을 기록했는지
 
 상태 확인이 실패하면 측정을 진행하지 않고 workflow를 실패시킨다. 이전 결과를 새 결과처럼
 재전송하지 않는다. 현재 앱에는 `/api/status`가 없으므로 상태 확인용 API를 새로 만들지 않는다.
@@ -281,6 +281,7 @@ Actions summary에 남기고 workflow를 실패시킨다.
 ```text
 .github/workflows/core-web-vitals-report.yml
 scripts/core-web-vitals-report.ts
+config/performance-targets.json
 scripts/performance-targets.ts
 src/lib/performance-alerts/
   crux-client.ts
@@ -345,10 +346,10 @@ CrUX와 Lighthouse가 모두 실패한 실행은 성능이 정상이라는 카�
 
 ### P1. 측정 계약
 
-- [ ] 대표 URL과 `SITE_URL` 검증을 구현한다.
-- [ ] CrUX 응답을 화이트리스트 타입으로 정규화한다.
-- [ ] 모바일 Lighthouse 3회 실행과 중앙값 계산을 구현한다.
-- [ ] 현재 CI의 Lighthouse 설정과 운영 측정 설정을 분리한다.
+- [x] 대표 URL과 `SITE_URL` 검증을 구현한다.
+- [x] CrUX 응답을 화이트리스트 타입으로 정규화한다.
+- [x] 모바일 Lighthouse 3회 실행과 중앙값 계산을 구현한다.
+- [x] 현재 CI의 Lighthouse 설정과 운영 측정 설정을 분리한다.
 
 ### P2. 결정적 판정과 이력
 

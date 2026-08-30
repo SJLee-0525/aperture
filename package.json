@@ -27,6 +27,7 @@
     "test:chat-eval": "node scripts/run-chat-eval.mjs",
     "test:chat-eval:live": "node scripts/chat-eval.mjs",
     "test:lighthouse": "lhci autorun",
+    "test:lighthouse:production": "lhci autorun --config=lighthouserc.production.cjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test:rules": "node scripts/run-supabase-rls-tests.mjs",

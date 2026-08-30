@@ -1,0 +1,6 @@
+[
+  { "id": "home", "path": "/ko" },
+  { "id": "photo", "path": "/ko/photo" },
+  { "id": "music", "path": "/ko/music" },
+  { "id": "dev", "path": "/ko/dev" }
+]
