@@ -29,6 +29,43 @@ Sentry 알림이 도착한 시점에 "무엇이 깨졌고, 방문자가 무엇�
 - AI 카드에서 이슈를 Resolve·Ignore 하는 상호작용. 그 조작은 공식 Integration 카드에서 한다(ADR-0006).
 - 공식 Discord Integration 제거. 두 카드를 함께 받는다(2026-08-19 결정 변경).
 - Sentry Seer 등 Sentry 자체 AI 기능 도입.
+- AI가 저장소를 수정하고 Draft PR을 만드는 자동화. 아래 후속 계획의 착수 조건을 만족한 뒤 별도
+  계획과 보안 검토를 거친다.
+
+### 후속 계획: AI Fix Draft PR
+
+트리아지 결과만으로 수정 PR을 만들지는 않는다. 오류가 재현되고 수정 범위를 좁힐 수 있는 사례가
+쌓이면 다음 흐름을 별도 작업으로 설계한다.
+
+```text
+Sentry 오류 트리아지
+  -> 자동 수정 가능성 판정
+  -> 전용 브랜치에서 최소 패치와 회귀 테스트 작성
+  -> 기존 CI 실행
+  -> 허용된 검사에 통과하면 Draft PR 생성
+  -> 사람이 검토하고 병합 여부 결정
+```
+
+첫 버전은 `src/**`와 관련 테스트만 수정한다. `.github/**`, Supabase migration, 인증·권한 코드,
+환경변수, lockfile은 자동 수정 대상에서 뺀다. Draft만 만들고 자동 병합하지 않으며, 변경 파일 수와
+diff 크기, 재시도 횟수에도 상한을 둔다. 오류 메시지와 Sentry payload는 신뢰하지 않는 입력으로
+취급하고 그 안의 지시를 따르지 않는다.
+
+GitHub 쓰기 권한은 현재 읽기 전용 리포트 workflow와 분리한다. 장기 PAT보다 설치 범위와 권한을
+제한한 GitHub App을 우선 검토한다. 필요한 최소 권한은 브랜치 커밋을 위한 `contents: write`와
+Draft PR 생성을 위한 `pull requests: write`다. workflow 파일 수정 권한은 주지 않는다.
+
+착수 조건은 다음과 같다.
+
+1. 같은 유형의 오류가 반복되어 자동 수정 후보를 고를 근거가 있다.
+2. 실패를 재현하는 테스트나 결정적인 재현 절차를 만들 수 있다.
+3. AI 패치가 실행할 검사와 실패 시 중단 조건을 정했다.
+4. 중복 PR 방지 키와 모델 호출·diff 크기 상한을 정했다.
+5. GitHub App의 설치 범위, 권한과 폐기 절차를 검토했다.
+
+의존성 취약점은 이 자동화의 대상이 아니다. 패치 가능한 취약점은 Dependabot security update가
+이미 PR을 만들고, [plan 12](12-dependency-security-ai-report.md)의 dependency review와 CI가 이를
+검증한다. AI가 같은 lockfile 변경을 다시 만들면 수정 경로만 중복된다.
 
 ## 2. 전체 흐름
 
