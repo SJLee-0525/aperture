@@ -160,7 +160,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Download production build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: production-build
           path: .next-playwright-v7
@@ -259,7 +259,7 @@ jobs:
         run: echo "CHROME_PATH=$(node -e 'process.stdout.write(require(\"playwright\").chromium.executablePath())')" >> "$GITHUB_ENV"
 
       - name: Download production build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: production-build
           path: .next-playwright-v7
