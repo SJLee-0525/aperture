@@ -1,3 +1,5 @@
+import { formatDelta, severityRatio } from "@/lib/performance-alerts/metric-descriptor";
+
 import type { DiscordEmbed } from "@/lib/discord/types";
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
@@ -118,25 +120,38 @@ const mergedChecks = (targets: PerformanceTriageTarget[]): string => {
     : "제안 없음";
 };
 
+/**
+ * 악화 판정과 정렬은 metric의 방향과 단위를 아는 metric-descriptor에 맡긴다.
+ * 원시 delta로 비교하면 ms metric이 항상 CLS를 이기고 performanceScore 상승이 악화가 된다.
+ */
 const worstTargets = (entries: TriageEntry[]): string => {
   const ranked = entries
     .flatMap((entry) => {
       const changes =
-        entry.input?.metrics.flatMap((metric) =>
-          metric.previous === null || metric.current <= metric.previous
+        entry.input?.metrics.flatMap((metric) => {
+          if (metric.previous === null) return [];
+          const severity = severityRatio(metric.metric, metric.current, metric.previous);
+          return severity === null
             ? []
-            : [{ metric: metric.metric, delta: metric.current - metric.previous }],
-        ) ?? [];
-      const worst = changes.sort((a, b) => b.delta - a.delta)[0];
+            : [
+                {
+                  metric: metric.metric,
+                  current: metric.current,
+                  previous: metric.previous,
+                  severity,
+                },
+              ];
+        }) ?? [];
+      const worst = changes.sort((a, b) => b.severity - a.severity)[0];
       return worst ? [{ label: entry.label.split("\n")[0]!, ...worst }] : [];
     })
-    .sort((a, b) => b.delta - a.delta)
+    .sort((a, b) => b.severity - a.severity)
     .slice(0, 3);
   return ranked.length
     ? ranked
         .map(
           (item) =>
-            `• ${item.label} — ${item.metric} +${Math.round(item.delta)}${item.metric.toUpperCase() === "CLS" ? "" : "ms"}`,
+            `• ${item.label} — ${item.metric} ${formatDelta(item.metric, item.current, item.previous)}`,
         )
         .join("\n")
     : "이전 측정 대비 악화 대상 없음";
@@ -192,9 +207,12 @@ const buildPerformanceTriageCards = (
   const footer = triageFooter(analysis, entries.length);
   if (entries.length === 1) return [attachPerformanceTriage(entries[0]!.card, targets[0]!, footer)];
 
-  const actionsRun = entries[0]!.card.url
-    ? `[Actions run](${entries[0]!.card.url})`
-    : "Actions run에서 확인";
+  // 같은 url을 두 문구가 쓰므로 한 번만 읽어 링크와 평문 폴백을 같은 조건에서 만든다.
+  const runUrl = entries[0]!.card.url;
+  const actionsRun = runUrl ? `[Actions run](${runUrl})` : "Actions run에서 확인";
+  const lighthouseLink = runUrl
+    ? `[Lighthouse 결과](${runUrl}#artifacts)`
+    : "실행 artifact에서 Lighthouse 결과 확인";
   return [
     fitEmbed({
       ...entries[0]!.card,
@@ -217,7 +235,7 @@ const buildPerformanceTriageCards = (
         { name: "가장 크게 악화", value: worstTargets(entries) },
         {
           name: "상세",
-          value: `${actionsRun} · [Lighthouse 결과](${entries[0]!.card.url}#artifacts)\n${entries.length}개 대상의 전체 분석은 Actions summary와 core-web-vitals-ai-report artifact에 있습니다.`,
+          value: `${actionsRun} · ${lighthouseLink}\n${entries.length}개 대상의 전체 분석은 Actions summary와 core-web-vitals-ai-report artifact에 있습니다.`,
         },
       ],
       footer: { text: footer },

@@ -71,7 +71,10 @@ const reportScore = async (jsonPath: string): Promise<number> => {
   return typeof score === "number" && Number.isFinite(score) ? score : 0;
 };
 
-/** LHCI와 같은 방식으로 performance score 중앙값에 가장 가까운 실행 하나를 진단 대표값으로 고른다. */
+/**
+ * LHCI와 같은 방식으로 performance score 중앙값에 가장 가까운 실행 하나를 진단 대표값으로 고른다.
+ * 두 실행만 남으면 낮은 점수를 골라 회귀를 낙관하지 않는다.
+ */
 const markRepresentativeRun = async (
   runs: LighthouseManifestItem[],
 ): Promise<LighthouseManifestItem[]> => {
@@ -79,7 +82,7 @@ const markRepresentativeRun = async (
     runs.map(async (run) => ({ run, score: await reportScore(run.jsonPath) })),
   );
   const median = [...scored].sort((left, right) => left.score - right.score)[
-    Math.floor(scored.length / 2)
+    Math.floor((scored.length - 1) / 2)
   ];
   return runs.map((run) => ({ ...run, isRepresentativeRun: run === median?.run }));
 };

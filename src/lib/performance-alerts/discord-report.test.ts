@@ -69,6 +69,14 @@ const triageInput = (host: string, lcp: number, previous: number): PerformanceTr
   diagnostics: [],
 });
 
+const metricsInput = (
+  host: string,
+  metrics: Array<Omit<PerformanceTriageInput["metrics"][number], "status">>,
+): PerformanceTriageInput => ({
+  ...triageInput(host, 0, 0),
+  metrics: metrics.map((metric) => ({ ...metric, status: "poor" })),
+});
+
 describe("createPerformanceDiscordCard", () => {
   it.each([
     ["field", "field"],
@@ -201,6 +209,78 @@ describe("buildPerformanceTriageCards", () => {
     expect(card?.fields?.some((field) => field.name === "a.example")).toBe(false);
     expect(card?.fields?.some((field) => field.name === "b.example")).toBe(false);
     expect(card?.footer?.text).toBe("openai/model-id · 2개 대상 통합 분석");
+  });
+
+  it("performanceScore가 오른 대상은 가장 크게 악화에 넣지 않는다", () => {
+    const [card] = buildPerformanceTriageCards(
+      [
+        {
+          card: alertCard("a.example"),
+          label: "a.example",
+          input: metricsInput("a.example", [
+            { source: "lab", metric: "performanceScore", current: 0.95, previous: 0.85 },
+          ]),
+        },
+        {
+          card: alertCard("b.example"),
+          label: "b.example",
+          input: metricsInput("b.example", [
+            { source: "lab", metric: "performanceScore", current: 0.75, previous: 0.85 },
+          ]),
+        },
+      ],
+      analysisOf([target(0), target(1)]),
+    );
+    const worst = card?.fields?.find((field) => field.name === "가장 크게 악화")?.value ?? "";
+
+    expect(worst).not.toContain("a.example");
+    expect(worst).toContain("b.example — performanceScore -0.10");
+  });
+
+  it("CLS 악화를 ms metric의 미세한 증가보다 위에 두고 실제 변화량으로 적는다", () => {
+    const [card] = buildPerformanceTriageCards(
+      [
+        {
+          card: alertCard("a.example"),
+          label: "a.example",
+          input: metricsInput("a.example", [
+            { source: "lab", metric: "LCP", current: 2_030, previous: 2_000 },
+          ]),
+        },
+        {
+          card: alertCard("b.example"),
+          label: "b.example",
+          input: metricsInput("b.example", [
+            { source: "lab", metric: "CLS", current: 0.35, previous: 0.2 },
+          ]),
+        },
+      ],
+      analysisOf([target(0), target(1)]),
+    );
+    const lines =
+      card?.fields
+        ?.find((field) => field.name === "가장 크게 악화")
+        ?.value.split("\n")
+        .filter(Boolean) ?? [];
+
+    expect(lines[0]).toContain("b.example — CLS +0.150");
+    expect(lines[1]).toContain("a.example — LCP +30ms");
+  });
+
+  it("url이 없는 카드에서도 상세 링크에 undefined를 넣지 않는다", () => {
+    const withoutUrl = { title: "경고", color: 0, fields: [{ name: "대상", value: "a.example" }] };
+    const [card] = buildPerformanceTriageCards(
+      [
+        { card: withoutUrl, label: "a.example", input: triageInput("a.example", 4_500, 3_000) },
+        { card: withoutUrl, label: "b.example", input: triageInput("b.example", 4_000, 4_200) },
+      ],
+      analysisOf([target(0), target(1)]),
+    );
+
+    expect(JSON.stringify(card)).not.toContain("undefined");
+    expect(card?.fields?.find((field) => field.name === "상세")?.value).toContain(
+      "Lighthouse 결과 확인",
+    );
   });
 
   it("대상 수와 분석 수가 어긋나면 분석을 붙이지 않는다", () => {
