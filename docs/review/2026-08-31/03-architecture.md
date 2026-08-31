@@ -50,8 +50,8 @@ OpenAI Responses 의 `output_text` 추출, Gemini `candidates[0].content.parts` 
 "unusable dependency triage result" 라는 엉뚱한 사유로 실패한다.
 나머지 둘은 차단됐다고 말한다.
 
-셋째 행은 [01](01-security-and-boundaries.md#s4-배열-원소-타입을-보지-않는다-낮음),
-넷째 행은 [02](02-correctness.md#c1-빈-목록이-discord-400-을-만들고-알림이-사라진다) 의 높음 결함이다.
+셋째 행은 [01](01-security-and-boundaries.md#s4-배열-원소-타입을-보지-않는다-닫힘-0baf016),
+넷째 행은 [02](02-correctness.md#c1-빈-목록이-discord-400-을-만들고-알림이-사라진다-닫힘-1a67ec4) 의 높음 결함이다.
 
 ### 해법
 

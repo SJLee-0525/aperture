@@ -68,16 +68,20 @@ ESLint 를 직접 돌렸다. 0건이었다. 무시된 파일이라 조용히 통
 
 ### `redactPerformanceError` 의 실제 유출 경로
 
-pathname 을 남기는 것은 확인했다([01](01-security-and-boundaries.md#s1-redactperformanceerror-가-url-pathname-을-남긴다-낮음)).
+pathname 을 남기는 것은 확인했다([01](01-security-and-boundaries.md#s1-치환이-url-pathname-을-남긴다-닫힘-d252f81)).
 그런데 현재 코드에서 웹훅 URL 이 오류 메시지에 들어가는 경로는 찾지 못했다.
 `send-webhook.ts` 의 실패 문자열은 상태 코드만 담고, undici 의 네트워크 오류 메시지에도
 URL 이 없다. GitHub Actions 의 시크릿 마스킹도 한 겹 더 있다.
 
-"확인된 유출"이 아니라 "강도가 다른 방어"로 낮춰 적었다.
-실제 도달 경로를 찾으면 심각도를 올려야 한다.
+"확인된 유출"이 아니라 "강도가 다른 방어"로 낮춰 적었다. 도달 경로를 못 찾았어도 두 스크립트가
+같은 목적의 방어를 서로 다른 강도로 적용하는 것 자체가 문제라고 보아 `d252f81` 에서 닫았다.
+보류로 남는 것은 심각도 판단이 아니라 "이 경로가 실제로 도달 가능한가"라는 미확인 사실이다.
 
 ### Discord 400 의 실측
 
-[02](02-correctness.md#c1-빈-목록이-discord-400-을-만들고-알림이-사라진다) 의 높음 1건은 Discord API 계약과 코드 경로 추적으로 세웠다.
+[02](02-correctness.md#c1-빈-목록이-discord-400-을-만들고-알림이-사라진다-닫힘-1a67ec4) 의 높음 1건은 Discord API 계약과 코드 경로 추적으로 세웠다.
 실제로 빈 field 를 보내 400 을 받아 보지는 않았다.
 모델이 두 배열을 모두 비우는 빈도도 알 수 없다.
+
+`1a67ec4` 가 폴백을 넣어 닫았지만 이 미확인 사실은 그대로다. 수동 dispatch 는 배포 smoke
+test 라 이 경로를 재현하지 않는다. 회귀는 단위 테스트가 막는다.
