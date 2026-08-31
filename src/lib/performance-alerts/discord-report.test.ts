@@ -123,6 +123,18 @@ describe("attachPerformanceTriage", () => {
     expect(result.footer?.text).toBe("openai/model-id");
   });
 
+  it("확인 순서가 비면 Discord가 거부하지 않도록 폴백 문구를 넣는다", () => {
+    const result = attachPerformanceTriage(
+      alertCard("a.example"),
+      target(0, { inspectFirst: [], recommendedChecks: [] }),
+      "openai/model-id",
+    );
+    const steps = result.fields?.find((field) => field.name === "확인 순서");
+
+    expect(steps?.value).toBe("제안 없음");
+    expect(result.fields?.every((field) => field.value.length > 0)).toBe(true);
+  });
+
   it("긴 AI 설명도 Discord 전체 제한 안으로 줄인다", () => {
     const result = attachPerformanceTriage(
       { title: "경고", color: 0, fields: [{ name: "Field", value: "f".repeat(1_024) }] },

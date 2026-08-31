@@ -151,6 +151,7 @@ const attachPerformanceTriage = (
   target: PerformanceTriageTarget,
   footer: string,
 ): DiscordEmbed => {
+  const steps = [...target.inspectFirst, ...target.recommendedChecks];
   const explanation = [
     { name: "AI 요약", value: target.summary },
     { name: "사용자 영향", value: target.userImpact },
@@ -162,9 +163,10 @@ const attachPerformanceTriage = (
     },
     {
       name: "확인 순서",
-      value: [...target.inspectFirst, ...target.recommendedChecks]
-        .map((item, index) => `${index + 1}. ${item}`)
-        .join("\n"),
+      // Discord 는 값이 빈 field 를 400 으로 거부하므로 목록이 비면 카드 자체가 나가지 못한다.
+      value: steps.length
+        ? steps.map((item, index) => `${index + 1}. ${item}`).join("\n")
+        : "제안 없음",
     },
   ];
   return fitEmbed({

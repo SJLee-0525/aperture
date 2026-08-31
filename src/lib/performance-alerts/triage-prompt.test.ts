@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ALLOWED_CHECKS,
   buildPerformanceTriageInput,
   PERFORMANCE_TRIAGE_INSTRUCTIONS,
 } from "@/lib/performance-alerts/triage-prompt";
+import { ALLOWED_CHECKS } from "@/lib/performance-alerts/triage-schema";
 
 describe("buildPerformanceTriageInput", () => {
   it("화이트리스트 사실과 신뢰하지 않는 진단 문자열만 직렬화한다", () => {

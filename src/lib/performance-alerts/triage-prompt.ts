@@ -1,4 +1,4 @@
-import { MAX_TARGETS } from "@/lib/performance-alerts/triage-schema";
+import { ALLOWED_CHECKS, MAX_TARGETS } from "@/lib/performance-alerts/triage-schema";
 
 type TriageMetric = {
   source: "field" | "lab";
@@ -22,13 +22,6 @@ type PerformanceTriageInput = {
   metrics: TriageMetric[];
   diagnostics: TriageDiagnostic[];
 };
-
-const ALLOWED_CHECKS = [
-  "npm test -- performance",
-  "npm run check",
-  "npm run lint",
-  "npm run test:lighthouse:production",
-] as const;
 
 const PERFORMANCE_TRIAGE_INSTRUCTIONS = [
   "You analyze Core Web Vitals alerts for a Next.js portfolio site.",
@@ -92,7 +85,6 @@ const buildPerformanceTriageInput = (inputs: PerformanceTriageInput[]): string =
 };
 
 export {
-  ALLOWED_CHECKS,
   buildPerformanceTriageInput,
   PERFORMANCE_TRIAGE_INSTRUCTIONS,
   performanceTriageOutputTokens,
