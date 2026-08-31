@@ -307,12 +307,12 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
   }
 
   const reports: PerformanceReport[] = [];
+  const insufficientReports: string[] = [];
   for (const group of issues.values()) {
     if (group.insufficient.length) {
-      reports.push({
-        ...reportFrom("insufficient_data", group, input),
-        fieldSummary: group.insufficient.join("\n"),
-      });
+      insufficientReports.push(
+        `${group.targetUrl} (${group.formFactor}): ${group.insufficient.join(", ")}`,
+      );
     }
     if (group.field.length || group.lab.length) {
       reports.push(
@@ -327,6 +327,17 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         ),
       );
     }
+  }
+  if (insufficientReports.length) {
+    reports.unshift({
+      kind: "insufficient_data",
+      targetUrl: input.siteOrigin,
+      formFactor: "전체 대상",
+      measuredAt: input.measuredAt,
+      fieldSummary: insufficientReports.join("\n"),
+      actionsRunUrl: input.actionsRunUrl,
+      artifactName: SNAPSHOT_ARTIFACT_NAME,
+    });
   }
   if (!reports.length && input.sendBaseline) {
     reports.push({

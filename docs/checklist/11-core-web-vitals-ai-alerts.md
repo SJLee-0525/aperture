@@ -312,6 +312,8 @@ npm run deps:check
       병합한다.
 - [x] 중간 실패 시에도 각 shard의 성공 결과를 보존하고, 한 URL에서 2회가 성공하면 `partial`로
       계속 처리한다.
+- [x] 한 실행의 CrUX `record 없음` 항목은 Discord 데이터 부족 요약 카드 한 장으로 묶고, snapshot의
+      대상별 연속 횟수와 중복 억제 key는 유지한다.
 
 - [ ] `send_baseline=true`로 수동 실행해 정상 카드를 받는다.
 - [ ] Actions log, summary와 artifact에 API key와 webhook URL이 없는지 확인한다.

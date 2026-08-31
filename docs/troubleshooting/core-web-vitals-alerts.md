@@ -13,6 +13,9 @@ Actions summary와 artifact만 남긴다.
 CrUX는 origin과 각 URL을 PHONE, DESKTOP으로 조회한다. Lighthouse는 아래 URL을 모바일 환경에서
 각 3회 측정한다.
 
+CrUX `record 없음`은 대상별 연속 횟수와 중복 억제 key를 snapshot에 보존하지만, Discord 알림은 한 실행의
+데이터 부족 항목을 요약 카드 한 장으로 묶는다. Lighthouse 회귀 알림은 대상별로 별도 전송한다.
+
 ```text
 https://sungjoon.works/ko/dev/projects
 https://sungjoon.works/ko/dev/articles
