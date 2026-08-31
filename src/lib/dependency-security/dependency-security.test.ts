@@ -257,6 +257,50 @@ describe("dependency triage", () => {
     expect(parseTriageResults('{"results":[{"alertNumber":12}]}')).toBeNull();
   });
 
+  describe("parseTriageResults 부분 허용", () => {
+    const result = (overrides: Record<string, unknown> = {}) => ({
+      alertNumber: 1,
+      impact: "런타임 의존성이라 배포본에 포함된다.",
+      priorityReason: "직접 의존성이고 수정 버전이 있다.",
+      recommendedChecks: ["npm run check"],
+      confidence: "medium",
+      ...overrides,
+    });
+    const parse = (results: unknown[]) => parseTriageResults(JSON.stringify({ results }));
+
+    it("유효한 항목만 남기고 어긋난 항목은 버린다", () => {
+      const parsed = parse([result({ alertNumber: 1 }), { alertNumber: 2 }]);
+      expect(parsed).toHaveLength(1);
+      expect(parsed?.[0]?.alertNumber).toBe(1);
+    });
+
+    it.each([
+      ["recommendedChecks 에 객체", { recommendedChecks: [{ cmd: "npm run check" }] }],
+      ["impact 301자", { impact: "i".repeat(301) }],
+      ["priorityReason 301자", { priorityReason: "p".repeat(301) }],
+      ["check 201자", { recommendedChecks: ["c".repeat(201)] }],
+      ["check 4개", { recommendedChecks: ["a", "b", "c", "d"] }],
+      ["공백만 있는 impact", { impact: "   " }],
+    ])("%s 인 결과만 제외한다", (_label, overrides) => {
+      const parsed = parse([result({ alertNumber: 1 }), result({ alertNumber: 2, ...overrides })]);
+      expect(parsed).toHaveLength(1);
+      expect(parsed?.[0]?.alertNumber).toBe(1);
+    });
+
+    it("길이는 trim 후 기준으로 잰다", () => {
+      const parsed = parse([result({ impact: `  ${"i".repeat(300)}  ` })]);
+      expect(parsed?.[0]?.impact).toBe("i".repeat(300));
+    });
+
+    it("남는 항목이 없으면 null 을 돌려준다", () => {
+      expect(parse([{ alertNumber: 1 }, { alertNumber: 2 }])).toBeNull();
+    });
+
+    it("빈 results 도 null 로 본다", () => {
+      expect(parse([])).toBeNull();
+    });
+  });
+
   it("primary 실패 시 Gemini fallback 결과를 사용한다", async () => {
     vi.stubEnv("DEPENDENCY_TRIAGE_PROVIDER", "openai");
     vi.stubEnv("DEPENDENCY_TRIAGE_PROVIDER_API_KEY", "key");
