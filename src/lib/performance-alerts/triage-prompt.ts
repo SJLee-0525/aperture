@@ -1,4 +1,5 @@
-import { MAX_TARGETS } from "@/lib/performance-alerts/triage-schema";
+import { rankMetrics } from "@/lib/performance-alerts/metric-severity";
+import { ALLOWED_CHECKS, MAX_TARGETS } from "@/lib/performance-alerts/triage-schema";
 
 type TriageMetric = {
   source: "field" | "lab";
@@ -22,13 +23,6 @@ type PerformanceTriageInput = {
   metrics: TriageMetric[];
   diagnostics: TriageDiagnostic[];
 };
-
-const ALLOWED_CHECKS = [
-  "npm test -- performance",
-  "npm run check",
-  "npm run lint",
-  "npm run test:lighthouse:production",
-] as const;
 
 const PERFORMANCE_TRIAGE_INSTRUCTIONS = [
   "You analyze Core Web Vitals alerts for a Next.js portfolio site.",
@@ -64,6 +58,7 @@ const performanceTriageTimeout = (targets: number, base: number): number =>
  * 진단 문자열은 별도 구역에 두어 명령이 아니라 신뢰하지 않는 데이터임을 반복한다.
  */
 const buildPerformanceTriageInput = (inputs: PerformanceTriageInput[]): string => {
+  // 호출자가 selectTriageTargets로 이미 상한을 맞춘다. 여기 slice는 그 계약이 깨졌을 때의 방어다.
   const limited = inputs.slice(0, MAX_TARGETS);
   const facts = limited.map((input, targetIndex) => ({
     targetIndex,
@@ -72,7 +67,8 @@ const buildPerformanceTriageInput = (inputs: PerformanceTriageInput[]): string =
     formFactor: input.formFactor,
     collectionPeriod: input.collectionPeriod,
     release: input.release,
-    metrics: input.metrics.slice(0, 12),
+    // 12개를 넘으면 행이 버려지므로 경고를 만든 metric이 남도록 먼저 정렬한다.
+    metrics: rankMetrics(input.metrics).slice(0, 12),
   }));
   const diagnostics = limited.map((input, targetIndex) => ({
     targetIndex,
@@ -92,7 +88,6 @@ const buildPerformanceTriageInput = (inputs: PerformanceTriageInput[]): string =
 };
 
 export {
-  ALLOWED_CHECKS,
   buildPerformanceTriageInput,
   PERFORMANCE_TRIAGE_INSTRUCTIONS,
   performanceTriageOutputTokens,

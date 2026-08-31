@@ -14,6 +14,17 @@ type PerformanceTriageResult = {
   targets: PerformanceTriageTarget[];
 };
 
+/**
+ * recommendedChecks 에 허용하는 명령. 프롬프트가 이 목록을 지시문에 싣고 파서가 같은 목록으로
+ * 거른다. 지시문만으로는 모델이 저장소에 없는 명령을 적어도 그대로 카드에 실린다.
+ */
+const ALLOWED_CHECKS = [
+  "npm test -- performance",
+  "npm run check",
+  "npm run lint",
+  "npm run test:lighthouse:production",
+] as const;
+
 const CONFIDENCES: readonly PerformanceTriageConfidence[] = ["high", "medium", "low"];
 const MAX_TEXT = 300;
 const MAX_ITEMS = 4;
@@ -102,7 +113,10 @@ const parseTarget = (value: unknown, expectedTargets: number): PerformanceTriage
   const userImpact = text(entries.userImpact, MAX_TEXT);
   const likelyCauses = textArray(entries.likelyCauses);
   const inspectFirst = textArray(entries.inspectFirst);
-  const recommendedChecks = textArray(entries.recommendedChecks);
+  // inspectFirst 는 자유 서술이라 거르지 않는다. 실행할 명령을 적는 쪽만 목록으로 제한한다.
+  const recommendedChecks = textArray(entries.recommendedChecks)?.filter((check) =>
+    (ALLOWED_CHECKS as readonly string[]).includes(check),
+  );
   if (
     !summary ||
     !userImpact ||
@@ -158,5 +172,5 @@ const parsePerformanceTriageResult = (
   };
 };
 
-export { buildPerformanceTriageSchema, MAX_TARGETS, parsePerformanceTriageResult };
+export { ALLOWED_CHECKS, buildPerformanceTriageSchema, MAX_TARGETS, parsePerformanceTriageResult };
 export type { PerformanceTriageResult, PerformanceTriageTarget };

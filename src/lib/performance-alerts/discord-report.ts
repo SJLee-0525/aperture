@@ -1,9 +1,11 @@
+import { fitEmbed } from "@/lib/discord/embed-budget";
+import { formatDelta, severityRatio } from "@/lib/performance-alerts/metric-descriptor";
+
+import type { BudgetPolicy } from "@/lib/discord/embed-budget";
 import type { DiscordEmbed } from "@/lib/discord/types";
+import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
 import type { PerformanceTriageTarget } from "@/lib/performance-alerts/triage-schema";
-
-const DISCORD_FIELD_LIMIT = 1_024;
-const DISCORD_EMBED_LIMIT = 6_000;
 
 type ReportKind = "field" | "lab" | "combined" | "insufficient_data" | "baseline";
 type PerformanceReport = {
@@ -34,43 +36,105 @@ const titleByKind: Record<ReportKind, string> = {
   baseline: "Core Web Vitals 기준선",
 };
 
-const truncate = (value: string, limit: number): string =>
-  value.length <= limit ? value : `${value.slice(0, Math.max(0, limit - 1))}…`;
+/**
+ * 통합 카드가 field 다섯 개로 요약을 유지하도록 Discord 상한보다 좁게 쓴다.
+ * 상한 자체는 `fitEmbed` 기본값이 강제하므로 여기서는 표시 밀도만 정한다.
+ */
+const PERFORMANCE_EMBED_POLICY: BudgetPolicy = { description: 1_000, footer: 500, fields: 10 };
 
-const embedLength = (embed: DiscordEmbed): number =>
-  embed.title.length +
-  (embed.description?.length ?? 0) +
-  (embed.footer?.text.length ?? 0) +
-  (embed.fields ?? []).reduce((total, field) => total + field.name.length + field.value.length, 0);
-
-/** Discord가 카드 전체를 거부하지 않도록 field와 embed 상한을 전송 전에 함께 적용한다. */
-const fitEmbed = (embed: DiscordEmbed): DiscordEmbed => {
-  const result: DiscordEmbed = {
-    ...embed,
-    title: truncate(embed.title, 256),
-    description: embed.description ? truncate(embed.description, 1_000) : undefined,
-    footer: embed.footer ? { text: truncate(embed.footer.text, 500) } : undefined,
-    fields: embed.fields?.slice(0, 10).map((field) => ({
-      ...field,
-      name: truncate(field.name, 256),
-      value: truncate(field.value, DISCORD_FIELD_LIMIT),
-    })),
-  };
-
-  while (embedLength(result) > DISCORD_EMBED_LIMIT && result.fields?.length) {
-    result.fields.pop();
-  }
-  return result;
-};
-
-const MERGED_TARGET_LIMIT = 8;
-const MERGED_SECTION_LIMIT = 440;
-const MERGED_CAUSE_LIMIT = 2;
+const fitPerformanceEmbed = (embed: DiscordEmbed): DiscordEmbed =>
+  fitEmbed(embed, PERFORMANCE_EMBED_POLICY);
 
 const triageFooter = (analysis: PerformanceTriageProviderResult, targets: number): string =>
   targets < 2
     ? `${analysis.provider}/${analysis.model} · confidence ${analysis.result.targets[0]?.confidence ?? "unknown"}`
     : `${analysis.provider}/${analysis.model} · ${targets}개 대상 통합 분석`;
+
+type TriageEntry = { card: DiscordEmbed; label: string; input?: PerformanceTriageInput };
+
+const targetMetrics = (
+  entries: TriageEntry[],
+  predicate: (metric: PerformanceTriageInput["metrics"][number]) => boolean,
+): number => entries.filter((entry) => entry.input?.metrics.some(predicate)).length;
+
+const mergedStatus = (entries: TriageEntry[]): string => {
+  const lcpPoor = targetMetrics(
+    entries,
+    (metric) => metric.metric.toUpperCase() === "LCP" && metric.status === "poor",
+  );
+  const worsened = targetMetrics(
+    entries,
+    (metric) =>
+      metric.metric.toUpperCase() === "LCP" &&
+      metric.previous !== null &&
+      metric.current > metric.previous,
+  );
+  const improved = targetMetrics(
+    entries,
+    (metric) =>
+      metric.metric.toUpperCase() === "LCP" &&
+      metric.previous !== null &&
+      metric.current < metric.previous,
+  );
+  const tbtIncreased = targetMetrics(
+    entries,
+    (metric) =>
+      metric.metric.toUpperCase() === "TBT" &&
+      metric.previous !== null &&
+      metric.current > metric.previous,
+  );
+  const clsPoor = targetMetrics(
+    entries,
+    (metric) => metric.metric.toUpperCase() === "CLS" && metric.status === "poor",
+  );
+  return `LCP 불량 ${lcpPoor} · 이전보다 악화 ${worsened} · 개선 ${improved}\nTBT 증가 ${tbtIncreased} · CLS 문제 ${clsPoor}`;
+};
+
+const mergedChecks = (targets: PerformanceTriageTarget[]): string => {
+  const checks = [
+    ...new Set(targets.flatMap((target) => [...target.inspectFirst, ...target.recommendedChecks])),
+  ].slice(0, 3);
+  return checks.length
+    ? checks.map((check, index) => `${index + 1}. ${check}`).join("\n")
+    : "제안 없음";
+};
+
+/**
+ * 악화 판정과 정렬은 metric의 방향과 단위를 아는 metric-descriptor에 맡긴다.
+ * 원시 delta로 비교하면 ms metric이 항상 CLS를 이기고 performanceScore 상승이 악화가 된다.
+ */
+const worstTargets = (entries: TriageEntry[]): string => {
+  const ranked = entries
+    .flatMap((entry) => {
+      const changes =
+        entry.input?.metrics.flatMap((metric) => {
+          if (metric.previous === null) return [];
+          const severity = severityRatio(metric.metric, metric.current, metric.previous);
+          return severity === null
+            ? []
+            : [
+                {
+                  metric: metric.metric,
+                  current: metric.current,
+                  previous: metric.previous,
+                  severity,
+                },
+              ];
+        }) ?? [];
+      const worst = changes.sort((a, b) => b.severity - a.severity)[0];
+      return worst ? [{ label: entry.label.split("\n")[0]!, ...worst }] : [];
+    })
+    .sort((a, b) => b.severity - a.severity)
+    .slice(0, 3);
+  return ranked.length
+    ? ranked
+        .map(
+          (item) =>
+            `• ${item.label} — ${item.metric} ${formatDelta(item.metric, item.current, item.previous)}`,
+        )
+        .join("\n")
+    : "이전 측정 대비 악화 대상 없음";
+};
 
 /**
  * AI 설명은 기존 수치 field 뒤에 추가해 성공과 실패 카드의 측정 사실을 동일하게 유지한다.
@@ -81,6 +145,7 @@ const attachPerformanceTriage = (
   target: PerformanceTriageTarget,
   footer: string,
 ): DiscordEmbed => {
+  const steps = [...target.inspectFirst, ...target.recommendedChecks];
   const explanation = [
     { name: "AI 요약", value: target.summary },
     { name: "사용자 영향", value: target.userImpact },
@@ -92,12 +157,13 @@ const attachPerformanceTriage = (
     },
     {
       name: "확인 순서",
-      value: [...target.inspectFirst, ...target.recommendedChecks]
-        .map((item, index) => `${index + 1}. ${item}`)
-        .join("\n"),
+      // Discord 는 값이 빈 field 를 400 으로 거부하므로 목록이 비면 카드 자체가 나가지 못한다.
+      value: steps.length
+        ? steps.map((item, index) => `${index + 1}. ${item}`).join("\n")
+        : "제안 없음",
     },
   ];
-  return fitEmbed({
+  return fitPerformanceEmbed({
     ...embed,
     description: "측정값은 코드가 판정했고 AI는 원인 후보와 확인 순서만 작성했습니다.",
     fields: [...(embed.fields ?? []), ...explanation],
@@ -106,32 +172,11 @@ const attachPerformanceTriage = (
 };
 
 /**
- * 통합 카드는 알림이고 전문은 artifact에 있으므로 대상당 분량을 줄여 담는다.
- * 줄이지 않으면 embed 상한에서 뒤쪽 대상이 통째로 사라진다.
- */
-const mergedSection = (label: string, target: PerformanceTriageTarget) => ({
-  name: label,
-  value: truncate(
-    [
-      `요약: ${target.summary}`,
-      target.likelyCauses.length
-        ? `원인 후보: ${target.likelyCauses
-            .slice(0, MERGED_CAUSE_LIMIT)
-            .map((item) => truncate(item, 80))
-            .join(" / ")}`
-        : "원인 후보: 근거 부족",
-      `confidence: ${target.confidence}`,
-    ].join("\n"),
-    MERGED_SECTION_LIMIT,
-  ),
-});
-
-/**
  * batch 분석 한 번의 결과를 카드로 만든다. entries[i]는 analysis.result.targets[i]와 짝이며
  * 수가 어긋나면 분석을 붙이지 않고 측정값 카드를 그대로 돌려준다.
  */
 const buildPerformanceTriageCards = (
-  entries: Array<{ card: DiscordEmbed; label: string }>,
+  entries: TriageEntry[],
   analysis: PerformanceTriageProviderResult,
 ): DiscordEmbed[] => {
   const targets = analysis.result.targets;
@@ -141,31 +186,36 @@ const buildPerformanceTriageCards = (
   const footer = triageFooter(analysis, entries.length);
   if (entries.length === 1) return [attachPerformanceTriage(entries[0]!.card, targets[0]!, footer)];
 
-  const shown = entries.slice(0, MERGED_TARGET_LIMIT);
-  const hidden = entries.slice(MERGED_TARGET_LIMIT);
+  // 같은 url을 두 문구가 쓰므로 한 번만 읽어 링크와 평문 폴백을 같은 조건에서 만든다.
+  const runUrl = entries[0]!.card.url;
+  const actionsRun = runUrl ? `[Actions run](${runUrl})` : "Actions run에서 확인";
+  const lighthouseLink = runUrl
+    ? `[Lighthouse 결과](${runUrl}#artifacts)`
+    : "실행 artifact에서 Lighthouse 결과 확인";
   return [
-    fitEmbed({
+    fitPerformanceEmbed({
       ...entries[0]!.card,
-      title: "Core Web Vitals 통합 AI 분석",
-      description: `측정값은 코드가 판정했고 AI는 대상별 원인 후보를 요약했습니다.\n${analysis.result.commonSummary}`,
+      title: `Core Web Vitals — ${entries.length}개 경고`,
+      description: analysis.result.commonSummary,
       fields: [
+        { name: "현황", value: mergedStatus(entries) },
         ...(analysis.result.commonCauses.length
           ? [
               {
                 name: "공통 원인",
-                value: analysis.result.commonCauses.map((item) => `- ${item}`).join("\n"),
+                value: analysis.result.commonCauses
+                  .slice(0, 3)
+                  .map((item) => `- ${item}`)
+                  .join("\n"),
               },
             ]
           : []),
-        ...shown.map((entry, index) => mergedSection(entry.label, targets[index]!)),
-        ...(hidden.length
-          ? [
-              {
-                name: `그 외 ${hidden.length}개 대상`,
-                value: `${hidden.map((entry) => entry.label).join("\n")}\n전문은 core-web-vitals-ai-report artifact에 있습니다.`,
-              },
-            ]
-          : []),
+        { name: "우선 확인", value: mergedChecks(targets) },
+        { name: "가장 크게 악화", value: worstTargets(entries) },
+        {
+          name: "상세",
+          value: `${actionsRun} · ${lighthouseLink}\n${entries.length}개 대상의 전체 분석은 Actions summary와 core-web-vitals-ai-report artifact에 있습니다.`,
+        },
       ],
       footer: { text: footer },
     }),
@@ -202,7 +252,7 @@ const createPerformanceDiscordCard = (
     },
   ];
 
-  return fitEmbed({
+  return fitPerformanceEmbed({
     title: titleByKind[report.kind],
     url: report.actionsRunUrl,
     description:
@@ -215,13 +265,5 @@ const createPerformanceDiscordCard = (
   });
 };
 
-export {
-  attachPerformanceTriage,
-  buildPerformanceTriageCards,
-  createPerformanceDiscordCard,
-  DISCORD_EMBED_LIMIT,
-  DISCORD_FIELD_LIMIT,
-  embedLength,
-  fitEmbed,
-};
+export { attachPerformanceTriage, buildPerformanceTriageCards, createPerformanceDiscordCard };
 export type { PerformanceReport };

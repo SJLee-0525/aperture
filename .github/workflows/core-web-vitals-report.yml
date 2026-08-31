@@ -40,9 +40,9 @@ jobs:
       LIGHTHOUSE_SHARD_COUNT: 3
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -92,9 +92,9 @@ jobs:
       FORCE_AI_ANALYSIS: ${{ inputs.force_ai_analysis == true && 'true' || 'false' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm

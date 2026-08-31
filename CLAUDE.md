@@ -217,6 +217,8 @@ src/
 ├── lib/i18n/                   # pick-text.ts (ko/en 폴백) · locale-path.ts
 ├── lib/exif/                   # exifr 래퍼 (사진 전용)
 ├── lib/sentry-triage/          # Sentry 웹훅 → LLM 판정 → Discord 카드 (ADR-0006, UI 없음)
+├── lib/triage/  lib/discord/   # 세 알림 계열 공용 — LLM 전송(provider 선택·폴백, ADR-0007) · 카드 타입·embed 예산·웹훅 전송
+├── lib/performance-alerts/  lib/dependency-security/  # Core Web Vitals·주간 의존성 보안 알림 — 각자의 GitHub Actions 워크플로가 실행, 시크릿은 저장소 Actions 설정에만 (docs/troubleshooting/ 두 문서)
 ├── lib/monitoring/  lib/http/  lib/rate-limit/  lib/auth/  # DSN 판정 · 본문 상한 · Upstash 카운터 · 관리자 게이트
 ├── mocks/                      # env 미설정 시 폴백 (design 데이터 이식 — photos/albums/music/dev/site)
 ├── constants/                  # COLLECTIONS, DICTIONARY, NAVIGATION(mega-menu), ROUTES(+DETAIL_QUERY_KEYS), STORAGE_KEYS, BREAKPOINTS, SECTIONS(액센트)

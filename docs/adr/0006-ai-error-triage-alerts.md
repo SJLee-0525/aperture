@@ -8,6 +8,10 @@ Accepted — 2026-08-18 · Amended — 2026-08-19 (오류 수집 자체의 개�
 2026-08-19 개정: 결정 7을 바꿨다. Sentry 공식 Discord Integration을 제거하지 않고 남긴다.
 나머지 결정은 그대로다.
 
+2026-08-31: 단발 JSON 트리아지가 세 계열로 늘어난 뒤의 전송 코드 공유 결정은
+[ADR-0007](0007-shared-triage-transport.md)이 대체한다(추론 과정의 "공유하는 것은 코드가
+아니라 규약" 판단이 대상이다). 챗봇을 이 seam 에서 제외하는 판단은 유지한다.
+
 ## Context
 
 현재 오류 알림은 Sentry 공식 Discord Integration이 보낸다([plan 05](../plan/05-sentry-error-monitoring.md) P1).

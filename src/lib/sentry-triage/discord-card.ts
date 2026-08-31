@@ -1,17 +1,7 @@
+import { fitEmbed } from "@/lib/discord/embed-budget";
+
 import type { DiscordEmbed } from "@/lib/discord/types";
 import type { SentryAlertSummary, TriageOutcome, TriageSeverity } from "@/types/sentry-alert";
-
-/**
- * Discord embed 상한. 넘기면 400 이 떨어지므로 전송 전에 자른다.
- * 합계는 title·description·field 이름과 값·footer 를 모두 더한 값에 적용된다.
- */
-const LIMIT = {
-  title: 256,
-  description: 4096,
-  fieldValue: 1024,
-  footer: 2048,
-  total: 6000,
-} as const;
 
 /**
  * Discord 전용 색상. 사이트 액센트 토큰과 무관하다.
@@ -34,43 +24,8 @@ const SEVERITY_LABEL: Record<TriageSeverity, string> = {
   low: "낮음",
 };
 
-/**
- * 잘린 사실이 드러나도록 말줄임표를 남긴다. 조용히 자르면 카드만 보고
- * 조치 목록이 끝난 것으로 읽힌다.
- */
-const truncate = (text: string, max: number): string =>
-  text.length <= max ? text : `${text.slice(0, max - 1)}…`;
-
-const embedLength = (embed: DiscordEmbed): number =>
-  embed.title.length +
-  (embed.description?.length ?? 0) +
-  (embed.footer?.text.length ?? 0) +
-  (embed.fields ?? []).reduce((sum, field) => sum + field.name.length + field.value.length, 0);
-
-/**
- * 합계 상한을 넘으면 뒤쪽 field 부터 버린다. 앞쪽일수록 판단에 먼저 쓰이는 정보다.
- * field 를 다 버려도 넘으면 description 을 줄인다. 제목과 링크는 마지막까지 남긴다.
- */
-const fitTotal = (embed: DiscordEmbed): DiscordEmbed => {
-  const fitted = { ...embed, fields: [...(embed.fields ?? [])] };
-  while (fitted.fields.length > 0 && embedLength(fitted) > LIMIT.total) {
-    fitted.fields.pop();
-  }
-  if (embedLength(fitted) > LIMIT.total && fitted.description) {
-    const excess = embedLength(fitted) - LIMIT.total;
-    fitted.description = truncate(
-      fitted.description,
-      Math.max(1, fitted.description.length - excess),
-    );
-  }
-  return fitted;
-};
-
 const footerText = (alert: SentryAlertSummary, suffix: string): string =>
-  truncate(
-    [alert.environment, alert.release, alert.triggeredRule, suffix].filter(Boolean).join(" · "),
-    LIMIT.footer,
-  );
+  [alert.environment, alert.release, alert.triggeredRule, suffix].filter(Boolean).join(" · ");
 
 /**
  * 판정 결과가 있는 카드. 심각도를 제목 앞에 붙여 목록에서 정렬 없이도 눈에 들어오게 한다.
@@ -88,14 +43,14 @@ const triagedEmbed = (
     .map((action, index) => `${index + 1}. ${action}`)
     .join("\n");
 
-  return fitTotal({
-    title: truncate(`[${prefix}] ${alert.title}`, LIMIT.title),
+  return fitEmbed({
+    title: `[${prefix}] ${alert.title}`,
     url: alert.webUrl,
-    description: truncate(result.userImpact, LIMIT.description),
+    description: result.userImpact,
     color: result.isNoise ? NOISE_COLOR : SEVERITY_COLOR[result.severity],
     fields: [
-      { name: "추정 원인", value: truncate(cause || "판정 없음", LIMIT.fieldValue) },
-      ...(actions ? [{ name: "권장 조치", value: truncate(actions, LIMIT.fieldValue) }] : []),
+      { name: "추정 원인", value: cause || "판정 없음" },
+      ...(actions ? [{ name: "권장 조치", value: actions }] : []),
     ],
     footer: {
       text: footerText(alert, `${outcome.provider}/${outcome.model} · 확신도 ${result.confidence}`),
@@ -112,12 +67,12 @@ const untriagedEmbed = (alert: SentryAlertSummary, reason: string): DiscordEmbed
     .filter(Boolean)
     .join("\n");
 
-  return fitTotal({
-    title: truncate(alert.title, LIMIT.title),
+  return fitEmbed({
+    title: alert.title,
     url: alert.webUrl,
-    description: truncate(`AI 트리아지 없음: ${reason}`, LIMIT.description),
+    description: `AI 트리아지 없음: ${reason}`,
     color: UNTRIAGED_COLOR,
-    fields: context ? [{ name: "이벤트", value: truncate(context, LIMIT.fieldValue) }] : [],
+    fields: context ? [{ name: "이벤트", value: context }] : [],
     footer: { text: footerText(alert, "판정 없음") },
   });
 };
@@ -132,5 +87,4 @@ const untriagedEmbed = (alert: SentryAlertSummary, reason: string): DiscordEmbed
 const buildDiscordCard = (alert: SentryAlertSummary, outcome: TriageOutcome): DiscordEmbed =>
   outcome.status === "ok" ? triagedEmbed(alert, outcome) : untriagedEmbed(alert, outcome.reason);
 
-export { buildDiscordCard, LIMIT, NOISE_COLOR, SEVERITY_COLOR, UNTRIAGED_COLOR };
-export type { DiscordEmbed };
+export { buildDiscordCard, NOISE_COLOR, SEVERITY_COLOR, UNTRIAGED_COLOR };

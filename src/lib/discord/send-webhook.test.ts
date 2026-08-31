@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { DISCORD_LIMIT, embedLength, fitEmbed } from "@/lib/discord/embed-budget";
 import { sendDiscordCard } from "@/lib/discord/send-webhook";
 
-import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
+import type { DiscordEmbed } from "@/lib/discord/types";
 
 const embed: DiscordEmbed = { title: "Error: boom", color: 0xe5484d };
 
@@ -250,6 +251,71 @@ describe("sendDiscordCard", () => {
       });
 
       expect(result).toEqual({ ok: false, error: "socket closed" });
+    });
+  });
+  describe("예산 강제", () => {
+    const sentEmbed = (fetcher: ReturnType<typeof vi.fn>): DiscordEmbed => {
+      const [, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+      return (JSON.parse(init.body as string) as { embeds: DiscordEmbed[] }).embeds[0]!;
+    };
+
+    it("합계 상한을 넘긴 embed 도 예산 안으로 줄여 보낸다", async () => {
+      const fetcher = vi.fn(async () => response(204));
+      const oversized: DiscordEmbed = {
+        title: "t".repeat(500),
+        description: "d".repeat(5_000),
+        color: 0,
+        footer: { text: "f".repeat(3_000) },
+      };
+
+      await sendDiscordCard(WEBHOOK, oversized, { fetcher: fetcher as typeof fetch });
+
+      const sent = sentEmbed(fetcher);
+      expect(sent.title).toHaveLength(DISCORD_LIMIT.title);
+      expect(embedLength(sent)).toBeLessThanOrEqual(DISCORD_LIMIT.total);
+    });
+
+    it("field 개수 초과와 빈 field 를 body 에서 정리한다", async () => {
+      const fetcher = vi.fn(async () => response(204));
+      const fields = [
+        { name: "", value: "값" },
+        ...Array.from({ length: 30 }, (_, index) => ({ name: `f${index}`, value: "v" })),
+      ];
+
+      await sendDiscordCard(
+        WEBHOOK,
+        { title: "제목", color: 0, fields },
+        {
+          fetcher: fetcher as typeof fetch,
+        },
+      );
+
+      const sent = sentEmbed(fetcher);
+      expect(sent.fields!.length).toBeLessThanOrEqual(DISCORD_LIMIT.fields);
+      expect(sent.fields!.every((field) => field.name !== "")).toBe(true);
+    });
+
+    it("호출자가 넘긴 원본 embed 는 변형하지 않는다", async () => {
+      const fetcher = vi.fn(async () => response(204));
+      const oversized: DiscordEmbed = { title: "t".repeat(500), color: 0 };
+
+      await sendDiscordCard(WEBHOOK, oversized, { fetcher: fetcher as typeof fetch });
+
+      expect(oversized.title).toHaveLength(500);
+    });
+
+    it("빌더가 이미 예산을 맞춘 embed 는 같은 내용으로 보낸다", async () => {
+      const fetcher = vi.fn(async () => response(204));
+      const fitted = fitEmbed({
+        title: "t".repeat(500),
+        description: "d".repeat(5_000),
+        color: 0,
+        fields: [{ name: "이름", value: "값" }],
+      });
+
+      await sendDiscordCard(WEBHOOK, fitted, { fetcher: fetcher as typeof fetch });
+
+      expect(sentEmbed(fetcher)).toEqual(JSON.parse(JSON.stringify(fitted)));
     });
   });
 });

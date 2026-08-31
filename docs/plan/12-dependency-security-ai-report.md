@@ -416,16 +416,22 @@ src/lib/dependency-security/
 ├─ normalize-alert.ts
 ├─ lockfile-context.ts
 ├─ priority.ts
-├─ dependency-triage-provider.ts
-├─ openai-dependency-triage-provider.ts
-├─ gemini-dependency-triage-provider.ts
-├─ dependency-triage-prompt.ts
+├─ triage-provider.ts
+├─ triage-prompt.ts
+├─ triage-schema.ts
 ├─ discord-report.ts
 └─ *.test.ts
 
 src/lib/discord/
-└─ send-webhook.ts
+├─ embed-budget.ts
+├─ send-webhook.ts
+└─ types.ts
 ```
+
+2026-08-31 갱신: OpenAI·Gemini 호출과 폴백, provider 선택은 세 알림 계열이 공유하는
+`src/lib/triage/`가 소유한다([ADR-0007](../adr/0007-shared-triage-transport.md)).
+`triage-provider.ts`에는 이 계열의 계약만 남고, `DEPENDENCY_TRIAGE_PROVIDER=mock`도
+공용 계층을 통해 동작한다.
 
 workflow에서 TypeScript entrypoint를 실행하기 위해 `tsx`, 취약 버전 범위를 계산하기 위해
 `semver`와 타입을 devDependency로 추가한다. `npm run security:report` script는 `npm ci` 뒤에

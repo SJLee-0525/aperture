@@ -1,3 +1,5 @@
+import { worseOf } from "@/lib/performance-alerts/metric-descriptor";
+
 const METRIC_AUDITS = {
   lcp: "largest-contentful-paint",
   cls: "cumulative-layout-shift",
@@ -81,15 +83,17 @@ const metricValues = (report: unknown): Record<LighthouseMetricName, number> => 
   };
 };
 
-const aggregateValues = (values: number[]): MetricRange => {
+const aggregateValues = (name: LighthouseMetricName, values: number[]): MetricRange => {
   if (values.length < 2 || values.length > 3) {
     throw new Error(`Lighthouse requires 2 or 3 successful runs, received ${values.length}`);
   }
   const sorted = [...values].sort((left, right) => left - right);
+  const low = sorted[0] ?? 0;
+  const high = sorted.at(-1) ?? 0;
   return {
-    value: sorted.length === 3 ? (sorted[1] ?? 0) : (sorted[1] ?? 0),
-    min: sorted[0] ?? 0,
-    max: sorted.at(-1) ?? 0,
+    value: sorted.length === 3 ? (sorted[1] ?? 0) : worseOf(name, low, high),
+    min: low,
+    max: high,
   };
 };
 
@@ -118,6 +122,7 @@ const diagnosticsFrom = (report: unknown): LighthouseDiagnostic[] => {
 /**
  * 세 실행은 metric별 중앙값을 사용한다. 한 번 실패해 두 값만 남으면 회귀를 낙관하지 않도록
  * 더 나쁜 값을 사용하고 partial로 표시한다.
+ * 어느 쪽이 나쁜지는 metric마다 다르므로 `metric-descriptor`가 답한다.
  */
 const summarizeLighthouseRuns = (runs: LighthouseRun[]): LighthouseTargetResult[] => {
   const grouped = Map.groupBy(runs, (run) => run.url);
@@ -132,7 +137,13 @@ const summarizeLighthouseRuns = (runs: LighthouseRun[]): LighthouseTargetResult[
     const runMetrics = urlRuns.map((run) => metricValues(run.report));
     const metricNames = Object.keys(runMetrics[0] ?? {}) as LighthouseMetricName[];
     const metrics = Object.fromEntries(
-      metricNames.map((name) => [name, aggregateValues(runMetrics.map((item) => item[name]))]),
+      metricNames.map((name) => [
+        name,
+        aggregateValues(
+          name,
+          runMetrics.map((item) => item[name]),
+        ),
+      ]),
     ) as Record<LighthouseMetricName, MetricRange>;
 
     return {

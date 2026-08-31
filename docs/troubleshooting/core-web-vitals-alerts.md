@@ -14,9 +14,17 @@ CrUX는 origin과 각 URL을 PHONE, DESKTOP으로 조회한다. Lighthouse는 �
 각 3회 측정한다.
 
 CrUX `record 없음`은 대상별 연속 횟수와 중복 억제 key를 snapshot에 보존하지만, Discord 알림은 한 실행의
-데이터 부족 항목을 요약 카드 한 장으로 묶는다. Lighthouse 회귀 알림은 대상별로 별도 전송한다.
+데이터 부족 항목을 요약 카드 한 장으로 묶는다. 요약은 대상마다 한 줄이며 phone과 desktop의 연속 횟수를
+함께 적는다. 목록이 Discord field 상한을 넘으면 마지막 줄에 `외 N개 대상`을 적어 표시하지 못한 수를 남긴다.
+Lighthouse 회귀 알림은 대상별로 별도 전송한다.
+
 `force_ai_analysis=true`인 수동 실행에서는 중복 억제를 무시하고 현재 경고를 다시 AI에 전달하며, 여러 대상의
-분석 결과는 통합 AI 카드 한 장으로 전송한다.
+분석 결과는 통합 AI 카드 한 장으로 전송한다. 강제 실행도 중복 억제 key를 snapshot에 남기므로 같은 회귀로
+다음 정기 실행이 카드를 한 번 더 보내지 않는다.
+
+AI 분석은 한 실행에 최대 20개 대상까지만 보낸다. 경고가 그보다 많으면 심각도 순으로 20개를 고르고,
+나머지는 AI 설명 없이 측정값 카드로 나간다. 이때 Actions summary에
+`AI 분석 대상 20개, 나머지 N개는 측정값 카드만 전송`이 남는다. 20개 이하면 이 줄이 없는 것이 정상이다.
 
 ```text
 https://sungjoon.works/ko/dev/projects
@@ -85,8 +93,11 @@ workflow는 두 artifact를 90일간 보관한다.
 | `core-web-vitals-lighthouse` | URL별 Lighthouse JSON, HTML과 `manifest.json`         |
 
 snapshot에는 CrUX 원본 응답, Lighthouse HTML, screenshot, API key와 webhook URL을 넣지 않는다.
-Discord 카드에는 코드가 판정한 수치를 먼저 표시하고, AI가 성공하면 요약, 사용자 영향, 원인 후보와
-확인 순서를 추가한다. AI가 실패해도 수치 카드는 전송된다.
+Discord 카드에는 코드가 판정한 수치를 먼저 표시한다. AI가 성공한 단일 대상 카드는 요약, 사용자
+영향, 원인 후보와 확인 순서를 추가한다. 여러 대상의 통합 카드는 공통 요약만 보내고, 대상별 전체
+분석은 Actions summary와 `core-web-vitals-ai-report` artifact에서 확인한다. 통합 카드에는 코드가
+집계한 현황, 공통 원인 최대 3개, 우선 확인 3개와 악화 폭이 큰 대상 3개를 표시한다. AI가 실패해도
+수치 카드는 전송된다.
 
 ## 로컬 확인
 
@@ -141,6 +152,11 @@ challenge는 애플리케이션 도달 전에 처리되므로 Vercel 애플리�
 
 Hobby 플랜에서는 system-level DDoS mitigation을 끄거나 System Bypass Rule을 만들 수 없다. 따라서
 Lighthouse를 세 shard job으로 나눠 각 runner가 네 URL만 측정하고, aggregation job에서 결과를 합친다.
+
+aggregation은 shard 개수를 세지 않는다. shard 수는 워크플로 설정이라 스크립트가 알 수 없고, 개수가 맞아도
+한 shard가 비면 통과하기 때문이다. 대신 병합 결과가 `config/performance-targets.json`의 대상 집합과
+정확히 일치하는지, 대상마다 실행이 2~3개이고 대표 실행이 정확히 하나인지를 본다. 어긋나면 어떤 URL이
+문제인지 오류 문구에 담고 병합 manifest를 남기지 않는다.
 
 - 실패한 시각의 `Project → Firewall → Overview → Events`에서 `System Mitigations`, `Challenged`, IP,
   JA4, User Agent와 경로를 확인한다. `Rules`가 비어 있어도 자동 DDoS mitigation은 별도로 동작한다.

@@ -22,7 +22,11 @@ const verdict: TriageResult = {
 
 const deps = (overrides: Partial<SentryAlertDependencies> = {}) => {
   const base: SentryAlertDependencies = {
-    provider: vi.fn(async () => ({ result: verdict, provider: "openai", model: "gpt-5.6-luna" })),
+    provider: vi.fn(async () => ({
+      result: verdict,
+      provider: "openai" as const,
+      model: "gpt-5.6-luna",
+    })),
     rateLimiter: vi.fn(async () => ({ allowed: true, count: 1 })),
     sendCard: vi.fn(async () => ({ ok: true as const })),
     claim: vi.fn(async () => ({ status: "claimed" as const, alertId: "row-1" })),
@@ -75,7 +79,7 @@ describe("handleSentryAlert — 정상 경로", () => {
       }),
       provider: vi.fn(async () => {
         order.push("provider");
-        return { result: verdict, provider: "openai", model: "m" };
+        return { result: verdict, provider: "openai" as const, model: "m" };
       }),
     });
 
@@ -245,7 +249,7 @@ describe("handleSentryAlert — 카드 내용", () => {
     const d = deps({
       provider: vi.fn(async () => ({
         result: { ...verdict, isNoise: true },
-        provider: "gemini",
+        provider: "gemini" as const,
         model: "m",
       })),
     });

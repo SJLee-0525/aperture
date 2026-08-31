@@ -73,6 +73,18 @@ describe("production Lighthouse collector", () => {
     expect(marked.map((run) => run.isRepresentativeRun)).toEqual([false, false, true]);
   });
 
+  it("두 실행만 남으면 점수가 낮은 실행을 대표로 고른다", async () => {
+    const runs: LighthouseManifestItem[] = await Promise.all(
+      [0.85, 0.75].map(async (score, index) => {
+        const paths = reportPaths(resolve(reportDirectory, `pair-${index}`));
+        await writeReport(resolve(reportDirectory, `pair-${index}`), score);
+        return { url: "https://sungjoon.works/ko", ...paths, isRepresentativeRun: false };
+      }),
+    );
+    const marked = await markRepresentativeRun(runs);
+    expect(marked.map((run) => run.isRepresentativeRun)).toEqual([false, true]);
+  });
+
   it("한 회차가 재시도 후에도 실패하면 두 성공 결과를 partial manifest로 남긴다", async () => {
     const runner = vi.fn(async (_url: string, outputPath: string) => {
       if (outputPath.includes("run-2")) throw new Error("HTTP 403");

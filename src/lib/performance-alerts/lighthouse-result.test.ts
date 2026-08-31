@@ -6,6 +6,7 @@ import {
   metricValues,
   summarizeLighthouseRuns,
 } from "@/lib/performance-alerts/lighthouse-result";
+import { judgeLab } from "@/lib/performance-alerts/performance-status";
 
 const report = (offset = 0) => ({
   categories: { performance: { score: 0.9 - offset / 10_000 } },
@@ -54,15 +55,23 @@ describe("Lighthouse result", () => {
   });
 
   it("세 값의 중앙값과 범위를 계산한다", () => {
-    expect(aggregateValues([3, 1, 2])).toEqual({ value: 2, min: 1, max: 3 });
+    expect(aggregateValues("lcp", [3, 1, 2])).toEqual({ value: 2, min: 1, max: 3 });
   });
 
   it("두 값만 남으면 나쁜 값을 사용한다", () => {
-    expect(aggregateValues([1, 3])).toEqual({ value: 3, min: 1, max: 3 });
+    expect(aggregateValues("lcp", [1, 3])).toEqual({ value: 3, min: 1, max: 3 });
+  });
+
+  it("두 값만 남은 performanceScore는 낮은 값을 사용한다", () => {
+    expect(aggregateValues("performanceScore", [0.75, 0.85])).toEqual({
+      value: 0.75,
+      min: 0.75,
+      max: 0.85,
+    });
   });
 
   it.each([[[]], [[1]], [[1, 2, 3, 4]]])("허용하지 않는 실행 수를 거부한다", (values) => {
-    expect(() => aggregateValues(values)).toThrow("requires 2 or 3");
+    expect(() => aggregateValues("lcp", values)).toThrow("requires 2 or 3");
   });
 
   it("대표 실행에서 허용한 audit 필드만 읽는다", () => {
@@ -99,6 +108,24 @@ describe("Lighthouse result", () => {
       { url: "https://sungjoon.works/ko", isRepresentativeRun: false, report: report(100) },
     ]);
     expect(result).toMatchObject({ status: "partial", metrics: { lcp: { value: 2_100 } } });
+  });
+
+  it("두 실행의 performanceScore는 낮은 값을 써서 lab 경고를 만든다", () => {
+    const scored = (score: number) => ({ ...report(), categories: { performance: { score } } });
+    const [result] = summarizeLighthouseRuns([
+      { url: "https://sungjoon.works/ko", isRepresentativeRun: true, report: scored(0.85) },
+      { url: "https://sungjoon.works/ko", isRepresentativeRun: false, report: scored(0.75) },
+    ]);
+    expect(result?.metrics.performanceScore.value).toBe(0.75);
+    const judgement = judgeLab({
+      lcp: result?.metrics.lcp.value ?? 0,
+      cls: result?.metrics.cls.value ?? 0,
+      tbt: result?.metrics.tbt.value ?? 0,
+      performanceScore: result?.metrics.performanceScore.value ?? 0,
+    });
+    expect(judgement.alerts).toContainEqual(
+      expect.objectContaining({ metric: "performanceScore", reason: "threshold" }),
+    );
   });
 
   it.each([

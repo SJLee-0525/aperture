@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { DISCORD_LIMIT } from "@/lib/discord/embed-budget";
 import {
   buildDiscordCard,
-  LIMIT,
   NOISE_COLOR,
   SEVERITY_COLOR,
   UNTRIAGED_COLOR,
@@ -94,21 +94,21 @@ describe("buildDiscordCard", () => {
     it("제목을 상한에서 자르고 말줄임표를 남긴다", () => {
       const card = buildDiscordCard(alert({ title: "가".repeat(400) }), ok());
 
-      expect(card.title).toHaveLength(LIMIT.title);
+      expect(card.title).toHaveLength(DISCORD_LIMIT.title);
       expect(card.title.endsWith("…")).toBe(true);
     });
 
     it("field 값을 상한에서 자른다", () => {
       const card = buildDiscordCard(alert(), ok({ recommendedActions: ["나".repeat(2000)] }));
 
-      expect(card.fields?.[1]?.value).toHaveLength(LIMIT.fieldValue);
+      expect(card.fields?.[1]?.value).toHaveLength(DISCORD_LIMIT.fieldValue);
     });
 
     it("합계 상한을 넘으면 뒤쪽 field 부터 버린다", () => {
       const card = buildDiscordCard(
         alert(),
         ok({
-          userImpact: "다".repeat(LIMIT.description),
+          userImpact: "다".repeat(DISCORD_LIMIT.description),
           recommendedActions: ["라".repeat(900)],
         }),
       );
@@ -119,7 +119,7 @@ describe("buildDiscordCard", () => {
         (card.footer?.text.length ?? 0) +
         (card.fields ?? []).reduce((sum, f) => sum + f.name.length + f.value.length, 0);
 
-      expect(total).toBeLessThanOrEqual(LIMIT.total);
+      expect(total).toBeLessThanOrEqual(DISCORD_LIMIT.total);
       expect(card.title).toContain("[높음]");
       expect(card.url).toBeDefined();
     });
@@ -131,12 +131,12 @@ describe("buildDiscordCard", () => {
       );
 
       expect(card.fields).toHaveLength(0);
-      expect(card.title).toHaveLength(LIMIT.title);
+      expect(card.title).toHaveLength(DISCORD_LIMIT.title);
       expect(card.url).toBe("https://sentry.io/organizations/o/issues/1/events/2/");
 
       const total =
         card.title.length + (card.description?.length ?? 0) + (card.footer?.text.length ?? 0);
-      expect(total).toBeLessThanOrEqual(LIMIT.total);
+      expect(total).toBeLessThanOrEqual(DISCORD_LIMIT.total);
     });
   });
 

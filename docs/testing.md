@@ -132,6 +132,31 @@ CI는 홈·사진·음악·프로젝트 화면의 Lighthouse 보고서를 `light
 보관한다. 성능은 초기 기준을 수집하기 위해 경고로 두며, 접근성·Best Practices·SEO가
 기준 미달이면 실패한다.
 
+### Core Web Vitals 알림의 로컬 fixture 테스트
+
+수집 정규화, 판정, 카드 구성, AI 계약 테스트가 전부 fixture 기반이라 네트워크와
+API key 가 필요 없다.
+
+```powershell
+npm test -- performance
+```
+
+### 운영 Lighthouse 수동 실행
+
+`core-web-vitals-report.yml` 워크플로가 쓰는 측정을 로컬에서 돌릴 수 있다. CI의
+`npm run test:lighthouse`와는 config와 대상이 다르며 서로의 계약을 바꾸지 않는다.
+운영 origin을 직접 측정하므로 빌드는 필요 없다.
+
+```powershell
+$env:SITE_URL = "https://sungjoon.works"
+npm run test:lighthouse:production   # 대표 URL을 3회씩 측정해 JSON·HTML·manifest 기록
+npm run test:lighthouse:merge        # shard 결과와 manifest 병합 (단일 실행이면 그대로 통과)
+```
+
+shard 분할이 필요하면 `LIGHTHOUSE_SHARD_INDEX`·`LIGHTHOUSE_SHARD_COUNT`를 설정한다.
+미설정 시 전체 URL을 한 번에 측정한다. 절차와 장애 대응은
+[troubleshooting](troubleshooting/core-web-vitals-alerts.md)에 있다.
+
 ## Storybook
 
 ```powershell
