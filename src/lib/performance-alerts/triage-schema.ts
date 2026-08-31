@@ -159,4 +159,4 @@ const parsePerformanceTriageResult = (
 };
 
 export { buildPerformanceTriageSchema, MAX_TARGETS, parsePerformanceTriageResult };
-export type { PerformanceTriageConfidence, PerformanceTriageResult, PerformanceTriageTarget };
+export type { PerformanceTriageResult, PerformanceTriageTarget };
