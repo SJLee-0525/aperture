@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  buildDependencySecurityReport,
-  embedLength,
-} from "@/lib/dependency-security/discord-report";
+import { buildDependencySecurityReport } from "@/lib/dependency-security/discord-report";
 import { createGeminiProvider } from "@/lib/dependency-security/gemini-triage-provider";
 import { fetchDependabotAlerts, nextLink } from "@/lib/dependency-security/github-alerts";
 import { addLockfileContext, packageNameAt } from "@/lib/dependency-security/lockfile-context";
@@ -13,6 +10,7 @@ import { isNewAlert, priorityFor } from "@/lib/dependency-security/priority";
 import { buildTriageInput, INSTRUCTIONS } from "@/lib/dependency-security/triage-prompt";
 import { getDependencyTriageProvider } from "@/lib/dependency-security/triage-provider";
 import { parseTriageResults } from "@/lib/dependency-security/triage-schema";
+import { embedLength } from "@/lib/discord/embed-budget";
 
 import type { DependencySecurityFact } from "@/lib/dependency-security/types";
 

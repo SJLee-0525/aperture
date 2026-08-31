@@ -1,7 +1,5 @@
-import {
-  createPerformanceDiscordCard,
-  DISCORD_FIELD_LIMIT,
-} from "@/lib/performance-alerts/discord-report";
+import { DISCORD_LIMIT } from "@/lib/discord/embed-budget";
+import { createPerformanceDiscordCard } from "@/lib/performance-alerts/discord-report";
 import {
   judgeFieldMetric,
   judgeInsufficientData,
@@ -71,7 +69,7 @@ const summarizeInsufficient = (
         .join(" · ")}`,
   );
   const suffix = (remaining: number) => `외 ${remaining}개 대상`;
-  const budget = DISCORD_FIELD_LIMIT - suffix(lines.length).length - 1;
+  const budget = DISCORD_LIMIT.fieldValue - suffix(lines.length).length - 1;
   const shown: string[] = [];
   let used = 0;
   for (const line of lines) {

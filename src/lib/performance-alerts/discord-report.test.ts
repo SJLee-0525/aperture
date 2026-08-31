@@ -1,13 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { DISCORD_LIMIT, embedLength, fitEmbed } from "@/lib/discord/embed-budget";
 import {
   attachPerformanceTriage,
   buildPerformanceTriageCards,
   createPerformanceDiscordCard,
-  DISCORD_EMBED_LIMIT,
-  DISCORD_FIELD_LIMIT,
-  embedLength,
-  fitEmbed,
 } from "@/lib/performance-alerts/discord-report";
 
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
@@ -116,8 +113,10 @@ describe("createPerformanceDiscordCard", () => {
       })),
       footer: { text: "f".repeat(3_000) },
     });
-    expect(card.fields?.every((field) => field.value.length <= DISCORD_FIELD_LIMIT)).toBe(true);
-    expect(embedLength(card)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
+    expect(card.fields?.every((field) => field.value.length <= DISCORD_LIMIT.fieldValue)).toBe(
+      true,
+    );
+    expect(embedLength(card)).toBeLessThanOrEqual(DISCORD_LIMIT.total);
   });
 });
 
@@ -155,7 +154,7 @@ describe("attachPerformanceTriage", () => {
       }),
       "gemini/model-id",
     );
-    expect(embedLength(result)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
+    expect(embedLength(result)).toBeLessThanOrEqual(DISCORD_LIMIT.total);
     expect(result.fields?.[0]?.name).toBe("Field");
   });
 });
@@ -305,7 +304,7 @@ describe("buildPerformanceTriageCards", () => {
     expect(card?.fields?.find((field) => field.name === "상세")?.value).toContain(
       "12개 대상의 전체 분석",
     );
-    expect(embedLength(card!)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
+    expect(embedLength(card!)).toBeLessThanOrEqual(DISCORD_LIMIT.total);
   });
 
   it("가장 긴 분석에서도 대상이 잘려 나가지 않는다", () => {
@@ -326,6 +325,6 @@ describe("buildPerformanceTriageCards", () => {
       ),
     );
     expect(card?.fields?.filter((field) => field.name.startsWith("host-"))).toHaveLength(0);
-    expect(embedLength(card!)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
+    expect(embedLength(card!)).toBeLessThanOrEqual(DISCORD_LIMIT.total);
   });
 });

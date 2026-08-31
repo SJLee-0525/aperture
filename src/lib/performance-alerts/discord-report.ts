@@ -1,12 +1,11 @@
+import { fitEmbed } from "@/lib/discord/embed-budget";
 import { formatDelta, severityRatio } from "@/lib/performance-alerts/metric-descriptor";
 
+import type { BudgetPolicy } from "@/lib/discord/embed-budget";
 import type { DiscordEmbed } from "@/lib/discord/types";
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
 import type { PerformanceTriageTarget } from "@/lib/performance-alerts/triage-schema";
-
-const DISCORD_FIELD_LIMIT = 1_024;
-const DISCORD_EMBED_LIMIT = 6_000;
 
 type ReportKind = "field" | "lab" | "combined" | "insufficient_data" | "baseline";
 type PerformanceReport = {
@@ -37,34 +36,14 @@ const titleByKind: Record<ReportKind, string> = {
   baseline: "Core Web Vitals 기준선",
 };
 
-const truncate = (value: string, limit: number): string =>
-  value.length <= limit ? value : `${value.slice(0, Math.max(0, limit - 1))}…`;
+/**
+ * 통합 카드가 field 다섯 개로 요약을 유지하도록 Discord 상한보다 좁게 쓴다.
+ * 상한 자체는 `fitEmbed` 기본값이 강제하므로 여기서는 표시 밀도만 정한다.
+ */
+const PERFORMANCE_EMBED_POLICY: BudgetPolicy = { description: 1_000, footer: 500, fields: 10 };
 
-const embedLength = (embed: DiscordEmbed): number =>
-  embed.title.length +
-  (embed.description?.length ?? 0) +
-  (embed.footer?.text.length ?? 0) +
-  (embed.fields ?? []).reduce((total, field) => total + field.name.length + field.value.length, 0);
-
-/** Discord가 카드 전체를 거부하지 않도록 field와 embed 상한을 전송 전에 함께 적용한다. */
-const fitEmbed = (embed: DiscordEmbed): DiscordEmbed => {
-  const result: DiscordEmbed = {
-    ...embed,
-    title: truncate(embed.title, 256),
-    description: embed.description ? truncate(embed.description, 1_000) : undefined,
-    footer: embed.footer ? { text: truncate(embed.footer.text, 500) } : undefined,
-    fields: embed.fields?.slice(0, 10).map((field) => ({
-      ...field,
-      name: truncate(field.name, 256),
-      value: truncate(field.value, DISCORD_FIELD_LIMIT),
-    })),
-  };
-
-  while (embedLength(result) > DISCORD_EMBED_LIMIT && result.fields?.length) {
-    result.fields.pop();
-  }
-  return result;
-};
+const fitPerformanceEmbed = (embed: DiscordEmbed): DiscordEmbed =>
+  fitEmbed(embed, PERFORMANCE_EMBED_POLICY);
 
 const triageFooter = (analysis: PerformanceTriageProviderResult, targets: number): string =>
   targets < 2
@@ -184,7 +163,7 @@ const attachPerformanceTriage = (
         : "제안 없음",
     },
   ];
-  return fitEmbed({
+  return fitPerformanceEmbed({
     ...embed,
     description: "측정값은 코드가 판정했고 AI는 원인 후보와 확인 순서만 작성했습니다.",
     fields: [...(embed.fields ?? []), ...explanation],
@@ -214,7 +193,7 @@ const buildPerformanceTriageCards = (
     ? `[Lighthouse 결과](${runUrl}#artifacts)`
     : "실행 artifact에서 Lighthouse 결과 확인";
   return [
-    fitEmbed({
+    fitPerformanceEmbed({
       ...entries[0]!.card,
       title: `Core Web Vitals — ${entries.length}개 경고`,
       description: analysis.result.commonSummary,
@@ -273,7 +252,7 @@ const createPerformanceDiscordCard = (
     },
   ];
 
-  return fitEmbed({
+  return fitPerformanceEmbed({
     title: titleByKind[report.kind],
     url: report.actionsRunUrl,
     description:
@@ -286,13 +265,5 @@ const createPerformanceDiscordCard = (
   });
 };
 
-export {
-  attachPerformanceTriage,
-  buildPerformanceTriageCards,
-  createPerformanceDiscordCard,
-  DISCORD_EMBED_LIMIT,
-  DISCORD_FIELD_LIMIT,
-  embedLength,
-  fitEmbed,
-};
+export { attachPerformanceTriage, buildPerformanceTriageCards, createPerformanceDiscordCard };
 export type { PerformanceReport };

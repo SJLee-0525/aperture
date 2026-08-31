@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DISCORD_FIELD_LIMIT, fitEmbed } from "@/lib/performance-alerts/discord-report";
+import { DISCORD_LIMIT, fitEmbed } from "@/lib/discord/embed-budget";
 import { buildPerformanceDecision } from "@/lib/performance-alerts/report-decision";
 
 import type { CollectedCruxResult } from "@/lib/performance-alerts/crux-client";
@@ -300,7 +300,7 @@ describe("buildPerformanceDecision", () => {
     });
     const summary = result.cards[0]?.fields?.find((field) => field.name === "Field")?.value ?? "";
 
-    expect(summary.length).toBeLessThanOrEqual(DISCORD_FIELD_LIMIT);
+    expect(summary.length).toBeLessThanOrEqual(DISCORD_LIMIT.fieldValue);
     expect(summary.endsWith("…")).toBe(false);
     expect(summary).toMatch(/외 \d+개 대상$/);
     // fitEmbed를 한 번 더 통과해도 목록이 다시 잘리지 않는다.
