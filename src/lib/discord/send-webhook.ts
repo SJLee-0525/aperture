@@ -1,3 +1,5 @@
+import { fitEmbed } from "@/lib/discord/embed-budget";
+
 import type { DiscordEmbed } from "@/lib/discord/types";
 
 type SendResult = { ok: true } | { ok: false; error: string };
@@ -34,6 +36,10 @@ const retryAfterMs = async (response: Response): Promise<number | null> => {
 /**
  * 카드 한 장을 Discord 채널 웹훅으로 보낸다. 재시도는 최대 1회다.
  *
+ * 입력 embed 는 변경하지 않고 Discord 예산에 맞춘 복사본을 만들어 보낸다. 빌더가 예산
+ * 적용을 빠뜨려도 문자열 길이·field 개수·합계 초과로 인한 400 은 여기서 막힌다.
+ * 예산 밖 유효성(빈 title, URL 형식)은 보장하지 않는다.
+ *
  * 실패를 예외로 올리지 않는다. 호출자는 전송 실패를 기록하고 나머지 흐름을 이어가야 하며,
  * 알림 실패가 판정 기록까지 잃게 만들어서는 안 된다.
  *
@@ -64,6 +70,8 @@ const sendDiscordCard = async (
   const deadline = now() + budgetMs;
   const remaining = () => deadline - now();
 
+  const body = JSON.stringify({ embeds: [fitEmbed(embed)], allowed_mentions: { parse: [] } });
+
   // 대기가 예상보다 길어져 남은 시간이 0 이하가 되면 AbortSignal.timeout 이 거부한다.
   const post = (timeoutMs: number) =>
     fetcher(url, {
@@ -71,7 +79,7 @@ const sendDiscordCard = async (
       headers: { "Content-Type": "application/json" },
       // 지금 body 는 embed 뿐이라 멘션이 발생하지 않는다. content 한 줄이 추가되는 순간
       // 트리아지 입력에 심긴 @everyone 이 실제 핑이 되므로 미리 닫아 둔다.
-      body: JSON.stringify({ embeds: [embed], allowed_mentions: { parse: [] } }),
+      body,
       signal: AbortSignal.timeout(Math.max(1, timeoutMs)),
     });
 
