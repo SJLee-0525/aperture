@@ -9,6 +9,7 @@ import {
   markRepresentativeRun,
   reportPaths,
   safeTargetName,
+  selectTargetShard,
   type LighthouseManifestItem,
 } from "./collect-production-lighthouse";
 
@@ -46,6 +47,14 @@ describe("production Lighthouse collector", () => {
 
   it("URL path를 파일명에 안전한 이름으로 바꾼다", () => {
     expect(safeTargetName("https://sungjoon.works/ko/dev/projects")).toBe("ko-dev-projects");
+  });
+
+  it("열두 target을 세 runner에 네 개씩 겹치지 않게 나눈다", () => {
+    const targets = Array.from({ length: 12 }, (_, index) => `target-${index}`);
+    const shards = [0, 1, 2].map((index) => selectTargetShard(targets, index, 3));
+
+    expect(shards.map((shard) => shard.length)).toEqual([4, 4, 4]);
+    expect(shards.flat()).toEqual(targets);
   });
 
   it("performance score 중앙값을 대표 실행으로 고른다", async () => {

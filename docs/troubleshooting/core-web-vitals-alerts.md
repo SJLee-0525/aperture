@@ -128,15 +128,22 @@ URL별 3회 중 2회가 성공하면 `partial`로 report를 만들며 2회 미�
 실패시킨다.
 
 2026-08-31 KST 첫 baseline 실행에서는 10개 URL의 30회와 `/ko`의 첫 2회가 성공한 뒤 `/ko` 3회차
-문서 요청이 HTTP 403으로 끝났다. 그 결과 `/ko/contact`, report 생성, Discord 전송과 snapshot 업로드는
-실행되지 않았다. 같은 시각의 Vercel 애플리케이션 로그에는 관련 오류가 없었다. 요청이 애플리케이션에
-도달하기 전 엣지에서 응답했거나 로그에 기록되지 않은 일시 오류일 가능성이 있으므로, 현재 기록만으로
-403의 주체를 확정하지 않는다. 일시 재실행만으로 통과시키기보다 아래 항목을 함께 확인한다.
+문서 요청이 HTTP 403으로 끝났다. 재실행에서도 같은 패턴이 반복됐다. Vercel Firewall에서
+`System Mitigations: Active`, `Custom Rules: 0`, `Bot Protection: Inactive`, `Challenged 24`와
+GitHub runner(Microsoft ASN) IP가 확인되어 Vercel 자동 DDoS mitigation challenge가 원인임을 확정했다.
+challenge는 애플리케이션 도달 전에 처리되므로 Vercel 애플리케이션 로그에는 오류가 남지 않는다.
 
-- 실패한 시각의 배포 및 방화벽 로그에서 403 응답 주체와 적용된 규칙을 확인한다.
+Hobby 플랜에서는 system-level DDoS mitigation을 끄거나 System Bypass Rule을 만들 수 없다. 따라서
+Lighthouse를 세 shard job으로 나눠 각 runner가 네 URL만 측정하고, aggregation job에서 결과를 합친다.
+
+- 실패한 시각의 `Project → Firewall → Overview → Events`에서 `System Mitigations`, `Challenged`, IP,
+  JA4, User Agent와 경로를 확인한다. `Rules`가 비어 있어도 자동 DDoS mitigation은 별도로 동작한다.
 - `collection-summary.json`에서 실패한 URL, 회차와 재시도 결과를 확인한다.
 - 성공한 JSON과 HTML이 `core-web-vitals-lighthouse` artifact에 남았는지 확인한다.
 - 한 URL의 성공이 2회 미만이면 report와 snapshot은 만들지 않으므로 원시 결과로 원인을 조사한다.
+
+재현 시에는 Firewall의 `Live 10 minutes`를 열어 둔 상태에서 workflow를 수동 실행한다. challenge가
+확인되면 임의의 Custom Rule이나 Attack Challenge Mode를 추가하지 않는다.
 
 ### AI 분석 실패
 

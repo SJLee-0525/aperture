@@ -342,7 +342,30 @@ diff에 추가한 패키지 엔트리만 남아야 정상. `package.json`과 `pa
 
 ## 컨벤션
 
-- 커밋: `[TYPE] 한글 제목` — [git-commit-convention](.claude/skills/git-commit-convention/SKILL.md)
+### 커밋 규칙 (필수)
+
+커밋하기 전에 이 항목과 [`git-commit-convention`](.claude/skills/git-commit-convention/SKILL.md)을 반드시 읽는다. 사용자가 따로 말하지 않아도 아래 형식을 지킨다.
+
+- 제목은 반드시 `[TYPE] 한글 제목` 형식으로 쓴다. 허용 TYPE은 `[FEAT]`, `[FIX]`, `[DOCS]`, `[REFACTOR]`, `[TEST]`, `[CHORE]`다.
+- 제목에는 이슈 번호, 마침표, 영어 동사를 붙이지 않는다. 한 줄에 변경 결과 하나만 적는다.
+- 본문은 제목 다음 빈 줄 뒤에 작성한다. 무엇이 왜 바뀌었는지와 영향 범위를 1~3개 문단으로 설명한다. 구현 파일을 나열하거나 작업 과정을 일지처럼 쓰지 않는다.
+- 검증 명령과 결과는 `검증:` 문단으로 남긴다. 실행하지 않은 명령을 통과했다고 쓰지 않는다.
+- 공동 작업이나 에이전트가 기여한 경우 본문 마지막에 Git trailer를 한 줄 추가한다: `Co-Authored-By: Codex <noreply@openai.com>`.
+- trailer는 본문과 빈 줄 하나로 분리하고, trailer 뒤에 설명을 덧붙이지 않는다. 여러 trailer는 한 줄씩 쓴다.
+- 예시:
+
+```text
+[FIX] Lighthouse 측정을 shard로 분할한다
+
+동일 GitHub runner IP에서 반복 요청이 누적되어 Vercel DDoS mitigation challenge가 발생하므로
+측정 대상을 세 job으로 나누고 aggregation 단계에서 결과를 병합한다.
+
+검증: npm test -- scripts/collect-production-lighthouse.test.ts scripts/merge-production-lighthouse.test.ts
+
+Co-Authored-By: Codex <noreply@openai.com>
+```
+
+- 커밋 전 `git diff --check`와 관련 테스트를 실행하고, 결과를 본문에 반영한다. 문서만 바꿔도 동일 규칙을 적용한다.
 - 브랜치: `main` + `feature/{요약}` 단순 전략 — [git-branch-strategy](.claude/skills/git-branch-strategy/SKILL.md)
 - **파일당 단일 책임(SRP)** — 사용자 강선호 ([memory](.claude/memory/feedback_srp_per_file.md))
 - 상대경로 import(`../`) 금지 → `@/` alias (hook이 경고)
