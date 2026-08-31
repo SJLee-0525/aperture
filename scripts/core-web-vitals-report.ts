@@ -21,6 +21,7 @@ import {
   type LighthouseTargetResult,
 } from "@/lib/performance-alerts/lighthouse-result";
 import { buildPerformanceDecision } from "@/lib/performance-alerts/report-decision";
+import { selectTriageTargets } from "@/lib/performance-alerts/select-triage-targets";
 import { readSnapshotArchive } from "@/lib/performance-alerts/snapshot-archive";
 import {
   parsePerformanceSnapshot,
@@ -29,6 +30,7 @@ import {
 } from "@/lib/performance-alerts/snapshot";
 import { preflightPerformanceTargets, siteOrigin } from "@/lib/performance-alerts/site-target";
 import { getPerformanceTriageProvider } from "@/lib/performance-alerts/triage-provider";
+import { MAX_TARGETS } from "@/lib/performance-alerts/triage-schema";
 import { redactSecrets } from "@/lib/text/redact-secrets";
 
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
@@ -40,6 +42,11 @@ type PreviousSnapshotResult =
   | { status: "comparison_skipped"; reason: string };
 
 type CollectionResult = { complete: boolean; value: unknown };
+/**
+ * `triageOrder`는 AI에 넘긴 배열에서의 순위다. 분석하지 않는 대상은 null이다.
+ * provider 요청 순서, 응답의 targetIndex, 카드 순서가 모두 이 값 하나로 맞춰진다.
+ */
+type ReportEntry = { card: unknown; input: unknown | null; triageOrder: number | null };
 type ReportDecision = {
   cards: unknown[];
   triageInputs?: Array<unknown | null>;
@@ -59,10 +66,7 @@ type ReportDependencies = {
   }) => Promise<ReportDecision> | ReportDecision;
   sendCard: (card: unknown) => Promise<{ ok: true } | { ok: false; error: string }>;
   analyzeTargets?: (inputs: unknown[]) => Promise<unknown>;
-  renderCards: (
-    entries: Array<{ card: unknown; input: unknown | null }>,
-    analysis: unknown | null,
-  ) => unknown[];
+  renderCards: (entries: ReportEntry[], analysis: unknown | null) => unknown[];
   writeAiReport?: (inputs: unknown[], analysis: unknown | null) => Promise<void>;
   writeSnapshot: (snapshot: unknown) => Promise<void>;
   appendSummary: (summary: string) => Promise<void>;
@@ -73,6 +77,18 @@ const WORKFLOW_FILE = "core-web-vitals-report.yml";
 const LIGHTHOUSE_MANIFEST = "lighthouse-production-report/manifest.json";
 const SNAPSHOT_PATH = "performance-snapshot.json";
 const AI_REPORT_PATH = "performance-ai-report.md";
+
+/**
+ * 분석 대상 entry를 provider에 넘긴 순서대로 돌려준다.
+ * 요청 순서와 응답의 targetIndex, 카드 순서가 이 함수 하나로 같아진다.
+ */
+const orderedTriageEntries = <T extends { triageOrder: number | null }>(entries: T[]): T[] =>
+  entries
+    .filter((entry) => entry.triageOrder !== null)
+    .sort((left, right) => (left.triageOrder ?? 0) - (right.triageOrder ?? 0));
+
+const orderedTriageInputs = (entries: ReportEntry[]): unknown[] =>
+  orderedTriageEntries(entries).map((entry) => entry.input);
 
 /** Discord 통합 카드가 대상을 구분할 수 있게 측정 대상과 form factor를 함께 적는다. */
 const triageLabel = (input: PerformanceTriageInput): string =>
@@ -120,11 +136,27 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
   });
   await dependencies.appendSummary(decision.summary);
 
-  const entries = decision.cards.map((card, index) => ({
+  const candidates = decision.cards.map((card, index) => ({
     card,
     input: decision.triageInputs?.[index] ?? null,
   }));
-  const analyzable = entries.flatMap((entry) => (entry.input === null ? [] : [entry.input]));
+  const { selected, omitted } = selectTriageTargets(
+    candidates.flatMap((entry) =>
+      entry.input === null ? [] : [entry.input as PerformanceTriageInput],
+    ),
+    MAX_TARGETS,
+  );
+  const entries: ReportEntry[] = candidates.map((entry) => {
+    const order =
+      entry.input === null ? -1 : selected.indexOf(entry.input as PerformanceTriageInput);
+    return { ...entry, triageOrder: order < 0 ? null : order };
+  });
+  if (omitted > 0) {
+    await dependencies.appendSummary(
+      `AI 분석 대상 ${selected.length}개, 나머지 ${omitted}개는 측정값 카드만 전송`,
+    );
+  }
+  const analyzable = orderedTriageInputs(entries);
   let analysis: unknown = null;
   if (analyzable.length && dependencies.analyzeTargets) {
     try {
@@ -297,18 +329,15 @@ const main = async (): Promise<void> => {
       }),
     renderCards: (entries, analysis) => {
       if (!analysis) return entries.map((entry) => entry.card);
-      const analyzed = entries.flatMap((entry) =>
-        entry.input === null
-          ? []
-          : [
-              {
-                card: entry.card as DiscordEmbed,
-                label: triageLabel(entry.input as PerformanceTriageInput),
-                input: entry.input as PerformanceTriageInput,
-              },
-            ],
+      // 분석 순서가 곧 응답 targetIndex 순서다. 여기서 어긋나면 설명이 다른 카드에 붙는다.
+      const analyzed = orderedTriageEntries(entries).map((entry) => ({
+        card: entry.card as DiscordEmbed,
+        label: triageLabel(entry.input as PerformanceTriageInput),
+        input: entry.input as PerformanceTriageInput,
+      }));
+      const untouched = entries.flatMap((entry) =>
+        entry.triageOrder === null ? [entry.card] : [],
       );
-      const untouched = entries.flatMap((entry) => (entry.input === null ? [entry.card] : []));
       return [
         ...buildPerformanceTriageCards(analyzed, analysis as PerformanceTriageProviderResult),
         ...untouched,

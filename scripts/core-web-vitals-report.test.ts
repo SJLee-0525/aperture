@@ -115,20 +115,107 @@ describe("runCoreWebVitalsReport", () => {
     const deps = dependencies();
     deps.judge.mockResolvedValue({
       cards: [{ title: "a" }, { title: "b" }, { title: "데이터 부족" }],
-      triageInputs: [{ target: "/ko" }, { target: "/ko/photo" }, null],
+      triageInputs: [{ target: "/ko", metrics: [] }, { target: "/ko/photo", metrics: [] }, null],
       snapshot: {},
       summary: "경고",
     });
     await runCoreWebVitalsReport(deps);
     expect(deps.analyzeTargets).toHaveBeenCalledTimes(1);
-    expect(deps.analyzeTargets).toHaveBeenCalledWith([{ target: "/ko" }, { target: "/ko/photo" }]);
+    expect(deps.analyzeTargets).toHaveBeenCalledWith([
+      { target: "/ko", metrics: [] },
+      { target: "/ko/photo", metrics: [] },
+    ]);
+  });
+
+  it("상한을 넘는 대상은 심각도 상위만 분석하고 나머지는 측정값 카드로 남긴다", async () => {
+    const deps = dependencies();
+    // 뒤쪽 대상일수록 LCP 악화가 크므로 심각도 정렬이 입력 순서를 뒤집는다.
+    const inputs = Array.from({ length: 26 }, (_, index) => ({
+      target: `https://example.test/${index}`,
+      metrics: [
+        {
+          source: "field",
+          metric: "LCP",
+          current: 3_000 + index * 100,
+          previous: 3_000,
+          status: "poor",
+        },
+      ],
+    }));
+    deps.judge.mockResolvedValue({
+      cards: inputs.map((input) => ({ title: input.target })),
+      triageInputs: inputs,
+      snapshot: {},
+      summary: "경고",
+    });
+    await runCoreWebVitalsReport(deps);
+
+    const analyzed = deps.analyzeTargets.mock.calls[0]?.[0] as typeof inputs;
+    expect(analyzed).toHaveLength(20);
+    expect(analyzed[0]?.target).toBe("https://example.test/25");
+    expect(analyzed.at(-1)?.target).toBe("https://example.test/6");
+    expect(deps.appendSummary).toHaveBeenCalledWith(
+      "AI 분석 대상 20개, 나머지 6개는 측정값 카드만 전송",
+    );
+
+    const rendered = deps.renderCards.mock.calls[0]?.[0] ?? [];
+    expect(rendered.filter((entry) => entry.triageOrder !== null)).toHaveLength(20);
+    expect(rendered.filter((entry) => entry.triageOrder === null)).toHaveLength(6);
+  });
+
+  it("심각도 정렬로 순서가 바뀌어도 분석을 원래 카드에 붙인다", async () => {
+    const deps = dependencies();
+    const inputs = [
+      {
+        target: "https://example.test/mild",
+        formFactor: "phone",
+        metrics: [
+          { source: "field", metric: "LCP", current: 3_010, previous: 3_000, status: "poor" },
+        ],
+        diagnostics: [],
+      },
+      {
+        target: "https://example.test/severe",
+        formFactor: "phone",
+        metrics: [
+          { source: "field", metric: "LCP", current: 9_000, previous: 3_000, status: "poor" },
+        ],
+        diagnostics: [],
+      },
+    ];
+    deps.judge.mockResolvedValue({
+      cards: inputs.map((input) => ({ title: input.target })),
+      triageInputs: inputs,
+      snapshot: {},
+      summary: "경고",
+    });
+    deps.renderCards.mockImplementation((entries, analysis) => {
+      const targets = (analysis as { targets: string[] }).targets;
+      return entries
+        .filter((entry) => entry.triageOrder !== null)
+        .sort((left, right) => (left.triageOrder ?? 0) - (right.triageOrder ?? 0))
+        .map((entry, index) => ({
+          card: (entry.card as { title: string }).title,
+          summary: targets[index],
+        }));
+    });
+    // provider는 요청 순서대로 대상별 분석을 돌려준다.
+    deps.analyzeTargets.mockImplementation(async (received) => ({
+      targets: (received as Array<{ target: string }>).map((input) => `${input.target} 분석`),
+    }));
+    await runCoreWebVitalsReport(deps);
+
+    expect(deps.sendCard.mock.calls.map(([card]) => card)).toEqual([
+      { card: "https://example.test/severe", summary: "https://example.test/severe 분석" },
+      { card: "https://example.test/mild", summary: "https://example.test/mild 분석" },
+    ]);
   });
 
   it("분석 결과와 카드를 renderCards에 함께 넘긴다", async () => {
     const deps = dependencies();
     deps.judge.mockResolvedValue({
       cards: [{ title: "기본" }],
-      triageInputs: [{ target: "/ko" }],
+      triageInputs: [{ target: "/ko", metrics: [] }],
       snapshot: {},
       summary: "경고",
     });
@@ -136,7 +223,7 @@ describe("runCoreWebVitalsReport", () => {
     deps.renderCards.mockReturnValue([{ title: "AI 결합" }]);
     await runCoreWebVitalsReport(deps);
     expect(deps.renderCards).toHaveBeenCalledWith(
-      [{ card: { title: "기본" }, input: { target: "/ko" } }],
+      [{ card: { title: "기본" }, input: { target: "/ko", metrics: [] }, triageOrder: 0 }],
       { id: "분석" },
     );
     expect(deps.sendCard).toHaveBeenCalledWith({ title: "AI 결합" });
@@ -146,14 +233,14 @@ describe("runCoreWebVitalsReport", () => {
     const deps = dependencies();
     deps.judge.mockResolvedValue({
       cards: [{ title: "기본" }],
-      triageInputs: [{ target: "/ko" }],
+      triageInputs: [{ target: "/ko", metrics: [] }],
       snapshot: {},
       summary: "경고",
     });
     deps.analyzeTargets.mockRejectedValue(new Error("provider failed"));
     await expect(runCoreWebVitalsReport(deps)).resolves.toBeUndefined();
     expect(deps.renderCards).toHaveBeenCalledWith(
-      [{ card: { title: "기본" }, input: { target: "/ko" } }],
+      [{ card: { title: "기본" }, input: { target: "/ko", metrics: [] }, triageOrder: 0 }],
       null,
     );
     expect(deps.appendSummary).toHaveBeenCalledWith("AI 분석 생략: provider failed");
@@ -176,7 +263,7 @@ describe("runCoreWebVitalsReport", () => {
     const deps = dependencies();
     deps.judge.mockResolvedValue({
       cards: [{ title: "기본" }],
-      triageInputs: [{ target: "/ko" }],
+      triageInputs: [{ target: "/ko", metrics: [] }],
       snapshot: {},
       summary: "경고",
     });
