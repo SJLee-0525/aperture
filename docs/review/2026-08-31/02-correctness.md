@@ -132,7 +132,7 @@ ms 단위 metric 이 항상 CLS 를 이긴다. CLS 0.2 악화(심각)가 LCP +30
 
 `scripts/merge-production-lighthouse.ts:31` 의 기본값 `3`,
 `.github/workflows/core-web-vitals-report.yml` 의 `matrix.shard: [0, 1, 2]` 와
-`LIGHTHOUSE_SHARD_COUNT: 3` 이 서로를 모른다.
+`LIGHTHOUSE_SHARD_COUNT: 3` 이 서로를 참조하지 않는다.
 
 matrix 를 4로 늘리고 스크립트를 안 고치면 merge 가
 `Expected 3 Lighthouse shards, found 4` 로 실패한다. 그 단계는 `continue-on-error: true` 라서

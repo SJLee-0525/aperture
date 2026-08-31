@@ -1,7 +1,7 @@
 # 03-architecture 후보 4건 처리 결과 (2026-08-31)
 
 브랜치 `feature/core-web-vital` · 기준 `2f7044b` 위에서 진행.
-계획은 후보 3 → 2 → 1 → 4 순서로 넷을 모두 구현하는 것이었다.
+계획은 후보 3, 2, 1, 4 순서로 넷을 모두 구현하는 것이었다.
 원본 보고서는 [03-architecture.md](03-architecture.md).
 
 ## 처리 현황
@@ -30,6 +30,104 @@
 | 설정 누락 경고·폴백 승격      | `lib/triage/provider.test.ts` — 세 계열 공통   |
 | 테스트용 `fetch` 주입         | `provider.test.ts` + `contract-wiring.test.ts` |
 
+## 합치는 데 쓴 패턴
+
+새로 발명한 구조는 없다. 자리마다 이미 이름이 붙은 패턴을 골랐고, 무엇을 고를지는
+계열 사이의 차이가 어떤 종류인지가 정했다. 차이가 동작이면 함수를 주입했고
+숫자면 값을 주입했다.
+
+| 자리                        | 패턴            | 코드                                        |
+| --------------------------- | --------------- | ------------------------------------------- |
+| 계열별 차이를 담는 그릇     | Strategy        | `TriageContract<In, Out>`                   |
+| 두 제공자의 HTTP 계약 흡수  | Adapter         | `createOpenAIAdapter`·`createGeminiAdapter` |
+| 호출 골격 고정, 빈칸만 위임 | Template Method | 두 어댑터의 본문                            |
+| 폴백과 구간 상한 덧씌우기   | Decorator       | `withFallback`                              |
+| env 로 구현 고르기          | Factory         | `createTriageProvider`                      |
+| 미설정도 인터페이스 만족    | Null Object     | 던지는 provider                             |
+| 계열별 embed 상한           | Policy 객체     | `BudgetPolicy`                              |
+
+### Strategy: 계열의 차이를 계약 하나에 모았다
+
+계열마다 다른 것은 지시문, 입력 직렬화, 스키마, 파서, 출력 예산, 구간 상한이다.
+이것을 `TriageContract<In, Out>` 한 객체에 모아 전송에 넘긴다. 전송은 어느 계열을
+다루는지 알 필요가 없으므로 계열이 하나 더 늘어도 `lib/triage` 는 바뀌지 않는다.
+
+계약의 멤버가 상수가 아니라 함수인 이유가 여기 있다. `outputTokens(request)` 와
+`timeoutMs(request, base)`, `parse(text, request)` 는 요청을 받는다.
+`performance-alerts` 만 셋 다 대상 수에 따라 달라지고, 그 파서는 기대 대상 수를 두 번째
+인자로 요구한다. 상수 설정 객체로 뒀다면 이 계열이 계약에 들어오지 못한다.
+
+호출부는 `TriageProvider<In, Out>` 를 직접 쓰지 않고 계열이 내보내는 별칭을 받는다.
+`handle-sentry-alert.ts` 는 `SentryTriageProvider` 를, `core-web-vitals-report.ts` 는
+`PerformanceTriageProvider` 를 받는다. 제네릭 인스턴스화가 호출부마다 반복되지 않고,
+계열의 입출력 타입이 바뀌어도 호출부는 그대로다.
+
+### Adapter: 두 응답 형태를 한 시그니처로
+
+OpenAI Responses 는 `output[].content[].text` 에, Gemini generateContent 는
+`candidates[0].content.parts[]` 에 답을 담는다. 요청 형태와 오류 표현도 다르다.
+`createOpenAIAdapter` 와 `createGeminiAdapter` 가 이 차이를 흡수해 둘 다
+`(request, signal)` 을 받아 `{ result, provider, model }` 을 돌려주는 하나로 보이게 한다.
+파일 이름 `openai.ts`·`gemini.ts` 가 이 역할의 경계다.
+
+### Template Method: 골격은 어댑터, 빈칸은 계약
+
+어댑터 본문의 순서는 고정이다. 요청 조립, 상태 코드 확인, 응답 텍스트 추출, 파싱,
+실패 시 오류 문구 만들기. 계약은 그 사이의 빈칸만 채운다. 상속 대신 계약 주입으로
+구현했다. 두 어댑터가 공유하는 것은 절차이지 상태가 아니라 공통 부모를 둘 이유가 없고,
+계열이 늘 때 상속 계층이 아니라 계약 값 하나가 늘어야 한다.
+
+한 제공자에만 있는 단계는 골격 쪽에 남는다. Gemini 의 안전 차단 확인과 OpenAI 응답의
+`error` 필드 읽기가 그것이다. 검토가 센 비대칭 다섯 중 둘이 정확히 이 자리였고,
+이제 계열이 아니라 어댑터에 한 번만 있다.
+
+### Decorator: 폴백과 구간 상한을 덧씌운다
+
+`withFallback` 은 provider 를 받아 같은 시그니처의 provider 를 돌려준다. 폴백 시도와
+구간 상한(`AbortSignal.any` 로 호출자의 신호와 자체 타임아웃을 합친다)이 어댑터를
+건드리지 않고 얹힌다. 호출부는 감싼 provider 와 감싸지 않은 provider 를 구분하지 않는다.
+
+폴백이 있을 때만 구간 상한이 걸리던 이전 동작이 사라진 것도 이 배치 덕이다.
+지금은 단일 제공자 설정도 같은 데코레이터를 지난다.
+
+### Factory 와 Null Object: 호출부의 분기를 걷어냈다
+
+`createTriageProvider` 가 env 여섯 개를 읽어 어떤 어댑터를 만들지 정한다. 아무것도
+설정되지 않았을 때도 `null` 을 돌려주지 않고, 호출하면 `TriageProviderUnavailableError`
+를 던지는 provider 를 돌려준다.
+
+Null Object 는 보통 아무 일도 하지 않는 구현을 뜻하는데 여기서는 던진다. 판정 없이 기본
+카드를 보내는 결정은 호출부의 try/catch 가 이미 내리고 있어서, 성공한 척 빈 값을
+돌려주는 것보다 같은 자리에서 실패하는 편이 기존 흐름과 맞는다. `dependency-security`
+만 갖고 있던 `null` 반환과 `provider &&` 분기, `NonNullable<typeof provider>` 가
+이걸로 사라졌다.
+
+### Policy 객체: 예산은 숫자만 다르다
+
+전송 계층과 달리 embed 예산은 계열 사이의 차이가 숫자뿐이라 함수를 받을 이유가 없다.
+`fitEmbed(embed, policy)` 는 `BudgetPolicy` 값 하나를 받는다. `budgetValue` 가 정책을
+Discord 상한 안으로 정규화하므로 정책이 상한을 넓히지 못하고, 비정상 값은 기본값으로
+돌아간다. 지금 정책을 넘기는 곳은 `performance-alerts` 의
+`{ description: 1000, footer: 500, fields: 10 }` 하나다.
+
+`fitEmbed` 은 입력 embed 와 `fields` 배열을 변형하지 않고 복사본을 만들며, 같은 예산으로
+두 번 적용해도 결과가 같다. 이 성질이 있어야 빌더가 이미 맞춘 카드를 전송기가 한 번 더
+통과시켜도 내용이 바뀌지 않는다(2b).
+
+### 예산 강제를 전송 경계에 둔 이유
+
+`sendDiscordCard` 가 전송 직전에 기본 예산을 적용하는 것은 패턴 이름보다 위치가
+요점이다. 빌더 셋이 각자 예산을 지키자는 규약은 이미 한 번 유지되지 않았고, 그것이 이
+검토가 시작된 이유다. 나가는 길목 하나가 지키면 규약을 새로 만들지 않아도 된다.
+
+### 테스트를 두 층으로 갈랐다
+
+`triage-provider-symmetry.test.ts` 하나가 하던 일을 나눴다. 공용 동작(안전 차단,
+`error` 필드, 설정 누락 경고, 폴백)은 `lib/triage/*.test.ts` 가 한 번만 검증한다.
+세 계약이 전송에 같은 방식으로 꽂히는지는 `contract-wiring.test.ts` 가 `describe.each` 로
+sentry·dependency·performance 세 계약을 같은 표에 넣어 확인한다. 계열이 늘면 그 표에
+줄 하나가 는다.
+
 ## 계획 검수가 잡은 것
 
 착수 전 두 차례 검수가 계획의 결함 넷을 잡았고, 넷 다 구현에 반영됐다.
@@ -41,7 +139,7 @@
 **개별 상한만으로는 6,000자가 보장되지 않는다.** title 256 + description 4,096 +
 footer 2,048 = 6,400 이라 field 를 다 버려도 합계를 넘는다. 처음 계획의
 `shrinkDescription` 선택 플래그는 기본값에서 이 구멍을 남기므로 제거했고, `fitEmbed` 은
-정책과 무관하게 field → description → footer → title 순으로 항상 합계를 맞춘다.
+정책과 무관하게 field, description, footer, title 순으로 항상 합계를 맞춘다.
 각 단계마다 `embedLength` 를 다시 잰다. `truncate` 가 말줄임표를 더해 한 번의 뺄셈으로는
 감소량이 보장되지 않기 때문이다.
 
@@ -96,7 +194,7 @@ Status 절의 포인터가 그 위치를 가리킨다.
 - 전체 `npx vitest run` 356파일 2,948 passed. `npm run test:coverage` exit 0,
   `src/lib/triage` statements 96.8% · branches 86.44%, `src/lib/**` 임계값(85/80/78/85) 위.
 - `npm run check` 0 error · `npm run lint` 0 problem · `npm run deps:check`
-  0 violation (1,309 modules) · `prettier --write` 적용 후 `--check` 통과.
+  0 violation (1,309 modules) · `npm run knip` 0건 · `prettier --check` 통과.
 
 측정하지 않은 것: 실제 LLM 응답 분포, 실제 Discord 도착, 워크플로 실행. push 이후
 `gh workflow run core-web-vitals-report.yml -f force_ai_analysis=true` 와
