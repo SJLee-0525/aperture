@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { sendDiscordCard } from "@/lib/discord/send-webhook";
 
-import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
+import type { DiscordEmbed } from "@/lib/discord/types";
 
 const embed: DiscordEmbed = { title: "Error: boom", color: 0xe5484d };
 

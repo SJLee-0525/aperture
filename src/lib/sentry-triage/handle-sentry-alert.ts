@@ -5,7 +5,7 @@ import { getTriageProvider } from "@/lib/sentry-triage/triage-provider";
 import { getTriageRateLimiter } from "@/lib/sentry-triage/triage-rate-limit";
 import { claimSentryAlert, completeSentryAlert } from "@/lib/supabase/sentry-alerts";
 
-import type { DiscordEmbed } from "@/lib/sentry-triage/discord-card";
+import type { DiscordEmbed } from "@/lib/discord/types";
 import type { TriageProvider } from "@/lib/sentry-triage/triage-provider";
 import type { TriageOutcome } from "@/types/sentry-alert";
 

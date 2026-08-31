@@ -133,4 +133,3 @@ const buildDiscordCard = (alert: SentryAlertSummary, outcome: TriageOutcome): Di
   outcome.status === "ok" ? triagedEmbed(alert, outcome) : untriagedEmbed(alert, outcome.reason);
 
 export { buildDiscordCard, LIMIT, NOISE_COLOR, SEVERITY_COLOR, UNTRIAGED_COLOR };
-export type { DiscordEmbed };
