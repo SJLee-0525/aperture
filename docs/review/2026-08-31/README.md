@@ -9,13 +9,18 @@ Core Web Vitals 알림. 세 계열과 그 공용 전송 계층만 본다. 나머
 
 ## 문서
 
+**먼저 읽을 것: [00-completion.md](00-completion.md)**. 세 라운드를 끝낸 뒤의 상태,
+지표 변화, 남은 일과 착수 순서를 모은 완료 보고다.
+
 | 파일                                                           | 내용                                        |
 | -------------------------------------------------------------- | ------------------------------------------- |
+| [00-completion.md](00-completion.md)                           | 완료 보고. 지표·남은 일·수동 dispatch 안내  |
 | [01-security-and-boundaries.md](01-security-and-boundaries.md) | 신뢰 경계 7개의 STRIDE, 열린 1건과 닫힌 4건 |
 | [01-resolution.md](01-resolution.md)                           | 위 다섯 항목의 처리 결과와 리뷰와 달랐던 것 |
 | [02-correctness.md](02-correctness.md)                         | 정확성 결함 15건, 전부 닫힘                 |
 | [02-resolution.md](02-resolution.md)                           | 그중 열려 있던 9건의 처리 결과              |
 | [03-architecture.md](03-architecture.md)                       | 세 파이프라인의 중복과 심화 후보 4건        |
+| [03-resolution.md](03-resolution.md)                           | 구조 후보 넷의 처리 결과                    |
 | [07-rejected.md](07-rejected.md)                               | 재검증에서 무너진 주장 5건                  |
 | [08-method.md](08-method.md)                                   | 검토 방법과 이 보고서를 읽는 법             |
 
@@ -43,12 +48,14 @@ zip 처리, 리다이렉트 인증, 멘션 봉쇄, 키 전송은 전부 의도�
 
 ## 지금 고칠 것
 
-**결함은 남아 있지 않다.** 두 라운드가 01 과 02 의 항목을 모두 닫았고, 남은 S2 는
-낮음이며 워크플로에 Upstash 시크릿을 등록하기로 정해야 착수할 수 있다.
+**결함도 구조 후보도 남아 있지 않다.** 두 라운드가 01 과 02 의 항목을 모두 닫았고,
+구조 라운드가 [03](03-architecture.md) 의 후보 넷을 닫았다. 트리아지 전송은
+`lib/triage`([ADR-0007](../../adr/0007-shared-triage-transport.md)), embed 예산은
+`lib/discord/embed-budget` 한 벌이다. 처리 내역은 [03-resolution.md](03-resolution.md).
 
-다음 작업은 [03](03-architecture.md) 의 구조 후보 넷이다. 결함은 닫혔지만 그 결함들을
-만든 구조, 즉 트리아지 전송과 embed 예산이 세 번 복제된 상태는 그대로다.
-착수 순서는 그 문서가 적은 대로 3 → 2 → 1 이다.
+남은 것은 둘이다. S2(호출 상한)는 낮음이며 워크플로에 Upstash 시크릿을 등록하기로
+정해야 착수할 수 있다. 그리고 push 이후 수동 dispatch 로 실제 Discord 도착과
+artifact 기록을 확인해야 한다(01·03 resolution 의 미확인 항목).
 
 정확성 라운드가 무엇을 어떻게 닫았는지는 [02-resolution.md](02-resolution.md) 에 있다.
 
