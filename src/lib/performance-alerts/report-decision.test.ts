@@ -141,6 +141,80 @@ describe("buildPerformanceDecision", () => {
     expect(second.triageInputs[0]).toMatchObject({ target: target.url, scope: "lab" });
   });
 
+  it.each([
+    [
+      "field",
+      () => ({ ...input(), previous: previous(), crux: [crux(4_500)] }),
+      () => ({ ...input(), crux: [crux(4_500)] }),
+    ],
+    [
+      "lab",
+      () => ({ ...input(), lighthouse: [lighthouse(3_500)] }),
+      () => ({ ...input(), lighthouse: [lighthouse(3_500)] }),
+    ],
+  ])("강제 실행도 %s 경고의 중복 억제 key를 snapshot에 남긴다", (_kind, forced, repeat) => {
+    const first = buildPerformanceDecision({ ...forced(), forceAiAnalysis: true });
+    expect(first.cards).toHaveLength(1);
+    expect(first.snapshot.sentAlerts.length).toBeGreaterThan(0);
+
+    const second = buildPerformanceDecision({ ...repeat(), previous: first.snapshot });
+    expect(second.cards).toEqual([]);
+  });
+
+  it("강제 실행도 데이터 부족 경고의 중복 억제 key를 snapshot에 남긴다", () => {
+    const notFound: CollectedCruxResult = {
+      query: { scope: "url", identifier: target.url, formFactor: "PHONE" },
+      result: { status: "not_found" },
+    };
+    const first = buildPerformanceDecision({
+      ...input(),
+      crux: [notFound],
+      forceAiAnalysis: true,
+    });
+    expect(first.cards[0]?.title).toContain("데이터 부족");
+
+    const second = buildPerformanceDecision({
+      ...input(),
+      crux: [notFound],
+      previous: first.snapshot,
+    });
+    expect(second.cards).toEqual([]);
+  });
+
+  it("경고가 아닌 데이터 부족 회차의 key는 강제 실행에서도 기록하지 않는다", () => {
+    // 데이터 부족은 최초와 4회 연속만 알린다. 2회째는 알림이 아니므로 key도 남기지 않는다.
+    const prior = previous();
+    prior.targets[0]!.measurements = [
+      {
+        scope: "url",
+        formFactor: "phone",
+        collectionPeriod: null,
+        metrics: [
+          {
+            name: "record",
+            value: null,
+            status: "insufficient_data",
+            insufficientReason: "record_missing",
+            consecutiveCount: 1,
+          },
+        ],
+      },
+    ];
+    const notFound: CollectedCruxResult = {
+      query: { scope: "url", identifier: target.url, formFactor: "PHONE" },
+      result: { status: "not_found" },
+    };
+    const result = buildPerformanceDecision({
+      ...input(),
+      previous: prior,
+      crux: [notFound],
+      forceAiAnalysis: true,
+    });
+
+    expect(result.cards).toEqual([]);
+    expect(result.snapshot.sentAlerts).toEqual([]);
+  });
+
   it("CrUX record 없음 4회째에 데이터 부족 카드를 만든다", () => {
     const prior = previous();
     prior.targets[0]!.measurements = [

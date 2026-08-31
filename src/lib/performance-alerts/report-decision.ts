@@ -193,10 +193,14 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         status: `insufficient_data_${judgement.consecutiveCount}`,
         collectionPeriod: null,
       });
-      if (judgement.alert && (input.forceAiAnalysis || registerAlert(key))) {
-        issue(targetId, targetUrl, formFactor).insufficient.push(
-          `CrUX record 없음, ${judgement.consecutiveCount}회 연속`,
-        );
+      if (judgement.alert) {
+        // 강제 실행도 key를 남겨야 다음 정기 실행이 같은 경고를 신규로 보지 않는다.
+        const registered = registerAlert(key);
+        if (input.forceAiAnalysis || registered) {
+          issue(targetId, targetUrl, formFactor).insufficient.push(
+            `CrUX record 없음, ${judgement.consecutiveCount}회 연속`,
+          );
+        }
       }
       continue;
     }
@@ -228,7 +232,8 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         status: judgement.status,
         collectionPeriod: period,
       });
-      if (input.forceAiAnalysis || registerAlert(key)) {
+      const registered = registerAlert(key);
+      if (input.forceAiAnalysis || registered) {
         const group = issue(targetId, targetUrl, formFactor);
         group.collectionPeriod = period;
         group.field.push(fieldLine(metric, judgement.previousValue, judgement.change));
@@ -280,7 +285,8 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         status: alert.reason,
         collectionPeriod: null,
       });
-      if (!input.forceAiAnalysis && !registerAlert(key)) continue;
+      const registered = registerAlert(key);
+      if (!input.forceAiAnalysis && !registered) continue;
       const metricName =
         alert.metric === "LCP"
           ? "lcp"
