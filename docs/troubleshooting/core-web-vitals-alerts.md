@@ -15,6 +15,8 @@ CrUX는 origin과 각 URL을 PHONE, DESKTOP으로 조회한다. Lighthouse는 �
 
 CrUX `record 없음`은 대상별 연속 횟수와 중복 억제 key를 snapshot에 보존하지만, Discord 알림은 한 실행의
 데이터 부족 항목을 요약 카드 한 장으로 묶는다. Lighthouse 회귀 알림은 대상별로 별도 전송한다.
+`force_ai_analysis=true`인 수동 실행에서는 중복 억제를 무시하고 현재 경고를 다시 AI에 전달하며, 여러 대상의
+분석 결과는 통합 AI 카드 한 장으로 전송한다.
 
 ```text
 https://sungjoon.works/ko/dev/projects
@@ -67,7 +69,8 @@ model과 API key가 필요 없다.
 1. GitHub 저장소의 `Actions`에서 `Core Web Vitals report`를 연다.
 2. `Run workflow`를 누른다.
 3. Discord 연결을 함께 확인하려면 `send_baseline`을 `true`로 선택한다.
-4. 실행이 끝나면 summary의 target별 field, lab 상태를 확인한다.
+4. 기존 중복 억제와 관계없이 AI 분석을 다시 확인하려면 `force_ai_analysis`를 `true`로 선택한다.
+5. 실행이 끝나면 summary의 target별 field, lab 상태를 확인한다.
 
 첫 실행에는 이전 snapshot이 없으므로 고정 임계값만 판정한다. 정상 실행이 끝나면
 `core-web-vitals-snapshot` artifact가 생기고 다음 실행부터 회귀 비교에 사용된다.

@@ -34,6 +34,7 @@ type DecisionInput = {
   previous: PerformanceSnapshot | null;
   actionsRunUrl: string;
   sendBaseline: boolean;
+  forceAiAnalysis?: boolean;
 };
 type PerformanceDecision = {
   cards: DiscordEmbed[];
@@ -192,7 +193,7 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         status: `insufficient_data_${judgement.consecutiveCount}`,
         collectionPeriod: null,
       });
-      if (judgement.alert && registerAlert(key)) {
+      if (judgement.alert && (input.forceAiAnalysis || registerAlert(key))) {
         issue(targetId, targetUrl, formFactor).insufficient.push(
           `CrUX record 없음, ${judgement.consecutiveCount}회 연속`,
         );
@@ -227,7 +228,7 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         status: judgement.status,
         collectionPeriod: period,
       });
-      if (registerAlert(key)) {
+      if (input.forceAiAnalysis || registerAlert(key)) {
         const group = issue(targetId, targetUrl, formFactor);
         group.collectionPeriod = period;
         group.field.push(fieldLine(metric, judgement.previousValue, judgement.change));
