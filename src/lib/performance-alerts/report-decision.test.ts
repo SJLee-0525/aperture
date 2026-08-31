@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DISCORD_FIELD_LIMIT, fitEmbed } from "@/lib/performance-alerts/discord-report";
 import { buildPerformanceDecision } from "@/lib/performance-alerts/report-decision";
 
 import type { CollectedCruxResult } from "@/lib/performance-alerts/crux-client";
@@ -244,6 +245,68 @@ describe("buildPerformanceDecision", () => {
       status: "insufficient_data",
       consecutiveCount: 4,
     });
+  });
+
+  it("한 대상의 form factor별 연속 횟수를 한 줄에 모두 남긴다", () => {
+    const prior = previous();
+    prior.targets[0]!.measurements = [
+      {
+        scope: "url",
+        formFactor: "desktop",
+        collectionPeriod: null,
+        metrics: [
+          {
+            name: "record",
+            value: null,
+            status: "insufficient_data",
+            insufficientReason: "record_missing",
+            consecutiveCount: 3,
+          },
+        ],
+      },
+    ];
+    const notFound = (formFactor: "PHONE" | "DESKTOP"): CollectedCruxResult => ({
+      query: { scope: "url", identifier: target.url, formFactor },
+      result: { status: "not_found" },
+    });
+    const result = buildPerformanceDecision({
+      ...input(),
+      previous: prior,
+      crux: [notFound("PHONE"), notFound("DESKTOP")],
+      lighthouse: [],
+    });
+    const summary = result.cards[0]?.fields?.find((field) => field.name === "Field")?.value ?? "";
+
+    expect(summary).toContain(`${target.url}: phone 1회 · desktop 4회`);
+  });
+
+  it("데이터 부족 목록이 지면을 넘으면 남은 대상 수를 적고 잘리지 않는다", () => {
+    const targets = Array.from({ length: 30 }, (_, index) => ({
+      id: `target-${index}`,
+      url: `https://sungjoon.works/ko/very/long/path/segment/number/${index}`,
+    }));
+    const notFound = (
+      identifier: string,
+      formFactor: "PHONE" | "DESKTOP",
+    ): CollectedCruxResult => ({
+      query: { scope: "url", identifier, formFactor },
+      result: { status: "not_found" },
+    });
+    const result = buildPerformanceDecision({
+      ...input(),
+      targets,
+      crux: targets.flatMap((item) => [notFound(item.url, "PHONE"), notFound(item.url, "DESKTOP")]),
+      lighthouse: [],
+    });
+    const summary = result.cards[0]?.fields?.find((field) => field.name === "Field")?.value ?? "";
+
+    expect(summary.length).toBeLessThanOrEqual(DISCORD_FIELD_LIMIT);
+    expect(summary.endsWith("…")).toBe(false);
+    expect(summary).toMatch(/외 \d+개 대상$/);
+    // fitEmbed를 한 번 더 통과해도 목록이 다시 잘리지 않는다.
+    expect(fitEmbed(result.cards[0]!).fields?.find((field) => field.name === "Field")?.value).toBe(
+      summary,
+    );
   });
 
   it("여러 대상의 CrUX 부족 알림을 실행당 한 장으로 합친다", () => {

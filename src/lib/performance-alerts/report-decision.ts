@@ -1,4 +1,7 @@
-import { createPerformanceDiscordCard } from "@/lib/performance-alerts/discord-report";
+import {
+  createPerformanceDiscordCard,
+  DISCORD_FIELD_LIMIT,
+} from "@/lib/performance-alerts/discord-report";
 import {
   judgeFieldMetric,
   judgeInsufficientData,
@@ -49,7 +52,36 @@ type IssueGroup = {
   collectionPeriod?: string;
   field: string[];
   lab: string[];
-  insufficient: string[];
+  insufficient: Array<{ formFactor: string; consecutiveCount: number }>;
+};
+
+/**
+ * 데이터 부족 목록을 Discord field 하나에 담는다.
+ * form factor마다 연속 횟수가 다를 수 있어 대상별로 한 줄에 모두 적는다.
+ * 지면을 넘기면 fitEmbed가 뒤를 말줄임으로 지워 목록이 전부인 것처럼 보이므로,
+ * 남은 대상 수를 적을 자리를 먼저 빼 두고 채운다.
+ */
+const summarizeInsufficient = (
+  byTarget: Map<string, Array<{ formFactor: string; consecutiveCount: number }>>,
+): string => {
+  const lines = [...byTarget.entries()].map(
+    ([targetUrl, entries]) =>
+      `${targetUrl}: ${entries
+        .map((entry) => `${entry.formFactor} ${entry.consecutiveCount}회`)
+        .join(" · ")}`,
+  );
+  const suffix = (remaining: number) => `외 ${remaining}개 대상`;
+  const budget = DISCORD_FIELD_LIMIT - suffix(lines.length).length - 1;
+  const shown: string[] = [];
+  let used = 0;
+  for (const line of lines) {
+    const next = used + line.length + (shown.length ? 1 : 0);
+    if (next > budget) break;
+    shown.push(line);
+    used = next;
+  }
+  const remaining = lines.length - shown.length;
+  return remaining ? [...shown, suffix(remaining)].join("\n") : shown.join("\n");
 };
 
 const previousMeasurement = (
@@ -197,9 +229,10 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         // 강제 실행도 key를 남겨야 다음 정기 실행이 같은 경고를 신규로 보지 않는다.
         const registered = registerAlert(key);
         if (input.forceAiAnalysis || registered) {
-          issue(targetId, targetUrl, formFactor).insufficient.push(
-            `CrUX record 없음, ${judgement.consecutiveCount}회 연속`,
-          );
+          issue(targetId, targetUrl, formFactor).insufficient.push({
+            formFactor,
+            consecutiveCount: judgement.consecutiveCount,
+          });
         }
       }
       continue;
@@ -314,12 +347,11 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
   }
 
   const reports: PerformanceReport[] = [];
-  const insufficientReports: string[] = [];
+  const insufficientByTarget = new Map<string, IssueGroup["insufficient"]>();
   for (const group of issues.values()) {
     if (group.insufficient.length) {
-      insufficientReports.push(
-        `${group.targetUrl} (${group.formFactor}): ${group.insufficient.join(", ")}`,
-      );
+      const existing = insufficientByTarget.get(group.targetUrl) ?? [];
+      insufficientByTarget.set(group.targetUrl, [...existing, ...group.insufficient]);
     }
     if (group.field.length || group.lab.length) {
       reports.push(
@@ -335,13 +367,13 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
       );
     }
   }
-  if (insufficientReports.length) {
+  if (insufficientByTarget.size) {
     reports.unshift({
       kind: "insufficient_data",
       targetUrl: input.siteOrigin,
       formFactor: "전체 대상",
       measuredAt: input.measuredAt,
-      fieldSummary: insufficientReports.join("\n"),
+      fieldSummary: summarizeInsufficient(insufficientByTarget),
       actionsRunUrl: input.actionsRunUrl,
       artifactName: SNAPSHOT_ARTIFACT_NAME,
     });
