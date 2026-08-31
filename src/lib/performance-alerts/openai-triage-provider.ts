@@ -1,6 +1,7 @@
 import {
   buildPerformanceTriageInput,
   PERFORMANCE_TRIAGE_INSTRUCTIONS,
+  performanceTriageOutputTokens,
 } from "@/lib/performance-alerts/triage-prompt";
 import {
   buildPerformanceTriageSchema,
@@ -26,16 +27,16 @@ const outputText = (response: OpenAIResponse): string =>
 /** Responses API에는 원시 측정 결과를 저장하지 않도록 store를 끈 strict JSON 요청만 보낸다. */
 const createOpenAIPerformanceTriageProvider =
   (apiKey: string, model: string, request: typeof fetch = fetch): PerformanceTriageProvider =>
-  async ({ input, signal }) => {
+  async ({ inputs, signal }) => {
     const response = await request(OPENAI_RESPONSES_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model,
         instructions: PERFORMANCE_TRIAGE_INSTRUCTIONS,
-        input: [{ role: "user", content: buildPerformanceTriageInput(input) }],
+        input: [{ role: "user", content: buildPerformanceTriageInput(inputs) }],
         reasoning: { effort: "low" },
-        max_output_tokens: 1_500,
+        max_output_tokens: performanceTriageOutputTokens(inputs.length),
         store: false,
         text: {
           format: {
@@ -51,6 +52,7 @@ const createOpenAIPerformanceTriageProvider =
     if (!response.ok) throw new Error(`OpenAI performance triage failed (${response.status})`);
     const result = parsePerformanceTriageResult(
       outputText((await response.json()) as OpenAIResponse),
+      inputs.length,
     );
     if (!result) throw new Error("OpenAI returned an unusable performance triage result");
     return { result, provider: "openai", model };

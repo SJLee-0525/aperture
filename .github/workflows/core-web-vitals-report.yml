@@ -136,6 +136,17 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      # Discord 전송이 실패한 실행에서도 AI 분석을 확인할 수 있어야 한다.
+      # 분석이 없는 실행에서는 파일 자체가 없으므로 누락을 실패로 보지 않는다.
+      - name: Upload AI analysis report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-web-vitals-ai-report
+          path: performance-ai-report.md
+          if-no-files-found: ignore
+          retention-days: 90
+
       - name: Fail when Lighthouse failed
         if: steps.lighthouse.outcome != 'success'
         run: exit 1

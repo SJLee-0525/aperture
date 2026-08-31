@@ -1,5 +1,6 @@
 import type { DiscordEmbed } from "@/lib/discord/types";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
+import type { PerformanceTriageTarget } from "@/lib/performance-alerts/triage-schema";
 
 const DISCORD_FIELD_LIMIT = 1_024;
 const DISCORD_EMBED_LIMIT = 6_000;
@@ -62,27 +63,36 @@ const fitEmbed = (embed: DiscordEmbed): DiscordEmbed => {
   return result;
 };
 
+const MERGED_TARGET_LIMIT = 8;
+const MERGED_SECTION_LIMIT = 440;
+const MERGED_CAUSE_LIMIT = 2;
+
+const triageFooter = (analysis: PerformanceTriageProviderResult, targets: number): string =>
+  targets < 2
+    ? `${analysis.provider}/${analysis.model} · confidence ${analysis.result.targets[0]?.confidence ?? "unknown"}`
+    : `${analysis.provider}/${analysis.model} · ${targets}개 대상 통합 분석`;
+
 /**
  * AI 설명은 기존 수치 field 뒤에 추가해 성공과 실패 카드의 측정 사실을 동일하게 유지한다.
  * provider 원본 응답은 받지 않고 schema 검증을 통과한 결과와 provider 식별자만 표시한다.
  */
 const attachPerformanceTriage = (
   embed: DiscordEmbed,
-  analysis: PerformanceTriageProviderResult,
+  target: PerformanceTriageTarget,
+  footer: string,
 ): DiscordEmbed => {
-  const result = analysis.result;
   const explanation = [
-    { name: "AI 요약", value: result.summary },
-    { name: "사용자 영향", value: result.userImpact },
+    { name: "AI 요약", value: target.summary },
+    { name: "사용자 영향", value: target.userImpact },
     {
       name: "원인 후보",
-      value: result.likelyCauses.length
-        ? result.likelyCauses.map((item) => `- ${item}`).join("\n")
+      value: target.likelyCauses.length
+        ? target.likelyCauses.map((item) => `- ${item}`).join("\n")
         : "근거 부족",
     },
     {
       name: "확인 순서",
-      value: [...result.inspectFirst, ...result.recommendedChecks]
+      value: [...target.inspectFirst, ...target.recommendedChecks]
         .map((item, index) => `${index + 1}. ${item}`)
         .join("\n"),
     },
@@ -91,33 +101,74 @@ const attachPerformanceTriage = (
     ...embed,
     description: "측정값은 코드가 판정했고 AI는 원인 후보와 확인 순서만 작성했습니다.",
     fields: [...(embed.fields ?? []), ...explanation],
-    footer: {
-      text: `${analysis.provider}/${analysis.model} · confidence ${result.confidence}`,
-    },
+    footer: { text: footer },
   });
 };
 
-/** 여러 대상의 분석 결과를 한 카드로 묶되, 측정 대상과 AI 요약의 대응 관계를 유지한다. */
-const mergeAnalyzedPerformanceCards = (cards: DiscordEmbed[]): DiscordEmbed[] => {
-  const analyzed = cards.filter((card) => card.footer?.text !== "AI 분석 없음");
-  const untouched = cards.filter((card) => card.footer?.text === "AI 분석 없음");
-  if (analyzed.length < 2) return cards;
-  const sections = analyzed.map((card) => {
-    const target = card.fields?.find((field) => field.name === "대상")?.value ?? "대상 미상";
-    const summary = card.fields?.find((field) => field.name === "AI 요약")?.value ?? "요약 없음";
-    const causes = card.fields?.find((field) => field.name === "원인 후보")?.value ?? "근거 부족";
-    return { name: target, value: `요약: ${summary}\n원인 후보: ${causes}` };
-  });
-  const base = analyzed[0]!;
+/**
+ * 통합 카드는 알림이고 전문은 artifact에 있으므로 대상당 분량을 줄여 담는다.
+ * 줄이지 않으면 embed 상한에서 뒤쪽 대상이 통째로 사라진다.
+ */
+const mergedSection = (label: string, target: PerformanceTriageTarget) => ({
+  name: label,
+  value: truncate(
+    [
+      `요약: ${target.summary}`,
+      target.likelyCauses.length
+        ? `원인 후보: ${target.likelyCauses
+            .slice(0, MERGED_CAUSE_LIMIT)
+            .map((item) => truncate(item, 80))
+            .join(" / ")}`
+        : "원인 후보: 근거 부족",
+      `confidence: ${target.confidence}`,
+    ].join("\n"),
+    MERGED_SECTION_LIMIT,
+  ),
+});
+
+/**
+ * batch 분석 한 번의 결과를 카드로 만든다. entries[i]는 analysis.result.targets[i]와 짝이며
+ * 수가 어긋나면 분석을 붙이지 않고 측정값 카드를 그대로 돌려준다.
+ */
+const buildPerformanceTriageCards = (
+  entries: Array<{ card: DiscordEmbed; label: string }>,
+  analysis: PerformanceTriageProviderResult,
+): DiscordEmbed[] => {
+  const targets = analysis.result.targets;
+  if (!entries.length || entries.length !== targets.length) {
+    return entries.map((entry) => entry.card);
+  }
+  const footer = triageFooter(analysis, entries.length);
+  if (entries.length === 1) return [attachPerformanceTriage(entries[0]!.card, targets[0]!, footer)];
+
+  const shown = entries.slice(0, MERGED_TARGET_LIMIT);
+  const hidden = entries.slice(MERGED_TARGET_LIMIT);
   return [
     fitEmbed({
-      ...base,
+      ...entries[0]!.card,
       title: "Core Web Vitals 통합 AI 분석",
-      description: "측정값은 코드가 판정했고 AI는 대상별 원인 후보와 확인 순서를 요약했습니다.",
-      fields: sections,
-      footer: { text: "여러 대상 통합 분석" },
+      description: `측정값은 코드가 판정했고 AI는 대상별 원인 후보를 요약했습니다.\n${analysis.result.commonSummary}`,
+      fields: [
+        ...(analysis.result.commonCauses.length
+          ? [
+              {
+                name: "공통 원인",
+                value: analysis.result.commonCauses.map((item) => `- ${item}`).join("\n"),
+              },
+            ]
+          : []),
+        ...shown.map((entry, index) => mergedSection(entry.label, targets[index]!)),
+        ...(hidden.length
+          ? [
+              {
+                name: `그 외 ${hidden.length}개 대상`,
+                value: `${hidden.map((entry) => entry.label).join("\n")}\n전문은 core-web-vitals-ai-report artifact에 있습니다.`,
+              },
+            ]
+          : []),
+      ],
+      footer: { text: footer },
     }),
-    ...untouched,
   ];
 };
 
@@ -166,7 +217,7 @@ const createPerformanceDiscordCard = (
 
 export {
   attachPerformanceTriage,
-  mergeAnalyzedPerformanceCards,
+  buildPerformanceTriageCards,
   createPerformanceDiscordCard,
   DISCORD_EMBED_LIMIT,
   DISCORD_FIELD_LIMIT,

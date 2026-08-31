@@ -1,6 +1,7 @@
 import {
   buildPerformanceTriageInput,
   PERFORMANCE_TRIAGE_INSTRUCTIONS,
+  performanceTriageOutputTokens,
 } from "@/lib/performance-alerts/triage-prompt";
 import {
   buildPerformanceTriageSchema,
@@ -20,7 +21,7 @@ type GeminiResponse = {
 /** Gemini key는 query에 남기지 않고 header로 보내며 JSON schema 응답만 허용한다. */
 const createGeminiPerformanceTriageProvider =
   (apiKey: string, model: string, request: typeof fetch = fetch): PerformanceTriageProvider =>
-  async ({ input, signal }) => {
+  async ({ inputs, signal }) => {
     const response = await request(
       `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent`,
       {
@@ -28,10 +29,10 @@ const createGeminiPerformanceTriageProvider =
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: PERFORMANCE_TRIAGE_INSTRUCTIONS }] },
-          contents: [{ role: "user", parts: [{ text: buildPerformanceTriageInput(input) }] }],
+          contents: [{ role: "user", parts: [{ text: buildPerformanceTriageInput(inputs) }] }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 1_500,
+            maxOutputTokens: performanceTriageOutputTokens(inputs.length),
             responseMimeType: "application/json",
             responseJsonSchema: RESPONSE_SCHEMA,
           },
@@ -46,7 +47,7 @@ const createGeminiPerformanceTriageProvider =
     }
     const text =
       data.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("") ?? "";
-    const result = parsePerformanceTriageResult(text);
+    const result = parsePerformanceTriageResult(text, inputs.length);
     if (!result) throw new Error("Gemini returned an unusable performance triage result");
     return { result, provider: "gemini", model };
   };

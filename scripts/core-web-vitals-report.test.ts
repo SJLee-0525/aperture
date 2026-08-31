@@ -23,7 +23,11 @@ const dependencies = () => ({
     summary: "정상",
   })),
   sendCard: vi.fn<Dependencies["sendCard"]>(async () => ({ ok: true })),
-  analyzeCard: vi.fn<NonNullable<Dependencies["analyzeCard"]>>(async (card) => card),
+  analyzeTargets: vi.fn<NonNullable<Dependencies["analyzeTargets"]>>(async (inputs) => ({
+    targets: inputs.length,
+  })),
+  renderCards: vi.fn<Dependencies["renderCards"]>((entries) => entries.map((entry) => entry.card)),
+  writeAiReport: vi.fn<NonNullable<Dependencies["writeAiReport"]>>(async () => undefined),
   writeSnapshot: vi.fn<Dependencies["writeSnapshot"]>(async () => undefined),
   appendSummary: vi.fn<Dependencies["appendSummary"]>(async () => undefined),
 });
@@ -107,7 +111,20 @@ describe("runCoreWebVitalsReport", () => {
     expect(deps.appendSummary).toHaveBeenCalledWith("Discord 전송 실패: webhook=[redacted-secret]");
   });
 
-  it("AI 분석 성공 시 결합한 카드를 전송한다", async () => {
+  it("여러 대상을 한 번의 batch 요청으로 분석한다", async () => {
+    const deps = dependencies();
+    deps.judge.mockResolvedValue({
+      cards: [{ title: "a" }, { title: "b" }, { title: "데이터 부족" }],
+      triageInputs: [{ target: "/ko" }, { target: "/ko/photo" }, null],
+      snapshot: {},
+      summary: "경고",
+    });
+    await runCoreWebVitalsReport(deps);
+    expect(deps.analyzeTargets).toHaveBeenCalledTimes(1);
+    expect(deps.analyzeTargets).toHaveBeenCalledWith([{ target: "/ko" }, { target: "/ko/photo" }]);
+  });
+
+  it("분석 결과와 카드를 renderCards에 함께 넘긴다", async () => {
     const deps = dependencies();
     deps.judge.mockResolvedValue({
       cards: [{ title: "기본" }],
@@ -115,25 +132,57 @@ describe("runCoreWebVitalsReport", () => {
       snapshot: {},
       summary: "경고",
     });
-    deps.analyzeCard.mockResolvedValue({ title: "AI 결합" });
+    deps.analyzeTargets.mockResolvedValue({ id: "분석" });
+    deps.renderCards.mockReturnValue([{ title: "AI 결합" }]);
     await runCoreWebVitalsReport(deps);
-    expect(deps.analyzeCard).toHaveBeenCalledWith({ title: "기본" }, { target: "/ko" });
+    expect(deps.renderCards).toHaveBeenCalledWith(
+      [{ card: { title: "기본" }, input: { target: "/ko" } }],
+      { id: "분석" },
+    );
     expect(deps.sendCard).toHaveBeenCalledWith({ title: "AI 결합" });
   });
 
-  it("AI 분석 실패 시 같은 기본 카드를 전송하고 실행을 계속한다", async () => {
+  it("AI 분석 실패 시 분석 없이 렌더하고 실행을 계속한다", async () => {
     const deps = dependencies();
-    const card = { title: "기본", fields: [{ name: "Field", value: "LCP 4500" }] };
     deps.judge.mockResolvedValue({
-      cards: [card],
+      cards: [{ title: "기본" }],
       triageInputs: [{ target: "/ko" }],
       snapshot: {},
       summary: "경고",
     });
-    deps.analyzeCard.mockRejectedValue(new Error("provider failed"));
+    deps.analyzeTargets.mockRejectedValue(new Error("provider failed"));
     await expect(runCoreWebVitalsReport(deps)).resolves.toBeUndefined();
-    expect(deps.sendCard).toHaveBeenCalledWith(card);
+    expect(deps.renderCards).toHaveBeenCalledWith(
+      [{ card: { title: "기본" }, input: { target: "/ko" } }],
+      null,
+    );
     expect(deps.appendSummary).toHaveBeenCalledWith("AI 분석 생략: provider failed");
+  });
+
+  it("분석 대상이 없으면 provider를 호출하지 않는다", async () => {
+    const deps = dependencies();
+    deps.judge.mockResolvedValue({
+      cards: [{ title: "데이터 부족" }],
+      triageInputs: [null],
+      snapshot: {},
+      summary: "경고",
+    });
+    await runCoreWebVitalsReport(deps);
+    expect(deps.analyzeTargets).not.toHaveBeenCalled();
+    expect(deps.writeAiReport).toHaveBeenCalledWith([], null);
+  });
+
+  it("Discord 전송이 실패해도 AI 보고서는 이미 기록한다", async () => {
+    const deps = dependencies();
+    deps.judge.mockResolvedValue({
+      cards: [{ title: "기본" }],
+      triageInputs: [{ target: "/ko" }],
+      snapshot: {},
+      summary: "경고",
+    });
+    deps.sendCard.mockResolvedValue({ ok: false, error: "webhook down" });
+    await expect(runCoreWebVitalsReport(deps)).rejects.toThrow("Discord delivery failed");
+    expect(deps.writeAiReport).toHaveBeenCalledTimes(1);
   });
 });
 

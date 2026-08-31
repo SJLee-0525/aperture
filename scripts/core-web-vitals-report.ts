@@ -9,11 +9,9 @@ import { PERFORMANCE_TARGETS } from "./performance-targets";
 
 import type { DiscordEmbed } from "@/lib/discord/types";
 import { sendDiscordCard } from "@/lib/discord/send-webhook";
+import { renderPerformanceAiReport } from "@/lib/performance-alerts/ai-report";
 import { collectCruxRecords, type CollectedCruxResult } from "@/lib/performance-alerts/crux-client";
-import {
-  attachPerformanceTriage,
-  mergeAnalyzedPerformanceCards,
-} from "@/lib/performance-alerts/discord-report";
+import { buildPerformanceTriageCards } from "@/lib/performance-alerts/discord-report";
 import {
   downloadArtifactArchive,
   findPreviousSnapshotArtifact,
@@ -33,6 +31,7 @@ import { preflightPerformanceTargets, siteOrigin } from "@/lib/performance-alert
 import { getPerformanceTriageProvider } from "@/lib/performance-alerts/triage-provider";
 
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
+import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
 
 type PreviousSnapshotResult =
   | { status: "loaded"; snapshot: unknown }
@@ -58,7 +57,12 @@ type ReportDependencies = {
     lighthouse: unknown;
   }) => Promise<ReportDecision> | ReportDecision;
   sendCard: (card: unknown) => Promise<{ ok: true } | { ok: false; error: string }>;
-  analyzeCard?: (card: unknown, input: unknown) => Promise<unknown>;
+  analyzeTargets?: (inputs: unknown[]) => Promise<unknown>;
+  renderCards: (
+    entries: Array<{ card: unknown; input: unknown | null }>,
+    analysis: unknown | null,
+  ) => unknown[];
+  writeAiReport?: (inputs: unknown[], analysis: unknown | null) => Promise<void>;
   writeSnapshot: (snapshot: unknown) => Promise<void>;
   appendSummary: (summary: string) => Promise<void>;
 };
@@ -67,6 +71,12 @@ const execFile = promisify(execFileCallback);
 const WORKFLOW_FILE = "core-web-vitals-report.yml";
 const LIGHTHOUSE_MANIFEST = "lighthouse-production-report/manifest.json";
 const SNAPSHOT_PATH = "performance-snapshot.json";
+const AI_REPORT_PATH = "performance-ai-report.md";
+
+/** Discord 통합 카드가 대상을 구분할 수 있게 측정 대상과 form factor를 함께 적는다. */
+const triageLabel = (input: PerformanceTriageInput): string =>
+  `${input.target}
+${input.formFactor}`;
 
 /** 외부 오류가 Actions log와 summary에 query 또는 secret 형태를 남기지 않게 한다. */
 const redactPerformanceError = (value: unknown): string => {
@@ -125,20 +135,23 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
   });
   await dependencies.appendSummary(decision.summary);
 
-  const preparedCards: unknown[] = [];
-  for (const [index, card] of decision.cards.entries()) {
-    const triageInput = decision.triageInputs?.[index];
-    let preparedCard = card;
-    if (triageInput && dependencies.analyzeCard) {
-      try {
-        preparedCard = await dependencies.analyzeCard(card, triageInput);
-      } catch (error) {
-        await dependencies.appendSummary(`AI 분석 생략: ${redactPerformanceError(error)}`);
-      }
+  const entries = decision.cards.map((card, index) => ({
+    card,
+    input: decision.triageInputs?.[index] ?? null,
+  }));
+  const analyzable = entries.flatMap((entry) => (entry.input === null ? [] : [entry.input]));
+  let analysis: unknown = null;
+  if (analyzable.length && dependencies.analyzeTargets) {
+    try {
+      analysis = await dependencies.analyzeTargets(analyzable);
+    } catch (error) {
+      await dependencies.appendSummary(`AI 분석 생략: ${redactPerformanceError(error)}`);
     }
-    preparedCards.push(preparedCard);
   }
-  const cardsToSend = mergeAnalyzedPerformanceCards(preparedCards as DiscordEmbed[]);
+  // Discord 전송이 실패해도 분석 결과가 남도록 전송보다 먼저 기록한다.
+  if (dependencies.writeAiReport) await dependencies.writeAiReport(analyzable, analysis);
+
+  const cardsToSend = dependencies.renderCards(entries, analysis);
   for (const preparedCard of cardsToSend) {
     const sent = await dependencies.sendCard(preparedCard);
     if (!sent.ok) {
@@ -292,12 +305,36 @@ const main = async (): Promise<void> => {
       sendDiscordCard(process.env.DISCORD_PERFORMANCE_WEBHOOK_URL, card as DiscordEmbed, {
         configName: "DISCORD_PERFORMANCE_WEBHOOK_URL",
       }),
-    analyzeCard: async (card, input) => {
-      const analysis = await triageProvider({
-        input: input as PerformanceTriageInput,
+    analyzeTargets: (inputs) =>
+      triageProvider({
+        inputs: inputs as PerformanceTriageInput[],
         signal: new AbortController().signal,
-      });
-      return attachPerformanceTriage(card as DiscordEmbed, analysis);
+      }),
+    renderCards: (entries, analysis) => {
+      if (!analysis) return entries.map((entry) => entry.card);
+      const analyzed = entries.flatMap((entry) =>
+        entry.input === null
+          ? []
+          : [
+              {
+                card: entry.card as DiscordEmbed,
+                label: triageLabel(entry.input as PerformanceTriageInput),
+              },
+            ],
+      );
+      const untouched = entries.flatMap((entry) => (entry.input === null ? [entry.card] : []));
+      return [
+        ...buildPerformanceTriageCards(analyzed, analysis as PerformanceTriageProviderResult),
+        ...untouched,
+      ];
+    },
+    writeAiReport: async (inputs, analysis) => {
+      const report = renderPerformanceAiReport(
+        inputs as PerformanceTriageInput[],
+        analysis as PerformanceTriageProviderResult | null,
+      );
+      await writeFile(AI_REPORT_PATH, report, "utf8");
+      if (analysis) await appendActionsSummary(report);
     },
     writeSnapshot: async (snapshot) => {
       await writeFile(SNAPSHOT_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
