@@ -1,5 +1,6 @@
 import { createGeminiPerformanceTriageProvider } from "@/lib/performance-alerts/gemini-triage-provider";
 import { createOpenAIPerformanceTriageProvider } from "@/lib/performance-alerts/openai-triage-provider";
+import { performanceTriageTimeout } from "@/lib/performance-alerts/triage-prompt";
 
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageResult } from "@/lib/performance-alerts/triage-schema";
@@ -10,25 +11,30 @@ type PerformanceTriageProviderResult = {
   model: string;
 };
 type PerformanceTriageProvider = (request: {
-  input: PerformanceTriageInput;
+  inputs: PerformanceTriageInput[];
   signal: AbortSignal;
 }) => Promise<PerformanceTriageProviderResult>;
 
-const MOCK_RESULT: PerformanceTriageResult = {
-  summary: "성능 경고가 감지됐습니다.",
-  userImpact: "측정값을 직접 확인해야 합니다.",
-  likelyCauses: [],
-  inspectFirst: [],
-  recommendedChecks: ["npm run test:lighthouse:production"],
-  confidence: "low",
-};
+const mockResult = (targets: number): PerformanceTriageResult => ({
+  commonSummary: "성능 경고가 감지됐습니다.",
+  commonCauses: [],
+  targets: Array.from({ length: targets }, (_, targetIndex) => ({
+    targetIndex,
+    summary: "성능 경고가 감지됐습니다.",
+    userImpact: "측정값을 직접 확인해야 합니다.",
+    likelyCauses: [],
+    inspectFirst: [],
+    recommendedChecks: ["npm run test:lighthouse:production"],
+    confidence: "low" as const,
+  })),
+});
 
 const unavailable: PerformanceTriageProvider = async () => {
   throw new Error("Performance triage provider is not configured");
 };
-const mock: PerformanceTriageProvider = async ({ signal }) => {
+const mock: PerformanceTriageProvider = async ({ inputs, signal }) => {
   if (signal.aborted) throw signal.reason;
-  return { result: MOCK_RESULT, provider: "mock", model: "mock" };
+  return { result: mockResult(inputs.length), provider: "mock", model: "mock" };
 };
 
 const configured = (
@@ -54,13 +60,19 @@ const withFallback =
     try {
       return await primary({
         ...request,
-        signal: AbortSignal.any([request.signal, AbortSignal.timeout(20_000)]),
+        signal: AbortSignal.any([
+          request.signal,
+          AbortSignal.timeout(performanceTriageTimeout(request.inputs.length, 20_000)),
+        ]),
       });
     } catch (error) {
       if (request.signal.aborted || !fallback) throw error;
       return fallback({
         ...request,
-        signal: AbortSignal.any([request.signal, AbortSignal.timeout(15_000)]),
+        signal: AbortSignal.any([
+          request.signal,
+          AbortSignal.timeout(performanceTriageTimeout(request.inputs.length, 15_000)),
+        ]),
       });
     }
   };
