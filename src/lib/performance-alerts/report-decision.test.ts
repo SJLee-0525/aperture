@@ -155,4 +155,25 @@ describe("buildPerformanceDecision", () => {
       consecutiveCount: 4,
     });
   });
+
+  it("여러 대상의 CrUX 부족 알림을 실행당 한 장으로 합친다", () => {
+    const secondTarget = { id: "dev", url: "https://sungjoon.works/ko/dev" };
+    const notFound = (identifier: string): CollectedCruxResult => ({
+      query: { scope: "url", identifier, formFactor: "PHONE" },
+      result: { status: "not_found" },
+    });
+    const result = buildPerformanceDecision({
+      ...input(),
+      targets: [target, secondTarget],
+      crux: [notFound(target.url), notFound(secondTarget.url)],
+      lighthouse: [],
+    });
+
+    expect(result.cards).toHaveLength(1);
+    expect(result.cards[0]?.title).toContain("데이터 부족");
+    expect(result.cards[0]?.fields?.some((field) => field.value.includes(target.url))).toBe(true);
+    expect(result.cards[0]?.fields?.some((field) => field.value.includes(secondTarget.url))).toBe(
+      true,
+    );
+  });
 });
