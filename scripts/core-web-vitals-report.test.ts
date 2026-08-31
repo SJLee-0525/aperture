@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { redactPerformanceError, runCoreWebVitalsReport } from "./core-web-vitals-report";
+import { runCoreWebVitalsReport } from "./core-web-vitals-report";
 
 type Dependencies = Parameters<typeof runCoreWebVitalsReport>[0];
 
@@ -183,15 +183,5 @@ describe("runCoreWebVitalsReport", () => {
     deps.sendCard.mockResolvedValue({ ok: false, error: "webhook down" });
     await expect(runCoreWebVitalsReport(deps)).rejects.toThrow("Discord delivery failed");
     expect(deps.writeAiReport).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("redactPerformanceError", () => {
-  it("URL query와 secret 형태를 제거한다", () => {
-    expect(
-      redactPerformanceError(
-        "failed https://example.com/path?api_key=secret token=ghp_abcdefghijklmnopqrstuvwxyz",
-      ),
-    ).toBe("failed https://example.com/path token=[redacted-secret]");
   });
 });

@@ -29,6 +29,7 @@ import {
 } from "@/lib/performance-alerts/snapshot";
 import { preflightPerformanceTargets, siteOrigin } from "@/lib/performance-alerts/site-target";
 import { getPerformanceTriageProvider } from "@/lib/performance-alerts/triage-provider";
+import { redactSecrets } from "@/lib/text/redact-secrets";
 
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
@@ -78,22 +79,6 @@ const triageLabel = (input: PerformanceTriageInput): string =>
   `${input.target}
 ${input.formFactor}`;
 
-/** 외부 오류가 Actions log와 summary에 query 또는 secret 형태를 남기지 않게 한다. */
-const redactPerformanceError = (value: unknown): string => {
-  const message = value instanceof Error ? value.message : String(value);
-  return message
-    .replace(/https?:\/\/[^\s?#]+[^\s]*/gi, (url) => {
-      try {
-        const parsed = new URL(url);
-        return `${parsed.origin}${parsed.pathname}`;
-      } catch {
-        return "[redacted-url]";
-      }
-    })
-    .replace(/\b(?:AIza[\w-]{20,}|gh[opsu]_[\w]{20,})\b/g, "[redacted-secret]")
-    .replace(/(api[_-]?key|token|webhook)(\s*[=:]\s*)[^\s]+/gi, "$1$2[redacted-secret]");
-};
-
 /**
  * 이전 snapshot 조회 실패는 비교만 생략하지만 현재 측정과 Discord 전송 실패는 실행을 실패시킨다.
  * 모든 수집이 완전한 경우에만 다음 실행이 사용할 snapshot을 기록한다.
@@ -105,7 +90,7 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
   try {
     previous = await dependencies.loadPreviousSnapshot();
   } catch (error) {
-    previous = { status: "comparison_skipped", reason: redactPerformanceError(error) };
+    previous = { status: "comparison_skipped", reason: redactSecrets(error) };
   }
   if (previous.status !== "loaded") {
     const detail = previous.status === "cold_start" ? "이전 snapshot 없음" : previous.reason;
@@ -116,7 +101,7 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
   try {
     crux = await dependencies.collectCrux();
   } catch (error) {
-    await dependencies.appendSummary(`CrUX 전체 실패: ${redactPerformanceError(error)}`);
+    await dependencies.appendSummary(`CrUX 전체 실패: ${redactSecrets(error)}`);
     throw new Error("CrUX collection failed");
   }
 
@@ -145,7 +130,7 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
     try {
       analysis = await dependencies.analyzeTargets(analyzable);
     } catch (error) {
-      await dependencies.appendSummary(`AI 분석 생략: ${redactPerformanceError(error)}`);
+      await dependencies.appendSummary(`AI 분석 생략: ${redactSecrets(error)}`);
     }
   }
   // Discord 전송이 실패해도 분석 결과가 남도록 전송보다 먼저 기록한다.
@@ -155,7 +140,7 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
   for (const preparedCard of cardsToSend) {
     const sent = await dependencies.sendCard(preparedCard);
     if (!sent.ok) {
-      const reason = redactPerformanceError(sent.error);
+      const reason = redactSecrets(sent.error);
       await dependencies.appendSummary(`Discord 전송 실패: ${reason}`);
       throw new Error(`Discord delivery failed: ${reason}`);
     }
@@ -245,7 +230,7 @@ const previousSnapshot = async (
     });
     return { status: "loaded", snapshot: parsePerformanceSnapshot(raw) };
   } catch (error) {
-    return { status: "comparison_skipped", reason: redactPerformanceError(error) };
+    return { status: "comparison_skipped", reason: redactSecrets(error) };
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true });
   }
@@ -347,9 +332,9 @@ const main = async (): Promise<void> => {
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
-    process.stderr.write(`${redactPerformanceError(error)}\n`);
+    process.stderr.write(`${redactSecrets(error)}\n`);
     process.exitCode = 1;
   });
 }
 
-export { loadLighthouseResults, main, redactPerformanceError, runCoreWebVitalsReport };
+export { loadLighthouseResults, main, runCoreWebVitalsReport };
