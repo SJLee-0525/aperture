@@ -10,11 +10,21 @@
 
 이후 01 문서의 보안 항목을 처리하는 라운드에서 C1 이 함께 닫혔다. 허용 목록 필터링이
 빈 배열을 만들 수 있어 C1 의 폴백과 한 커밋으로 묶어야 했기 때문이다.
-줄번호는 `84509d7` 기준이며 C1 관련 줄번호만 `1a67ec4` 기준이다.
 
-## 높음
+그다음 라운드(`3658a56`~`2f7044b`)가 남은 아홉 건을 전부 닫았다. 그 과정에서 검토가 못 본
+두 건(C14 대표 실행 편향, C15 metric 행 절단)이 나와 같은 라운드에서 함께 닫았다.
+**열린 항목은 없다.** 처리 경위는 [02-resolution.md](02-resolution.md) 에 있다.
 
-### C2. 대상이 21개를 넘으면 AI 분석이 항상 버려진다
+줄번호는 각 항목이 열려 있던 시점 기준이다. 대부분 `84509d7`, C1 은 `1a67ec4`,
+C14 와 C15 는 `06e4004` 다.
+
+## 처리됨
+
+C1 부터 C15 까지 전부 닫혔다. C2·C5·C6·C8~C13 은 정확성 라운드, C1 은 보안 라운드,
+C3·C4·C7 은 `84509d7` 이 닫았고 C14·C15 는 정확성 라운드에서 나와 같은 라운드에서 닫혔다.
+각 항목의 제목은 다른 문서가 앵커로 참조하므로 바꾸지 않고 닫힌 커밋만 덧붙였다.
+
+### C2. 대상이 21개를 넘으면 AI 분석이 항상 버려진다 (닫힘, `da802d9`)
 
 `src/lib/performance-alerts/triage-prompt.ts:67`, `openai-triage-provider.ts:53`,
 `gemini-triage-provider.ts:50`
@@ -37,9 +47,7 @@ primary 도 fallback 도 "unusable result" 로 실패하고 AI 분석이 통째�
 자르는 지점이 셋이라는 것도 문제다. `buildPerformanceTriageInput` 이 자르고,
 스키마가 상한을 검사하고, `core-web-vitals-report.ts:142` 의 `analyzable` 은 자르지 않는다.
 
-## 중간
-
-### C5. 강제 실행이 중복 억제 key 를 기록하지 않는다
+### C5. 강제 실행이 중복 억제 key 를 기록하지 않는다 (닫힘, `e6f2b03`)
 
 `src/lib/performance-alerts/report-decision.ts:196, 231, 283`
 
@@ -67,7 +75,7 @@ troubleshooting 문서는 record 없음의 "대상별 연속 횟수와 중복 �
 `registerAlert(key)` 를 먼저 호출해 결과를 받고, 그 결과와 강제 플래그를 OR 하면
 세 경로가 한 번에 닫힌다.
 
-### C6. 2회 실행에서 performanceScore 를 낙관적으로 집계한다
+### C6. 2회 실행에서 performanceScore 를 낙관적으로 집계한다 (닫힘, `706f5ea`)
 
 `src/lib/performance-alerts/lighthouse-result.ts:84-94`
 
@@ -88,7 +96,7 @@ LCP, CLS, TBT 는 값이 클수록 나쁘므로 맞다.
 
 같은 줄의 삼항은 두 분기가 글자까지 같아서 아무 일도 하지 않는다.
 
-### C12. "가장 크게 악화"가 performanceScore 개선을 악화로 세고, CLS 변화를 +0 으로 보여준다
+### C12. "가장 크게 악화"가 performanceScore 개선을 악화로 세고, CLS 변화를 +0 으로 보여준다 (닫힘, `706f5ea`)
 
 `src/lib/performance-alerts/discord-report.ts:121-143` (`84509d7` 신규)
 
@@ -104,9 +112,7 @@ ms 단위 metric 이 항상 CLS 를 이긴다. CLS 0.2 악화(심각)가 LCP +30
 `discord-report.test.ts` 의 새 케이스는 LCP 만 검증하고 CLS 는 delta 0 으로 두어
 이 경로가 드러나지 않는다.
 
-## 낮음
-
-### C8. 데이터 부족 요약이 1,024자에서 잘린다
+### C8. 데이터 부족 요약이 1,024자에서 잘린다 (닫힘, `e459b6a`)
 
 `report-decision.ts:338`
 
@@ -118,11 +124,11 @@ ms 단위 metric 이 항상 CLS 를 이긴다. CLS 0.2 악화(심각)가 LCP +30
 이 집계 자체가 여러 대상이 동시에 CrUX 표본을 잃는 상황을 위해 만들어졌다.
 가장 흔한 경우에 목록의 절반을 잃는다. 게다가 잘린 결과가 "영향받는 대상은 이게 전부"처럼 읽힌다.
 
-### C9. 아무 일도 하지 않는 삼항
+### C9. 아무 일도 하지 않는 삼항 (닫힘, `706f5ea`)
 
 `lighthouse-result.ts:90`. C6 과 같은 줄이다. 두 분기가 동일하다.
 
-### C10. shard 개수가 세 곳에 따로 적혀 있다
+### C10. shard 개수가 세 곳에 따로 적혀 있다 (닫힘, `2f7044b`)
 
 `scripts/merge-production-lighthouse.ts:31` 의 기본값 `3`,
 `.github/workflows/core-web-vitals-report.yml` 의 `matrix.shard: [0, 1, 2]` 와
@@ -132,7 +138,7 @@ matrix 를 4로 늘리고 스크립트를 안 고치면 merge 가
 `Expected 3 Lighthouse shards, found 4` 로 실패한다. 그 단계는 `continue-on-error: true` 라서
 실제 오류는 다음 단계의 `manifest.json` ENOENT 로 나타난다. 원인과 증상이 멀다.
 
-### C11. 대상 id 와 path 의 짝을 검증하지 않는다
+### C11. 대상 id 와 path 의 짝을 검증하지 않는다 (닫힘, `2f7044b`)
 
 `scripts/performance-targets.ts:33-61`
 
@@ -140,7 +146,7 @@ matrix 를 4로 늘리고 스크립트를 안 고치면 merge 가
 각각 본다. 짝은 보지 않으므로 `{ id: "home", path: "/ko/contact" }` 가 통과한다.
 커밋된 설정 파일이라 실수 여지는 작지만, 이 함수의 목적이 그 실수를 잡는 것이다.
 
-### C13. 상세 링크가 url 없는 카드에서 `undefined` 를 만든다
+### C13. 상세 링크가 url 없는 카드에서 `undefined` 를 만든다 (닫힘, `706f5ea`)
 
 `src/lib/performance-alerts/discord-report.ts:193-195, 216-219` (`84509d7` 신규)
 
@@ -150,7 +156,32 @@ url 이 비면 `[Lighthouse 결과](undefined#artifacts)` 가 카드에 실린�
 실제 배선에서는 `createPerformanceDiscordCard` 가 항상 url 을 넣어 도달하지 않지만,
 한 함수 안에서 같은 값을 한 번은 가드하고 한 번은 안 하는 상태다.
 
-## 닫힌 항목
+### C14. 두 실행만 남으면 점수가 높은 실행을 대표로 고른다 (닫힘, `706f5ea`)
+
+`scripts/collect-production-lighthouse.ts:81-83`
+
+검토 시점에 없던 항목이다. C6 을 고치려고 집계 경로를 따라가다 나왔다.
+
+`markRepresentativeRun` 이 `Math.floor(scored.length / 2)` 를 쓴다. 세 실행에서는 중앙값이
+맞지만 두 실행에서는 index 1, 즉 performanceScore 가 **더 높은** 실행이 대표가 된다.
+대표 실행의 audit 만 진단 문구로 읽으므로 두 번 성공한 대상은 더 나은 쪽 진단이 AI 입력이 된다.
+
+C6 과 같은 방향 편향이 진단 선택 계층에 한 번 더 있었다. 값은 `aggregateValues` 가,
+진단은 이 함수가 고르는데 둘이 서로 다른 실행을 가리키게 된다.
+`Math.floor((scored.length - 1) / 2)` 로 바꿔 세 실행은 그대로, 두 실행은 낮은 점수를 고른다.
+
+### C15. combined 대상에서 metric 행이 조용히 버려진다 (닫힘, `da802d9`)
+
+`src/lib/performance-alerts/triage-prompt.ts:68`
+
+검토 시점에 없던 항목이다. C2 의 자르기 지점을 세다가 나왔다.
+
+`metrics.slice(0, 12)` 가 대상당 metric 을 12개로 자른다. field 와 lab 이 함께 나쁜 대상은
+url·origin 의 LCP·INP·CLS 여섯 행에 lab 일곱 행을 더해 13행이라 한 행이 버려진다.
+정렬이 없으므로 버려지는 행이 경고를 만든 metric 일 수 있다.
+
+C2 와 같은 부류다. 자르기가 어떤 순서를 전제하는데 그 순서를 아무도 정하지 않았다.
+`rankMetrics` 를 먼저 적용해 가장 덜 중요한 행이 버려지게 했다.
 
 ### C1. 빈 목록이 Discord 400 을 만들고 알림이 사라진다 (닫힘, `1a67ec4`)
 
@@ -192,11 +223,14 @@ Actions run 과 artifact 를 가리키는 `상세` field 를 담는다.
 
 ## 확인한 측정값
 
-| 시점                    | 항목                                       | 결과                                      |
-| ----------------------- | ------------------------------------------ | ----------------------------------------- |
-| 첫 검토 (`89484c2`)     | `vitest run` (범위 내)                     | 32 파일 / 369개 전부 통과, 1.49초         |
-| 첫 검토                 | `eslint scripts/core-web-vitals-report.ts` | 0건 (무시 파일 아님을 JSON 포맷으로 확인) |
-| 첫 검토                 | `gh run list` 두 워크플로                  | 최근 실행 모두 성공                       |
-| 재검토 (`84509d7`)      | `vitest run` (범위 내)                     | 32 파일 / 370개 전부 통과, 1.35초         |
-| 보안 라운드 (`33b1ab9`) | `vitest run` (범위 내)                     | 38 파일 / 408개 전부 통과, 1.61초         |
-| 보안 라운드             | `npm run test:coverage`                    | 통과 (`lib/text` statements 100%)         |
+| 시점                      | 항목                                       | 결과                                      |
+| ------------------------- | ------------------------------------------ | ----------------------------------------- |
+| 첫 검토 (`89484c2`)       | `vitest run` (범위 내)                     | 32 파일 / 369개 전부 통과, 1.49초         |
+| 첫 검토                   | `eslint scripts/core-web-vitals-report.ts` | 0건 (무시 파일 아님을 JSON 포맷으로 확인) |
+| 첫 검토                   | `gh run list` 두 워크플로                  | 최근 실행 모두 성공                       |
+| 재검토 (`84509d7`)        | `vitest run` (범위 내)                     | 32 파일 / 370개 전부 통과, 1.35초         |
+| 보안 라운드 (`33b1ab9`)   | `vitest run` (범위 내)                     | 38 파일 / 408개 전부 통과, 1.61초         |
+| 보안 라운드               | `npm run test:coverage`                    | 통과 (`lib/text` statements 100%)         |
+| 정확성 라운드 (`2f7044b`) | `vitest run` (범위 내)                     | 41 파일 / 475개 전부 통과, 1.68초         |
+| 정확성 라운드             | `npm run test:coverage`                    | 353 파일 / 2,892개 통과, 임계값 통과      |
+| 정확성 라운드             | `npm run check` · `eslint` · `deps:check`  | 0 error · 0건 · 위반 0건                  |
