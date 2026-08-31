@@ -280,7 +280,7 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
         status: alert.reason,
         collectionPeriod: null,
       });
-      if (!registerAlert(key)) continue;
+      if (!input.forceAiAnalysis && !registerAlert(key)) continue;
       const metricName =
         alert.metric === "LCP"
           ? "lcp"

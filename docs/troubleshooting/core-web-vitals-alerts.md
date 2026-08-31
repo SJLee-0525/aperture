@@ -85,8 +85,11 @@ workflow는 두 artifact를 90일간 보관한다.
 | `core-web-vitals-lighthouse` | URL별 Lighthouse JSON, HTML과 `manifest.json`         |
 
 snapshot에는 CrUX 원본 응답, Lighthouse HTML, screenshot, API key와 webhook URL을 넣지 않는다.
-Discord 카드에는 코드가 판정한 수치를 먼저 표시하고, AI가 성공하면 요약, 사용자 영향, 원인 후보와
-확인 순서를 추가한다. AI가 실패해도 수치 카드는 전송된다.
+Discord 카드에는 코드가 판정한 수치를 먼저 표시한다. AI가 성공한 단일 대상 카드는 요약, 사용자
+영향, 원인 후보와 확인 순서를 추가한다. 여러 대상의 통합 카드는 공통 요약만 보내고, 대상별 전체
+분석은 Actions summary와 `core-web-vitals-ai-report` artifact에서 확인한다. 통합 카드에는 코드가
+집계한 현황, 공통 원인 최대 3개, 우선 확인 3개와 악화 폭이 큰 대상 3개를 표시한다. AI가 실패해도
+수치 카드는 전송된다.
 
 ## 로컬 확인
 

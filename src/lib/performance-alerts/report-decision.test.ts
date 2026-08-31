@@ -125,6 +125,22 @@ describe("buildPerformanceDecision", () => {
     expect(second.cards).toEqual([]);
   });
 
+  it("강제 AI 분석은 이미 전송한 Lighthouse 경고도 다시 포함한다", () => {
+    const first = buildPerformanceDecision({
+      ...input(),
+      lighthouse: [lighthouse(3_500)],
+    });
+    const second = buildPerformanceDecision({
+      ...input(),
+      previous: first.snapshot,
+      lighthouse: [lighthouse(3_500)],
+      forceAiAnalysis: true,
+    });
+
+    expect(second.cards).toHaveLength(1);
+    expect(second.triageInputs[0]).toMatchObject({ target: target.url, scope: "lab" });
+  });
+
   it("CrUX record 없음 4회째에 데이터 부족 카드를 만든다", () => {
     const prior = previous();
     prior.targets[0]!.measurements = [

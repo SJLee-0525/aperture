@@ -10,6 +10,7 @@ import {
   fitEmbed,
 } from "@/lib/performance-alerts/discord-report";
 
+import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
 import type { PerformanceTriageTarget } from "@/lib/performance-alerts/triage-schema";
 
@@ -53,6 +54,20 @@ const alertCard = (host: string) =>
     kind: "field",
     fieldSummary: "LCP: 4500ms, 이전 3000ms, +50.0%",
   })!;
+
+const triageInput = (host: string, lcp: number, previous: number): PerformanceTriageInput => ({
+  target: `https://${host}`,
+  scope: "lab",
+  formFactor: "Lighthouse mobile",
+  collectionPeriod: null,
+  release: null,
+  metrics: [
+    { source: "lab", metric: "LCP", current: lcp, previous, status: "poor" },
+    { source: "lab", metric: "TBT", current: 130, previous: 100, status: "good" },
+    { source: "lab", metric: "CLS", current: 0, previous: 0, status: "good" },
+  ],
+  diagnostics: [],
+});
 
 describe("createPerformanceDiscordCard", () => {
   it.each([
@@ -138,22 +153,41 @@ describe("buildPerformanceTriageCards", () => {
     expect(card?.footer?.text).toBe("openai/model-id · confidence medium");
   });
 
-  it("여러 대상은 공통 분석과 대상별 요약을 담은 카드 한 장으로 만든다", () => {
+  it("여러 대상은 공통 분석과 전체 상세 링크를 담은 카드 한 장으로 만든다", () => {
     const [card, ...rest] = buildPerformanceTriageCards(
       [
-        { card: alertCard("a.example"), label: "a.example" },
-        { card: alertCard("b.example"), label: "b.example" },
+        {
+          card: alertCard("a.example"),
+          label: "a.example",
+          input: triageInput("a.example", 4_500, 3_000),
+        },
+        {
+          card: alertCard("b.example"),
+          label: "b.example",
+          input: triageInput("b.example", 4_000, 4_200),
+        },
       ],
       analysisOf([target(0), target(1)]),
     );
     expect(rest).toHaveLength(0);
-    expect(card?.title).toBe("Core Web Vitals 통합 AI 분석");
+    expect(card?.title).toBe("Core Web Vitals — 2개 경고");
     expect(card?.description).toContain("공통 요약");
-    expect(card?.fields?.[0]).toMatchObject({ name: "공통 원인" });
-    expect(card?.fields?.[1]?.name).toBe("a.example");
-    expect(card?.fields?.[1]?.value).toContain("대상 0 요약");
-    expect(card?.fields?.[2]?.name).toBe("b.example");
-    expect(card?.fields?.[2]?.value).toContain("대상 1 요약");
+    expect(card?.fields?.find((field) => field.name === "현황")?.value).toBe(
+      "LCP 불량 2 · 이전보다 악화 1 · 개선 1\nTBT 증가 2 · CLS 문제 0",
+    );
+    expect(card?.fields?.find((field) => field.name === "공통 원인")).toBeDefined();
+    expect(card?.fields?.find((field) => field.name === "우선 확인")?.value).toContain(
+      "1. LCP breakdown 진단",
+    );
+    expect(card?.fields?.find((field) => field.name === "가장 크게 악화")?.value).toContain(
+      "a.example — LCP +1500ms",
+    );
+    expect(card?.fields?.find((field) => field.name === "상세")?.value).toContain("Actions run");
+    expect(card?.fields?.find((field) => field.name === "상세")?.value).toContain(
+      "core-web-vitals-ai-report",
+    );
+    expect(card?.fields?.some((field) => field.name === "a.example")).toBe(false);
+    expect(card?.fields?.some((field) => field.name === "b.example")).toBe(false);
     expect(card?.footer?.text).toBe("openai/model-id · 2개 대상 통합 분석");
   });
 
@@ -167,7 +201,7 @@ describe("buildPerformanceTriageCards", () => {
     );
   });
 
-  it("상한을 넘는 대상은 버리지 않고 남은 대상 목록으로 알린다", () => {
+  it("대상이 많아도 Discord에는 전체 요약만 싣고 대상 수를 표시한다", () => {
     const entries = Array.from({ length: 12 }, (_, index) => ({
       card: alertCard(`host-${index}.example`),
       label: `host-${index}.example`,
@@ -176,11 +210,10 @@ describe("buildPerformanceTriageCards", () => {
       entries,
       analysisOf(Array.from({ length: 12 }, (_, index) => target(index))),
     );
-    const overflow = card?.fields?.find((field) => field.name.startsWith("그 외"));
-    expect(overflow?.name).toBe("그 외 4개 대상");
-    expect(overflow?.value).toContain("host-11.example");
+    expect(card?.fields?.find((field) => field.name === "상세")?.value).toContain(
+      "12개 대상의 전체 분석",
+    );
     expect(embedLength(card!)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
-    expect(card?.fields?.at(-1)).toBe(overflow);
   });
 
   it("가장 긴 분석에서도 대상이 잘려 나가지 않는다", () => {
@@ -200,7 +233,7 @@ describe("buildPerformanceTriageCards", () => {
         { model: "m".repeat(50) },
       ),
     );
-    expect(card?.fields?.filter((field) => field.name.startsWith("host-"))).toHaveLength(8);
+    expect(card?.fields?.filter((field) => field.name.startsWith("host-"))).toHaveLength(0);
     expect(embedLength(card!)).toBeLessThanOrEqual(DISCORD_EMBED_LIMIT);
   });
 });

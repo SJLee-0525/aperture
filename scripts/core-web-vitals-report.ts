@@ -319,6 +319,7 @@ const main = async (): Promise<void> => {
               {
                 card: entry.card as DiscordEmbed,
                 label: triageLabel(entry.input as PerformanceTriageInput),
+                input: entry.input as PerformanceTriageInput,
               },
             ],
       );

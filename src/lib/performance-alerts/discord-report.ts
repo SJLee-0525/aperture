@@ -1,4 +1,5 @@
 import type { DiscordEmbed } from "@/lib/discord/types";
+import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
 import type { PerformanceTriageTarget } from "@/lib/performance-alerts/triage-schema";
 
@@ -63,14 +64,83 @@ const fitEmbed = (embed: DiscordEmbed): DiscordEmbed => {
   return result;
 };
 
-const MERGED_TARGET_LIMIT = 8;
-const MERGED_SECTION_LIMIT = 440;
-const MERGED_CAUSE_LIMIT = 2;
-
 const triageFooter = (analysis: PerformanceTriageProviderResult, targets: number): string =>
   targets < 2
     ? `${analysis.provider}/${analysis.model} · confidence ${analysis.result.targets[0]?.confidence ?? "unknown"}`
     : `${analysis.provider}/${analysis.model} · ${targets}개 대상 통합 분석`;
+
+type TriageEntry = { card: DiscordEmbed; label: string; input?: PerformanceTriageInput };
+
+const targetMetrics = (
+  entries: TriageEntry[],
+  predicate: (metric: PerformanceTriageInput["metrics"][number]) => boolean,
+): number => entries.filter((entry) => entry.input?.metrics.some(predicate)).length;
+
+const mergedStatus = (entries: TriageEntry[]): string => {
+  const lcpPoor = targetMetrics(
+    entries,
+    (metric) => metric.metric.toUpperCase() === "LCP" && metric.status === "poor",
+  );
+  const worsened = targetMetrics(
+    entries,
+    (metric) =>
+      metric.metric.toUpperCase() === "LCP" &&
+      metric.previous !== null &&
+      metric.current > metric.previous,
+  );
+  const improved = targetMetrics(
+    entries,
+    (metric) =>
+      metric.metric.toUpperCase() === "LCP" &&
+      metric.previous !== null &&
+      metric.current < metric.previous,
+  );
+  const tbtIncreased = targetMetrics(
+    entries,
+    (metric) =>
+      metric.metric.toUpperCase() === "TBT" &&
+      metric.previous !== null &&
+      metric.current > metric.previous,
+  );
+  const clsPoor = targetMetrics(
+    entries,
+    (metric) => metric.metric.toUpperCase() === "CLS" && metric.status === "poor",
+  );
+  return `LCP 불량 ${lcpPoor} · 이전보다 악화 ${worsened} · 개선 ${improved}\nTBT 증가 ${tbtIncreased} · CLS 문제 ${clsPoor}`;
+};
+
+const mergedChecks = (targets: PerformanceTriageTarget[]): string => {
+  const checks = [
+    ...new Set(targets.flatMap((target) => [...target.inspectFirst, ...target.recommendedChecks])),
+  ].slice(0, 3);
+  return checks.length
+    ? checks.map((check, index) => `${index + 1}. ${check}`).join("\n")
+    : "제안 없음";
+};
+
+const worstTargets = (entries: TriageEntry[]): string => {
+  const ranked = entries
+    .flatMap((entry) => {
+      const changes =
+        entry.input?.metrics.flatMap((metric) =>
+          metric.previous === null || metric.current <= metric.previous
+            ? []
+            : [{ metric: metric.metric, delta: metric.current - metric.previous }],
+        ) ?? [];
+      const worst = changes.sort((a, b) => b.delta - a.delta)[0];
+      return worst ? [{ label: entry.label.split("\n")[0]!, ...worst }] : [];
+    })
+    .sort((a, b) => b.delta - a.delta)
+    .slice(0, 3);
+  return ranked.length
+    ? ranked
+        .map(
+          (item) =>
+            `• ${item.label} — ${item.metric} +${Math.round(item.delta)}${item.metric.toUpperCase() === "CLS" ? "" : "ms"}`,
+        )
+        .join("\n")
+    : "이전 측정 대비 악화 대상 없음";
+};
 
 /**
  * AI 설명은 기존 수치 field 뒤에 추가해 성공과 실패 카드의 측정 사실을 동일하게 유지한다.
@@ -106,32 +176,11 @@ const attachPerformanceTriage = (
 };
 
 /**
- * 통합 카드는 알림이고 전문은 artifact에 있으므로 대상당 분량을 줄여 담는다.
- * 줄이지 않으면 embed 상한에서 뒤쪽 대상이 통째로 사라진다.
- */
-const mergedSection = (label: string, target: PerformanceTriageTarget) => ({
-  name: label,
-  value: truncate(
-    [
-      `요약: ${target.summary}`,
-      target.likelyCauses.length
-        ? `원인 후보: ${target.likelyCauses
-            .slice(0, MERGED_CAUSE_LIMIT)
-            .map((item) => truncate(item, 80))
-            .join(" / ")}`
-        : "원인 후보: 근거 부족",
-      `confidence: ${target.confidence}`,
-    ].join("\n"),
-    MERGED_SECTION_LIMIT,
-  ),
-});
-
-/**
  * batch 분석 한 번의 결과를 카드로 만든다. entries[i]는 analysis.result.targets[i]와 짝이며
  * 수가 어긋나면 분석을 붙이지 않고 측정값 카드를 그대로 돌려준다.
  */
 const buildPerformanceTriageCards = (
-  entries: Array<{ card: DiscordEmbed; label: string }>,
+  entries: TriageEntry[],
   analysis: PerformanceTriageProviderResult,
 ): DiscordEmbed[] => {
   const targets = analysis.result.targets;
@@ -141,31 +190,33 @@ const buildPerformanceTriageCards = (
   const footer = triageFooter(analysis, entries.length);
   if (entries.length === 1) return [attachPerformanceTriage(entries[0]!.card, targets[0]!, footer)];
 
-  const shown = entries.slice(0, MERGED_TARGET_LIMIT);
-  const hidden = entries.slice(MERGED_TARGET_LIMIT);
+  const actionsRun = entries[0]!.card.url
+    ? `[Actions run](${entries[0]!.card.url})`
+    : "Actions run에서 확인";
   return [
     fitEmbed({
       ...entries[0]!.card,
-      title: "Core Web Vitals 통합 AI 분석",
-      description: `측정값은 코드가 판정했고 AI는 대상별 원인 후보를 요약했습니다.\n${analysis.result.commonSummary}`,
+      title: `Core Web Vitals — ${entries.length}개 경고`,
+      description: analysis.result.commonSummary,
       fields: [
+        { name: "현황", value: mergedStatus(entries) },
         ...(analysis.result.commonCauses.length
           ? [
               {
                 name: "공통 원인",
-                value: analysis.result.commonCauses.map((item) => `- ${item}`).join("\n"),
+                value: analysis.result.commonCauses
+                  .slice(0, 3)
+                  .map((item) => `- ${item}`)
+                  .join("\n"),
               },
             ]
           : []),
-        ...shown.map((entry, index) => mergedSection(entry.label, targets[index]!)),
-        ...(hidden.length
-          ? [
-              {
-                name: `그 외 ${hidden.length}개 대상`,
-                value: `${hidden.map((entry) => entry.label).join("\n")}\n전문은 core-web-vitals-ai-report artifact에 있습니다.`,
-              },
-            ]
-          : []),
+        { name: "우선 확인", value: mergedChecks(targets) },
+        { name: "가장 크게 악화", value: worstTargets(entries) },
+        {
+          name: "상세",
+          value: `${actionsRun} · [Lighthouse 결과](${entries[0]!.card.url}#artifacts)\n${entries.length}개 대상의 전체 분석은 Actions summary와 core-web-vitals-ai-report artifact에 있습니다.`,
+        },
       ],
       footer: { text: footer },
     }),

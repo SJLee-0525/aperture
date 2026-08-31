@@ -286,8 +286,9 @@ PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_MODEL=
 - 현재 p75와 직전 p75, 변화량
 - CrUX collection period와 측정 시각
 - Lighthouse 중앙값과 실행 범위
-- AI 요약, 사용자 영향, 원인 후보와 확인 순서
-- Actions run과 Lighthouse artifact 링크
+- 단일 대상이면 AI 요약, 사용자 영향, 원인 후보와 확인 순서
+- 여러 대상이면 코드가 집계한 현황, 공통 AI 요약과 원인 최대 3개, 우선 확인 3개,
+  악화 폭이 큰 대상 3개, Actions run 및 전체 AI report 링크
 - provider/model 또는 `AI 분석 없음`
 
 Discord 제한에 맞춰 필드와 embed 전체 길이를 전송 전에 자른다. 사용자나 외부 데이터가 카드에
@@ -296,6 +297,8 @@ Actions summary에 남기고 workflow를 실패시킨다.
 
 정상 실행마다 성공 카드를 보내지는 않는다. 모든 대상이 기준 안이면 Actions summary와 artifact만
 남긴다. `workflow_dispatch`에는 `send_baseline=true` 입력을 두어 설정 검증 때만 정상 카드를 보낸다.
+`force_ai_analysis=true`이면 중복 억제 여부와 관계없이 현재 경고 대상 전체를 다시 분석한다. 여러
+대상의 상세 분석은 Actions summary와 `core-web-vitals-ai-report` artifact에 모두 남긴다.
 
 ## 11. 파일 구조
 
