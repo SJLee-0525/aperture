@@ -26,7 +26,7 @@ type LighthouseAttempt = {
 type LighthouseRunner = (url: string, outputPath: string) => Promise<void>;
 
 const execFile = promisify(execFileCallback);
-const REPORT_DIRECTORY = resolve("lighthouse-production-report");
+const REPORT_ROOT = resolve("lighthouse-production-report");
 const RUNS_PER_TARGET = 3;
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 15_000;
@@ -34,6 +34,19 @@ const RUN_DELAY_MS = 3_000;
 
 const wait = async (milliseconds: number): Promise<void> => {
   await new Promise((resolveWait) => setTimeout(resolveWait, milliseconds));
+};
+
+const selectTargetShard = <Target>(
+  targets: readonly Target[],
+  shardIndex: number,
+  shardCount: number,
+): Target[] => {
+  if (!Number.isInteger(shardCount) || shardCount <= 0) throw new Error("Invalid shard count");
+  if (!Number.isInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
+    throw new Error("Invalid shard index");
+  }
+  const shardSize = Math.ceil(targets.length / shardCount);
+  return targets.slice(shardIndex * shardSize, (shardIndex + 1) * shardSize);
 };
 
 const safeTargetName = (url: string): string => {
@@ -96,8 +109,9 @@ const collectProductionLighthouse = async (
   runner: LighthouseRunner = runLighthouse,
   delay: (milliseconds: number) => Promise<void> = wait,
   logFailure: (message: string) => void = (message) => process.stderr.write(message),
+  reportDirectory: string = REPORT_ROOT,
 ): Promise<{ attempts: LighthouseAttempt[]; complete: boolean }> => {
-  await mkdir(REPORT_DIRECTORY, { recursive: true });
+  await mkdir(reportDirectory, { recursive: true });
   const attempts: LighthouseAttempt[] = [];
   const manifest: LighthouseManifestItem[] = [];
   let complete = true;
@@ -108,7 +122,7 @@ const collectProductionLighthouse = async (
       let succeeded = false;
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
         const outputPath = resolve(
-          REPORT_DIRECTORY,
+          reportDirectory,
           `${String(targetIndex + 1).padStart(2, "0")}-${safeTargetName(url)}-run-${run}-attempt-${attempt}`,
         );
         const paths = reportPaths(outputPath);
@@ -141,9 +155,9 @@ const collectProductionLighthouse = async (
     }
   }
 
-  await writeFile(resolve(REPORT_DIRECTORY, "manifest.json"), JSON.stringify(manifest, null, 2));
+  await writeFile(resolve(reportDirectory, "manifest.json"), JSON.stringify(manifest, null, 2));
   await writeFile(
-    resolve(REPORT_DIRECTORY, "collection-summary.json"),
+    resolve(reportDirectory, "collection-summary.json"),
     JSON.stringify({ complete, attempts }, null, 2),
   );
   return { attempts, complete };
@@ -165,8 +179,19 @@ const main = async (): Promise<void> => {
   ) {
     throw new Error("SITE_URL must be an HTTPS origin without path, query, fragment, or port");
   }
-  const urls = PERFORMANCE_TARGETS.map(({ path }) => `${siteUrl.origin}${path}`);
-  const result = await collectProductionLighthouse(urls);
+  const shardIndex = Number(process.env.LIGHTHOUSE_SHARD_INDEX ?? "0");
+  const shardCount = Number(process.env.LIGHTHOUSE_SHARD_COUNT ?? "1");
+  const targets = selectTargetShard(PERFORMANCE_TARGETS, shardIndex, shardCount);
+  const urls = targets.map(({ path }) => `${siteUrl.origin}${path}`);
+  const reportDirectory =
+    shardCount === 1 ? REPORT_ROOT : resolve(REPORT_ROOT, `shard-${shardIndex}`);
+  const result = await collectProductionLighthouse(
+    urls,
+    runLighthouse,
+    wait,
+    (message) => process.stderr.write(message),
+    reportDirectory,
+  );
   if (!result.complete) process.exitCode = 1;
 };
 
@@ -179,5 +204,12 @@ if (invokedPath === fileURLToPath(import.meta.url)) {
   });
 }
 
-export { collectProductionLighthouse, main, markRepresentativeRun, reportPaths, safeTargetName };
+export {
+  collectProductionLighthouse,
+  main,
+  markRepresentativeRun,
+  reportPaths,
+  safeTargetName,
+  selectTargetShard,
+};
 export type { LighthouseAttempt, LighthouseManifestItem, LighthouseRunner };

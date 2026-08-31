@@ -306,15 +306,17 @@ npm run deps:check
 - [x] `send_baseline=true`로 workflow를 수동 실행한다.
 - [x] secret 값이 Actions log에서 `***`로 마스킹되는지 확인한다.
 - [x] `/ko/contact`를 제외한 앞선 10개 URL은 각 3회, `/ko`는 2회까지 정상 측정됐다. 총 32회다.
-- [ ] `/ko` 3회차가 HTTP 403으로 실패했다. `/ko/contact` 측정, report 생성, Discord 전송과 snapshot
-      업로드는 실행되지 않았다.
-- [ ] 중간 실패 시에도 성공한 Lighthouse 결과를 보존하고, 한 URL에서 2회가 성공하면 `partial`로
-      계속 처리하는지 확인한다.
+- [x] `/ko` 3회차부터 Vercel 자동 DDoS mitigation challenge가 발생하는 것을 Firewall Events에서
+      확인했다(`System Mitigations`, Microsoft runner IP, `Challenged`).
+- [x] Lighthouse를 세 shard job으로 분할하고 aggregation job에서 manifest와 collection summary를
+      병합한다.
+- [x] 중간 실패 시에도 각 shard의 성공 결과를 보존하고, 한 URL에서 2회가 성공하면 `partial`로
+      계속 처리한다.
 
 - [ ] `send_baseline=true`로 수동 실행해 정상 카드를 받는다.
 - [ ] Actions log, summary와 artifact에 API key와 webhook URL이 없는지 확인한다.
 - [ ] CrUX URL 데이터가 있는 target과 없는 target의 표시가 정확한지 확인한다.
-- [ ] URL별 3회, 총 36개의 Lighthouse JSON과 HTML이 보존됐는지 확인한다.
+- [ ] shard 병합 후 URL별 3회, 총 36개의 Lighthouse JSON과 HTML이 보존됐는지 확인한다.
 - [ ] snapshot에 원본 API 응답이나 Lighthouse HTML이 들어 있지 않은지 확인한다.
 - [ ] 임시 임계값으로 lab 회귀 카드를 한 번 확인한 뒤 원래 값으로 되돌린다.
 - [ ] AI primary를 의도적으로 실패시켜 fallback 카드를 확인한다.

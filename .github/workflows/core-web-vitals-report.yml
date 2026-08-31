@@ -21,21 +21,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  report:
+  collect-lighthouse:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
+    strategy:
+      # 같은 runner IP의 연속 요청이 Vercel system DDoS mitigation을 다시 자극하지 않게 한다.
+      max-parallel: 1
+      matrix:
+        shard: [0, 1, 2]
     env:
       SITE_URL: ${{ vars.SITE_URL }}
-      CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}
-      DISCORD_PERFORMANCE_WEBHOOK_URL: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK_URL }}
-      PERFORMANCE_TRIAGE_PROVIDER: ${{ vars.PERFORMANCE_TRIAGE_PROVIDER }}
-      PERFORMANCE_TRIAGE_PROVIDER_MODEL: ${{ vars.PERFORMANCE_TRIAGE_PROVIDER_MODEL }}
-      PERFORMANCE_TRIAGE_PROVIDER_API_KEY: ${{ secrets.PERFORMANCE_TRIAGE_PROVIDER_API_KEY }}
-      PERFORMANCE_TRIAGE_FALLBACK_PROVIDER: ${{ vars.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER }}
-      PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_MODEL: ${{ vars.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_MODEL }}
-      PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_API_KEY: ${{ secrets.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}
-      SEND_BASELINE: ${{ inputs.send_baseline == true && 'true' || 'false' }}
+      LIGHTHOUSE_SHARD_INDEX: ${{ matrix.shard }}
+      LIGHTHOUSE_SHARD_COUNT: 3
 
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +58,54 @@ jobs:
         continue-on-error: true
         run: npm run test:lighthouse:production
 
+      - name: Upload Lighthouse shard
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-web-vitals-lighthouse-shard-${{ matrix.shard }}
+          path: lighthouse-production-report/shard-${{ matrix.shard }}/
+          if-no-files-found: error
+          retention-days: 90
+
+  report:
+    needs: collect-lighthouse
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}
+      DISCORD_PERFORMANCE_WEBHOOK_URL: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK_URL }}
+      PERFORMANCE_TRIAGE_PROVIDER: ${{ vars.PERFORMANCE_TRIAGE_PROVIDER }}
+      PERFORMANCE_TRIAGE_PROVIDER_MODEL: ${{ vars.PERFORMANCE_TRIAGE_PROVIDER_MODEL }}
+      PERFORMANCE_TRIAGE_PROVIDER_API_KEY: ${{ secrets.PERFORMANCE_TRIAGE_PROVIDER_API_KEY }}
+      PERFORMANCE_TRIAGE_FALLBACK_PROVIDER: ${{ vars.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER }}
+      PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_MODEL: ${{ vars.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_MODEL }}
+      PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_API_KEY: ${{ secrets.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      SEND_BASELINE: ${{ inputs.send_baseline == true && 'true' || 'false' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download Lighthouse shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: core-web-vitals-lighthouse-shard-*
+          path: lighthouse-production-report
+
+      - name: Merge Lighthouse shards
+        id: lighthouse
+        continue-on-error: true
+        run: npm run test:lighthouse:merge
+
       # 실패한 측정도 원인을 조사할 수 있어야 하므로 snapshot과 독립적으로 보존한다.
       - name: Upload Lighthouse reports
         if: always()
@@ -68,7 +113,7 @@ jobs:
         with:
           name: core-web-vitals-lighthouse
           path: lighthouse-production-report/
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 90
 
       - name: Build performance report
