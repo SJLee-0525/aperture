@@ -12,6 +12,7 @@ Core Web Vitals 알림. 세 계열과 그 공용 전송 계층만 본다. 나머
 | 파일                                                           | 내용                                        |
 | -------------------------------------------------------------- | ------------------------------------------- |
 | [01-security-and-boundaries.md](01-security-and-boundaries.md) | 신뢰 경계 7개의 STRIDE, 열린 1건과 닫힌 4건 |
+| [01-resolution.md](01-resolution.md)                           | 위 다섯 항목의 처리 결과와 리뷰와 달랐던 것 |
 | [02-correctness.md](02-correctness.md)                         | 열린 결함 9건과 닫힌 4건                    |
 | [03-architecture.md](03-architecture.md)                       | 세 파이프라인의 중복과 심화 후보 4건        |
 | [07-rejected.md](07-rejected.md)                               | 재검증에서 무너진 주장 5건                  |
