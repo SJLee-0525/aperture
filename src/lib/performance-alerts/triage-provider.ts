@@ -1,19 +1,18 @@
-import { createGeminiPerformanceTriageProvider } from "@/lib/performance-alerts/gemini-triage-provider";
-import { createOpenAIPerformanceTriageProvider } from "@/lib/performance-alerts/openai-triage-provider";
-import { performanceTriageTimeout } from "@/lib/performance-alerts/triage-prompt";
+import {
+  buildPerformanceTriageInput,
+  PERFORMANCE_TRIAGE_INSTRUCTIONS,
+  performanceTriageOutputTokens,
+  performanceTriageTimeout,
+} from "@/lib/performance-alerts/triage-prompt";
+import {
+  buildPerformanceTriageSchema,
+  parsePerformanceTriageResult,
+} from "@/lib/performance-alerts/triage-schema";
+import { createTriageProvider } from "@/lib/triage/provider";
 
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageResult } from "@/lib/performance-alerts/triage-schema";
-
-type PerformanceTriageProviderResult = {
-  result: PerformanceTriageResult;
-  provider: "openai" | "gemini" | "mock";
-  model: string;
-};
-type PerformanceTriageProvider = (request: {
-  inputs: PerformanceTriageInput[];
-  signal: AbortSignal;
-}) => Promise<PerformanceTriageProviderResult>;
+import type { TriageContract, TriageProvider, TriageResponse } from "@/lib/triage/contract";
 
 const mockResult = (targets: number): PerformanceTriageResult => ({
   commonSummary: "성능 경고가 감지됐습니다.",
@@ -29,69 +28,30 @@ const mockResult = (targets: number): PerformanceTriageResult => ({
   })),
 });
 
-const unavailable: PerformanceTriageProvider = async () => {
-  throw new Error("Performance triage provider is not configured");
-};
-const mock: PerformanceTriageProvider = async ({ inputs, signal }) => {
-  if (signal.aborted) throw signal.reason;
-  return { result: mockResult(inputs.length), provider: "mock", model: "mock" };
-};
-
-const configured = (
-  name: string | undefined,
-  key: string | undefined,
-  model: string | undefined,
-): PerformanceTriageProvider | undefined => {
-  const provider = name?.trim().toLowerCase();
-  if (provider === "mock") return mock;
-  if (!key?.trim() || !model?.trim()) return undefined;
-  if (provider === "openai") return createOpenAIPerformanceTriageProvider(key.trim(), model.trim());
-  if (provider === "gemini") return createGeminiPerformanceTriageProvider(key.trim(), model.trim());
-  return undefined;
+/**
+ * 이 계열의 판정 계약. 전송(제공자 선택·폴백·타임아웃)은 `lib/triage` 가 소유한다.
+ * 출력 예산·구간 상한·파서가 모두 대상 수의 함수라 상수로 둘 수 없다.
+ */
+const PERFORMANCE_TRIAGE_CONTRACT: TriageContract<
+  PerformanceTriageInput[],
+  PerformanceTriageResult
+> = {
+  envPrefix: "PERFORMANCE_TRIAGE",
+  schemaName: "performance_triage",
+  instructions: PERFORMANCE_TRIAGE_INSTRUCTIONS,
+  buildInput: buildPerformanceTriageInput,
+  schema: (strict) => buildPerformanceTriageSchema({ strict }),
+  parse: (text, inputs) => parsePerformanceTriageResult(text, inputs.length),
+  outputTokens: (inputs) => performanceTriageOutputTokens(inputs.length),
+  timeoutMs: (inputs, base) => performanceTriageTimeout(inputs.length, base),
+  mockResult: (inputs) => mockResult(inputs.length),
 };
 
-/** primary가 실패하면 한 번만 fallback을 호출하며 전체 요청 취소는 그대로 전파한다. */
-const withFallback =
-  (
-    primary: PerformanceTriageProvider,
-    fallback?: PerformanceTriageProvider,
-  ): PerformanceTriageProvider =>
-  async (request) => {
-    try {
-      return await primary({
-        ...request,
-        signal: AbortSignal.any([
-          request.signal,
-          AbortSignal.timeout(performanceTriageTimeout(request.inputs.length, 20_000)),
-        ]),
-      });
-    } catch (error) {
-      if (request.signal.aborted || !fallback) throw error;
-      return fallback({
-        ...request,
-        signal: AbortSignal.any([
-          request.signal,
-          AbortSignal.timeout(performanceTriageTimeout(request.inputs.length, 15_000)),
-        ]),
-      });
-    }
-  };
+type PerformanceTriageProvider = TriageProvider<PerformanceTriageInput[], PerformanceTriageResult>;
+type PerformanceTriageProviderResult = TriageResponse<PerformanceTriageResult>;
 
-/** 설정이 없거나 잘못된 경우 호출 시 실패하는 provider를 반환해 기본 카드 경로를 유지한다. */
-const getPerformanceTriageProvider = (): PerformanceTriageProvider => {
-  const primary = configured(
-    process.env.PERFORMANCE_TRIAGE_PROVIDER,
-    process.env.PERFORMANCE_TRIAGE_PROVIDER_API_KEY,
-    process.env.PERFORMANCE_TRIAGE_PROVIDER_MODEL,
-  );
-  const fallback = configured(
-    process.env.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER,
-    process.env.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_API_KEY,
-    process.env.PERFORMANCE_TRIAGE_FALLBACK_PROVIDER_MODEL,
-  );
-  if (!primary) return fallback ?? unavailable;
-  return withFallback(primary, fallback);
-};
+const getPerformanceTriageProvider = (): PerformanceTriageProvider =>
+  createTriageProvider(PERFORMANCE_TRIAGE_CONTRACT);
 
-export { getPerformanceTriageProvider, withFallback };
+export { getPerformanceTriageProvider, PERFORMANCE_TRIAGE_CONTRACT };
 export type { PerformanceTriageProvider, PerformanceTriageProviderResult };

@@ -1,132 +1,107 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createGeminiPerformanceTriageProvider } from "@/lib/performance-alerts/gemini-triage-provider";
-import { createOpenAIPerformanceTriageProvider } from "@/lib/performance-alerts/openai-triage-provider";
+import {
+  performanceTriageOutputTokens,
+  performanceTriageTimeout,
+} from "@/lib/performance-alerts/triage-prompt";
 import {
   getPerformanceTriageProvider,
-  withFallback,
+  PERFORMANCE_TRIAGE_CONTRACT,
 } from "@/lib/performance-alerts/triage-provider";
+import { buildPerformanceTriageSchema } from "@/lib/performance-alerts/triage-schema";
 
-import type { PerformanceTriageProvider } from "@/lib/performance-alerts/triage-provider";
+import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 
-const target = (targetIndex: number) => ({
-  targetIndex,
-  summary: "요약",
-  userImpact: "영향",
-  likelyCauses: ["원인"],
-  inspectFirst: ["진단"],
-  recommendedChecks: ["npm run check"],
-  confidence: "medium" as const,
-});
-const result = {
-  commonSummary: "공통 요약",
-  commonCauses: ["공통 원인"],
-  targets: [target(0), target(1)],
-};
-const single = { ...result, targets: [target(0)] };
-const input = {
-  target: "https://sungjoon.works/ko",
-  scope: "url" as const,
-  formFactor: "phone",
-  collectionPeriod: "2026-08-30",
+const input = (target: string): PerformanceTriageInput => ({
+  target,
+  scope: "url",
+  formFactor: "PHONE",
+  collectionPeriod: null,
   release: null,
-  metrics: [
-    {
-      source: "field" as const,
-      metric: "LCP",
-      current: 4_500,
-      previous: 3_000,
-      status: "poor",
-    },
-  ],
+  metrics: [{ source: "field", metric: "LCP", current: 4_500, previous: 3_000, status: "poor" }],
   diagnostics: [],
-};
-const inputs = [input, { ...input, target: "https://sungjoon.works/ko/photo" }];
+});
 
-afterEach(() => vi.unstubAllEnvs());
+const inputs = (count: number): PerformanceTriageInput[] =>
+  Array.from({ length: count }, (_, index) => input(`https://example.com/${index}`));
 
-describe("performance triage providers", () => {
-  it("OpenAI와 Gemini가 같은 fixture를 같은 계약으로 반환한다", async () => {
-    const openAIRequest = vi.fn(
-      async (requestInput: RequestInfo | URL, requestInit?: RequestInit) => {
-        void requestInput;
-        void requestInit;
-        return new Response(
-          JSON.stringify({
-            output: [{ content: [{ type: "output_text", text: JSON.stringify(result) }] }],
-          }),
-        );
-      },
-    );
-    const geminiRequest = vi.fn(
-      async (requestInput: RequestInfo | URL, requestInit?: RequestInit) => {
-        void requestInput;
-        void requestInit;
-        return new Response(
-          JSON.stringify({
-            candidates: [{ content: { parts: [{ text: JSON.stringify(result) }] } }],
-          }),
-        );
-      },
-    );
-    const signal = new AbortController().signal;
-    const openAI = await createOpenAIPerformanceTriageProvider(
-      "openai-key",
-      "openai-model",
-      openAIRequest as typeof fetch,
-    )({ inputs, signal });
-    const gemini = await createGeminiPerformanceTriageProvider(
-      "gemini-key",
-      "gemini-model",
-      geminiRequest as typeof fetch,
-    )({ inputs, signal });
-    expect(openAI.result).toEqual(result);
-    expect(gemini.result).toEqual(result);
-    expect(JSON.parse(openAIRequest.mock.calls[0]![1]!.body as string)).toMatchObject({
-      store: false,
-    });
-    expect(geminiRequest.mock.calls[0]![1]!.headers).toMatchObject({
-      "x-goog-api-key": "gemini-key",
-    });
-    expect(openAIRequest).toHaveBeenCalledTimes(1);
-    expect(geminiRequest).toHaveBeenCalledTimes(1);
+describe("PERFORMANCE_TRIAGE_CONTRACT", () => {
+  it("기존 env 이름과 스키마 이름을 유지한다", () => {
+    expect(PERFORMANCE_TRIAGE_CONTRACT.envPrefix).toBe("PERFORMANCE_TRIAGE");
+    expect(PERFORMANCE_TRIAGE_CONTRACT.schemaName).toBe("performance_triage");
   });
 
-  it("primary 실패 후 fallback을 한 번 호출한다", async () => {
-    const primary = vi.fn<PerformanceTriageProvider>(async () => {
-      throw new Error("primary failed");
+  it("출력 예산과 구간 상한이 대상 수에 비례한다", () => {
+    for (const count of [1, 5, 20]) {
+      expect(PERFORMANCE_TRIAGE_CONTRACT.outputTokens(inputs(count))).toBe(
+        performanceTriageOutputTokens(count),
+      );
+      expect(PERFORMANCE_TRIAGE_CONTRACT.timeoutMs(inputs(count), 20_000)).toBe(
+        performanceTriageTimeout(count, 20_000),
+      );
+    }
+  });
+
+  it("계약의 스키마가 이 계열 구현과 같다", () => {
+    expect(PERFORMANCE_TRIAGE_CONTRACT.schema(true)).toEqual(
+      buildPerformanceTriageSchema({ strict: true }),
+    );
+    expect(PERFORMANCE_TRIAGE_CONTRACT.schema(false)).toEqual(
+      buildPerformanceTriageSchema({ strict: false }),
+    );
+  });
+
+  it("파서가 요청 대상 수와 다른 응답을 거부한다", () => {
+    const twoTargets = JSON.stringify({
+      commonSummary: "요약",
+      commonCauses: [],
+      targets: [0, 1].map((targetIndex) => ({
+        targetIndex,
+        summary: "요약",
+        userImpact: "영향",
+        likelyCauses: [],
+        inspectFirst: [],
+        recommendedChecks: [],
+        confidence: "low",
+      })),
     });
-    const fallback = vi.fn<PerformanceTriageProvider>(async () => ({
-      result: single,
-      provider: "gemini",
-      model: "fallback",
-    }));
-    const response = await withFallback(
-      primary,
-      fallback,
-    )({
-      inputs: [input],
-      signal: new AbortController().signal,
-    });
-    expect(response.provider).toBe("gemini");
-    expect(primary).toHaveBeenCalledTimes(1);
-    expect(fallback).toHaveBeenCalledTimes(1);
+
+    expect(PERFORMANCE_TRIAGE_CONTRACT.parse(twoTargets, inputs(2))).not.toBeNull();
+    expect(PERFORMANCE_TRIAGE_CONTRACT.parse(twoTargets, inputs(1))).toBeNull();
+  });
+
+  it("mock 판정은 대상 수만큼 targets 를 만든다", () => {
+    const mock = PERFORMANCE_TRIAGE_CONTRACT.mockResult!(inputs(3));
+
+    expect(mock.targets).toHaveLength(3);
+    expect(mock.targets.map((target) => target.targetIndex)).toEqual([0, 1, 2]);
+    expect(mock.targets[0]!.confidence).toBe("low");
+  });
+});
+
+describe("getPerformanceTriageProvider", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it("mock provider 는 외부 요청 없이 결과를 만든다", async () => {
+    vi.stubEnv("PERFORMANCE_TRIAGE_PROVIDER", "mock");
+
+    const response = await getPerformanceTriageProvider()(inputs(1), new AbortController().signal);
+
+    expect(response.provider).toBe("mock");
+    expect(response.model).toBe("mock");
+    expect(response.result.targets).toHaveLength(1);
   });
 
   it("설정되지 않으면 기본 카드 경로로 사용할 실패를 반환한다", async () => {
-    vi.stubEnv("PERFORMANCE_TRIAGE_PROVIDER", "");
-    await expect(
-      getPerformanceTriageProvider()({ inputs: [input], signal: new AbortController().signal }),
-    ).rejects.toThrow("not configured");
-  });
+    const run = getPerformanceTriageProvider()(inputs(1), new AbortController().signal);
 
-  it("mock provider는 외부 요청 없이 결과를 만든다", async () => {
-    vi.stubEnv("PERFORMANCE_TRIAGE_PROVIDER", "mock");
-    const response = await getPerformanceTriageProvider()({
-      inputs,
-      signal: new AbortController().signal,
-    });
-    expect(response).toMatchObject({ provider: "mock", model: "mock" });
-    expect(response.result.targets.map((item) => item.targetIndex)).toEqual([0, 1]);
+    await expect(run).rejects.toThrow("Triage provider is not configured");
   });
 });

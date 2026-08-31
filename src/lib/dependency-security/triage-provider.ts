@@ -1,58 +1,40 @@
-import { createGeminiProvider } from "@/lib/dependency-security/gemini-triage-provider";
-import { createOpenAIProvider } from "@/lib/dependency-security/openai-triage-provider";
+import { buildTriageInput, INSTRUCTIONS } from "@/lib/dependency-security/triage-prompt";
+import { parseTriageResults, schemaFor } from "@/lib/dependency-security/triage-schema";
+import { createTriageProvider } from "@/lib/triage/provider";
 
 import type { DependencyTriageResult } from "@/lib/dependency-security/triage-schema";
 import type { DependencySecurityFact } from "@/lib/dependency-security/types";
+import type { TriageContract, TriageProvider } from "@/lib/triage/contract";
 
-type DependencyTriageProvider = (input: {
-  facts: DependencySecurityFact[];
-  signal: AbortSignal;
-}) => Promise<{ results: DependencyTriageResult[]; provider: string; model: string }>;
+const mockResults = (facts: DependencySecurityFact[]): DependencyTriageResult[] =>
+  facts.map((fact) => ({
+    alertNumber: fact.alertNumber,
+    impact: "목 판정입니다. 실제 제공자가 설정되지 않았습니다.",
+    priorityReason: "DEPENDENCY_TRIAGE_PROVIDER 가 mock 으로 설정돼 있습니다.",
+    recommendedChecks: ["DEPENDENCY_TRIAGE_PROVIDER 와 키를 설정한다"],
+    confidence: "low",
+  }));
 
-const configured = (
-  name?: string,
-  key?: string,
-  model?: string,
-): DependencyTriageProvider | null => {
-  const normalizedName = name?.trim().toLowerCase();
-  const normalizedKey = key?.trim();
-  const normalizedModel = model?.trim();
-  if (!normalizedKey || !normalizedModel) return null;
-  if (normalizedName === "openai") return createOpenAIProvider(normalizedKey, normalizedModel);
-  if (normalizedName === "gemini") return createGeminiProvider(normalizedKey, normalizedModel);
-  return null;
+/** 이 계열의 판정 계약. 전송(제공자 선택·폴백·타임아웃)은 `lib/triage` 가 소유한다. */
+const DEPENDENCY_TRIAGE_CONTRACT: TriageContract<
+  DependencySecurityFact[],
+  DependencyTriageResult[]
+> = {
+  envPrefix: "DEPENDENCY_TRIAGE",
+  schemaName: "dependency_triage",
+  instructions: INSTRUCTIONS,
+  buildInput: buildTriageInput,
+  schema: schemaFor,
+  parse: (text) => parseTriageResults(text),
+  outputTokens: () => 3_000,
+  timeoutMs: (_request, base) => base,
+  mockResult: mockResults,
 };
 
-/** primary 실패 시 fallback을 한 번 시도하며 전체 호출을 35초 안에 끝낸다. */
-const getDependencyTriageProvider = (): DependencyTriageProvider | null => {
-  const primary = configured(
-    process.env.DEPENDENCY_TRIAGE_PROVIDER,
-    process.env.DEPENDENCY_TRIAGE_PROVIDER_API_KEY,
-    process.env.DEPENDENCY_TRIAGE_PROVIDER_MODEL,
-  );
-  const fallback = configured(
-    process.env.DEPENDENCY_TRIAGE_FALLBACK_PROVIDER,
-    process.env.DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_API_KEY,
-    process.env.DEPENDENCY_TRIAGE_FALLBACK_PROVIDER_MODEL,
-  );
-  if (!primary) return fallback;
-  if (!fallback) return primary;
-  return async (input) => {
-    try {
-      return await primary({
-        ...input,
-        signal: AbortSignal.any([input.signal, AbortSignal.timeout(20_000)]),
-      });
-    } catch (error) {
-      if (input.signal.aborted) throw error;
-      console.warn("[dependency-triage] primary failed; using fallback");
-      return fallback({
-        ...input,
-        signal: AbortSignal.any([input.signal, AbortSignal.timeout(15_000)]),
-      });
-    }
-  };
-};
+type DependencyTriageProvider = TriageProvider<DependencySecurityFact[], DependencyTriageResult[]>;
 
-export { getDependencyTriageProvider };
+const getDependencyTriageProvider = (): DependencyTriageProvider =>
+  createTriageProvider(DEPENDENCY_TRIAGE_CONTRACT);
+
+export { DEPENDENCY_TRIAGE_CONTRACT, getDependencyTriageProvider };
 export type { DependencyTriageProvider };

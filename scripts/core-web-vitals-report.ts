@@ -323,10 +323,7 @@ const main = async (): Promise<void> => {
         configName: "DISCORD_PERFORMANCE_WEBHOOK_URL",
       }),
     analyzeTargets: (inputs) =>
-      triageProvider({
-        inputs: inputs as PerformanceTriageInput[],
-        signal: new AbortController().signal,
-      }),
+      triageProvider(inputs as PerformanceTriageInput[], new AbortController().signal),
     renderCards: (entries, analysis) => {
       if (!analysis) return entries.map((entry) => entry.card);
       // 분석 순서가 곧 응답 targetIndex 순서다. 여기서 어긋나면 설명이 다른 카드에 붙는다.

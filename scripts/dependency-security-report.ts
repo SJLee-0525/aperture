@@ -20,13 +20,13 @@ const main = async () => {
     Number.parseInt(process.env.DEPENDENCY_TRIAGE_MAX_ALERTS ?? "10", 10) || 10,
   );
   const provider = getDependencyTriageProvider();
-  let triage: Awaited<ReturnType<NonNullable<typeof provider>>> | null = null;
-  if (provider && facts.length > 0 && maxAlerts > 0) {
+  let triage: Awaited<ReturnType<typeof provider>> | null = null;
+  if (facts.length > 0 && maxAlerts > 0) {
     try {
-      triage = await provider({
-        facts: sortForTriage(facts).slice(0, maxAlerts),
-        signal: AbortSignal.timeout(35_000),
-      });
+      triage = await provider(
+        sortForTriage(facts).slice(0, maxAlerts),
+        AbortSignal.timeout(35_000),
+      );
     } catch {
       console.warn("[dependency-triage] AI analysis unavailable; sending the base report");
     }
@@ -36,7 +36,7 @@ const main = async () => {
     buildDependencySecurityReport(
       facts,
       new Date(),
-      triage?.results,
+      triage?.result,
       triage ? `${triage.provider}/${triage.model}` : undefined,
     ),
     { configName: "DISCORD_SECURITY_WEBHOOK_URL" },
