@@ -72,6 +72,8 @@ Next.js App Router 단일 앱이며 의존 방향은 `app → features → compo
 - `admin`: 인증된 CMS이며 공개 E2E에서 제외
 - `platform` feature: 여러 feature 가 소비하는 횡단 기능. 일반 feature 와 달리 다른 feature 를 참조할 수 없다 — `lang`·`theme`·`image-upload`·`photo-detail`·`dev-blog`·`admin-shell`·`pointer-chrome`
 - `admin token gate`: 관리자 표면의 공통 전처리. `lib/auth/admin-gate` 가 토큰 검증·스로틀·실패 표현을 한 벌로 갖는다 — route 는 `adminGateResponse`, server action 은 `requireAdminToken`.
+- `lib/triage`: 단발 JSON 판정의 제공자 선택·폴백·전송(ADR-0007). 지시문과 스키마, 파서는 계열이 계약으로 넘긴다. 소비자는 `sentry-triage`·`dependency-security`·`performance-alerts` 셋이다.
+- `lib/discord`: 카드 타입, embed 예산, 웹훅 전송. 전송 직전에 문자열·field·total 예산을 강제해 예산 초과로 인한 400 을 막는다.
 
 공개 페이지의 서버 읽기는 PostgREST를 사용하고 관리 기능은 supabase-js를 사용한다. E2E mock 모드는 이 외부 경계를 통과하지 않는다. 지도 타일과 외부 링크는 제3자 시스템이므로 E2E는 앱의 컨테이너, 링크와 위치 데이터까지만 검증한다.
 
