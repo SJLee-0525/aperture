@@ -471,3 +471,4 @@ const buildPerformanceDecision = (input: DecisionInput): PerformanceDecision => 
 };
 
 export { buildPerformanceDecision };
+export type { PerformanceDecision };

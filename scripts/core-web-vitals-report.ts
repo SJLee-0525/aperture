@@ -7,7 +7,6 @@ import { promisify } from "node:util";
 
 import { PERFORMANCE_TARGETS } from "./performance-targets";
 
-import type { DiscordEmbed } from "@/lib/discord/types";
 import { sendDiscordCard } from "@/lib/discord/send-webhook";
 import { renderPerformanceAiReport } from "@/lib/performance-alerts/ai-report";
 import { collectCruxRecords, type CollectedCruxResult } from "@/lib/performance-alerts/crux-client";
@@ -33,42 +32,52 @@ import { getPerformanceTriageProvider } from "@/lib/performance-alerts/triage-pr
 import { MAX_TARGETS } from "@/lib/performance-alerts/triage-schema";
 import { redactSecrets } from "@/lib/text/redact-secrets";
 
+import type { DiscordEmbed } from "@/lib/discord/types";
+import type { PerformanceDecision } from "@/lib/performance-alerts/report-decision";
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
 import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
+import type { PerformanceTriageResult } from "@/lib/performance-alerts/triage-schema";
+import type { TriageProvider } from "@/lib/triage/contract";
 
 type PreviousSnapshotResult =
-  | { status: "loaded"; snapshot: unknown }
+  | { status: "loaded"; snapshot: PerformanceSnapshot }
   | { status: "cold_start" }
   | { status: "comparison_skipped"; reason: string };
 
-type CollectionResult = { complete: boolean; value: unknown };
+type CollectionResult<T> = { complete: boolean; value: T };
 /**
  * `triageOrder`는 AI에 넘긴 배열에서의 순위다. 분석하지 않는 대상은 null이다.
  * provider 요청 순서, 응답의 targetIndex, 카드 순서가 모두 이 값 하나로 맞춰진다.
  */
-type ReportEntry = { card: unknown; input: unknown | null; triageOrder: number | null };
-type ReportDecision = {
-  cards: unknown[];
-  triageInputs?: Array<unknown | null>;
-  snapshot: unknown;
-  summary: string;
+type ReportEntry = {
+  card: DiscordEmbed;
+  input: PerformanceTriageInput | null;
+  triageOrder: number | null;
 };
 
+// 이 seam 의 값은 전부 각 의존성 구현이 검증을 끝낸 뒤의 값이다. `loadPreviousSnapshot` 은
+// `parsePerformanceSnapshot` 을 거친 snapshot 만 돌려주고, 수집 함수도 타입을 확정한다.
 type ReportDependencies = {
   preflight: () => Promise<void>;
   loadPreviousSnapshot: () => Promise<PreviousSnapshotResult>;
-  collectCrux: () => Promise<CollectionResult>;
-  collectLighthouse: () => Promise<CollectionResult>;
+  collectCrux: () => Promise<CollectionResult<CollectedCruxResult[]>>;
+  collectLighthouse: () => Promise<CollectionResult<LighthouseTargetResult[]>>;
   judge: (input: {
     previous: PreviousSnapshotResult;
-    crux: unknown;
-    lighthouse: unknown;
-  }) => Promise<ReportDecision> | ReportDecision;
-  sendCard: (card: unknown) => Promise<{ ok: true } | { ok: false; error: string }>;
-  analyzeTargets?: (inputs: unknown[]) => Promise<unknown>;
-  renderCards: (entries: ReportEntry[], analysis: unknown | null) => unknown[];
-  writeAiReport?: (inputs: unknown[], analysis: unknown | null) => Promise<void>;
-  writeSnapshot: (snapshot: unknown) => Promise<void>;
+    crux: CollectedCruxResult[];
+    lighthouse: LighthouseTargetResult[];
+  }) => Promise<PerformanceDecision> | PerformanceDecision;
+  sendCard: (card: DiscordEmbed) => Promise<{ ok: true } | { ok: false; error: string }>;
+  analyzeTargets?: TriageProvider<PerformanceTriageInput[], PerformanceTriageResult>;
+  renderCards: (
+    entries: ReportEntry[],
+    analysis: PerformanceTriageProviderResult | null,
+  ) => DiscordEmbed[];
+  writeAiReport?: (
+    inputs: PerformanceTriageInput[],
+    analysis: PerformanceTriageProviderResult | null,
+  ) => Promise<void>;
+  writeSnapshot: (snapshot: PerformanceSnapshot) => Promise<void>;
   appendSummary: (summary: string) => Promise<void>;
 };
 
@@ -87,8 +96,8 @@ const orderedTriageEntries = <T extends { triageOrder: number | null }>(entries:
     .filter((entry) => entry.triageOrder !== null)
     .sort((left, right) => (left.triageOrder ?? 0) - (right.triageOrder ?? 0));
 
-const orderedTriageInputs = (entries: ReportEntry[]): unknown[] =>
-  orderedTriageEntries(entries).map((entry) => entry.input);
+const orderedTriageInputs = (entries: ReportEntry[]): PerformanceTriageInput[] =>
+  orderedTriageEntries(entries).flatMap((entry) => (entry.input === null ? [] : [entry.input]));
 
 /** Discord 통합 카드가 대상을 구분할 수 있게 측정 대상과 form factor를 함께 적는다. */
 const triageLabel = (input: PerformanceTriageInput): string =>
@@ -99,7 +108,10 @@ ${input.formFactor}`;
  * 이전 snapshot 조회 실패는 비교만 생략하지만 현재 측정과 Discord 전송 실패는 실행을 실패시킨다.
  * 모든 수집이 완전한 경우에만 다음 실행이 사용할 snapshot을 기록한다.
  */
-const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise<void> => {
+const runCoreWebVitalsReport = async (
+  dependencies: ReportDependencies,
+  signal: AbortSignal,
+): Promise<void> => {
   await dependencies.preflight();
 
   let previous: PreviousSnapshotResult;
@@ -113,7 +125,7 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
     await dependencies.appendSummary(`비교 생략: ${detail}`);
   }
 
-  let crux: CollectionResult;
+  let crux: CollectionResult<CollectedCruxResult[]>;
   try {
     crux = await dependencies.collectCrux();
   } catch (error) {
@@ -141,14 +153,11 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
     input: decision.triageInputs?.[index] ?? null,
   }));
   const { selected, omitted } = selectTriageTargets(
-    candidates.flatMap((entry) =>
-      entry.input === null ? [] : [entry.input as PerformanceTriageInput],
-    ),
+    candidates.flatMap((entry) => (entry.input === null ? [] : [entry.input])),
     MAX_TARGETS,
   );
   const entries: ReportEntry[] = candidates.map((entry) => {
-    const order =
-      entry.input === null ? -1 : selected.indexOf(entry.input as PerformanceTriageInput);
+    const order = entry.input === null ? -1 : selected.indexOf(entry.input);
     return { ...entry, triageOrder: order < 0 ? null : order };
   });
   if (omitted > 0) {
@@ -157,10 +166,10 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
     );
   }
   const analyzable = orderedTriageInputs(entries);
-  let analysis: unknown = null;
+  let analysis: PerformanceTriageProviderResult | null = null;
   if (analyzable.length && dependencies.analyzeTargets) {
     try {
-      analysis = await dependencies.analyzeTargets(analyzable);
+      analysis = await dependencies.analyzeTargets(analyzable, signal);
     } catch (error) {
       await dependencies.appendSummary(`AI 분석 생략: ${redactSecrets(error)}`);
     }
@@ -292,67 +301,64 @@ const main = async (): Promise<void> => {
   const actionsRunUrl = `https://github.com/${repository}/actions/runs/${runId}`;
   const triageProvider = getPerformanceTriageProvider();
 
-  await runCoreWebVitalsReport({
-    preflight: async () => {
-      await preflightPerformanceTargets(origin, PERFORMANCE_TARGETS);
-    },
-    loadPreviousSnapshot: () => previousSnapshot(repository, token, runId),
-    collectCrux: async () => ({
-      complete: true,
-      value: await collectCruxRecords(origin, targets, apiKey),
-    }),
-    collectLighthouse: async () => ({
-      complete: true,
-      value: await loadLighthouseResults(LIGHTHOUSE_MANIFEST),
-    }),
-    judge: ({ previous, crux, lighthouse }) =>
-      buildPerformanceDecision({
-        siteOrigin: origin,
-        targets,
-        measuredAt: new Date().toISOString(),
-        release: process.env.GITHUB_SHA ?? null,
-        crux: crux as CollectedCruxResult[],
-        lighthouse: lighthouse as LighthouseTargetResult[],
-        previous: previous.status === "loaded" ? (previous.snapshot as PerformanceSnapshot) : null,
-        actionsRunUrl,
-        sendBaseline: process.env.SEND_BASELINE === "true",
-        forceAiAnalysis: process.env.FORCE_AI_ANALYSIS === "true",
+  await runCoreWebVitalsReport(
+    {
+      preflight: async () => {
+        await preflightPerformanceTargets(origin, PERFORMANCE_TARGETS);
+      },
+      loadPreviousSnapshot: () => previousSnapshot(repository, token, runId),
+      collectCrux: async () => ({
+        complete: true,
+        value: await collectCruxRecords(origin, targets, apiKey),
       }),
-    sendCard: (card) =>
-      sendDiscordCard(process.env.DISCORD_PERFORMANCE_WEBHOOK_URL, card as DiscordEmbed, {
-        configName: "DISCORD_PERFORMANCE_WEBHOOK_URL",
+      collectLighthouse: async () => ({
+        complete: true,
+        value: await loadLighthouseResults(LIGHTHOUSE_MANIFEST),
       }),
-    analyzeTargets: (inputs) =>
-      triageProvider(inputs as PerformanceTriageInput[], new AbortController().signal),
-    renderCards: (entries, analysis) => {
-      if (!analysis) return entries.map((entry) => entry.card);
-      // 분석 순서가 곧 응답 targetIndex 순서다. 여기서 어긋나면 설명이 다른 카드에 붙는다.
-      const analyzed = orderedTriageEntries(entries).map((entry) => ({
-        card: entry.card as DiscordEmbed,
-        label: triageLabel(entry.input as PerformanceTriageInput),
-        input: entry.input as PerformanceTriageInput,
-      }));
-      const untouched = entries.flatMap((entry) =>
-        entry.triageOrder === null ? [entry.card] : [],
-      );
-      return [
-        ...buildPerformanceTriageCards(analyzed, analysis as PerformanceTriageProviderResult),
-        ...untouched,
-      ];
+      judge: ({ previous, crux, lighthouse }) =>
+        buildPerformanceDecision({
+          siteOrigin: origin,
+          targets,
+          measuredAt: new Date().toISOString(),
+          release: process.env.GITHUB_SHA ?? null,
+          crux,
+          lighthouse,
+          previous: previous.status === "loaded" ? previous.snapshot : null,
+          actionsRunUrl,
+          sendBaseline: process.env.SEND_BASELINE === "true",
+          forceAiAnalysis: process.env.FORCE_AI_ANALYSIS === "true",
+        }),
+      sendCard: (card) =>
+        sendDiscordCard(process.env.DISCORD_PERFORMANCE_WEBHOOK_URL, card, {
+          configName: "DISCORD_PERFORMANCE_WEBHOOK_URL",
+        }),
+      analyzeTargets: triageProvider,
+      renderCards: (entries, analysis) => {
+        if (!analysis) return entries.map((entry) => entry.card);
+        // 분석 순서가 곧 응답 targetIndex 순서다. 여기서 어긋나면 설명이 다른 카드에 붙는다.
+        const analyzed = orderedTriageEntries(entries).flatMap((entry) =>
+          entry.input === null
+            ? []
+            : [{ card: entry.card, label: triageLabel(entry.input), input: entry.input }],
+        );
+        const untouched = entries.flatMap((entry) =>
+          entry.triageOrder === null ? [entry.card] : [],
+        );
+        return [...buildPerformanceTriageCards(analyzed, analysis), ...untouched];
+      },
+      writeAiReport: async (inputs, analysis) => {
+        const report = renderPerformanceAiReport(inputs, analysis);
+        await writeFile(AI_REPORT_PATH, report, "utf8");
+        if (analysis) await appendActionsSummary(report);
+      },
+      writeSnapshot: async (snapshot) => {
+        await writeFile(SNAPSHOT_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+      },
+      appendSummary: appendActionsSummary,
+      // CI 스크립트에는 취소 지점이 없다. 실제 구간 상한은 계약의 timeoutMs 가 정한다.
     },
-    writeAiReport: async (inputs, analysis) => {
-      const report = renderPerformanceAiReport(
-        inputs as PerformanceTriageInput[],
-        analysis as PerformanceTriageProviderResult | null,
-      );
-      await writeFile(AI_REPORT_PATH, report, "utf8");
-      if (analysis) await appendActionsSummary(report);
-    },
-    writeSnapshot: async (snapshot) => {
-      await writeFile(SNAPSHOT_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
-    },
-    appendSummary: appendActionsSummary,
-  });
+    new AbortController().signal,
+  );
 };
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
