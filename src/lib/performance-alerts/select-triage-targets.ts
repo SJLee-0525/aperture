@@ -25,4 +25,3 @@ const selectTriageTargets = (inputs: PerformanceTriageInput[], limit: number): T
 };
 
 export { selectTriageTargets };
-export type { TriageSelection };

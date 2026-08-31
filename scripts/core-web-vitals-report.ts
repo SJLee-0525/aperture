@@ -35,9 +35,10 @@ import { redactSecrets } from "@/lib/text/redact-secrets";
 import type { DiscordEmbed } from "@/lib/discord/types";
 import type { PerformanceDecision } from "@/lib/performance-alerts/report-decision";
 import type { PerformanceTriageInput } from "@/lib/performance-alerts/triage-prompt";
-import type { PerformanceTriageProviderResult } from "@/lib/performance-alerts/triage-provider";
-import type { PerformanceTriageResult } from "@/lib/performance-alerts/triage-schema";
-import type { TriageProvider } from "@/lib/triage/contract";
+import type {
+  PerformanceTriageProvider,
+  PerformanceTriageProviderResult,
+} from "@/lib/performance-alerts/triage-provider";
 
 type PreviousSnapshotResult =
   | { status: "loaded"; snapshot: PerformanceSnapshot }
@@ -68,7 +69,7 @@ type ReportDependencies = {
     lighthouse: LighthouseTargetResult[];
   }) => Promise<PerformanceDecision> | PerformanceDecision;
   sendCard: (card: DiscordEmbed) => Promise<{ ok: true } | { ok: false; error: string }>;
-  analyzeTargets?: TriageProvider<PerformanceTriageInput[], PerformanceTriageResult>;
+  analyzeTargets?: PerformanceTriageProvider;
   renderCards: (
     entries: ReportEntry[],
     analysis: PerformanceTriageProviderResult | null,

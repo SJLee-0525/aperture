@@ -37,4 +37,3 @@ const getDependencyTriageProvider = (): DependencyTriageProvider =>
   createTriageProvider(DEPENDENCY_TRIAGE_CONTRACT);
 
 export { DEPENDENCY_TRIAGE_CONTRACT, getDependencyTriageProvider };
-export type { DependencyTriageProvider };

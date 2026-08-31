@@ -66,4 +66,3 @@ const compareTargetSeverity = (
 ): number => compareKeys(targetSeverityKey(left), targetSeverityKey(right));
 
 export { compareMetricSeverity, compareTargetSeverity, rankMetrics, targetSeverityKey };
-export type { SeverityKey };

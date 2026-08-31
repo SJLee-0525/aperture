@@ -6,8 +6,8 @@ import { getTriageRateLimiter } from "@/lib/sentry-triage/triage-rate-limit";
 import { claimSentryAlert, completeSentryAlert } from "@/lib/supabase/sentry-alerts";
 
 import type { DiscordEmbed } from "@/lib/discord/types";
-import type { TriageProvider } from "@/lib/triage/contract";
-import type { SentryAlertSummary, TriageOutcome, TriageResult } from "@/types/sentry-alert";
+import type { SentryTriageProvider } from "@/lib/sentry-triage/triage-provider";
+import type { TriageOutcome } from "@/types/sentry-alert";
 
 /** LLM 전체 예산. 카드 전송과 기록 몫을 남긴다 (docs/plan/10 §4 시간 예산). */
 const TRIAGE_BUDGET_MS = 35_000;
@@ -19,7 +19,7 @@ type ClaimResult =
   | { status: "failed" };
 
 type SentryAlertDependencies = {
-  provider: TriageProvider<SentryAlertSummary, TriageResult>;
+  provider: SentryTriageProvider;
   rateLimiter: () => Promise<{ allowed: boolean; count: number }>;
   sendCard: (embed: DiscordEmbed) => Promise<{ ok: true } | { ok: false; error: string }>;
   claim: (summary: Parameters<typeof claimSentryAlert>[0]) => Promise<ClaimResult>;

@@ -31,4 +31,4 @@ type TriageResponse<Out> = {
 
 type TriageProvider<In, Out> = (request: In, signal: AbortSignal) => Promise<TriageResponse<Out>>;
 
-export type { TriageContract, TriageProvider, TriageProviderName, TriageResponse };
+export type { TriageContract, TriageProvider, TriageResponse };

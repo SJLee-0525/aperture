@@ -79,4 +79,3 @@ const formatDelta = (name: string, current: number, previous: number): string =>
 };
 
 export { describeMetric, formatDelta, severityRatio, worseningDelta, worseOf };
-export type { MetricDescriptor };

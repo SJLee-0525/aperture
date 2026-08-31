@@ -120,4 +120,4 @@ const fitEmbed = (embed: DiscordEmbed, policy?: BudgetPolicy): DiscordEmbed => {
 };
 
 export { DISCORD_LIMIT, embedLength, fitEmbed, truncate };
-export type { BudgetPolicy, EmbedBudget };
+export type { BudgetPolicy };

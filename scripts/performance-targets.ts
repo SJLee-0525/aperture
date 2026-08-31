@@ -39,5 +39,4 @@ const assertPerformanceTargets = (
 const PERFORMANCE_TARGETS: readonly PerformanceTarget[] =
   assertPerformanceTargets(configuredTargets);
 
-export { assertPerformanceTargets, PERFORMANCE_TARGETS, TARGET_PATHS };
-export type { PerformanceTarget, PerformanceTargetId, PerformanceTargetPath };
+export { assertPerformanceTargets, PERFORMANCE_TARGETS };
