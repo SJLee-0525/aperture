@@ -10,7 +10,10 @@ import { PERFORMANCE_TARGETS } from "./performance-targets";
 import type { DiscordEmbed } from "@/lib/discord/types";
 import { sendDiscordCard } from "@/lib/discord/send-webhook";
 import { collectCruxRecords, type CollectedCruxResult } from "@/lib/performance-alerts/crux-client";
-import { attachPerformanceTriage } from "@/lib/performance-alerts/discord-report";
+import {
+  attachPerformanceTriage,
+  mergeAnalyzedPerformanceCards,
+} from "@/lib/performance-alerts/discord-report";
 import {
   downloadArtifactArchive,
   findPreviousSnapshotArtifact,
@@ -122,6 +125,7 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
   });
   await dependencies.appendSummary(decision.summary);
 
+  const preparedCards: unknown[] = [];
   for (const [index, card] of decision.cards.entries()) {
     const triageInput = decision.triageInputs?.[index];
     let preparedCard = card;
@@ -132,6 +136,10 @@ const runCoreWebVitalsReport = async (dependencies: ReportDependencies): Promise
         await dependencies.appendSummary(`AI 분석 생략: ${redactPerformanceError(error)}`);
       }
     }
+    preparedCards.push(preparedCard);
+  }
+  const cardsToSend = mergeAnalyzedPerformanceCards(preparedCards as DiscordEmbed[]);
+  for (const preparedCard of cardsToSend) {
     const sent = await dependencies.sendCard(preparedCard);
     if (!sent.ok) {
       const reason = redactPerformanceError(sent.error);
@@ -278,6 +286,7 @@ const main = async (): Promise<void> => {
         previous: previous.status === "loaded" ? (previous.snapshot as PerformanceSnapshot) : null,
         actionsRunUrl,
         sendBaseline: process.env.SEND_BASELINE === "true",
+        forceAiAnalysis: process.env.FORCE_AI_ANALYSIS === "true",
       }),
     sendCard: (card) =>
       sendDiscordCard(process.env.DISCORD_PERFORMANCE_WEBHOOK_URL, card as DiscordEmbed, {

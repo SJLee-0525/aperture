@@ -97,6 +97,30 @@ const attachPerformanceTriage = (
   });
 };
 
+/** 여러 대상의 분석 결과를 한 카드로 묶되, 측정 대상과 AI 요약의 대응 관계를 유지한다. */
+const mergeAnalyzedPerformanceCards = (cards: DiscordEmbed[]): DiscordEmbed[] => {
+  const analyzed = cards.filter((card) => card.footer?.text !== "AI 분석 없음");
+  const untouched = cards.filter((card) => card.footer?.text === "AI 분석 없음");
+  if (analyzed.length < 2) return cards;
+  const sections = analyzed.map((card) => {
+    const target = card.fields?.find((field) => field.name === "대상")?.value ?? "대상 미상";
+    const summary = card.fields?.find((field) => field.name === "AI 요약")?.value ?? "요약 없음";
+    const causes = card.fields?.find((field) => field.name === "원인 후보")?.value ?? "근거 부족";
+    return { name: target, value: `요약: ${summary}\n원인 후보: ${causes}` };
+  });
+  const base = analyzed[0]!;
+  return [
+    fitEmbed({
+      ...base,
+      title: "Core Web Vitals 통합 AI 분석",
+      description: "측정값은 코드가 판정했고 AI는 대상별 원인 후보와 확인 순서를 요약했습니다.",
+      fields: sections,
+      footer: { text: "여러 대상 통합 분석" },
+    }),
+    ...untouched,
+  ];
+};
+
 /**
  * 정상 측정은 기본적으로 카드를 만들지 않으며 수동 baseline 요청만 예외로 허용한다.
  * AI 분석이 없어도 확인 가능한 수치와 실행 링크는 항상 포함한다.
@@ -142,6 +166,7 @@ const createPerformanceDiscordCard = (
 
 export {
   attachPerformanceTriage,
+  mergeAnalyzedPerformanceCards,
   createPerformanceDiscordCard,
   DISCORD_EMBED_LIMIT,
   DISCORD_FIELD_LIMIT,
