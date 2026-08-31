@@ -357,6 +357,11 @@ ADR-0004가 Sentry에 세운 최소 수집 원칙을 LLM 제공자에게도 그�
 
 ### 6.1 구조
 
+> 2026-08-31 갱신: 아래 구조와 호출 형태는 설계 당시 기록이다. 구현은
+> `src/lib/sentry-triage/`에 있고, OpenAI·Gemini 호출과 폴백은 단발 JSON 트리아지가
+> 셋이 된 뒤 공용 `src/lib/triage/`로 옮겼다([ADR-0007](../adr/0007-shared-triage-transport.md)).
+> `triage-provider.ts`에는 계약만 남고 호출 규약은 `(request, signal)`이다.
+
 `chat-provider.ts` 와 같은 형태를 복사한다. 코드를 공유하지 않는 이유는 ADR-0006에 있다.
 
 ```

@@ -316,12 +316,15 @@ src/lib/performance-alerts/
   performance-status.ts
   snapshot.ts
   triage-provider.ts
-  openai-triage-provider.ts
-  gemini-triage-provider.ts
   triage-prompt.ts
   triage-schema.ts
   discord-report.ts
 ```
+
+2026-08-31 갱신: OpenAI·Gemini 호출과 폴백, provider 선택은 세 알림 계열이 공유하는
+`src/lib/triage/`가 소유한다([ADR-0007](../adr/0007-shared-triage-transport.md)).
+`triage-provider.ts`에는 이 계열의 계약(지시문, 입력 직렬화, 스키마, 파서, 토큰 예산)만
+남는다. Discord embed 예산은 `src/lib/discord/embed-budget.ts`가 적용한다.
 
 Lighthouse 실행을 TypeScript orchestration 안에 직접 구현하지 않는다. LHCI 또는 Lighthouse CLI가
 만든 JSON을 읽고 정규화한다. 외부 호출과 파일 읽기는 script가 조립하고, 판정 로직은 순수 함수로 둔다.

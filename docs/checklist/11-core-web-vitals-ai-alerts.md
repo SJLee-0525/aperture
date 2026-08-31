@@ -252,6 +252,11 @@ npm run deps:check
 - [x] 같은 fixture로 두 provider의 출력 계약을 검증한다.
 - [x] audit 문자열 안의 prompt injection이 instructions를 바꾸지 않는지 테스트한다.
 
+2026-08-31 구조 정리: provider 선택, 폴백, OpenAI·Gemini HTTP 호출은 세 알림 계열이
+공유하는 `src/lib/triage/`가 소유한다([ADR-0007](../adr/0007-shared-triage-transport.md)).
+이 계열의 `triage-provider.ts`에는 계약(지시문·스키마·파서·토큰 예산)만 남고, 위 항목의
+전송 쪽 검증은 `src/lib/triage/*.test.ts`와 `contract-wiring.test.ts`가 잡는다.
+
 ### 3.3 카드 결합
 
 - [x] 기본 카드에 AI 요약, 사용자 영향, 원인 후보, 확인 순서와 confidence를 선택적으로 붙인다.
@@ -315,7 +320,7 @@ npm run deps:check
 - [x] 한 실행의 CrUX `record 없음` 항목은 Discord 데이터 부족 요약 카드 한 장으로 묶고, snapshot의
       대상별 연속 횟수와 중복 억제 key는 유지한다.
 
-- [ ] `send_baseline=true`로 수동 실행해 정상 카드를 받는다.
+- [x] `send_baseline=true`로 수동 실행해 정상 카드를 받는다.
 - [ ] Actions log, summary와 artifact에 API key와 webhook URL이 없는지 확인한다.
 - [ ] CrUX URL 데이터가 있는 target과 없는 target의 표시가 정확한지 확인한다.
 - [ ] shard 병합 후 URL별 3회, 총 36개의 Lighthouse JSON과 HTML이 보존됐는지 확인한다.
@@ -329,15 +334,30 @@ npm run deps:check
 
 ## 5. 문서와 마감
 
-- [ ] `.env.example`에는 GitHub Actions 전용 secret을 넣지 않고 주석으로 관리 위치만 안내한다.
+- [x] `.env.example`에는 GitHub Actions 전용 secret을 넣지 않고 주석으로 관리 위치만 안내한다.
 - [x] `README.md`의 운영 자동화 목록과 디렉터리 구조를 갱신한다.
-- [ ] `docs/testing.md`에 로컬 fixture 테스트와 운영 LHCI 수동 실행법을 추가한다.
+- [x] `docs/testing.md`에 로컬 fixture 테스트와 운영 LHCI 수동 실행법을 추가한다.
 - [x] 장애 조사 절차를 `docs/troubleshooting/core-web-vitals-alerts.md`에 작성한다.
-- [ ] `CLAUDE.md`에 성능 알림 모듈과 Actions 설정을 요약한다.
-- [ ] 개인정보처리방침을 바꾸지 않았음을 확인한다. 자체 RUM을 추가하지 않는 동안 새 방문자 데이터
+- [x] `CLAUDE.md`에 성능 알림 모듈과 Actions 설정을 요약한다.
+- [x] 개인정보처리방침을 바꾸지 않았음을 확인한다. 자체 RUM을 추가하지 않는 동안 새 방문자 데이터
       수신자는 없다.
-- [ ] plan 13의 P1부터 P4와 완료 조건을 실제 상태에 맞게 체크한다.
-- [ ] 이 체크리스트의 상태를 구현 완료 또는 운영 검증 중으로 바꾼다.
+- [x] plan 13의 P1부터 P4와 완료 조건을 실제 상태에 맞게 체크한다.
+- [x] 이 체크리스트의 상태를 구현 완료 또는 운영 검증 중으로 바꾼다.
+
+완료 기록 (2026-08-31):
+
+```text
+.env.example=Actions 전용 secret 안내 주석 추가 (헤더의 ℹ️ 블록)
+docs/testing.md=Lighthouse 절에 fixture 테스트(npm test -- performance)와
+  운영 실측(test:lighthouse:production·merge, SITE_URL·shard 환경변수) 실행법 추가
+CLAUDE.md=lib/triage·lib/discord·lib/performance-alerts·lib/dependency-security 와
+  두 워크플로, Actions secret 관리 위치를 디렉토리 구조에 등재
+개인정보=자체 RUM 코드 없음(useReportWebVitals 미사용). 측정은 CrUX 공개 집계와
+  워크플로의 Lighthouse 실측뿐이라 새 방문자 데이터 수신자 없음
+plan 13=P1~P3 체크 유지, P4 미체크가 실제 상태(수동 dispatch 대기)와 일치.
+  §11 파일 구조를 현재 코드와 ADR-0007 기준으로 갱신
+상태=헤더의 "P1부터 P3 구현 완료, P4 운영 검증 중" 이 현재 상태와 일치
+```
 
 최종 품질 게이트:
 
