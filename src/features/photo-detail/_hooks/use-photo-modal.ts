@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useDetailQuerySession } from "@/hooks/use-detail-query-session";
 
@@ -30,8 +30,19 @@ const usePhotoModal = (
     [photoIds, photos],
   );
 
-  const index = activeId ? navigationIds.indexOf(activeId) : -1;
-  const photo = activeId ? (photos.find((item) => item.id === activeId) ?? null) : null;
+  const activePhoto = activeId ? (photos.find((item) => item.id === activeId) ?? null) : null;
+  const [heldPhoto, setHeldPhoto] = useState<Photo | null>(null);
+  if (activePhoto != null && activePhoto !== heldPhoto) setHeldPhoto(activePhoto);
+  else if (activeId == null && heldPhoto != null) setHeldPhoto(null);
+  /* 열린 채 상세를 아직 받지 못한 사진으로 넘어가면 직전 사진을 계속 보여 준다.
+     photo 가 null 이 되면 모달 전체가 퇴장했다가 상세 도착 후 다시 등장한다. */
+  const holding =
+    activePhoto == null &&
+    activeId != null &&
+    heldPhoto != null &&
+    navigationIds.includes(activeId);
+  const photo = holding ? heldPhoto : activePhoto;
+  const index = photo ? navigationIds.indexOf(photo.id) : -1;
   const open = photo != null;
   const close = useCallback(() => {
     if (onClose) {

@@ -46,6 +46,11 @@ type Props = {
   revealed?: boolean;
   onImageReady?: (id: string) => void;
   chatTarget?: boolean;
+  /**
+   * 불투명한 배경이 화면에 커밋됐는지 알린다. 페인트 전에 호출되므로 로딩 프레임이 같은
+   * 프레임에서 자기 배경을 걷을 수 있다.
+   */
+  onBackdropShownChange?: (shown: boolean) => void;
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -68,6 +73,7 @@ const PhotoModal = ({
   revealed = true,
   onImageReady,
   chatTarget = false,
+  onBackdropShownChange,
 }: Props) => {
   const { dict, lang } = useLang();
   const sheet = usePhotoPanelSheet();
@@ -239,6 +245,14 @@ const PhotoModal = ({
     track.style.transition = "none";
     track.style.transform = "translate3d(0, 0, 0)";
   }, [photo?.id, trackRef]);
+
+  // 배경 페이드를 하는 열기에서는 아직 투명할 수 있어 불투명하다고 알리지 않는다.
+  const backdropShown = mounted && open && (!animateOnOpen || revealed);
+  useLayoutEffect(() => {
+    if (!onBackdropShownChange) return;
+    onBackdropShownChange(backdropShown);
+    return () => onBackdropShownChange(false);
+  }, [backdropShown, onBackdropShownChange]);
 
   if (!mounted) return null;
 
