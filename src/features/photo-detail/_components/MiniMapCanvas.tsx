@@ -1,7 +1,13 @@
 "use client";
 
 import maplibregl from "maplibre-gl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { MapUnavailableNotice } from "@/components/MapUnavailableNotice";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
+
+import { createMapOrNull } from "@/lib/geo/create-map-or-null";
 
 import type { Coords } from "@/types/coords";
 
@@ -25,14 +31,16 @@ type Props = { coords: Coords };
  * next/dynamic(ssr:false)로만 로드 — maplibre-gl 은 window 의존.
  */
 const MiniMapCanvas = ({ coords }: Props) => {
+  const { dict } = useLang();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const center: [number, number] = [coords.lng, coords.lat];
-    const map = new maplibregl.Map({
+    const map = createMapOrNull({
       container,
       style: STYLE_URL[currentTheme()],
       center,
@@ -40,6 +48,10 @@ const MiniMapCanvas = ({ coords }: Props) => {
       interactive: false,
       attributionControl: { compact: true },
     });
+    if (!map) {
+      setUnavailable(true);
+      return;
+    }
 
     const pin = document.createElement("span");
     pin.className = styles.pin;
@@ -57,7 +69,12 @@ const MiniMapCanvas = ({ coords }: Props) => {
     };
   }, [coords.lat, coords.lng]);
 
-  return <div ref={containerRef} className={styles.canvas} />;
+  return (
+    <>
+      <div ref={containerRef} className={styles.canvas} />
+      {unavailable ? <MapUnavailableNotice message={dict.mapUnavailable} compact /> : null}
+    </>
+  );
 };
 
 export default MiniMapCanvas;

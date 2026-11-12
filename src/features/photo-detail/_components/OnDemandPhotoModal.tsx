@@ -107,6 +107,9 @@ const OnDemandPhotoModal = ({
   const shouldStartPending = activeId != null && (readyId == null || activePhoto == null);
   const pendingOpen = activeId != null && pendingId === activeId && readyId !== activeId;
   const pendingRef = useFocusTrap(pendingOpen && mounted);
+  /* PhotoModal 이 화면에 배경을 그리고 있는지. 상세가 도착해도 모달 청크가 늦으면 아직
+     그려지지 않으므로 데이터가 아니라 모달의 커밋 신호를 따른다. */
+  const [modalBackdropShown, setModalBackdropShown] = useState(false);
   // 로딩 프레임도 닫을 수 있어야 한다. 사진이 늦게 오는 동안 Escape 가 듣지 않으면
   // 방문자는 닫기 버튼을 찾기 전까지 갇힌다.
   useEscapeKey(pendingOpen, close);
@@ -148,6 +151,7 @@ const OnDemandPhotoModal = ({
             setPendingId((current) => (current === id ? null : current));
           }}
           chatTarget={chatTarget}
+          onBackdropShownChange={setModalBackdropShown}
         />
       ) : null}
       {mounted
@@ -168,7 +172,9 @@ const OnDemandPhotoModal = ({
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.22, ease: EASE }}
                 >
-                  <div className={styles.scrim} aria-hidden="true" />
+                  {/* 모달이 이미 같은 스크림을 그리고 있으면 겹치지 않는다. 두 겹이 되면
+                      backdrop-filter 와 어둡기가 함께 짙어졌다가 프레임이 걷힐 때 한 번에 풀린다. */}
+                  {modalBackdropShown ? null : <div className={styles.scrim} aria-hidden="true" />}
                   {/* 스케일은 여기에 주지 않는다. 사진이 도착하면 실제 패널이 같은 자리에서
                       스케일로 등장하므로, 로딩 프레임까지 확대하면 등장 연출이 두 번 보인다. */}
                   <m.div

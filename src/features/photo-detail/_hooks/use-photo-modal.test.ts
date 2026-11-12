@@ -104,4 +104,40 @@ describe("usePhotoModal", () => {
       "/photo?photo=photo-3",
     );
   });
+
+  it("열린 채 상세가 없는 사진으로 넘어가면 직전 사진을 유지해 모달을 닫지 않는다", () => {
+    navigation.searchParams = new URLSearchParams("photo=photo-1");
+    const loadedPhotos = [{ id: "photo-1" }] as Photo[];
+    const ids = ["photo-1", "photo-2", "photo-3"];
+    const { result, rerender } = renderHook(() =>
+      usePhotoModal(loadedPhotos, true, undefined, ids),
+    );
+
+    navigation.searchParams = new URLSearchParams("photo=photo-2");
+    rerender();
+
+    expect(result.current.open).toBe(true);
+    expect(result.current.photo?.id).toBe("photo-1");
+    expect(result.current.index).toBe(0);
+  });
+
+  it("탐색 목록에 없는 사진으로 바뀌면 직전 사진을 유지하지 않는다", () => {
+    navigation.searchParams = new URLSearchParams("photo=photo-1");
+    const { result, rerender } = renderHook(() => usePhotoModal(photos));
+
+    navigation.searchParams = new URLSearchParams("photo=missing");
+    rerender();
+
+    expect(result.current.open).toBe(false);
+  });
+
+  it("상세가 없는 사진으로 처음 열면 유지할 사진이 없어 열지 않는다", () => {
+    navigation.searchParams = new URLSearchParams("photo=photo-2");
+    const loadedPhotos = [{ id: "photo-1" }] as Photo[];
+    const { result } = renderHook(() =>
+      usePhotoModal(loadedPhotos, true, undefined, ["photo-1", "photo-2"]),
+    );
+
+    expect(result.current.open).toBe(false);
+  });
 });
