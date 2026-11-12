@@ -88,6 +88,7 @@ type UIDict = {
   collapsePhotoInfoLabel: string;
   photoLoadingLabel: string;
   photoLoadError: string;
+  mapUnavailable: string;
   noImageLabel: string;
   languageLabel: string;
   languagePreferenceNote: string;
@@ -295,6 +296,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     collapsePhotoInfoLabel: "사진 정보 접기",
     photoLoadingLabel: "사진 불러오는 중",
     photoLoadError: "사진을 불러오지 못했습니다.",
+    mapUnavailable: "이 브라우저에서는 지도를 표시할 수 없습니다.",
     noImageLabel: "이미지 없음",
     languageLabel: "언어",
     languagePreferenceNote: "선택한 언어를 30일간 기억합니다.",
@@ -508,6 +510,7 @@ const DICTIONARY: Record<Lang, UIDict> = {
     collapsePhotoInfoLabel: "Collapse photo information",
     photoLoadingLabel: "Loading photo",
     photoLoadError: "Couldn’t load the photo.",
+    mapUnavailable: "This browser can’t display the map.",
     noImageLabel: "No image",
     languageLabel: "Language",
     languagePreferenceNote: "Your language choice is remembered for 30 days.",

@@ -1,9 +1,13 @@
 "use client";
 
 import maplibregl from "maplibre-gl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { setMapCursorHover } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
+
+import { createMapOrNull } from "@/lib/geo/create-map-or-null";
 
 import type { MapLocation } from "@/features/map/_lib/map-location";
 import type { FeatureCollection } from "geojson";
@@ -51,7 +55,9 @@ const VIEWPORT_UPDATE_DELAY = 250;
  * 테마 변경 시 지도 스타일과 사용자 레이어를 다시 구성한다.
  */
 const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => {
+  const { dict } = useLang();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [unavailable, setUnavailable] = useState(false);
   const mapRef = useRef<maplibregl.Map | null>(null);
   /* 지도는 마운트당 한 번만 만든다. 콜백이나 배열의 참조가 바뀌었다고 다시 만들면 같은
      컨테이너에 인스턴스가 둘 생기고, 먼저 것이 제거될 때 캔버스만 남아 화면이 빈다. */
@@ -97,12 +103,16 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
           }
         : { center: points[0] ?? ([135, 37] as [number, number]), zoom: 5 };
 
-    const map = new maplibregl.Map({
+    const map = createMapOrNull({
       container,
       style: STYLE_URL[currentTheme()],
       attributionControl: { compact: true },
       ...fit,
     });
+    if (!map) {
+      setUnavailable(true);
+      return;
+    }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     mapRef.current = map;
 
@@ -251,7 +261,15 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
     });
   }, [locations]);
 
-  return <div ref={containerRef} className={styles.canvas} />;
+  return (
+    <div ref={containerRef} className={styles.canvas}>
+      {unavailable ? (
+        <p className={styles.unavailable} role="status">
+          {dict.mapUnavailable}
+        </p>
+      ) : null}
+    </div>
+  );
 };
 
 export default MapCanvas;

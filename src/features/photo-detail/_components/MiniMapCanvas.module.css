@@ -16,3 +16,14 @@
   border: 3px solid var(--bg);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
+
+/* 아래쪽 장소 캡션과 겹치지 않도록 캡션 위 빈 자리에 둔다. */
+.unavailable {
+  position: absolute;
+  inset: 0 0 auto;
+  margin: 0;
+  padding: var(--s-8) var(--s-3) 0;
+  color: var(--text-3);
+  font-size: 11px;
+  text-align: center;
+}
