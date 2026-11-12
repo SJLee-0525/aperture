@@ -149,16 +149,3 @@
     height: 36px;
   }
 }
-
-/* WebGL 을 쓸 수 없는 브라우저. 위치 리스트는 그대로 동작하므로 지면에 안내만 남긴다. */
-.unavailable {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  padding: var(--s-6);
-  color: var(--text-2);
-  font-size: var(--t-small);
-  text-align: center;
-}

@@ -3,6 +3,8 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 
+import { MapUnavailableNotice } from "@/components/MapUnavailableNotice";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { setMapCursorHover } from "@/features/pointer-chrome/_lib/pointer-chrome-events";
@@ -262,13 +264,10 @@ const MapCanvas = ({ locations, onSelect, onVisibleLocationsChange }: Props) => 
   }, [locations]);
 
   return (
-    <div ref={containerRef} className={styles.canvas}>
-      {unavailable ? (
-        <p className={styles.unavailable} role="status">
-          {dict.mapUnavailable}
-        </p>
-      ) : null}
-    </div>
+    <>
+      <div ref={containerRef} className={styles.canvas} />
+      {unavailable ? <MapUnavailableNotice message={dict.mapUnavailable} /> : null}
+    </>
   );
 };
 

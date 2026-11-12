@@ -3,6 +3,8 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 
+import { MapUnavailableNotice } from "@/components/MapUnavailableNotice";
+
 import { useLang } from "@/features/lang/_hooks/use-lang";
 
 import { createMapOrNull } from "@/lib/geo/create-map-or-null";
@@ -68,13 +70,10 @@ const MiniMapCanvas = ({ coords }: Props) => {
   }, [coords.lat, coords.lng]);
 
   return (
-    <div ref={containerRef} className={styles.canvas}>
-      {unavailable ? (
-        <p className={styles.unavailable} role="status">
-          {dict.mapUnavailable}
-        </p>
-      ) : null}
-    </div>
+    <>
+      <div ref={containerRef} className={styles.canvas} />
+      {unavailable ? <MapUnavailableNotice message={dict.mapUnavailable} compact /> : null}
+    </>
   );
 };
 
